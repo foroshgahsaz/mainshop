@@ -1,0 +1,78 @@
+@font-face {
+  font-family: 'YekanBakh';
+  src: url('../fonts/yekan/YekanBakhFaNum-Thin.woff') format('woff');
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'YekanBakh';
+  src: url('../fonts/yekan/YekanBakhFaNum-Light.woff') format('woff');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'YekanBakh';
+  src: url('../fonts/yekan/YekanBakhFaNum-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'YekanBakh';
+  src: url('../fonts/yekan/YekanBakhFaNum-SemiBold.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'YekanBakh';
+  src: url('../fonts/yekan/YekanBakhFaNum-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'YekanBakh';
+  src: url('../fonts/yekan/YekanBakhFaNum-ExtraBold.woff') format('woff');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'YekanBakh';
+  src: url('../fonts/yekan/YekanBakhFaNum-Black.woff') format('woff');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+html {
+  font-family: 'YekanBakh', Tahoma, sans-serif;
+  font-weight: 400;
+}
+
+h1, h2, h3 {
+  font-family: 'YekanBakh', Tahoma, sans-serif;
+  font-weight: 800;
+}
+
+h4, h5, h6 {
+  font-family: 'YekanBakh', Tahoma, sans-serif;
+  font-weight: 700;
+}
+
+p, span, a, li, label, input, button {
+  font-family: 'YekanBakh', Tahoma, sans-serif;
+}
+
+strong, b {
+  font-weight: 700;
+}

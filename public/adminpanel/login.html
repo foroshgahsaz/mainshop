@@ -1,0 +1,134 @@
+﻿<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ورود - TailAdmin</title>
+    <link href="/vendor/bootstrap/5.3.0/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="/vendor/fontawesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+    <div class="grid-pattern"></div>
+    
+    <div class="login-container">
+        <div class="left-panel">
+            <div class="brand-content">
+                <div class="logo-container">
+                    <div class="logo">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h1 class="brand-name">سامانه </h1>
+                </div>
+                <p class="brand-description">
+                   به سامانه خوش امدید
+                </p>
+            </div>
+        </div>
+        
+        <div class="right-panel">
+            <div class="login-box">
+                <a href="#" class="back-link">
+                    <i class="fas fa-arrow-right"></i>
+                    بازگشت به داشبورد
+                </a>
+                
+                <div id="loginPage">
+                    <h2 class="login-title">ورود</h2>
+                    <p class="login-subtitle">برای ورود شماره موبایل یا نام کاربری خود را وارد کنید!</p>
+                    
+                    <div class="auth-tabs">
+                        <button class="auth-tab active" onclick="switchTab('mobile')">
+                            <i class="fas fa-mobile-alt ms-2"></i>
+                            ورود با شماره موبایل
+                        </button>
+                        <button class="auth-tab" onclick="switchTab('username')">
+                            <i class="fas fa-user ms-2"></i>
+                            ورود با نام کاربری
+                        </button>
+                    </div>
+                    
+                    <form id="mobileForm">
+                        <div class="mb-3">
+                            <label class="form-label">شماره موبایل<span class="required">*</span></label>
+                            <input type="tel" class="form-control" placeholder="09123456789" id="mobileInput">
+                            <div class="error-message" id="mobileError"></div>
+                        </div>
+                        
+                        <button type="submit" class="btn-login">دریافت رمز یکبار مصرف</button>
+                    </form>
+                    
+                    <form id="usernameForm" style="display: none;">
+                        <div class="mb-3">
+                            <label class="form-label">نام کاربری<span class="required">*</span></label>
+                            <input type="text" class="form-control" placeholder="نام کاربری خود را وارد کنید" id="usernameInput">
+                            <div class="error-message" id="usernameError"></div>
+                        </div>
+                        
+                        <div class="mb-3 position-relative">
+                            <label class="form-label">رمز عبور<span class="required">*</span></label>
+                            <input type="password" class="form-control" placeholder="رمز عبور خود را وارد کنید" id="passwordInput">
+                            <button type="button" class="password-toggle" onclick="togglePassword()">
+                                <i class="fas fa-eye" id="passwordIcon"></i>
+                            </button>
+                            <div class="error-message" id="passwordError"></div>
+                        </div>
+                        
+                        <div class="form-options">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="rememberMe">
+                                <label class="form-check-label" for="rememberMe">
+                                    مرا به خاطر بسپار
+                                </label>
+                            </div>
+                            <a href="#" class="forgot-link">فراموشی رمز عبور؟</a>
+                        </div>
+                        
+                        <button type="submit" class="btn-login">ورود</button>
+                    </form>
+                    
+                    <div class="signup-link">
+                        حساب کاربری ندارید؟ <a href="#">ثبت نام کنید</a>
+                    </div>
+                </div>
+                
+                <div id="otpPage" style="display: none;">
+                    <h2 class="login-title">تایید شماره موبایل</h2>
+                    <p class="login-subtitle">کد 6 رقمی ارسال شده به شماره <strong id="displayMobile"></strong> را وارد کنید</p>
+                    
+                    <form id="otpForm">
+                        <div class="otp-container">
+                            <input type="text" maxlength="1" class="otp-input" data-index="0">
+                            <input type="text" maxlength="1" class="otp-input" data-index="1">
+                            <input type="text" maxlength="1" class="otp-input" data-index="2">
+                            <input type="text" maxlength="1" class="otp-input" data-index="3">
+                            <input type="text" maxlength="1" class="otp-input" data-index="4">
+                            <input type="text" maxlength="1" class="otp-input" data-index="5">
+                        </div>
+                        <div class="error-message text-center" id="otpError"></div>
+                        
+                        <div class="otp-timer">
+                            <span id="timer">02:00</span>
+                            <br>
+                            <a href="#" class="resend-link disabled" id="resendLink">ارسال مجدد کد</a>
+                        </div>
+                        
+                        <button type="submit" class="btn-login mt-4">تایید و ورود</button>
+                    </form>
+                    
+                    <div class="signup-link">
+                        <a href="#" onclick="backToLogin()">بازگشت به صفحه ورود</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()">
+        <i class="fas fa-moon"></i>
+    </button>
+    
+    <script src="/vendor/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="login.js"></script>
+</body>
+</html>

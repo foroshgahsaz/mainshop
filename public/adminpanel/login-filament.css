@@ -1,0 +1,213 @@
+.admin-login-page {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background: #f5f8fa !important;
+    overflow-x: hidden;
+    font-family: YekanBakh, Yekan, Tahoma, Arial, sans-serif !important;
+}
+
+.admin-login-root {
+    position: relative;
+    min-height: 100vh;
+}
+
+.admin-login-page .fi-simple-layout,
+.admin-login-page .fi-simple-main-ctn,
+.admin-login-page .fi-simple-main {
+    all: unset;
+    display: contents;
+}
+
+/* Filament form inside login box */
+.admin-login-page #adminLoginForm {
+    margin: 0;
+}
+
+.admin-login-page .fi-fo-field-wrp {
+    margin-bottom: 1rem;
+}
+
+.admin-login-page .fi-fo-field-wrp-label {
+    font-weight: 500 !important;
+    color: #3f4254 !important;
+    margin-bottom: 0.5rem !important;
+    display: block;
+    font-size: 1rem !important;
+}
+
+.admin-login-page .fi-fo-field-wrp-label .fi-fo-field-wrp-label-required-mark {
+    color: #f1416c;
+}
+
+/* Reset Filament input wrapper — single bordered field like login.html */
+.admin-login-page .fi-input-wrp {
+    position: relative;
+    display: block !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    --tw-ring-shadow: 0 0 #0000 !important;
+    --tw-ring-offset-shadow: 0 0 #0000 !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+}
+
+.admin-login-page .fi-input-wrp:focus-within {
+    box-shadow: none !important;
+    --tw-ring-shadow: 0 0 #0000 !important;
+}
+
+.admin-login-page .fi-input-wrp-input {
+    padding: 0 !important;
+    min-width: 0;
+}
+
+.admin-login-page .fi-input-wrp input[type="text"],
+.admin-login-page .fi-input-wrp input[type="password"],
+.admin-login-page .fi-input-wrp input[type="email"] {
+    display: block;
+    width: 100% !important;
+    padding: 0.85rem 1rem !important;
+    padding-left: 2.75rem !important;
+    border: 1px solid #e4e6ef !important;
+    border-radius: 8px !important;
+    font-size: 1rem !important;
+    line-height: 1.5 !important;
+    background: #f9f9f9 !important;
+    box-shadow: none !important;
+    font-family: YekanBakh, Yekan, Tahoma, Arial, sans-serif !important;
+    color: #181c32 !important;
+    min-height: unset !important;
+}
+
+.admin-login-page .fi-input-wrp:not(:has(.fi-input-wrp-suffix)) input {
+    padding-left: 1rem !important;
+}
+
+.admin-login-page .fi-input-wrp input:focus {
+    border-color: #7239ea !important;
+    box-shadow: 0 0 0 3px rgba(114, 57, 234, 0.1) !important;
+    background: #fff !important;
+    outline: none !important;
+}
+
+.admin-login-page .fi-input-wrp input::placeholder {
+    color: #a1a5b7;
+}
+
+/* Password reveal button */
+.admin-login-page .fi-input-wrp-suffix {
+    position: absolute !important;
+    left: 0.75rem !important;
+    right: auto !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    width: auto !important;
+    height: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    pointer-events: auto !important;
+}
+
+.admin-login-page .fi-input-wrp .fi-icon-btn {
+    width: 2rem !important;
+    height: 2rem !important;
+    min-width: 2rem !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    color: #a1a5b7 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 6px !important;
+}
+
+.admin-login-page .fi-input-wrp .fi-icon-btn:hover {
+    color: #7239ea !important;
+    background: rgba(114, 57, 234, 0.08) !important;
+}
+
+.admin-login-page .fi-input-wrp .fi-icon-btn svg {
+    width: 1.1rem !important;
+    height: 1.1rem !important;
+}
+
+/* Remember me */
+.admin-login-page .fi-fo-checkbox {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    margin: 0.25rem 0 1.25rem !important;
+}
+
+.admin-login-page .fi-fo-checkbox-label {
+    color: #5e6278 !important;
+    font-size: 0.9rem !important;
+    font-weight: 400 !important;
+}
+
+.admin-login-page .fi-checkbox-input {
+    width: 1rem !important;
+    height: 1rem !important;
+    border-radius: 4px !important;
+    border-color: #e4e6ef !important;
+}
+
+.admin-login-page .fi-checkbox-input:checked {
+    background-color: #7239ea !important;
+    border-color: #7239ea !important;
+}
+
+.admin-login-page .fi-form-actions,
+.admin-login-page .fi-btn:not(.filament-auth-submit) {
+    display: none !important;
+}
+
+.admin-login-page .filament-auth-submit {
+    margin-top: 0.25rem;
+    width: 100%;
+}
+
+.admin-login-page .fi-fo-field-wrp-error-message {
+    color: #f1416c;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+}
+
+.admin-login-form-error {
+    display: none;
+    color: #f1416c;
+    font-size: 0.875rem;
+    margin: 0.75rem 0 1rem;
+    padding: 0.75rem 1rem;
+    background: #fff5f8;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+}
+
+.admin-login-form-error.show {
+    display: block;
+}
+
+.admin-login-page .fi-fo-component-ctn {
+    gap: 0 !important;
+}
+
+.admin-login-page .fi-fo-form {
+    gap: 0 !important;
+}
+
+/* Hide default Filament section chrome on login */
+.admin-login-page .fi-section,
+.admin-login-page .fi-section-content-ctn {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    background: transparent !important;
+}

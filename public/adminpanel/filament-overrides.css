@@ -1,0 +1,490 @@
+/* ===== Hide default Filament chrome ===== */
+body.fi-body .fi-sidebar,
+body.fi-body .fi-topbar,
+body.fi-body .fi-sidebar-close-overlay,
+body.fi-body aside.fi-main-sidebar {
+    display: none !important;
+}
+
+body.fi-body {
+    font-family: Yekan, YekanBakh, Tahoma, Arial, sans-serif !important;
+    background: #f5f8fa !important;
+    overflow-x: hidden;
+    direction: rtl;
+}
+
+body.fi-body .fi-body {
+    direction: rtl;
+}
+
+body.fi-body .fi-ta-search-field input::placeholder,
+body.fi-body .fi-ta-search-field input {
+    text-align: right;
+}
+
+body.fi-body .fi-ta-filters-indicator,
+body.fi-body .fi-ta-header-toolbar,
+body.fi-body .fi-breadcrumbs,
+body.fi-body .fi-header-heading,
+body.fi-body .fi-section-header-heading,
+body.fi-body .fi-ta-header-cell,
+body.fi-body .fi-ta-cell,
+body.fi-body .fi-btn,
+body.fi-body .fi-input,
+body.fi-body .fi-field-wrp-label {
+    font-family: Yekan, YekanBakh, Tahoma, Arial, sans-serif !important;
+}
+
+.fi-admin-shell .sidebar-menu a.submenu-item {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #a1a5b7;
+    line-height: 1.6;
+    padding-right: 12px;
+}
+
+.fi-admin-shell .sidebar-section-heading {
+    font-family: Yekan, YekanBakh, Tahoma, Arial, sans-serif !important;
+}
+
+.fi-admin-shell .sidebar-menu a.dashboard-link {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    margin: 0 8px 8px;
+    border-radius: 8px;
+    color: #5e6278;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.fi-admin-shell .sidebar-menu a.dashboard-link.active,
+.fi-admin-shell .sidebar-menu a.dashboard-link:hover {
+    color: #7239ea;
+    background: #f5f8fa;
+}
+
+.fi-admin-shell .sidebar-section-divider {
+    height: 1px;
+    background: #eff2f5;
+    margin: 8px 16px 12px;
+}
+
+.fi-admin-shell .submenu-item-icon {
+    width: 16px;
+    text-align: center;
+    font-size: 12px;
+    opacity: 0.75;
+}
+
+body.fi-body .fi-panel-admin {
+    background: #f5f8fa !important;
+}
+
+/* ===== Admin shell ===== */
+.fi-admin-shell {
+    min-height: 100vh;
+    position: relative;
+}
+
+.fi-admin-shell .sidebar-secondary {
+    z-index: 800 !important;
+}
+
+.fi-admin-shell .sidebar-primary {
+    z-index: 799 !important;
+}
+
+.fi-admin-shell .toggle-sidebar-btn {
+    z-index: 1100 !important;
+}
+
+/* Filament modals — بالاتر از سایدبار */
+body.fi-has-open-modal .fi-admin-shell .sidebar-secondary,
+body.fi-has-open-modal .fi-admin-shell .sidebar-primary,
+body.fi-has-open-modal .fi-admin-shell .toggle-sidebar-btn {
+    z-index: 1 !important;
+    pointer-events: none !important;
+}
+
+body.fi-body .fi-modal.fi-modal-open {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 99999 !important;
+    display: block !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    pointer-events: none !important;
+}
+
+body.fi-body .fi-modal.fi-modal-open > div {
+    pointer-events: auto !important;
+}
+
+body.fi-body .fi-modal-close-overlay,
+body.fi-body .fi-modal .fixed.inset-0 {
+    z-index: 99998 !important;
+}
+
+body.fi-body .fi-modal-window {
+    z-index: 99999 !important;
+    pointer-events: auto !important;
+    position: relative !important;
+}
+
+body.fi-body .fi-dropdown-panel,
+body.fi-body .fi-select-list,
+body.fi-body .fi-fo-file-upload-panel,
+body.fi-body [x-ref="panel"],
+body.fi-body .tippy-box {
+    z-index: 99999 !important;
+}
+
+/* تصاویر در جدول */
+.fi-admin-shell .fi-ta-image img,
+.fi-admin-shell .fi-ta-image-column img {
+    border-radius: 8px;
+    object-fit: cover;
+    max-width: 100%;
+}
+
+/* جدول کاربران — استایل نمونه */
+.fi-admin-shell .fi-ta-header-toolbar .fi-btn.fi-color-primary,
+.fi-admin-shell .fi-ta-header-toolbar .fi-ac-btn-action.fi-color-primary {
+    background: #7239ea !important;
+    border-color: #7239ea !important;
+    color: #fff !important;
+    font-weight: 600;
+    padding: 0.55rem 1.1rem;
+}
+
+.fi-admin-shell .fi-ta-header-toolbar .fi-btn.fi-color-primary:hover {
+    background: #6528e0 !important;
+}
+
+.fi-admin-shell .fi-ta-search-field {
+    min-width: 280px;
+}
+
+.fi-admin-shell .fi-ta-search-field input {
+    border-radius: 8px !important;
+    padding: 0.55rem 2.5rem 0.55rem 0.75rem !important;
+}
+
+.fi-admin-shell .fi-badge {
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.fi-admin-shell .fi-ta-actions-cell {
+    gap: 4px;
+}
+
+.fi-admin-shell .fi-ta-actions-cell .fi-icon-btn {
+    border: 1px solid #eff2f5;
+    border-radius: 8px;
+    width: 34px;
+    height: 34px;
+}
+
+.fi-admin-shell .sidebar-menu a.submenu-item:hover,
+.fi-admin-shell .sidebar-menu a.submenu-item.active {
+    color: #7239ea;
+    font-weight: 500;
+}
+
+.fi-admin-shell .sidebar-secondary .sidebar-icon-item,
+.fi-admin-shell .sidebar-secondary .sidebar-icon-item i,
+.fi-admin-shell .sidebar-secondary .sidebar-icon-link,
+.fi-admin-shell .sidebar-secondary .sidebar-icon-link i {
+    color: #ffffff !important;
+}
+
+.fi-admin-shell .sidebar-secondary .sidebar-icon-item:hover,
+.fi-admin-shell .sidebar-secondary .sidebar-icon-item:hover i,
+.fi-admin-shell .sidebar-secondary .sidebar-icon-item.active,
+.fi-admin-shell .sidebar-secondary .sidebar-icon-item.active i {
+    color: #ffffff !important;
+}
+
+.fi-admin-shell .sidebar-secondary [data-tooltip] {
+    position: relative;
+}
+
+.fi-admin-shell .sidebar-secondary [data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    right: calc(100% + 10px);
+    left: auto;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #2b2b40;
+    color: #fff;
+    font-size: 12px;
+    font-family: Yekan, YekanBakh, Tahoma, sans-serif;
+    padding: 6px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+    z-index: 1300;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.fi-admin-shell .sidebar-secondary [data-tooltip]:hover::after {
+    opacity: 1;
+    visibility: visible;
+}
+
+.fi-admin-shell .sidebar-icon-item {
+    text-decoration: none;
+}
+
+.fi-admin-shell .sidebar-header .sidebar-title {
+    margin-bottom: 4px;
+}
+
+/* ===== Main content (Filament pages) ===== */
+.fi-admin-shell .content-area {
+    padding: 0 0 0 30px !important;
+}
+
+.fi-admin-shell .content-area .fi-main {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.fi-admin-shell .content-area .fi-page > section {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+body.fi-body .fi-admin-shell .fi-wi-widget {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.fi-admin-shell .content-area .fi-section,
+.fi-admin-shell .content-area .fi-ta-ctn {
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.04);
+    border: 1px solid #eff2f5;
+    overflow: hidden;
+    background: #fff;
+}
+
+.fi-admin-shell .fi-ta-header-toolbar {
+    padding: 16px 20px !important;
+    background: #fff !important;
+    border-bottom: 1px solid #eff2f5;
+}
+
+.fi-admin-shell .fi-ta-table {
+    font-size: 13px;
+}
+
+.fi-admin-shell .fi-ta-header-cell {
+    background: #f9fafb !important;
+    color: #5e6278 !important;
+    font-weight: 600 !important;
+    font-size: 12px !important;
+    padding: 12px 16px !important;
+}
+
+.fi-admin-shell .fi-ta-cell {
+    padding: 14px 16px !important;
+    color: #3f4254;
+    vertical-align: middle;
+}
+
+.fi-admin-shell .fi-ta-row:hover .fi-ta-cell {
+    background: #f9fafb;
+}
+
+.fi-admin-shell .fi-ta-actions-cell .fi-ac-btn-action {
+    border-radius: 8px;
+}
+
+.fi-admin-shell .fi-section {
+    border: 1px solid #eff2f5;
+    border-radius: 12px;
+    background: #fff;
+    padding: 8px;
+}
+
+.fi-admin-shell .fi-section-header {
+    padding: 12px 16px;
+}
+
+.fi-admin-shell .fi-fo-field-wrp {
+    margin-bottom: 4px;
+}
+
+body.fi-body .fi-no-notification {
+    font-family: Yekan, YekanBakh, Tahoma, sans-serif !important;
+}
+
+body.fi-body .fi-no-notification-icon {
+    color: #50cd89 !important;
+}
+
+.fi-admin-shell .content-area .fi-ta-header-toolbar {
+    border-radius: 12px 12px 0 0;
+}
+
+.fi-admin-shell .fi-btn {
+    border-radius: 8px;
+    font-family: inherit;
+}
+
+.fi-admin-shell .btn-new-goal {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    background: #7239ea;
+    color: #fff !important;
+    border: none;
+}
+
+.fi-admin-shell .btn-new-goal:hover {
+    background: #6528e0;
+    color: #fff !important;
+}
+
+/* ===== Global header actions (shop + logout) ===== */
+.fi-admin-shell .fi-header {
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.fi-admin-shell .fi-header > div:last-child {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.fi-admin-global-actions {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.fi-admin-global-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s, opacity 0.2s;
+    white-space: nowrap;
+}
+
+.fi-admin-global-btn-store {
+    background: #3699ff;
+    color: #fff !important;
+}
+
+.fi-admin-global-btn-store:hover {
+    background: #187de4;
+    color: #fff !important;
+}
+
+.fi-admin-global-btn-logout {
+    background: #f1416c;
+    color: #fff;
+}
+
+.fi-admin-global-btn-logout:hover {
+    background: #d9214e;
+}
+
+/* ===== Filter slide-over from right ===== */
+body.fi-body .fi-modal-slide-over-window {
+    inset-inline-start: auto !important;
+    inset-inline-end: 0 !important;
+    margin-inline-end: 0 !important;
+    max-width: 360px !important;
+    border-radius: 12px 0 0 12px !important;
+}
+
+body.fi-body .fi-modal-slide-over-window-hiding {
+    inset-inline-start: auto !important;
+    inset-inline-end: 0 !important;
+}
+
+/* ===== Price range slider in filters ===== */
+.price-range-slider-wrap input[type="range"] {
+    height: 6px;
+    cursor: pointer;
+}
+
+.price-range-track .price-range-fill {
+    pointer-events: none;
+}
+
+.fi-admin-shell .price-range-min-input,
+.fi-admin-shell .price-range-max-input {
+    margin-top: 4px;
+}
+
+.fi-admin-login-wrap {
+    min-height: 100vh;
+    background: #f5f8fa;
+    font-family: Yekan, YekanBakh, Tahoma, Arial, sans-serif;
+}
+
+.fi-admin-login-wrap .fi-simple-main {
+    max-width: 100%;
+    padding: 2rem 1rem;
+}
+
+.fi-admin-login-wrap .fi-simple-main-ctn,
+.fi-admin-login-wrap form {
+    font-family: inherit;
+}
+
+@media (max-width: 991px) {
+    .fi-admin-shell .main-content {
+        margin-right: 110px !important;
+    }
+
+    .fi-admin-shell .sidebar-primary {
+        transform: translateX(100%);
+    }
+
+    .fi-admin-shell .sidebar-primary.open {
+        transform: translateX(0);
+    }
+}
+
+/* Orders map widget (Leaflet) */
+.orders-map-widget.leaflet-container,
+.orders-map-widget .leaflet-container {
+    height: 100% !important;
+    min-height: 400px;
+    width: 100%;
+    z-index: 1;
+}
+
+.orders-map-widget {
+    position: relative;
+    z-index: 1;
+}

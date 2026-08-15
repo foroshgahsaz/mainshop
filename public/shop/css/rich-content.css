@@ -1,0 +1,145 @@
+.rich-content {
+  color: #374151;
+  line-height: 1.9;
+  font-size: 0.9375rem;
+}
+
+.rich-content h2,
+.rich-content h3 {
+  color: #111827;
+  font-weight: 800;
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.rich-content h2 {
+  font-size: 1.25rem;
+}
+
+.rich-content h3 {
+  font-size: 1.0625rem;
+}
+
+.rich-content p {
+  margin-bottom: 1rem;
+}
+
+.rich-content ul,
+.rich-content ol {
+  margin: 0 0 1rem;
+  padding-right: 1.25rem;
+}
+
+.rich-content li {
+  margin-bottom: 0.35rem;
+}
+
+.rich-content blockquote {
+  margin: 1.25rem 0;
+  padding: 1rem 1.25rem;
+  border-right: 4px solid #ef394e;
+  background: #fdf2f8;
+  border-radius: 0 12px 12px 0;
+  color: #4b5563;
+  font-style: normal;
+}
+
+.rich-content img,
+.rich-content figure img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  margin: 1.25rem 0;
+}
+
+.rich-content figure {
+  margin: 1.25rem 0;
+}
+
+.rich-content figcaption {
+  font-size: 0.8125rem;
+  color: #9ca3af;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.rich-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.25rem 0;
+  font-size: 0.875rem;
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.rich-content table th,
+.rich-content table td {
+  border: 1px solid #e5e7eb;
+  padding: 0.75rem 1rem;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.rich-content table th {
+  background: #f9fafb;
+  font-weight: 700;
+  color: #374151;
+}
+
+.rich-content table tr:nth-child(even) td {
+  background: #fafafa;
+}
+
+.rich-content a {
+  color: #059669;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.rich-content pre,
+.rich-content code {
+  font-family: ui-monospace, monospace;
+  font-size: 0.8125rem;
+}
+
+.rich-content pre {
+  background: #1f2937;
+  color: #f9fafb;
+  padding: 1rem;
+  border-radius: 12px;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.rich-content .content-grid {
+  display: grid;
+  gap: 1rem;
+  margin: 1.25rem 0;
+}
+
+@media (min-width: 768px) {
+  .rich-content .content-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.rich-content .info-box {
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  margin: 1rem 0;
+}
+
+.rich-content .warning-box {
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  margin: 1rem 0;
+}
+
+.page-content.rich-content {
+  max-width: none;
+}

@@ -1,0 +1,113 @@
+@import './fonts.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .section-title {
+    @apply flex items-center gap-2 text-base md:text-lg font-bold text-gray-900;
+  }
+  .section-title::before {
+    content: '';
+    @apply w-1 h-5 bg-accent-teal rounded-full shrink-0;
+  }
+  .product-card {
+    @apply bg-white rounded-2xl border border-gray-200 shadow-none overflow-hidden flex flex-col;
+  }
+  .product-card__media {
+    @apply relative flex items-center justify-center bg-white overflow-hidden;
+  }
+  .product-card__media img {
+    @apply transition-transform duration-300 ease-out;
+  }
+  .product-card-link:hover .product-card__media img,
+  .product-card:hover .product-card__media img {
+    transform: scale(1.1);
+  }
+  .product-card-link {
+    @apply block text-inherit no-underline;
+  }
+  .product-card-link:hover {
+    @apply text-inherit;
+  }
+  .product-card__price {
+    @apply flex flex-col items-start gap-1 text-left mt-2.5;
+  }
+  .product-card__price-old {
+    font-size: 11px;
+    color: #9ca3af;
+    text-decoration: line-through;
+    font-weight: 300;
+    line-height: 1.2;
+  }
+  .product-card__price-old span {
+    font-size: 10px;
+  }
+  .product-card__price-sale {
+    font-size: 15px;
+    font-weight: 800;
+    color: #001a72;
+    line-height: 1.3;
+  }
+  .product-card__price-sale span {
+    font-size: 10px;
+    font-weight: 400;
+    color: #6b7280;
+  }
+  .btn-cart {
+    @apply w-9 h-9 bg-brand-red hover:bg-red-600 text-white rounded-lg flex items-center justify-center shrink-0 transition-colors;
+  }
+  .tab-pill {
+    @apply px-4 py-2 rounded-full text-xs md:text-sm border border-gray-200 text-gray-600 whitespace-nowrap transition-colors;
+  }
+  .tab-pill.active {
+    @apply bg-gray-900 text-white border-gray-900;
+  }
+  .section-arrow {
+    @apply w-7 h-7 md:w-8 md:h-8 bg-white border border-gray-200 rounded-lg shadow-sm flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-gray-800 transition-colors shrink-0;
+  }
+  .section-nav-link {
+    @apply inline-flex items-center text-[11px] md:text-xs text-gray-500 hover:text-brand-green whitespace-nowrap border border-gray-200 rounded-lg px-3 py-1.5 transition-colors;
+  }
+  .main-nav-link {
+    font-size: 15px;
+    color: #000;
+    font-weight: 300;
+  }
+  .category-card {
+    @apply flex flex-col items-center justify-center gap-1 aspect-square bg-white border border-gray-200 rounded-2xl p-2 shadow-none transition-colors hover:border-gray-300;
+    width: 130px;
+    height: 130px;
+  }
+  .category-card img {
+    @apply w-6 h-6 md:w-7 md:h-7 object-contain;
+  }
+  .category-card span {
+    font-size: 14px;
+    font-weight: 400;
+    @apply text-black text-center leading-5;
+  }
+  .header-login-btn {
+    @apply flex items-center gap-2.5 px-4 py-2 rounded-full border border-gray-200 bg-white whitespace-nowrap transition-colors hover:border-gray-300;
+    font-size: 15px;
+    font-weight: 300;
+    color: #000;
+  }
+  .header-divider {
+    @apply w-px h-6 bg-gray-200 shrink-0;
+  }
+  .header-icon-btn {
+    @apply p-2 text-gray-700 hover:text-navy transition-colors shrink-0;
+  }
+  .cart-badge {
+    @apply absolute -top-0.5 -left-0.5 min-w-[16px] h-4 px-1 text-[10px] font-bold text-white rounded flex items-center justify-center leading-none;
+    background: linear-gradient(135deg, #ff7e15, #ff4500);
+  }
+  .footer-link {
+    @apply text-sm text-gray-500 hover:text-brand-green transition-colors leading-7;
+  }
+  .footer-heading {
+    @apply text-sm font-bold text-gray-900 mb-4;
+  }
+}

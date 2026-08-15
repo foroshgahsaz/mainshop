@@ -1,0 +1,720 @@
+﻿<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>داشبورد | پنل مدیریت</title>
+    <link href="/vendor/bootstrap/5.3.0/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="/vendor/fontawesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/vendor/bootstrap-icons/1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/vendor/leaflet/1.9.4/leaflet.css" />
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <!-- Secondary Sidebar (Icons) -->
+    <div class="sidebar-secondary">
+        <div class="logo-small">۷</div>
+
+        <div class="sidebar-icon-item active" data-menu="home">
+            <i class="fas fa-home"></i>
+        </div>
+        <div class="sidebar-icon-item" data-menu="files">
+            <i class="fas fa-file-alt"></i>
+        </div>
+        <div class="sidebar-icon-item" data-menu="users">
+            <i class="fas fa-user"></i>
+        </div>
+        <div class="sidebar-icon-item" data-menu="auth">
+            <i class="fas fa-key"></i>
+        </div>
+
+        <div class="sidebar-divider"></div>
+
+        <div class="sidebar-icon-item" data-menu="clipboard">
+            <i class="fas fa-clipboard"></i>
+        </div>
+        <div class="sidebar-icon-item" data-menu="check">
+            <i class="fas fa-check"></i>
+        </div>
+        <div class="sidebar-icon-item" data-menu="book">
+            <i class="fas fa-book"></i>
+        </div>
+        <div class="sidebar-icon-item" data-menu="briefcase">
+            <i class="fas fa-briefcase"></i>
+        </div>
+        <div class="sidebar-icon-item" data-menu="bars">
+            <i class="fas fa-bars"></i>
+        </div>
+        <div class="sidebar-icon-item" data-menu="chart">
+            <i class="fas fa-chart-bar"></i>
+        </div>
+        <div class="sidebar-icon-item" data-menu="sun">
+            <i class="fas fa-sun"></i>
+        </div>
+
+        <img src="images/avatar-default.svg"
+             class="sidebar-user-icon"
+             alt="User">
+    </div>
+
+    <!-- Primary Sidebar (Full Menu) -->
+    <div class="sidebar-primary"
+         id="sidebarPrimary">
+        <div class="sidebar-header">
+            <p class="sidebar-title">منوی اصلی</p>
+        </div>
+
+        <div class="sidebar-menu">
+            <!-- محتوای تب خانه -->
+            <div class="menu-content active" id="homeContent">
+                <button class="menu-item active" data-submenu="homeSubmenu">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="menu-icon"><i class="fas fa-home"></i></span>
+                        <span>خانه</span>
+                    </div>
+                    <i class="fas fa-chevron-up menu-arrow"></i>
+                </button>
+
+                <div class="submenu expanded" id="homeSubmenu">
+                    <div class="submenu-item active">داشبورد</div>
+                    <div class="submenu-item">اطلاعات کلی</div>
+                    <div class="submenu-item">آمارها</div>
+                    <div class="submenu-item">گزارش‌های روزانه</div>
+                    <div class="submenu-item">فعالیت‌های اخیر</div>
+                </div>
+            </div>
+
+            <!-- محتوای تب مدیریت فایل -->
+            <div class="menu-content" id="filesContent">
+                <button class="menu-item" data-submenu="filesSubmenu">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="menu-icon"><i class="fas fa-cloud"></i></span>
+                        <span>مدیریت فایل</span>
+                    </div>
+                    <i class="fas fa-chevron-up menu-arrow"></i>
+                </button>
+
+                <div class="submenu" id="filesSubmenu">
+                    <div class="submenu-item">آپلود فایل</div>
+                    <div class="submenu-item">مدیریت فایل‌ها</div>
+                    <div class="submenu-item">فضای ذخیره‌سازی</div>
+                    <div class="submenu-item">اشتراک‌گذاری</div>
+                    <div class="submenu-item">بایگانی</div>
+                </div>
+            </div>
+
+            <!-- محتوای تب مدیریت کاربران -->
+            <div class="menu-content" id="usersContent">
+                <button class="menu-item" data-submenu="usersSubmenu">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="menu-icon"><i class="fas fa-user-shield"></i></span>
+                        <span>مدیریت کاربران</span>
+                    </div>
+                    <i class="fas fa-chevron-up menu-arrow"></i>
+                </button>
+
+                <div class="submenu expanded" id="usersSubmenu">
+                    <button class="menu-item submenu-header" id="usersSubSubmenuToggle">
+                        <span style="font-size: 13px;">کاربران</span>
+                        <i class="fas fa-chevron-down" style="font-size: 10px; color: rgb(161, 165, 183);"></i>
+                    </button>
+
+                    <div class="sub-submenu expanded" id="usersSubSubmenuItems">
+                        <div class="submenu-item" onclick="window.location.href='user-list.html'">لیست کاربران</div>
+                        <div class="submenu-item" onclick="window.location.href='user-details.html'">جزییات کاربر</div>
+                    </div>
+
+                    <div class="submenu-item">نقش‌ها</div>
+                    <div class="submenu-item">مجوزها</div>
+                </div>
+            </div>
+
+            <!-- محتوای تب احراز هویت -->
+            <div class="menu-content" id="authContent">
+                <button class="menu-item" data-submenu="authSubmenu">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="menu-icon"><i class="fas fa-fingerprint"></i></span>
+                        <span>احراز هویت</span>
+                    </div>
+                    <i class="fas fa-chevron-up menu-arrow"></i>
+                </button>
+
+                <div class="submenu" id="authSubmenu">
+                    <div class="submenu-item">ورود</div>
+                    <div class="submenu-item">ثبت نام</div>
+                    <div class="submenu-item">بازیابی رمز عبور</div>
+                    <div class="submenu-item">تایید دو مرحله‌ای</div>
+                    <div class="submenu-item">پروفایل کاربری</div>
+                </div>
+            </div>
+
+            <!-- محتوای تب پروژه‌ها -->
+            <div class="menu-content" id="projectsContent">
+                <button class="menu-item" data-submenu="projectsSubmenu">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="menu-icon"><i class="fas fa-rocket"></i></span>
+                        <span>پروژه‌ها</span>
+                    </div>
+                    <i class="fas fa-chevron-up menu-arrow"></i>
+                </button>
+
+                <div class="submenu" id="projectsSubmenu">
+                    <div class="submenu-item">لیست پروژه‌ها</div>
+                    <div class="submenu-item">پروژه‌های جدید</div>
+                    <div class="submenu-item">گزارش‌ها</div>
+                    <div class="submenu-item">تیم‌ها</div>
+                    <div class="submenu-item">وظایف</div>
+                </div>
+            </div>
+
+            <!-- محتوای تب تجارت الکترونیک -->
+            <div class="menu-content" id="ecommerceContent">
+                <button class="menu-item" data-submenu="ecommerceSubmenu">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="menu-icon"><i class="fas fa-shopping-cart"></i></span>
+                        <span>تجارت الکترونیک</span>
+                    </div>
+                    <i class="fas fa-chevron-up menu-arrow"></i>
+                </button>
+
+                <div class="submenu" id="ecommerceSubmenu">
+                    <div class="submenu-item">محصولات</div>
+                    <div class="submenu-item">دسته‌بندی‌ها</div>
+                    <div class="submenu-item">سفارشات</div>
+                    <div class="submenu-item">مشتریان</div>
+                    <div class="submenu-item">تخفیف‌ها</div>
+                </div>
+            </div>
+
+            <!-- محتوای تب کلیپ‌بورد -->
+            <div class="menu-content" id="clipboardContent">
+                <button class="menu-item" data-submenu="clipboardSubmenu">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="menu-icon"><i class="fas fa-clipboard"></i></span>
+                        <span>کلیپ‌بورد</span>
+                    </div>
+                    <i class="fas fa-chevron-up menu-arrow"></i>
+                </button>
+
+                <div class="submenu" id="clipboardSubmenu">
+                    <div class="submenu-item">یادداشت‌ها</div>
+                    <div class="submenu-item">برچسب‌ها</div>
+                    <div class="submenu-item">اشتراک‌گذاری</div>
+                    <div class="submenu-item">آرشیو</div>
+                </div>
+            </div>
+
+            <!-- محتوای تب چک‌لیست -->
+            <div class="menu-content" id="checkContent">
+                <button class="menu-item" data-submenu="checkSubmenu">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="menu-icon"><i class="fas fa-check"></i></span>
+                        <span>چک‌لیست</span>
+                    </div>
+                    <i class="fas fa-chevron-up menu-arrow"></i>
+                </button>
+
+                <div class="submenu" id="checkSubmenu">
+                    <div class="submenu-item">وظایف روزانه</div>
+                    <div class="submenu-item">پروژه‌ها</div>
+                    <div class="submenu-item">اهداف</div>
+                    <div class="submenu-item">نظارت</div>
+                </div>
+            </div>
+
+            <!-- محتوای تب کتاب -->
+            <div class="menu-content" id="bookContent">
+                <button class="menu-item" data-submenu="bookSubmenu">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="menu-icon"><i class="fas fa-book"></i></span>
+                        <span>کتاب</span>
+                    </div>
+                    <i class="fas fa-chevron-up menu-arrow"></i>
+                </button>
+
+                <div class="submenu" id="bookSubmenu">
+                    <div class="submenu-item">کتابخانه</div>
+                    <div class="submenu-item">دسته‌بندی‌ها</div>
+                    <div class="submenu-item">نویسندگان</div>
+                    <div class="submenu-item">بررسی‌ها</div>
+                </div>
+            </div>
+
+            <!-- محتوای تب کسب و کار -->
+            <div class="menu-content" id="briefcaseContent">
+                <button class="menu-item" data-submenu="briefcaseSubmenu">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="menu-icon"><i class="fas fa-briefcase"></i></span>
+                        <span>کسب و کار</span>
+                    </div>
+                    <i class="fas fa-chevron-up menu-arrow"></i>
+                </button>
+
+                <div class="submenu" id="briefcaseSubmenu">
+                    <div class="submenu-item">شرکت‌ها</div>
+                    <div class="submenu-item">مشتریان</div>
+                    <div class="submenu-item">قراردادها</div>
+                    <div class="submenu-item">گزارش‌های مالی</div>
+                </div>
+            </div>
+
+            <!-- محتوای تب منو -->
+            <div class="menu-content" id="barsContent">
+                <button class="menu-item" data-submenu="barsSubmenu">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="menu-icon"><i class="fas fa-bars"></i></span>
+                        <span>منو</span>
+                    </div>
+                    <i class="fas fa-chevron-up menu-arrow"></i>
+                </button>
+
+                <div class="submenu" id="barsSubmenu">
+                    <div class="submenu-item">تنظیمات</div>
+                    <div class="submenu-item">نمایه</div>
+                    <div class="submenu-item">پیام‌ها</div>
+                    <div class="submenu-item">اعلان‌ها</div>
+                </div>
+            </div>
+
+            <!-- محتوای تب نمودار -->
+            <div class="menu-content" id="chartContent">
+                <button class="menu-item" data-submenu="chartSubmenu">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="menu-icon"><i class="fas fa-chart-bar"></i></span>
+                        <span>نمودار</span>
+                    </div>
+                    <i class="fas fa-chevron-up menu-arrow"></i>
+                </button>
+
+                <div class="submenu" id="chartSubmenu">
+                    <div class="submenu-item">آمار فروش</div>
+                    <div class="submenu-item">تحلیل کاربران</div>
+                    <div class="submenu-item">گزارش‌های مالی</div>
+                    <div class="submenu-item">پیش‌بینی‌ها</div>
+                </div>
+            </div>
+
+            <!-- محتوای تب تنظیمات -->
+            <div class="menu-content" id="sunContent">
+                <button class="menu-item" data-submenu="sunSubmenu">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="menu-icon"><i class="fas fa-sun"></i></span>
+                        <span>تنظیمات</span>
+                    </div>
+                    <i class="fas fa-chevron-up menu-arrow"></i>
+                </button>
+
+                <div class="submenu" id="sunSubmenu">
+                    <div class="submenu-item">پروفایل</div>
+                    <div class="submenu-item">امنیت</div>
+                    <div class="submenu-item">اعلان‌ها</div>
+                    <div class="submenu-item">ظاهر</div>
+                    <div class="submenu-item">زبان</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- دکمه toggle که در موقعیت ثابت کنار سایدبار قرار می‌گیرد -->
+    <div class="toggle-sidebar-btn"
+         onclick="toggleSidebar()">
+        <i class="fas fa-chevron-left"
+           id="toggleIcon"></i>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content"
+         id="mainContent">
+        <div class="top-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <!-- تغییر: عنوان به راست و دکمه‌ها به چپ -->
+                <div class="text-start">
+                    <h1 class="page-title">داشبورد</h1>
+                    <p class="breadcrumb-custom">خانه / داشبورد</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn-new-goal">هدف جدید</button>
+                    <button class="btn-new-user">کاربر جدید</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-area">
+            <!-- کارت‌های آمار -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="card stat-card">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="stat-icon bg-warning bg-opacity-25 text-warning me-3">
+                                <i class="bi bi-hourglass-split"></i>
+                            </div>
+                            <div>
+                                <h6 class="text-muted mb-0">سفارش در انتظار</h6>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-end">
+                            <h2 class="mb-0">237</h2>
+                            <span class="badge badge-up">(42%+)</span>
+                        </div>
+                        <small class="text-muted">تحلیل هفته گذشته</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="stat-icon bg-success bg-opacity-25 text-success me-3">
+                                <i class="bi bi-check-circle"></i>
+                            </div>
+                            <div>
+                                <h6 class="text-muted mb-0">تحویل شده</h6>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-end">
+                            <h2 class="mb-0">1,860</h2>
+                            <span class="badge badge-up">(34%+)</span>
+                        </div>
+                        <small class="text-muted">تحلیل هفته گذشته</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="stat-icon bg-danger bg-opacity-25 text-danger me-3">
+                                <i class="bi bi-truck"></i>
+                            </div>
+                            <div>
+                                <h6 class="text-muted mb-0">در حال ارسال</h6>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-end">
+                            <h2 class="mb-0">567</h2>
+                            <span class="badge badge-up">(18%+)</span>
+                        </div>
+                        <small class="text-muted">تحلیل هفته گذشته</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="stat-icon bg-primary bg-opacity-25 text-primary me-3">
+                                <i class="bi bi-box-seam"></i>
+                            </div>
+                            <div>
+                                <h6 class="text-muted mb-0">خارج از انبار</h6>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-end">
+                            <h2 class="mb-0">459</h2>
+                            <span class="badge badge-up">(29%+)</span>
+                        </div>
+                        <small class="text-muted">کل سفارشات</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- نقشه و لیست رویدادها -->
+            <div class="row g-4 mb-4">
+                <div class="col-lg-8">
+                    <div class="card-custom">
+                        <div class="card-header-custom">
+                            <h3 class="card-title-custom">نقشه رویدادها</h3>
+                            <button class="btn-view-all"><i class="bi bi-fullscreen"></i></button>
+                        </div>
+                        <div id="map" style="height: 400px; border-radius: 8px;"></div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card-custom">
+                        <div class="card-header-custom">
+                            <h3 class="card-title-custom">جدیدترین رویدادها</h3>
+                            <button class="btn-view-all">مشاهده همه</button>
+                        </div>
+                        <div class="events-list">
+                            <div class="event-item">
+                                <div class="event-marker event-marker-live"></div>
+                                <div class="event-content">
+                                    <h4 class="event-title">جشنواره زمستانی</h4>
+                                    <p class="event-date">۳ دی ۱۴۰۰ - ۱۶ دی ۱۴۰۰</p>
+                                </div>
+                                <span class="event-status status-live">فعال</span>
+                            </div>
+                            <div class="event-item">
+                                <div class="event-marker event-marker-reviewing"></div>
+                                <div class="event-content">
+                                    <h4 class="event-title">جشن بهاره</h4>
+                                    <p class="event-date">۱۴ بهمن ۱۴۰۰ - ۲۵ بهمن ۱۴۰۰</p>
+                                </div>
+                                <span class="event-status status-reviewing">در حال بررسی</span>
+                            </div>
+                            <div class="event-item">
+                                <div class="event-marker event-marker-live"></div>
+                                <div class="event-content">
+                                    <h4 class="event-title">فروش ویژه نوروز</h4>
+                                    <p class="event-date">۲۸ اسفند ۱۴۰۰ - ۱۴ فروردین ۱۴۰۱</p>
+                                </div>
+                                <span class="event-status status-live">فعال</span>
+                            </div>
+                            <div class="event-item">
+                                <div class="event-marker event-marker-paused"></div>
+                                <div class="event-content">
+                                    <h4 class="event-title">کمپین تابستانی</h4>
+                                    <p class="event-date">۳۰ خرداد ۱۴۰۱ - ۱۰ تیر ۱۴۰۱</p>
+                                </div>
+                                <span class="event-status status-paused">متوقف شده</span>
+                            </div>
+                            <div class="event-item">
+                                <div class="event-marker event-marker-paused"></div>
+                                <div class="event-content">
+                                    <h4 class="event-title">ویژه روز مادر</h4>
+                                    <p class="event-date">۱۱ مرداد ۱۴۰۱ - ۱۱ شهریور ۱۴۰۱</p>
+                                </div>
+                                <span class="event-status status-paused">متوقف شده</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- نمودار تحلیل سفارشات -->
+            <div class="row g-4 mb-4">
+                <div class="col-12">
+                    <div class="card-custom">
+                        <div class="card-header-custom">
+                            <h3 class="card-title-custom">تحلیل سفارشات هفتگی</h3>
+                            <div class="chart-filters">
+                                <button class="filter-btn active" data-filter="all">همه</button>
+                                <button class="filter-btn" data-filter="shipped">ارسال شده</button>
+                                <button class="filter-btn" data-filter="outofstock">خارج از انبار</button>
+                            </div>
+                        </div>
+                        <canvas id="ordersChart" height="80"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- جدیدترین سفارشات ثبت شده -->
+            <div class="card-custom">
+                <div class="card-header-custom">
+                    <h3 class="card-title-custom">جدیدترین سفارشات ثبت شده</h3>
+                    <button class="btn-view-all">مشاهده همه</button>
+                </div>
+
+                <table class="table-custom table-orders-new">
+                    <thead>
+                        <tr>
+                            <th>نام مشتری</th>
+                            <th>پذیرنده/ارسال کننده</th>
+                            <th>مبدا و مقصد</th>
+                            <th>وضعیت</th>
+                            <th>تاریخ ثبت</th>
+                            <th>مشاهده</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="customer-name-cell">محمد سیفی</div>
+                            </td>
+                            <td>
+                                <div class="social-icons">
+                                    <a href="#" class="social-icon social-facebook"><i class="fab fa-facebook-f"></i></a>
+                                    <a href="#" class="social-icon social-twitter"><i class="fab fa-twitter"></i></a>
+                                    <a href="#" class="social-icon social-linkedin"><i class="fab fa-linkedin-in"></i></a>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="route-cell">
+                                    <span class="route-location">تهران</span>
+                                    <i class="fas fa-arrow-left route-arrow-icon"></i>
+                                    <span class="route-location">کرمان</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="status-badge-table status-registered">ثبت شده</span>
+                            </td>
+                            <td>
+                                <div class="date-cell">۲۴ دی ۱۴۰۰ - ۶ دی ۱۴۰۰</div>
+                            </td>
+                            <td>
+                                <button class="btn-view-row">
+                                    <i class="fas fa-arrow-left"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="customer-name-cell">محمد سیفی</div>
+                            </td>
+                            <td>
+                                <div class="social-icons">
+                                    <a href="#" class="social-icon social-facebook"><i class="fab fa-facebook-f"></i></a>
+                                    <a href="#" class="social-icon social-twitter"><i class="fab fa-twitter"></i></a>
+                                    <a href="#" class="social-icon social-linkedin"><i class="fab fa-linkedin-in"></i></a>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="route-cell">
+                                    <span class="route-location">تهران</span>
+                                    <i class="fas fa-arrow-left route-arrow-icon"></i>
+                                    <span class="route-location">کرمان</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="status-badge-table status-registered">ثبت شده</span>
+                            </td>
+                            <td>
+                                <div class="date-cell">۲۴ دی ۱۴۰۰ - ۶ دی ۱۴۰۰</div>
+                            </td>
+                            <td>
+                                <button class="btn-view-row">
+                                    <i class="fas fa-arrow-left"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="customer-name-cell">محمد سیفی</div>
+                            </td>
+                            <td>
+                                <div class="social-icons">
+                                    <a href="#" class="social-icon social-facebook"><i class="fab fa-facebook-f"></i></a>
+                                    <a href="#" class="social-icon social-twitter"><i class="fab fa-twitter"></i></a>
+                                    <a href="#" class="social-icon social-linkedin"><i class="fab fa-linkedin-in"></i></a>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="route-cell">
+                                    <span class="route-location">تهران</span>
+                                    <i class="fas fa-arrow-left route-arrow-icon"></i>
+                                    <span class="route-location">کرمان</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="status-badge-table status-registered">ثبت شده</span>
+                            </td>
+                            <td>
+                                <div class="date-cell">۲۴ دی ۱۴۰۰ - ۶ دی ۱۴۰۰</div>
+                            </td>
+                            <td>
+                                <button class="btn-view-row">
+                                    <i class="fas fa-arrow-left"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="pagination-wrapper">
+                    <div class="footer-info">تنظیمات</div>
+                    <ul class="pagination-custom">
+                        <li><a href="#" class="page-link-custom"><i class="fas fa-chevron-right"></i></a></li>
+                        <li><a href="#" class="page-link-custom">۳</a></li>
+                        <li><a href="#" class="page-link-custom">۲</a></li>
+                        <li><a href="#" class="page-link-custom active">۱</a></li>
+                        <li><a href="#" class="page-link-custom"><i class="fas fa-chevron-left"></i></a></li>
+                    </ul>
+                    <div class="footer-links">
+                        <a href="#">درباره</a>
+                        <a href="#">پشتیبانی</a>
+                        <a href="#">خرید</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal افزودن کاربر -->
+    <div class="modal-overlay" id="addUserModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title">افزودن کاربر جدید</h3>
+                <button class="modal-close" onclick="closeAddUserModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- تب‌های نوع کاربر -->
+                <div class="user-type-tabs">
+                    <button type="button" class="user-type-tab active" onclick="switchUserType('system-admin')" data-type="system-admin">
+                        <i class="fas fa-user-shield"></i>
+                        مدیر سامانه
+                    </button>
+                    <button type="button" class="user-type-tab" onclick="switchUserType('operator')" data-type="operator">
+                        <i class="fas fa-user-cog"></i>
+                        اپراتور
+                    </button>
+                    <button type="button" class="user-type-tab" onclick="switchUserType('acceptor')" data-type="acceptor">
+                        <i class="fas fa-user-tie"></i>
+                        پذیرنده
+                    </button>
+                    <button type="button" class="user-type-tab" onclick="switchUserType('service-provider')" data-type="service-provider">
+                        <i class="fas fa-user-md"></i>
+                        سرویس دهنده
+                    </button>
+                    <button type="button" class="user-type-tab" onclick="switchUserType('support')" data-type="support">
+                        <i class="fas fa-headset"></i>
+                        پشتیبانی
+                    </button>
+                </div>
+
+                <form id="addUserForm">
+                    <input type="hidden" id="userRole" value="system-admin">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label-modal">نام <span class="required">*</span></label>
+                            <input type="text" class="form-control-modal" id="firstName" placeholder="نام را وارد کنید" required>
+                            <div class="error-message-modal" id="firstNameError"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label-modal">نام خانوادگی <span class="required">*</span></label>
+                            <input type="text" class="form-control-modal" id="lastName" placeholder="نام خانوادگی را وارد کنید" required>
+                            <div class="error-message-modal" id="lastNameError"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label-modal">کد ملی <span class="required">*</span></label>
+                            <input type="text" class="form-control-modal" id="nationalCode" placeholder="کد ملی را وارد کنید" maxlength="10" required>
+                            <div class="error-message-modal" id="nationalCodeError"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label-modal">شماره موبایل <span class="required">*</span></label>
+                            <input type="tel" class="form-control-modal" id="mobile" placeholder="09123456789" maxlength="11" required>
+                            <div class="error-message-modal" id="mobileError"></div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label-modal">آدرس</label>
+                            <textarea class="form-control-modal" id="address" rows="3" placeholder="آدرس را وارد کنید"></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label-modal">تصویر کاربر</label>
+                            <div class="image-upload-wrapper">
+                                <input type="file" class="image-input" id="userImage" accept="image/*" onchange="previewImage(this)">
+                                <label for="userImage" class="image-upload-label">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <span>برای آپلود تصویر کلیک کنید</span>
+                                </label>
+                                <div class="image-preview" id="imagePreview" style="display: none;">
+                                    <img id="previewImg" src="" alt="Preview">
+                                    <button type="button" class="remove-image" onclick="removeImage()">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-modal-cancel" onclick="closeAddUserModal()">انصراف</button>
+                <button type="button" class="btn-modal-submit" onclick="submitAddUser()">ثبت و تایید</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/vendor/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="/vendor/leaflet/1.9.4/leaflet.js"></script>
+    <script src="/vendor/chart.js/chart.umd.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 200" fill="none">
+  <rect width="360" height="200" rx="16" fill="#e5e7eb"/>
+  <rect y="120" width="360" height="80" fill="#fff"/>
+  <rect x="16" y="136" width="80" height="10" rx="3" fill="#d1d5db"/>
+  <rect x="16" y="154" width="120" height="8" rx="2" fill="#e5e7eb"/>
+  <rect x="16" y="172" width="60" height="8" rx="2" fill="#e5e7eb"/>
+  <rect x="280" y="8" width="64" height="22" rx="6" fill="#2563eb"/>
+  <text x="312" y="23" text-anchor="middle" fill="#fff" font-size="10" font-family="sans-serif">حیوانات</text>
+  <circle cx="320" cy="140" r="14" fill="#fcd34d"/>
+</svg>

@@ -1,0 +1,1676 @@
+﻿<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جزییات کاربر</title>
+    <link href="/vendor/bootstrap/5.3.0/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="/vendor/fontawesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/vendor/bootstrap-icons/1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* استایل‌های صفحه جزییات کاربر */
+        .profile-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.03);
+            margin-bottom: 30px;
+        }
+
+        .profile-header {
+            display: flex;
+            gap: 25px;
+            margin-bottom: 30px;
+            align-items: flex-start;
+        }
+
+        .profile-avatar-wrapper {
+            position: relative;
+        }
+
+        .profile-avatar {
+            width: 160px;
+            height: 160px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 4px solid white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .online-status {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            width: 18px;
+            height: 18px;
+            background: #50cd89;
+            border: 3px solid white;
+            border-radius: 50%;
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-name-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .profile-name {
+            font-size: 28px;
+            font-weight: 700;
+            color: #181c32;
+            margin: 0;
+        }
+
+        .verified-badge {
+            color: #7239ea;
+            font-size: 22px;
+        }
+
+        .upgrade-badge {
+            background: #e8fff3;
+            color: #50cd89;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .profile-meta {
+            display: flex;
+            gap: 20px;
+            color: #a1a5b7;
+            font-size: 14px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .profile-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .profile-meta-item i {
+            color: #a1a5b7;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 18px 22px;
+            flex: 1;
+        }
+
+        .stat-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #a1a5b7;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .stat-label i {
+            font-size: 12px;
+        }
+
+        .stat-value {
+            font-size: 26px;
+            font-weight: 700;
+            color: #181c32;
+        }
+
+        .stat-caption {
+            color: #a1a5b7;
+            font-size: 13px;
+            margin-top: 2px;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .progress-section {
+            flex: 1;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            color: #a1a5b7;
+            font-size: 13px;
+        }
+
+        .progress-label span:last-child {
+            color: #181c32;
+            font-weight: 600;
+        }
+
+        .progress-bar-custom {
+            height: 8px;
+            background: #eff2f5;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #50cd89 0%, #3ac47d 100%);
+            width: 50%;
+            border-radius: 10px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-action {
+            padding: 11px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-follow {
+            background: white;
+            color: #5e6278;
+            border: 1px solid #e4e6ef;
+        }
+
+        .btn-follow:hover {
+            background: #f5f8fa;
+            border-color: #7239ea;
+            color: #7239ea;
+        }
+
+        .btn-hire {
+            background: linear-gradient(135deg, #7239ea 0%, #9d5cff 100%);
+            color: white;
+            border: none;
+        }
+
+        .btn-hire:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(114, 57, 234, 0.3);
+        }
+
+        .btn-more {
+            background: white;
+            color: #5e6278;
+            border: 1px solid #e4e6ef;
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+
+        .btn-more:hover {
+            background: #f5f8fa;
+            border-color: #7239ea;
+            color: #7239ea;
+        }
+
+        .tabs-navigation {
+            display: flex;
+            gap: 35px;
+            border-bottom: 2px solid #eff2f5;
+            margin-bottom: 30px;
+        }
+
+        .tab-item {
+            padding: 15px 0;
+            color: #a1a5b7;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+
+        .tab-item:hover {
+            color: #7239ea;
+        }
+
+        .tab-item.active {
+            color: #7239ea;
+            border-bottom-color: #7239ea;
+        }
+
+        .details-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.03);
+            margin-bottom: 20px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #181c32;
+            margin: 0;
+        }
+
+        .btn-edit-profile {
+            background: linear-gradient(135deg, #7239ea 0%, #9d5cff 100%);
+            color: white;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-edit-profile:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(114, 57, 234, 0.3);
+        }
+
+        .detail-row {
+            display: flex;
+            padding: 18px 0;
+            border-bottom: 1px solid #eff2f5;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            width: 200px;
+            color: #a1a5b7;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .detail-value {
+            flex: 1;
+            color: #181c32;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .verified-badge-small {
+            background: #e8fff3;
+            color: #50cd89;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .alert-warning {
+            background: #fff8dd;
+            border: 1px solid #ffd666;
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .alert-icon {
+            width: 40px;
+            height: 40px;
+            background: #ffd666;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #181c32;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #181c32;
+            margin: 0 0 8px 0;
+        }
+
+        .alert-text {
+            color: #5e6278;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .alert-link {
+            color: #7239ea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .alert-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Workflow Styles */
+        .workflow-steps-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .workflow-step-card {
+            background: #f9f9f9;
+            border: 1px solid #e4e6ef;
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            min-height: 200px;
+        }
+
+        .workflow-step-card:hover {
+            border-color: #7239ea;
+            box-shadow: 0 2px 8px rgba(114, 57, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .workflow-step-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e4e6ef;
+        }
+
+        .workflow-step-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #181c32;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .workflow-step-number {
+            background: linear-gradient(135deg, #7239ea 0%, #9d5cff 100%);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .workflow-step-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 12px;
+            flex: 1;
+        }
+
+        .workflow-action-item {
+            background: white;
+            border: 1px solid #e4e6ef;
+            border-radius: 6px;
+            padding: 10px 12px;
+            font-size: 12px;
+            color: #5e6278;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .workflow-action-item:hover {
+            border-color: #7239ea;
+            background: #f1edff;
+        }
+
+        .workflow-action-item-icon {
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .workflow-action-item-name {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .workflow-add-btn {
+            background: white;
+            border: 2px dashed #e4e6ef;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #7239ea;
+            font-weight: 500;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+        }
+
+        .workflow-add-btn:hover {
+            border-color: #7239ea;
+            background: #f1edff;
+        }
+
+        .workflow-add-btn i {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .workflow-end-card {
+            background: #fff5f5;
+            border: 1px solid #f1416c;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            color: #f1416c;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+        }
+
+        .workflow-end-card i {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        /* Action Card Styles */
+        .action-card-modal {
+            border: 2px solid #e4e6ef;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+            text-align: center;
+        }
+
+        .action-card-modal:hover {
+            border-color: #7239ea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(114, 57, 234, 0.2);
+        }
+
+        .action-card-modal.selected {
+            border-color: #7239ea;
+            background: #f1edff;
+        }
+
+        .action-icon-modal {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .action-name-modal {
+            font-weight: 500;
+            color: #3f4254;
+            font-size: 13px;
+        }
+
+        .selected-action-item-modal {
+            background: #f5f8fa;
+            border: 1px solid #e4e6ef;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+
+        .action-config-modal {
+            background: #f5f8fa;
+            border: 1px solid #e4e6ef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .action-config-title-modal {
+            font-weight: 600;
+            color: #3f4254;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1050;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-dialog {
+            max-width: 700px;
+            width: 100%;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #e4e6ef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #181c32;
+            margin: 0;
+        }
+
+        .btn-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #a1a5b7;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-close:hover {
+            color: #7239ea;
+        }
+
+        .modal-body {
+            padding: 20px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid #e4e6ef;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #7239ea 0%, #9d5cff 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(114, 57, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f5f8fa;
+            color: #3f4254;
+            border: 1px solid #e4e6ef;
+        }
+
+        .btn-secondary:hover {
+            background: #e4e6ef;
+        }
+
+        .btn-danger {
+            background: #f1416c;
+            color: white;
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn-danger:hover {
+            background: #e0315c;
+        }
+
+        @media (max-width: 991px) {
+            .profile-header {
+                flex-direction: column;
+            }
+
+            .stats-row {
+                flex-direction: column;
+            }
+
+            .profile-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .tabs-navigation {
+                overflow-x: auto;
+                gap: 20px;
+            }
+
+            .detail-row {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .detail-label {
+                width: 100%;
+            }
+
+            .workflow-steps-container {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .workflow-step-card {
+                min-height: auto;
+            }
+
+            .workflow-add-btn {
+                min-height: 150px;
+            }
+
+            .workflow-end-card {
+                min-height: 150px;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .workflow-steps-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .workflow-steps-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Secondary Sidebar (Icons) -->
+    <div class="sidebar-secondary">
+        <div class="logo-small">۷</div>
+
+        <div class="sidebar-icon-item active" data-menu="home">
+            <i class="fas fa-home"></i>
+        </div>
+        <div class="sidebar-icon-item" data-menu="files">
+            <i class="fas fa-file-alt"></i>
+        </div>
+        <div class="sidebar-icon-item" data-menu="users">
+            <i class="fas fa-user"></i>
+        </div>
+        <div class="sidebar-icon-item" data-menu="auth">
+            <i class="fas fa-key"></i>
+        </div>
+
+        <div class="sidebar-divider"></div>
+
+        <div class="sidebar-icon-item" data-menu="clipboard">
+            <i class="fas fa-clipboard"></i>
+        </div>
+        <div class="sidebar-icon-item" data-menu="check">
+            <i class="fas fa-check"></i>
+        </div>
+        <div class="sidebar-icon-item" data-menu="book">
+            <i class="fas fa-book"></i>
+        </div>
+        <div class="sidebar-icon-item" data-menu="briefcase">
+            <i class="fas fa-briefcase"></i>
+        </div>
+        <div class="sidebar-icon-item" data-menu="bars">
+            <i class="fas fa-bars"></i>
+        </div>
+        <div class="sidebar-icon-item" data-menu="chart">
+            <i class="fas fa-chart-bar"></i>
+        </div>
+        <div class="sidebar-icon-item" data-menu="sun">
+            <i class="fas fa-sun"></i>
+        </div>
+
+        <img src="images/avatar-default.svg"
+             class="sidebar-user-icon"
+             alt="User">
+    </div>
+
+    <!-- Primary Sidebar (Full Menu) -->
+    <div class="sidebar-primary"
+         id="sidebarPrimary">
+        <div class="sidebar-header">
+            <p class="sidebar-title">منوی اصلی</p>
+        </div>
+
+        <div class="sidebar-menu">
+            <!-- محتوای تب خانه -->
+            <div class="menu-content active" id="homeContent">
+                <button class="menu-item active" data-submenu="homeSubmenu">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="menu-icon"><i class="fas fa-home"></i></span>
+                        <span>خانه</span>
+                    </div>
+                    <i class="fas fa-chevron-up menu-arrow"></i>
+                </button>
+
+                <div class="submenu expanded" id="homeSubmenu">
+                    <div class="submenu-item active">داشبورد</div>
+                    <div class="submenu-item">اطلاعات کلی</div>
+                    <div class="submenu-item">آمارها</div>
+                    <div class="submenu-item">گزارش‌های روزانه</div>
+                    <div class="submenu-item">فعالیت‌های اخیر</div>
+                </div>
+            </div>
+
+            <!-- محتوای تب مدیریت فایل -->
+            <div class="menu-content" id="filesContent">
+                <button class="menu-item" data-submenu="filesSubmenu">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="menu-icon"><i class="fas fa-cloud"></i></span>
+                        <span>مدیریت فایل</span>
+                    </div>
+                    <i class="fas fa-chevron-up menu-arrow"></i>
+                </button>
+
+                <div class="submenu" id="filesSubmenu">
+                    <div class="submenu-item">آپلود فایل</div>
+                    <div class="submenu-item">مدیریت فایل‌ها</div>
+                    <div class="submenu-item">فضای ذخیره‌سازی</div>
+                    <div class="submenu-item">اشتراک‌گذاری</div>
+                    <div class="submenu-item">بایگانی</div>
+                </div>
+            </div>
+
+            <!-- محتوای تب مدیریت کاربران -->
+            <div class="menu-content" id="usersContent">
+                <button class="menu-item" data-submenu="usersSubmenu">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="menu-icon"><i class="fas fa-user-shield"></i></span>
+                        <span>مدیریت کاربران</span>
+                    </div>
+                    <i class="fas fa-chevron-up menu-arrow"></i>
+                </button>
+
+                <div class="submenu expanded" id="usersSubmenu">
+                    <button class="menu-item submenu-header" id="usersSubSubmenuToggle">
+                        <span style="font-size: 13px;">کاربران</span>
+                        <i class="fas fa-chevron-down" style="font-size: 10px; color: rgb(161, 165, 183);"></i>
+                    </button>
+
+                    <div class="sub-submenu expanded" id="usersSubSubmenuItems">
+                        <div class="submenu-item" onclick="window.location.href='index.html'">لیست کاربران</div>
+                        <div class="submenu-item active" onclick="window.location.href='user-details.html'">جزییات کاربر</div>
+                    </div>
+
+                    <div class="submenu-item">نقش‌ها</div>
+                    <div class="submenu-item">مجوزها</div>
+                </div>
+            </div>
+
+            <!-- محتوای تب احراز هویت -->
+            <div class="menu-content" id="authContent">
+                <button class="menu-item" data-submenu="authSubmenu">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="menu-icon"><i class="fas fa-fingerprint"></i></span>
+                        <span>احراز هویت</span>
+                    </div>
+                    <i class="fas fa-chevron-up menu-arrow"></i>
+                </button>
+
+                <div class="submenu" id="authSubmenu">
+                    <div class="submenu-item">ورود</div>
+                    <div class="submenu-item">ثبت نام</div>
+                    <div class="submenu-item">بازیابی رمز عبور</div>
+                    <div class="submenu-item">تایید دو مرحله‌ای</div>
+                    <div class="submenu-item">پروفایل کاربری</div>
+                </div>
+            </div>
+
+            <!-- محتوای تب پروژه‌ها -->
+            <div class="menu-content" id="projectsContent">
+                <button class="menu-item" data-submenu="projectsSubmenu">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="menu-icon"><i class="fas fa-rocket"></i></span>
+                        <span>پروژه‌ها</span>
+                    </div>
+                    <i class="fas fa-chevron-up menu-arrow"></i>
+                </button>
+
+                <div class="submenu" id="projectsSubmenu">
+                    <div class="submenu-item">لیست پروژه‌ها</div>
+                    <div class="submenu-item">پروژه‌های جدید</div>
+                    <div class="submenu-item">گزارش‌ها</div>
+                    <div class="submenu-item">تیم‌ها</div>
+                    <div class="submenu-item">وظایف</div>
+                </div>
+            </div>
+
+            <!-- محتوای تب تجارت الکترونیک -->
+            <div class="menu-content" id="ecommerceContent">
+                <button class="menu-item" data-submenu="ecommerceSubmenu">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="menu-icon"><i class="fas fa-shopping-cart"></i></span>
+                        <span>تجارت الکترونیک</span>
+                    </div>
+                    <i class="fas fa-chevron-up menu-arrow"></i>
+                </button>
+
+                <div class="submenu" id="ecommerceSubmenu">
+                    <div class="submenu-item">محصولات</div>
+                    <div class="submenu-item">دسته‌بندی‌ها</div>
+                    <div class="submenu-item">سفارشات</div>
+                    <div class="submenu-item">مشتریان</div>
+                    <div class="submenu-item">تخفیف‌ها</div>
+                </div>
+            </div>
+
+            <!-- محتوای تب کلیپ‌بورد -->
+            <div class="menu-content" id="clipboardContent">
+                <button class="menu-item" data-submenu="clipboardSubmenu">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="menu-icon"><i class="fas fa-clipboard"></i></span>
+                        <span>کلیپ‌بورد</span>
+                    </div>
+                    <i class="fas fa-chevron-up menu-arrow"></i>
+                </button>
+
+                <div class="submenu" id="clipboardSubmenu">
+                    <div class="submenu-item">یادداشت‌ها</div>
+                    <div class="submenu-item">برچسب‌ها</div>
+                    <div class="submenu-item">اشتراک‌گذاری</div>
+                    <div class="submenu-item">آرشیو</div>
+                </div>
+            </div>
+
+            <!-- محتوای تب چک‌لیست -->
+            <div class="menu-content" id="checkContent">
+                <button class="menu-item" data-submenu="checkSubmenu">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="menu-icon"><i class="fas fa-check"></i></span>
+                        <span>چک‌لیست</span>
+                    </div>
+                    <i class="fas fa-chevron-up menu-arrow"></i>
+                </button>
+
+                <div class="submenu" id="checkSubmenu">
+                    <div class="submenu-item">وظایف روزانه</div>
+                    <div class="submenu-item">پروژه‌ها</div>
+                    <div class="submenu-item">اهداف</div>
+                    <div class="submenu-item">نظارت</div>
+                </div>
+            </div>
+
+            <!-- محتوای تب کتاب -->
+            <div class="menu-content" id="bookContent">
+                <button class="menu-item" data-submenu="bookSubmenu">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="menu-icon"><i class="fas fa-book"></i></span>
+                        <span>کتاب</span>
+                    </div>
+                    <i class="fas fa-chevron-up menu-arrow"></i>
+                </button>
+
+                <div class="submenu" id="bookSubmenu">
+                    <div class="submenu-item">کتابخانه</div>
+                    <div class="submenu-item">دسته‌بندی‌ها</div>
+                    <div class="submenu-item">نویسندگان</div>
+                    <div class="submenu-item">بررسی‌ها</div>
+                </div>
+            </div>
+
+            <!-- محتوای تب کسب و کار -->
+            <div class="menu-content" id="briefcaseContent">
+                <button class="menu-item" data-submenu="briefcaseSubmenu">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="menu-icon"><i class="fas fa-briefcase"></i></span>
+                        <span>کسب و کار</span>
+                    </div>
+                    <i class="fas fa-chevron-up menu-arrow"></i>
+                </button>
+
+                <div class="submenu" id="briefcaseSubmenu">
+                    <div class="submenu-item">شرکت‌ها</div>
+                    <div class="submenu-item">مشتریان</div>
+                    <div class="submenu-item">قراردادها</div>
+                    <div class="submenu-item">گزارش‌های مالی</div>
+                </div>
+            </div>
+
+            <!-- محتوای تب منو -->
+            <div class="menu-content" id="barsContent">
+                <button class="menu-item" data-submenu="barsSubmenu">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="menu-icon"><i class="fas fa-bars"></i></span>
+                        <span>منو</span>
+                    </div>
+                    <i class="fas fa-chevron-up menu-arrow"></i>
+                </button>
+
+                <div class="submenu" id="barsSubmenu">
+                    <div class="submenu-item">تنظیمات</div>
+                    <div class="submenu-item">نمایه</div>
+                    <div class="submenu-item">پیام‌ها</div>
+                    <div class="submenu-item">اعلان‌ها</div>
+                </div>
+            </div>
+
+            <!-- محتوای تب نمودار -->
+            <div class="menu-content" id="chartContent">
+                <button class="menu-item" data-submenu="chartSubmenu">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="menu-icon"><i class="fas fa-chart-bar"></i></span>
+                        <span>نمودار</span>
+                    </div>
+                    <i class="fas fa-chevron-up menu-arrow"></i>
+                </button>
+
+                <div class="submenu" id="chartSubmenu">
+                    <div class="submenu-item">آمار فروش</div>
+                    <div class="submenu-item">تحلیل کاربران</div>
+                    <div class="submenu-item">گزارش‌های مالی</div>
+                    <div class="submenu-item">پیش‌بینی‌ها</div>
+                </div>
+            </div>
+
+            <!-- محتوای تب تنظیمات -->
+            <div class="menu-content" id="sunContent">
+                <button class="menu-item" data-submenu="sunSubmenu">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="menu-icon"><i class="fas fa-sun"></i></span>
+                        <span>تنظیمات</span>
+                    </div>
+                    <i class="fas fa-chevron-up menu-arrow"></i>
+                </button>
+
+                <div class="submenu" id="sunSubmenu">
+                    <div class="submenu-item">پروفایل</div>
+                    <div class="submenu-item">امنیت</div>
+                    <div class="submenu-item">اعلان‌ها</div>
+                    <div class="submenu-item">ظاهر</div>
+                    <div class="submenu-item">زبان</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- دکمه toggle که در موقعیت ثابت کنار سایدبار قرار می‌گیرد -->
+    <div class="toggle-sidebar-btn"
+         onclick="toggleSidebar()">
+        <i class="fas fa-chevron-left"
+           id="toggleIcon"></i>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content"
+         id="mainContent">
+        <div class="top-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="text-start">
+                    <h1 class="page-title">جزییات کاربر</h1>
+                    <p class="breadcrumb-custom">خانه / مدیریت کاربران / کاربران / جزییات کاربر</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn-new-goal">هدف جدید</button>
+                    <button class="btn-new-user" onclick="window.location.href='index.html'">بازگشت به لیست</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-area">
+            <!-- Profile Card -->
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-avatar-wrapper">
+                        <img src="images/avatar-profile.svg" alt="Max Smith" class="profile-avatar">
+                        <div class="online-status"></div>
+                    </div>
+                    
+                    <div class="profile-info">
+                        <div class="profile-name-row">
+                            <h2 class="profile-name">مکس اسمیت</h2>
+                            <i class="fas fa-check-circle verified-badge"></i>
+                            <span class="upgrade-badge">ارتقا به حرفه‌ای</span>
+                        </div>
+                        
+                        <div class="profile-meta">
+                            <div class="profile-meta-item">
+                                <i class="fas fa-user"></i>
+                                <span>توسعه‌دهنده</span>
+                            </div>
+                            <div class="profile-meta-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>سانفرانسیسکو، منطقه خلیج</span>
+                            </div>
+                            <div class="profile-meta-item">
+                                <i class="fas fa-envelope"></i>
+                                <span>max@kt.com</span>
+                            </div>
+                        </div>
+                        <div class="stats-row">
+                            <div class="stat-box">
+                                <div class="stat-label">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>درآمد</span>
+                                </div>
+                                <div class="stat-value">$4,500</div>
+                                <div class="stat-caption">درآمد</div>
+                            </div>
+                            
+                            <div class="stat-box">
+                                <div class="stat-label">
+                                    <i class="fas fa-arrow-down"></i>
+                                    <span>پروژه‌ها</span>
+                                </div>
+                                <div class="stat-value">75</div>
+                                <div class="stat-caption">پروژه‌ها</div>
+                            </div>
+                            
+                            <div class="stat-box">
+                                <div class="stat-label">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>نرخ موفقیت</span>
+                                </div>
+                                <div class="stat-value">%60</div>
+                                <div class="stat-caption">نرخ موفقیت</div>
+                            </div>
+                        </div>
+                        <div class="profile-actions">
+                            <div class="progress-section">
+                                <div class="progress-label">
+                                    <span>تکمیل پروفایل</span>
+                                    <span>50%</span>
+                                </div>
+                                <div class="progress-bar-custom">
+                                    <div class="progress-fill"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="action-buttons">
+                                <button class="btn-action btn-follow">جززیات پرداخت</button>
+                                <button class="btn-action btn-hire"> شارژ پنل</button>
+                               
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabs Navigation -->
+                <div class="tabs-navigation">
+                    <div class="tab-item active">نمای کلی</div>
+                    <div class="tab-item">تنظیمات</div>
+                    <div class="tab-item">امنیت</div>
+                    <div class="tab-item">صورتحساب</div>
+                    <div class="tab-item">گزارش‌ها</div>
+                    <div class="tab-item">معرفی‌ها</div>
+                    <div class="tab-item">کلیدهای API</div>
+                    <div class="tab-item">گزارش‌ها</div>
+                </div>
+            </div>
+
+        
+
+            <!-- Workflow Section -->
+            <div class="details-section">
+                <div class="section-header">
+                    <h3 class="section-title">مدیریت جریان کار</h3>
+                    <button class="btn-edit-profile" onclick="openCreateWorkflowModal()">
+                        <i class="fas fa-plus ms-2"></i>
+                        ایجاد جریان جدید
+                    </button>
+                </div>
+                
+                <div id="workflowContainer" style="margin-top: 20px;">
+                    <!-- Workflow steps will be displayed here -->
+                </div>
+            </div>
+
+            <!-- Warning Alert -->
+            <div class="alert-warning">
+                <div class="alert-icon">
+                    <i class="fas fa-exclamation"></i>
+                </div>
+                <div class="alert-content">
+                    <h4 class="alert-title">به توجه شما نیاز داریم!</h4>
+                    <p class="alert-text">
+                        پرداخت شما رد شد. برای شروع استفاده از ابزارها، لطفاً 
+                        <a href="#" class="alert-link">روش پرداخت اضافه کنید</a>.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Workflow Modal -->
+    <div class="modal fade" id="workflowModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="workflowModalTitle">ایجاد مرحله جدید</h5>
+                    <button type="button" class="btn-close" onclick="closeWorkflowModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group mb-3">
+                        <label class="form-label">انتخاب اقدامات</label>
+                        <div class="row g-3" id="actionsGrid">
+                            <!-- Actions will be loaded here -->
+                        </div>
+                    </div>
+
+                    <div id="actionConfigsContainer">
+                        <!-- Action configs will be shown here -->
+                    </div>
+
+                    <div class="selected-actions mt-4" id="selectedActions" style="display: none;">
+                        <h6 class="mb-3" style="color: #3f4254; font-weight: 600;">اقدامات انتخاب شده:</h6>
+                        <div id="selectedActionsList"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeWorkflowModal()">انصراف</button>
+                    <button type="button" class="btn btn-primary" onclick="createWorkflowStep()">ایجاد</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Step Actions Modal -->
+    <div class="modal fade" id="viewWorkflowModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="viewWorkflowModalTitle">مشاهده اقدامات</h5>
+                    <button type="button" class="btn-close" onclick="closeViewWorkflowModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="viewActionsList" style="max-height: 400px; overflow-y: auto;">
+                        <!-- Actions will be shown here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeViewWorkflowModal()">بستن</button>
+                    <button type="button" class="btn btn-primary" onclick="editWorkflowStepFromView()">
+                        <i class="fas fa-edit ms-2"></i>
+                        ویرایش
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/vendor/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // Available Actions
+        const availableActions = [
+            { id: 'sms_to_customer', icon: '📱', name: 'ارسال SMS به کاربر' },
+            { id: 'sms_to_admin', icon: '📱', name: 'ارسال SMS به ادمین' },
+            { id: 'email_to_customer', icon: '📧', name: 'ارسال ایمیل به کاربر' },
+            { id: 'email_to_admin', icon: '📧', name: 'ارسال ایمیل به ادمین' },
+            { id: 'notification_to_admin', icon: '🔔', name: 'نوتیفیکیشن به ادمین' },
+            { id: 'webhook_to_source', icon: '🌐', name: 'Webhook به سایت مبدا' },
+            { id: 'post_to_source', icon: '📤', name: 'POST تغییر وضعیت' },
+            { id: 'status_change', icon: '🔄', name: 'تغییر وضعیت سفارش' },
+            { id: 'create_invoice', icon: '📄', name: 'ایجاد پیش‌فاکتور' },
+            { id: 'warehouse_out', icon: '📦', name: 'ثبت خروج از انبار' },
+            { id: 'warehouse_in', icon: '📥', name: 'ثبت ورود به انبار' },
+            { id: 'check_inventory', icon: '📊', name: 'بررسی موجودی' },
+            { id: 'register_payment', icon: '💳', name: 'ثبت پرداخت' },
+            { id: 'register_shipping', icon: '🚚', name: 'ثبت اطلاعات پست/پیک' },
+            { id: 'wait_for_approval', icon: '⏳', name: 'انتظار برای تایید' },
+            { id: 'delay', icon: '⏱️', name: 'تاخیر زمانی' }
+        ];
+
+        // Action Config Templates
+        const actionConfigs = {
+            'sms_to_customer': {
+                template: `
+                    <div class="mb-3">
+                        <label class="form-label">قالب پیام SMS *</label>
+                        <textarea class="form-control" id="smsTemplate" placeholder="مثال: کاربر گرامی {customer_name}، سفارش شما با شماره {order_id} ثبت شد." required></textarea>
+                        <small class="text-muted">متغیرهای قابل استفاده: {customer_name}, {order_id}, {total_price}, {status}</small>
+                    </div>
+                `,
+                getData: () => ({
+                    template: document.getElementById('smsTemplate')?.value || ''
+                })
+            },
+            'sms_to_admin': {
+                template: `
+                    <div class="mb-3">
+                        <label class="form-label">شماره موبایل ادمین *</label>
+                        <input type="text" class="form-control" id="adminMobile" placeholder="09123456789" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">قالب پیام SMS *</label>
+                        <textarea class="form-control" id="smsTemplate" placeholder="مثال: سفارش جدید با شماره {order_id} ثبت شد." required></textarea>
+                    </div>
+                `,
+                getData: () => ({
+                    mobile: document.getElementById('adminMobile')?.value || '',
+                    template: document.getElementById('smsTemplate')?.value || ''
+                })
+            },
+            'email_to_customer': {
+                template: `
+                    <div class="mb-3">
+                        <label class="form-label">موضوع ایمیل *</label>
+                        <input type="text" class="form-control" id="emailSubject" placeholder="مثال: تایید ثبت سفارش" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">متن ایمیل *</label>
+                        <textarea class="form-control" id="emailBody" placeholder="متن ایمیل..." required></textarea>
+                    </div>
+                `,
+                getData: () => ({
+                    subject: document.getElementById('emailSubject')?.value || '',
+                    body: document.getElementById('emailBody')?.value || ''
+                })
+            },
+            'status_change': {
+                template: `
+                    <div class="mb-3">
+                        <label class="form-label">وضعیت جدید *</label>
+                        <select class="form-select" id="newStatus" required>
+                            <option value="">انتخاب کنید</option>
+                            <option value="pending">در انتظار</option>
+                            <option value="pending_processing">در انتظار پردازش</option>
+                            <option value="processing">در حال پردازش</option>
+                            <option value="ready_to_ship">آماده ارسال</option>
+                            <option value="warehouse_out">خروج از انبار</option>
+                            <option value="shipping">در حال ارسال</option>
+                            <option value="delivered">تحویل شده</option>
+                            <option value="cancelled">لغو شده</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">یادداشت</label>
+                        <textarea class="form-control" id="statusNote"></textarea>
+                    </div>
+                `,
+                getData: () => ({
+                    status: document.getElementById('newStatus')?.value || '',
+                    note: document.getElementById('statusNote')?.value || ''
+                })
+            }
+        };
+
+        let workflowSteps = [];
+        let currentSelectedActions = [];
+        let currentEditingStepIndex = null;
+        let currentViewingStepIndex = null;
+
+        function openCreateWorkflowModal() {
+            currentSelectedActions = [];
+            currentEditingStepIndex = null;
+            document.getElementById('workflowModalTitle').textContent = 'ایجاد مرحله جدید';
+            loadActions();
+            updateSelectedActionsDisplay();
+            document.getElementById('workflowModal').classList.add('show');
+        }
+
+        function closeWorkflowModal() {
+            document.getElementById('workflowModal').classList.remove('show');
+            currentSelectedActions = [];
+            currentEditingStepIndex = null;
+            document.getElementById('actionConfigsContainer').innerHTML = '';
+        }
+
+        function loadActions() {
+            const grid = document.getElementById('actionsGrid');
+            grid.innerHTML = availableActions.map(action => {
+                const isSelected = currentSelectedActions.some(a => a.id === action.id);
+                return `
+                    <div class="col-md-4 col-sm-6">
+                        <div class="action-card-modal ${isSelected ? 'selected' : ''}" 
+                             onclick="toggleAction('${action.id}')" 
+                             data-action-id="${action.id}">
+                            <div class="action-icon-modal">${action.icon}</div>
+                            <div class="action-name-modal">${action.name}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            updateActionConfigs();
+        }
+
+        function toggleAction(actionId) {
+            const action = availableActions.find(a => a.id === actionId);
+            const card = document.querySelector(`[data-action-id="${actionId}"]`);
+            
+            const index = currentSelectedActions.findIndex(a => a.id === actionId);
+            
+            if (index >= 0) {
+                currentSelectedActions.splice(index, 1);
+                card.classList.remove('selected');
+            } else {
+                currentSelectedActions.push({
+                    id: action.id,
+                    icon: action.icon,
+                    name: action.name,
+                    config: {}
+                });
+                card.classList.add('selected');
+            }
+            
+            updateActionConfigs();
+            updateSelectedActionsDisplay();
+        }
+
+        function updateActionConfigs() {
+            const container = document.getElementById('actionConfigsContainer');
+            container.innerHTML = '';
+            
+            currentSelectedActions.forEach((action, index) => {
+                if (actionConfigs[action.id]) {
+                    const configDiv = document.createElement('div');
+                    configDiv.className = 'action-config-modal';
+                    configDiv.id = `config_${action.id}_${index}`;
+                    configDiv.innerHTML = `
+                        <div class="action-config-title-modal">
+                            ${action.icon} ${action.name}
+                        </div>
+                        ${actionConfigs[action.id].template}
+                    `;
+                    container.appendChild(configDiv);
+                    
+                    if (action.config && Object.keys(action.config).length > 0) {
+                        fillConfigFields(action.id, index, action.config);
+                    }
+                }
+            });
+        }
+
+        function fillConfigFields(actionId, index, config) {
+            const configDiv = document.getElementById(`config_${actionId}_${index}`);
+            if (!configDiv) return;
+            
+            Object.keys(config).forEach(key => {
+                const input = configDiv.querySelector(`#${key}`);
+                if (input) {
+                    input.value = config[key];
+                }
+            });
+        }
+
+        function updateSelectedActionsDisplay() {
+            const container = document.getElementById('selectedActions');
+            const list = document.getElementById('selectedActionsList');
+            
+            if (currentSelectedActions.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+            
+            container.style.display = 'block';
+            list.innerHTML = currentSelectedActions.map((action, index) => `
+                <div class="selected-action-item-modal">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span>${action.icon}</span>
+                        <span>${action.name}</span>
+                    </div>
+                    <button class="btn btn-danger btn-sm" onclick="removeAction(${index})">حذف</button>
+                </div>
+            `).join('');
+        }
+
+        function removeAction(index) {
+            const action = currentSelectedActions[index];
+            currentSelectedActions.splice(index, 1);
+            
+            const card = document.querySelector(`[data-action-id="${action.id}"]`);
+            if (card) card.classList.remove('selected');
+            
+            updateActionConfigs();
+            updateSelectedActionsDisplay();
+        }
+
+        function createWorkflowStep() {
+            if (currentSelectedActions.length === 0) {
+                alert('لطفا حداقل یک اقدام انتخاب کنید');
+                return;
+            }
+
+            currentSelectedActions.forEach((action, index) => {
+                if (actionConfigs[action.id]) {
+                    try {
+                        action.config = actionConfigs[action.id].getData();
+                    } catch (e) {
+                        console.error('Error getting config:', e);
+                    }
+                }
+            });
+
+            const step = {
+                id: Date.now(),
+                order: currentEditingStepIndex !== null ? workflowSteps[currentEditingStepIndex].order : workflowSteps.length + 1,
+                name: `مرحله ${currentEditingStepIndex !== null ? workflowSteps[currentEditingStepIndex].order : workflowSteps.length + 1}`,
+                actions: JSON.parse(JSON.stringify(currentSelectedActions))
+            };
+
+            if (currentEditingStepIndex !== null) {
+                workflowSteps[currentEditingStepIndex] = step;
+            } else {
+                workflowSteps.push(step);
+            }
+
+            renderWorkflow();
+            closeWorkflowModal();
+        }
+
+        function renderWorkflow() {
+            const container = document.getElementById('workflowContainer');
+            
+            if (workflowSteps.length === 0) {
+                container.innerHTML = `
+                    <div class="workflow-steps-container">
+                        <div class="workflow-add-btn" onclick="openCreateWorkflowModal()">
+                            <i class="fas fa-plus"></i>
+                            برای شروع، یک مرحله جدید ایجاد کنید
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<div class="workflow-steps-container">';
+
+            // Render workflow steps
+            workflowSteps.forEach((step, index) => {
+                html += `
+                    <div class="workflow-step-card" onclick="viewStepActions(${index})">
+                        <div class="workflow-step-header">
+                            <div class="workflow-step-title">
+                                <span class="workflow-step-number">${step.order}</span>
+                                <span>${step.name}</span>
+                            </div>
+                            <i class="fas fa-edit" style="color: #7239ea; font-size: 14px;"></i>
+                        </div>
+                        <div class="workflow-step-actions">
+                            ${step.actions.length > 0 ? step.actions.map((action, actionIndex) => `
+                                <div class="workflow-action-item">
+                                    <span class="workflow-action-item-icon">${action.icon}</span>
+                                    <span class="workflow-action-item-name">${actionIndex + 1}. ${action.name}</span>
+                                </div>
+                            `).join('') : `
+                                <div style="text-align: center; color: #a1a5b7; padding: 20px; font-size: 13px;">
+                                    هیچ اقدامی تعریف نشده است
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Add button after last step
+            html += `
+                <div class="workflow-add-btn" onclick="openCreateWorkflowModal()">
+                    <i class="fas fa-plus"></i>
+                    افزودن مرحله بعد
+                </div>
+            `;
+
+            // Add end card
+            html += `
+                <div class="workflow-end-card">
+                    <i class="fas fa-flag"></i>
+                    پایان جریان
+                </div>
+            `;
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function viewStepActions(stepIndex) {
+            currentViewingStepIndex = stepIndex;
+            const step = workflowSteps[stepIndex];
+            document.getElementById('viewWorkflowModalTitle').textContent = `اقدامات ${step.name}`;
+            
+            const list = document.getElementById('viewActionsList');
+            list.innerHTML = step.actions.map((action, index) => {
+                let configHtml = '';
+                if (action.config && Object.keys(action.config).length > 0) {
+                    configHtml = `
+                        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e4e6ef; font-size: 13px; color: #5e6278;">
+                            ${Object.entries(action.config).map(([key, value]) => `
+                                <div style="margin-bottom: 6px;">
+                                    <strong style="color: #3f4254;">${key}:</strong> ${value}
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+                
+                return `
+                    <div style="background: #f5f8fa; border: 1px solid #e4e6ef; border-radius: 8px; padding: 15px; margin-bottom: 12px;">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                            <span style="font-size: 20px;">${action.icon}</span>
+                            <span style="font-weight: 600; color: #3f4254;">${index + 1}. ${action.name}</span>
+                        </div>
+                        ${configHtml}
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('viewWorkflowModal').classList.add('show');
+        }
+
+        function closeViewWorkflowModal() {
+            document.getElementById('viewWorkflowModal').classList.remove('show');
+            currentViewingStepIndex = null;
+        }
+
+        function editWorkflowStepFromView() {
+            if (currentViewingStepIndex === null) return;
+            
+            const stepIndex = currentViewingStepIndex;
+            const step = workflowSteps[stepIndex];
+            
+            document.getElementById('viewWorkflowModal').classList.remove('show');
+            currentViewingStepIndex = null;
+            
+            currentEditingStepIndex = stepIndex;
+            currentSelectedActions = JSON.parse(JSON.stringify(step.actions));
+            
+            document.getElementById('workflowModalTitle').textContent = `ویرایش ${step.name}`;
+            loadActions();
+            updateSelectedActionsDisplay();
+            
+            setTimeout(() => {
+                document.getElementById('workflowModal').classList.add('show');
+            }, 100);
+        }
+
+        // Close modal on outside click
+        document.getElementById('workflowModal').addEventListener('click', function(e) {
+            if (e.target === this) closeWorkflowModal();
+        });
+
+        document.getElementById('viewWorkflowModal').addEventListener('click', function(e) {
+            if (e.target === this) closeViewWorkflowModal();
+        });
+
+        // Initialize
+        renderWorkflow();
+    </script>
+</body>
+</html>
+
+

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 220" fill="none">
+  <rect width="400" height="220" rx="24" fill="#0f766e"/>
+  <text x="240" y="90" fill="#fff" font-size="20" font-weight="bold" font-family="sans-serif">هوش مصنوعی</text>
+  <text x="240" y="120" fill="#ccfbf1" font-size="14" font-family="sans-serif">یادگیری عمیق و کاربردی</text>
+  <text x="240" y="155" fill="#fff" font-size="13" font-family="sans-serif">شروع از صفر تا حرفه‌ای</text>
+  <circle cx="100" cy="110" r="45" fill="#14b8a6" opacity=".5"/>
+  <circle cx="100" cy="110" r="25" fill="#5eead4"/>
+</svg>

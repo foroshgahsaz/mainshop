@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 220" fill="none">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e9d5ff"/>
+      <stop offset="100%" stop-color="#ddd6fe"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="220" rx="24" fill="url(#g)"/>
+  <text x="240" y="85" fill="#1e1b4b" font-size="22" font-weight="bold" font-family="sans-serif">زنگ پر تخفیف</text>
+  <text x="240" y="115" fill="#1e1b4b" font-size="22" font-weight="bold" font-family="sans-serif">خرداد ماه</text>
+  <text x="240" y="145" fill="#4b5563" font-size="13" font-family="sans-serif">دوره‌های آموزشی با تخفیف ویژه</text>
+  <circle cx="100" cy="110" r="40" fill="#fbbf24" opacity=".8"/>
+  <rect x="140" y="80" width="50" height="35" rx="6" fill="#6366f1" opacity=".7"/>
+</svg>

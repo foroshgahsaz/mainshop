@@ -19,6 +19,8 @@
     </source>
     <php>
         <env name="APP_ENV" value="testing"/>
+        <env name="APP_DEBUG" value="true"/>
+        <env name="APP_KEY" value="base64:TtUhUUE/8zcm0GA7ws8n2Q01RNgq7DDLWbviRiD7PHM="/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>
@@ -32,5 +34,9 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <env name="SMS_DRIVER" value="log"/>
+        <env name="PAYMENT_GATEWAY" value="zarinpal"/>
+        <env name="ZARINPAL_SANDBOX" value="true"/>
+        <env name="ZARINPAL_MERCHANT_ID" value="00000000-0000-0000-0000-000000000000"/>
     </php>
 </phpunit>

@@ -7,6 +7,7 @@ use App\Notifications\PaymentSuccessNotification;
 use App\Services\Payment\PaymentService;
 use App\Services\Sms\OrderSmsNotifier;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
@@ -19,15 +20,29 @@ class PaymentController extends Controller
     {
         $payment = Payment::where('tracking_code', $request->query('payment'))->firstOrFail();
 
-        $payment = $this->paymentService->verify(
-            $payment,
-            (string) $request->query('Authority', ''),
-            (string) $request->query('Status', '')
-        );
+        try {
+            $payment = $this->paymentService->verify(
+                $payment,
+                (string) $request->query('Authority', ''),
+                (string) $request->query('Status', '')
+            );
+        } catch (\Throwable $e) {
+            Log::error('Payment verify failed', [
+                'payment_id' => $payment->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()
+                ->route('account.orders.show', $payment->order_id)
+                ->with('payment_status', Payment::STATUS_FAILED);
+        }
 
         if ($payment->status === Payment::STATUS_SUCCESS) {
-            $payment->user->notify(new PaymentSuccessNotification($payment));
-            $this->sms->orderPaid($payment->order);
+            $payment->loadMissing('user', 'order');
+            $payment->user?->notify(new PaymentSuccessNotification($payment));
+            if ($payment->order) {
+                $this->sms->orderPaid($payment->order);
+            }
         }
 
         return redirect()

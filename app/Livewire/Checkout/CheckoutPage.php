@@ -2,9 +2,10 @@
 
 namespace App\Livewire\Checkout;
 
-use App\Services\Checkout\CheckoutService;
 use App\Services\Cache\ShopCacheService;
+use App\Services\Checkout\CheckoutService;
 use App\Services\Payment\PaymentService;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -33,10 +34,7 @@ class CheckoutPage extends Component
 
     public function placeOrder(CheckoutService $checkout, PaymentService $payment): void
     {
-        $this->validate([
-            'addressId' => ['required', 'integer', 'exists:user_addresses,id'],
-            'paymentMethod' => ['in:online,cod'],
-        ]);
+        $this->validate($this->checkoutRules());
 
         try {
             $order = $checkout->placeOrder(
@@ -54,9 +52,14 @@ class CheckoutPage extends Component
         }
 
         if ($order->payment_method === 'online') {
-            $paymentModel = $payment->createForOrder($order);
-            $url = $payment->initiate($paymentModel, $order);
-            $this->redirect($url);
+            try {
+                $paymentModel = $payment->createForOrder($order);
+                $url = $payment->initiate($paymentModel, $order);
+                $this->redirect($url);
+            } catch (\RuntimeException $e) {
+                session()->flash('error', $e->getMessage());
+                $this->redirect(route('account.orders.show', $order), navigate: true);
+            }
 
             return;
         }
@@ -85,5 +88,41 @@ class CheckoutPage extends Component
             'addresses' => auth()->user()->addresses,
             'shippingMethods' => $cache->shippingMethods(),
         ]);
+    }
+
+    /** @return array<string, mixed> */
+    protected function checkoutRules(): array
+    {
+        $rules = [
+            'addressId' => [
+                'required',
+                'integer',
+                Rule::exists('user_addresses', 'id')->where('user_id', auth()->id()),
+            ],
+            'paymentMethod' => ['in:online,cod'],
+        ];
+
+        if (app(CheckoutService::class)->hasActiveShippingMethods()) {
+            $rules['shippingMethodId'] = [
+                'required',
+                'integer',
+                Rule::exists('shipping_methods', 'id')->where('is_active', true),
+            ];
+        } else {
+            $rules['shippingMethodId'] = ['nullable', 'integer'];
+        }
+
+        return $rules;
+    }
+
+    /** @return array<string, string> */
+    protected function messages(): array
+    {
+        return [
+            'addressId.required' => 'آدرس را انتخاب کنید.',
+            'addressId.exists' => 'آدرس انتخاب‌شده معتبر نیست.',
+            'shippingMethodId.required' => 'روش ارسال را انتخاب کنید.',
+            'shippingMethodId.exists' => 'روش ارسال معتبر نیست.',
+        ];
     }
 }

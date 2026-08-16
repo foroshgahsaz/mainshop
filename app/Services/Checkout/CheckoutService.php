@@ -2,8 +2,9 @@
 
 namespace App\Services\Checkout;
 
-use App\Models\Coupon;
 use App\Models\Order;
+use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\ShippingMethod;
 use App\Models\User;
 use App\Models\UserAddress;
@@ -55,9 +56,20 @@ class CheckoutService
         string $paymentMethod = 'online',
         ?string $note = null
     ): Order {
-        $preview = $this->preview($user, $couponCode, $shippingMethodId);
+        if ($this->hasActiveShippingMethods() && ! $shippingMethodId) {
+            throw new RuntimeException('روش ارسال را انتخاب کنید.');
+        }
 
-        $address = UserAddress::where('user_id', $user->id)->findOrFail($addressId);
+        $address = UserAddress::query()
+            ->where('user_id', $user->id)
+            ->whereKey($addressId)
+            ->first();
+
+        if (! $address) {
+            throw new RuntimeException('آدرس انتخاب‌شده معتبر نیست.');
+        }
+
+        $preview = $this->preview($user, $couponCode, $shippingMethodId);
 
         return DB::transaction(function () use ($user, $address, $preview, $paymentMethod, $note) {
             $order = Order::create([
@@ -71,21 +83,18 @@ class CheckoutService
                 'final_amount' => $preview['total'],
                 'payment_method' => $paymentMethod,
                 'status' => Order::STATUS_PENDING,
+                'stock_reserved' => false,
                 'tracking_code' => strtoupper(Str::random(10)),
                 'note' => $note,
             ]);
 
             foreach ($preview['items'] as $item) {
-                $product = \App\Models\Product::findOrFail($item['product_id']);
+                $product = Product::query()->findOrFail($item['product_id']);
                 $variant = isset($item['product_variant_id'])
-                    ? \App\Models\ProductVariant::find($item['product_variant_id'])
+                    ? ProductVariant::query()->find($item['product_variant_id'])
                     : null;
 
-                $this->stockService->assertAvailable($product, $variant, $item['quantity']);
-
-                if ($paymentMethod === 'cod') {
-                    $this->stockService->decrement($product, $variant, $item['quantity']);
-                }
+                $this->stockService->decrement($product, $variant, $item['quantity']);
 
                 $order->items()->create([
                     'product_id' => $item['product_id'],
@@ -97,6 +106,8 @@ class CheckoutService
                     'sku' => $item['sku'] ?? null,
                 ]);
             }
+
+            $order->update(['stock_reserved' => true]);
 
             if ($preview['coupon']) {
                 $this->couponService->recordUsage($preview['coupon'], $user, $order);
@@ -116,5 +127,10 @@ class CheckoutService
 
             return $order->load(['items', 'address', 'shippingMethod', 'coupon']);
         });
+    }
+
+    public function hasActiveShippingMethods(): bool
+    {
+        return ShippingMethod::query()->where('is_active', true)->exists();
     }
 }

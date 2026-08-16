@@ -32,6 +32,7 @@ class Order extends Model
         'discount_amount',
         'payment_method',
         'status',
+        'stock_reserved',
         'tracking_code',
         'shipping_tracking_code',
         'note',
@@ -48,6 +49,7 @@ class Order extends Model
             'discount_amount' => 'integer',
             'shipped_at' => 'datetime',
             'delivered_at' => 'datetime',
+            'stock_reserved' => 'boolean',
         ];
     }
 
@@ -103,20 +105,22 @@ class Order extends Model
 
     public function canBeCanceled(): bool
     {
+        return $this->canBeCanceledByCustomer();
+    }
+
+    public function canBeCanceledByCustomer(): bool
+    {
+        return $this->status === self::STATUS_PENDING && ! $this->isPaid();
+    }
+
+    public function canBeCanceledByAdmin(): bool
+    {
         return in_array($this->status, [self::STATUS_PENDING, self::STATUS_PROCESSING], true);
     }
 
     public function stockWasDeducted(): bool
     {
-        if ($this->status === self::STATUS_CANCELED) {
-            return false;
-        }
-
-        if ($this->payment_method === 'cod') {
-            return true;
-        }
-
-        return $this->isPaid();
+        return (bool) $this->stock_reserved;
     }
 
     public function canPayAgain(): bool

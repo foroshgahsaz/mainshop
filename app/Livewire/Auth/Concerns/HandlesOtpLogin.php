@@ -4,6 +4,7 @@ namespace App\Livewire\Auth\Concerns;
 
 use App\Models\User;
 use App\Services\Auth\OtpService;
+use App\Services\Auth\ShopLoginGuard;
 use App\Services\Cart\CartService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -26,6 +27,11 @@ trait HandlesOtpLogin
         ], [
             'phone.regex' => 'شماره موبایل باید با 09 شروع شود و ۱۱ رقم باشد.',
         ]);
+
+        app(ShopLoginGuard::class)->assertAllowed(
+            User::query()->where('phone', $this->phone)->first(),
+            'phone'
+        );
 
         $key = 'otp-send:'.$this->phone;
 
@@ -70,20 +76,18 @@ trait HandlesOtpLogin
 
         RateLimiter::clear($key);
 
-        $user = User::firstOrCreate(
-            ['phone' => $this->phone],
-            [
+        $user = User::query()->where('phone', $this->phone)->first();
+
+        if (! $user) {
+            $user = User::query()->create([
+                'phone' => $this->phone,
                 'name' => 'کاربر '.substr($this->phone, -4),
                 'status' => true,
                 'password' => Hash::make(Str::random(32)),
-            ]
-        );
-
-        if (! $user->status) {
-            throw ValidationException::withMessages([
-                'otp' => 'حساب کاربری غیرفعال است.',
             ]);
         }
+
+        app(ShopLoginGuard::class)->assertAllowed($user, 'otp');
 
         $otp->markPhoneVerified($user);
 

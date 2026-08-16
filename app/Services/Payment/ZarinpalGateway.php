@@ -4,8 +4,8 @@ namespace App\Services\Payment;
 
 use App\Models\Order;
 use App\Models\Payment;
-use App\Services\Cart\StockService;
 use App\Services\Order\OrderActivityLogger;
+use App\Services\Settings\SettingsService;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
@@ -14,12 +14,21 @@ class ZarinpalGateway implements PaymentGatewayInterface
     public function __construct(
         protected PaymentActivityLogger $paymentLog,
         protected OrderActivityLogger $orderLog,
-        protected StockService $stockService,
+        protected SettingsService $settings,
     ) {}
 
     public function initiate(Payment $payment, Order $order): string
     {
-        $config = app(\App\Services\Settings\SettingsService::class)->zarinpal();
+        $config = $this->settings->zarinpal();
+
+        if (! ($config['enabled'] ?? true)) {
+            throw new RuntimeException('درگاه پرداخت فعال نیست.');
+        }
+
+        if (empty($config['merchant_id'])) {
+            throw new RuntimeException('تنظیمات درگاه پرداخت ناقص است.');
+        }
+
         $baseUrl = $config['sandbox']
             ? 'https://sandbox.zarinpal.com/pg/v4/payment'
             : 'https://payment.zarinpal.com/pg/v4/payment';
@@ -70,20 +79,16 @@ class ZarinpalGateway implements PaymentGatewayInterface
         return $startPayUrl.$data['authority'];
     }
 
-    public function verify(Payment $payment, string $authority, string $status): Payment
+    public function verify(Payment $payment, string $authority, string $status): GatewayVerificationResult
     {
-        $previousStatus = $payment->status;
-
         if ($status !== 'OK' || $authority !== $payment->transaction_id) {
-            $payment->update(['status' => Payment::STATUS_CANCELED]);
-
-            $this->paymentLog->statusChanged($payment->fresh(), $previousStatus, Payment::STATUS_CANCELED, 'انصراف یا لغو توسط کاربر');
-            $this->orderLog->paymentLinked($payment->order, $payment->tracking_code, Payment::STATUS_CANCELED);
-
-            return $payment;
+            return GatewayVerificationResult::canceled(
+                ['status' => $status, 'authority' => $authority],
+                'انصراف یا لغو توسط کاربر'
+            );
         }
 
-        $config = app(\App\Services\Settings\SettingsService::class)->zarinpal();
+        $config = $this->settings->zarinpal();
         $baseUrl = $config['sandbox']
             ? 'https://sandbox.zarinpal.com/pg/v4/payment'
             : 'https://payment.zarinpal.com/pg/v4/payment';
@@ -97,40 +102,12 @@ class ZarinpalGateway implements PaymentGatewayInterface
         $code = $response->json('data.code');
 
         if ($response->successful() && in_array($code, [100, 101], true)) {
-            $payment->update([
-                'status' => Payment::STATUS_SUCCESS,
-                'paid_at' => now(),
-                'card_number' => $response->json('data.card_pan'),
-                'raw_response' => $response->json(),
-            ]);
-
-            $payment = $payment->fresh();
-            $order = $payment->order;
-            $orderPrevious = $order->status;
-
-            $this->stockService->decrementOrderItems($order);
-
-            $order->update(['status' => Order::STATUS_PROCESSING]);
-
-            $card = $payment->card_number ? ' کارت: '.$payment->card_number : '';
-            $this->paymentLog->statusChanged($payment, $previousStatus, Payment::STATUS_SUCCESS, 'پرداخت تأیید شد.'.$card);
-            $this->orderLog->paymentLinked($order->fresh(), $payment->tracking_code, Payment::STATUS_SUCCESS, 'پرداخت آنلاین موفق');
-
-            if ($orderPrevious !== Order::STATUS_PROCESSING) {
-                $this->orderLog->statusChanged($order->fresh(), $orderPrevious, Order::STATUS_PROCESSING);
-            }
-
-            return $payment;
+            return GatewayVerificationResult::success(
+                $response->json('data.card_pan'),
+                $response->json()
+            );
         }
 
-        $payment->update([
-            'status' => Payment::STATUS_FAILED,
-            'raw_response' => $response->json(),
-        ]);
-
-        $this->paymentLog->statusChanged($payment->fresh(), $previousStatus, Payment::STATUS_FAILED, 'تأیید درگاه ناموفق');
-        $this->orderLog->paymentLinked($payment->order, $payment->tracking_code, Payment::STATUS_FAILED);
-
-        return $payment;
+        return GatewayVerificationResult::failed($response->json(), 'تأیید درگاه ناموفق');
     }
 }

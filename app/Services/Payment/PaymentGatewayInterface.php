@@ -9,5 +9,5 @@ interface PaymentGatewayInterface
 {
     public function initiate(Payment $payment, Order $order): string;
 
-    public function verify(Payment $payment, string $authority, string $status): Payment;
+    public function verify(Payment $payment, string $authority, string $status): GatewayVerificationResult;
 }

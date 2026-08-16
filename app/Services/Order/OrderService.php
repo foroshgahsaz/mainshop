@@ -2,13 +2,16 @@
 
 namespace App\Services\Order;
 
+use App\Models\CouponUsage;
 use App\Models\Order;
+use App\Models\Payment;
 use App\Models\User;
 use App\Notifications\OrderCanceledNotification;
 use App\Notifications\OrderDeliveredNotification;
 use App\Notifications\OrderShippedNotification;
 use App\Services\Cart\StockService;
 use App\Services\Sms\OrderSmsNotifier;
+use Illuminate\Support\Facades\DB;
 
 class OrderService
 {
@@ -20,27 +23,18 @@ class OrderService
 
     public function cancel(Order $order, ?User $actor = null): Order
     {
-        if (! $order->canBeCanceled()) {
-            throw new \RuntimeException('این سفارش قابل لغو نیست.');
-        }
+        return $this->finalizeCancel($order, $actor);
+    }
 
-        $previousStatus = $order->status;
+    public function expireUnpaid(Order $order): Order
+    {
+        $order = $this->finalizeCancel($order, null, systemExpire: true);
 
-        if ($order->stockWasDeducted()) {
-            $this->stockService->restoreOrderItems($order);
-        }
-
-        $order->update(['status' => Order::STATUS_CANCELED]);
-
-        if ($actor && $actor->id === $order->user_id) {
-            $this->orderLog->customerCanceled($order->fresh(), $actor);
-        } else {
-            $this->orderLog->statusChanged($order->fresh(), $previousStatus, Order::STATUS_CANCELED, $actor);
-        }
-
-        $order = $order->fresh(['user']);
-        $order->user?->notify(new OrderCanceledNotification($order));
-        $this->sms->orderCanceled($order);
+        $this->orderLog->system(
+            $order,
+            'سفارش به‌دلیل عدم پرداخت در مهلت مقرر لغو شد و موجودی آزاد گردید.',
+            'auto_canceled'
+        );
 
         return $order;
     }
@@ -99,7 +93,9 @@ class OrderService
             return $order;
         }
 
-        $shouldRestoreStock = $status === Order::STATUS_CANCELED && $order->stockWasDeducted();
+        if ($status === Order::STATUS_CANCELED) {
+            return $this->cancel($order, $actor);
+        }
 
         $updates = ['status' => $status];
 
@@ -123,20 +119,14 @@ class OrderService
         match ($status) {
             Order::STATUS_SHIPPED => $order->user?->notify(new OrderShippedNotification($order)),
             Order::STATUS_DELIVERED => $order->user?->notify(new OrderDeliveredNotification($order)),
-            Order::STATUS_CANCELED => $order->user?->notify(new OrderCanceledNotification($order)),
             default => null,
         };
 
         match ($status) {
             Order::STATUS_SHIPPED => $this->sms->orderShipped($order),
             Order::STATUS_DELIVERED => $this->sms->orderDelivered($order),
-            Order::STATUS_CANCELED => $this->sms->orderCanceled($order),
             default => null,
         };
-
-        if ($shouldRestoreStock) {
-            $this->stockService->restoreOrderItems($order);
-        }
 
         return $order;
     }
@@ -153,5 +143,57 @@ class OrderService
         $this->orderLog->trackingUpdated($order->fresh(), $previous, $trackingCode, $actor);
 
         return $order->fresh();
+    }
+
+    protected function finalizeCancel(Order $order, ?User $actor, bool $systemExpire = false): Order
+    {
+        return DB::transaction(function () use ($order, $actor, $systemExpire) {
+            /** @var Order $order */
+            $order = Order::query()->whereKey($order->id)->lockForUpdate()->firstOrFail();
+
+            $allowed = $systemExpire || ! $actor?->isAdmin()
+                ? $order->canBeCanceledByCustomer()
+                : $order->canBeCanceledByAdmin();
+
+            if (! $allowed) {
+                throw new \RuntimeException('این سفارش قابل لغو نیست.');
+            }
+
+            $previousStatus = $order->status;
+            $wasPaid = $order->isPaid();
+
+            if ($order->stock_reserved) {
+                $this->stockService->restoreOrderItems($order);
+                $order->stock_reserved = false;
+            }
+
+            $order->status = Order::STATUS_CANCELED;
+            $order->save();
+
+            if (! $wasPaid) {
+                CouponUsage::query()->where('order_id', $order->id)->delete();
+                $order->payments()
+                    ->whereIn('status', [Payment::STATUS_PENDING, Payment::STATUS_FAILED])
+                    ->update(['status' => Payment::STATUS_CANCELED]);
+            } elseif ($actor?->isAdmin()) {
+                $this->orderLog->system(
+                    $order,
+                    'سفارش پرداخت‌شده لغو شد. استرداد وجه در درگاه باید به‌صورت دستی انجام شود.',
+                    'manual_refund_required'
+                );
+            }
+
+            if ($actor && $actor->id === $order->user_id) {
+                $this->orderLog->customerCanceled($order->fresh(), $actor);
+            } else {
+                $this->orderLog->statusChanged($order->fresh(), $previousStatus, Order::STATUS_CANCELED, $actor);
+            }
+
+            $order = $order->fresh(['user']);
+            $order->user?->notify(new OrderCanceledNotification($order));
+            $this->sms->orderCanceled($order);
+
+            return $order;
+        });
     }
 }

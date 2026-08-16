@@ -4,35 +4,31 @@ namespace App\Services\Payment;
 
 use App\Models\Order;
 use App\Models\Payment;
-use App\Services\Cart\StockService;
 use App\Services\Order\OrderActivityLogger;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use RuntimeException;
 
 class PaymentService
 {
     public function __construct(
-        protected ZarinpalGateway $zarinpalGateway,
+        protected PaymentGatewayManager $gateways,
         protected PaymentActivityLogger $paymentLog,
         protected OrderActivityLogger $orderLog,
-        protected StockService $stockService,
     ) {}
 
-    public function gateway(): PaymentGatewayInterface
+    public function gateway(?string $name = null): PaymentGatewayInterface
     {
-        return match (config('payment.default')) {
-            'zarinpal' => $this->zarinpalGateway,
-            default => throw new RuntimeException('درگاه پرداخت پشتیبانی نمی‌شود.'),
-        };
+        return $this->gateways->driver($name);
     }
 
-    public function createForOrder(Order $order): Payment
+    public function createForOrder(Order $order, ?string $gateway = null): Payment
     {
         $payment = Payment::create([
             'order_id' => $order->id,
             'user_id' => $order->user_id,
             'amount' => $order->final_amount,
-            'gateway' => config('payment.default'),
+            'gateway' => $gateway ?: config('payment.default'),
             'status' => Payment::STATUS_PENDING,
             'tracking_code' => strtoupper(Str::random(12)),
         ]);
@@ -45,13 +41,100 @@ class PaymentService
 
     public function initiate(Payment $payment, Order $order): string
     {
-        $this->stockService->assertOrderAvailable($order);
+        if (! $order->stock_reserved) {
+            throw new RuntimeException('موجودی این سفارش رزرو نشده است.');
+        }
 
-        return $this->gateway()->initiate($payment, $order);
+        return $this->gateway($payment->gateway)->initiate($payment, $order);
     }
 
     public function verify(Payment $payment, string $authority, string $status): Payment
     {
-        return $this->gateway()->verify($payment, $authority, $status);
+        $fresh = $payment->fresh();
+
+        if ($fresh && $fresh->status === Payment::STATUS_SUCCESS) {
+            return $fresh;
+        }
+
+        $result = $this->gateway($payment->gateway)->verify($payment, $authority, $status);
+
+        return DB::transaction(function () use ($payment, $result) {
+            /** @var Payment $locked */
+            $locked = Payment::query()->whereKey($payment->id)->lockForUpdate()->firstOrFail();
+
+            if ($locked->status === Payment::STATUS_SUCCESS) {
+                return $locked;
+            }
+
+            $order = Order::query()->whereKey($locked->order_id)->lockForUpdate()->firstOrFail();
+
+            if ($order->isPaid()) {
+                $previous = $locked->status;
+                $locked->update([
+                    'status' => Payment::STATUS_CANCELED,
+                    'raw_response' => is_array($result->raw) ? $result->raw : $locked->raw_response,
+                ]);
+
+                $this->paymentLog->statusChanged(
+                    $locked->fresh(),
+                    $previous,
+                    Payment::STATUS_CANCELED,
+                    'پرداخت تکراری؛ سفارش قبلاً تسویه شده است'
+                );
+
+                return $locked->fresh();
+            }
+
+            if ($result->canceled) {
+                $previous = $locked->status;
+                $locked->update([
+                    'status' => Payment::STATUS_CANCELED,
+                    'raw_response' => $result->raw,
+                ]);
+
+                $this->paymentLog->statusChanged($locked->fresh(), $previous, Payment::STATUS_CANCELED, $result->message);
+                $this->orderLog->paymentLinked($order, $locked->tracking_code, Payment::STATUS_CANCELED);
+
+                return $locked->fresh();
+            }
+
+            if (! $result->successful) {
+                $previous = $locked->status;
+                $locked->update([
+                    'status' => Payment::STATUS_FAILED,
+                    'raw_response' => $result->raw,
+                ]);
+
+                $this->paymentLog->statusChanged($locked->fresh(), $previous, Payment::STATUS_FAILED, $result->message);
+                $this->orderLog->paymentLinked($order, $locked->tracking_code, Payment::STATUS_FAILED);
+
+                return $locked->fresh();
+            }
+
+            $previous = $locked->status;
+            $locked->update([
+                'status' => Payment::STATUS_SUCCESS,
+                'paid_at' => now(),
+                'card_number' => $result->cardPan,
+                'raw_response' => $result->raw,
+            ]);
+
+            $locked = $locked->fresh();
+            $orderPrevious = $order->status;
+
+            if ($order->status === Order::STATUS_PENDING) {
+                $order->update(['status' => Order::STATUS_PROCESSING]);
+            }
+
+            $card = $locked->card_number ? ' کارت: '.$locked->card_number : '';
+            $this->paymentLog->statusChanged($locked, $previous, Payment::STATUS_SUCCESS, 'پرداخت تأیید شد.'.$card);
+            $this->orderLog->paymentLinked($order->fresh(), $locked->tracking_code, Payment::STATUS_SUCCESS, 'پرداخت آنلاین موفق');
+
+            if ($orderPrevious !== Order::STATUS_PROCESSING) {
+                $this->orderLog->statusChanged($order->fresh(), $orderPrevious, Order::STATUS_PROCESSING);
+            }
+
+            return $locked;
+        });
     }
 }

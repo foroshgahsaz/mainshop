@@ -4,6 +4,7 @@ namespace App\Livewire\Auth;
 
 use App\Livewire\Auth\Concerns\HandlesOtpLogin;
 use App\Models\User;
+use App\Services\Auth\ShopLoginGuard;
 use App\Services\Cart\CartService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -68,11 +69,7 @@ class LoginModal extends Component
             ]);
         }
 
-        if (! $user->status) {
-            throw ValidationException::withMessages([
-                'username' => 'حساب کاربری غیرفعال است.',
-            ]);
-        }
+        app(ShopLoginGuard::class)->assertAllowed($user, 'username');
 
         RateLimiter::clear($key);
 

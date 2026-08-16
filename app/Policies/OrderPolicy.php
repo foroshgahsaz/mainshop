@@ -14,6 +14,10 @@ class OrderPolicy
 
     public function cancel(User $user, Order $order): bool
     {
-        return $user->id === $order->user_id && $order->canBeCanceled();
+        if ($user->isAdmin()) {
+            return $order->canBeCanceledByAdmin();
+        }
+
+        return $user->id === $order->user_id && $order->canBeCanceledByCustomer();
     }
 }

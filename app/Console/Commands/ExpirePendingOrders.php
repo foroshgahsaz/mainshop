@@ -3,33 +3,39 @@
 namespace App\Console\Commands;
 
 use App\Models\Order;
-use App\Services\Order\OrderActivityLogger;
+use App\Services\Order\OrderService;
 use Illuminate\Console\Command;
 
 class ExpirePendingOrders extends Command
 {
-    protected $signature = 'shop:expire-pending-orders {--hours=24 : ساعات انتظار قبل از لغو}';
+    protected $signature = 'shop:expire-pending-orders {--minutes= : دقایق انتظار قبل از لغو}';
 
-    protected $description = 'لغو سفارش‌های آنلاین پرداخت‌نشده قدیمی';
+    protected $description = 'لغو سفارش‌های آنلاین پرداخت‌نشده و آزادسازی موجودی رزرو شده';
 
-    public function handle(OrderActivityLogger $logger): int
+    public function handle(OrderService $orders): int
     {
-        $hours = (int) $this->option('hours');
-        $cutoff = now()->subHours($hours);
+        $minutes = (int) ($this->option('minutes') ?: config('shop.checkout.unpaid_ttl_minutes', 60));
+        $cutoff = now()->subMinutes($minutes);
 
-        $orders = Order::query()
+        $pending = Order::query()
             ->where('payment_method', 'online')
             ->where('status', Order::STATUS_PENDING)
             ->where('created_at', '<', $cutoff)
             ->whereDoesntHave('payments', fn ($q) => $q->where('status', 'success'))
             ->get();
 
-        foreach ($orders as $order) {
-            $order->update(['status' => Order::STATUS_CANCELED]);
-            $logger->system($order, "سفارش به‌دلیل عدم پرداخت پس از {$hours} ساعت لغو شد.", 'auto_canceled');
+        $expired = 0;
+
+        foreach ($pending as $order) {
+            try {
+                $orders->expireUnpaid($order);
+                $expired++;
+            } catch (\RuntimeException) {
+                continue;
+            }
         }
 
-        $this->info("✅ {$orders->count()} سفارش منقضی لغو شد.");
+        $this->info("{$expired} سفارش منقضی لغو شد.");
 
         return self::SUCCESS;
     }

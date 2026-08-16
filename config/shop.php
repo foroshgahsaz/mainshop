@@ -20,4 +20,8 @@ return [
         'guest_ttl' => 60 * 24 * 7,
     ],
 
+    'checkout' => [
+        'unpaid_ttl_minutes' => (int) env('SHOP_UNPAID_TTL_MINUTES', 60),
+    ],
+
 ];

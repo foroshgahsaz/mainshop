@@ -22,13 +22,13 @@ class ManageTara extends Page implements HasForms
 
     protected static ?string $title = 'تنظیمات درگاه اعتباری تارا';
 
-    protected static ?string $navigationGroup = 'تنظیمات';
+    protected static ?string $navigationGroup = 'درگاه‌ها';
 
     protected static ?int $navigationSort = 3;
 
     protected static bool $shouldRegisterNavigation = false;
 
-    protected static string $view = 'filament.pages.manage-tara';
+    protected static string $view = 'filament.pages.manage-general-settings';
 
     public ?array $data = [];
 

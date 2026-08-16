@@ -2,6 +2,7 @@
     use App\Filament\Pages\ManageGeneralSettings;
     use App\Filament\Pages\ManageIntegrations;
     use App\Filament\Pages\ManageTara;
+    use App\Filament\Pages\ManageZarinpal;
     use App\Filament\Resources\AttributeResource;
     use App\Filament\Resources\BrandResource;
     use App\Filament\Resources\CategoryResource;
@@ -143,21 +144,33 @@
                 ]],
             ],
         ],
+        'gateways' => [
+            'label' => 'درگاه‌ها',
+            'icon' => 'fa-plug',
+            'routes' => [
+                'filament.admin.pages.zarinpal',
+                'filament.admin.pages.tara',
+            ],
+            'menus' => [
+                ['label' => 'درگاه‌های پرداخت', 'icon' => 'fa-plug', 'items' => [
+                    ['label' => 'زرین‌پال', 'url' => ManageZarinpal::getUrl(), 'icon' => 'fa-university'],
+                    ['label' => 'تارا', 'url' => ManageTara::getUrl(), 'icon' => 'fa-wallet'],
+                ]],
+            ],
+        ],
         'settings' => [
             'label' => 'تنظیمات',
             'icon' => 'fa-cog',
             'routes' => [
                 'filament.admin.pages.manage-general-settings',
-                'filament.admin.pages.manage-integrations',
-                'filament.admin.pages.tara',
+                'filament.admin.pages.kavenegar',
             ],
             'menus' => [
                 ['label' => 'تنظیمات عمومی', 'icon' => 'fa-globe', 'items' => [
                     ['label' => 'مدیریت سایت', 'url' => ManageGeneralSettings::getUrl(), 'icon' => 'fa-cog'],
                 ]],
-                ['label' => 'درگاه‌ها', 'icon' => 'fa-plug', 'items' => [
-                    ['label' => 'پرداخت و پیامک', 'url' => ManageIntegrations::getUrl(), 'icon' => 'fa-credit-card'],
-                    ['label' => 'تارا', 'url' => ManageTara::getUrl(), 'icon' => 'fa-wallet'],
+                ['label' => 'پیامک', 'icon' => 'fa-sms', 'items' => [
+                    ['label' => 'کاوه‌نگار', 'url' => ManageIntegrations::getUrl(), 'icon' => 'fa-comment-dots'],
                 ]],
             ],
         ],
@@ -190,6 +203,7 @@
         ['id' => 'orders', 'icon' => 'fa-shopping-bag', 'tooltip' => 'سفارش‌ها', 'panel' => 'orders'],
         ['id' => 'content', 'icon' => 'fa-newspaper', 'tooltip' => 'محتوا', 'panel' => 'content'],
         ['id' => 'shipping', 'icon' => 'fa-truck', 'tooltip' => 'ارسال', 'panel' => 'shipping'],
+        ['id' => 'gateways', 'icon' => 'fa-plug', 'tooltip' => 'درگاه‌ها', 'panel' => 'gateways'],
         ['id' => 'settings', 'icon' => 'fa-cog', 'tooltip' => 'تنظیمات', 'panel' => 'settings'],
     ];
 

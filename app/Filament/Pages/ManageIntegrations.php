@@ -18,7 +18,7 @@ class ManageIntegrations extends Page implements HasForms
 
     protected static ?string $navigationLabel = 'درگاه‌ها و پیامک';
 
-    protected static ?string $title = 'تنظیمات درگاه پرداخت و پیامک';
+    protected static ?string $title = 'تنظیمات درگاه پرداخت و پیامک — تست تارا';
 
     protected static ?string $navigationGroup = 'تنظیمات';
 
@@ -98,6 +98,10 @@ class ManageIntegrations extends Page implements HasForms
                     Forms\Components\Tabs\Tab::make('تارا')
                         ->icon('heroicon-o-wallet')
                         ->schema([
+                            Forms\Components\Placeholder::make('tara_sync_test')
+                                ->label('تست همگام‌سازی گیت')
+                                ->content('اگر این متن را می‌بینید، pull از master درست آمده است. کد تست: TARA-SYNC-2026-08-16')
+                                ->columnSpanFull(),
                             Forms\Components\Fieldset::make('عمومی')->schema([
                                 Forms\Components\Toggle::make('tara_enabled')
                                     ->label('فعال‌سازی تارا')

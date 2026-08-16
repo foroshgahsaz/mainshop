@@ -1,6 +1,7 @@
 @php
     use App\Filament\Pages\ManageGeneralSettings;
     use App\Filament\Pages\ManageIntegrations;
+    use App\Filament\Pages\ManageTara;
     use App\Filament\Resources\AttributeResource;
     use App\Filament\Resources\BrandResource;
     use App\Filament\Resources\CategoryResource;
@@ -148,13 +149,15 @@
             'routes' => [
                 'filament.admin.pages.manage-general-settings',
                 'filament.admin.pages.manage-integrations',
+                'filament.admin.pages.tara',
             ],
             'menus' => [
                 ['label' => 'تنظیمات عمومی', 'icon' => 'fa-globe', 'items' => [
                     ['label' => 'مدیریت سایت', 'url' => ManageGeneralSettings::getUrl(), 'icon' => 'fa-cog'],
                 ]],
                 ['label' => 'درگاه‌ها', 'icon' => 'fa-plug', 'items' => [
-                    ['label' => 'پرداخت و پیامک — تست تارا', 'url' => ManageIntegrations::getUrl(), 'icon' => 'fa-credit-card'],
+                    ['label' => 'پرداخت و پیامک', 'url' => ManageIntegrations::getUrl(), 'icon' => 'fa-credit-card'],
+                    ['label' => 'تارا', 'url' => ManageTara::getUrl(), 'icon' => 'fa-wallet'],
                 ]],
             ],
         ],

@@ -4,6 +4,7 @@ namespace App\Livewire\Checkout;
 
 use App\Services\Cache\ShopCacheService;
 use App\Services\Checkout\CheckoutService;
+use App\Services\Payment\PaymentGatewayCatalog;
 use App\Services\Payment\PaymentService;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
@@ -20,21 +21,27 @@ class CheckoutPage extends Component
 
     public string $couponCode = '';
 
-    public string $paymentMethod = 'online';
+    public string $paymentMethod = 'zarinpal';
 
     public ?string $note = null;
 
-    public function mount(): void
+    public function mount(PaymentGatewayCatalog $catalog): void
     {
         if (! auth()->check()) {
             redirect()->setIntendedUrl(route('checkout'));
             $this->redirect(route('login'), navigate: true);
+
+            return;
         }
+
+        $this->paymentMethod = $this->defaultPaymentMethod($catalog);
     }
 
-    public function placeOrder(CheckoutService $checkout, PaymentService $payment): void
+    public function placeOrder(CheckoutService $checkout, PaymentService $payment, PaymentGatewayCatalog $catalog): void
     {
-        $this->validate($this->checkoutRules());
+        $this->validate($this->checkoutRules($catalog));
+
+        $isCod = $this->paymentMethod === 'cod';
 
         try {
             $order = $checkout->placeOrder(
@@ -42,7 +49,7 @@ class CheckoutPage extends Component
                 $this->addressId,
                 $this->shippingMethodId,
                 $this->couponCode ?: null,
-                $this->paymentMethod,
+                $isCod ? 'cod' : 'online',
                 $this->note
             );
         } catch (\RuntimeException $e) {
@@ -51,9 +58,9 @@ class CheckoutPage extends Component
             return;
         }
 
-        if ($order->payment_method === 'online') {
+        if (! $isCod) {
             try {
-                $paymentModel = $payment->createForOrder($order);
+                $paymentModel = $payment->createForOrder($order, $this->paymentMethod);
                 $url = $payment->initiate($paymentModel, $order);
                 $this->redirect($url);
             } catch (\RuntimeException $e) {
@@ -67,7 +74,7 @@ class CheckoutPage extends Component
         $this->redirect(route('account.orders.show', $order), navigate: true);
     }
 
-    public function render(CheckoutService $checkout, ShopCacheService $cache)
+    public function render(CheckoutService $checkout, ShopCacheService $cache, PaymentGatewayCatalog $catalog)
     {
         $preview = null;
         $error = null;
@@ -87,19 +94,23 @@ class CheckoutPage extends Component
             'error' => $error,
             'addresses' => auth()->user()->addresses,
             'shippingMethods' => $cache->shippingMethods(),
+            'creditGateways' => $catalog->credit(),
+            'cashGateways' => $catalog->cash(),
         ]);
     }
 
     /** @return array<string, mixed> */
-    protected function checkoutRules(): array
+    protected function checkoutRules(PaymentGatewayCatalog $catalog): array
     {
+        $allowed = array_merge(['cod'], $catalog->enabledNames());
+
         $rules = [
             'addressId' => [
                 'required',
                 'integer',
                 Rule::exists('user_addresses', 'id')->where('user_id', auth()->id()),
             ],
-            'paymentMethod' => ['in:online,cod'],
+            'paymentMethod' => ['required', Rule::in($allowed)],
         ];
 
         if (app(CheckoutService::class)->hasActiveShippingMethods()) {
@@ -123,6 +134,23 @@ class CheckoutPage extends Component
             'addressId.exists' => 'آدرس انتخاب‌شده معتبر نیست.',
             'shippingMethodId.required' => 'روش ارسال را انتخاب کنید.',
             'shippingMethodId.exists' => 'روش ارسال معتبر نیست.',
+            'paymentMethod.required' => 'روش پرداخت را انتخاب کنید.',
+            'paymentMethod.in' => 'روش پرداخت معتبر نیست.',
         ];
+    }
+
+    protected function defaultPaymentMethod(PaymentGatewayCatalog $catalog): string
+    {
+        $cash = $catalog->cash();
+        if ($cash !== []) {
+            return $cash[0]['name'];
+        }
+
+        $credit = $catalog->credit();
+        if ($credit !== []) {
+            return $credit[0]['name'];
+        }
+
+        return 'cod';
     }
 }

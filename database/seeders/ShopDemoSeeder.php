@@ -11,7 +11,6 @@ use App\Models\ShippingMethod;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class ShopDemoSeeder extends Seeder
 {
@@ -138,6 +137,10 @@ class ShopDemoSeeder extends Seeder
         DB::table('settings')->updateOrInsert(
             ['group' => 'zarinpal', 'key' => 'enabled'],
             ['value' => '1', 'created_at' => now(), 'updated_at' => now()]
+        );
+        DB::table('settings')->updateOrInsert(
+            ['group' => 'tara', 'key' => 'enabled'],
+            ['value' => '0', 'created_at' => now(), 'updated_at' => now()]
         );
 
         $this->command?->info('✅ ShopDemoSeeder با موفقیت اجرا شد.');

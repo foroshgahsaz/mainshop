@@ -19,5 +19,17 @@
             <dt>مبلغ نهایی</dt>
             <dd>{{ number_format($order->final_amount) }} تومان</dd>
         </div>
+        @if($order->paidAmount() > 0)
+            <div class="admin-order__totals-row">
+                <dt>پرداخت‌شده</dt>
+                <dd>{{ number_format($order->paidAmount()) }} تومان</dd>
+            </div>
+        @endif
+        @if($order->remainingAmount() > 0 && $order->payment_method === 'online')
+            <div class="admin-order__totals-row">
+                <dt>مانده</dt>
+                <dd>{{ number_format($order->remainingAmount()) }} تومان</dd>
+            </div>
+        @endif
     </dl>
 </section>

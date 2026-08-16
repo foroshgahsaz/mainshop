@@ -98,9 +98,34 @@ class Order extends Model
         return $this->hasMany(OrderNote::class)->latest();
     }
 
+    public function paidAmount(): int
+    {
+        if ($this->relationLoaded('payments')) {
+            return (int) $this->payments
+                ->where('status', Payment::STATUS_SUCCESS)
+                ->sum('amount');
+        }
+
+        return (int) $this->payments()->where('status', Payment::STATUS_SUCCESS)->sum('amount');
+    }
+
+    public function remainingAmount(): int
+    {
+        return max(0, (int) $this->final_amount - $this->paidAmount());
+    }
+
+    public function hasSuccessfulPayment(): bool
+    {
+        if ($this->relationLoaded('payments')) {
+            return $this->payments->contains('status', Payment::STATUS_SUCCESS);
+        }
+
+        return $this->payments()->where('status', Payment::STATUS_SUCCESS)->exists();
+    }
+
     public function isPaid(): bool
     {
-        return $this->payments()->where('status', Payment::STATUS_SUCCESS)->exists();
+        return $this->paidAmount() >= (int) $this->final_amount;
     }
 
     public function canBeCanceled(): bool
@@ -110,7 +135,7 @@ class Order extends Model
 
     public function canBeCanceledByCustomer(): bool
     {
-        return $this->status === self::STATUS_PENDING && ! $this->isPaid();
+        return $this->status === self::STATUS_PENDING && ! $this->hasSuccessfulPayment();
     }
 
     public function canBeCanceledByAdmin(): bool
@@ -127,6 +152,6 @@ class Order extends Model
     {
         return $this->payment_method === 'online'
             && $this->status === self::STATUS_PENDING
-            && ! $this->isPaid();
+            && $this->remainingAmount() > 0;
     }
 }

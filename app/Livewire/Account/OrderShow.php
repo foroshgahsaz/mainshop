@@ -4,9 +4,10 @@ namespace App\Livewire\Account;
 
 use App\Models\Order;
 use App\Models\OrderNote;
-use App\Models\Payment;
 use App\Services\Order\OrderService;
+use App\Services\Payment\PaymentGatewayCatalog;
 use App\Services\Payment\PaymentService;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -15,7 +16,9 @@ class OrderShow extends Component
 {
     public Order $order;
 
-    public function mount(Order $order): void
+    public string $selectedGateway = '';
+
+    public function mount(Order $order, PaymentGatewayCatalog $catalog): void
     {
         $this->authorize('view', $order);
         $this->order = $order->load([
@@ -26,6 +29,8 @@ class OrderShow extends Component
             'coupon',
             'notes' => fn ($q) => $q->where('type', OrderNote::TYPE_CUSTOMER)->with('author'),
         ]);
+
+        $this->selectedGateway = $this->defaultGateway($catalog);
     }
 
     public function cancel(OrderService $orderService): void
@@ -40,7 +45,7 @@ class OrderShow extends Component
         }
     }
 
-    public function payAgain(PaymentService $payments): void
+    public function payAgain(PaymentService $payments, PaymentGatewayCatalog $catalog): void
     {
         if (! $this->order->canPayAgain()) {
             session()->flash('error', 'این سفارش قابل پرداخت مجدد نیست.');
@@ -48,8 +53,15 @@ class OrderShow extends Component
             return;
         }
 
+        $this->validate([
+            'selectedGateway' => ['required', Rule::in($catalog->enabledNames())],
+        ], [
+            'selectedGateway.required' => 'درگاه پرداخت را انتخاب کنید.',
+            'selectedGateway.in' => 'درگاه پرداخت معتبر نیست.',
+        ]);
+
         try {
-            $payment = $payments->createForOrder($this->order);
+            $payment = $payments->createForOrder($this->order, $this->selectedGateway);
             $url = $payments->initiate($payment, $this->order);
             $this->redirect($url);
         } catch (\RuntimeException $e) {
@@ -57,8 +69,26 @@ class OrderShow extends Component
         }
     }
 
-    public function render()
+    public function render(PaymentGatewayCatalog $catalog)
     {
-        return view('livewire.account.order-show');
+        return view('livewire.account.order-show', [
+            'creditGateways' => $catalog->credit(),
+            'cashGateways' => $catalog->cash(),
+        ]);
+    }
+
+    protected function defaultGateway(PaymentGatewayCatalog $catalog): string
+    {
+        $cash = $catalog->cash();
+        if ($cash !== []) {
+            return $cash[0]['name'];
+        }
+
+        $credit = $catalog->credit();
+        if ($credit !== []) {
+            return $credit[0]['name'];
+        }
+
+        return '';
     }
 }

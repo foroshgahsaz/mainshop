@@ -160,7 +160,7 @@ class OrderService
             }
 
             $previousStatus = $order->status;
-            $wasPaid = $order->isPaid();
+            $hasCapture = $order->payments()->where('status', Payment::STATUS_SUCCESS)->exists();
 
             if ($order->stock_reserved) {
                 $this->stockService->restoreOrderItems($order);
@@ -170,7 +170,7 @@ class OrderService
             $order->status = Order::STATUS_CANCELED;
             $order->save();
 
-            if (! $wasPaid) {
+            if (! $hasCapture) {
                 CouponUsage::query()->where('order_id', $order->id)->delete();
                 $order->payments()
                     ->whereIn('status', [Payment::STATUS_PENDING, Payment::STATUS_FAILED])
@@ -178,7 +178,7 @@ class OrderService
             } elseif ($actor?->isAdmin()) {
                 $this->orderLog->system(
                     $order,
-                    'سفارش پرداخت‌شده لغو شد. استرداد وجه در درگاه باید به‌صورت دستی انجام شود.',
+                    'سفارش دارای پرداخت موفق لغو شد. استرداد وجه در درگاه باید به‌صورت دستی انجام شود.',
                     'manual_refund_required'
                 );
             }

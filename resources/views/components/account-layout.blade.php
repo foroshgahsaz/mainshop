@@ -1,8 +1,8 @@
 @props(['title', 'active' => ''])
 
 <div class="shop-page-wrap">
-    <div class="max-w-site mx-auto px-4 py-6 md:py-10">
-        <nav class="flex items-center gap-2 text-xs text-gray-400 mb-6">
+    <div class="max-w-site mx-auto px-4 account-page">
+        <nav class="flex items-center gap-2 text-xs text-gray-400 account-page__crumbs">
             <a href="{{ route('home') }}" class="hover:text-brand-green">خانه</a>
             <span>/</span>
             <a href="{{ route('account.dashboard') }}" class="hover:text-brand-green">حساب کاربری</a>
@@ -12,19 +12,19 @@
             @endif
         </nav>
 
-        <div class="flex flex-col lg:flex-row gap-6 lg:gap-8">
-            <aside class="lg:w-64 shrink-0">
-                <div class="shop-card p-4 lg:sticky lg:top-24">
-                    <div class="flex items-center gap-3 pb-4 mb-4 border-b border-gray-100">
-                        <span class="w-11 h-11 rounded-full bg-gradient-to-br from-brand-green to-accent-teal flex items-center justify-center text-white font-bold text-sm">
-                            {{ mb_substr(auth()->user()->name, 0, 1) }}
+        <div class="account-shell">
+            <aside class="account-sidebar">
+                <div class="shop-card account-sidebar__card">
+                    <div class="account-sidebar__user">
+                        <span class="account-sidebar__avatar">
+                            {{ mb_substr(auth()->user()->name ?: 'ک', 0, 1) }}
                         </span>
                         <div class="min-w-0">
-                            <p class="font-bold text-sm text-navy truncate">{{ auth()->user()->name }}</p>
-                            <p class="text-xs text-gray-400 truncate" dir="ltr">{{ auth()->user()->phone }}</p>
+                            <p class="account-sidebar__name">{{ auth()->user()->name }}</p>
+                            <p class="account-sidebar__phone" dir="ltr">{{ auth()->user()->phone }}</p>
                         </div>
                     </div>
-                    <nav class="space-y-1">
+                    <nav class="account-sidebar__nav" aria-label="منوی حساب کاربری">
                         @foreach ([
                             'dashboard' => ['label' => 'داشبورد', 'route' => 'account.dashboard', 'icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'],
                             'orders' => ['label' => 'سفارش‌ها', 'route' => 'account.orders', 'icon' => 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z'],
@@ -35,7 +35,7 @@
                         ] as $key => $item)
                             <a href="{{ route($item['route']) }}"
                                class="account-nav-link {{ $active === $key ? 'account-nav-link-active' : '' }}">
-                                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                                <svg class="account-nav-link__icon" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}" />
                                 </svg>
                                 {{ $item['label'] }}
@@ -45,9 +45,9 @@
                 </div>
             </aside>
 
-            <div class="flex-1 min-w-0">
+            <div class="account-main">
                 @if ($title)
-                    <h1 class="text-xl md:text-2xl font-black text-navy mb-6">{{ $title }}</h1>
+                    <h1 class="account-main__title">{{ $title }}</h1>
                 @endif
                 {{ $slot }}
             </div>

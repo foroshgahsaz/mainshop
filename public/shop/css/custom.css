@@ -1674,6 +1674,12 @@ body.has-admin-bar .listing-filters {
   transition: color 0.2s, background 0.2s;
 }
 
+.account-nav-link__icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
 .account-nav-link:hover {
   color: #3bb371;
   background: #f0fdf4;
@@ -1683,6 +1689,114 @@ body.has-admin-bar .listing-filters {
   color: #3bb371;
   background: #ecfdf5;
   font-weight: 700;
+}
+
+.account-page {
+  padding-top: 1.5rem;
+  padding-bottom: 2.5rem;
+}
+
+.account-page__crumbs {
+  margin-bottom: 1.5rem;
+}
+
+.account-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.account-sidebar {
+  width: 100%;
+}
+
+.account-sidebar__card {
+  padding: 1rem;
+}
+
+.account-sidebar__user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.account-sidebar__avatar {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #3bb371, #14b8a6);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.account-sidebar__name {
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: #181c32;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.account-sidebar__phone {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.account-sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.account-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.account-main__title {
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #181c32;
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .account-page {
+    padding-top: 2.5rem;
+    padding-bottom: 3rem;
+  }
+
+  .account-shell {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 2rem;
+  }
+
+  .account-sidebar {
+    width: 16rem;
+    flex-shrink: 0;
+  }
+
+  .account-sidebar__card {
+    position: sticky;
+    top: 6rem;
+  }
+
+  .account-main__title {
+    font-size: 1.5rem;
+  }
 }
 
 .header-user-dropdown .header-user-menu {

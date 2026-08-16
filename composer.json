@@ -84,6 +84,12 @@
             "php-http/discovery": true
         }
     },
+    "repositories": {
+        "packagist.org": {
+            "type": "composer",
+            "url": "https://repo.packagist.org"
+        }
+    },
     "minimum-stability": "stable",
     "prefer-stable": true
 }

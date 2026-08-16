@@ -1546,6 +1546,24 @@ body.has-admin-bar .listing-filters {
   transition: border-color 0.2s, background 0.2s;
 }
 
+.checkout-option__radio {
+  appearance: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-top: 0.15rem;
+  border: 2px solid #d1d5db;
+  border-radius: 9999px;
+  background: #fff;
+  flex-shrink: 0;
+}
+
+.checkout-option__radio:checked,
+.checkout-option-active .checkout-option__radio {
+  border-color: #3bb371;
+  background: #fff;
+  box-shadow: inset 0 0 0 4px #3bb371;
+}
+
 .checkout-option:last-child {
   margin-bottom: 0;
 }

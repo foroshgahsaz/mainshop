@@ -73,8 +73,8 @@
                             <div class="checkout-pay-group">
                                 <h3 class="checkout-pay-group__title">پرداخت اعتباری</h3>
                                 @foreach ($creditGateways as $gateway)
-                                    <label class="checkout-option {{ $paymentMethod === $gateway['name'] ? 'checkout-option-active' : '' }}">
-                                        <input type="radio" wire:model.live="paymentMethod" value="{{ $gateway['name'] }}" class="shrink-0">
+                                    <label wire:key="pay-{{ $gateway['name'] }}" class="checkout-option {{ $paymentMethod === $gateway['name'] ? 'checkout-option-active' : '' }}">
+                                        <input type="radio" name="paymentMethod" wire:model.live="paymentMethod" value="{{ $gateway['name'] }}" class="checkout-option__radio shrink-0">
                                         <div>
                                             <p class="font-bold text-sm">{{ $gateway['label'] }}</p>
                                             <p class="text-xs text-gray-400 mt-0.5">{{ $gateway['description'] }}</p>
@@ -88,8 +88,8 @@
                             <div class="checkout-pay-group">
                                 <h3 class="checkout-pay-group__title">درگاه‌های نقدی</h3>
                                 @foreach ($cashGateways as $gateway)
-                                    <label class="checkout-option {{ $paymentMethod === $gateway['name'] ? 'checkout-option-active' : '' }}">
-                                        <input type="radio" wire:model.live="paymentMethod" value="{{ $gateway['name'] }}" class="shrink-0">
+                                    <label wire:key="pay-{{ $gateway['name'] }}" class="checkout-option {{ $paymentMethod === $gateway['name'] ? 'checkout-option-active' : '' }}">
+                                        <input type="radio" name="paymentMethod" wire:model.live="paymentMethod" value="{{ $gateway['name'] }}" class="checkout-option__radio shrink-0">
                                         <div>
                                             <p class="font-bold text-sm">{{ $gateway['label'] }}</p>
                                             <p class="text-xs text-gray-400 mt-0.5">{{ $gateway['description'] }}</p>
@@ -102,7 +102,7 @@
                         <div class="checkout-pay-group">
                             <h3 class="checkout-pay-group__title">سایر روش‌ها</h3>
                             <label class="checkout-option {{ $paymentMethod === 'cod' ? 'checkout-option-active' : '' }}">
-                                <input type="radio" wire:model.live="paymentMethod" value="cod" class="shrink-0">
+                                <input type="radio" name="paymentMethod" wire:model.live="paymentMethod" value="cod" class="checkout-option__radio shrink-0">
                                 <div>
                                     <p class="font-bold text-sm">پرداخت در محل</p>
                                     <p class="text-xs text-gray-400 mt-0.5">هنگام تحویل</p>

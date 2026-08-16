@@ -154,7 +154,7 @@
                     ['label' => 'مدیریت سایت', 'url' => ManageGeneralSettings::getUrl(), 'icon' => 'fa-cog'],
                 ]],
                 ['label' => 'درگاه‌ها', 'icon' => 'fa-plug', 'items' => [
-                    ['label' => 'پرداخت و پیامک', 'url' => ManageIntegrations::getUrl(), 'icon' => 'fa-credit-card'],
+                    ['label' => 'پرداخت و پیامک — تست تارا', 'url' => ManageIntegrations::getUrl(), 'icon' => 'fa-credit-card'],
                 ]],
             ],
         ],

@@ -38,6 +38,7 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\ViewAction;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -45,6 +46,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Features\SupportFileUploads\FileUploadController;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -149,7 +151,18 @@ class AppServiceProvider extends ServiceProvider
                     ->fetchFileInformation(false)
                     ->maxSize(51200)
                     ->imagePreviewHeight('150')
-                    ->helperText('حداکثر ۵۰ مگابایت. اگر خطای آپلود گرفتید، نام فایل را کوتاه کنید.');
+                    ->helperText('حداکثر ۵۰ مگابایت. اگر خطا دیدید، نام فایل را کوتاه کنید و دوباره انتخاب کنید.')
+                    ->rule(static function () {
+                        return static function (string $attribute, mixed $value, \Closure $fail): void {
+                            foreach (Arr::wrap($value) as $file) {
+                                if ($file instanceof TemporaryUploadedFile && ! $file->isValid()) {
+                                    $fail('فایل آپلود نشد. نام فایل را کوتاه کنید، دوباره انتخاب کنید و تا پایان آپلود صبر کنید.');
+
+                                    return;
+                                }
+                            }
+                        };
+                    });
             });
         }
     }

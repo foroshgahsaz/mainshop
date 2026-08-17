@@ -79,7 +79,11 @@ class AppServiceProvider extends ServiceProvider
             URL::forceRootUrl(rtrim(request()->root(), '/'));
         }
 
-        Storage::disk('public')->makeDirectory('livewire-tmp');
+        Storage::disk('public')->makeDirectory('products');
+
+        $tempDisk = config('livewire.temporary_file_upload.disk', 'livewire-tmp');
+        $tempDirectory = config('livewire.temporary_file_upload.directory', 'livewire-tmp');
+        Storage::disk($tempDisk)->makeDirectory($tempDirectory);
 
         Product::observe(ProductObserver::class);
         ProductImage::observe(ProductImageObserver::class);

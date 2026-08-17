@@ -16,7 +16,12 @@ class LivewireUploadFilename
         $extension = Str::lower((string) ($file->guessExtension() ?: $file->getClientOriginalExtension() ?: 'bin'));
         $extension = Str::limit(preg_replace('/[^a-z0-9]+/', '', $extension) ?: 'bin', 10, '');
 
-        $originalName = Str::limit((string) $file->getClientOriginalName(), 80, '');
+        $originalName = Str::limit(
+            (string) preg_replace('/[^\p{L}\p{N}\._\- ]+/u', '_', (string) $file->getClientOriginalName()),
+            80,
+            ''
+        );
+        $originalName = $originalName !== '' ? $originalName : 'upload';
         $meta = str('-meta'.base64_encode($originalName).'-')->replace('/', '_')->toString();
 
         $filename = $hash.$meta.'.'.$extension;

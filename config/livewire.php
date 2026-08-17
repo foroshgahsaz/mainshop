@@ -64,7 +64,7 @@ return [
     */
 
     'temporary_file_upload' => [
-        'disk' => 'public',
+        'disk' => env('LIVEWIRE_TEMP_DISK', 'public'),
         'rules' => ['required', 'file', 'max:51200'],
         'directory' => 'livewire-tmp',
         'middleware' => null,

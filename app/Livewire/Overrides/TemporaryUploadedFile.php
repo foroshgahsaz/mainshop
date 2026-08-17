@@ -280,8 +280,8 @@ class TemporaryUploadedFile extends UploadedFile
 
         $path = trim($path, '/');
 
-        if ($path === '' || $path === 'livewire-tmp') {
-            return '__invalid-upload__';
+        if ($path === 'livewire-tmp') {
+            return '';
         }
 
         return $path;
@@ -289,8 +289,12 @@ class TemporaryUploadedFile extends UploadedFile
 
     protected static function isBrokenTempReference(string $path): bool
     {
+        if ($path === '') {
+            return true;
+        }
+
         return $path === FileUploadConfiguration::path('livewire-tmp', false)
-            || $path === FileUploadConfiguration::path('__invalid-upload__', false)
+            || $path === FileUploadConfiguration::directory()
             || str_ends_with($path, '/livewire-tmp');
     }
 }

@@ -30,7 +30,11 @@ class ImagesRelationManager extends RelationManager
                 ->visibility('public')
                 ->maxSize(51200)
                 ->imagePreviewHeight('150')
-                ->required(),
+                ->required(fn (string $operation): bool => $operation === 'create')
+                ->validationMessages([
+                    'required' => 'انتخاب تصویر الزامی است.',
+                    'uploaded' => 'فایل آپلود نشد. دوباره انتخاب کنید و تا پایان آپلود صبر کنید.',
+                ]),
             Forms\Components\TextInput::make('price')
                 ->label('قیمت این تصویر (تومان)')
                 ->numeric()

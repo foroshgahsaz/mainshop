@@ -21,6 +21,7 @@ class TemporaryUploadedFileOverrideTest extends TestCase
 
         $this->assertFalse($file->isValid());
         $this->assertSame(0, $file->getSize());
+        $this->assertNotSame('__invalid-upload__', $file->getFilename());
     }
 
     public function test_valid_temp_file_passes_validation(): void

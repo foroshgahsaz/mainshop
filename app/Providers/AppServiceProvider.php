@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Contracts\SmsSender;
 use App\Filament\Support\CrudSuccessNotification;
+use App\Filament\Support\FileUploadSanitizer;
 use App\Http\Controllers\LivewireFileUploadController;
 use App\Models\Brand;
 use App\Models\Category;
@@ -111,12 +112,18 @@ class AppServiceProvider extends ServiceProvider
         \Filament\Tables\Actions\CreateAction::configureUsing(function ($action): void {
             $action
                 ->label('افزودن')
-                ->successNotification(CrudSuccessNotification::created());
+                ->successNotification(CrudSuccessNotification::created())
+                ->beforeFormValidated(function ($action): void {
+                    self::sanitizeMountedActionUploads($action);
+                });
         });
         \Filament\Tables\Actions\EditAction::configureUsing(function ($action): void {
             $action
                 ->label('ویرایش')
-                ->successNotification(CrudSuccessNotification::saved());
+                ->successNotification(CrudSuccessNotification::saved())
+                ->beforeFormValidated(function ($action): void {
+                    self::sanitizeMountedActionUploads($action, $action->getRecord());
+                });
         });
         \Filament\Tables\Actions\DeleteAction::configureUsing(function ($action): void {
             $action
@@ -132,12 +139,18 @@ class AppServiceProvider extends ServiceProvider
         CreateAction::configureUsing(function ($action): void {
             $action
                 ->label('افزودن')
-                ->successNotification(CrudSuccessNotification::created());
+                ->successNotification(CrudSuccessNotification::created())
+                ->beforeFormValidated(function ($action): void {
+                    self::sanitizeMountedActionUploads($action);
+                });
         });
         EditAction::configureUsing(function ($action): void {
             $action
                 ->label('ویرایش')
-                ->successNotification(CrudSuccessNotification::saved());
+                ->successNotification(CrudSuccessNotification::saved())
+                ->beforeFormValidated(function ($action): void {
+                    self::sanitizeMountedActionUploads($action, $action->getRecord());
+                });
         });
         DeleteAction::configureUsing(function ($action): void {
             $action
@@ -152,6 +165,9 @@ class AppServiceProvider extends ServiceProvider
                     ->maxSize(51200)
                     ->imagePreviewHeight('150')
                     ->helperText('حداکثر ۵۰ مگابایت. اگر خطا دیدید، نام فایل را کوتاه کنید و دوباره انتخاب کنید.')
+                    ->validationMessages([
+                        'uploaded' => 'فایل آپلود نشد. دوباره انتخاب کنید و تا پایان آپلود صبر کنید.',
+                    ])
                     ->rule(static function () {
                         return static function (string $attribute, mixed $value, \Closure $fail): void {
                             foreach (Arr::wrap($value) as $file) {
@@ -165,5 +181,22 @@ class AppServiceProvider extends ServiceProvider
                     });
             });
         }
+    }
+
+    protected static function sanitizeMountedActionUploads(object $action, ?\Illuminate\Database\Eloquent\Model $record = null): void
+    {
+        $livewire = $action->getLivewire();
+
+        if (! method_exists($livewire, 'getMountedTableActionForm')) {
+            return;
+        }
+
+        $form = $livewire->getMountedTableActionForm(mountedAction: $action);
+
+        if ($form === null) {
+            return;
+        }
+
+        FileUploadSanitizer::sanitize($livewire, $form, $record);
     }
 }

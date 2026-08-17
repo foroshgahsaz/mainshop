@@ -20,6 +20,7 @@
     <php>
         <env name="APP_ENV" value="testing"/>
         <env name="APP_DEBUG" value="true"/>
+        <env name="APP_URL" value="http://localhost"/>
         <env name="APP_KEY" value="base64:TtUhUUE/8zcm0GA7ws8n2Q01RNgq7DDLWbviRiD7PHM="/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
@@ -38,5 +39,10 @@
         <env name="PAYMENT_GATEWAY" value="zarinpal"/>
         <env name="ZARINPAL_SANDBOX" value="true"/>
         <env name="ZARINPAL_MERCHANT_ID" value="00000000-0000-0000-0000-000000000000"/>
+        <env name="TARA_SANDBOX" value="true"/>
+        <env name="TARA_USERNAME" value="tara_ipg"/>
+        <env name="TARA_PASSWORD" value="tara_ipg@123_$"/>
+        <env name="TARA_SERVICE_ID" value="101"/>
+        <env name="TARA_AMOUNT_UNIT" value="toman"/>
     </php>
 </phpunit>

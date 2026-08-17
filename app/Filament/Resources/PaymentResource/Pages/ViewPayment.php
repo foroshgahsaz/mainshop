@@ -4,8 +4,9 @@ namespace App\Filament\Resources\PaymentResource\Pages;
 
 use App\Filament\Resources\OrderResource;
 use App\Filament\Resources\PaymentResource;
-use App\Models\PaymentNote;
+use App\Models\Payment;
 use App\Services\Payment\PaymentActivityLogger;
+use App\Services\Payment\TaraRefundService;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
@@ -27,6 +28,23 @@ class ViewPayment extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('taraRefund')
+                ->label('مرجوعی تارا')
+                ->icon('heroicon-o-arrow-uturn-left')
+                ->color('danger')
+                ->requiresConfirmation()
+                ->modalHeading('مرجوعی پرداخت تارا')
+                ->modalDescription('مبلغ این پرداخت در درگاه تارا مرجوع می‌شود. اگر سفارش دیگر تسویه نباشد، به حالت در انتظار برمی‌گردد.')
+                ->visible(fn () => $this->record->gateway === 'tara' && $this->record->status === Payment::STATUS_SUCCESS)
+                ->action(function (TaraRefundService $refunds): void {
+                    try {
+                        $this->record = $refunds->refund($this->record);
+                        $this->refreshRecord();
+                        Notification::make()->title('مرجوعی تارا انجام شد')->success()->send();
+                    } catch (\RuntimeException $e) {
+                        Notification::make()->title('مرجوعی ناموفق')->body($e->getMessage())->danger()->send();
+                    }
+                }),
             Actions\Action::make('order')
                 ->label('مشاهده سفارش')
                 ->icon('heroicon-o-shopping-bag')

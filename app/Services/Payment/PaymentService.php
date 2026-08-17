@@ -13,6 +13,7 @@ class PaymentService
 {
     public function __construct(
         protected PaymentGatewayManager $gateways,
+        protected PaymentGatewayCatalog $catalog,
         protected PaymentActivityLogger $paymentLog,
         protected OrderActivityLogger $orderLog,
     ) {}
@@ -24,11 +25,20 @@ class PaymentService
 
     public function createForOrder(Order $order, ?string $gateway = null): Payment
     {
+        $remaining = $order->remainingAmount();
+
+        if ($remaining <= 0) {
+            throw new RuntimeException('این سفارش تسویه شده است.');
+        }
+
+        $gatewayName = $gateway ?: config('payment.default');
+        $this->catalog->assertEnabled($gatewayName);
+
         $payment = Payment::create([
             'order_id' => $order->id,
             'user_id' => $order->user_id,
-            'amount' => $order->final_amount,
-            'gateway' => $gateway ?: config('payment.default'),
+            'amount' => $remaining,
+            'gateway' => $gatewayName,
             'status' => Payment::STATUS_PENDING,
             'tracking_code' => strtoupper(Str::random(12)),
         ]);
@@ -44,6 +54,12 @@ class PaymentService
         if (! $order->stock_reserved) {
             throw new RuntimeException('موجودی این سفارش رزرو نشده است.');
         }
+
+        if ($order->remainingAmount() <= 0) {
+            throw new RuntimeException('این سفارش تسویه شده است.');
+        }
+
+        $this->catalog->assertEnabled($payment->gateway);
 
         return $this->gateway($payment->gateway)->initiate($payment, $order);
     }
@@ -67,8 +83,13 @@ class PaymentService
             }
 
             $order = Order::query()->whereKey($locked->order_id)->lockForUpdate()->firstOrFail();
+            $alreadyPaid = (int) $order->payments()
+                ->where('status', Payment::STATUS_SUCCESS)
+                ->where('id', '!=', $locked->id)
+                ->sum('amount');
+            $remaining = max(0, (int) $order->final_amount - $alreadyPaid);
 
-            if ($order->isPaid()) {
+            if ($remaining <= 0) {
                 $previous = $locked->status;
                 $locked->update([
                     'status' => Payment::STATUS_CANCELED,
@@ -111,9 +132,29 @@ class PaymentService
                 return $locked->fresh();
             }
 
+            $captured = min($result->paidAmount ?? $locked->amount, $remaining);
+
+            if ($captured <= 0) {
+                $previous = $locked->status;
+                $locked->update([
+                    'status' => Payment::STATUS_CANCELED,
+                    'raw_response' => is_array($result->raw) ? $result->raw : $locked->raw_response,
+                ]);
+
+                $this->paymentLog->statusChanged(
+                    $locked->fresh(),
+                    $previous,
+                    Payment::STATUS_CANCELED,
+                    'مبلغ قابل اعمال روی سفارش صفر است'
+                );
+
+                return $locked->fresh();
+            }
+
             $previous = $locked->status;
             $locked->update([
                 'status' => Payment::STATUS_SUCCESS,
+                'amount' => $captured,
                 'paid_at' => now(),
                 'card_number' => $result->cardPan,
                 'raw_response' => $result->raw,
@@ -121,16 +162,20 @@ class PaymentService
 
             $locked = $locked->fresh();
             $orderPrevious = $order->status;
+            $paidInFull = ($alreadyPaid + $captured) >= (int) $order->final_amount;
+            $partialNote = $paidInFull
+                ? 'پرداخت آنلاین موفق؛ سفارش تسویه شد'
+                : 'پرداخت جزئی ثبت شد. مانده: '.number_format((int) $order->final_amount - $alreadyPaid - $captured).' تومان';
 
-            if ($order->status === Order::STATUS_PENDING) {
+            if ($paidInFull && $order->status === Order::STATUS_PENDING) {
                 $order->update(['status' => Order::STATUS_PROCESSING]);
             }
 
-            $card = $locked->card_number ? ' کارت: '.$locked->card_number : '';
+            $card = $locked->card_number ? ' مرجع: '.$locked->card_number : '';
             $this->paymentLog->statusChanged($locked, $previous, Payment::STATUS_SUCCESS, 'پرداخت تأیید شد.'.$card);
-            $this->orderLog->paymentLinked($order->fresh(), $locked->tracking_code, Payment::STATUS_SUCCESS, 'پرداخت آنلاین موفق');
+            $this->orderLog->paymentLinked($order->fresh(), $locked->tracking_code, Payment::STATUS_SUCCESS, $partialNote);
 
-            if ($orderPrevious !== Order::STATUS_PROCESSING) {
+            if ($paidInFull && $orderPrevious !== Order::STATUS_PROCESSING) {
                 $this->orderLog->statusChanged($order->fresh(), $orderPrevious, Order::STATUS_PROCESSING);
             }
 

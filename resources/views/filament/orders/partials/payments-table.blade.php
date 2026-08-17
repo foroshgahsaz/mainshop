@@ -16,7 +16,7 @@
                 @foreach($order->payments as $payment)
                     <tr>
                         <td dir="ltr">{{ $payment->tracking_code }}</td>
-                        <td>{{ $payment->gateway }}</td>
+                        <td>{{ \App\Support\ShopLabels::gateway($payment->gateway) }}</td>
                         <td>{{ number_format($payment->amount) }} تومان</td>
                         <td>
                             <span class="admin-order__badge admin-order__badge--payment-status admin-order__badge--pay-{{ $payment->status }}">

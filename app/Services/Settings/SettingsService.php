@@ -56,7 +56,43 @@ class SettingsService
                 FILTER_VALIDATE_BOOLEAN
             ),
             'callback_url' => $this->get('zarinpal', 'callback_url') ?: config('payment.gateways.zarinpal.callback_url'),
+            'amount_unit' => $this->get('zarinpal', 'amount_unit') ?: config('payment.gateways.zarinpal.amount_unit', 'toman'),
             'enabled' => filter_var($this->get('zarinpal', 'enabled', true), FILTER_VALIDATE_BOOLEAN),
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    public function tara(): array
+    {
+        $cfg = config('payment.gateways.tara', []);
+        $sandbox = filter_var($this->get('tara', 'sandbox', $cfg['sandbox'] ?? true), FILTER_VALIDATE_BOOLEAN);
+
+        $purchaseDefault = $sandbox
+            ? ($cfg['sandbox_base_url'] ?? 'https://stage-pay.tara360.ir/pay')
+            : ($cfg['base_url'] ?? 'https://pay.tara360.ir/pay');
+        $refundDefault = $sandbox
+            ? ($cfg['sandbox_refund_base_url'] ?? 'https://stage.tara-club.ir/club')
+            : ($cfg['refund_base_url'] ?? 'https://club.tara-club.ir/club');
+
+        return [
+            'enabled' => filter_var($this->get('tara', 'enabled', false), FILTER_VALIDATE_BOOLEAN),
+            'sandbox' => $sandbox,
+            'username' => (string) ($this->get('tara', 'username') ?: ($cfg['username'] ?? '')),
+            'password' => (string) ($this->get('tara', 'password') ?: ($cfg['password'] ?? '')),
+            'service_id' => (string) ($this->get('tara', 'service_id') ?: ($cfg['service_id'] ?? '')),
+            'amount_unit' => (string) ($this->get('tara', 'amount_unit') ?: ($cfg['amount_unit'] ?? 'toman')),
+            'callback_url' => (string) ($this->get('tara', 'callback_url') ?: ($cfg['callback_url'] ?? '/payment/callback/tara')),
+            'client_ip' => (string) ($this->get('tara', 'client_ip') ?: ($cfg['client_ip'] ?? '')),
+            'default_group' => (string) ($this->get('tara', 'default_group') ?: ($cfg['default_group'] ?? '1')),
+            'default_group_title' => (string) ($this->get('tara', 'default_group_title') ?: ($cfg['default_group_title'] ?? 'عمومی')),
+            'base_url' => rtrim((string) ($this->get('tara', $sandbox ? 'sandbox_base_url' : 'base_url') ?: $purchaseDefault), '/'),
+            'refund_base_url' => rtrim((string) ($this->get('tara', $sandbox ? 'sandbox_refund_base_url' : 'refund_base_url') ?: $refundDefault), '/'),
+            'refund_principal' => (string) ($this->get('tara', 'refund_principal') ?: ($cfg['refund_principal'] ?? '')),
+            'refund_password' => (string) ($this->get('tara', 'refund_password') ?: ($cfg['refund_password'] ?? '')),
+            'sandbox_base_url' => (string) ($this->get('tara', 'sandbox_base_url') ?: ($cfg['sandbox_base_url'] ?? '')),
+            'production_base_url' => (string) ($this->get('tara', 'base_url') ?: ($cfg['base_url'] ?? '')),
+            'sandbox_refund_base_url' => (string) ($this->get('tara', 'sandbox_refund_base_url') ?: ($cfg['sandbox_refund_base_url'] ?? '')),
+            'production_refund_base_url' => (string) ($this->get('tara', 'refund_base_url') ?: ($cfg['refund_base_url'] ?? '')),
         ];
     }
 

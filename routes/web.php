@@ -10,7 +10,6 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SitemapController;
-use App\Models\User;
 use App\Livewire\Account\AccountDashboard;
 use App\Livewire\Account\AddressManager;
 use App\Livewire\Account\OrderList;
@@ -64,7 +63,9 @@ Route::middleware('guest')->group(function () {
 
 Route::get('/cart', CartPage::class)->name('cart');
 Route::get('/checkout', CheckoutPage::class)->name('checkout')->middleware('auth');
-Route::get('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');
+Route::match(['get', 'post'], '/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');
+Route::match(['get', 'post'], '/payment/callback/tara', [PaymentController::class, 'taraCallback'])->name('payment.callback.tara');
+Route::get('/payment/tara/{tracking}', [PaymentController::class, 'taraRedirect'])->name('payment.tara.redirect');
 
 Route::middleware('auth')->prefix('account')->name('account.')->group(function () {
     Route::get('/', AccountDashboard::class)->name('dashboard');

@@ -1559,6 +1559,22 @@ body.has-admin-bar .listing-filters {
   background: #f0fdf4;
 }
 
+.checkout-pay-group {
+  margin-bottom: 1rem;
+  padding-bottom: 0.25rem;
+}
+
+.checkout-pay-group:last-child {
+  margin-bottom: 0;
+}
+
+.checkout-pay-group__title {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+
 .shop-page-wrap--has-mobile-bar {
   padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
 }

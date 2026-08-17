@@ -25,6 +25,8 @@
                 </span>
                 @if($order->isPaid())
                     <span class="admin-order__badge admin-order__badge--paid">پرداخت شده</span>
+                @elseif($order->hasSuccessfulPayment())
+                    <span class="admin-order__badge">پرداخت ناقص</span>
                 @endif
             </div>
         </header>

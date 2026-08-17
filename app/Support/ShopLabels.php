@@ -41,6 +41,15 @@ class ShopLabels
         };
     }
 
+    public static function gateway(?string $gateway): string
+    {
+        return match ($gateway) {
+            'zarinpal' => 'زرین‌پال',
+            'tara' => 'تارا',
+            default => $gateway ?? '—',
+        };
+    }
+
     public static function orderNoteType(?string $type): string
     {
         return match ($type) {

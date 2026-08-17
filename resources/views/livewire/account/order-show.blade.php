@@ -10,8 +10,18 @@
         <div class="mb-4 p-3 bg-red-50 text-red-700 rounded-xl text-sm">{{ session('error') }}</div>
     @endif
     @if (session('payment_status'))
-        <div class="mb-4 p-3 rounded-xl text-sm {{ session('payment_status') === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700' }}">
-            وضعیت پرداخت: {{ session('payment_status') === 'success' ? 'موفق' : 'ناموفق' }}
+        @php
+            $paymentStatus = session('payment_status');
+            $remainingFlash = session('payment_remaining');
+        @endphp
+        <div class="mb-4 p-3 rounded-xl text-sm {{ $paymentStatus === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700' }}">
+            @if ($paymentStatus === 'success' && $remainingFlash)
+                پرداخت ثبت شد. مانده سفارش: {{ number_format($remainingFlash) }} تومان. تا تسویه کامل، سفارش تکمیل نمی‌شود.
+            @elseif ($paymentStatus === 'success')
+                وضعیت پرداخت: موفق
+            @else
+                وضعیت پرداخت: ناموفق
+            @endif
         </div>
     @endif
 
@@ -25,10 +35,9 @@
                 <span class="text-xs text-gray-500">کد: {{ $order->tracking_code }}</span>
             </div>
             @if ($order->canPayAgain())
-                <button wire:click="payAgain" wire:loading.attr="disabled"
-                    class="bg-brand-green hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-bold">
-                    پرداخت مجدد
-                </button>
+                <span class="text-xs bg-amber-50 text-amber-700 px-3 py-1 rounded-full">
+                    مانده: {{ number_format($order->remainingAmount()) }} تومان
+                </span>
             @endif
         </div>
 
@@ -59,6 +68,18 @@
                 <dt class="font-bold text-navy">مبلغ نهایی</dt>
                 <dd class="text-lg font-black text-brand-green">{{ number_format($order->final_amount) }} تومان</dd>
             </div>
+            @if ($order->paidAmount() > 0)
+                <div class="flex justify-between text-emerald-700">
+                    <dt>پرداخت‌شده</dt>
+                    <dd>{{ number_format($order->paidAmount()) }} تومان</dd>
+                </div>
+            @endif
+            @if ($order->remainingAmount() > 0 && $order->payment_method === 'online')
+                <div class="flex justify-between text-amber-700">
+                    <dt>مانده</dt>
+                    <dd>{{ number_format($order->remainingAmount()) }} تومان</dd>
+                </div>
+            @endif
         </dl>
     </div>
 
@@ -90,12 +111,59 @@
             <div class="space-y-2">
                 @foreach($order->payments as $payment)
                     <div class="flex justify-between text-sm py-2 border-b border-gray-50 last:border-0">
-                        <span>{{ $payment->tracking_code }} — {{ ShopLabels::paymentStatus($payment->status) }}</span>
+                        <span>{{ $payment->tracking_code }} — {{ ShopLabels::gateway($payment->gateway) }} — {{ ShopLabels::paymentStatus($payment->status) }}</span>
                         <span>{{ number_format($payment->amount) }} تومان</span>
                     </div>
                 @endforeach
             </div>
             <p class="text-xs text-gray-400 mt-2">روش: {{ ShopLabels::paymentMethod($order->payment_method) }}</p>
+        </div>
+    @endif
+
+    @if ($order->canPayAgain())
+        <div class="shop-card p-5 mb-4">
+            <h2 class="font-bold text-navy mb-2">ادامه پرداخت</h2>
+            <p class="text-sm text-gray-600 mb-4">
+                مانده این سفارش {{ number_format($order->remainingAmount()) }} تومان است.
+                تا وقتی مجموع پرداخت اعتباری و نقدی با مبلغ سفارش برابر نشود، سفارش تکمیل نمی‌شود.
+            </p>
+
+            @if (count($creditGateways))
+                <div class="checkout-pay-group">
+                    <h3 class="checkout-pay-group__title">پرداخت اعتباری</h3>
+                    @foreach ($creditGateways as $gateway)
+                        <label class="checkout-option {{ $selectedGateway === $gateway['name'] ? 'checkout-option-active' : '' }}">
+                            <input type="radio" wire:model.live="selectedGateway" value="{{ $gateway['name'] }}" class="shrink-0">
+                            <div>
+                                <p class="font-bold text-sm">{{ $gateway['label'] }}</p>
+                                <p class="text-xs text-gray-400 mt-0.5">{{ $gateway['description'] }}</p>
+                            </div>
+                        </label>
+                    @endforeach
+                </div>
+            @endif
+
+            @if (count($cashGateways))
+                <div class="checkout-pay-group">
+                    <h3 class="checkout-pay-group__title">درگاه‌های نقدی</h3>
+                    @foreach ($cashGateways as $gateway)
+                        <label class="checkout-option {{ $selectedGateway === $gateway['name'] ? 'checkout-option-active' : '' }}">
+                            <input type="radio" wire:model.live="selectedGateway" value="{{ $gateway['name'] }}" class="shrink-0">
+                            <div>
+                                <p class="font-bold text-sm">{{ $gateway['label'] }}</p>
+                                <p class="text-xs text-gray-400 mt-0.5">{{ $gateway['description'] }}</p>
+                            </div>
+                        </label>
+                    @endforeach
+                </div>
+            @endif
+
+            @error('selectedGateway') <span class="text-red-600 text-xs mb-2 block">{{ $message }}</span> @enderror
+
+            <button wire:click="payAgain" wire:loading.attr="disabled"
+                class="bg-brand-green hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-bold">
+                پرداخت مانده
+            </button>
         </div>
     @endif
 

@@ -37,7 +37,7 @@ class ZarinpalGateway implements PaymentGatewayInterface
 
         $response = Http::post("{$baseUrl}/request.json", [
             'merchant_id' => $config['merchant_id'],
-            'amount' => $payment->amount * 10,
+            'amount' => AmountConverter::toGateway($payment->amount, $config['amount_unit'] ?? AmountConverter::UNIT_TOMAN),
             'callback_url' => $callbackUrl,
             'description' => "پرداخت سفارش {$order->tracking_code}",
             'metadata' => [
@@ -95,7 +95,7 @@ class ZarinpalGateway implements PaymentGatewayInterface
 
         $response = Http::post("{$baseUrl}/verify.json", [
             'merchant_id' => $config['merchant_id'],
-            'amount' => $payment->amount * 10,
+            'amount' => AmountConverter::toGateway($payment->amount, $config['amount_unit'] ?? AmountConverter::UNIT_TOMAN),
             'authority' => $authority,
         ]);
 

@@ -24,7 +24,7 @@
                 <span class="admin-order__badge admin-order__badge--payment-status admin-order__badge--pay-{{ $payment->status }}">
                     {{ \App\Support\ShopLabels::paymentStatus($payment->status) }}
                 </span>
-                <span class="admin-order__badge">{{ $payment->gateway }}</span>
+                <span class="admin-order__badge">{{ \App\Support\ShopLabels::gateway($payment->gateway) }}</span>
             </div>
         </header>
 
@@ -34,7 +34,7 @@
                     <h2 class="admin-order__section-title">جزئیات تراکنش</h2>
                     <dl class="admin-order__detail-grid">
                         <div><dt>مبلغ</dt><dd>{{ number_format($payment->amount) }} تومان</dd></div>
-                        <div><dt>درگاه</dt><dd>{{ $payment->gateway }}</dd></div>
+                        <div><dt>درگاه</dt><dd>{{ \App\Support\ShopLabels::gateway($payment->gateway) }}</dd></div>
                         <div><dt>کد پیگیری</dt><dd dir="ltr">{{ $payment->tracking_code }}</dd></div>
                         @if($payment->transaction_id)
                             <div><dt>Authority / تراکنش</dt><dd dir="ltr">{{ $payment->transaction_id }}</dd></div>

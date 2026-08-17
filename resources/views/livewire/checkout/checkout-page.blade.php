@@ -67,22 +67,49 @@
 
                     <section class="shop-card p-5">
                         <h2 class="shop-section-title">روش پرداخت</h2>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <label class="checkout-option {{ $paymentMethod === 'online' ? 'checkout-option-active' : '' }}">
-                                <input type="radio" wire:model="paymentMethod" value="online" class="shrink-0">
-                                <div>
-                                    <p class="font-bold text-sm">پرداخت آنلاین</p>
-                                    <p class="text-xs text-gray-400 mt-0.5">درگاه زرین‌پال</p>
-                                </div>
-                            </label>
+                        <p class="text-xs text-gray-500 mb-4">پرداخت اعتباری و نقدی جدا هستند. می‌توانید الان یکی را بزنید و مانده را بعداً از صفحه سفارش پرداخت کنید.</p>
+
+                        @if (count($creditGateways))
+                            <div class="checkout-pay-group">
+                                <h3 class="checkout-pay-group__title">پرداخت اعتباری</h3>
+                                @foreach ($creditGateways as $gateway)
+                                    <label class="checkout-option {{ $paymentMethod === $gateway['name'] ? 'checkout-option-active' : '' }}">
+                                        <input type="radio" wire:model.live="paymentMethod" value="{{ $gateway['name'] }}" class="shrink-0">
+                                        <div>
+                                            <p class="font-bold text-sm">{{ $gateway['label'] }}</p>
+                                            <p class="text-xs text-gray-400 mt-0.5">{{ $gateway['description'] }}</p>
+                                        </div>
+                                    </label>
+                                @endforeach
+                            </div>
+                        @endif
+
+                        @if (count($cashGateways))
+                            <div class="checkout-pay-group">
+                                <h3 class="checkout-pay-group__title">درگاه‌های نقدی</h3>
+                                @foreach ($cashGateways as $gateway)
+                                    <label class="checkout-option {{ $paymentMethod === $gateway['name'] ? 'checkout-option-active' : '' }}">
+                                        <input type="radio" wire:model.live="paymentMethod" value="{{ $gateway['name'] }}" class="shrink-0">
+                                        <div>
+                                            <p class="font-bold text-sm">{{ $gateway['label'] }}</p>
+                                            <p class="text-xs text-gray-400 mt-0.5">{{ $gateway['description'] }}</p>
+                                        </div>
+                                    </label>
+                                @endforeach
+                            </div>
+                        @endif
+
+                        <div class="checkout-pay-group">
+                            <h3 class="checkout-pay-group__title">سایر روش‌ها</h3>
                             <label class="checkout-option {{ $paymentMethod === 'cod' ? 'checkout-option-active' : '' }}">
-                                <input type="radio" wire:model="paymentMethod" value="cod" class="shrink-0">
+                                <input type="radio" wire:model.live="paymentMethod" value="cod" class="shrink-0">
                                 <div>
                                     <p class="font-bold text-sm">پرداخت در محل</p>
                                     <p class="text-xs text-gray-400 mt-0.5">هنگام تحویل</p>
                                 </div>
                             </label>
                         </div>
+                        @error('paymentMethod') <span class="text-red-600 text-xs mt-2 block">{{ $message }}</span> @enderror
                     </section>
                 </div>
 

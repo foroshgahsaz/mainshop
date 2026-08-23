@@ -17,7 +17,7 @@
 6. [مدل‌ها و دیتابیس](#6-مدل‌ها-و-دیتابیس)
 7. [لایه سرویس (Business Logic)](#7-لایه-سرویس-business-logic)
 8. [سبد، Checkout و سفارش](#8-سبد-checkout-و-سفارش)
-9. [پرداخت (زرین‌پال و تارا)](#9-پرداخت-زرین‌پال-و-تارا)
+9. [پرداخت و درگاه‌ها (جزئیات کامل)](#9-پرداخت-و-درگاه‌ها-جزئیات-کامل)
 10. [احراز هویت و OTP](#10-احراز-هویت-و-otp)
 11. [Cache و Performance](#11-cache-و-performance)
 12. [فایل، تصویر و آپلود](#12-فایل-تصویر-و-آپلود)
@@ -27,6 +27,15 @@
 16. [عیب‌یابی (Troubleshooting)](#16-عیب‌یابی-troubleshooting)
 17. [دستورالعمل افزودن Feature جدید](#17-دستورالعمل-افزودن-feature-جدید)
 18. [قراردادهای توسعه](#18-قراردادهای-توسعه)
+19. [Variant، Attribute و موجودی](#19-variant-attribute-و-موجودی)
+20. [کوپن تخفیف](#20-کوپن-تخفیف)
+21. [روش ارسال (Shipping)](#21-روش-ارسال-shipping)
+22. [سیستم Settings (DB)](#22-سیستم-settings-db)
+23. [محتوا، SEO، منو و اسلایدر](#23-محتوا-seo-منو-و-اسلایدر)
+24. [مدیریت سفارش و پرداخت در ادمین](#24-مدیریت-سفارش-و-پرداخت-در-ادمین)
+25. [Support، Middleware و Blade Components](#25-support-middleware-و-blade-components)
+26. [فهرست کامل تست‌ها](#26-فهرست-کامل-تست‌ها)
+27. [چک‌لیست پوشش راهنما](#27-چک‌لیست-پوشش-راهنما)
 
 ---
 
@@ -414,43 +423,195 @@ public function mount(CheckoutService $checkout, ShopCacheService $cache) { ... 
 
 ---
 
-## 9. پرداخت (زرین‌پال و تارا)
+## 9. پرداخت و درگاه‌ها (جزئیات کامل)
 
-### Config — `config/payment.php`
-
-| درگاه | type | کلاس |
-|-------|------|------|
-| زرین‌پال | `cash` | `ZarinpalGateway` |
-| تارا | `credit` | `TaraGateway` |
-
-### جریان
+### 9.1 نمای کلی
 
 ```
-PaymentService::createForOrder()
-  → initiate() → redirect URL
-  → کاربر پرداخت می‌کند
-  → callback (CSRF exempt)
-  → verify() → markSuccess()
-  → Notification + SMS
+CheckoutPage (انتخاب درگاه)
+    ↓
+CheckoutService::placeOrder()
+    ↓
+PaymentService::createForOrder()  → رکورد Payment (pending)
+    ↓
+PaymentService::initiate()        → redirect URL درگاه
+    ↓
+[کاربر در سایت درگاه پرداخت می‌کند]
+    ↓
+PaymentController::callback / taraCallback
+    ↓
+PaymentService::verify()
+    ↓
+Order paid / partial paid → Notification + SMS
 ```
 
-### Callback URLها
+### 9.2 فایل‌های کلیدی
 
-| درگاه | Route |
-|-------|-------|
-| زرین‌پال | `GET/POST /payment/callback` |
-| تارا | `GET/POST /payment/callback/tara` |
+| فایل | مسئولیت |
+|------|---------|
+| `config/payment.php` | تعریف درگاه‌ها، driver class، env |
+| `app/Services/Payment/PaymentGatewayInterface.php` | قرارداد: `initiate()`, `verify()` |
+| `app/Services/Payment/PaymentGatewayManager.php` | resolve driver از config |
+| `app/Services/Payment/PaymentGatewayCatalog.php` | لیست enabled، type، icon برای UI |
+| `app/Services/Payment/PaymentService.php` | create، initiate، verify، idempotent |
+| `app/Services/Payment/ZarinpalGateway.php` | درگاه نقدی |
+| `app/Services/Payment/TaraGateway.php` | درگاه اعتباری |
+| `app/Services/Payment/TaraRefundService.php` | استرداد تارا |
+| `app/Services/Payment/AmountConverter.php` | تومان ↔ ریال |
+| `app/Services/Payment/PaymentActivityLogger.php` | timeline پرداخت |
+| `app/Http/Controllers/PaymentController.php` | callback + redirect تارا |
+| `resources/views/payments/tara-redirect.blade.php` | صفحه میانی redirect تارا |
 
-### پرداخت ترکیبی (تارا + نقدی)
+### 9.3 درگاه زرین‌پال (cash / نقدی)
 
-- `Order::remainingAmount()` — مبلغ باقی‌مانده
-- چند `Payment` برای یک `Order`
-- تست: `tests/Feature/TaraSplitPaymentTest.php`
+| مورد | مقدار |
+|------|--------|
+| نام config | `zarinpal` |
+| type | `cash` |
+| کلاس | `ZarinpalGateway` |
+| Admin | `/admin/zarinpal` → `ManageZarinpal.php` |
+| Callback | `/payment/callback?payment={tracking_code}` |
+| CSRF | exempt در `bootstrap/app.php` |
 
-### واحد پول
+**تنظیمات (اولویت: DB → .env):**
 
-- داخلی: **تومان**
-- درگاه: تبدیل به ریال (`AmountConverter` ×10)
+| کلید settings | env |
+|---------------|-----|
+| `zarinpal.enabled` | — |
+| `zarinpal.merchant_id` | `ZARINPAL_MERCHANT_ID` |
+| `zarinpal.sandbox` | `ZARINPAL_SANDBOX` |
+| `zarinpal.callback_url` | `ZARINPAL_CALLBACK_URL` |
+| `zarinpal.amount_unit` | `ZARINPAL_AMOUNT_UNIT` |
+| `zarinpal.icon` | — (آپلود admin) |
+
+**API:** Zarinpal v4 — sandbox: `sandbox.zarinpal.com` / production: `payment.zarinpal.com`
+
+### 9.4 درگاه تارا (credit / اعتباری)
+
+| مورد | مقدار |
+|------|--------|
+| نام config | `tara` |
+| type | `credit` |
+| کلاس | `TaraGateway` |
+| Admin | `/admin/tara` → `ManageTara.php` |
+| Callback | `/payment/callback/tara?payment={tracking_code}` |
+| Redirect میانی | `/payment/tara/{tracking}` |
+| Refund | `TaraRefundService` — API جدا (club) |
+
+**تنظیمات:**
+
+| کلید settings | env |
+|---------------|-----|
+| `tara.enabled` | — |
+| `tara.username` | `TARA_USERNAME` |
+| `tara.password` | `TARA_PASSWORD` |
+| `tara.service_id` | `TARA_SERVICE_ID` |
+| `tara.sandbox` | `TARA_SANDBOX` |
+| `tara.base_url` / `sandbox_base_url` | `TARA_BASE_URL` / `TARA_SANDBOX_BASE_URL` |
+| `tara.refund_*` | `TARA_REFUND_*` |
+| `tara.client_ip` | `TARA_CLIENT_IP` |
+| `tara.default_group` | `TARA_DEFAULT_GROUP` |
+| `tara.icon` | — (آپلود admin) |
+
+**جریان تارا:** OAuth token → `/api/getToken` → redirect → callback → verify
+
+### 9.5 پرداخت ترکیبی (Split Payment)
+
+سناریو: کاربر بخشی با **تارا (اعتبار)** و مابقی با **زرین‌پال (نقدی)** می‌پردازد.
+
+| مفهوم | فایل/متد |
+|--------|-----------|
+| مبلغ باقی‌مانده | `Order::remainingAmount()` |
+| چند Payment روی یک Order | `payments` relation |
+| پرداخت مجدد از حساب کاربر | `Livewire/Account/OrderShow.php` |
+| UI انتخاب درگاه باقی‌مانده | `resources/views/livewire/account/order-show.blade.php` |
+| تست | `tests/Feature/TaraSplitPaymentTest.php` |
+
+```
+سفارش 1,000,000 تومان
+  → Payment#1 tara 400,000 success
+  → remainingAmount = 600,000
+  → Payment#2 zarinpal 600,000 → درگاه
+```
+
+### 9.6 PaymentGatewayCatalog — UI checkout
+
+`PaymentGatewayCatalog` درگاه‌های **فعال** را برای checkout برمی‌گرداند:
+
+```php
+$catalog->cash();     // فقط type=cash (زرین‌پال)
+$catalog->credit();   // فقط type=credit (تارا)
+$catalog->enabled();  // همه enabled
+$catalog->iconUrl('zarinpal');  // از settings + ShopMedia
+```
+
+**Checkout:** `CheckoutPage` + `PaymentGatewayCatalog`  
+**Account pay again:** `OrderShow` — cash/credit جدا
+
+### 9.7 آیکون درگاه و ارسال
+
+| Component | فایل |
+|-----------|------|
+| آپلود آیکون | `app/Filament/Support/ShopIconUpload.php` |
+| مسیر ذخیره | `gateway-icons/` روی disk public |
+| URL | `ShopMedia::url()` |
+| checkout UI | `resources/views/components/checkout-option-icon.blade.php` |
+| shipping icon | `ShippingMethodResource` — فیلد icon |
+
+### 9.8 Admin — منوی درگاه‌ها
+
+Sidebar: `resources/views/filament/partials/admin-sidebar.blade.php` — panel «درگاه‌ها»
+
+| صفحه | slug admin |
+|------|------------|
+| زرین‌پال | `/admin/zarinpal` |
+| تارا | `/admin/tara` |
+| یکپارچه‌سازی (legacy) | `/admin/manage-integrations` |
+
+ثبت در `AdminPanelProvider.php`: `ManageZarinpal`, `ManageTara`
+
+### 9.9 CSRF و امنیت callback
+
+`bootstrap/app.php`:
+
+```php
+$middleware->validateCsrfTokens(except: [
+    'payment/callback',
+    'payment/callback/tara',
+]);
+```
+
+**verify idempotent:** اگر Payment قبلاً `success` بود، دوباره پردازش نمی‌شود (`PaymentService::verify`).
+
+### 9.10 واحد پول
+
+| لایه | واحد |
+|------|------|
+| DB / Order / Cart | **تومان** |
+| ارسال به درگاه | ریال (×10) via `AmountConverter` |
+| config | `amount_unit`: `toman` یا `rial` |
+
+### 9.11 عیب‌یابی درگاه
+
+| مشکل | بررسی |
+|------|--------|
+| درگاه در checkout نیست | `enabled` در admin + `PaymentGatewayCatalog::isEnabled()` |
+| verify fail | `storage/logs/laravel.log`، sandbox vs merchant |
+| callback 419 | CSRF exempt؟ URL callback در admin درست؟ |
+| تارا redirect نمی‌شود | `TARA_CLIENT_IP`، sandbox URL |
+| split payment گیر کرد | `Order::remainingAmount()`، status payments |
+| آیکون نمی‌آید | `storage:link`، path در settings |
+
+### 9.12 افزودن درگاه جدید (recipe)
+
+1. کلاس جدید implements `PaymentGatewayInterface` در `app/Services/Payment/`
+2. ثبت در `config/payment.php` → `gateways.{name}`
+3. `PaymentGatewayCatalog::isEnabled()` — case جدید
+4. `SettingsService::{gateway}()` اگر admin لازم است
+5. Filament Page مثل `ManageZarinpal` (اختیاری)
+6. Route callback + CSRF exempt
+7. `CheckoutPage` / catalog — معمولاً خودکار از config
+8. Feature test
 
 ---
 
@@ -763,6 +924,270 @@ cursor/feature-name-fb08
 
 ---
 
+## 19. Variant، Attribute و موجودی
+
+### جریان محصول متغیر
+
+```
+Product
+  → AttributesRelationManager (ویژگی + is_variation)
+  → VariantGenerator::generate()  (ترکیب cartesian)
+  → VariantsRelationManager (قیمت، stock، SKU، تصویر)
+```
+
+| فایل | کار |
+|------|-----|
+| `AttributesRelationManager` | اتصال attribute به محصول |
+| `ValuesRelationManager` | مقادیر هر attribute |
+| `VariantsRelationManager` | CRUD variant |
+| `VariantGenerator` | ساخت خودکار variant از ترکیب attribute |
+| `StockService` | assert، reserve، decrement، release |
+| `ProductVariantMatrix` | helper matrix در frontend |
+| `Livewire/Product/VariantSelector.php` | انتخاب variant در صفحه محصول |
+
+### موجودی در سفارش
+
+1. `placeOrder()` → `StockService::reserve()` — `orders.stock_reserved = true`
+2. پرداخت موفق → `decrement()`
+3. لغo / expire → `release()`
+4. Migration: `stock_reserved` روی `orders`
+
+---
+
+## 20. کوپن تخفیف
+
+| فایل | کار |
+|------|-----|
+| `app/Models/Coupon.php` | code، type، amount، min_order، expires |
+| `app/Services/Checkout/CouponService.php` | validate، apply، record usage |
+| `app/Filament/Resources/CouponResource.php` | admin CRUD |
+| `CheckoutPage` | فیلد coupon + preview |
+
+**انواع:** درصد / مبلغ ثابت — متد `Coupon::calculateDiscount()`
+
+**Usage:** جدول `coupon_usages` — یک بار per user (بسته به rule)
+
+---
+
+## 21. روش ارسال (Shipping)
+
+| فایل | کار |
+|------|-----|
+| `app/Models/ShippingMethod.php` | name، price، icon، is_active |
+| `ShippingMethodResource` | admin + آپلود icon |
+| `ShopCacheService::shippingMethods()` | cache |
+| `ShippingMethodObserver` | invalidate |
+| `CheckoutPage` | انتخاب روش ارسال |
+
+**Migration icon:** `2026_08_16_215200_add_icon_to_shipping_methods_table.php`
+
+---
+
+## 22. سیستم Settings (DB)
+
+### جدول `settings`
+
+| column | مثال |
+|--------|------|
+| group | `zarinpal`, `tara`, `kavenegar`, `site` |
+| key | `merchant_id`, `enabled`, `icon` |
+| value | string |
+
+### SettingsService — `app/Services/Settings/SettingsService.php`
+
+```php
+$settings->get('zarinpal', 'merchant_id');
+$settings->set('zarinpal', 'enabled', true);
+$settings->zarinpal();  // merge DB + config
+$settings->tara();
+$settings->kavenegar();
+$settings->site();       // نام سایت، لوگو، ...
+```
+
+**Cache key:** `shop:settings:all` (TTL 3600)
+
+**Admin pages:**
+- `ManageGeneralSettings.php` — `/admin/manage-general-settings`
+- `ManageZarinpal.php` — `/admin/zarinpal`
+- `ManageTara.php` — `/admin/tara`
+- `ManageIntegrations.php` — legacy یکجا
+
+---
+
+## 23. محتوا، SEO، منو و اسلایدر
+
+### SEO
+
+| فایل | کار |
+|------|-----|
+| `app/Support/SeoPresenter.php` | meta، OG tags |
+| `app/Filament/Support/SeoFormSchema.php` | فیلدهای SEO در admin |
+| `resources/views/components/seo-meta.blade.php` | render |
+| `SitemapController` | `/sitemap.xml` |
+| `robots.txt` | route در `web.php` |
+
+**فیلدهای SEO:** `meta_title`, `meta_description`, `canonical`, ... روی Product، Category، Post، Page
+
+### CMS
+
+| موجودیت | Resource | Route |
+|---------|----------|-------|
+| Post (blog) | `PostResource` | `/blog/{slug}` |
+| Page | `PageResource` | `/pages/{slug}` |
+| HomeSlider | `HomeSliderResource` | home view |
+| MenuItem | `MenuItemResource` | header/nav cache |
+
+### MenuItem types
+
+`link`, `mega_trigger`, `mega_promo`, `accordion` — `MenuItemObserver` → cache nav
+
+### Rich content
+
+`RichContentEditor` + `public/shop/css/rich-content.css` — HTML محصول/بلاگ
+
+---
+
+## 24. مدیریت سفارش و پرداخت در ادمین
+
+### OrderResource
+
+| Page | URL | کار |
+|------|-----|-----|
+| List | `/admin/orders` | لیست + فیلتر |
+| View | `/admin/orders/{id}` | جزئیات، timeline، items |
+
+**View custom:** `resources/views/filament/orders/` — items table، notes
+
+### PaymentResource
+
+| Page | URL |
+|------|-----|
+| List | `/admin/payments` |
+| View | `/admin/payments/{id}` |
+
+### Activity timeline
+
+| Logger | Model | انواع note |
+|--------|-------|-----------|
+| `OrderActivityLogger` | `OrderNote` | system، private، customer |
+| `PaymentActivityLogger` | `PaymentNote` | status changes |
+
+**Backfill:** `php artisan shop:backfill-order-notes`
+
+### Widgets داشبورد
+
+| Widget | فایل |
+|--------|------|
+| آمار KPI | `ShopStatsOverview.php` |
+| نمودار سفارش | `OrdersTrendChart.php` |
+| نقشه | `OrdersMapWidget.php` + `IranCityCoordinates.php` |
+| آخرین سفارش‌ها | `LatestOrdersTable.php` |
+| موجودی کم | `LowStockProductsTable.php` |
+
+---
+
+## 25. Support، Middleware و Blade Components
+
+### Support — `app/Support/`
+
+| کلاس | کار |
+|------|-----|
+| `ShopMedia.php` | URL تصاویر/storage |
+| `ShopFormatter.php` | format عدد/پول |
+| `ShopLabels.php` | label وضعیت سفارش/پرداخت/درگاه |
+| `SeoPresenter.php` | SEO |
+| `ProductPlaceholder.php` | SVG placeholder تصویر |
+| `ProductSpecRows.php` | جدول مشخصات |
+| `ProductVariantMatrix.php` | variant matrix |
+| `IranCityCoordinates.php` | نقشه admin |
+
+### Middleware
+
+| فایل | کار |
+|------|-----|
+| `SetPersianLocale.php` | locale=fa |
+| `bootstrap/app.php` | trustProxies، CSRF except payment |
+
+### Blade Components — `resources/views/components/`
+
+| Component | کار |
+|-----------|-----|
+| `shop/product-card.blade.php` | کارت محصول |
+| `shop/deal-card.blade.php` | کارت تخفیف |
+| `checkout-option-icon.blade.php` | آیکون در checkout |
+| `seo-meta.blade.php` | meta tags |
+
+### Filament Support
+
+| کلاس | کار |
+|------|-----|
+| `FileUploadSanitizer.php` | fix آپلود invalid قبل validation |
+| `AdminImageColumn.php` | ستون تصویر |
+| `PriceRangeFilter.php` | فیلتر قیمت admin |
+| `ShopIconUpload.php` | آپلود icon |
+
+---
+
+## 26. فهرست کامل تست‌ها
+
+| فایل | پوشش |
+|------|------|
+| `CheckoutAndPaymentLaunchTest.php` | checkout کامل + زرین‌پال |
+| `TaraSplitPaymentTest.php` | پرداخت ترکیبی تارا + refund |
+| `CheckoutPageTest.php` | layout checkout، icon درگاه/ارسال |
+| `ShopLivewireTest.php` | OTP، cart، add-to-cart |
+| `ShopAuthSecurityTest.php` | admin نتواند shop login |
+| `SeoRoutesTest.php` | slug routes، sitemap، redirect |
+| `LivewireFileUploadControllerTest.php` | آپلود temp |
+| `TemporaryUploadedFileOverrideTest.php` | override Livewire |
+| `FileUploadSanitizerTest.php` | sanitizer |
+| `LivewireUploadFilenameTest.php` | نام فایل کوتاه |
+| `ShopMediaTest.php` | URL media |
+
+```bash
+php artisan test                    # همه
+php artisan test --filter=Tara      # تارا
+php artisan test --filter=Checkout  # checkout
+```
+
+---
+
+## 27. چک‌لیست پوشش راهنما
+
+| موضوع | بخش |
+|-------|-----|
+| شروع پروژه | §1 |
+| ساختار پوشه‌ها | §2 |
+| Routes فروشگاه | §4 |
+| Livewire components | §4.3 |
+| Filament admin + Resources | §5 |
+| Models + migrations | §6 |
+| Services layer | §7 |
+| سبد و checkout | §8 |
+| **زرین‌پال (کامل)** | §9.3 |
+| **تارا (کامل)** | §9.4 |
+| **پرداخت ترکیبی** | §9.5 |
+| **آیکون درگاه** | §9.7 |
+| **Admin درگاه‌ها** | §9.8 |
+| OTP و auth | §10 |
+| Cache + Redis | §11 |
+| آپلود + Runflare `/data` | §12 |
+| SMS + Kavenegar | §13 |
+| .env کامل | §14 |
+| Deploy + cron + queue | §15 |
+| Troubleshooting | §16 |
+| Recipes feature جدید | §17 |
+| **Variant + stock** | §19 |
+| **کوپن** | §20 |
+| **Shipping** | §21 |
+| **Settings DB** | §22 |
+| **SEO + CMS + Menu** | §23 |
+| **Order/Payment admin** | §24 |
+| Support helpers | §25 |
+| Tests | §26 |
+
+---
+
 ## پیوست: فایل‌های کلیدی (Quick Reference)
 
 ```
@@ -792,5 +1217,6 @@ resources/views/layouts/shop.blade.php
 | تاریخ | توضیح |
 |-------|--------|
 | 2026-08-23 | نسخه اول — راهنمای جامع offline |
+| 2026-08-23 | نسخه 1.1 — تکمیل درگاه‌ها، variant، coupon، settings، SEO، tests |
 
 > اگر بخش جدیدی به پروژه اضافه شد، همین فایل را در `docs/DEVELOPER_GUIDE.md` به‌روز کنید.

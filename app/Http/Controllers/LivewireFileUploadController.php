@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Support\LivewireUploadFilename;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -15,7 +17,7 @@ class LivewireFileUploadController extends BaseFileUploadController
     public function handle()
     {
         Log::info('livewire.upload.request', [
-            'disk' => request()->input('disk'),
+            'disk' => FileUploadConfiguration::disk(),
             'file_keys' => array_keys(request()->allFiles()),
             'host' => request()->getHost(),
             'scheme' => request()->getScheme(),
@@ -25,7 +27,7 @@ class LivewireFileUploadController extends BaseFileUploadController
             $response = parent::handle();
 
             Log::info('livewire.upload.response', [
-                'status' => $response->getStatusCode(),
+                'paths' => is_array($response) ? count($response['paths'] ?? []) : null,
             ]);
 
             return $response;
@@ -41,18 +43,46 @@ class LivewireFileUploadController extends BaseFileUploadController
 
     public function validateAndStore($files, $disk)
     {
+        $files = Arr::wrap($files);
+
         Validator::make(['files' => $files], [
             'files.*' => FileUploadConfiguration::rules(),
         ])->validate();
 
-        $directory = trim(FileUploadConfiguration::directory(), '/');
+        $storePath = trim(FileUploadConfiguration::path(), '/');
 
-        $fileHashPaths = collect($files)->map(function ($file) use ($disk, $directory) {
+        $fileHashPaths = collect($files)->map(function (UploadedFile $file) use ($disk, $storePath) {
+            if (! $file->isValid()) {
+                Log::error('livewire.upload.invalid_php_upload', [
+                    'error' => $file->getErrorMessage(),
+                    'error_code' => $file->getError(),
+                    'pathname' => $file->getPathname(),
+                ]);
+
+                throw ValidationException::withMessages([
+                    'files' => 'فایل به سرور نرسید. دوباره انتخاب کنید. اگر تکرار شد، upload_tmp_dir سرور را بررسی کنید.',
+                ]);
+            }
+
             $filename = LivewireUploadFilename::generate($file);
 
-            $storedPath = $file->storeAs($directory, $filename, [
+            $storedPath = $file->storeAs($storePath, $filename, [
                 'disk' => $disk,
             ]);
+
+            if (! is_string($storedPath) || $storedPath === '') {
+                Log::error('livewire.upload.store_failed', [
+                    'disk' => $disk,
+                    'store_path' => $storePath,
+                    'filename' => $filename,
+                    'pathname' => $file->getPathname(),
+                    'size' => $file->getSize(),
+                ]);
+
+                throw ValidationException::withMessages([
+                    'files' => 'فایل روی دیسک ذخیره نشد. دسترسی پوشه livewire-tmp را بررسی کنید.',
+                ]);
+            }
 
             if (! Storage::disk($disk)->exists($storedPath)) {
                 Log::error('livewire.upload.missing_after_store', [
@@ -76,8 +106,8 @@ class LivewireFileUploadController extends BaseFileUploadController
             return $storedPath;
         });
 
-        return $fileHashPaths->map(function ($path) use ($directory) {
-            $prefix = $directory.'/';
+        return $fileHashPaths->map(function (string $path) use ($storePath) {
+            $prefix = $storePath.'/';
 
             return str_starts_with($path, $prefix)
                 ? substr($path, strlen($prefix))

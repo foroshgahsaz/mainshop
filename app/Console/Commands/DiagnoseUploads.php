@@ -106,6 +106,9 @@ class DiagnoseUploads extends Command
 
         $this->newLine();
         $this->line('PHP limits:');
+        $uploadTmpDir = ini_get('upload_tmp_dir') ?: sys_get_temp_dir();
+        $this->line('  upload_tmp_dir: '.$uploadTmpDir);
+        $this->line('  upload_tmp writable: '.(is_writable($uploadTmpDir) ? 'OK' : 'FAIL'));
         $this->line('  upload_max_filesize: '.ini_get('upload_max_filesize'));
         $this->line('  post_max_size: '.ini_get('post_max_size'));
         $this->line('  max_file_uploads: '.ini_get('max_file_uploads'));

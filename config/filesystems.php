@@ -58,7 +58,7 @@ return [
                 rtrim(env('FILESYSTEM_PUBLIC_URL', rtrim(env('APP_URL', 'http://localhost'), '/').'/storage'), '/').'/livewire-tmp'
             ),
             'visibility' => 'public',
-            'throw' => false,
+            'throw' => true,
             'report' => false,
         ],
 

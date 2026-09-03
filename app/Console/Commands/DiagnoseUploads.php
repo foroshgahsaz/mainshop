@@ -134,6 +134,7 @@ class DiagnoseUploads extends Command
 
         $this->newLine();
         $this->comment('Runflare: FILESYSTEM_PUBLIC_ROOT and LIVEWIRE_TEMP_ROOT must be on the same persistent volume (e.g. /data).');
+        $this->comment('After each deploy run: php artisan shop:fix-storage-permissions (as root in deploy hook).');
         $this->comment('Image URLs must use Storage::disk(\'public\')->url() — not hardcoded /storage paths.');
         $this->comment('If upload shows "انتخاب تصویر الزامی است" after selecting a file: wait for upload progress to finish, then save.');
         $this->comment('Check browser Network tab for POST /livewire/upload-file (419/413/500 = config or proxy issue).');

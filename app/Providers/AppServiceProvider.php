@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Support\StoragePermissionFixer;
 use App\Contracts\SmsSender;
 use App\Filament\Support\CrudSuccessNotification;
 use App\Filament\Support\FileUploadSanitizer;
@@ -31,15 +30,18 @@ use App\Policies\OrderPolicy;
 use App\Policies\PaymentPolicy;
 use App\Policies\UserAddressPolicy;
 use App\Services\Cache\ShopCacheService;
+use App\Services\Media\ImageOptimizer;
 use App\Services\Settings\SettingsService;
 use App\Services\Sms\KavenegarSmsSender;
 use App\Services\Sms\LogSmsSender;
+use App\Support\StoragePermissionFixer;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\ViewAction;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -239,13 +241,13 @@ class AppServiceProvider extends ServiceProvider
                             ]);
                         }
 
-                        return $path;
+                        return app(ImageOptimizer::class)->optimize($disk, $path, $relativeDirectory);
                     });
             });
         }
     }
 
-    protected static function sanitizeMountedActionUploads(object $action, ?\Illuminate\Database\Eloquent\Model $record = null): void
+    protected static function sanitizeMountedActionUploads(object $action, ?Model $record = null): void
     {
         $livewire = $action->getLivewire();
 

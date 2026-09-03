@@ -73,12 +73,14 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        if ($this->app->environment('production')) {
+        $forceHttps = $this->shouldForceHttps();
+
+        if ($forceHttps) {
             URL::forceScheme('https');
         }
 
         if (! $this->app->runningInConsole() && request()->hasHeader('Host')) {
-            $scheme = $this->app->environment('production') || request()->isSecure()
+            $scheme = $forceHttps || request()->isSecure()
                 ? 'https'
                 : request()->getScheme();
 
@@ -232,5 +234,14 @@ class AppServiceProvider extends ServiceProvider
         }
 
         FileUploadSanitizer::sanitize($livewire, $form, $record);
+    }
+
+    protected function shouldForceHttps(): bool
+    {
+        if ($this->app->environment('production')) {
+            return true;
+        }
+
+        return str_starts_with((string) config('app.url'), 'https://');
     }
 }

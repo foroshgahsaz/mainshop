@@ -74,11 +74,15 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         if ($this->app->environment('production')) {
-            URL::forceHttps();
+            URL::forceScheme('https');
         }
 
         if (! $this->app->runningInConsole() && request()->hasHeader('Host')) {
-            URL::forceRootUrl(rtrim(request()->root(), '/'));
+            $scheme = $this->app->environment('production') || request()->isSecure()
+                ? 'https'
+                : request()->getScheme();
+
+            URL::forceRootUrl($scheme.'://'.request()->getHttpHost());
         }
 
         Storage::disk('public')->makeDirectory('products');

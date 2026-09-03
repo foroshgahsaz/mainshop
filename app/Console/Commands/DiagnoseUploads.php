@@ -63,13 +63,17 @@ class DiagnoseUploads extends Command
         $this->line('  CACHE_STORE: '.config('cache.default'));
         $this->line('  APP_URL: '.config('app.url'));
 
+        if (config('session.driver') === 'database') {
+            $this->line('  Session note: database driver is OK for multi-pod when DB is shared.');
+        }
+
         try {
             \Illuminate\Support\Facades\Redis::connection()->ping();
             $this->line('  Redis: OK');
         } catch (\Throwable $exception) {
-            $this->warn('  Redis: FAIL — '.$exception->getMessage());
-            if (config('session.driver') !== 'redis') {
-                $this->warn('  For multi-pod Runflare set SESSION_DRIVER=redis so Livewire upload state survives between requests.');
+            $this->line('  Redis: not available ('.$exception->getMessage().')');
+            if (config('session.driver') === 'file') {
+                $this->warn('  SESSION_DRIVER=file breaks Livewire uploads on multi-pod. Use database or redis.');
             }
         }
 
@@ -84,7 +88,9 @@ class DiagnoseUploads extends Command
         $this->newLine();
         $this->comment('Runflare: FILESYSTEM_PUBLIC_ROOT and LIVEWIRE_TEMP_ROOT must be on the same persistent volume (e.g. /data).');
         $this->comment('Image URLs must use Storage::disk(\'public\')->url() — not hardcoded /storage paths.');
-        $this->comment('If upload shows "انتخاب تصویر الزامی است" after selecting a file: wait for upload progress to finish, then save. On multi-pod use SESSION_DRIVER=redis.');
+        $this->comment('If upload shows "انتخاب تصویر الزامی است" after selecting a file: wait for upload progress to finish, then save.');
+        $this->comment('Check browser Network tab for POST /livewire/upload-file (419/413/500 = config or proxy issue).');
+        $this->comment('Behind Runflare/custom domain, APP_URL must be https://your-domain and assets must not load over http.');
 
         return self::SUCCESS;
     }

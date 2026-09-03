@@ -49,7 +49,7 @@ class LivewireFileUploadController extends BaseFileUploadController
             'files.*' => FileUploadConfiguration::rules(),
         ])->validate();
 
-        $storePath = trim(FileUploadConfiguration::path(), '/');
+        $storePath = trim(FileUploadConfiguration::directory(), '/');
 
         $fileHashPaths = collect($files)->map(function (UploadedFile $file) use ($disk, $storePath) {
             if (! $file->isValid()) {
@@ -65,36 +65,7 @@ class LivewireFileUploadController extends BaseFileUploadController
             }
 
             $filename = LivewireUploadFilename::generate($file);
-
-            $storedPath = $file->storeAs($storePath, $filename, [
-                'disk' => $disk,
-            ]);
-
-            if (! is_string($storedPath) || $storedPath === '') {
-                Log::error('livewire.upload.store_failed', [
-                    'disk' => $disk,
-                    'store_path' => $storePath,
-                    'filename' => $filename,
-                    'pathname' => $file->getPathname(),
-                    'size' => $file->getSize(),
-                ]);
-
-                throw ValidationException::withMessages([
-                    'files' => 'فایل روی دیسک ذخیره نشد. دسترسی پوشه livewire-tmp را بررسی کنید.',
-                ]);
-            }
-
-            if (! Storage::disk($disk)->exists($storedPath)) {
-                Log::error('livewire.upload.missing_after_store', [
-                    'disk' => $disk,
-                    'path' => $storedPath,
-                    'absolute' => Storage::disk($disk)->path($storedPath),
-                ]);
-
-                throw ValidationException::withMessages([
-                    'files' => 'فایل آپلود نشد. لطفاً دوباره تلاش کنید.',
-                ]);
-            }
+            $storedPath = $this->storeTempUpload($file, $disk, $storePath, $filename);
 
             Log::info('livewire.upload.stored', [
                 'disk' => $disk,
@@ -113,5 +84,66 @@ class LivewireFileUploadController extends BaseFileUploadController
                 ? substr($path, strlen($prefix))
                 : $path;
         });
+    }
+
+    protected function storeTempUpload(UploadedFile $file, string $disk, string $storePath, string $filename): string
+    {
+        $storage = Storage::disk($disk);
+        $absoluteDir = $storage->path($storePath);
+
+        if (! is_dir($absoluteDir)) {
+            $storage->makeDirectory($storePath);
+        }
+
+        if (! is_writable($absoluteDir)) {
+            Log::error('livewire.upload.dir_not_writable', [
+                'disk' => $disk,
+                'absolute' => $absoluteDir,
+                'perms' => is_dir($absoluteDir) ? substr(sprintf('%o', fileperms($absoluteDir)), -4) : null,
+            ]);
+
+            throw ValidationException::withMessages([
+                'files' => 'پوشه آپلود قابل نوشتن نیست. روی سرور اجرا کنید: php artisan shop:fix-storage-permissions',
+            ]);
+        }
+
+        $relativePath = trim($storePath.'/'.$filename, '/');
+
+        $storedPath = $file->storeAs($storePath, $filename, ['disk' => $disk]);
+
+        if (is_string($storedPath) && $storedPath !== '' && $storage->exists($storedPath)) {
+            return $storedPath;
+        }
+
+        $stream = fopen($file->getRealPath(), 'r');
+
+        if ($stream === false) {
+            throw ValidationException::withMessages([
+                'files' => 'خواندن فایل آپلودشده ممکن نشد. دوباره انتخاب کنید.',
+            ]);
+        }
+
+        try {
+            $written = $storage->writeStream($relativePath, $stream);
+        } finally {
+            fclose($stream);
+        }
+
+        if ($written !== true || ! $storage->exists($relativePath)) {
+            Log::error('livewire.upload.store_failed', [
+                'disk' => $disk,
+                'store_path' => $storePath,
+                'relative_path' => $relativePath,
+                'absolute' => $storage->path($relativePath),
+                'pathname' => $file->getPathname(),
+                'size' => $file->getSize(),
+            ]);
+
+            throw ValidationException::withMessages([
+                'files' => 'فایل روی دیسک ذخیره نشد. دستور php artisan shop:fix-storage-permissions را روی سرور اجرا کنید.',
+            ]);
+        }
+
+        return $relativePath;
     }
 }

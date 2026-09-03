@@ -88,8 +88,13 @@ class AppServiceProvider extends ServiceProvider
             URL::forceRootUrl($scheme.'://'.request()->getHttpHost());
         }
 
-        Storage::disk('public')->makeDirectory('products');
-        $this->ensureWritableDirectory(Storage::disk('public')->path('products'));
+        $productsPath = Storage::disk('public')->path('products');
+
+        if (! is_dir($productsPath)) {
+            Storage::disk('public')->makeDirectory('products');
+        }
+
+        $this->ensureWritableDirectory($productsPath);
 
         $tempDisk = config('livewire.temporary_file_upload.disk', 'livewire-tmp');
         $tempDirectory = config('livewire.temporary_file_upload.directory', 'livewire-tmp');

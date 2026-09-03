@@ -93,8 +93,13 @@ class AppServiceProvider extends ServiceProvider
 
         $tempDisk = config('livewire.temporary_file_upload.disk', 'livewire-tmp');
         $tempDirectory = config('livewire.temporary_file_upload.directory', 'livewire-tmp');
-        Storage::disk($tempDisk)->makeDirectory($tempDirectory);
-        $this->ensureWritableDirectory(Storage::disk($tempDisk)->path($tempDirectory));
+        $tempDirectoryPath = Storage::disk($tempDisk)->path($tempDirectory);
+
+        if (! is_dir($tempDirectoryPath)) {
+            Storage::disk($tempDisk)->makeDirectory($tempDirectory);
+        }
+
+        $this->ensureWritableDirectory($tempDirectoryPath);
 
         Product::observe(ProductObserver::class);
         ProductImage::observe(ProductImageObserver::class);

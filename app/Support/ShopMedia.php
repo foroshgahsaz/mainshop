@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use Illuminate\Support\Facades\Storage;
+
 class ShopMedia
 {
     public static function url(?string $path): ?string
@@ -18,6 +20,6 @@ class ShopMedia
             return $path;
         }
 
-        return asset('storage/'.$path);
+        return Storage::disk('public')->url(ltrim($path, '/'));
     }
 }

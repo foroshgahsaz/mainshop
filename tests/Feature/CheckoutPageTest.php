@@ -11,6 +11,7 @@ use App\Models\UserAddress;
 use App\Services\Cart\CartService;
 use App\Services\Payment\PaymentGatewayCatalog;
 use App\Services\Settings\SettingsService;
+use App\Support\ShopMedia;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -57,8 +58,8 @@ class CheckoutPageTest extends TestCase
 
         Livewire::actingAs($user)
             ->test(CheckoutPage::class)
-            ->assertSee(asset('storage/shipping-icons/post.png'), false)
-            ->assertSee(asset('storage/gateway-icons/zarinpal.png'), false)
+            ->assertSee(ShopMedia::url('shipping-icons/post.png'), false)
+            ->assertSee(ShopMedia::url('gateway-icons/zarinpal.png'), false)
             ->assertSee('آدرس تحویل')
             ->assertSee('نحوه ارسال')
             ->assertSee('کد تخفیف')
@@ -72,7 +73,7 @@ class CheckoutPageTest extends TestCase
 
         $catalog = app(PaymentGatewayCatalog::class);
 
-        $this->assertSame(asset('storage/gateway-icons/tara.png'), $catalog->definition('tara')['icon']);
+        $this->assertSame(ShopMedia::url('gateway-icons/tara.png'), $catalog->definition('tara')['icon']);
         $this->assertNull($catalog->definition('zarinpal')['icon']);
     }
 

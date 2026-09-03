@@ -50,7 +50,16 @@ class DiagnoseUploads extends Command
         }
 
         $this->newLine();
+        $this->line('Sample public URL:');
+        $this->line('  '.Storage::disk('public')->url('products/example.jpg'));
+
+        $symlink = public_path('storage');
+        $this->newLine();
+        $this->line('public/storage symlink: '.(is_link($symlink) ? 'OK → '.readlink($symlink) : (is_dir($symlink) ? 'directory (not symlink)' : 'missing (OK on Runflare /data)')));
+
+        $this->newLine();
         $this->comment('Runflare: FILESYSTEM_PUBLIC_ROOT and LIVEWIRE_TEMP_ROOT must be on the same persistent volume (e.g. /data).');
+        $this->comment('Image URLs must use Storage::disk(\'public\')->url() — not hardcoded /storage paths.');
 
         return self::SUCCESS;
     }

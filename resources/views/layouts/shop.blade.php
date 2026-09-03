@@ -20,7 +20,7 @@
     @endif
     @stack('meta')
     @if (! empty($siteSettings['favicon']))
-        <link rel="icon" href="{{ asset('storage/'.$siteSettings['favicon']) }}">
+        <link rel="icon" href="{{ \App\Support\ShopMedia::url($siteSettings['favicon']) }}">
     @endif
     <link rel="preload" href="{{ asset('fonts/yekan/fonts.css') }}" as="style">
     <link rel="stylesheet" href="{{ asset('fonts/yekan/fonts.css') }}">

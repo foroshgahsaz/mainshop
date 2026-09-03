@@ -86,6 +86,31 @@ class DiagnoseUploads extends Command
         $this->line('  livewire temp files on disk: '.$tempFiles);
 
         $this->newLine();
+        $this->line('PHP limits:');
+        $this->line('  upload_max_filesize: '.ini_get('upload_max_filesize'));
+        $this->line('  post_max_size: '.ini_get('post_max_size'));
+        $this->line('  max_file_uploads: '.ini_get('max_file_uploads'));
+
+        $this->newLine();
+        $this->line('Recent upload log lines:');
+        $logPath = storage_path('logs/laravel.log');
+        if (is_file($logPath)) {
+            $lines = collect(file($logPath, FILE_IGNORE_NEW_LINES))
+                ->filter(fn (string $line) => str_contains($line, 'livewire.upload'))
+                ->take(-5)
+                ->values();
+            if ($lines->isEmpty()) {
+                $this->line('  (none yet — try an admin upload, then rerun this command)');
+            } else {
+                foreach ($lines as $line) {
+                    $this->line('  '.$line);
+                }
+            }
+        } else {
+            $this->line('  log file not found');
+        }
+
+        $this->newLine();
         $this->comment('Runflare: FILESYSTEM_PUBLIC_ROOT and LIVEWIRE_TEMP_ROOT must be on the same persistent volume (e.g. /data).');
         $this->comment('Image URLs must use Storage::disk(\'public\')->url() — not hardcoded /storage paths.');
         $this->comment('If upload shows "انتخاب تصویر الزامی است" after selecting a file: wait for upload progress to finish, then save.');

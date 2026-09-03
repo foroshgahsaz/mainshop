@@ -30,4 +30,19 @@ class LivewireFileUploadControllerTest extends TestCase
         $this->assertLessThanOrEqual(LivewireUploadFilename::MAX_FILENAME_LENGTH, strlen($storedName));
         Storage::disk('public')->assertExists(FileUploadConfiguration::path($storedName));
     }
+
+    public function test_it_stores_temp_upload_on_livewire_tmp_disk(): void
+    {
+        Storage::fake('livewire-tmp');
+
+        $file = UploadedFile::fake()->image('product.jpg');
+        $controller = app(LivewireFileUploadController::class);
+
+        $paths = $controller->validateAndStore([$file], 'livewire-tmp');
+
+        $this->assertCount(1, $paths);
+        Storage::disk('livewire-tmp')->assertExists(
+            FileUploadConfiguration::directory().'/'.$paths->first()
+        );
+    }
 }

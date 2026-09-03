@@ -62,6 +62,21 @@ class DiagnoseUploads extends Command
         $this->line('  SESSION_DRIVER: '.config('session.driver'));
         $this->line('  CACHE_STORE: '.config('cache.default'));
         $this->line('  APP_URL: '.config('app.url'));
+        $this->line('  APP_ENV: '.config('app.env'));
+        $this->line('  APP_DEBUG: '.(config('app.debug') ? 'true' : 'false'));
+
+        if (config('app.env') !== 'production') {
+            $this->warn('  Set APP_ENV=production on Runflare.');
+        }
+
+        if (config('app.debug')) {
+            $this->warn('  Set APP_DEBUG=false on Runflare.');
+        }
+
+        if (str_starts_with((string) config('app.url'), 'https://')
+            && ! str_starts_with((string) config('filesystems.disks.public.url'), 'https://'.parse_url((string) config('app.url'), PHP_URL_HOST))) {
+            $this->warn('  FILESYSTEM_PUBLIC_URL should use the same domain as APP_URL (e.g. https://sarayechini.ir/data).');
+        }
 
         if (config('session.driver') === 'database') {
             $this->line('  Session note: database driver is OK for multi-pod when DB is shared.');

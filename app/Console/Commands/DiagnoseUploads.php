@@ -38,6 +38,8 @@ class DiagnoseUploads extends Command
         $this->line('Writable checks:');
         $this->line('  public/products: '.($this->checkWritable($publicDisk, 'products') ? 'OK' : 'FAIL'));
         $this->line('  livewire temp: '.($this->checkWritable($tempDisk, $tempDirectory) ? 'OK' : 'FAIL'));
+        $this->describeDirectoryPermissions($tempDisk->path($tempDirectory), 'livewire temp');
+        $this->describeDirectoryPermissions($publicDisk->path('products'), 'public/products');
 
         $testFile = $tempDirectory.'/diagnose-'.uniqid('', true).'.txt';
         try {
@@ -64,6 +66,8 @@ class DiagnoseUploads extends Command
         $this->line('  APP_URL: '.config('app.url'));
         $this->line('  APP_ENV: '.config('app.env'));
         $this->line('  APP_DEBUG: '.(config('app.debug') ? 'true' : 'false'));
+        $this->line('  SESSION_SECURE_COOKIE: '.(config('session.secure') ? 'true' : 'false'));
+        $this->line('  livewire upload URL: '.url('/livewire/upload-file'));
 
         if (config('app.env') !== 'production') {
             $this->warn('  Set APP_ENV=production on Runflare.');
@@ -130,6 +134,8 @@ class DiagnoseUploads extends Command
         $this->comment('Image URLs must use Storage::disk(\'public\')->url() — not hardcoded /storage paths.');
         $this->comment('If upload shows "انتخاب تصویر الزامی است" after selecting a file: wait for upload progress to finish, then save.');
         $this->comment('Check browser Network tab for POST /livewire/upload-file (419/413/500 = config or proxy issue).');
+        $this->comment('If diagnose shows writable OK but uploads fail: artisan runs as root; PHP-FPM may be www-data. Run: chown -R www-data:www-data /data/livewire-tmp /data/products');
+        $this->comment('After deploy, grep livewire.upload.incoming in laravel.log — if missing, the browser never reached Laravel.');
         $this->comment('Behind Runflare/custom domain, APP_URL must be https://your-domain and assets must not load over http.');
 
         return self::SUCCESS;
@@ -150,6 +156,32 @@ class DiagnoseUploads extends Command
             return is_writable($disk->path($path));
         } catch (\Throwable) {
             return false;
+        }
+    }
+
+    protected function describeDirectoryPermissions(string $path, string $label): void
+    {
+        if (! is_dir($path)) {
+            $this->line("  {$label} permissions: directory missing");
+
+            return;
+        }
+
+        $perms = substr(sprintf('%o', fileperms($path)), -4);
+        $owner = function_exists('posix_getpwuid')
+            ? (posix_getpwuid(fileowner($path))['name'] ?? (string) fileowner($path))
+            : (string) fileowner($path);
+        $group = function_exists('posix_getgrgid')
+            ? (posix_getgrgid(filegroup($path))['name'] ?? (string) filegroup($path))
+            : (string) filegroup($path);
+        $phpUser = function_exists('posix_getpwuid')
+            ? (posix_getpwuid(posix_geteuid())['name'] ?? get_current_user())
+            : get_current_user();
+
+        $this->line("  {$label} permissions: {$perms} owner={$owner} group={$group} (running as {$phpUser})");
+
+        if (! is_writable($path)) {
+            $this->warn("  {$label} is NOT writable by {$phpUser}. Fix: chown -R www-data:www-data {$path}");
         }
     }
 }

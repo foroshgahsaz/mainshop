@@ -67,7 +67,10 @@ return [
         'disk' => env('LIVEWIRE_TEMP_DISK', 'livewire-tmp'),
         'rules' => ['required', 'file', 'max:51200'],
         'directory' => 'livewire-tmp',
-        'middleware' => null,
+        'middleware' => [
+            'web',
+            \App\Http\Middleware\LogLivewireUpload::class,
+        ],
         'preview_mimes' => [
             'png', 'gif', 'bmp', 'svg', 'wav', 'mp4',
             'mov', 'avi', 'wmv', 'mp3', 'm4a',

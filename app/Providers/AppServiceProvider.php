@@ -77,6 +77,7 @@ class AppServiceProvider extends ServiceProvider
 
         if ($forceHttps) {
             URL::forceScheme('https');
+            config(['session.secure' => true]);
         }
 
         if (! $this->app->runningInConsole() && request()->hasHeader('Host')) {
@@ -88,10 +89,12 @@ class AppServiceProvider extends ServiceProvider
         }
 
         Storage::disk('public')->makeDirectory('products');
+        $this->ensureWritableDirectory(Storage::disk('public')->path('products'));
 
         $tempDisk = config('livewire.temporary_file_upload.disk', 'livewire-tmp');
         $tempDirectory = config('livewire.temporary_file_upload.directory', 'livewire-tmp');
         Storage::disk($tempDisk)->makeDirectory($tempDirectory);
+        $this->ensureWritableDirectory(Storage::disk($tempDisk)->path($tempDirectory));
 
         Product::observe(ProductObserver::class);
         ProductImage::observe(ProductImageObserver::class);
@@ -243,5 +246,18 @@ class AppServiceProvider extends ServiceProvider
         }
 
         return str_starts_with((string) config('app.url'), 'https://');
+    }
+
+    protected function ensureWritableDirectory(string $path): void
+    {
+        if (! is_dir($path) || is_writable($path)) {
+            return;
+        }
+
+        @chmod($path, 0775);
+
+        if (! is_writable($path)) {
+            @chmod($path, 0777);
+        }
     }
 }

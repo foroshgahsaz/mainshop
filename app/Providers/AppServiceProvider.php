@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Support\StoragePermissionFixer;
 use App\Contracts\SmsSender;
 use App\Filament\Support\CrudSuccessNotification;
 use App\Filament\Support\FileUploadSanitizer;
@@ -73,6 +74,10 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if ($this->app->runningInConsole() && StoragePermissionFixer::runningAsRoot()) {
+            StoragePermissionFixer::fix();
+        }
+
         $forceHttps = $this->shouldForceHttps();
 
         if ($forceHttps) {

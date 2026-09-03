@@ -57,7 +57,8 @@
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi",
             "@php artisan filament:upgrade",
-            "@php artisan view:clear --ansi"
+            "@php artisan view:clear --ansi",
+            "@php artisan shop:fix-storage-permissions --ansi"
         ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force"

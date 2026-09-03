@@ -6,6 +6,7 @@ use Filament\Forms\Components\BaseFileUpload;
 use Filament\Forms\Form;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
@@ -35,7 +36,11 @@ class FileUploadSanitizer
             data_set(
                 $livewire,
                 $statePath,
-                self::sanitizeState($state, is_string($fallback) ? $fallback : null),
+                self::sanitizeState(
+                    $state,
+                    is_string($fallback) ? $fallback : null,
+                    $statePath,
+                ),
             );
         }
     }
@@ -44,11 +49,19 @@ class FileUploadSanitizer
      * @param  array<string, TemporaryUploadedFile|string>  $state
      * @return array<string, TemporaryUploadedFile|string>
      */
-    public static function sanitizeState(array $state, ?string $fallbackPath = null): array
+    public static function sanitizeState(array $state, ?string $fallbackPath = null, ?string $statePath = null): array
     {
-        $cleaned = collect($state)->filter(function (TemporaryUploadedFile|string $file): bool {
+        $hadInvalidTemp = false;
+
+        $cleaned = collect($state)->filter(function (TemporaryUploadedFile|string $file) use (&$hadInvalidTemp): bool {
             if ($file instanceof TemporaryUploadedFile) {
-                return $file->isValid();
+                if ($file->isValid()) {
+                    return true;
+                }
+
+                $hadInvalidTemp = true;
+
+                return false;
             }
 
             return filled($file);
@@ -56,6 +69,12 @@ class FileUploadSanitizer
 
         if ($cleaned->isNotEmpty()) {
             return $cleaned->all();
+        }
+
+        if ($hadInvalidTemp && blank($fallbackPath)) {
+            throw ValidationException::withMessages([
+                $statePath ?? 'file' => 'آپلود تصویر کامل نشد یا فایل موقت روی سرور پیدا نشد. تا پایان آپلود صبر کنید و دوباره انتخاب کنید. اگر چند سرور دارید، SESSION_DRIVER=redis را فعال کنید.',
+            ]);
         }
 
         if (filled($fallbackPath)) {

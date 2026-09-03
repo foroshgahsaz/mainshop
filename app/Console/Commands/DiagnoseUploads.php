@@ -58,8 +58,33 @@ class DiagnoseUploads extends Command
         $this->line('public/storage symlink: '.(is_link($symlink) ? 'OK → '.readlink($symlink) : (is_dir($symlink) ? 'directory (not symlink)' : 'missing (OK on Runflare /data)')));
 
         $this->newLine();
+        $this->line('Session / multi-pod:');
+        $this->line('  SESSION_DRIVER: '.config('session.driver'));
+        $this->line('  CACHE_STORE: '.config('cache.default'));
+        $this->line('  APP_URL: '.config('app.url'));
+
+        try {
+            \Illuminate\Support\Facades\Redis::connection()->ping();
+            $this->line('  Redis: OK');
+        } catch (\Throwable $exception) {
+            $this->warn('  Redis: FAIL — '.$exception->getMessage());
+            if (config('session.driver') !== 'redis') {
+                $this->warn('  For multi-pod Runflare set SESSION_DRIVER=redis so Livewire upload state survives between requests.');
+            }
+        }
+
+        $tempFiles = 0;
+        try {
+            $tempFiles = count($tempDisk->files($tempDirectory));
+        } catch (\Throwable) {
+            // ignore
+        }
+        $this->line('  livewire temp files on disk: '.$tempFiles);
+
+        $this->newLine();
         $this->comment('Runflare: FILESYSTEM_PUBLIC_ROOT and LIVEWIRE_TEMP_ROOT must be on the same persistent volume (e.g. /data).');
         $this->comment('Image URLs must use Storage::disk(\'public\')->url() — not hardcoded /storage paths.');
+        $this->comment('If upload shows "انتخاب تصویر الزامی است" after selecting a file: wait for upload progress to finish, then save. On multi-pod use SESSION_DRIVER=redis.');
 
         return self::SUCCESS;
     }

@@ -29,4 +29,15 @@ class FileUploadSanitizerTest extends TestCase
 
         $this->assertSame(['abc' => 'products/existing.jpg'], $sanitized);
     }
+
+    public function test_it_throws_when_temp_upload_is_invalid_and_no_fallback_exists(): void
+    {
+        $invalid = TemporaryUploadedFile::createFromLivewire('livewire-tmp');
+
+        $this->expectException(\Illuminate\Validation\ValidationException::class);
+
+        FileUploadSanitizer::sanitizeState([
+            (string) Str::uuid() => $invalid,
+        ], null, 'mountedTableActionsData.0.image');
+    }
 }

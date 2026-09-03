@@ -31,6 +31,7 @@ class ImagesRelationManager extends RelationManager
                 ->maxSize(51200)
                 ->imagePreviewHeight('150')
                 ->required(fn (string $operation): bool => $operation === 'create')
+                ->helperText('تا پایان آپلود (نوار پیشرفت) صبر کنید، بعد ذخیره کنید. حداکثر ۵۰ مگابایت.')
                 ->validationMessages([
                     'required' => 'انتخاب تصویر الزامی است.',
                     'uploaded' => 'فایل آپلود نشد. دوباره انتخاب کنید و تا پایان آپلود صبر کنید.',

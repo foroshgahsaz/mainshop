@@ -40,7 +40,6 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\ViewAction;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -191,13 +190,33 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole() || request()->is('admin', 'admin/*')) {
             FileUpload::configureUsing(function (FileUpload $component): void {
                 $component
-                    ->fetchFileInformation(false)
+                    ->fetchFileInformation(true)
                     ->maxSize(51200)
                     ->imagePreviewHeight('150')
-                    ->helperText('حداکثر ۵۰ مگابایت. اگر خطا دیدید، نام فایل را کوتاه کنید و دوباره انتخاب کنید.')
+                    ->helperText('تا پایان آپلود (نوار پیشرفت) صبر کنید، بعد ذخیره کنید. حداکثر ۵۰ مگابایت.')
                     ->validationMessages([
                         'uploaded' => 'فایل آپلود نشد. دوباره انتخاب کنید و تا پایان آپلود صبر کنید.',
                     ])
+                    ->getUploadedFileUsing(function (FileUpload $component, string $file, string|array|null $storedFileNames): ?array {
+                        $storage = $component->getDisk();
+
+                        if (! $storage->exists($file)) {
+                            return null;
+                        }
+
+                        $url = $component->getVisibility() === 'private'
+                            ? rescue(fn () => $storage->temporaryUrl($file, now()->addMinutes(5)), report: false)
+                            : null;
+
+                        $url ??= $storage->url($file);
+
+                        return [
+                            'name' => ($component->isMultiple() ? ($storedFileNames[$file] ?? null) : $storedFileNames) ?? basename($file),
+                            'size' => $storage->size($file),
+                            'type' => $storage->mimeType($file),
+                            'url' => $url,
+                        ];
+                    })
                     ->saveUploadedFileUsing(function (TemporaryUploadedFile $file) use ($component): ?string {
                         $disk = $component->getDiskName();
                         $directory = trim((string) $component->getDirectory(), '/');
@@ -221,17 +240,6 @@ class AppServiceProvider extends ServiceProvider
                         }
 
                         return $path;
-                    })
-                    ->rule(static function () {
-                        return static function (string $attribute, mixed $value, \Closure $fail): void {
-                            foreach (Arr::wrap($value) as $file) {
-                                if ($file instanceof TemporaryUploadedFile && ! $file->isValid()) {
-                                    $fail('فایل آپلود نشد. نام فایل را کوتاه کنید، دوباره انتخاب کنید و تا پایان آپلود صبر کنید.');
-
-                                    return;
-                                }
-                            }
-                        };
                     });
             });
         }

@@ -46,6 +46,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Livewire\Features\SupportFileUploads\FileUploadController;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
@@ -172,6 +174,30 @@ class AppServiceProvider extends ServiceProvider
                     ->validationMessages([
                         'uploaded' => 'فایل آپلود نشد. دوباره انتخاب کنید و تا پایان آپلود صبر کنید.',
                     ])
+                    ->saveUploadedFileUsing(function (TemporaryUploadedFile $file) use ($component): ?string {
+                        $disk = $component->getDiskName();
+                        $directory = trim((string) $component->getDirectory(), '/');
+                        $extension = strtolower((string) ($file->getClientOriginalExtension() ?: $file->extension() ?: 'bin'));
+                        $extension = preg_replace('/[^a-z0-9]+/', '', $extension) ?: 'bin';
+                        $filename = Str::ulid().'.'.$extension;
+                        $relativeDirectory = $directory !== '' ? $directory : 'uploads';
+
+                        if (! $file->isValid()) {
+                            throw ValidationException::withMessages([
+                                $component->getName() => 'فایل موقت آپلود منقضی شده. دوباره انتخاب کنید و تا پایان آپلود صبر کنید.',
+                            ]);
+                        }
+
+                        $path = $file->storeAs($relativeDirectory, $filename, ['disk' => $disk]);
+
+                        if (! Storage::disk($disk)->exists($path)) {
+                            throw ValidationException::withMessages([
+                                $component->getName() => 'ذخیره فایل روی سرور انجام نشد. لطفاً دوباره آپلود کنید.',
+                            ]);
+                        }
+
+                        return $path;
+                    })
                     ->rule(static function () {
                         return static function (string $attribute, mixed $value, \Closure $fail): void {
                             foreach (Arr::wrap($value) as $file) {

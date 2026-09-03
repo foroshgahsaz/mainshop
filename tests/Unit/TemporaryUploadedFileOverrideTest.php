@@ -33,4 +33,14 @@ class TemporaryUploadedFileOverrideTest extends TestCase
         $this->assertTrue($file->isValid());
         $this->assertSame(8, $file->getSize());
     }
+
+    public function test_it_returns_image_mime_for_jpg_when_storage_mime_is_generic(): void
+    {
+        Storage::disk('tmp-for-tests')->put('livewire-tmp/brand-logo.jpg', '');
+
+        $file = TemporaryUploadedFile::createFromLivewire('brand-logo.jpg');
+
+        $this->assertTrue($file->isValid());
+        $this->assertSame('image/jpeg', $file->getMimeType());
+    }
 }

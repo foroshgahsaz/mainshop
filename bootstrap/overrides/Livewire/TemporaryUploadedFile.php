@@ -81,11 +81,28 @@ class TemporaryUploadedFile extends UploadedFile
 
         if (in_array($mimeType, ['application/octet-stream', 'inode/x-empty', 'application/x-empty'], true)) {
             $detector = new FinfoMimeTypeDetector;
+            $absolutePath = $this->getRealPath();
 
-            $mimeType = $detector->detectMimeTypeFromPath($this->path) ?: 'text/plain';
+            $mimeType = $detector->detectMimeTypeFromPath($absolutePath)
+                ?: (is_file($absolutePath) ? mime_content_type($absolutePath) : false)
+                ?: $this->guessMimeTypeFromExtension()
+                ?: $mimeType;
         }
 
-        return $mimeType;
+        return is_string($mimeType) && $mimeType !== '' ? $mimeType : 'application/octet-stream';
+    }
+
+    protected function guessMimeTypeFromExtension(): ?string
+    {
+        return match (strtolower(pathinfo($this->path, PATHINFO_EXTENSION))) {
+            'jpg', 'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'webp' => 'image/webp',
+            'gif' => 'image/gif',
+            'svg' => 'image/svg+xml',
+            'bmp' => 'image/bmp',
+            default => null,
+        };
     }
 
     public function getFilename(): string

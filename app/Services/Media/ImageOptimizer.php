@@ -213,4 +213,52 @@ class ImageOptimizer
 
         return $directory === '' ? $filename : $directory.'/'.$filename;
     }
+
+  /**
+   * Resize/encode a source image into a dedicated output path (display thumbnails).
+   *
+   * @param  array<string, mixed>  $preset
+   */
+  public function optimizeFromPreset(string $disk, string $sourcePath, array $preset, string $outputPath): ?string
+  {
+    if (! $this->isEnabled()) {
+      return null;
+    }
+
+    $manager = $this->manager();
+
+    if ($manager === null) {
+      return null;
+    }
+
+    $storage = Storage::disk($disk);
+    $absolutePath = $storage->path($sourcePath);
+
+    if (! is_file($absolutePath) || ! $this->shouldOptimize($absolutePath)) {
+      return null;
+    }
+
+    try {
+      $image = $manager->read($absolutePath);
+      $image = $this->transform($image, $preset);
+
+      $directory = trim(str_replace('\\', '/', dirname($outputPath)), '/.');
+
+      if ($directory !== '') {
+        $storage->makeDirectory($directory);
+      }
+
+      $this->encode($image, $preset)->save($storage->path($outputPath));
+
+      return $outputPath;
+    } catch (Throwable $exception) {
+      Log::warning('Display thumbnail generation failed.', [
+        'source' => $sourcePath,
+        'output' => $outputPath,
+        'error' => $exception->getMessage(),
+      ]);
+
+      return null;
+    }
+  }
 }

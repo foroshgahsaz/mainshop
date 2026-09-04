@@ -55,8 +55,8 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Features\SupportFileUploads\FileUploadController;
+use League\Flysystem\UnableToCheckExistence;
 use League\Flysystem\UnableToCheckFileExistence;
-use League\Flysystem\UnableToRetrieveMetadata;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class AppServiceProvider extends ServiceProvider
@@ -215,11 +215,14 @@ class AppServiceProvider extends ServiceProvider
                 ->getUploadedFileUsing(function (FileUpload $component, string $file, string|array|null $storedFileNames): ?array {
                     $file = MediaPath::normalize($file) ?? ltrim(str_replace('\\', '/', $file), '/');
                     $storage = $component->getDisk();
-                    $name = ($component->isMultiple() ? ($storedFileNames[$file] ?? null) : $storedFileNames) ?? basename($file);
+                    $storedName = $component->isMultiple()
+                        ? ($storedFileNames[$file] ?? null)
+                        : $storedFileNames;
+                    $name = is_string($storedName) ? $storedName : basename($file);
 
                     try {
                         $exists = $storage->exists($file);
-                    } catch (UnableToCheckFileExistence) {
+                    } catch (UnableToCheckExistence|UnableToCheckFileExistence) {
                         $exists = false;
                     }
 
@@ -254,7 +257,7 @@ class AppServiceProvider extends ServiceProvider
                             'type' => $storage->mimeType($file),
                             'url' => $url,
                         ];
-                    } catch (UnableToRetrieveMetadata) {
+                    } catch (\Throwable) {
                         return [
                             'name' => $name,
                             'size' => 0,
@@ -263,7 +266,7 @@ class AppServiceProvider extends ServiceProvider
                         ];
                     }
                 })
-                ->saveUploadedFileUsing(function (TemporaryUploadedFile $file) use ($component): ?string {
+                ->saveUploadedFileUsing(function (TemporaryUploadedFile $file, FileUpload $component): ?string {
                     $disk = $component->getDiskName();
                     $directory = trim((string) $component->getDirectory(), '/');
                     $extension = strtolower((string) ($file->getClientOriginalExtension() ?: $file->extension() ?: 'bin'));

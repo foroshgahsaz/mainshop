@@ -3,11 +3,10 @@
 namespace App\Filament\Forms\Components;
 
 use App\Models\MediaFile;
-use App\Services\Media\MediaRegistry;
+use App\Support\ShopMedia;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Radio;
-use Filament\Forms\Components\Tabs;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
@@ -15,31 +14,35 @@ use Illuminate\Support\Str;
 
 class MediaPicker extends FileUpload
 {
-    protected string $view = 'filament.forms.components.media-picker';
-
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->registerActions([
-            fn (): Action => $this->getOpenMediaCenterAction(),
-        ]);
+        $this->hintAction($this->getLibraryAction());
     }
 
-    public function getOpenMediaCenterAction(): Action
+    public function getLibraryAction(): Action
     {
-        return Action::make('openMediaCenter')
-            ->label('مرکز فایل')
-            ->icon('heroicon-m-folder-open')
+        return Action::make('pickFromLibrary')
+            ->label('از کتابخانه')
+            ->icon('heroicon-m-photo')
             ->modalHeading('مرکز فایل')
-            ->modalDescription('از تصاویر موجود انتخاب کنید یا فایل جدید بارگذاری کنید.')
+            ->modalDescription('یکی از تصاویر موجود را انتخاب کنید. برای فایل جدید، همین‌جا مودال را ببندید و روی کادر آپلود فیلد بگذارید.')
             ->modalWidth('7xl')
             ->modalSubmitActionLabel('تأیید و استفاده')
             ->modalCancelActionLabel('انصراف')
-            ->closeModalByClickingAway(true)
-            ->form(fn (): array => $this->getMediaCenterFormSchema())
+            ->form(fn (): array => [
+                Radio::make('selected_path')
+                    ->label($this->getLibraryFiles()->isEmpty()
+                        ? 'فایلی روی دیسک نیست. مودال را ببندید و فایل جدید آپلود کنید.'
+                        : 'یک تصویر را انتخاب کنید')
+                    ->options($this->libraryRadioOptions())
+                    ->allowHtml()
+                    ->columns(5)
+                    ->required(),
+            ])
             ->action(function (array $data): void {
-                $path = $this->resolveSelectedPath($data);
+                $path = $data['selected_path'] ?? null;
 
                 if (! is_string($path) || $path === '') {
                     return;
@@ -49,56 +52,17 @@ class MediaPicker extends FileUpload
             });
     }
 
-    /** @return array<int, \Filament\Forms\Components\Component> */
-    protected function getMediaCenterFormSchema(): array
+    protected function libraryRadioOptions(): array
     {
-        $files = $this->getLibraryFiles();
-
-        return [
-            Tabs::make('media_center')
-                ->tabs([
-                    Tabs\Tab::make('library')
-                        ->label('تصاویر موجود')
-                        ->icon('heroicon-m-photo')
-                        ->schema([
-                            Radio::make('selected_path')
-                                ->label($files->isEmpty()
-                                    ? 'فایلی روی دیسک نیست. از تب بارگذاری استفاده کنید.'
-                                    : 'یک تصویر را انتخاب کنید')
-                                ->options($this->libraryRadioOptions($files))
-                                ->allowHtml()
-                                ->columns(5)
-                                ->required(fn (callable $get): bool => blank($get('upload'))),
-                        ]),
-                    Tabs\Tab::make('upload')
-                        ->label('بارگذاری')
-                        ->icon('heroicon-m-arrow-up-tray')
-                        ->schema([
-                            FileUpload::make('upload')
-                                ->label('فایل جدید')
-                                ->image()
-                                ->disk('public')
-                                ->directory((string) $this->getDirectory())
-                                ->visibility('public')
-                                ->maxSize((int) ($this->getMaxSize() ?: 51200))
-                                ->helperText('تا پایان نوار پیشرفت صبر کنید، بعد تأیید و استفاده را بزنید.'),
-                        ]),
-                ]),
-        ];
-    }
-
-    /** @param  Collection<int, MediaFile>  $files */
-    protected function libraryRadioOptions(Collection $files): array
-    {
-        return $files
-            ->mapWithKeys(function (MediaFile $file): array {
-                $url = e((string) $file->url());
-                $name = e($file->original_name ?: basename($file->path));
+        return $this->getLibraryFiles()
+            ->mapWithKeys(function (object $file): array {
+                $url = e((string) ($file->url ?? ''));
+                $name = e((string) ($file->name ?? basename((string) $file->path)));
 
                 return [
                     $file->path => new HtmlString(
                         '<span class="media-picker-radio-card">'
-                        .'<img src="'.$url.'" alt="'.$name.'" />'
+                        .($url !== '' ? '<img src="'.$url.'" alt="'.$name.'" />' : '')
                         .'<span>'.$name.'</span>'
                         .'</span>'
                     ),
@@ -107,47 +71,32 @@ class MediaPicker extends FileUpload
             ->all();
     }
 
-    /** @param  array<string, mixed>  $data */
-    protected function resolveSelectedPath(array $data): ?string
-    {
-        $selected = $data['selected_path'] ?? null;
-
-        if (is_string($selected) && $selected !== '') {
-            return $selected;
-        }
-
-        $upload = $data['upload'] ?? null;
-
-        if (is_string($upload) && $upload !== '') {
-            return $upload;
-        }
-
-        if (is_array($upload)) {
-            $path = collect($upload)->first(fn ($value) => is_string($value) && $value !== '');
-
-            return is_string($path) ? $path : null;
-        }
-
-        return null;
-    }
-
-    /** @return Collection<int, MediaFile> */
+    /** @return Collection<int, object> */
     public function getLibraryFiles(): Collection
     {
         $directory = trim((string) $this->getDirectory(), '/');
         $disk = Storage::disk('public');
-        $registry = app(MediaRegistry::class);
         $files = collect();
 
-        MediaFile::query()
-            ->latest('id')
-            ->limit(200)
-            ->get()
-            ->each(function (MediaFile $file) use ($files): void {
-                if ($file->existsOnDisk()) {
-                    $files->put($file->path, $file);
-                }
-            });
+        try {
+            MediaFile::query()
+                ->latest('id')
+                ->limit(200)
+                ->get()
+                ->each(function (MediaFile $file) use ($files): void {
+                    if (! $this->safeExists($file->disk, $file->path)) {
+                        return;
+                    }
+
+                    $files->put($file->path, (object) [
+                        'path' => $file->path,
+                        'url' => $file->url(),
+                        'name' => $file->original_name ?: basename($file->path),
+                    ]);
+                });
+        } catch (\Throwable) {
+            // Library listing must never break the edit form.
+        }
 
         $folders = array_values(array_unique(array_filter([
             $directory,
@@ -155,27 +104,45 @@ class MediaPicker extends FileUpload
         ])));
 
         foreach ($folders as $folder) {
-            if ($folder === '' || ! $disk->exists($folder)) {
-                continue;
-            }
-
-            foreach ($disk->allFiles($folder) as $path) {
-                if ($files->has($path) || ! $this->isImagePath($path)) {
+            try {
+                if ($folder === '' || ! $disk->exists($folder)) {
                     continue;
                 }
 
-                $files->put($path, $registry->registerFromPath('public', $path));
+                foreach ($disk->allFiles($folder) as $path) {
+                    if ($files->has($path) || ! $this->isImagePath($path)) {
+                        continue;
+                    }
+
+                    $files->put($path, (object) [
+                        'path' => $path,
+                        'url' => ShopMedia::url($path),
+                        'name' => basename($path),
+                    ]);
+                }
+            } catch (\Throwable) {
+                continue;
             }
         }
 
         return $files
-            ->sortByDesc(function (MediaFile $file) use ($directory): int {
-                $inFolder = $directory !== '' && str_starts_with($file->path, $directory.'/') ? 1 : 0;
+            ->sortByDesc(function (object $file) use ($directory): int {
+                $path = (string) $file->path;
+                $inFolder = $directory !== '' && str_starts_with($path, $directory.'/') ? 1 : 0;
 
-                return ($inFolder * 1_000_000) + (int) ($file->id ?? 0);
+                return $inFolder;
             })
             ->take(80)
             ->values();
+    }
+
+    protected function safeExists(string $disk, string $path): bool
+    {
+        try {
+            return Storage::disk($disk)->exists($path);
+        } catch (\Throwable) {
+            return false;
+        }
     }
 
     protected function isImagePath(string $path): bool

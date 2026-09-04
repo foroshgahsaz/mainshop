@@ -26,8 +26,10 @@ class MediaRegistry
         $dimensions = is_file($absolutePath) ? @getimagesize($absolutePath) : false;
 
         return MediaFile::query()->updateOrCreate(
-            ['disk' => $disk, 'path' => $path],
+            ['path_hash' => MediaFile::pathHash($disk, $path)],
             [
+                'disk' => $disk,
+                'path' => $path,
                 'folder' => $folder,
                 'mime_type' => is_file($absolutePath) ? (string) (@mime_content_type($absolutePath) ?: null) : null,
                 'size' => $storage->exists($path) ? (int) $storage->size($path) : 0,

@@ -141,6 +141,14 @@ body.fi-body .tippy-box {
     z-index: 99999 !important;
 }
 
+body.fi-has-open-modal .media-picker-modal {
+    z-index: 99999 !important;
+}
+
+body.fi-has-open-modal .media-picker-modal > .absolute.inset-0 {
+    z-index: 99998 !important;
+}
+
 /* تصاویر در جدول */
 .fi-admin-shell .fi-ta-image img,
 .fi-admin-shell .fi-ta-image-column img {

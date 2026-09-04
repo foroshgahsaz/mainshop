@@ -242,7 +242,7 @@ class AppServiceProvider extends ServiceProvider
 
                     return app(ImageOptimizer::class)->optimize($disk, $path, $relativeDirectory);
                 });
-        });
+        }, isImportant: true);
     }
 
     protected static function sanitizeMountedActionUploads(object $action, ?Model $record = null): void

@@ -167,6 +167,13 @@ class AppServiceProvider extends ServiceProvider
             $action
                 ->label('ویرایش')
                 ->successNotification(CrudSuccessNotification::saved())
+                ->mutateRecordDataUsing(function (array $data, \Filament\Tables\Actions\EditAction $action): array {
+                    $record = $action->getRecord();
+
+                    return $record instanceof Model
+                        ? MissingUploadPathCleaner::clearFromFormData($data, $record)
+                        : $data;
+                })
                 ->beforeFormValidated(function ($action): void {
                     self::sanitizeMountedActionUploads($action, $action->getRecord());
                 });
@@ -194,6 +201,13 @@ class AppServiceProvider extends ServiceProvider
             $action
                 ->label('ویرایش')
                 ->successNotification(CrudSuccessNotification::saved())
+                ->mutateRecordDataUsing(function (array $data, EditAction $action): array {
+                    $record = $action->getRecord();
+
+                    return $record instanceof Model
+                        ? MissingUploadPathCleaner::clearFromFormData($data, $record)
+                        : $data;
+                })
                 ->beforeFormValidated(function ($action): void {
                     self::sanitizeMountedActionUploads($action, $action->getRecord());
                 });

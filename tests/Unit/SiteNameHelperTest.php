@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Filament\Forms\Components\MediaPicker;
+use App\Filament\Support\ShopMediaPicker;
 use App\Services\Settings\SettingsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
@@ -19,12 +20,12 @@ class SiteNameHelperTest extends TestCase
         $this->assertSame('فروشگاه تست', site_name());
     }
 
-    public function test_media_picker_extends_file_upload(): void
+    public function test_shop_media_picker_returns_file_upload(): void
     {
-        $picker = MediaPicker::make('image')->directory('products');
+        $field = ShopMediaPicker::image('image', 'products', 'تصویر');
 
-        $this->assertInstanceOf(MediaPicker::class, $picker);
-        $this->assertSame('products', $picker->getDirectory());
+        $this->assertInstanceOf(\Filament\Forms\Components\FileUpload::class, $field);
+        $this->assertSame('products', $field->getDirectory());
     }
 
     public function test_media_picker_lists_files_from_disk_when_registry_empty(): void

@@ -21,6 +21,8 @@ class StoragePermissionFixer
             Storage::disk('public')->path('posts'),
             Storage::disk('public')->path('seo'),
             Storage::disk('public')->path('pages'),
+            storage_path('logs'),
+            $publicRoot !== '' ? $publicRoot.'/logs' : null,
         ])));
     }
 

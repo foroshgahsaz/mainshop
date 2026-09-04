@@ -256,12 +256,7 @@ class AppServiceProvider extends ServiceProvider
                     $url ??= rescue(fn () => $storage->url($file), report: false) ?? ShopMedia::url($file);
 
                     if (! $exists) {
-                        return $url ? [
-                            'name' => $name,
-                            'size' => 0,
-                            'type' => null,
-                            'url' => $url,
-                        ] : null;
+                        return null;
                     }
 
                     if (! $component->shouldFetchFileInformation()) {

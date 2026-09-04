@@ -13,6 +13,7 @@ class MediaFile extends Model
     protected $fillable = [
         'disk',
         'path',
+        'path_hash',
         'folder',
         'mime_type',
         'size',
@@ -73,5 +74,12 @@ class MediaFile extends Model
         }
 
         return round($bytes / 1048576, 1).' MB';
+    }
+
+    public static function pathHash(string $disk, string $path): string
+    {
+        $path = ltrim(str_replace('\\', '/', $path), '/');
+
+        return hash('sha256', $disk.'|'.$path);
     }
 }

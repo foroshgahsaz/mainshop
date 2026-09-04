@@ -139,14 +139,7 @@ class ImageOptimizer
 
     protected function presetForDirectory(string $directory): ?array
     {
-        $directory = trim($directory, '/');
-        $presetName = config("image-optimizer.directory_presets.{$directory}");
-
-        if (! is_string($presetName) || $presetName === '') {
-            $presetName = 'default';
-        }
-
-        $preset = config("image-optimizer.presets.{$presetName}");
+        $preset = app(MediaPresetService::class)->forDirectory($directory);
 
         return is_array($preset) ? $preset : null;
     }

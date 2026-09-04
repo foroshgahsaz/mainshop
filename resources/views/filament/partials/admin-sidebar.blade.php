@@ -1,6 +1,7 @@
 @php
     use App\Filament\Pages\ManageGeneralSettings;
     use App\Filament\Pages\ManageIntegrations;
+    use App\Filament\Pages\ManageMediaPresets;
     use App\Filament\Pages\ManageTara;
     use App\Filament\Pages\ManageZarinpal;
     use App\Filament\Resources\AttributeResource;
@@ -8,6 +9,7 @@
     use App\Filament\Resources\CategoryResource;
     use App\Filament\Resources\CouponResource;
     use App\Filament\Resources\HomeSliderResource;
+    use App\Filament\Resources\MediaFileResource;
     use App\Filament\Resources\MenuItemResource;
     use App\Filament\Resources\OrderResource;
     use App\Filament\Resources\PageResource;
@@ -164,10 +166,16 @@
             'routes' => [
                 'filament.admin.pages.manage-general-settings',
                 'filament.admin.pages.kavenegar',
+                'filament.admin.pages.media-presets',
+                'filament.admin.resources.media-files.*',
             ],
             'menus' => [
                 ['label' => 'تنظیمات عمومی', 'icon' => 'fa-globe', 'items' => [
                     ['label' => 'مدیریت سایت', 'url' => ManageGeneralSettings::getUrl(), 'icon' => 'fa-cog'],
+                ]],
+                ['label' => 'رسانه', 'icon' => 'fa-photo-film', 'items' => [
+                    ['label' => 'مدیریت فایل‌ها', 'url' => MediaFileResource::getUrl('index'), 'icon' => 'fa-folder-open'],
+                    ['label' => 'سایز تصاویر', 'url' => ManageMediaPresets::getUrl(), 'icon' => 'fa-crop'],
                 ]],
                 ['label' => 'پیامک', 'icon' => 'fa-sms', 'items' => [
                     ['label' => 'کاوه‌نگار', 'url' => ManageIntegrations::getUrl(), 'icon' => 'fa-comment-dots'],

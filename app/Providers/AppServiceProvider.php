@@ -21,6 +21,7 @@ use App\Models\UserAddress;
 use App\Observers\BrandObserver;
 use App\Observers\CategoryObserver;
 use App\Observers\HomeSliderObserver;
+use App\Observers\MediaUsageObserver;
 use App\Observers\MenuItemObserver;
 use App\Observers\PostObserver;
 use App\Observers\ProductImageObserver;
@@ -31,6 +32,7 @@ use App\Policies\PaymentPolicy;
 use App\Policies\UserAddressPolicy;
 use App\Services\Cache\ShopCacheService;
 use App\Services\Media\ImageOptimizer;
+use App\Services\Media\MediaRegistry;
 use App\Services\Settings\SettingsService;
 use App\Services\Sms\KavenegarSmsSender;
 use App\Services\Sms\LogSmsSender;
@@ -120,6 +122,14 @@ class AppServiceProvider extends ServiceProvider
         Post::observe(PostObserver::class);
         HomeSlider::observe(HomeSliderObserver::class);
         ShippingMethod::observe(ShippingMethodObserver::class);
+
+        $mediaObserver = app(MediaUsageObserver::class);
+
+        foreach (array_keys(config('media-library.models', [])) as $modelClass) {
+            if (is_string($modelClass) && class_exists($modelClass)) {
+                $modelClass::observe($mediaObserver);
+            }
+        }
 
         View::composer([
             'shop.partials.header',
@@ -240,8 +250,41 @@ class AppServiceProvider extends ServiceProvider
                         ]);
                     }
 
-                    return app(ImageOptimizer::class)->optimize($disk, $path, $relativeDirectory);
+                    $path = app(ImageOptimizer::class)->optimize($disk, $path, $relativeDirectory);
+
+                    app(MediaRegistry::class)->registerFromPath(
+                        $disk,
+                        $path,
+                        $file->getClientOriginalName(),
+                    );
+
+                    return $path;
+                })
+                ->deleteUploadedFileUsing(function (): void {
+                    // Physical files are kept until shop:prune-unused-media removes orphans.
                 });
+        }, isImportant: true);
+
+        FileUpload::configureUsing(function (FileUpload $component): void {
+            $component->afterStateHydrated(function (FileUpload $component, $state): void {
+                if (filled($state)) {
+                    return;
+                }
+
+                $record = $component->getRecord();
+
+                if ($record === null) {
+                    return;
+                }
+
+                $path = $record->getAttribute($component->getName());
+
+                if (! is_string($path) || $path === '') {
+                    return;
+                }
+
+                $component->state([(string) Str::uuid() => $path]);
+            });
         }, isImportant: true);
     }
 

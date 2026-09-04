@@ -5,6 +5,7 @@ namespace Tests\Unit;
 use App\Filament\Forms\Components\MediaPicker;
 use App\Services\Settings\SettingsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class SiteNameHelperTest extends TestCase
@@ -24,5 +25,16 @@ class SiteNameHelperTest extends TestCase
 
         $this->assertInstanceOf(MediaPicker::class, $picker);
         $this->assertSame('products', $picker->getDirectory());
+    }
+
+    public function test_media_picker_lists_files_from_disk_when_registry_empty(): void
+    {
+        Storage::fake('public');
+        Storage::disk('public')->put('products/test-image.jpg', 'image-bytes');
+
+        $files = MediaPicker::make('image')->directory('products')->getLibraryFiles();
+
+        $this->assertCount(1, $files);
+        $this->assertSame('products/test-image.jpg', $files->first()->path);
     }
 }

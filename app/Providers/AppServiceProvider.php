@@ -189,62 +189,60 @@ class AppServiceProvider extends ServiceProvider
                 ->successNotification(CrudSuccessNotification::deleted());
         });
 
-        if ($this->app->runningInConsole() || request()->is('admin', 'admin/*')) {
-            FileUpload::configureUsing(function (FileUpload $component): void {
-                $component
-                    ->fetchFileInformation(true)
-                    ->maxSize(51200)
-                    ->imagePreviewHeight('150')
-                    ->helperText('تا پایان آپلود (نوار پیشرفت) صبر کنید، بعد ذخیره کنید. حداکثر ۵۰ مگابایت.')
-                    ->validationMessages([
-                        'uploaded' => 'فایل آپلود نشد. دوباره انتخاب کنید و تا پایان آپلود صبر کنید.',
-                    ])
-                    ->getUploadedFileUsing(function (FileUpload $component, string $file, string|array|null $storedFileNames): ?array {
-                        $storage = $component->getDisk();
+        FileUpload::configureUsing(function (FileUpload $component): void {
+            $component
+                ->fetchFileInformation(true)
+                ->maxSize(51200)
+                ->imagePreviewHeight('150')
+                ->helperText('تا پایان آپلود (نوار پیشرفت) صبر کنید، بعد ذخیره کنید. حداکثر ۵۰ مگابایت.')
+                ->validationMessages([
+                    'uploaded' => 'فایل آپلود نشد. دوباره انتخاب کنید و تا پایان آپلود صبر کنید.',
+                ])
+                ->getUploadedFileUsing(function (FileUpload $component, string $file, string|array|null $storedFileNames): ?array {
+                    $storage = $component->getDisk();
 
-                        if (! $storage->exists($file)) {
-                            return null;
-                        }
+                    if (! $storage->exists($file)) {
+                        return null;
+                    }
 
-                        $url = $component->getVisibility() === 'private'
-                            ? rescue(fn () => $storage->temporaryUrl($file, now()->addMinutes(5)), report: false)
-                            : null;
+                    $url = $component->getVisibility() === 'private'
+                        ? rescue(fn () => $storage->temporaryUrl($file, now()->addMinutes(5)), report: false)
+                        : null;
 
-                        $url ??= $storage->url($file);
+                    $url ??= $storage->url($file);
 
-                        return [
-                            'name' => ($component->isMultiple() ? ($storedFileNames[$file] ?? null) : $storedFileNames) ?? basename($file),
-                            'size' => $storage->size($file),
-                            'type' => $storage->mimeType($file),
-                            'url' => $url,
-                        ];
-                    })
-                    ->saveUploadedFileUsing(function (TemporaryUploadedFile $file) use ($component): ?string {
-                        $disk = $component->getDiskName();
-                        $directory = trim((string) $component->getDirectory(), '/');
-                        $extension = strtolower((string) ($file->getClientOriginalExtension() ?: $file->extension() ?: 'bin'));
-                        $extension = preg_replace('/[^a-z0-9]+/', '', $extension) ?: 'bin';
-                        $filename = Str::ulid().'.'.$extension;
-                        $relativeDirectory = $directory !== '' ? $directory : 'uploads';
+                    return [
+                        'name' => ($component->isMultiple() ? ($storedFileNames[$file] ?? null) : $storedFileNames) ?? basename($file),
+                        'size' => $storage->size($file),
+                        'type' => $storage->mimeType($file),
+                        'url' => $url,
+                    ];
+                })
+                ->saveUploadedFileUsing(function (TemporaryUploadedFile $file) use ($component): ?string {
+                    $disk = $component->getDiskName();
+                    $directory = trim((string) $component->getDirectory(), '/');
+                    $extension = strtolower((string) ($file->getClientOriginalExtension() ?: $file->extension() ?: 'bin'));
+                    $extension = preg_replace('/[^a-z0-9]+/', '', $extension) ?: 'bin';
+                    $filename = Str::ulid().'.'.$extension;
+                    $relativeDirectory = $directory !== '' ? $directory : 'uploads';
 
-                        if (! $file->isValid()) {
-                            throw ValidationException::withMessages([
-                                $component->getName() => 'فایل موقت آپلود منقضی شده. دوباره انتخاب کنید و تا پایان آپلود صبر کنید.',
-                            ]);
-                        }
+                    if (! $file->isValid()) {
+                        throw ValidationException::withMessages([
+                            $component->getName() => 'فایل موقت آپلود منقضی شده. دوباره انتخاب کنید و تا پایان آپلود صبر کنید.',
+                        ]);
+                    }
 
-                        $path = $file->storeAs($relativeDirectory, $filename, ['disk' => $disk]);
+                    $path = $file->storeAs($relativeDirectory, $filename, ['disk' => $disk]);
 
-                        if (! Storage::disk($disk)->exists($path)) {
-                            throw ValidationException::withMessages([
-                                $component->getName() => 'ذخیره فایل روی سرور انجام نشد. لطفاً دوباره آپلود کنید.',
-                            ]);
-                        }
+                    if (! Storage::disk($disk)->exists($path)) {
+                        throw ValidationException::withMessages([
+                            $component->getName() => 'ذخیره فایل روی سرور انجام نشد. لطفاً دوباره آپلود کنید.',
+                        ]);
+                    }
 
-                        return app(ImageOptimizer::class)->optimize($disk, $path, $relativeDirectory);
-                    });
-            });
-        }
+                    return app(ImageOptimizer::class)->optimize($disk, $path, $relativeDirectory);
+                });
+        });
     }
 
     protected static function sanitizeMountedActionUploads(object $action, ?Model $record = null): void

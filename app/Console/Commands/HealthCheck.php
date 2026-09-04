@@ -130,19 +130,32 @@ class HealthCheck extends Command
             $this->record('storage', "writable: {$folder}", $writable ? 'ok' : 'fail', $writable ? 'OK' : 'not writable');
         }
 
+        $legacyCount = $this->countLocalFiles(storage_path('app/public'));
+        $dataCount = $this->countLocalFiles('/data');
+        $publicProducts = $this->countDiskFiles($disk, 'products');
+
         $this->record(
             'storage',
             'legacy storage/app/public',
             is_dir(storage_path('app/public')) ? 'ok' : 'warn',
-            $this->countLocalFiles(storage_path('app/public')).' files (run shop:sync-public-storage if needed)'
+            $legacyCount.' files (run shop:sync-public-storage if needed)'
         );
 
         $this->record(
             'storage',
             '/data volume',
             is_dir('/data') ? 'ok' : 'warn',
-            is_dir('/data') ? $this->countLocalFiles('/data').' files' : 'not mounted (local dev OK)'
+            is_dir('/data') ? $dataCount.' files' : 'not mounted (local dev OK)'
         );
+
+        if ($legacyCount > 0 && (int) $publicProducts === 0) {
+            $this->record(
+                'storage',
+                'sync needed',
+                'fail',
+                'files exist in storage/app/public but /data is empty — run: php artisan shop:sync-public-storage'
+            );
+        }
 
         if ($publicRoot !== $tempRoot) {
             $this->record('storage', 'temp vs public root', 'warn', "different roots — ensure both on same persistent volume");
@@ -302,7 +315,7 @@ class HealthCheck extends Command
                 Product::query()->latest('id')->whereHas('images')->first()
             ),
             'best_sellers' => fn () => $this->productImagePath(
-                Product::query()->whereHas('images')->orderByDesc('sold_count')->first()
+                Product::query()->whereHas('images')->latest('id')->first()
             ),
             'blog' => fn () => Post::query()->whereNotNull('image')->value('image'),
         ];
@@ -311,7 +324,7 @@ class HealthCheck extends Command
             $preset = $homepageImages->forSection($key) ?? [];
             $enabled = (bool) ($preset['enabled'] ?? true);
             $label = (string) ($definition['label'] ?? $key);
-            $path = isset($samples[$key]) ? ($samples[$key])() : null;
+            $path = isset($samples[$key]) ? rescue(fn () => ($samples[$key])(), report: false) : null;
 
             if (! $enabled) {
                 $this->record('homepage', $label, 'warn', 'preset disabled — using full image');
@@ -473,5 +486,14 @@ class HealthCheck extends Command
         }
 
         return $count;
+    }
+
+    protected function countDiskFiles($disk, string $directory): int
+    {
+        try {
+            return count($disk->allFiles($directory));
+        } catch (\Throwable) {
+            return 0;
+        }
     }
 }

@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Contracts\SmsSender;
 use App\Filament\Support\CrudSuccessNotification;
 use App\Filament\Support\FileUploadSanitizer;
+use App\Filament\Support\MissingUploadPathCleaner;
 use App\Http\Controllers\LivewireFileUploadController;
 use App\Models\Brand;
 use App\Models\Category;
@@ -166,6 +167,13 @@ class AppServiceProvider extends ServiceProvider
             $action
                 ->label('ویرایش')
                 ->successNotification(CrudSuccessNotification::saved())
+                ->mutateRecordDataUsing(function (array $data, \Filament\Tables\Actions\EditAction $action): array {
+                    $record = $action->getRecord();
+
+                    return $record instanceof Model
+                        ? MissingUploadPathCleaner::clearFromFormData($data, $record)
+                        : $data;
+                })
                 ->beforeFormValidated(function ($action): void {
                     self::sanitizeMountedActionUploads($action, $action->getRecord());
                 });
@@ -193,6 +201,13 @@ class AppServiceProvider extends ServiceProvider
             $action
                 ->label('ویرایش')
                 ->successNotification(CrudSuccessNotification::saved())
+                ->mutateRecordDataUsing(function (array $data, EditAction $action): array {
+                    $record = $action->getRecord();
+
+                    return $record instanceof Model
+                        ? MissingUploadPathCleaner::clearFromFormData($data, $record)
+                        : $data;
+                })
                 ->beforeFormValidated(function ($action): void {
                     self::sanitizeMountedActionUploads($action, $action->getRecord());
                 });
@@ -212,7 +227,15 @@ class AppServiceProvider extends ServiceProvider
                 ->validationMessages([
                     'uploaded' => 'فایل آپلود نشد. دوباره انتخاب کنید و تا پایان آپلود صبر کنید.',
                 ])
-                ->getUploadedFileUsing(function (FileUpload $component, string $file, string|array|null $storedFileNames): ?array {
+                ->getUploadedFileUsing(function (FileUpload $component, mixed $file, string|array|null $storedFileNames): ?array {
+                    if ($file instanceof TemporaryUploadedFile) {
+                        return null;
+                    }
+
+                    if (! is_string($file) || $file === '') {
+                        return null;
+                    }
+
                     $file = MediaPath::normalize($file) ?? ltrim(str_replace('\\', '/', $file), '/');
                     $storage = $component->getDisk();
                     $storedName = $component->isMultiple()
@@ -318,6 +341,10 @@ class AppServiceProvider extends ServiceProvider
                 $path = MediaPath::normalize($record->getAttribute($component->getName()));
 
                 if ($path === null) {
+                    return;
+                }
+
+                if (! MissingUploadPathCleaner::existsOnDisk($component->getDisk(), $path)) {
                     return;
                 }
 

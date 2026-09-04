@@ -1,6 +1,6 @@
 @extends('layouts.shop')
 
-@section('title', config('app.name') . ' | فروشگاه آنلاین')
+@section('title', site_name() . ' | فروشگاه آنلاین')
 
 @section('content')
     @if(session('success'))

@@ -134,6 +134,7 @@
                     type="button"
                     class="shop-image-upload__clear"
                     x-show="preview && ! uploading"
+                    x-cloak
                     x-on:click.prevent="clear()"
                     @disabled($isDisabled)
                 >

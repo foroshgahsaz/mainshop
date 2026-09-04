@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\MediaFile;
 use App\Services\Media\MediaRegistry;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
 class AuditMedia extends Command
@@ -15,6 +16,12 @@ class AuditMedia extends Command
 
     public function handle(MediaRegistry $registry): int
     {
+        if (! Schema::hasTable('media_files')) {
+            $this->error('جدول media_files وجود ندارد. ابتدا php artisan migrate --force را اجرا کنید.');
+
+            return self::FAILURE;
+        }
+
         $disk = Storage::disk('public');
         $limit = (int) $this->option('limit');
 

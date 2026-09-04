@@ -7,6 +7,7 @@ use App\Models\MediaFile;
 use App\Services\Media\MediaRegistry;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -18,13 +19,13 @@ class MediaFileResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-photo';
 
-    protected static ?string $navigationLabel = 'مدیریت فایل‌ها';
+    protected static ?string $navigationLabel = 'مدیریت فایل';
 
     protected static ?string $modelLabel = 'فایل';
 
-    protected static ?string $pluralModelLabel = 'فایل‌ها';
+    protected static ?string $pluralModelLabel = 'مدیریت فایل';
 
-    protected static ?string $navigationGroup = 'تنظیمات';
+    protected static ?string $navigationGroup = 'مدیریت فایل';
 
     protected static ?int $navigationSort = 4;
 
@@ -109,6 +110,33 @@ class MediaFileResource extends Resource
                     }),
             ])
             ->headerActions([
+                Tables\Actions\Action::make('sync_disk')
+                    ->label('همگام‌سازی از دیسک')
+                    ->icon('heroicon-o-arrow-path')
+                    ->requiresConfirmation()
+                    ->modalHeading('همگام‌سازی فایل‌های /data')
+                    ->modalDescription('فایل‌های موجود روی دیسک در کتابخانه رسانه ثبت می‌شوند.')
+                    ->action(function (MediaRegistry $registry): void {
+                        $disk = Storage::disk('public');
+                        $imported = 0;
+
+                        foreach (array_keys(config('media-library.folders', [])) as $folder) {
+                            if (! $disk->exists($folder)) {
+                                continue;
+                            }
+
+                            foreach ($disk->allFiles($folder) as $path) {
+                                $registry->registerFromPath('public', $path);
+                                $imported++;
+                            }
+                        }
+
+                        Notification::make()
+                            ->title('همگام‌سازی انجام شد')
+                            ->body("{$imported} فایل ثبت شد.")
+                            ->success()
+                            ->send();
+                    }),
                 Tables\Actions\Action::make('upload')
                     ->label('آپلود فایل')
                     ->icon('heroicon-o-arrow-up-tray')

@@ -160,22 +160,32 @@
                 ]],
             ],
         ],
+        'media' => [
+            'label' => 'مدیریت فایل',
+            'icon' => 'fa-folder-open',
+            'routes' => [
+                'filament.admin.resources.media-files.*',
+                'filament.admin.pages.media-presets',
+            ],
+            'menus' => [
+                ['label' => 'کتابخانه رسانه', 'icon' => 'fa-photo-film', 'items' => [
+                    ['label' => 'همه فایل‌ها', 'url' => MediaFileResource::getUrl('index'), 'icon' => 'fa-images'],
+                ]],
+                ['label' => 'تنظیمات تصویر', 'icon' => 'fa-crop', 'items' => [
+                    ['label' => 'سایز و تامبنیل', 'url' => ManageMediaPresets::getUrl(), 'icon' => 'fa-sliders'],
+                ]],
+            ],
+        ],
         'settings' => [
             'label' => 'تنظیمات',
             'icon' => 'fa-cog',
             'routes' => [
                 'filament.admin.pages.manage-general-settings',
                 'filament.admin.pages.kavenegar',
-                'filament.admin.pages.media-presets',
-                'filament.admin.resources.media-files.*',
             ],
             'menus' => [
                 ['label' => 'تنظیمات عمومی', 'icon' => 'fa-globe', 'items' => [
                     ['label' => 'مدیریت سایت', 'url' => ManageGeneralSettings::getUrl(), 'icon' => 'fa-cog'],
-                ]],
-                ['label' => 'رسانه', 'icon' => 'fa-photo-film', 'items' => [
-                    ['label' => 'مدیریت فایل‌ها', 'url' => MediaFileResource::getUrl('index'), 'icon' => 'fa-folder-open'],
-                    ['label' => 'سایز تصاویر', 'url' => ManageMediaPresets::getUrl(), 'icon' => 'fa-crop'],
                 ]],
                 ['label' => 'پیامک', 'icon' => 'fa-sms', 'items' => [
                     ['label' => 'کاوه‌نگار', 'url' => ManageIntegrations::getUrl(), 'icon' => 'fa-comment-dots'],
@@ -212,6 +222,7 @@
         ['id' => 'content', 'icon' => 'fa-newspaper', 'tooltip' => 'محتوا', 'panel' => 'content'],
         ['id' => 'shipping', 'icon' => 'fa-truck', 'tooltip' => 'ارسال', 'panel' => 'shipping'],
         ['id' => 'gateways', 'icon' => 'fa-plug', 'tooltip' => 'درگاه‌ها', 'panel' => 'gateways'],
+        ['id' => 'media', 'icon' => 'fa-folder-open', 'tooltip' => 'مدیریت فایل', 'panel' => 'media'],
         ['id' => 'settings', 'icon' => 'fa-cog', 'tooltip' => 'تنظیمات', 'panel' => 'settings'],
     ];
 

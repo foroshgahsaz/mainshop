@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\MediaFile;
 use App\Services\Media\MediaRegistry;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
 class PruneUnusedMedia extends Command
@@ -15,6 +16,12 @@ class PruneUnusedMedia extends Command
 
     public function handle(MediaRegistry $registry): int
     {
+        if (! Schema::hasTable('media_files') || ! Schema::hasTable('media_usages')) {
+            $this->error('جداول media_files یا media_usages وجود ندارد. ابتدا php artisan migrate --force را اجرا کنید.');
+
+            return self::FAILURE;
+        }
+
         $dryRun = (bool) $this->option('dry-run');
         $deleted = 0;
 

@@ -30,6 +30,8 @@ class ImageOptimizer
         $manager = $this->manager();
 
         if ($manager === null) {
+            Log::warning('Image optimization skipped: no GD/Imagick driver available.');
+
             return $relativePath;
         }
 
@@ -37,10 +39,22 @@ class ImageOptimizer
         $absolutePath = $storage->path($relativePath);
 
         if (! is_file($absolutePath)) {
+            Log::warning('Image optimization skipped: file not found on disk.', [
+                'path' => $relativePath,
+                'absolute' => $absolutePath,
+                'disk_root' => config("filesystems.disks.{$disk}.root"),
+            ]);
+
             return $relativePath;
         }
 
         if (! $this->shouldOptimize($absolutePath)) {
+            Log::warning('Image optimization skipped: unsupported file type.', [
+                'path' => $relativePath,
+                'mime' => $this->resolveMimeType($absolutePath),
+                'extension' => pathinfo($absolutePath, PATHINFO_EXTENSION),
+            ]);
+
             return $relativePath;
         }
 
@@ -95,12 +109,19 @@ class ImageOptimizer
             return false;
         }
 
-        return in_array($mimeType, [
+        if (in_array($mimeType, [
             'image/jpeg',
+            'image/jpg',
+            'image/pjpeg',
             'image/png',
+            'image/x-png',
             'image/webp',
             'image/avif',
-        ], true);
+        ], true)) {
+            return true;
+        }
+
+        return in_array($extension, ['jpg', 'jpeg', 'png', 'webp', 'avif'], true);
     }
 
     protected function resolveMimeType(string $absolutePath): string

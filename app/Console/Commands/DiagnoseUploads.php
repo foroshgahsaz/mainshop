@@ -2,9 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Category;
 use App\Support\MediaPath;
 use App\Support\ShopMedia;
-use App\Models\Category;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Features\SupportFileUploads\FileUploadConfiguration;
 

@@ -328,27 +328,16 @@ class AppServiceProvider extends ServiceProvider
 
         FileUpload::configureUsing(function (FileUpload $component): void {
             $component->afterStateHydrated(function (FileUpload $component, $state): void {
-                if (filled($state)) {
+                if (is_string($state) && filled($state)) {
+                    $path = MediaPath::normalize($state) ?? $state;
+                    $component->state($path !== '' ? [(string) Str::uuid() => $path] : []);
+
                     return;
                 }
 
-                $record = $component->getRecord();
-
-                if ($record === null) {
-                    return;
+                if (blank($state)) {
+                    $component->state([]);
                 }
-
-                $path = MediaPath::normalize($record->getAttribute($component->getName()));
-
-                if ($path === null) {
-                    return;
-                }
-
-                if (! MissingUploadPathCleaner::existsOnDisk($component->getDisk(), $path)) {
-                    return;
-                }
-
-                $component->state([(string) Str::uuid() => $path]);
             });
         }, isImportant: true);
     }

@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Filament\Support\CrudSuccessNotification;
 use App\Filament\Support\FileUploadSanitizer;
+use App\Filament\Support\NormalizesFileUploadFormState;
 use App\Services\Media\MediaRegistry;
 use App\Services\Settings\SettingsService;
 use Filament\Forms;
@@ -15,6 +16,9 @@ use Filament\Pages\Page;
 class ManageGeneralSettings extends Page implements HasForms
 {
     use InteractsWithForms;
+    use NormalizesFileUploadFormState {
+        NormalizesFileUploadFormState::getFormUploadedFiles insteadof InteractsWithForms;
+    }
 
     protected static ?string $navigationIcon = 'heroicon-o-globe-alt';
 

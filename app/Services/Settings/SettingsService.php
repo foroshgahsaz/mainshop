@@ -135,7 +135,20 @@ class SettingsService
             'template_id' => $this->get('smsir', 'template_id') ?: config('sms.smsir.template_id'),
             'otp_parameter' => $this->get('smsir', 'otp_parameter') ?: config('sms.smsir.otp_parameter', 'Code'),
             'line_number' => $this->get('smsir', 'line_number') ?: config('sms.smsir.line_number'),
+            'resend_minutes' => $this->otpResendMinutes(),
             'enabled' => filter_var($this->get('smsir', 'enabled', $driverIsSmsIr), FILTER_VALIDATE_BOOLEAN),
         ];
+    }
+
+    public function otpResendMinutes(): int
+    {
+        $minutes = (int) ($this->get('smsir', 'resend_minutes') ?: config('sms.smsir.resend_minutes', 2));
+
+        return max(1, min(15, $minutes));
+    }
+
+    public function otpResendSeconds(): int
+    {
+        return $this->otpResendMinutes() * 60;
     }
 }

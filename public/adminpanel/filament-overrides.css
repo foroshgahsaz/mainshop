@@ -684,3 +684,61 @@ body.fi-has-open-modal .fi-admin-shell .toggle-sidebar-btn {
     z-index: 1 !important;
     pointer-events: none !important;
 }
+
+/* ===== SweetAlert2 (admin CRUD + upload feedback) ===== */
+body.fi-body .fi-no-notifications {
+    display: none !important;
+}
+
+.shop-swal-popup {
+    font-family: Yekan, YekanBakh, Tahoma, sans-serif !important;
+    direction: rtl;
+    text-align: right;
+    border-radius: 14px !important;
+    padding: 1.25rem 1.5rem 1.5rem !important;
+}
+
+.shop-swal-title {
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    color: #181c32 !important;
+}
+
+.shop-swal-body {
+    font-size: 0.9rem !important;
+    color: #5e6278 !important;
+    line-height: 1.7 !important;
+}
+
+.shop-swal-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 88px;
+    padding: 0.55rem 1.25rem;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    margin: 0 4px;
+}
+
+.shop-swal-btn--confirm {
+    background: #7239ea !important;
+    color: #fff !important;
+}
+
+.shop-swal-btn--confirm:hover {
+    background: #6528e0 !important;
+}
+
+.shop-swal-btn--cancel {
+    background: #f1f1f4 !important;
+    color: #5e6278 !important;
+}
+
+.shop-swal-btn--cancel:hover {
+    background: #e8e8ed !important;
+}

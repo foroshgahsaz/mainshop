@@ -34,9 +34,7 @@ use App\Policies\UserAddressPolicy;
 use App\Services\Cache\ShopCacheService;
 use App\Services\Media\ImageOptimizer;
 use App\Services\Media\MediaRegistry;
-use App\Services\Settings\SettingsService;
-use App\Services\Sms\KavenegarSmsSender;
-use App\Services\Sms\LogSmsSender;
+use App\Services\Sms\SmsSenderFactory;
 use App\Support\MediaPath;
 use App\Support\ShopMedia;
 use App\Support\StoragePermissionFixer;
@@ -66,18 +64,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(FileUploadController::class, LivewireFileUploadController::class);
 
-        $this->app->bind(SmsSender::class, function () {
-            $kavenegar = app(SettingsService::class)->kavenegar();
-
-            if (($kavenegar['enabled'] ?? false) && ! empty($kavenegar['api_key'])) {
-                return new KavenegarSmsSender;
-            }
-
-            return match (config('sms.driver')) {
-                'kavenegar' => new KavenegarSmsSender,
-                default => new LogSmsSender,
-            };
-        });
+        $this->app->bind(SmsSender::class, fn () => app(SmsSenderFactory::class)->make());
     }
 
     public function boot(): void

@@ -124,4 +124,18 @@ class SettingsService
             'enabled' => filter_var($this->get('kavenegar', 'enabled', config('sms.driver') === 'kavenegar'), FILTER_VALIDATE_BOOLEAN),
         ];
     }
+
+    /** @return array<string, mixed> */
+    public function smsIr(): array
+    {
+        $driverIsSmsIr = in_array(config('sms.driver'), ['smsir', 'sms.ir'], true);
+
+        return [
+            'api_key' => $this->get('smsir', 'api_key') ?: config('sms.smsir.api_key'),
+            'template_id' => $this->get('smsir', 'template_id') ?: config('sms.smsir.template_id'),
+            'otp_parameter' => $this->get('smsir', 'otp_parameter') ?: config('sms.smsir.otp_parameter', 'Code'),
+            'line_number' => $this->get('smsir', 'line_number') ?: config('sms.smsir.line_number'),
+            'enabled' => filter_var($this->get('smsir', 'enabled', $driverIsSmsIr), FILTER_VALIDATE_BOOLEAN),
+        ];
+    }
 }

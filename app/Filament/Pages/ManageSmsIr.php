@@ -42,6 +42,7 @@ class ManageSmsIr extends Page implements HasForms
             'template_id' => $smsIr['template_id'] ?: null,
             'otp_parameter' => $smsIr['otp_parameter'],
             'line_number' => $smsIr['line_number'],
+            'resend_minutes' => $smsIr['resend_minutes'],
         ]);
     }
 
@@ -69,6 +70,13 @@ class ManageSmsIr extends Page implements HasForms
                             ->label('نام پارامتر قالب')
                             ->placeholder('Code')
                             ->helperText('همان کلید داخل قالب، بدون #. پیش‌فرض: Code'),
+                        Forms\Components\TextInput::make('resend_minutes')
+                            ->label('زمان ارسال مجدد (دقیقه)')
+                            ->numeric()
+                            ->minValue(1)
+                            ->maxValue(15)
+                            ->default(2)
+                            ->helperText('شمارنده «ارسال مجدد کد» در ورود فروشگاه و ادمین. پیش‌فرض ۲ دقیقه.'),
                     ])->columns(2),
                 Forms\Components\Section::make('پیامک سفارش (Bulk)')
                     ->schema([
@@ -91,6 +99,7 @@ class ManageSmsIr extends Page implements HasForms
             'template_id' => $data['template_id'] ?? '',
             'otp_parameter' => $data['otp_parameter'] ?: 'Code',
             'line_number' => $data['line_number'] ?? '',
+            'resend_minutes' => max(1, min(15, (int) ($data['resend_minutes'] ?? 2))),
         ]);
 
         CrudSuccessNotification::saved()

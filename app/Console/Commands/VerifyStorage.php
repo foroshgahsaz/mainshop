@@ -67,31 +67,36 @@ class VerifyStorage extends Command
 
                 if ($publicRoot === '/data') {
                     $this->newLine();
-                    $this->warn('Liara (or similar): persistent disk is usually mounted at storage/app/public, not /data.');
-                    $this->line('Recommended fix — remove from production .env:');
-                    $this->line('  FILESYSTEM_PUBLIC_ROOT=/data');
-                    $this->line('  LIVEWIRE_TEMP_ROOT=/data');
-                    $this->line('  LIVEWIRE_TEMP_DISK=livewire-tmp  (optional)');
-                    $this->line('Keep FILESYSTEM_PUBLIC_URL if you serve files via /data route.');
-                    $this->line('Then: php artisan config:clear');
-                    $this->line('Re-run this command — roots equal should be "yes" and products should be > 0.');
-                    $this->newLine();
-                    $this->comment('Runflare / K8s with /data volume: instead run shop:sync-public-storage, then fix-storage-permissions, then import-existing-media.');
+                    $this->warn('Liara / Runflare: mount a persistent disk at /data (shared across all pods).');
+                    $this->line('Then run once (or after first deploy):');
+                    $this->line('  php artisan shop:sync-public-storage');
+                    $this->line('  php artisan shop:fix-storage-permissions');
+                    $this->line('  php artisan shop:import-existing-media');
+                    $this->line('Keep in .env: FILESYSTEM_PUBLIC_ROOT=/data and LIVEWIRE_TEMP_ROOT=/data');
                 } else {
                     $this->line('Run: php artisan shop:sync-public-storage');
                     $this->line('Then: php artisan shop:fix-storage-permissions');
                     $this->line('Then: php artisan shop:import-existing-media');
                 }
             } elseif ($legacyCount > 0 && $publicCount > 0) {
-                $this->comment('Both legacy and public disk have files. Run shop:restore-public-files for DB paths missing on /data.');
+                if ($publicCount >= (int) $legacyCount) {
+                    $this->info('Public disk OK — /data has files (legacy copies can be ignored).');
+                    $this->comment('Run shop:restore-public-files only if specific product images are still missing on the site.');
+                } else {
+                    $this->comment('Public disk has fewer files than legacy. Run: php artisan shop:restore-public-files');
+                }
+            } elseif ($publicCount > 0) {
+                $this->info('Public disk OK — persistent /data volume is working on this pod.');
             }
         }
 
         if ($publicRoot === '/data' && $this->countPath('/data') === '0' && $this->countPath($legacyRoot) !== '0') {
             $this->newLine();
-            $this->warn('After each deploy, /data is wiped unless it is a shared persistent volume.');
-            $this->warn('Runflare/K8s: mount the SAME volume to /data on every pod, then shop:sync-public-storage.');
-            $this->warn('Liara: do NOT use /data — use default storage/app/public (remove FILESYSTEM_PUBLIC_ROOT from .env).');
+            $this->warn('After each deploy, /data is wiped unless a persistent disk is mounted at /data.');
+            $this->warn('Liara / Runflare: attach the same volume to /data on every pod, then shop:sync-public-storage.');
+        } elseif ($publicRoot === '/data' && (int) $this->countPath('/data') > 0) {
+            $this->newLine();
+            $this->info('Persistent /data volume looks healthy — uploads should survive deploys.');
         }
 
         return self::SUCCESS;

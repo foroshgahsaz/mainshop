@@ -95,33 +95,14 @@
                             @error('otpCode') {{ $message }} @enderror
                         </div>
 
-                        <div class="otp-timer"
-                             x-data="{
-                                remaining: {{ $this->otpResendSeconds() }},
-                                timer: null,
-                                get clock() {
-                                    const minutes = String(Math.floor(this.remaining / 60)).padStart(2, '0')
-                                    const seconds = String(this.remaining % 60).padStart(2, '0')
-                                    return minutes + ':' + seconds
-                                },
-                                start() {
-                                    this.timer = setInterval(() => {
-                                        if (this.remaining <= 0) {
-                                            clearInterval(this.timer)
-                                            return
-                                        }
-                                        this.remaining -= 1
-                                    }, 1000)
-                                }
-                             }"
-                             x-init="start()">
-                            <span id="timer" x-show="remaining > 0" x-text="clock">{{ sprintf('%02d:%02d', intdiv($this->otpResendSeconds(), 60), $this->otpResendSeconds() % 60) }}</span>
+                        <div class="otp-timer">
+                            <span id="timer" class="otp-countdown">{{ sprintf('%02d:%02d', intdiv($this->otpResendSeconds(), 60), $this->otpResendSeconds() % 60) }}</span>
                             <br>
                             <button type="button"
                                     class="resend-link"
                                     id="resendLink"
-                                    x-show="remaining <= 0"
-                                    x-cloak
+                                    hidden
+                                    disabled
                                     wire:click="sendAdminOtp"
                                     wire:loading.attr="disabled">
                                 ارسال مجدد کد
@@ -135,8 +116,8 @@
                     </form>
 
                     <div class="signup-link">
-                        <button type="button" class="resend-link" id="backToLoginLink" wire:click="backToAdminPhone">
-                            بازگشت به صفحه ورود
+                        <button type="button" class="resend-link" id="editPhoneLink" wire:click="backToAdminPhone">
+                            ویرایش شماره موبایل
                         </button>
                     </div>
                 </div>

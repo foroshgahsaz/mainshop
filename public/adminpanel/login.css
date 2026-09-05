@@ -350,6 +350,17 @@ body {
     margin-top: 1rem;
 }
 
+.otp-countdown {
+    display: inline-block;
+    font-variant-numeric: tabular-nums;
+    direction: ltr;
+}
+
+#resendLink[hidden],
+#resendLink.disabled {
+    display: none !important;
+}
+
 .resend-link {
     color: #7239ea;
     text-decoration: none;

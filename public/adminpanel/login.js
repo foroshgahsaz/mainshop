@@ -84,6 +84,7 @@ function validateOTP(otp) {
 
 let currentTab = 'mobile';
 let timerInterval;
+let timerStartedFor = null;
 
 function switchTab(tab) {
     currentTab = tab;
@@ -175,23 +176,68 @@ function backToLogin() {
     });
 }
 
-function startTimer() {
-    let timeLeft = 120;
-    const timerElement = document.getElementById('timer');
-    const resendLink = document.getElementById('resendLink');
+function formatOtpClock(totalSeconds) {
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
 
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function hideAdminResend() {
+    const resendLink = document.getElementById('resendLink');
+    if (!resendLink) {
+        return;
+    }
+
+    resendLink.hidden = true;
+    resendLink.disabled = true;
+    resendLink.classList.add('disabled');
+}
+
+function showAdminResend() {
+    const resendLink = document.getElementById('resendLink');
+    if (!resendLink) {
+        return;
+    }
+
+    resendLink.hidden = false;
+    resendLink.disabled = false;
+    resendLink.classList.remove('disabled');
+}
+
+function startTimer() {
+    const otpPage = document.getElementById('otpPage');
+    const timerElement = document.getElementById('timer');
+
+    if (!otpPage || !timerElement || otpPage.style.display === 'none') {
+        return;
+    }
+
+    const timerKey = otpPage.getAttribute('wire:key') || otpPage.dataset.resendSeconds;
+    if (timerStartedFor === timerKey) {
+        return;
+    }
+
+    const timeLeftStart = parseInt(otpPage.dataset.resendSeconds || '120', 10);
+    let timeLeft = Number.isFinite(timeLeftStart) && timeLeftStart > 0 ? timeLeftStart : 120;
+
+    timerStartedFor = timerKey;
     clearInterval(timerInterval);
+    hideAdminResend();
+    timerElement.hidden = false;
+    timerElement.textContent = formatOtpClock(timeLeft);
 
     timerInterval = setInterval(() => {
         timeLeft -= 1;
-        const minutes = Math.floor(timeLeft / 60);
-        const seconds = timeLeft % 60;
-        timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
         if (timeLeft <= 0) {
             clearInterval(timerInterval);
-            resendLink.classList.remove('disabled');
+            timerElement.hidden = true;
+            showAdminResend();
+            return;
         }
+
+        timerElement.textContent = formatOtpClock(timeLeft);
     }, 1000);
 }
 
@@ -319,6 +365,7 @@ function bindLoginLivewireHooks() {
             restoreLoginTab();
             bindOtpInputs();
             bindOtpFormSubmit();
+            startTimer();
         });
     };
 

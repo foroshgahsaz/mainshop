@@ -26,7 +26,7 @@ class OtpService
         $throttleKey = "otp:throttle:{$phone}";
 
         if (Cache::has($throttleKey)) {
-            throw new \RuntimeException('لطفاً کمی صبر کنید و دوباره تلاش کنید.');
+            throw new \RuntimeException('ارسال مجدد هنوز فعال نیست. تا پایان شمارنده صبر کنید.');
         }
 
         $code = str_pad((string) random_int(0, 999999), config('shop.otp.length'), '0', STR_PAD_LEFT);

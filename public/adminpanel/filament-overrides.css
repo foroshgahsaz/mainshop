@@ -686,52 +686,112 @@ body.fi-has-open-modal .fi-admin-shell .toggle-sidebar-btn {
 }
 
 /* ===== SweetAlert2 (admin CRUD + upload feedback) ===== */
-body.fi-body .fi-no-notifications {
-    display: none !important;
+body.fi-body .fi-no {
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
 }
 
 .shop-swal-popup {
+    width: min(22rem, calc(100vw - 2rem)) !important;
+    padding: 1.75rem 1.5rem 1.35rem !important;
+    border-radius: 20px !important;
+    border: 1px solid #eef0f6 !important;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18) !important;
     font-family: Yekan, YekanBakh, Tahoma, sans-serif !important;
     direction: rtl;
-    text-align: right;
-    border-radius: 14px !important;
-    padding: 1.25rem 1.5rem 1.5rem !important;
+    text-align: center;
+}
+
+.shop-swal-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.shop-swal-icon-wrap {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: var(--shop-swal-ring);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.35rem;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.65);
+}
+
+.shop-swal-icon-char {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--shop-swal-color);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.shop-swal-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.2rem 0.7rem;
+    border-radius: 999px;
+    background: #f5f3ff;
+    color: #7239ea;
+    font-size: 0.72rem;
+    font-weight: 700;
+    margin-bottom: 0.15rem;
 }
 
 .shop-swal-title {
-    font-size: 1.1rem !important;
-    font-weight: 700 !important;
+    margin: 0;
+    font-size: 1.15rem !important;
+    font-weight: 800 !important;
     color: #181c32 !important;
+    line-height: 1.6 !important;
 }
 
 .shop-swal-body {
+    margin: 0.15rem 0 0;
     font-size: 0.9rem !important;
     color: #5e6278 !important;
-    line-height: 1.7 !important;
+    line-height: 1.8 !important;
 }
 
 .shop-swal-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 88px;
-    padding: 0.55rem 1.25rem;
-    border-radius: 8px;
+    min-width: 96px;
+    padding: 0.62rem 1.35rem;
+    border-radius: 10px;
     font-family: inherit;
     font-size: 0.875rem;
-    font-weight: 600;
+    font-weight: 700;
     border: none;
     cursor: pointer;
-    margin: 0 4px;
+    margin: 0.35rem 4px 0;
+    transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.shop-swal-btn:active {
+    transform: scale(0.98);
 }
 
 .shop-swal-btn--confirm {
-    background: #7239ea !important;
+    background: linear-gradient(135deg, #7239ea, #8b5cf6) !important;
     color: #fff !important;
+    box-shadow: 0 10px 24px rgba(114, 57, 234, 0.28);
 }
 
 .shop-swal-btn--confirm:hover {
-    background: #6528e0 !important;
+    background: linear-gradient(135deg, #6528e0, #7c3aed) !important;
 }
 
 .shop-swal-btn--cancel {
@@ -741,4 +801,40 @@ body.fi-body .fi-no-notifications {
 
 .shop-swal-btn--cancel:hover {
     background: #e8e8ed !important;
+}
+
+.shop-swal-animate-in {
+    animation: shop-swal-in 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.shop-swal-animate-out {
+    animation: shop-swal-out 0.18s ease-in forwards;
+}
+
+@keyframes shop-swal-in {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes shop-swal-out {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    to {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+}
+
+.swal2-timer-progress-bar {
+    background: linear-gradient(90deg, #7239ea, #50cd89) !important;
 }

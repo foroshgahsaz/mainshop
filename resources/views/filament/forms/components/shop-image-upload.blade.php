@@ -91,7 +91,7 @@
                         this.uploading = false
                         this.progress = 100
                         if (window.shopAdminToast) {
-                            window.shopAdminToast('فایل با موفقیت آپلود شد', 'success')
+                            window.shopAdminToast('آپلود تصویر', 'success', 'فایل با موفقیت آپلود شد. برای ثبت نهایی دکمه ذخیره را بزنید.')
                         }
                     },
                     () => {
@@ -120,7 +120,7 @@
                 this.uploading = false
                 this.error = null
                 if (window.shopAdminToast) {
-                    window.shopAdminToast('تصویر از فرم حذف شد', 'info')
+                    window.shopAdminToast('حذف تصویر', 'info', 'تصویر از فرم حذف شد. برای ثبت نهایی دکمه ذخیره را بزنید.')
                 }
             },
         }"

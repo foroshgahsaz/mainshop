@@ -2,71 +2,34 @@
     $files = $files ?? collect();
     $directoryLabel = $directoryLabel ?? 'فایل‌ها';
     $statePath = $getStatePath();
-    $filesPayload = $files->map(fn ($file) => [
-        'path' => $file->path,
-        'alt_text' => $file->alt_text,
-        'title' => $file->title,
-    ])->values();
+    $formRoot = str($statePath)->beforeLast('.')->toString();
+    $wireKey = md5($statePath.'|'.$directory);
 @endphp
 
 <div
-    class="media-library-grid"
+    class="media-library-grid-host"
     x-data="{
-        files: @js($filesPayload),
-        selected: $wire.{{ $applyStateBindingModifiers("\$entangle('{$statePath}')") }},
-        pick(path) {
-            this.selected = path
-            const file = this.files.find((item) => item.path === path)
-            if (!file) {
-                return
-            }
-            const root = @js(str($statePath)->beforeLast('.')->toString());
-            if (file.alt_text) {
-                $wire.set(root + '.alt_text', file.alt_text, false)
-            }
-            if (file.title) {
-                $wire.set(root + '.title', file.title, false)
-            }
-        },
+        formRoot: @js($formRoot),
     }"
+    x-on:media-library-picked.window="
+        if ($event.detail.formRoot !== formRoot) return;
+        $wire.set(formRoot + '.selected_path', $event.detail.path, false);
+        if ($event.detail.altText) $wire.set(formRoot + '.alt_text', $event.detail.altText, false);
+        if ($event.detail.title) $wire.set(formRoot + '.title', $event.detail.title, false);
+    "
+    x-on:media-library-deleted.window="
+        if ($event.detail.formRoot !== formRoot) return;
+        const current = $wire.get(formRoot + '.selected_path');
+        if ($event.detail.paths.includes(current)) {
+            $wire.set(formRoot + '.selected_path', null, false);
+            $wire.set(formRoot + '.alt_text', null, false);
+            $wire.set(formRoot + '.title', null, false);
+        }
+    "
 >
-    <div class="media-library-grid__toolbar">
-        <div>
-            <strong>مرکز فایل</strong>
-            <span class="media-library-grid__count">{{ $files->count() }} فایل در «{{ $directoryLabel }}»</span>
-        </div>
-        <span class="media-library-grid__tip">روی تصویر کلیک کنید تا انتخاب شود</span>
-    </div>
-
-    @if ($files->isEmpty())
-        <div class="media-library-grid__empty">
-            <x-filament::icon icon="heroicon-o-photo" class="h-10 w-10" />
-            <p>هنوز فایلی در این پوشه نیست.</p>
-            <p class="media-library-grid__empty-sub">به تب «بارگذاری» بروید و فایل جدید آپلود کنید.</p>
-        </div>
-    @else
-        <div class="media-library-grid__items">
-            @foreach ($files as $file)
-                <button
-                    type="button"
-                    class="media-library-grid__item"
-                    :class="{ 'is-selected': selected === @js($file->path) }"
-                    x-on:click="pick(@js($file->path))"
-                >
-                    <span class="media-library-grid__thumb">
-                        @if ($file->url)
-                            <img src="{{ $file->url }}" alt="{{ $file->alt_text ?: $file->name }}" loading="lazy">
-                        @endif
-                        <span class="media-library-grid__check">
-                            <x-filament::icon icon="heroicon-m-check" class="h-4 w-4" />
-                        </span>
-                    </span>
-                    <span class="media-library-grid__name" title="{{ $file->name }}">{{ $file->name }}</span>
-                    @if ($file->title || $file->alt_text)
-                        <span class="media-library-grid__seo-badge">SEO</span>
-                    @endif
-                </button>
-            @endforeach
-        </div>
-    @endif
+    @livewire(\App\Livewire\Admin\MediaLibraryGrid::class, [
+        'directory' => $directory,
+        'formRoot' => $formRoot,
+        'wireKey' => $wireKey,
+    ], key('media-library-'.$wireKey))
 </div>

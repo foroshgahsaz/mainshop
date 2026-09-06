@@ -162,6 +162,56 @@ class MediaRegistry
         return $this->pathReferencedInContentTables($path);
     }
 
+    /**
+     * @param  array<int, string>  $paths
+     * @return array{deleted: array<int, string>, errors: array<string, string>}
+     */
+    public function deletePaths(array $paths, string $disk = 'public'): array
+    {
+        $deleted = [];
+        $errors = [];
+
+        foreach (array_values(array_unique(array_filter($paths))) as $path) {
+            if (! is_string($path) || $path === '') {
+                continue;
+            }
+
+            try {
+                $this->deletePath($path, $disk);
+                $deleted[] = $path;
+            } catch (\Throwable $exception) {
+                $errors[$path] = $exception->getMessage();
+            }
+        }
+
+        return [
+            'deleted' => $deleted,
+            'errors' => $errors,
+        ];
+    }
+
+    public function deletePath(string $path, string $disk = 'public'): void
+    {
+        $path = ltrim(str_replace('\\', '/', $path), '/');
+
+        if ($path === '' || str_contains($path, '..')) {
+            throw new \RuntimeException('مسیر فایل نامعتبر است.');
+        }
+
+        if ($this->isPathInUse($path, $disk)) {
+            throw new \RuntimeException('این فایل هنوز در محتوا استفاده می‌شود و قابل حذف نیست.');
+        }
+
+        if (Storage::disk($disk)->exists($path)) {
+            Storage::disk($disk)->delete($path);
+        }
+
+        MediaFile::query()
+            ->where('disk', $disk)
+            ->where('path', $path)
+            ->delete();
+    }
+
     protected function pathReferencedInContentTables(string $path): bool
     {
         $path = ltrim($path, '/');

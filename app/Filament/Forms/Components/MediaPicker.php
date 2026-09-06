@@ -4,7 +4,6 @@ namespace App\Filament\Forms\Components;
 
 use App\Models\MediaFile;
 use App\Services\Media\MediaRegistry;
-use App\Support\ShopMedia;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Section;
@@ -14,7 +13,6 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ViewField;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class MediaPicker extends FileUpload
@@ -89,7 +87,7 @@ class MediaPicker extends FileUpload
                             ViewField::make('selected_path')
                                 ->view('filament.forms.components.media-library-grid')
                                 ->viewData(fn (): array => [
-                                    'files' => $this->getLibraryFiles(),
+                                    'directory' => $directory,
                                     'directoryLabel' => config('media-library.folders.'.$directory, $directory),
                                 ]),
                         ]),
@@ -176,81 +174,10 @@ class MediaPicker extends FileUpload
             ->first();
     }
 
-    /** @return Collection<int, object{path: string, url: ?string, name: string, alt_text: ?string, title: ?string}> */
+    /** @return Collection<int, object> */
     public function getLibraryFiles(): Collection
     {
-        $directory = trim((string) $this->getDirectory(), '/');
-        $disk = Storage::disk('public');
-        $files = collect();
-
-        try {
-            MediaFile::query()
-                ->when($directory !== '', fn ($query) => $query->where('folder', $directory))
-                ->latest('id')
-                ->limit(120)
-                ->get()
-                ->each(function (MediaFile $file) use ($files): void {
-                    if (! $this->safeExists($file->disk, $file->path)) {
-                        return;
-                    }
-
-                    $files->put($file->path, (object) [
-                        'path' => $file->path,
-                        'url' => $file->url(),
-                        'name' => $file->original_name ?: basename($file->path),
-                        'alt_text' => $file->alt_text,
-                        'title' => $file->title,
-                    ]);
-                });
-        } catch (\Throwable) {
-            // Library listing must never break the edit form.
-        }
-
-        if ($directory !== '' && $disk->exists($directory)) {
-            try {
-                foreach ($disk->allFiles($directory) as $path) {
-                    if ($files->has($path) || ! $this->isImagePath($path)) {
-                        continue;
-                    }
-
-                    $files->put($path, (object) [
-                        'path' => $path,
-                        'url' => ShopMedia::url($path),
-                        'name' => basename($path),
-                        'alt_text' => null,
-                        'title' => null,
-                    ]);
-                }
-            } catch (\Throwable) {
-                // Ignore unreadable folders.
-            }
-        }
-
-        return $files
-            ->sortByDesc(function (object $file): int {
-                try {
-                    return (int) @filemtime(Storage::disk('public')->path($file->path));
-                } catch (\Throwable) {
-                    return 0;
-                }
-            })
-            ->take(60)
-            ->values();
-    }
-
-    protected function safeExists(string $disk, string $path): bool
-    {
-        try {
-            return Storage::disk($disk)->exists($path);
-        } catch (\Throwable) {
-            return false;
-        }
-    }
-
-    protected function isImagePath(string $path): bool
-    {
-        $extension = strtolower((string) pathinfo($path, PATHINFO_EXTENSION));
-
-        return in_array($extension, ['jpg', 'jpeg', 'png', 'webp', 'gif', 'avif', 'svg'], true);
+        return app(\App\Services\Media\MediaLibrary::class)
+            ->filesInDirectory(trim((string) $this->getDirectory(), '/'));
     }
 }

@@ -44,6 +44,23 @@ class MediaRegistry
         );
     }
 
+    public function updateSeo(
+        string $disk,
+        string $path,
+        ?string $altText = null,
+        ?string $title = null,
+    ): ?MediaFile {
+        $mediaFile = $this->registerFromPath($disk, $path);
+
+        $mediaFile->fill([
+            'alt_text' => $altText,
+            'title' => $title,
+        ]);
+        $mediaFile->save();
+
+        return $mediaFile;
+    }
+
     /** @param  array<int, string>  $fields */
     public function syncModel(Model $model, array $fields): void
     {

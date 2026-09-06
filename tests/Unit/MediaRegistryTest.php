@@ -63,4 +63,20 @@ class MediaRegistryTest extends TestCase
 
         $this->assertDatabaseHas('media_files', ['id' => $mediaId]);
     }
+
+    public function test_update_seo_persists_alt_and_title(): void
+    {
+        Storage::fake('public');
+        Storage::disk('public')->put('avatars/seo.webp', 'binary');
+
+        $registry = app(MediaRegistry::class);
+        $registry->registerFromPath('public', 'avatars/seo.webp', 'seo.webp');
+        $registry->updateSeo('public', 'avatars/seo.webp', 'Avatar alt', 'Avatar title');
+
+        $media = MediaFile::query()->where('path', 'avatars/seo.webp')->first();
+
+        $this->assertNotNull($media);
+        $this->assertSame('Avatar alt', $media->alt_text);
+        $this->assertSame('Avatar title', $media->title);
+    }
 }

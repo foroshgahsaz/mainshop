@@ -17,7 +17,7 @@ class HomepageImageServiceTest extends TestCase
         $preset = $service->forSection('deals');
 
         $this->assertIsArray($preset);
-        $this->assertSame('پیشنهاد شگفت‌انگیز', $preset['label'] ?? null);
+        $this->assertSame('فروش ویژه', $preset['label'] ?? null);
         $this->assertSame(400, $preset['width'] ?? null);
         $this->assertTrue($preset['enabled'] ?? false);
     }

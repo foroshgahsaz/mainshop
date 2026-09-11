@@ -28,6 +28,17 @@ class ThumbnailRouteTest extends TestCase
         $response->assertOk();
     }
 
+    public function test_thumbnail_route_returns_storage_url_when_source_is_missing(): void
+    {
+        Storage::fake('public');
+
+        $url = app(DisplayImageService::class)->url('categories', 'categories/missing.webp');
+
+        $this->assertNotNull($url);
+        $this->assertStringContainsString('categories/missing.webp', $url);
+        $this->assertStringNotContainsString('/thumb/', $url);
+    }
+
     public function test_thumbnail_route_returns_404_for_unknown_section(): void
     {
         Storage::fake('public');

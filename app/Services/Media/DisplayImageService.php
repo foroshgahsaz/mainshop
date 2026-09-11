@@ -41,8 +41,14 @@ class DisplayImageService
             return ShopMedia::url($path);
         }
 
-        if (! Storage::disk('public')->exists($path)) {
-            return null;
+        try {
+            $exists = Storage::disk('public')->exists($path);
+        } catch (\Throwable) {
+            $exists = false;
+        }
+
+        if (! $exists) {
+            return ShopMedia::url($path);
         }
 
         return route('shop.thumbnail', [

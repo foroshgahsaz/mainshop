@@ -267,22 +267,46 @@ function createAutoHorizontalSwiper(el, { spaceBetween = 16, withNav = true, nav
   return new Swiper(el, config);
 }
 
-function initFeaturedDealsSwiper(el) {
-  const slider = el.closest('.featured-deals-slider');
-  el.querySelectorAll('.deal-card__cart-btn, .featured-deals-nav-btn').forEach((node) => {
-    node.classList.add('swiper-no-swiping');
-  });
+function initCategorySwiper(el) {
+  if (!el || typeof Swiper === 'undefined') {
+    return null;
+  }
 
-  return createAutoHorizontalSwiper(el, {
-    spaceBetween: 10,
-    withNav: true,
-    navRoot: slider,
+  return new Swiper(el, {
+    slidesPerView: 3.5,
+    spaceBetween: 8,
+    grabCursor: true,
+    watchOverflow: true,
+    breakpoints: {
+      768: { slidesPerView: 5.5, spaceBetween: 14 },
+      1024: { slidesPerView: 7.5, spaceBetween: 16 },
+    },
+  });
+}
+
+function initFeaturedDealsSwiper(el) {
+  const section = el.closest('.special-sale-section') || el.closest('.featured-deals-section');
+
+  return new Swiper(el, {
+    slidesPerView: 2.25,
+    spaceBetween: 12,
+    grabCursor: true,
+    watchOverflow: true,
+    navigation: {
+      nextEl: section?.querySelector('[data-swiper-next]'),
+      prevEl: section?.querySelector('[data-swiper-prev]'),
+    },
+    breakpoints: {
+      768: { slidesPerView: 3.4, spaceBetween: 16 },
+      1024: { slidesPerView: 4.4, spaceBetween: 18 },
+      1280: { slidesPerView: 5.3, spaceBetween: 20 },
+    },
   });
 }
 
 function initProductSwipers() {
   document.querySelectorAll('.categorySwiper').forEach((el) => {
-    createAutoHorizontalSwiper(el, { spaceBetween: 25 });
+    initCategorySwiper(el);
   });
 
   document.querySelectorAll('.featuredDealsSwiper').forEach((el) => {

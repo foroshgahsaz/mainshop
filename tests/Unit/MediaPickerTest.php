@@ -47,6 +47,34 @@ class MediaPickerTest extends TestCase
         $this->assertSame('categories/new.webp', $path);
     }
 
+    public function test_it_resolves_dehydrated_upload_string(): void
+    {
+        $picker = MediaPicker::make('image')->directory('categories');
+
+        $path = $this->invokeResolvePath($picker, [
+            'selected_path' => null,
+            'upload_file' => 'categories/uploaded.webp',
+        ]);
+
+        $this->assertSame('categories/uploaded.webp', $path);
+    }
+
+    public function test_it_extracts_string_or_file_upload_array_state(): void
+    {
+        $picker = MediaPicker::make('image')->directory('categories');
+
+        $this->assertSame(
+            'categories/shoes.webp',
+            $picker->extractPath('categories/shoes.webp'),
+        );
+        $this->assertSame(
+            'categories/shoes.webp',
+            $picker->extractPath(['abc-uuid' => 'categories/shoes.webp']),
+        );
+        $this->assertNull($picker->extractPath([]));
+        $this->assertNull($picker->extractPath(null));
+    }
+
     /** @param  array<string, mixed>  $data */
     protected function invokeResolvePath(MediaPicker $picker, array $data): ?string
     {

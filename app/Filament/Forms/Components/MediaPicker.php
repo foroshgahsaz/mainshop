@@ -6,51 +6,77 @@ use App\Models\MediaFile;
 use App\Services\Media\ImageOptimizer;
 use App\Services\Media\MediaRegistry;
 use App\Support\MediaPath;
+use Closure;
 use Filament\Forms\Components\Actions\Action;
+use Filament\Forms\Components\Field;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ViewField;
+use Filament\Notifications\Notification;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
-class MediaPicker extends FileUpload
+class MediaPicker extends Field
 {
+    protected string $view = 'filament.forms.components.media-picker';
+
+    protected string | Closure $directory = 'uploads';
+
+    protected int | Closure $maxSize = 51200;
+
     protected function setUp(): void
     {
         parent::setUp();
 
+        $this->afterStateHydrated(function (MediaPicker $component, mixed $state): void {
+            $path = $component->extractPath($state);
+
+            if ($state === $path) {
+                return;
+            }
+
+            $component->state($path);
+        });
+
         $this->dehydrateStateUsing(function (mixed $state): ?string {
-            if (is_string($state) && $state !== '') {
-                return MediaPath::normalize($state) ?? $state;
-            }
-
-            if (! is_array($state)) {
-                return null;
-            }
-
-            foreach ($state as $value) {
-                if ($value instanceof TemporaryUploadedFile) {
-                    continue;
-                }
-
-                if (is_string($value) && $value !== '') {
-                    return MediaPath::normalize($value) ?? $value;
-                }
-            }
-
-            return null;
+            return $this->extractPath($state);
         });
 
         $this->registerActions([
             $this->getMediaCenterAction(),
             $this->getClearImageAction(),
         ]);
+    }
+
+    public function directory(string | Closure $directory): static
+    {
+        $this->directory = $directory;
+
+        return $this;
+    }
+
+    public function maxSize(int | Closure $size): static
+    {
+        $this->maxSize = $size;
+
+        return $this;
+    }
+
+    public function getDirectory(): string
+    {
+        return trim((string) $this->evaluate($this->directory), '/');
+    }
+
+    public function getMaxSize(): int
+    {
+        return (int) $this->evaluate($this->maxSize);
     }
 
     public function getMediaCenterAction(): Action
@@ -75,7 +101,7 @@ class MediaPicker extends FileUpload
                     ]);
                 }
 
-                $this->state([(string) Str::uuid() => $path]);
+                $this->applySelectedPath($path);
 
                 $registry->registerFromPath('public', $path);
                 $registry->updateSeo(
@@ -84,6 +110,12 @@ class MediaPicker extends FileUpload
                     filled($data['alt_text'] ?? null) ? (string) $data['alt_text'] : null,
                     filled($data['title'] ?? null) ? (string) $data['title'] : null,
                 );
+
+                Notification::make()
+                    ->title('تصویر انتخاب شد')
+                    ->body('برای ذخیره روی رکورد، دکمه ذخیره فرم را بزنید.')
+                    ->success()
+                    ->send();
             });
     }
 
@@ -95,7 +127,28 @@ class MediaPicker extends FileUpload
             ->color('gray')
             ->outlined()
             ->visible(fn (): bool => filled($this->getCurrentPath()))
-            ->action(fn (): mixed => $this->state([]));
+            ->action(function (): void {
+                $this->applySelectedPath(null);
+
+                Notification::make()
+                    ->title('تصویر حذف شد')
+                    ->body('برای قطعی شدن، فرم را ذخیره کنید.')
+                    ->success()
+                    ->send();
+            });
+    }
+
+    public function applySelectedPath(?string $path): void
+    {
+        $normalized = is_string($path) && $path !== ''
+            ? (MediaPath::normalize($path) ?? $path)
+            : null;
+
+        $livewire = $this->getLivewire();
+        data_set($livewire, $this->getStatePath(), $normalized);
+
+        $this->state($normalized);
+        $this->callAfterStateUpdated();
     }
 
     /** @return array<string, mixed> */
@@ -115,16 +168,20 @@ class MediaPicker extends FileUpload
     /** @return array<int, mixed> */
     protected function getMediaCenterFormSchema(): array
     {
-        $directory = trim((string) $this->getDirectory(), '/');
+        $directory = $this->getDirectory();
+        $maxSize = $this->getMaxSize();
 
         return [
+            Hidden::make('selected_path'),
             Tabs::make('media_center_tabs')
                 ->tabs([
                     Tabs\Tab::make('library')
                         ->label('مرکز فایل')
                         ->icon('heroicon-m-photo')
                         ->schema([
-                            ViewField::make('selected_path')
+                            ViewField::make('library_browser')
+                                ->hiddenLabel()
+                                ->dehydrated(false)
                                 ->view('filament.forms.components.media-library-grid')
                                 ->viewData(fn (): array => [
                                     'directory' => $directory,
@@ -141,7 +198,7 @@ class MediaPicker extends FileUpload
                                 ->disk('public')
                                 ->directory($directory !== '' ? $directory : 'uploads')
                                 ->visibility('public')
-                                ->maxSize(51200)
+                                ->maxSize($maxSize)
                                 ->maxFiles(1)
                                 ->helperText('پس از انتخاب، فایل آپلود می‌شود. سپس فیلدهای سئو را تکمیل و تأیید کنید.'),
                         ]),
@@ -176,13 +233,15 @@ class MediaPicker extends FileUpload
             return $path;
         }
 
-        $selected = $data['selected_path'] ?? null;
-
-        return is_string($selected) && $selected !== '' ? $selected : null;
+        return $this->extractPath($data['selected_path'] ?? null);
     }
 
     protected function extractPathFromUploadState(mixed $upload): ?string
     {
+        if (is_string($upload) && $upload !== '') {
+            return $upload;
+        }
+
         if (! is_array($upload) || $upload === []) {
             return null;
         }
@@ -209,7 +268,7 @@ class MediaPicker extends FileUpload
     protected function persistUploadedTempFile(TemporaryUploadedFile $file): string
     {
         $disk = 'public';
-        $directory = trim((string) $this->getDirectory(), '/') ?: 'uploads';
+        $directory = $this->getDirectory() !== '' ? $this->getDirectory() : 'uploads';
         $extension = strtolower((string) ($file->getClientOriginalExtension() ?: $file->extension() ?: 'bin'));
         $extension = preg_replace('/[^a-z0-9]+/', '', $extension) ?: 'bin';
         $filename = Str::ulid().'.'.$extension;
@@ -234,15 +293,22 @@ class MediaPicker extends FileUpload
 
     public function getCurrentPath(): ?string
     {
-        $state = $this->getState();
+        return $this->extractPath($this->getState());
+    }
+
+    public function extractPath(mixed $state): ?string
+    {
+        if (is_string($state) && $state !== '') {
+            return MediaPath::normalize($state) ?? $state;
+        }
 
         if (! is_array($state)) {
-            return is_string($state) && $state !== '' ? $state : null;
+            return null;
         }
 
         foreach ($state as $value) {
             if (is_string($value) && $value !== '') {
-                return $value;
+                return MediaPath::normalize($value) ?? $value;
             }
         }
 
@@ -265,6 +331,6 @@ class MediaPicker extends FileUpload
     public function getLibraryFiles(): Collection
     {
         return app(\App\Services\Media\MediaLibrary::class)
-            ->filesInDirectory(trim((string) $this->getDirectory(), '/'));
+            ->filesInDirectory($this->getDirectory());
     }
 }

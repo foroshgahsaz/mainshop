@@ -1,7 +1,9 @@
 @php
     $state = $getState();
-    $currentPath = collect(is_array($state) ? $state : [])
-        ->first(fn ($value) => is_string($value) && $value !== '');
+    $currentPath = is_string($state) && $state !== ''
+        ? $state
+        : collect(is_array($state) ? $state : [])
+            ->first(fn ($value) => is_string($value) && $value !== '');
     $previewUrl = $currentPath ? \App\Support\ShopMedia::url($currentPath) : null;
     $openAction = $getAction('openMediaCenter');
     $clearAction = $getAction('clearImage');
@@ -15,7 +17,10 @@
     :field="$field"
     label-tag="div"
 >
-    <div class="media-picker-field media-picker-field--modern">
+    <div
+        class="media-picker-field media-picker-field--modern"
+        wire:key="media-picker-{{ $getStatePath() }}-{{ md5((string) $currentPath) }}"
+    >
         <div class="media-picker-field__card">
             <div class="media-picker-field__preview">
                 @if ($previewUrl)

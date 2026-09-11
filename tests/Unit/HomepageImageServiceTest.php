@@ -22,6 +22,13 @@ class HomepageImageServiceTest extends TestCase
         $this->assertTrue($preset['enabled'] ?? false);
     }
 
+    public function test_category_images_use_contain_mode_by_default(): void
+    {
+        $preset = app(HomepageImageService::class)->forSection('categories');
+
+        $this->assertSame('contain', $preset['mode'] ?? null);
+    }
+
     public function test_it_persists_custom_deals_dimensions(): void
     {
         $service = app(HomepageImageService::class);

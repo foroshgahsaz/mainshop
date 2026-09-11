@@ -54,7 +54,9 @@
                     @foreach($categories as $category)
                         <div class="swiper-slide">
                             <a href="{{ route('categories.show', $category) }}" class="category-card">
-                                <img src="{{ \App\Support\ShopFormatter::categoryImage($category->image) }}" alt="{{ $category->name }}" loading="lazy">
+                                <span class="category-card__image">
+                                    <img src="{{ \App\Support\ShopFormatter::categoryImage($category->image) }}" alt="{{ $category->name }}" loading="lazy">
+                                </span>
                                 <span>{{ $category->name }}</span>
                             </a>
                         </div>

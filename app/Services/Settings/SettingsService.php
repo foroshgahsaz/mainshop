@@ -102,7 +102,7 @@ class SettingsService
     public function site(): array
     {
         return [
-            'name' => $this->get('site', 'name') ?: config('app.name', 'چاپینو'),
+            'name' => $this->get('site', 'name') ?: config('app.name', 'چینی بازار'),
             'description' => $this->get('site', 'description', ''),
             'logo' => $this->get('site', 'logo'),
             'favicon' => $this->get('site', 'favicon'),

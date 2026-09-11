@@ -2318,13 +2318,24 @@ body.has-admin-bar .listing-filters {
 
 .category-card {
   box-shadow: 0px 1px 10px -5px rgba(0, 0, 0, 0.14);
+  overflow: visible;
+}
+
+.category-card__image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.9rem;
+  height: 3.75rem;
+  flex-shrink: 0;
 }
 
 .category-card img {
-  height: 3.75rem;
-  width: 3.9rem;
-  max-width: none;
-  max-height: none;
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 3.9rem;
+  max-height: 3.75rem;
   object-fit: contain;
   object-position: center;
 }
@@ -2334,8 +2345,25 @@ body.has-admin-bar .listing-filters {
     width: 100% !important;
     height: auto !important;
     min-height: 0;
-    aspect-ratio: auto;
-    padding: 0.45rem 0.3rem;
+    aspect-ratio: auto !important;
+    padding: 0.35rem 0.25rem 0.4rem;
+    gap: 0.25rem;
+  }
+
+  .category-card span {
+    line-height: 1.35;
+  }
+}
+
+@media (max-width: 767px) {
+  .shop-header > .max-w-site {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .header-phone-wrap {
+    margin-top: 0;
+    margin-bottom: 0;
   }
 }
 

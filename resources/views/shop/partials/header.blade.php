@@ -1,7 +1,7 @@
   <!-- HEADER -->
     <header class="shop-header w-full bg-white border-b border-gray-200 sticky z-40">
-    <div class="max-w-site mx-auto px-4 md:px-6 pb-3 pt-4 md:pt-5">
-      <div class="flex items-center justify-between gap-3 mb-3 md:mb-4">
+    <div class="max-w-site mx-auto px-4 md:px-6 pb-2 pt-2 md:pb-3 md:pt-5">
+      <div class="flex items-center justify-between gap-2 mb-0 md:gap-3 md:mb-4">
         <div class="flex items-center gap-2 md:gap-3">
                 <button onclick="toggleElement('mobileMenu', true)"
                   class="md:hidden p-2 text-gray-600 hover:text-navy"
@@ -16,10 +16,8 @@
             </svg>
                 </button>
           <a href="{{ route('home') }}"
-             class="flex items-center gap-2">
-            <span
-                  class="w-9 h-9 rounded-full bg-gradient-to-br from-brand-green to-accent-teal flex items-center justify-center text-white text-sm font-black">چ</span>
-            <span class="text-xl md:text-2xl font-black text-navy">چاپینو</span>
+             class="flex items-center">
+            <span class="text-lg md:text-2xl font-black text-navy">{{ site_name() }}</span>
           </a>
                 </div>
 

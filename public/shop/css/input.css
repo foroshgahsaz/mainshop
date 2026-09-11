@@ -81,9 +81,21 @@
     height: 130px;
     box-shadow: 0px 1px 10px -5px rgba(0, 0, 0, 0.14);
   }
-  .category-card img {
-    height: 3.75rem;
+  .category-card__image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 3.9rem;
+    height: 3.75rem;
+    flex-shrink: 0;
+  }
+
+  .category-card img {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 3.9rem;
+    max-height: 3.75rem;
     object-fit: contain;
   }
   .category-card span {

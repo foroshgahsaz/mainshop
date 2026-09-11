@@ -267,6 +267,23 @@ function createAutoHorizontalSwiper(el, { spaceBetween = 16, withNav = true, nav
   return new Swiper(el, config);
 }
 
+function initCategorySwiper(el) {
+  if (!el || typeof Swiper === 'undefined') {
+    return null;
+  }
+
+  return new Swiper(el, {
+    slidesPerView: 3.5,
+    spaceBetween: 8,
+    grabCursor: true,
+    watchOverflow: true,
+    resistanceRatio: 0.85,
+    breakpoints: {
+      768: { slidesPerView: 'auto', spaceBetween: 25 },
+    },
+  });
+}
+
 function initFeaturedDealsSwiper(el) {
   const section = el.closest('.special-sale-section') || el.closest('.featured-deals-section');
 
@@ -289,7 +306,7 @@ function initFeaturedDealsSwiper(el) {
 
 function initProductSwipers() {
   document.querySelectorAll('.categorySwiper').forEach((el) => {
-    createAutoHorizontalSwiper(el, { spaceBetween: 25 });
+    initCategorySwiper(el);
   });
 
   document.querySelectorAll('.featuredDealsSwiper').forEach((el) => {

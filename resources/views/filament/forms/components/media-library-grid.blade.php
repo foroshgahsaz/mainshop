@@ -3,6 +3,7 @@
     $directoryLabel = $directoryLabel ?? 'فایل‌ها';
     $statePath = $getStatePath();
     $formRoot = str($statePath)->beforeLast('.')->toString();
+    $selectedStatePath = $formRoot.'.selected_path';
     $wireKey = md5($statePath.'|'.$directory);
 @endphp
 
@@ -10,11 +11,12 @@
     class="media-library-grid-host"
     x-data="{
         formRoot: @js($formRoot),
-        selected: @entangle($statePath).live,
+        selected: $wire.$entangle(@js($selectedStatePath)).live,
     }"
     x-on:media-library-picked.window="
         if ($event.detail.formRoot !== formRoot) return;
         selected = $event.detail.path;
+        $wire.set(formRoot + '.selected_path', $event.detail.path);
         if ($event.detail.altText) $wire.set(formRoot + '.alt_text', $event.detail.altText);
         if ($event.detail.title) $wire.set(formRoot + '.title', $event.detail.title);
     "
@@ -27,6 +29,10 @@
         }
     "
 >
+    <p class="media-library-grid__selection" x-show="selected" x-cloak>
+        انتخاب‌شده: <span x-text="selected"></span>
+    </p>
+
     @livewire(\App\Livewire\Admin\MediaLibraryGrid::class, [
         'directory' => $directory,
         'formRoot' => $formRoot,

@@ -20,6 +20,18 @@ class ShopImageUploadFieldTest extends TestCase
         $this->assertStringContainsString('media-picker-field', $html);
         $this->assertStringContainsString('انتخاب / تغییر تصویر', $html);
         $this->assertStringContainsString('openMediaCenter', $html);
+        $this->assertStringContainsString('بدون تصویر', $html);
+    }
+
+    public function test_shop_media_picker_preview_renders_selected_path(): void
+    {
+        $html = Livewire::test(ShopImageUploadFormStub::class)
+            ->set('data.image', 'products/laptop.webp')
+            ->html();
+
+        $this->assertStringContainsString('products/laptop.webp', $html);
+        $this->assertStringContainsString('حذف تصویر', $html);
+        $this->assertStringNotContainsString('بدون تصویر', $html);
     }
 
     public function test_shop_icon_upload_uses_native_upload_view(): void

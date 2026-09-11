@@ -20,13 +20,14 @@ class SiteNameHelperTest extends TestCase
         $this->assertSame('فروشگاه تست', site_name());
     }
 
-    public function test_shop_media_picker_returns_file_upload(): void
+    public function test_shop_media_picker_returns_media_picker_field(): void
     {
         $field = ShopMediaPicker::image('image', 'products', 'تصویر');
 
-        $this->assertInstanceOf(\Filament\Forms\Components\FileUpload::class, $field);
+        $this->assertInstanceOf(MediaPicker::class, $field);
+        $this->assertNotInstanceOf(\Filament\Forms\Components\FileUpload::class, $field);
         $this->assertSame('products', $field->getDirectory());
-        $this->assertSame('filament.forms.components.shop-image-upload', $field->getView());
+        $this->assertSame('filament.forms.components.media-picker', $field->getView());
     }
 
     public function test_shop_image_upload_view_exposes_native_file_input(): void

@@ -590,6 +590,18 @@ body.fi-body .fi-modal-slide-over-window-hiding {
     gap: 0.85rem;
 }
 
+.media-library-grid__selection {
+    margin: 0;
+    padding: 0.55rem 0.75rem;
+    border-radius: 0.65rem;
+    background: var(--primary-50, #f5f3ff);
+    color: var(--primary-700, #6d28d9);
+    font-size: 0.8rem;
+    font-weight: 600;
+    direction: ltr;
+    text-align: right;
+}
+
 .media-library-grid__toolbar {
     display: flex;
     flex-wrap: wrap;

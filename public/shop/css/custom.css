@@ -332,11 +332,12 @@
 
 @media (max-width: 767px) {
   .categorySwiper {
-    overflow: hidden;
+    overflow: hidden !important;
   }
 
   .categorySwiper .swiper-slide {
-    width: calc((100% - 1.25rem) / 3.5);
+    width: calc((100% - 20px) / 3.5) !important;
+    flex-shrink: 0;
   }
 }
 
@@ -1752,12 +1753,12 @@ body.has-admin-bar .listing-filters {
 }
 
 .shop-mobile-bar {
+  display: none;
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
   z-index: 40;
-  display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
@@ -1767,8 +1768,9 @@ body.has-admin-bar .listing-filters {
   box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.08);
 }
 
-@media (max-width: 767px) {
+@media (max-width: 1023px) {
   .shop-mobile-bar {
+    display: flex;
     bottom: calc(var(--mobile-bottom-nav-height, 64px) + env(safe-area-inset-bottom, 0px));
     z-index: 85;
     padding-bottom: 12px;
@@ -2329,8 +2331,8 @@ body.has-admin-bar .listing-filters {
 
 @media (max-width: 767px) {
   .category-card {
-    width: 100%;
-    height: auto;
+    width: 100% !important;
+    height: auto !important;
     min-height: 0;
     aspect-ratio: auto;
     padding: 0.45rem 0.3rem;
@@ -2528,14 +2530,14 @@ body.has-admin-bar .listing-filters {
   position: relative;
   width: 42px;
   height: 42px;
-  margin: 4px 8px 4px 4px;
+  margin: 8px 10px 8px 6px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
   background: #059669;
   color: #fff;
-  box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.12);
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.18);
   overflow: visible;
   z-index: 2;
   -webkit-tap-highlight-color: transparent;
@@ -2559,11 +2561,11 @@ body.has-admin-bar .listing-filters {
 
 .header-phone-btn__waves span {
   position: absolute;
-  inset: 0;
-  border: 2px solid rgba(5, 150, 105, 0.55);
+  inset: -2px;
+  border: 2px solid #34d399;
   border-radius: 9999px;
   opacity: 0;
-  animation: header-phone-wave 2.2s ease-out infinite;
+  animation: header-phone-wave 2s ease-out infinite;
 }
 
 .header-phone-btn__waves span:nth-child(2) {
@@ -2922,7 +2924,8 @@ body.has-admin-bar .listing-filters {
     display: none;
   }
 
-  .cart-invoice__col-index {
+  .cart-invoice__table th.cart-invoice__col-index,
+  .cart-invoice__table td.cart-invoice__col-index {
     display: none;
   }
 

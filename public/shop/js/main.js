@@ -277,6 +277,7 @@ function initCategorySwiper(el) {
     spaceBetween: 8,
     grabCursor: true,
     watchOverflow: true,
+    resistanceRatio: 0.85,
     breakpoints: {
       768: { slidesPerView: 'auto', spaceBetween: 25 },
     },

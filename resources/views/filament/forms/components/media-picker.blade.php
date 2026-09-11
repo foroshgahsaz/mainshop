@@ -4,6 +4,7 @@
         ->first(fn ($value) => is_string($value) && $value !== '');
     $previewUrl = $currentPath ? \App\Support\ShopMedia::url($currentPath) : null;
     $openAction = $getAction('openMediaCenter');
+    $clearAction = $getAction('clearImage');
     $mediaFile = $currentPath
         ? \App\Models\MediaFile::query()->where('disk', 'public')->where('path', $currentPath)->first()
         : null;
@@ -58,16 +59,8 @@
                 {{ $openAction }}
             @endif
 
-            @if ($currentPath)
-                <x-filament::button
-                    type="button"
-                    color="gray"
-                    outlined
-                    icon="heroicon-m-trash"
-                    wire:click="$set(@js($getStatePath()), [])"
-                >
-                    حذف تصویر
-                </x-filament::button>
+            @if ($clearAction)
+                {{ $clearAction }}
             @endif
         </div>
     </div>

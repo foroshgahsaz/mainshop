@@ -3,7 +3,9 @@
 namespace App\Filament\Forms\Components;
 
 use App\Models\MediaFile;
+use App\Services\Media\ImageOptimizer;
 use App\Services\Media\MediaRegistry;
+use App\Support\MediaPath;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Section;
@@ -14,6 +16,8 @@ use Filament\Forms\Components\ViewField;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class MediaPicker extends FileUpload
 {
@@ -21,8 +25,31 @@ class MediaPicker extends FileUpload
     {
         parent::setUp();
 
+        $this->dehydrateStateUsing(function (mixed $state): ?string {
+            if (is_string($state) && $state !== '') {
+                return MediaPath::normalize($state) ?? $state;
+            }
+
+            if (! is_array($state)) {
+                return null;
+            }
+
+            foreach ($state as $value) {
+                if ($value instanceof TemporaryUploadedFile) {
+                    continue;
+                }
+
+                if (is_string($value) && $value !== '') {
+                    return MediaPath::normalize($value) ?? $value;
+                }
+            }
+
+            return null;
+        });
+
         $this->registerActions([
             $this->getMediaCenterAction(),
+            $this->getClearImageAction(),
         ]);
     }
 
@@ -43,7 +70,9 @@ class MediaPicker extends FileUpload
                 $path = $this->resolvePathFromModalData($data);
 
                 if (! is_string($path) || $path === '') {
-                    return;
+                    throw ValidationException::withMessages([
+                        'selected_path' => 'یک تصویر از کتابخانه انتخاب کنید یا در تب بارگذاری فایل آپلود کنید.',
+                    ]);
                 }
 
                 $this->state([(string) Str::uuid() => $path]);
@@ -56,6 +85,17 @@ class MediaPicker extends FileUpload
                     filled($data['title'] ?? null) ? (string) $data['title'] : null,
                 );
             });
+    }
+
+    public function getClearImageAction(): Action
+    {
+        return Action::make('clearImage')
+            ->label('حذف تصویر')
+            ->icon('heroicon-m-trash')
+            ->color('gray')
+            ->outlined()
+            ->visible(fn (): bool => filled($this->getCurrentPath()))
+            ->action(fn (): mixed => $this->state([]));
     }
 
     /** @return array<string, mixed> */
@@ -130,19 +170,66 @@ class MediaPicker extends FileUpload
     /** @param  array<string, mixed>  $data */
     protected function resolvePathFromModalData(array $data): ?string
     {
-        $upload = $data['upload_file'] ?? null;
+        $path = $this->extractPathFromUploadState($data['upload_file'] ?? null);
 
-        if (is_array($upload) && $upload !== []) {
-            $path = Arr::first(array_filter($upload, fn ($value) => is_string($value) && $value !== ''));
-
-            if (is_string($path) && $path !== '') {
-                return $path;
-            }
+        if (is_string($path) && $path !== '') {
+            return $path;
         }
 
         $selected = $data['selected_path'] ?? null;
 
         return is_string($selected) && $selected !== '' ? $selected : null;
+    }
+
+    protected function extractPathFromUploadState(mixed $upload): ?string
+    {
+        if (! is_array($upload) || $upload === []) {
+            return null;
+        }
+
+        foreach ($upload as $value) {
+            if ($value instanceof TemporaryUploadedFile) {
+                if (! $value->isValid()) {
+                    continue;
+                }
+
+                return $this->persistUploadedTempFile($value);
+            }
+
+            if (is_string($value) && $value !== '') {
+                return $value;
+            }
+        }
+
+        $path = Arr::first(array_filter($upload, fn ($value) => is_string($value) && $value !== ''));
+
+        return is_string($path) && $path !== '' ? $path : null;
+    }
+
+    protected function persistUploadedTempFile(TemporaryUploadedFile $file): string
+    {
+        $disk = 'public';
+        $directory = trim((string) $this->getDirectory(), '/') ?: 'uploads';
+        $extension = strtolower((string) ($file->getClientOriginalExtension() ?: $file->extension() ?: 'bin'));
+        $extension = preg_replace('/[^a-z0-9]+/', '', $extension) ?: 'bin';
+        $filename = Str::ulid().'.'.$extension;
+
+        if (! $file->isValid()) {
+            throw ValidationException::withMessages([
+                'upload_file' => 'فایل موقت آپلود منقضی شده. دوباره انتخاب کنید و تا پایان آپلود صبر کنید.',
+            ]);
+        }
+
+        $path = $file->storeAs($directory, $filename, ['disk' => $disk]);
+        $path = app(ImageOptimizer::class)->optimize($disk, $path, $directory);
+
+        app(MediaRegistry::class)->registerFromPath(
+            $disk,
+            $path,
+            $file->getClientOriginalName(),
+        );
+
+        return $path;
     }
 
     public function getCurrentPath(): ?string

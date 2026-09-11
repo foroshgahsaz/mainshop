@@ -1,6 +1,5 @@
 @php
     $isHome = request()->routeIs('home');
-    $isCart = request()->routeIs('cart', 'checkout');
     $isAccount = request()->routeIs('account.*', 'login', 'register');
 @endphp
 

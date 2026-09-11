@@ -88,7 +88,7 @@ class FileUploadSanitizer
             ]);
         }
 
-        if (filled($fallbackPath)) {
+        if ($hadInvalidTemp && filled($fallbackPath)) {
             return [(string) Str::uuid() => $fallbackPath];
         }
 

@@ -40,4 +40,11 @@ class FileUploadSanitizerTest extends TestCase
             (string) Str::uuid() => $invalid,
         ], null, 'mountedTableActionsData.0.image');
     }
+
+    public function test_it_keeps_empty_state_when_user_cleared_image(): void
+    {
+        $sanitized = FileUploadSanitizer::sanitizeState([], 'categories/existing.jpg');
+
+        $this->assertSame([], $sanitized);
+    }
 }

@@ -10,20 +10,20 @@
     class="media-library-grid-host"
     x-data="{
         formRoot: @js($formRoot),
+        selected: @entangle($statePath).live,
     }"
     x-on:media-library-picked.window="
         if ($event.detail.formRoot !== formRoot) return;
-        $wire.set(formRoot + '.selected_path', $event.detail.path, false);
-        if ($event.detail.altText) $wire.set(formRoot + '.alt_text', $event.detail.altText, false);
-        if ($event.detail.title) $wire.set(formRoot + '.title', $event.detail.title, false);
+        selected = $event.detail.path;
+        if ($event.detail.altText) $wire.set(formRoot + '.alt_text', $event.detail.altText);
+        if ($event.detail.title) $wire.set(formRoot + '.title', $event.detail.title);
     "
     x-on:media-library-deleted.window="
         if ($event.detail.formRoot !== formRoot) return;
-        const current = $wire.get(formRoot + '.selected_path');
-        if ($event.detail.paths.includes(current)) {
-            $wire.set(formRoot + '.selected_path', null, false);
-            $wire.set(formRoot + '.alt_text', null, false);
-            $wire.set(formRoot + '.title', null, false);
+        if ($event.detail.paths.includes(selected)) {
+            selected = null;
+            $wire.set(formRoot + '.alt_text', null);
+            $wire.set(formRoot + '.title', null);
         }
     "
 >

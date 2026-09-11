@@ -50,10 +50,10 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($items as $index => $item)
+                            @foreach ($items as $item)
                                 @php $variantArg = ($item['product_variant_id'] ?? null) !== null ? $item['product_variant_id'] : 'null'; @endphp
                                 <tr wire:key="cart-page-{{ $item['product_id'] }}-{{ $item['product_variant_id'] ?? 0 }}">
-                                    <td class="cart-invoice__col-index" data-label="ردیف">{{ $index + 1 }}</td>
+                                    <td class="cart-invoice__col-index" data-label="ردیف">{{ $loop->iteration }}</td>
                                     <td class="cart-invoice__product" data-label="شرح کالا">
                                         <a href="{{ $item['url'] }}" class="cart-invoice__product-link">
                                             <img src="{{ $item['image'] }}" alt="{{ $item['product_name'] }}">

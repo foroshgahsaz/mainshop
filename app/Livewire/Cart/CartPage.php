@@ -59,7 +59,7 @@ class CartPage extends Component
     public function render(CartService $cart)
     {
         return view('livewire.cart.cart-page', [
-            'items' => $cart->getItems(),
+            'items' => $cart->getItems()->values(),
             'summary' => $cart->summary(),
         ]);
     }

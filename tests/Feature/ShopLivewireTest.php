@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\User;
 use App\Services\Auth\OtpService;
+use App\Services\Cart\CartService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Livewire;
@@ -23,6 +24,33 @@ class ShopLivewireTest extends TestCase
         Livewire::test(CartPage::class)
             ->assertOk()
             ->assertSee('سبد خرید شما خالی است');
+    }
+
+    public function test_guest_cart_page_renders_invoice_for_string_item_keys(): void
+    {
+        $category = Category::create([
+            'name' => 'Test',
+            'slug' => 'test-guest-cart',
+            'is_active' => true,
+        ]);
+
+        $product = Product::create([
+            'category_id' => $category->id,
+            'name' => 'Guest Cart Product',
+            'slug' => 'guest-cart-product',
+            'price' => 150000,
+            'stock' => 10,
+            'is_active' => true,
+        ]);
+
+        $this->get(route('home'))->assertOk();
+        app(CartService::class)->add($product->id, 2);
+
+        Livewire::test(CartPage::class)
+            ->assertOk()
+            ->assertSee('فاکتور سبد خرید')
+            ->assertSee('Guest Cart Product')
+            ->assertSee('300,000');
     }
 
     public function test_home_mobile_header_keeps_phone_and_opens_cart_sidebar(): void

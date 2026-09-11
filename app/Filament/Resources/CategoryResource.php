@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\CategoryResource\Pages;
+use App\Filament\Support\AdminImageColumn;
 use App\Filament\Support\AdminTable;
 use App\Filament\Support\SeoFormSchema;
 use App\Filament\Support\ShopMediaPicker;
@@ -83,6 +84,7 @@ class CategoryResource extends Resource
     {
         return AdminTable::configure($table)
             ->columns([
+                AdminImageColumn::make('image', 48, 'تصویر'),
                 Tables\Columns\TextColumn::make('name')->label('نام')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('parent.name')->label('والد')->placeholder('—'),
                 Tables\Columns\IconColumn::make('show_in_mega')->label('مگامenu')->boolean(),

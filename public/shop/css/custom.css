@@ -2525,21 +2525,27 @@ body.has-admin-bar .listing-filters {
   }
 }
 
-/* Mobile header: phone only, shake + radiating waves */
-.header-phone-btn {
+/* Mobile header: phone only, shake + subtle radiating waves */
+.header-phone-wrap {
   position: relative;
   width: 42px;
   height: 42px;
   margin: 8px 10px 8px 6px;
+  flex-shrink: 0;
+  isolation: isolate;
+}
+
+.header-phone-btn {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
   background: #059669;
   color: #fff;
-  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.18);
-  overflow: visible;
-  z-index: 2;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -2554,35 +2560,37 @@ body.has-admin-bar .listing-filters {
 
 .header-phone-btn__waves {
   position: absolute;
-  inset: 0;
+  left: 50%;
+  top: 50%;
+  width: 42px;
+  height: 42px;
+  margin: 0;
   pointer-events: none;
   z-index: 1;
+  transform: translate(-50%, -50%);
 }
 
 .header-phone-btn__waves span {
   position: absolute;
-  inset: -2px;
-  border: 2px solid #34d399;
+  inset: 0;
+  border: 1px solid rgba(52, 211, 153, 0.55);
   border-radius: 9999px;
   opacity: 0;
-  animation: header-phone-wave 2s ease-out infinite;
+  animation: header-phone-wave 2.4s ease-out infinite;
+  will-change: transform, opacity;
 }
 
 .header-phone-btn__waves span:nth-child(2) {
-  animation-delay: 0.8s;
-}
-
-.header-phone-btn__waves span:nth-child(3) {
-  animation-delay: 1.6s;
+  animation-delay: 1.2s;
 }
 
 @keyframes header-phone-wave {
   0% {
     transform: scale(1);
-    opacity: 0.7;
+    opacity: 0.4;
   }
   100% {
-    transform: scale(2.7);
+    transform: scale(1.45);
     opacity: 0;
   }
 }

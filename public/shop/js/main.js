@@ -7,10 +7,37 @@ document.addEventListener('DOMContentLoaded', () => {
   initBlogSwiper();
   initProgTabs();
   initCartEvents();
+  initLoginTriggers();
   initHeaderUserMenu();
   initShopAdminBarOffset();
   initSearchModalEvents();
 });
+
+function openLoginModal(redirectUrl) {
+  const redirect = redirectUrl || window.location.href;
+
+  if (typeof Livewire !== 'undefined') {
+    Livewire.dispatch('open-login-modal', { redirect });
+    return;
+  }
+
+  const loginUrl = new URL('/login', window.location.origin);
+  loginUrl.searchParams.set('redirect', redirect);
+  window.location.href = loginUrl.toString();
+}
+
+function initLoginTriggers() {
+  document.addEventListener('click', (event) => {
+    const trigger = event.target.closest('[data-open-login]');
+
+    if (!trigger) {
+      return;
+    }
+
+    event.preventDefault();
+    openLoginModal(trigger.dataset.loginRedirect || window.location.href);
+  });
+}
 
 function initHeaderMetrics() {
   const header = document.querySelector('.shop-header');
@@ -459,3 +486,4 @@ function switchTab(type) {
 window.toggleElement = toggleElement;
 window.toggleAccordion = toggleAccordion;
 window.switchTab = switchTab;
+window.openLoginModal = openLoginModal;

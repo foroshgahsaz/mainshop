@@ -6,7 +6,7 @@
 @endphp
 
 <a href="{{ $isOrders && auth()->guest() ? '#' : $url }}"
-   @if($isOrders && auth()->guest()) onclick="event.preventDefault(); toggleElement('loginModal', true)" @endif
+   @if($isOrders && auth()->guest()) data-open-login onclick="event.preventDefault(); window.openLoginModal && window.openLoginModal('{{ route('account.orders') }}')" @endif
    @if($item->open_in_new_tab) target="_blank" rel="noopener" @endif
    class="main-nav-link py-3 px-2 rounded-xl hover:bg-emerald-50 hover:text-brand-green">
     {{ $item->label }}

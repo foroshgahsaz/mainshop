@@ -3,29 +3,24 @@
 namespace App\Livewire\Auth;
 
 use App\Livewire\Auth\Concerns\HandlesOtpLogin;
+use App\Livewire\Auth\Concerns\HandlesPasswordLogin;
 use App\Models\User;
-use App\Services\Auth\ShopLoginGuard;
 use App\Services\Cart\CartService;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 class LoginModal extends Component
 {
     use HandlesOtpLogin;
+    use HandlesPasswordLogin;
 
     public string $activeTab = 'otp';
 
-    public string $username = '';
-
-    public string $password = '';
-
     #[On('open-login-modal')]
-    public function openModal(): void
+    public function openModal(?string $redirect = null): void
     {
+        $this->rememberIntendedUrl($redirect);
         $this->resetLoginForm();
         $this->js('toggleElement("loginModal", true)');
     }
@@ -34,51 +29,6 @@ class LoginModal extends Component
     {
         $this->resetLoginForm();
         $this->js('toggleElement("loginModal", false)');
-    }
-
-    public function loginWithPassword(CartService $cart): void
-    {
-        $this->validate([
-            'username' => ['required', 'string'],
-            'password' => ['required', 'string'],
-        ], [
-            'username.required' => 'نام کاربری یا شماره موبایل را وارد کنید.',
-            'password.required' => 'رمز عبور را وارد کنید.',
-        ]);
-
-        $key = 'password-login:'.request()->ip();
-
-        if (RateLimiter::tooManyAttempts($key, 10)) {
-            throw ValidationException::withMessages([
-                'username' => 'تلاش‌های زیاد. لطفاً چند دقیقه بعد دوباره امتحان کنید.',
-            ]);
-        }
-
-        $login = trim($this->username);
-
-        $user = User::query()
-            ->where(function ($query) use ($login) {
-                $query->where('phone', $login)->orWhere('email', $login);
-            })
-            ->first();
-
-        if (! $user || ! Hash::check($this->password, $user->password)) {
-            RateLimiter::hit($key, 300);
-            throw ValidationException::withMessages([
-                'username' => 'نام کاربری یا رمز عبور اشتباه است.',
-            ]);
-        }
-
-        app(ShopLoginGuard::class)->assertAllowed($user, 'username');
-
-        RateLimiter::clear($key);
-
-        $user->forceFill([
-            'last_login_at' => now(),
-            'login_count' => $user->login_count + 1,
-        ])->save();
-
-        $this->afterSuccessfulLogin($user, $cart);
     }
 
     protected function afterSuccessfulLogin(User $user, CartService $cart): void
@@ -98,9 +48,35 @@ class LoginModal extends Component
         $this->step = 'phone';
         $this->phone = '';
         $this->otp = '';
-        $this->username = '';
-        $this->password = '';
+        $this->resetPasswordForm();
         $this->resetValidation();
+    }
+
+    protected function rememberIntendedUrl(?string $redirect): void
+    {
+        $target = $this->normalizeIntendedUrl($redirect ?: url()->current());
+
+        if ($this->shouldSkipIntendedUrl($target)) {
+            return;
+        }
+
+        session(['url.intended' => $target]);
+    }
+
+    protected function normalizeIntendedUrl(string $url): string
+    {
+        if (! parse_url($url, PHP_URL_SCHEME)) {
+            return url($url);
+        }
+
+        return $url;
+    }
+
+    protected function shouldSkipIntendedUrl(string $url): bool
+    {
+        $path = parse_url($url, PHP_URL_PATH) ?: '';
+
+        return in_array($path, ['/login', '/register'], true);
     }
 
     public function render()

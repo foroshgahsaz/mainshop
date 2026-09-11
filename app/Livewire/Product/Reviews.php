@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Product;
 
+use App\Livewire\Concerns\PromptsLoginModal;
 use App\Models\Product;
 use App\Models\ProductReview;
 use Illuminate\Contracts\View\View;
@@ -10,6 +11,7 @@ use Livewire\WithPagination;
 
 class Reviews extends Component
 {
+    use PromptsLoginModal;
     use WithPagination;
 
     public Product $product;
@@ -28,7 +30,7 @@ class Reviews extends Component
     public function submitReview(): void
     {
         if (! auth()->check()) {
-            $this->redirect(route('login'), navigate: true);
+            $this->promptLoginModal();
 
             return;
         }

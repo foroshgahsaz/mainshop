@@ -2,12 +2,14 @@
 
 namespace App\Livewire\Product;
 
+use App\Livewire\Concerns\PromptsLoginModal;
 use App\Models\Product;
 use App\Models\Wishlist;
 use Livewire\Component;
 
 class ToggleWishlist extends Component
 {
+    use PromptsLoginModal;
     public Product $product;
 
     public bool $inWishlist = false;
@@ -21,7 +23,7 @@ class ToggleWishlist extends Component
     public function toggle(): void
     {
         if (! auth()->check()) {
-            $this->dispatch('open-login-modal');
+            $this->promptLoginModal();
 
             return;
         }

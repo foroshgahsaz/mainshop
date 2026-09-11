@@ -267,23 +267,6 @@ function createAutoHorizontalSwiper(el, { spaceBetween = 16, withNav = true, nav
   return new Swiper(el, config);
 }
 
-function initCategorySwiper(el) {
-  if (!el || typeof Swiper === 'undefined') {
-    return null;
-  }
-
-  return new Swiper(el, {
-    slidesPerView: 3.5,
-    spaceBetween: 8,
-    grabCursor: true,
-    watchOverflow: true,
-    breakpoints: {
-      768: { slidesPerView: 5.5, spaceBetween: 14 },
-      1024: { slidesPerView: 7.5, spaceBetween: 16 },
-    },
-  });
-}
-
 function initFeaturedDealsSwiper(el) {
   const section = el.closest('.special-sale-section') || el.closest('.featured-deals-section');
 
@@ -306,7 +289,7 @@ function initFeaturedDealsSwiper(el) {
 
 function initProductSwipers() {
   document.querySelectorAll('.categorySwiper').forEach((el) => {
-    initCategorySwiper(el);
+    createAutoHorizontalSwiper(el, { spaceBetween: 25 });
   });
 
   document.querySelectorAll('.featuredDealsSwiper').forEach((el) => {

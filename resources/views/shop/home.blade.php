@@ -44,27 +44,21 @@
 
     {{-- CATEGORIES --}}
     @if($categories->isNotEmpty())
-        <section class="featured-categories-section">
-            <div class="max-w-site mx-auto px-4">
-                <div class="flex items-center justify-between section-header">
-                    <h2 class="section-title">دسته‌بندی‌های منتخب</h2>
-                    <a href="{{ route('products.index') }}" class="section-nav-link">مشاهده همه</a>
-                </div>
+        <section class="max-w-site mx-auto px-4 featured-categories-section">
+            <div class="flex items-center justify-between section-header">
+                <h2 class="section-title">دسته‌بندی‌های منتخب</h2>
+                <a href="{{ route('products.index') }}" class="section-nav-link">مشاهده همه</a>
             </div>
-            <div class="featured-categories-slider max-w-site mx-auto">
-                <div class="swiper categorySwiper">
-                    <div class="swiper-wrapper">
-                        @foreach($categories as $category)
-                            <div class="swiper-slide">
-                                <a href="{{ route('categories.show', $category) }}" class="category-card">
-                                    <div class="category-card__media">
-                                        <img src="{{ \App\Support\ShopFormatter::categoryImage($category->image) }}" alt="{{ $category->name }}" loading="lazy">
-                                    </div>
-                                    <span class="category-card__name">{{ $category->name }}</span>
-                                </a>
-                            </div>
-                        @endforeach
-                    </div>
+            <div class="swiper categorySwiper">
+                <div class="swiper-wrapper">
+                    @foreach($categories as $category)
+                        <div class="swiper-slide">
+                            <a href="{{ route('categories.show', $category) }}" class="category-card">
+                                <img src="{{ \App\Support\ShopFormatter::categoryImage($category->image) }}" alt="{{ $category->name }}" loading="lazy">
+                                <span>{{ $category->name }}</span>
+                            </a>
+                        </div>
+                    @endforeach
                 </div>
             </div>
         </section>

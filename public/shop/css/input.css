@@ -76,16 +76,20 @@
     font-weight: 300;
   }
   .category-card {
-    @apply flex flex-col items-center justify-center gap-1 aspect-square bg-white border border-gray-200 rounded-2xl p-2 shadow-none transition-colors hover:border-gray-300;
-    width: 130px;
-    height: 130px;
+    @apply flex flex-col items-center justify-start gap-1 bg-white rounded-2xl p-2 transition-colors;
+    width: 100%;
+    height: auto;
+    aspect-ratio: auto;
+    border: none;
+    box-shadow: 0px 1px 10px -5px rgba(0, 0, 0, 0.14);
   }
   .category-card img {
-    @apply w-6 h-6 md:w-7 md:h-7 object-contain;
+    @apply w-full h-full object-cover;
   }
-  .category-card span {
-    font-size: 14px;
-    font-weight: 400;
+  .category-card span,
+  .category-card__name {
+    font-size: 12px;
+    font-weight: 500;
     @apply text-black text-center leading-5;
   }
   .header-login-btn {

@@ -26,16 +26,16 @@ return [
 
     'categories' => [
       'label' => 'دسته‌بندی‌های منتخب',
-      'mode' => 'contain',
-      'width' => 112,
-      'height' => 112,
+      'mode' => 'cover',
+      'width' => 240,
+      'height' => 240,
       'quality' => 85,
       'format' => 'webp',
       'enabled' => true,
     ],
 
     'deals' => [
-      'label' => 'پیشنهاد شگفت‌انگیز',
+      'label' => 'فروش ویژه',
       'mode' => 'contain',
       'width' => 400,
       'height' => 400,

@@ -44,56 +44,61 @@
 
     {{-- CATEGORIES --}}
     @if($categories->isNotEmpty())
-        <section class="max-w-site mx-auto px-4 featured-categories-section">
-            <div class="flex items-center justify-between section-header">
-                <h2 class="section-title">دسته‌بندی‌های منتخب</h2>
-                <a href="{{ route('products.index') }}" class="section-nav-link">مشاهده همه</a>
+        <section class="featured-categories-section">
+            <div class="max-w-site mx-auto px-4">
+                <div class="flex items-center justify-between section-header">
+                    <h2 class="section-title">دسته‌بندی‌های منتخب</h2>
+                    <a href="{{ route('products.index') }}" class="section-nav-link">مشاهده همه</a>
+                </div>
             </div>
-            <div class="swiper categorySwiper">
-                <div class="swiper-wrapper">
-                    @foreach($categories as $category)
-                        <div class="swiper-slide">
-                            <a href="{{ route('categories.show', $category) }}" class="category-card">
-                                <img src="{{ \App\Support\ShopFormatter::categoryImage($category->image) }}" alt="{{ $category->name }}" loading="lazy">
-                                <span>{{ $category->name }}</span>
-                            </a>
-                        </div>
-                    @endforeach
+            <div class="featured-categories-slider max-w-site mx-auto">
+                <div class="swiper categorySwiper">
+                    <div class="swiper-wrapper">
+                        @foreach($categories as $category)
+                            <div class="swiper-slide">
+                                <a href="{{ route('categories.show', $category) }}" class="category-card">
+                                    <div class="category-card__media">
+                                        <img src="{{ \App\Support\ShopFormatter::categoryImage($category->image) }}" alt="{{ $category->name }}" loading="lazy">
+                                    </div>
+                                    <span class="category-card__name">{{ $category->name }}</span>
+                                </a>
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
             </div>
         </section>
     @endif
 
-    {{-- DISCOUNTED / FEATURED DEALS --}}
+    {{-- SPECIAL SALE --}}
     @if($discounted->isNotEmpty())
-        <section class="featured-deals-section">
-            <div class="featured-deals-section__container">
-                <div class="featured-deals-box">
-                    <div class="featured-deals-box__pattern" aria-hidden="true"></div>
-                    <div class="featured-deals-slider product-slider-overlay">
-                        <div class="featured-deals-slider__nav">
-                            <button type="button" data-swiper-prev class="featured-deals-nav-btn" aria-label="قبلی">‹</button>
-                            <button type="button" data-swiper-next class="featured-deals-nav-btn" aria-label="بعدی">›</button>
-                        </div>
-                        <div class="swiper featuredDealsSwiper">
-                            <div class="swiper-wrapper">
-                                <div class="swiper-slide swiper-slide--promo h-auto">
-                                    <div class="featured-deals-promo">
-                                        <p class="featured-deals-promo__heading">پیشنهاد<br>شگفت‌انگیز</p>
-                                    </div>
-                                </div>
-                                @foreach($discounted as $product)
-                                    <div class="swiper-slide swiper-slide--product h-auto">
-                                        <x-shop.deal-card :product="$product" section="deals" />
-                                    </div>
-                                @endforeach
-                                <div class="swiper-slide swiper-slide--view-all h-auto">
-                                    <a href="{{ route('products.index') }}" class="deal-view-all-card">
-                                        <span class="deal-view-all-card__text">مشاهده همه</span>
-                                    </a>
-                                </div>
+        <section class="special-sale-section featured-deals-section">
+            <div class="max-w-site mx-auto px-4">
+                <div class="special-sale-header section-header">
+                    <h2 class="section-title">فروش ویژه</h2>
+                    <div class="special-sale-header__actions">
+                        <a href="{{ route('products.index') }}" class="section-nav-link">مشاهده همه</a>
+                        <button type="button" class="special-sale-nav-btn" data-swiper-prev aria-label="قبلی">
+                            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                <path d="M7.5 4.5 13 10l-5.5 5.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                        <button type="button" class="special-sale-nav-btn" data-swiper-next aria-label="بعدی">
+                            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                <path d="M12.5 4.5 7 10l5.5 5.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="special-sale-slider max-w-site mx-auto">
+                <div class="swiper featuredDealsSwiper">
+                    <div class="swiper-wrapper">
+                        @foreach($discounted as $product)
+                            <div class="swiper-slide h-auto">
+                                <x-shop.deal-card :product="$product" section="deals" />
                             </div>
-                        </div>
+                        @endforeach
                     </div>
                 </div>
             </div>

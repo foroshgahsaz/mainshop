@@ -92,16 +92,12 @@ class ShopFormatter
         $relative = ltrim($path, '/');
         $disk = Storage::disk('public');
 
-        if (! $disk->exists($relative)) {
-            return null;
-        }
-
         try {
-            if ($disk->size($relative) < 512) {
+            if ($disk->exists($relative) && $disk->size($relative) < 512) {
                 return null;
             }
         } catch (\Throwable) {
-            return null;
+            // Still return the public URL so the browser can load the file.
         }
 
         return ShopMedia::url($relative);

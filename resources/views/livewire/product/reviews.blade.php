@@ -80,7 +80,7 @@
     @else
         <div class="product-reviews__login">
             <p>برای ثبت نظر ابتدا وارد حساب کاربری شوید.</p>
-            <a href="{{ route('login') }}" class="product-reviews__login-btn">ورود / ثبت‌نام</a>
+            <x-shop.login-trigger class="product-reviews__login-btn" />
         </div>
     @endauth
 

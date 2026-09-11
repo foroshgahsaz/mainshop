@@ -58,7 +58,7 @@
         </div>
     @else
         <button type="button"
-                onclick="toggleElement('loginModal', true)"
+                data-open-login
                 class="{{ $btnClass }}"
                 aria-label="ورود / ثبت نام">
             <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Checkout;
 
+use App\Livewire\Concerns\PromptsLoginModal;
 use App\Services\Cache\ShopCacheService;
 use App\Services\Checkout\CheckoutService;
 use App\Services\Payment\PaymentGatewayCatalog;
@@ -15,6 +16,9 @@ use Livewire\Component;
 #[Title('تسویه حساب')]
 class CheckoutPage extends Component
 {
+    use PromptsLoginModal;
+
+    public bool $awaitingLogin = false;
     public ?int $addressId = null;
 
     public ?int $shippingMethodId = null;
@@ -44,8 +48,8 @@ class CheckoutPage extends Component
     public function mount(PaymentGatewayCatalog $catalog, ShopCacheService $cache): void
     {
         if (! auth()->check()) {
-            redirect()->setIntendedUrl(route('checkout'));
-            $this->redirect(route('login'), navigate: true);
+            $this->awaitingLogin = true;
+            $this->promptLoginModal(route('checkout'));
 
             return;
         }
@@ -139,6 +143,18 @@ class CheckoutPage extends Component
 
     public function render(CheckoutService $checkout, ShopCacheService $cache, PaymentGatewayCatalog $catalog)
     {
+        if (! auth()->check()) {
+            return view('livewire.checkout.checkout-page', [
+                'preview' => null,
+                'error' => null,
+                'addresses' => collect(),
+                'shippingMethods' => $cache->shippingMethods(),
+                'creditGateways' => $catalog->credit(),
+                'cashGateways' => $catalog->cash(),
+                'awaitingLogin' => true,
+            ]);
+        }
+
         $preview = null;
         $error = null;
 
@@ -159,6 +175,7 @@ class CheckoutPage extends Component
             'shippingMethods' => $cache->shippingMethods(),
             'creditGateways' => $catalog->credit(),
             'cashGateways' => $catalog->cash(),
+            'awaitingLogin' => false,
         ]);
     }
 

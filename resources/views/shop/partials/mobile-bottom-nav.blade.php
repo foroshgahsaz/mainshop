@@ -50,9 +50,10 @@
                 <span class="mobile-bottom-nav__label">حساب کاربری</span>
             </a>
         @else
-            <a href="{{ route('login') }}"
-               class="mobile-bottom-nav__item {{ $isAccount ? 'is-active' : '' }}"
-               @if ($isAccount) aria-current="page" @endif>
+            <button type="button"
+                    data-open-login
+                    class="mobile-bottom-nav__item"
+                    aria-label="ورود / حساب کاربری">
                 <span class="mobile-bottom-nav__icon" aria-hidden="true">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -60,7 +61,7 @@
                     </svg>
                 </span>
                 <span class="mobile-bottom-nav__label">حساب کاربری</span>
-            </a>
+            </button>
         @endauth
     </div>
 </nav>

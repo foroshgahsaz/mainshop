@@ -16,6 +16,15 @@ $app = Application::configure(basePath: dirname(__DIR__))
             'payment/callback',
             'payment/callback/tara',
         ]);
+        $middleware->redirectGuestsTo(function ($request) {
+            if ($request->expectsJson()) {
+                return route('login');
+            }
+
+            session(['url.intended' => $request->fullUrl()]);
+
+            return route('login', ['redirect' => $request->fullUrl()]);
+        });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

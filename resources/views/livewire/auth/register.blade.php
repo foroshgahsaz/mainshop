@@ -30,6 +30,6 @@
     </form>
 
     <p class="mt-4 text-center text-sm">
-        قبلاً ثبت‌نام کرده‌اید؟ <a href="{{ route('login') }}" class="text-[#6c7fd8]">ورود</a>
+        قبلاً ثبت‌نام کرده‌اید؟ <x-shop.login-trigger class="text-[#6c7fd8] font-bold" label="ورود" />
     </p>
 </div>

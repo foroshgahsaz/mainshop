@@ -14,7 +14,7 @@ class MenuItemSeeder extends Seeder
         }
 
         $items = [
-            ['label' => 'محصولات چاپینو', 'item_type' => MenuItem::TYPE_MEGA_TRIGGER, 'link_type' => 'route', 'link_value' => 'products.index', 'location' => MenuItem::LOCATION_DESKTOP, 'position' => 1],
+            ['label' => 'محصولات چینی بازار', 'item_type' => MenuItem::TYPE_MEGA_TRIGGER, 'link_type' => 'route', 'link_value' => 'products.index', 'location' => MenuItem::LOCATION_DESKTOP, 'position' => 1],
             ['label' => 'صفحه اصلی', 'item_type' => MenuItem::TYPE_LINK, 'link_type' => 'route', 'link_value' => 'home', 'location' => MenuItem::LOCATION_BOTH, 'position' => 2],
             ['label' => 'لیست کالاها', 'item_type' => MenuItem::TYPE_LINK, 'link_type' => 'route', 'link_value' => 'products.index', 'location' => MenuItem::LOCATION_BOTH, 'position' => 3],
             ['label' => 'سوالی دارید؟', 'item_type' => MenuItem::TYPE_LINK, 'link_type' => 'page', 'link_value' => 'contact', 'location' => MenuItem::LOCATION_BOTH, 'position' => 4],

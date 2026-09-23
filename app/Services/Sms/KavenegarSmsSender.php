@@ -33,7 +33,7 @@ class KavenegarSmsSender implements SmsSender
         } else {
             $sender = app(\App\Services\Settings\SettingsService::class)->kavenegar()['sender']
                 ?: config('sms.kavenegar.sender');
-            $message = "کد تایید چاپینو: {$code}";
+            $message = 'کد تایید '.site_name().": {$code}";
 
             $response = Http::timeout(15)->get(
                 "https://api.kavenegar.com/v1/{$apiKey}/sms/send.json",

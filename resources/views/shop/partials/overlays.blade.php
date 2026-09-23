@@ -1,5 +1,5 @@
 @php
-    $popularSearches = ['پیراهن', 'کفش', 'پوشاک', 'چاپینو'];
+    $popularSearches = ['پیراهن', 'کفش', 'پوشاک', site_name()];
     $megaColumns = ($navCategories ?? collect())->take(3);
 @endphp
 
@@ -48,7 +48,7 @@
       <form action="{{ route('products.index') }}" method="GET" class="search-modal__form flex-1">
         <input type="text" name="search" value="{{ request('search') }}"
                class="search-modal__input"
-               placeholder="جستجو در تمام محصولات چاپینو..."
+               placeholder="جستجو در تمام محصولات {{ site_name() }}..."
                autocomplete="off">
         <svg class="search-modal__icon w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
@@ -76,7 +76,7 @@
       <div class="search-modal__promo">
         <div>
           <p class="search-modal__promo-text">فروش ویژه</p>
-          <p class="search-modal__promo-title">تخفیف‌های شگفت‌انگیز چاپینو</p>
+          <p class="search-modal__promo-title">تخفیف‌های شگفت‌انگیز {{ site_name() }}</p>
         </div>
         <a href="{{ route('products.index') }}" class="search-modal__promo-btn" onclick="toggleSearchModal(false)">مشاهده کالاها</a>
       </div>

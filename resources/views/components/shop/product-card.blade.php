@@ -16,7 +16,7 @@
         <div class="clothing-card__body">
             <div class="product-card__brand">
                 <span class="product-card__brand-icon" aria-hidden="true"></span>
-                <span>{{ $product->category?->name ?? 'چاپینو' }}</span>
+                <span>{{ $product->category?->name ?? site_name() }}</span>
             </div>
             <h4 class="clothing-card__title">{{ $product->name }}</h4>
             <div class="product-card__price-row">

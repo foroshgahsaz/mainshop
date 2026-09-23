@@ -36,7 +36,7 @@ class ShopDemoSeeder extends Seeder
         $categoryIds = Category::pluck('id', 'slug');
 
         $brands = [
-            ['name' => 'چاپینو', 'slug' => 'chapino', 'position' => 1],
+            ['name' => 'چینی بازار', 'slug' => 'chapino', 'position' => 1],
             ['name' => 'اسنوا', 'slug' => 'snowa', 'position' => 2],
             ['name' => 'پارس', 'slug' => 'pars', 'position' => 3],
             ['name' => 'آذر', 'slug' => 'azar', 'position' => 4],
@@ -54,10 +54,10 @@ class ShopDemoSeeder extends Seeder
         $author = User::updateOrCreate(
             ['phone' => '09120000001'],
             [
-                'name' => 'تحریریه چاپینو',
+                'name' => 'تحریریه چینی بازار',
                 'slug' => 'chapino-editorial',
                 'email' => 'editor@chapino.local',
-                'bio' => 'تیم تحریریه مجله چاپینو',
+                'bio' => 'تیم تحریریه مجله چینی بازار',
                 'is_author' => true,
                 'is_admin' => false,
                 'status' => true,

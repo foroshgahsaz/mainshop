@@ -65,7 +65,7 @@ return [
     ],
 
     'blog' => [
-      'label' => 'مجله چاپینو',
+      'label' => 'مجله چینی بازار',
       'mode' => 'cover',
       'width' => 400,
       'height' => 160,

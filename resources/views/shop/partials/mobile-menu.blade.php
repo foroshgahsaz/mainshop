@@ -6,7 +6,7 @@
        class="shop-mobile-menu__panel"
        onclick="event.stopPropagation()">
     <div class="flex items-center justify-between border-b pb-4">
-      <span class="font-black text-brand-green text-lg">منو چاپینو</span>
+      <span class="font-black text-brand-green text-lg">منو {{ site_name() }}</span>
       <button type="button" onclick="toggleElement('mobileMenu', false)" aria-label="بستن">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path d="M18 6 6 18M6 6l12 12"/>

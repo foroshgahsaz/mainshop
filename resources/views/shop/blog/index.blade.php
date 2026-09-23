@@ -1,10 +1,10 @@
 @extends('layouts.shop')
 
-@section('title', 'مجله چاپینو | ' . site_name())
+@section('title', 'مجله ' . site_name())
 
 @section('content')
 <div class="max-w-site mx-auto px-4 md:px-6 py-6 md:py-10">
-    <h1 class="section-title mb-8">مجله چاپینو</h1>
+    <h1 class="section-title mb-8">مجله {{ site_name() }}</h1>
 
     @if($posts->isEmpty())
         <p class="text-gray-500">مقاله‌ای یافت نشد.</p>

@@ -25,6 +25,9 @@ $app = Application::configure(basePath: dirname(__DIR__))
 
             return route('login', ['redirect' => $request->fullUrl()]);
         });
+        $middleware->web(append: [
+            \App\Http\Middleware\EnsureShopNotInMaintenance::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

@@ -7,6 +7,7 @@ use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\ManageTara;
 use App\Filament\Pages\ManageZarinpal;
 use App\Http\Middleware\SetPersianLocale;
+use App\Services\Settings\SettingsService;
 use Filament\FontProviders\LocalFontProvider;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -34,7 +35,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login(Login::class)
             ->topbar(false)
-            ->brandName('چاپینو')
+            ->brandName(fn () => app(SettingsService::class)->site()['name'])
             ->font('YekanBakh', provider: LocalFontProvider::class)
             ->favicon(asset('shop/images/categories/code.svg'))
             ->colors([

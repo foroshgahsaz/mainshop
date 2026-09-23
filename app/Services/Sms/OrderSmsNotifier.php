@@ -15,7 +15,7 @@ class OrderSmsNotifier
     public function orderPlaced(Order $order): void
     {
         $this->send($order, sprintf(
-            'چاپینو: سفارش %s ثبت شد. مبلغ: %s تومان',
+            site_name().': سفارش %s ثبت شد. مبلغ: %s تومان',
             $order->tracking_code,
             number_format($order->final_amount)
         ));
@@ -24,14 +24,14 @@ class OrderSmsNotifier
     public function orderPaid(Order $order): void
     {
         $this->send($order, sprintf(
-            'چاپینو: پرداخت سفارش %s با موفقیت انجام شد.',
+            site_name().': پرداخت سفارش %s با موفقیت انجام شد.',
             $order->tracking_code
         ));
     }
 
     public function orderShipped(Order $order): void
     {
-        $msg = sprintf('چاپینو: سفارش %s ارسال شد.', $order->tracking_code);
+        $msg = sprintf(site_name().': سفارش %s ارسال شد.', $order->tracking_code);
 
         if ($order->shipping_tracking_code) {
             $msg .= ' رهگیری: '.$order->shipping_tracking_code;
@@ -43,7 +43,7 @@ class OrderSmsNotifier
     public function orderDelivered(Order $order): void
     {
         $this->send($order, sprintf(
-            'چاپینو: سفارش %s تحویل داده شد. از خرید شما سپاسگزاریم.',
+            site_name().': سفارش %s تحویل داده شد. از خرید شما سپاسگزاریم.',
             $order->tracking_code
         ));
     }
@@ -51,7 +51,7 @@ class OrderSmsNotifier
     public function orderCanceled(Order $order): void
     {
         $this->send($order, sprintf(
-            'چاپینو: سفارش %s لغو شد.',
+            site_name().': سفارش %s لغو شد.',
             $order->tracking_code
         ));
     }

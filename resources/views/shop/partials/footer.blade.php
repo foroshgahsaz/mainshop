@@ -181,43 +181,7 @@
             </div>
           </details>
 
-          <div class="site-footer__trust-col">
-            <h4 class="footer-heading hidden md:block">نمادهای اعتماد</h4>
-            <div class="site-footer__trust-badges">
-              <div class="site-footer__trust-badge">
-                <svg class="w-6 h-6 text-gray-300"
-                     fill="none"
-                     stroke="currentColor"
-                     stroke-width="1.5"
-                     viewBox="0 0 24 24">
-                  <path
-                        d="M9 12.75 11.25 15 15 9.75M9 12.75V8.25m12 3.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                </svg>
-                <span>نماد اعتماد<br>الکترونیکی</span>
-              </div>
-              <div class="site-footer__trust-badge">
-                <svg class="w-6 h-6 text-gray-300"
-                     fill="none"
-                     stroke="currentColor"
-                     stroke-width="1.5"
-                     viewBox="0 0 24 24">
-                  <path
-                        d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-                </svg>
-                <span>پرداخت<br>امن</span>
-              </div>
-              <div class="site-footer__trust-badge">
-                <svg class="w-6 h-6 text-gray-300"
-                     fill="none"
-                     stroke="currentColor"
-                     stroke-width="1.5"
-                     viewBox="0 0 24 24">
-                  <path d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a49.902 49.902 0 0 0-2.437-8.336A1.125 1.125 0 0 0 18.375 9H15.75V6.375A2.625 2.625 0 0 0 13.125 3.75h-2.25A2.625 2.625 0 0 0 8.25 6.375V9H5.625a1.125 1.125 0 0 0-1.091 1.416 49.902 49.902 0 0 0-2.437 8.336c-.04.62.469 1.124 1.09 1.124H8.25Z" />
-                </svg>
-                <span>ارسال<br>سریع</span>
-              </div>
-            </div>
-          </div>
+          @include('shop.partials.trust-badges')
         </div>
       </div>
 

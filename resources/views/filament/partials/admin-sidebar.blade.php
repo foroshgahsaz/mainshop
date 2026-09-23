@@ -1,5 +1,6 @@
 @php
     use App\Filament\Pages\ManageGeneralSettings;
+    use App\Filament\Pages\ManageTrustBadges;
     use App\Filament\Pages\ManageIntegrations;
     use App\Filament\Pages\ManageSmsIr;
     use App\Filament\Pages\ManageHomepageImages;
@@ -185,12 +186,14 @@
             'icon' => 'fa-cog',
             'routes' => [
                 'filament.admin.pages.manage-general-settings',
+                'filament.admin.pages.trust-badges',
                 'filament.admin.pages.kavenegar',
                 'filament.admin.pages.sms-ir',
             ],
             'menus' => [
                 ['label' => 'تنظیمات عمومی', 'icon' => 'fa-globe', 'items' => [
                     ['label' => 'مدیریت سایت', 'url' => ManageGeneralSettings::getUrl(), 'icon' => 'fa-cog'],
+                    ['label' => 'مجوزها', 'url' => ManageTrustBadges::getUrl(), 'icon' => 'fa-certificate'],
                 ]],
                 ['label' => 'پیامک', 'icon' => 'fa-sms', 'items' => [
                     ['label' => 'sms.ir', 'url' => ManageSmsIr::getUrl(), 'icon' => 'fa-comment-dots'],

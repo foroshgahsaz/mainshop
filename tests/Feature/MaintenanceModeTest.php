@@ -22,7 +22,8 @@ class MaintenanceModeTest extends TestCase
 
         $response = $this->get(route('home'));
 
-        $response->assertStatus(503);
+        $response->assertOk();
+        $response->assertHeader('X-Maintenance-Mode', '1');
         $response->assertSee('سایت در حال بروزرسانی است');
     }
 
@@ -51,8 +52,20 @@ class MaintenanceModeTest extends TestCase
 
         $response = $this->actingAs($user)->get(route('home'));
 
-        $response->assertStatus(503);
+        $response->assertOk();
+        $response->assertHeader('X-Maintenance-Mode', '1');
         $response->assertSee('سایت در حال بروزرسانی است');
+    }
+
+    public function test_livewire_requests_receive_json_503_during_maintenance(): void
+    {
+        $this->enableMaintenanceMode();
+
+        $response = $this->post('/livewire/update', [], [
+            'Accept' => 'application/json',
+        ]);
+
+        $response->assertStatus(503);
     }
 
     public function test_admin_panel_remains_accessible_during_maintenance(): void

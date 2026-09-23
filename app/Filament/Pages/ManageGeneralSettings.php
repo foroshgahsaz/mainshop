@@ -107,7 +107,7 @@ class ManageGeneralSettings extends Page implements HasForms
                         Forms\Components\Toggle::make('maintenance_mode')
                             ->label('سایت در حال بروزرسانی')
                             ->inline(false)
-                            ->helperText('پنل مدیریت (/admin) همیشه در دسترس مدیران است.'),
+                            ->helperText('پنل مدیریت (/admin) همیشه در دسترس مدیران است. از php artisan down استفاده نکنید — فقط این سوئیچ را فعال کنید.'),
                         Forms\Components\Textarea::make('maintenance_message')
                             ->label('پیام صفحه بروزرسانی')
                             ->rows(3)

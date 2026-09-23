@@ -3,8 +3,10 @@
 namespace App\Providers;
 
 use App\Contracts\SmsSender;
+use App\Filament\Support\CrudErrorNotification;
 use App\Filament\Support\CrudSuccessNotification;
 use App\Filament\Support\FileUploadSanitizer;
+use App\Filament\Support\MissingUploadPathCleaner;
 use App\Http\Controllers\LivewireFileUploadController;
 use App\Models\Brand;
 use App\Models\Category;
@@ -21,6 +23,7 @@ use App\Models\UserAddress;
 use App\Observers\BrandObserver;
 use App\Observers\CategoryObserver;
 use App\Observers\HomeSliderObserver;
+use App\Observers\MediaUsageObserver;
 use App\Observers\MenuItemObserver;
 use App\Observers\PostObserver;
 use App\Observers\ProductImageObserver;
@@ -30,16 +33,19 @@ use App\Policies\OrderPolicy;
 use App\Policies\PaymentPolicy;
 use App\Policies\UserAddressPolicy;
 use App\Services\Cache\ShopCacheService;
-use App\Services\Settings\SettingsService;
-use App\Services\Sms\KavenegarSmsSender;
-use App\Services\Sms\LogSmsSender;
+use App\Services\Media\ImageOptimizer;
+use App\Services\Media\MediaRegistry;
+use App\Services\Sms\SmsSenderFactory;
+use App\Support\MediaPath;
+use App\Support\ShopMedia;
+use App\Support\StoragePermissionFixer;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\ViewAction;
-use Illuminate\Support\Arr;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -49,6 +55,8 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Features\SupportFileUploads\FileUploadController;
+use League\Flysystem\UnableToCheckExistence;
+use League\Flysystem\UnableToCheckFileExistence;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class AppServiceProvider extends ServiceProvider
@@ -57,22 +65,15 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(FileUploadController::class, LivewireFileUploadController::class);
 
-        $this->app->bind(SmsSender::class, function () {
-            $kavenegar = app(SettingsService::class)->kavenegar();
-
-            if (($kavenegar['enabled'] ?? false) && ! empty($kavenegar['api_key'])) {
-                return new KavenegarSmsSender;
-            }
-
-            return match (config('sms.driver')) {
-                'kavenegar' => new KavenegarSmsSender,
-                default => new LogSmsSender,
-            };
-        });
+        $this->app->bind(SmsSender::class, fn () => app(SmsSenderFactory::class)->make());
     }
 
     public function boot(): void
     {
+        if ($this->app->runningInConsole() && StoragePermissionFixer::runningAsRoot()) {
+            StoragePermissionFixer::fix();
+        }
+
         $forceHttps = $this->shouldForceHttps();
 
         if ($forceHttps) {
@@ -115,6 +116,14 @@ class AppServiceProvider extends ServiceProvider
         HomeSlider::observe(HomeSliderObserver::class);
         ShippingMethod::observe(ShippingMethodObserver::class);
 
+        $mediaObserver = app(MediaUsageObserver::class);
+
+        foreach (array_keys(config('media-library.models', [])) as $modelClass) {
+            if (is_string($modelClass) && class_exists($modelClass)) {
+                $modelClass::observe($mediaObserver);
+            }
+        }
+
         View::composer([
             'shop.partials.header',
             'shop.partials.overlays',
@@ -138,6 +147,7 @@ class AppServiceProvider extends ServiceProvider
             $action
                 ->label('افزودن')
                 ->successNotification(CrudSuccessNotification::created())
+                ->failureNotification(CrudErrorNotification::failed())
                 ->beforeFormValidated(function ($action): void {
                     self::sanitizeMountedActionUploads($action);
                 });
@@ -146,6 +156,14 @@ class AppServiceProvider extends ServiceProvider
             $action
                 ->label('ویرایش')
                 ->successNotification(CrudSuccessNotification::saved())
+                ->failureNotification(CrudErrorNotification::failed())
+                ->mutateRecordDataUsing(function (array $data, \Filament\Tables\Actions\EditAction $action): array {
+                    $record = $action->getRecord();
+
+                    return $record instanceof Model
+                        ? MissingUploadPathCleaner::clearFromFormData($data, $record)
+                        : $data;
+                })
                 ->beforeFormValidated(function ($action): void {
                     self::sanitizeMountedActionUploads($action, $action->getRecord());
                 });
@@ -153,18 +171,21 @@ class AppServiceProvider extends ServiceProvider
         \Filament\Tables\Actions\DeleteAction::configureUsing(function ($action): void {
             $action
                 ->label('حذف')
-                ->successNotification(CrudSuccessNotification::deleted());
+                ->successNotification(CrudSuccessNotification::deleted())
+                ->failureNotification(CrudErrorNotification::failed());
         });
         ViewAction::configureUsing(fn ($action) => $action->label('مشاهده'));
         DeleteBulkAction::configureUsing(function ($action): void {
             $action
                 ->label('حذف انتخاب‌شده‌ها')
-                ->successNotification(CrudSuccessNotification::deleted());
+                ->successNotification(CrudSuccessNotification::deleted())
+                ->failureNotification(CrudErrorNotification::failed());
         });
         CreateAction::configureUsing(function ($action): void {
             $action
                 ->label('افزودن')
                 ->successNotification(CrudSuccessNotification::created())
+                ->failureNotification(CrudErrorNotification::failed())
                 ->beforeFormValidated(function ($action): void {
                     self::sanitizeMountedActionUploads($action);
                 });
@@ -173,6 +194,14 @@ class AppServiceProvider extends ServiceProvider
             $action
                 ->label('ویرایش')
                 ->successNotification(CrudSuccessNotification::saved())
+                ->failureNotification(CrudErrorNotification::failed())
+                ->mutateRecordDataUsing(function (array $data, EditAction $action): array {
+                    $record = $action->getRecord();
+
+                    return $record instanceof Model
+                        ? MissingUploadPathCleaner::clearFromFormData($data, $record)
+                        : $data;
+                })
                 ->beforeFormValidated(function ($action): void {
                     self::sanitizeMountedActionUploads($action, $action->getRecord());
                 });
@@ -180,59 +209,130 @@ class AppServiceProvider extends ServiceProvider
         DeleteAction::configureUsing(function ($action): void {
             $action
                 ->label('حذف')
-                ->successNotification(CrudSuccessNotification::deleted());
+                ->successNotification(CrudSuccessNotification::deleted())
+                ->failureNotification(CrudErrorNotification::failed());
         });
 
-        if ($this->app->runningInConsole() || request()->is('admin', 'admin/*')) {
-            FileUpload::configureUsing(function (FileUpload $component): void {
-                $component
-                    ->fetchFileInformation(false)
-                    ->maxSize(51200)
-                    ->imagePreviewHeight('150')
-                    ->helperText('حداکثر ۵۰ مگابایت. اگر خطا دیدید، نام فایل را کوتاه کنید و دوباره انتخاب کنید.')
-                    ->validationMessages([
-                        'uploaded' => 'فایل آپلود نشد. دوباره انتخاب کنید و تا پایان آپلود صبر کنید.',
-                    ])
-                    ->saveUploadedFileUsing(function (TemporaryUploadedFile $file) use ($component): ?string {
-                        $disk = $component->getDiskName();
-                        $directory = trim((string) $component->getDirectory(), '/');
-                        $extension = strtolower((string) ($file->getClientOriginalExtension() ?: $file->extension() ?: 'bin'));
-                        $extension = preg_replace('/[^a-z0-9]+/', '', $extension) ?: 'bin';
-                        $filename = Str::ulid().'.'.$extension;
-                        $relativeDirectory = $directory !== '' ? $directory : 'uploads';
+        FileUpload::configureUsing(function (FileUpload $component): void {
+            $component
+                ->fetchFileInformation(true)
+                ->maxSize(51200)
+                ->imagePreviewHeight('150')
+                ->helperText('تا پایان آپلود (نوار پیشرفت) صبر کنید، بعد ذخیره کنید. حداکثر ۵۰ مگابایت.')
+                ->validationMessages([
+                    'uploaded' => 'فایل آپلود نشد. دوباره انتخاب کنید و تا پایان آپلود صبر کنید.',
+                ])
+                ->getUploadedFileUsing(function (FileUpload $component, mixed $file, string|array|null $storedFileNames): ?array {
+                    if ($file instanceof TemporaryUploadedFile) {
+                        return null;
+                    }
 
-                        if (! $file->isValid()) {
-                            throw ValidationException::withMessages([
-                                $component->getName() => 'فایل موقت آپلود منقضی شده. دوباره انتخاب کنید و تا پایان آپلود صبر کنید.',
-                            ]);
-                        }
+                    if (! is_string($file) || $file === '') {
+                        return null;
+                    }
 
-                        $path = $file->storeAs($relativeDirectory, $filename, ['disk' => $disk]);
+                    $file = MediaPath::normalize($file) ?? ltrim(str_replace('\\', '/', $file), '/');
+                    $storage = $component->getDisk();
+                    $storedName = $component->isMultiple()
+                        ? ($storedFileNames[$file] ?? null)
+                        : $storedFileNames;
+                    $name = is_string($storedName) ? $storedName : basename($file);
 
-                        if (! Storage::disk($disk)->exists($path)) {
-                            throw ValidationException::withMessages([
-                                $component->getName() => 'ذخیره فایل روی سرور انجام نشد. لطفاً دوباره آپلود کنید.',
-                            ]);
-                        }
+                    try {
+                        $exists = $storage->exists($file);
+                    } catch (UnableToCheckExistence|UnableToCheckFileExistence) {
+                        $exists = false;
+                    }
 
-                        return $path;
-                    })
-                    ->rule(static function () {
-                        return static function (string $attribute, mixed $value, \Closure $fail): void {
-                            foreach (Arr::wrap($value) as $file) {
-                                if ($file instanceof TemporaryUploadedFile && ! $file->isValid()) {
-                                    $fail('فایل آپلود نشد. نام فایل را کوتاه کنید، دوباره انتخاب کنید و تا پایان آپلود صبر کنید.');
+                    $url = $component->getVisibility() === 'private'
+                        ? rescue(fn () => $storage->temporaryUrl($file, now()->addMinutes(5)), report: false)
+                        : null;
 
-                                    return;
-                                }
-                            }
-                        };
-                    });
+                    $url ??= rescue(fn () => $storage->url($file), report: false) ?? ShopMedia::url($file);
+
+                    if (! $exists) {
+                        return null;
+                    }
+
+                    if (! $component->shouldFetchFileInformation()) {
+                        return [
+                            'name' => $name,
+                            'size' => 0,
+                            'type' => null,
+                            'url' => $url,
+                        ];
+                    }
+
+                    try {
+                        return [
+                            'name' => $name,
+                            'size' => (int) $storage->size($file),
+                            'type' => $storage->mimeType($file),
+                            'url' => $url,
+                        ];
+                    } catch (\Throwable) {
+                        return [
+                            'name' => $name,
+                            'size' => 0,
+                            'type' => null,
+                            'url' => $url,
+                        ];
+                    }
+                })
+                ->saveUploadedFileUsing(function (TemporaryUploadedFile $file, FileUpload $component): ?string {
+                    $disk = $component->getDiskName();
+                    $directory = trim((string) $component->getDirectory(), '/');
+                    $extension = strtolower((string) ($file->getClientOriginalExtension() ?: $file->extension() ?: 'bin'));
+                    $extension = preg_replace('/[^a-z0-9]+/', '', $extension) ?: 'bin';
+                    $filename = Str::ulid().'.'.$extension;
+                    $relativeDirectory = $directory !== '' ? $directory : 'uploads';
+
+                    if (! $file->isValid()) {
+                        throw ValidationException::withMessages([
+                            $component->getName() => 'فایل موقت آپلود منقضی شده. دوباره انتخاب کنید و تا پایان آپلود صبر کنید.',
+                        ]);
+                    }
+
+                    $path = $file->storeAs($relativeDirectory, $filename, ['disk' => $disk]);
+
+                    if (! Storage::disk($disk)->exists($path)) {
+                        throw ValidationException::withMessages([
+                            $component->getName() => 'ذخیره فایل روی سرور انجام نشد. لطفاً دوباره آپلود کنید.',
+                        ]);
+                    }
+
+                    $path = app(ImageOptimizer::class)->optimize($disk, $path, $relativeDirectory);
+
+                    app(MediaRegistry::class)->registerFromPath(
+                        $disk,
+                        $path,
+                        $file->getClientOriginalName(),
+                    );
+
+                    return $path;
+                })
+                ->deleteUploadedFileUsing(function (): void {
+                    // Physical files are kept until shop:prune-unused-media removes orphans.
+                });
+        }, isImportant: true);
+
+        FileUpload::configureUsing(function (FileUpload $component): void {
+            $component->afterStateHydrated(function (FileUpload $component, $state): void {
+                if (is_string($state) && filled($state)) {
+                    $path = MediaPath::normalize($state) ?? $state;
+                    $component->state($path !== '' ? [(string) Str::uuid() => $path] : []);
+
+                    return;
+                }
+
+                if (blank($state)) {
+                    $component->state([]);
+                }
             });
-        }
+        }, isImportant: true);
     }
 
-    protected static function sanitizeMountedActionUploads(object $action, ?\Illuminate\Database\Eloquent\Model $record = null): void
+    protected static function sanitizeMountedActionUploads(object $action, ?Model $record = null): void
     {
         $livewire = $action->getLivewire();
 

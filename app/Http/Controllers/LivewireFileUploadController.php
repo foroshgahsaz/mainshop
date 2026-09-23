@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Support\LivewireUploadFilename;
+use App\Support\StoragePermissionFixer;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
@@ -95,15 +96,16 @@ class LivewireFileUploadController extends BaseFileUploadController
             $storage->makeDirectory($storePath);
         }
 
-        if (! is_writable($absoluteDir)) {
+        if (! StoragePermissionFixer::isDirectoryWritable($absoluteDir)) {
             Log::error('livewire.upload.dir_not_writable', [
                 'disk' => $disk,
                 'absolute' => $absoluteDir,
                 'perms' => is_dir($absoluteDir) ? substr(sprintf('%o', fileperms($absoluteDir)), -4) : null,
+                'owner' => is_dir($absoluteDir) ? fileowner($absoluteDir) : null,
             ]);
 
             throw ValidationException::withMessages([
-                'files' => 'پوشه آپلود قابل نوشتن نیست. روی سرور اجرا کنید: php artisan shop:fix-storage-permissions',
+                'files' => 'پوشه آپلود قابل نوشتن نیست. روی سرور (به‌عنوان root) اجرا کنید: chown -R www-data:www-data /data/livewire-tmp && chmod -R 775 /data/livewire-tmp',
             ]);
         }
 

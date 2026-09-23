@@ -1,6 +1,9 @@
 @php
     use App\Filament\Pages\ManageGeneralSettings;
     use App\Filament\Pages\ManageIntegrations;
+    use App\Filament\Pages\ManageSmsIr;
+    use App\Filament\Pages\ManageHomepageImages;
+    use App\Filament\Pages\ManageMediaPresets;
     use App\Filament\Pages\ManageTara;
     use App\Filament\Pages\ManageZarinpal;
     use App\Filament\Resources\AttributeResource;
@@ -8,6 +11,7 @@
     use App\Filament\Resources\CategoryResource;
     use App\Filament\Resources\CouponResource;
     use App\Filament\Resources\HomeSliderResource;
+    use App\Filament\Resources\MediaFileResource;
     use App\Filament\Resources\MenuItemResource;
     use App\Filament\Resources\OrderResource;
     use App\Filament\Resources\PageResource;
@@ -158,19 +162,39 @@
                 ]],
             ],
         ],
+        'media' => [
+            'label' => 'مدیریت فایل',
+            'icon' => 'fa-folder-open',
+            'routes' => [
+                'filament.admin.resources.media-files.*',
+                'filament.admin.pages.media-presets',
+                'filament.admin.pages.homepage-images',
+            ],
+            'menus' => [
+                ['label' => 'کتابخانه رسانه', 'icon' => 'fa-photo-film', 'items' => [
+                    ['label' => 'همه فایل‌ها', 'url' => MediaFileResource::getUrl('index'), 'icon' => 'fa-images'],
+                ]],
+                ['label' => 'تنظیمات تصویر', 'icon' => 'fa-crop', 'items' => [
+                    ['label' => 'سایز آپلود', 'url' => ManageMediaPresets::getUrl(), 'icon' => 'fa-sliders'],
+                    ['label' => 'تامبنیل صفحه اصلی', 'url' => ManageHomepageImages::getUrl(), 'icon' => 'fa-image'],
+                ]],
+            ],
+        ],
         'settings' => [
             'label' => 'تنظیمات',
             'icon' => 'fa-cog',
             'routes' => [
                 'filament.admin.pages.manage-general-settings',
                 'filament.admin.pages.kavenegar',
+                'filament.admin.pages.sms-ir',
             ],
             'menus' => [
                 ['label' => 'تنظیمات عمومی', 'icon' => 'fa-globe', 'items' => [
                     ['label' => 'مدیریت سایت', 'url' => ManageGeneralSettings::getUrl(), 'icon' => 'fa-cog'],
                 ]],
                 ['label' => 'پیامک', 'icon' => 'fa-sms', 'items' => [
-                    ['label' => 'کاوه‌نگار', 'url' => ManageIntegrations::getUrl(), 'icon' => 'fa-comment-dots'],
+                    ['label' => 'sms.ir', 'url' => ManageSmsIr::getUrl(), 'icon' => 'fa-comment-dots'],
+                    ['label' => 'کاوه‌نگار', 'url' => ManageIntegrations::getUrl(), 'icon' => 'fa-comment-sms'],
                 ]],
             ],
         ],
@@ -204,6 +228,7 @@
         ['id' => 'content', 'icon' => 'fa-newspaper', 'tooltip' => 'محتوا', 'panel' => 'content'],
         ['id' => 'shipping', 'icon' => 'fa-truck', 'tooltip' => 'ارسال', 'panel' => 'shipping'],
         ['id' => 'gateways', 'icon' => 'fa-plug', 'tooltip' => 'درگاه‌ها', 'panel' => 'gateways'],
+        ['id' => 'media', 'icon' => 'fa-folder-open', 'tooltip' => 'مدیریت فایل', 'panel' => 'media'],
         ['id' => 'settings', 'icon' => 'fa-cog', 'tooltip' => 'تنظیمات', 'panel' => 'settings'],
     ];
 

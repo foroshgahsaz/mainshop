@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Product;
 
+use App\Livewire\Concerns\PromptsLoginModal;
 use App\Models\Product;
 use App\Models\ProductQuestion;
 use Illuminate\Contracts\View\View;
@@ -10,6 +11,7 @@ use Livewire\WithPagination;
 
 class Questions extends Component
 {
+    use PromptsLoginModal;
     use WithPagination;
 
     public Product $product;
@@ -24,7 +26,7 @@ class Questions extends Component
     public function submitQuestion(): void
     {
         if (! auth()->check()) {
-            $this->redirect(route('login'), navigate: true);
+            $this->promptLoginModal();
 
             return;
         }

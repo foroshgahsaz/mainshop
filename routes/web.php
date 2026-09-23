@@ -10,6 +10,7 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\ThumbnailController;
 use App\Livewire\Account\AccountDashboard;
 use App\Livewire\Account\AddressManager;
 use App\Livewire\Account\OrderList;
@@ -22,6 +23,10 @@ use App\Livewire\Auth\Register;
 use App\Livewire\Cart\CartPage;
 use App\Livewire\Checkout\CheckoutPage;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/thumb/{section}/{path}', ThumbnailController::class)
+    ->where('path', '.*')
+    ->name('shop.thumbnail');
 
 Route::get('/data/{path}', function (string $path) {
     $path = ltrim($path, '/');
@@ -78,7 +83,7 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::get('/cart', CartPage::class)->name('cart');
-Route::get('/checkout', CheckoutPage::class)->name('checkout')->middleware('auth');
+Route::get('/checkout', CheckoutPage::class)->name('checkout');
 Route::match(['get', 'post'], '/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');
 Route::match(['get', 'post'], '/payment/callback/tara', [PaymentController::class, 'taraCallback'])->name('payment.callback.tara');
 Route::get('/payment/tara/{tracking}', [PaymentController::class, 'taraRedirect'])->name('payment.tara.redirect');

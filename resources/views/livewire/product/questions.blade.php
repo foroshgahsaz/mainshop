@@ -31,7 +31,7 @@
     @else
         <div class="product-qa__login">
             <p>برای ثبت پرسش ابتدا وارد حساب کاربری شوید.</p>
-            <a href="{{ route('login') }}" class="product-qa__login-btn">ورود / ثبت‌نام</a>
+            <x-shop.login-trigger class="product-qa__login-btn" />
         </div>
     @endauth
 

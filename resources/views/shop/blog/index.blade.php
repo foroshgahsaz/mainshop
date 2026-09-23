@@ -1,6 +1,6 @@
 @extends('layouts.shop')
 
-@section('title', 'مجله ' . site_name() . ' | ' . config('app.name'))
+@section('title', 'مجله ' . site_name())
 
 @section('content')
 <div class="max-w-site mx-auto px-4 md:px-6 py-6 md:py-10">

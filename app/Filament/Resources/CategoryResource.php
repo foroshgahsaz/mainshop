@@ -3,8 +3,10 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\CategoryResource\Pages;
+use App\Filament\Support\AdminImageColumn;
 use App\Filament\Support\AdminTable;
 use App\Filament\Support\SeoFormSchema;
+use App\Filament\Support\ShopMediaPicker;
 use App\Models\Category;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -55,12 +57,7 @@ class CategoryResource extends Resource
                         ->label('توضیحات')
                         ->rows(4)
                         ->columnSpanFull(),
-                    Forms\Components\FileUpload::make('image')
-                        ->label('تصویر')
-                        ->image()
-                        ->disk('public')
-                        ->directory('categories')
-                        ->columnSpanFull(),
+                    ShopMediaPicker::image('image', 'categories', 'تصویر')->columnSpanFull(),
                     Forms\Components\Toggle::make('is_active')
                         ->label('فعال')
                         ->default(true),
@@ -87,6 +84,7 @@ class CategoryResource extends Resource
     {
         return AdminTable::configure($table)
             ->columns([
+                AdminImageColumn::make('image', 48, 'تصویر'),
                 Tables\Columns\TextColumn::make('name')->label('نام')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('parent.name')->label('والد')->placeholder('—'),
                 Tables\Columns\IconColumn::make('show_in_mega')->label('مگامenu')->boolean(),

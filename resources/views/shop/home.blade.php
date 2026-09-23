@@ -1,6 +1,6 @@
 @extends('layouts.shop')
 
-@section('title', config('app.name') . ' | فروشگاه آنلاین')
+@section('title', site_name() . ' | فروشگاه آنلاین')
 
 @section('content')
     @if(session('success'))
@@ -16,11 +16,7 @@
                 @forelse($sliders as $i => $slider)
                     <div class="swiper-slide">
                         @php
-                            $url = str_starts_with($slider->image, 'http')
-                                ? $slider->image
-                                : (str_starts_with($slider->image, 'shop/')
-                                    ? asset($slider->image)
-                                    : \App\Support\ShopMedia::url($slider->image));
+                            $url = \App\Support\ShopFormatter::sectionImage('hero', $slider->image, 'shop/images/hero/slide-ai.svg');
                         @endphp
                         @if($slider->link)
                             <a href="{{ $slider->link }}" class="hero-slide__link">
@@ -58,7 +54,9 @@
                     @foreach($categories as $category)
                         <div class="swiper-slide">
                             <a href="{{ route('categories.show', $category) }}" class="category-card">
-                                <img src="{{ \App\Support\ShopFormatter::categoryImage($category->image) }}" alt="{{ $category->name }}" loading="lazy">
+                                <span class="category-card__image">
+                                    <img src="{{ \App\Support\ShopFormatter::categoryImage($category->image) }}" alt="{{ $category->name }}" loading="lazy">
+                                </span>
                                 <span>{{ $category->name }}</span>
                             </a>
                         </div>
@@ -68,36 +66,35 @@
         </section>
     @endif
 
-    {{-- DISCOUNTED / FEATURED DEALS --}}
+    {{-- SPECIAL SALE --}}
     @if($discounted->isNotEmpty())
-        <section class="featured-deals-section">
-            <div class="featured-deals-section__container">
-                <div class="featured-deals-box">
-                    <div class="featured-deals-box__pattern" aria-hidden="true"></div>
-                    <div class="featured-deals-slider product-slider-overlay">
-                        <div class="featured-deals-slider__nav">
-                            <button type="button" data-swiper-prev class="featured-deals-nav-btn" aria-label="قبلی">‹</button>
-                            <button type="button" data-swiper-next class="featured-deals-nav-btn" aria-label="بعدی">›</button>
-                        </div>
-                        <div class="swiper featuredDealsSwiper">
-                            <div class="swiper-wrapper">
-                                <div class="swiper-slide swiper-slide--promo h-auto">
-                                    <div class="featured-deals-promo">
-                                        <p class="featured-deals-promo__heading">پیشنهاد<br>شگفت‌انگیز</p>
-                                    </div>
-                                </div>
-                                @foreach($discounted as $product)
-                                    <div class="swiper-slide swiper-slide--product h-auto">
-                                        <x-shop.deal-card :product="$product" />
-                                    </div>
-                                @endforeach
-                                <div class="swiper-slide swiper-slide--view-all h-auto">
-                                    <a href="{{ route('products.index') }}" class="deal-view-all-card">
-                                        <span class="deal-view-all-card__text">مشاهده همه</span>
-                                    </a>
-                                </div>
+        <section class="special-sale-section featured-deals-section">
+            <div class="max-w-site mx-auto px-4">
+                <div class="special-sale-header section-header">
+                    <h2 class="section-title">فروش ویژه</h2>
+                    <div class="special-sale-header__actions">
+                        <a href="{{ route('products.index') }}" class="section-nav-link">مشاهده همه</a>
+                        <button type="button" class="special-sale-nav-btn" data-swiper-prev aria-label="قبلی">
+                            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                <path d="M7.5 4.5 13 10l-5.5 5.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                        <button type="button" class="special-sale-nav-btn" data-swiper-next aria-label="بعدی">
+                            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                <path d="M12.5 4.5 7 10l5.5 5.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="special-sale-slider max-w-site mx-auto">
+                <div class="swiper featuredDealsSwiper">
+                    <div class="swiper-wrapper">
+                        @foreach($discounted as $product)
+                            <div class="swiper-slide h-auto">
+                                <x-shop.deal-card :product="$product" section="deals" />
                             </div>
-                        </div>
+                        @endforeach
                     </div>
                 </div>
             </div>
@@ -118,7 +115,7 @@
                     <div class="swiper-wrapper">
                         @foreach($new as $product)
                             <div class="swiper-slide h-auto">
-                                <x-shop.product-card :product="$product" variant="clothing" />
+                                <x-shop.product-card :product="$product" variant="clothing" section="new_products" />
                             </div>
                         @endforeach
                     </div>
@@ -138,7 +135,7 @@
                     <div class="swiper-wrapper">
                         @foreach($best_sellers as $product)
                             <div class="swiper-slide h-auto">
-                                <x-shop.product-card :product="$product" variant="scroll" />
+                                <x-shop.product-card :product="$product" variant="scroll" section="best_sellers" />
                             </div>
                         @endforeach
                     </div>
@@ -162,7 +159,7 @@
                                 <article class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
                                     <a href="{{ route('blog.show', $post) }}">
                                         <div class="relative">
-                                            <img src="{{ $post->image ? \App\Support\ShopMedia::url($post->image) : asset('shop/images/blog/article-1.svg') }}" alt="{{ $post->title }}" class="w-full h-40 object-cover" loading="lazy">
+                                            <img src="{{ \App\Support\ShopFormatter::sectionImage('blog', $post->image, 'shop/images/blog/article-1.svg') }}" alt="{{ $post->title }}" class="w-full h-40 object-cover" loading="lazy">
                                         </div>
                                     </a>
                                     <div class="p-4">

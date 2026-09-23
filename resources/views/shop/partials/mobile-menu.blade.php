@@ -47,7 +47,8 @@
 
     @guest
       <button type="button"
-              onclick="toggleElement('mobileMenu', false); toggleElement('loginModal', true)"
+              data-open-login
+              onclick="toggleElement('mobileMenu', false)"
               class="mt-auto bg-brand-gold text-white py-3 rounded-xl font-bold text-sm">
         ورود / ثبت نام
       </button>

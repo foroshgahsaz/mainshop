@@ -10,14 +10,19 @@
 
         <h1 class="text-xl md:text-2xl font-black text-navy mb-6">تسویه حساب</h1>
 
-        @if ($error)
+        @if ($awaitingLogin ?? false)
+            <div class="shop-card p-6 md:p-8 text-center max-w-lg mx-auto">
+                <p class="text-gray-600 mb-4">برای تکمیل خرید ابتدا وارد حساب کاربری شوید.</p>
+                <x-shop.login-trigger class="shop-btn-primary inline-flex" :redirect="route('checkout')" />
+            </div>
+        @elseif ($error)
             <div class="mb-4 p-3 bg-red-50 text-red-700 rounded-xl text-sm">{{ $error }}</div>
         @endif
         @if (session('error'))
             <div class="mb-4 p-3 bg-red-50 text-red-700 rounded-xl text-sm">{{ session('error') }}</div>
         @endif
 
-        @if ($preview)
+        @if (! ($awaitingLogin ?? false) && $preview)
             <form wire:submit="placeOrder" id="checkoutForm" class="checkout-layout">
                 <div class="checkout-row">
                     <section class="shop-card checkout-card">

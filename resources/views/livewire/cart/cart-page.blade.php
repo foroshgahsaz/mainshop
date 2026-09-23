@@ -1,3 +1,7 @@
+@php
+    $itemCount = (int) ($summary['item_count'] ?? $items->count());
+@endphp
+
 <div class="shop-page-wrap @if(!$items->isEmpty()) shop-page-wrap--has-mobile-bar @endif">
     <div class="max-w-site mx-auto px-4 py-6 md:py-10">
         <nav class="flex items-center gap-2 text-xs text-gray-400 mb-6">
@@ -5,8 +9,6 @@
             <span>/</span>
             <span class="text-gray-600">سبد خرید</span>
         </nav>
-
-        <h1 class="text-xl md:text-2xl font-black text-navy mb-6">سبد خرید</h1>
 
         @if (session('success'))
             <div class="mb-4 p-3 bg-emerald-50 text-emerald-700 rounded-xl text-sm">{{ session('success') }}</div>
@@ -16,8 +18,8 @@
         @endif
 
         @if ($items->isEmpty())
-            <div class="shop-card p-12 text-center">
-                <svg class="w-20 h-20 text-gray-200 mx-auto mb-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <div class="cart-invoice cart-invoice--empty">
+                <svg class="w-16 h-16 text-gray-200 mx-auto mb-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                     <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
                     <path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" />
                 </svg>
@@ -26,89 +28,108 @@
                 <a href="{{ route('products.index') }}" class="shop-btn-primary inline-flex">مشاهده محصولات</a>
             </div>
         @else
-            <div class="flex flex-col lg:flex-row gap-6 lg:gap-8">
-                <div class="flex-1 space-y-4">
-                    @foreach ($items as $item)
-                        <div class="shop-card p-4 flex flex-col sm:flex-row gap-4"
-                             wire:key="cart-page-{{ $item['product_id'] }}-{{ $item['product_variant_id'] ?? 0 }}">
-                            <a href="{{ $item['url'] }}" class="shrink-0">
-                                <img src="{{ $item['image'] }}"
-                                     alt="{{ $item['product_name'] }}"
-                                     class="w-24 h-24 rounded-xl bg-gray-50 object-contain p-1">
-                            </a>
-                            <div class="flex-1 min-w-0 flex flex-col justify-between gap-3">
-                                <div>
-                                    <a href="{{ $item['url'] }}" class="font-bold text-sm md:text-base text-navy hover:text-brand-green line-clamp-2">
-                                        {{ $item['product_name'] }}
-                                    </a>
-                                    @if (! empty($item['sku']))
-                                        <p class="text-xs text-gray-400 mt-1">کد: {{ $item['sku'] }}</p>
-                                    @endif
-                                    <p class="text-brand-green font-black mt-2">{{ number_format($item['price']) }} تومان</p>
-                                </div>
-                                <div class="flex items-center justify-between gap-4">
-                                    <div class="shop-qty-control">
-                                        @php $variantArg = ($item['product_variant_id'] ?? null) !== null ? $item['product_variant_id'] : 'null'; @endphp
+            <div class="cart-invoice">
+                <header class="cart-invoice__head">
+                    <div>
+                        <h1 class="cart-invoice__title">فاکتور سبد خرید</h1>
+                        <p class="cart-invoice__meta">{{ $itemCount }} قلم کالا</p>
+                    </div>
+                    <a href="{{ route('products.index') }}" class="cart-invoice__continue">ادامه خرید</a>
+                </header>
+
+                <div class="cart-invoice__table-wrap">
+                    <table class="cart-invoice__table">
+                        <thead>
+                            <tr>
+                                <th class="cart-invoice__col-index">ردیف</th>
+                                <th class="cart-invoice__col-item">شرح کالا</th>
+                                <th>قیمت واحد</th>
+                                <th>تعداد</th>
+                                <th>مبلغ</th>
+                                <th class="cart-invoice__col-action"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($items as $item)
+                                @php $variantArg = ($item['product_variant_id'] ?? null) !== null ? $item['product_variant_id'] : 'null'; @endphp
+                                <tr wire:key="cart-page-{{ $item['product_id'] }}-{{ $item['product_variant_id'] ?? 0 }}">
+                                    <td class="cart-invoice__col-index" data-label="ردیف">{{ $loop->iteration }}</td>
+                                    <td class="cart-invoice__product" data-label="شرح کالا">
+                                        <a href="{{ $item['url'] }}" class="cart-invoice__product-link">
+                                            <img src="{{ $item['image'] }}" alt="{{ $item['product_name'] }}">
+                                            <span>
+                                                <strong>{{ $item['product_name'] }}</strong>
+                                                @if (! empty($item['sku']))
+                                                    <small>کد: {{ $item['sku'] }}</small>
+                                                @endif
+                                            </span>
+                                        </a>
+                                    </td>
+                                    <td data-label="قیمت واحد">{{ number_format($item['price']) }} <span>تومان</span></td>
+                                    <td data-label="تعداد">
+                                        <div class="shop-qty-control">
+                                            <button type="button"
+                                                    wire:click="decrementQuantity({{ $item['product_id'] }}, {{ $variantArg }})"
+                                                    class="shop-qty-btn">−</button>
+                                            <span class="shop-qty-value">{{ $item['quantity'] }}</span>
+                                            <button type="button"
+                                                    wire:click="incrementQuantity({{ $item['product_id'] }}, {{ $variantArg }})"
+                                                    class="shop-qty-btn">+</button>
+                                        </div>
+                                    </td>
+                                    <td class="cart-invoice__line-total" data-label="مبلغ">
+                                        {{ number_format($item['price'] * $item['quantity']) }} <span>تومان</span>
+                                    </td>
+                                    <td class="cart-invoice__col-action">
                                         <button type="button"
-                                                wire:click="decrementQuantity({{ $item['product_id'] }}, {{ $variantArg }})"
-                                                class="shop-qty-btn">−</button>
-                                        <span class="shop-qty-value">{{ $item['quantity'] }}</span>
-                                        <button type="button"
-                                                wire:click="incrementQuantity({{ $item['product_id'] }}, {{ $variantArg }})"
-                                                class="shop-qty-btn">+</button>
-                                    </div>
-                                    <button wire:click="remove({{ $item['product_id'] }}, {{ $variantArg }})"
-                                            class="text-red-500 text-sm font-medium hover:text-red-700">
-                                        حذف
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
+                                                wire:click="remove({{ $item['product_id'] }}, {{ $variantArg }})"
+                                                class="cart-invoice__remove">
+                                            حذف
+                                        </button>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
 
-                <aside class="lg:w-80 shrink-0">
-                    <div class="shop-card p-5 lg:sticky lg:top-24 space-y-4">
-                        <h2 class="font-bold text-navy border-b border-gray-100 pb-3">خلاصه سفارش</h2>
-                        <div class="space-y-2 text-sm">
-                            <div class="flex justify-between text-gray-600">
-                                <span>جمع کالاها ({{ $summary['item_count'] }} قلم)</span>
-                                <span>{{ number_format($summary['subtotal']) }} تومان</span>
-                            </div>
-                            @if ($summary['discount'] > 0)
-                                <div class="flex justify-between text-emerald-600">
-                                    <span>تخفیف</span>
-                                    <span>− {{ number_format($summary['discount']) }} تومان</span>
-                                </div>
-                            @endif
-                            <div class="flex justify-between text-gray-600">
-                                <span>
-                                    هزینه ارسال
-                                    @if ($summary['shipping_method'])
-                                        <span class="text-[11px] text-gray-400">({{ $summary['shipping_method'] }})</span>
-                                    @endif
-                                </span>
-                                <span>
-                                    @if ($summary['shipping'] === 0)
-                                        <span class="text-emerald-600 font-medium">رایگان</span>
-                                    @else
-                                        {{ number_format($summary['shipping']) }} تومان
-                                    @endif
-                                </span>
-                            </div>
+                <div class="cart-invoice__totals">
+                    <h2>خلاصه فاکتور</h2>
+                    <dl>
+                        <div>
+                            <dt>جمع کالاها ({{ $itemCount }} قلم)</dt>
+                            <dd>{{ number_format($summary['subtotal']) }} تومان</dd>
                         </div>
-                        <div class="flex justify-between items-center border-t border-gray-100 pt-4">
-                            <span class="font-bold text-navy">مبلغ قابل پرداخت</span>
-                            <span class="text-lg font-black text-brand-green">{{ number_format($summary['total']) }} تومان</span>
+                        @if ($summary['discount'] > 0)
+                            <div class="is-discount">
+                                <dt>تخفیف</dt>
+                                <dd>− {{ number_format($summary['discount']) }} تومان</dd>
+                            </div>
+                        @endif
+                        <div>
+                            <dt>
+                                هزینه ارسال
+                                @if ($summary['shipping_method'])
+                                    <small>({{ $summary['shipping_method'] }})</small>
+                                @endif
+                            </dt>
+                            <dd>
+                                @if ($summary['shipping'] === 0)
+                                    <span class="is-free">رایگان</span>
+                                @else
+                                    {{ number_format($summary['shipping']) }} تومان
+                                @endif
+                            </dd>
                         </div>
-                        <a href="{{ route('checkout') }}" class="shop-btn-gold block text-center w-full">
-                            ادامه و تسویه حساب
-                        </a>
-                        <a href="{{ route('products.index') }}" class="block text-center text-xs text-gray-500 hover:text-brand-green py-1">
-                            ادامه خرید
-                        </a>
-                    </div>
-                </aside>
+                        <div class="is-payable">
+                            <dt>مبلغ قابل پرداخت</dt>
+                            <dd>{{ number_format($summary['total']) }} تومان</dd>
+                        </div>
+                    </dl>
+                    <a href="{{ route('checkout') }}" class="shop-btn-gold cart-invoice__checkout">
+                        ادامه و تسویه حساب
+                    </a>
+                </div>
             </div>
 
             <div class="shop-mobile-bar lg:hidden" aria-label="خلاصه سبد خرید">

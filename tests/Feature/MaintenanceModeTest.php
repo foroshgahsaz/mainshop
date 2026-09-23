@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use App\Services\Settings\SettingsService;
+use App\Services\Settings\TrustBadgeService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -57,15 +58,14 @@ class MaintenanceModeTest extends TestCase
         $response->assertSee('سایت در حال بروزرسانی است');
     }
 
-    public function test_livewire_requests_receive_json_503_during_maintenance(): void
+    public function test_json_requests_receive_503_during_maintenance(): void
     {
         $this->enableMaintenanceMode();
 
-        $response = $this->post('/livewire/update', [], [
-            'Accept' => 'application/json',
-        ]);
+        $response = $this->getJson(route('home'));
 
         $response->assertStatus(503);
+        $response->assertJsonStructure(['message']);
     }
 
     public function test_admin_panel_remains_accessible_during_maintenance(): void

@@ -67,11 +67,9 @@
         <div class="lg:col-span-4 pb-6 md:pb-0 border-b md:border-b-0 border-gray-100">
           <a href="{{ route('home') }}"
              class="inline-flex items-center gap-2.5">
-            <span
-                  class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-green to-accent-teal flex items-center justify-center text-white text-base font-black">چ</span>
-            <span class="text-2xl font-black text-navy">چاپینو</span>
+            <span class="text-2xl font-black text-navy">{{ site_name() }}</span>
           </a>
-          <p class="text-sm text-gray-500 leading-7 mt-4">فروشگاه اینترنتی چاپینو؛ مرجع خرید کالای دیجیتال، لوازم خانگی، پوشاک و
+          <p class="text-sm text-gray-500 leading-7 mt-4">فروشگاه اینترنتی {{ site_name() }}؛ مرجع خرید کالای دیجیتال، لوازم خانگی، پوشاک و
             دوره‌های آموزشی با بهترین قیمت، ارسال سریع و پشتیبانی واقعی.</p>
           <div class="site-footer__brand-contact mt-4 space-y-2.5">
             <div class="site-footer__contact-item">
@@ -174,7 +172,7 @@
                 <li><a href="{{ route('products.index') }}"
                      class="footer-link">دسته‌بندی‌ها</a></li>
                 <li><a href="{{ route('blog.index') }}"
-                     class="footer-link">مجله چاپینو</a></li>
+                     class="footer-link">مجله {{ site_name() }}</a></li>
                 <li><a href="{{ route('pages.show', 'refund-policy') }}"
                      class="footer-link">شرایط بازگشت کالا</a></li>
               </ul>
@@ -222,17 +220,17 @@
       </div>
 
       <div class="site-footer__about">
-        <p>چاپینو با هدف ارائه تجربه خرید آنلاین ساده، مطمئن و سریع برای خانواده‌های ایرانی فعالیت می‌کند.</p>
+        <p>{{ site_name() }} با هدف ارائه تجربه خرید آنلاین ساده، مطمئن و سریع برای خانواده‌های ایرانی فعالیت می‌کند.</p>
         <p>ما مجموعه‌ای منتخب از کالاهای دیجیتال، لوازم خانگی، پوشاک و دوره‌های آموزشی را با قیمت رقابتی عرضه می‌کنیم.</p>
         <p>تمامی سفارش‌ها با بسته‌بندی استاندارد، پشتیبانی پاسخگو و امکان پیگیری آنلاین برای مشتریان ارسال می‌شوند.</p>
-        <p>اعتماد شما سرمایه ماست؛ چاپینو همراه مطمئن خرید اینترنتی شماست.</p>
+        <p>اعتماد شما سرمایه ماست؛ {{ site_name() }} همراه مطمئن خرید اینترنتی شماست.</p>
       </div>
     </div>
 
     <!-- Bottom bar -->
     <div class="site-footer__bottom">
       <div class="max-w-site mx-auto px-4 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <p class="text-xs leading-6 text-center sm:text-right">© ۱۴۰۵ چاپینو — تمامی حقوق این وب‌سایت محفوظ است.</p>
+        <p class="text-xs leading-6 text-center sm:text-right">© ۱۴۰۵ {{ site_name() }} — تمامی حقوق این وب‌سایت محفوظ است.</p>
         <div class="flex items-center justify-center sm:justify-end gap-4 text-xs">
           <a href="{{ route('pages.show', 'terms') }}"
              class="hover:text-white transition-colors">قوانین و مقررات</a>

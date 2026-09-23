@@ -14,7 +14,7 @@
                     <div class="text-center">
                         <div class="logo-small mx-auto mb-4" style="width:64px;height:64px;font-size:28px;">چ</div>
                         <h2 class="fw-bold mb-3">{{ filament()->getBrandName() }}</h2>
-                        <p class="mb-0 opacity-75">پنل مدیریت فروشگاه چاپینو</p>
+                        <p class="mb-0 opacity-75">پنل مدیریت فروشگاه {{ site_name() }}</p>
                     </div>
                 </div>
                 <div class="col-lg-6 p-4 p-md-5">

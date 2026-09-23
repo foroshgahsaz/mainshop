@@ -31,8 +31,8 @@ class SampleProductsSeeder extends Seeder
         $brandChapino = Brand::updateOrCreate(
             ['slug' => 'chapino'],
             [
-                'name' => 'چاپینو',
-                'description' => 'برند اختصاصی فروشگاه چاپینو',
+                'name' => 'چینی بازار',
+                'description' => 'برند اختصاصی فروشگاه چینی بازار',
                 'is_active' => true,
                 'position' => 1,
             ]
@@ -103,10 +103,10 @@ class SampleProductsSeeder extends Seeder
                 'stock' => 45,
                 'sku' => 'SHIRT-001',
                 'short_description' => 'پیراهن مردانه با پارچه نخی درجه یک، مناسب محیط کار و مهمانی.',
-                'description' => 'پیراهن مردانه کلاسیک چاپینو با دوخت مرغوب، یقه استاندارد و رنگ‌بندی متنوع. قابل شستشو با ماشین لباسشویی.',
+                'description' => 'پیراهن مردانه کلاسیک چینی بازار با دوخت مرغوب، یقه استاندارد و رنگ‌بندی متنوع. قابل شستشو با ماشین لباسشویی.',
                 'weight' => 320,
                 'is_featured' => true,
-                'meta_title' => 'پیراهن مردانه کلاسیک | چاپینو',
+                'meta_title' => 'پیراهن مردانه کلاسیک | چینی بازار',
                 'meta_description' => 'خرید پیراهن مردانه کلاسیک با قیمت مناسب، ارسال سریع و ضمانت اصالت کالا.',
             ],
             attributes: [$colorAttr, $sizeAttr, $fabricAttr],
@@ -132,7 +132,7 @@ class SampleProductsSeeder extends Seeder
                 'description' => 'کفش چرم ورزشی مردانه با طراحی مدرن، دوام بالا و راحتی استثنایی. مناسب فصل پاییز و زمستان.',
                 'weight' => 780,
                 'is_featured' => true,
-                'meta_title' => 'کفش چرم ورزشی مردانه | چاپینو',
+                'meta_title' => 'کفش چرم ورزشی مردانه | چینی بازار',
                 'meta_description' => 'خرید کفش چرم مردانه با کیفیت بالا، رنگ و سایز متنوع.',
             ],
             attributes: [$colorAttr, $sizeAttr, $soleAttr],

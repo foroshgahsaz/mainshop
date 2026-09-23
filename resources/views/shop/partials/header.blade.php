@@ -17,9 +17,7 @@
                 </button>
           <a href="{{ route('home') }}"
              class="flex items-center gap-2">
-            <span
-                  class="w-9 h-9 rounded-full bg-gradient-to-br from-brand-green to-accent-teal flex items-center justify-center text-white text-sm font-black">چ</span>
-            <span class="text-xl md:text-2xl font-black text-navy">چاپینو</span>
+            <span class="text-xl md:text-2xl font-black text-navy">{{ site_name() }}</span>
           </a>
                 </div>
 
@@ -27,7 +25,7 @@
                     <div class="relative">
                     <form action="{{ route('products.index') }}" method="GET" class="relative">
                         <input type="text" name="search" value="{{ request('search') }}"
-                   placeholder="جستجو در چاپینو..."
+                   placeholder="جستجو در {{ site_name() }}..."
                    class="w-full bg-white border-2 border-gray-200 rounded-xl py-3 px-5 pr-12 outline-none focus:border-brand-green text-sm">
             <svg class="w-5 h-5 absolute right-4 top-3.5 text-gray-400"
                  fill="none"

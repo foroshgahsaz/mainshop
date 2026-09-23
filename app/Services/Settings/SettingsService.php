@@ -98,11 +98,16 @@ class SettingsService
         ];
     }
 
+    public function isMaintenanceMode(): bool
+    {
+        return filter_var($this->get('site', 'maintenance_mode', false), FILTER_VALIDATE_BOOLEAN);
+    }
+
     /** @return array<string, mixed> */
     public function site(): array
     {
         return [
-            'name' => $this->get('site', 'name') ?: config('app.name', 'چاپینو'),
+            'name' => $this->get('site', 'name') ?: config('app.name', 'چینی بازار'),
             'description' => $this->get('site', 'description', ''),
             'logo' => $this->get('site', 'logo'),
             'favicon' => $this->get('site', 'favicon'),
@@ -111,6 +116,12 @@ class SettingsService
             'address' => $this->get('site', 'address', ''),
             'instagram' => $this->get('site', 'instagram', ''),
             'telegram' => $this->get('site', 'telegram', ''),
+            'maintenance_mode' => $this->isMaintenanceMode(),
+            'maintenance_message' => $this->get(
+                'site',
+                'maintenance_message',
+                'سایت در حال بروزرسانی می‌باشد. لطفاً کمی بعد دوباره سر بزنید.'
+            ),
         ];
     }
 

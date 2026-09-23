@@ -44,6 +44,8 @@ class ManageGeneralSettings extends Page implements HasForms
             'address' => $site['address'],
             'instagram' => $site['instagram'],
             'telegram' => $site['telegram'],
+            'maintenance_mode' => $site['maintenance_mode'],
+            'maintenance_message' => $site['maintenance_message'],
         ]);
     }
 
@@ -101,6 +103,19 @@ class ManageGeneralSettings extends Page implements HasForms
                             ->url()
                             ->placeholder('https://t.me/...'),
                     ])->columns(2),
+                Forms\Components\Section::make('حالت بروزرسانی')
+                    ->description('با فعال‌سازی، فقط مدیران می‌توانند فروشگاه را ببینند و سایر کاربران صفحه «در حال بروزرسانی» را مشاهده می‌کنند.')
+                    ->schema([
+                        Forms\Components\Toggle::make('maintenance_mode')
+                            ->label('سایت در حال بروزرسانی')
+                            ->inline(false)
+                            ->helperText('پنل مدیریت (/admin) همیشه در دسترس مدیران است.'),
+                        Forms\Components\Textarea::make('maintenance_message')
+                            ->label('پیام صفحه بروزرسانی')
+                            ->rows(3)
+                            ->maxLength(500)
+                            ->columnSpanFull(),
+                    ])->columns(1),
             ])
             ->statePath('data');
     }
@@ -119,6 +134,8 @@ class ManageGeneralSettings extends Page implements HasForms
             'address' => $data['address'] ?? '',
             'instagram' => $data['instagram'] ?? '',
             'telegram' => $data['telegram'] ?? '',
+            'maintenance_mode' => (bool) ($data['maintenance_mode'] ?? false),
+            'maintenance_message' => $data['maintenance_message'] ?? '',
         ]);
 
         CrudSuccessNotification::saved()

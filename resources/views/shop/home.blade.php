@@ -152,7 +152,7 @@
         <section class="articles-section relative">
             <div id="articles-content" class="max-w-site mx-auto px-4 articles-section__inner">
                 <div class="flex items-center justify-between section-header">
-                    <h2 class="section-title">مجله چاپینو</h2>
+                    <h2 class="section-title">مجله {{ site_name() }}</h2>
                     <a href="{{ route('blog.index') }}" class="section-nav-link">مشاهده همه</a>
                 </div>
                 <div class="swiper blogSwiper mb-5">

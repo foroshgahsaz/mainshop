@@ -50,7 +50,7 @@
 <main class="max-w-site mx-auto px-4 md:px-6 py-4 md:py-8">
 
     <nav class="product-breadcrumb mb-4 md:mb-6" aria-label="مسیر">
-        <a href="{{ route('home') }}">فروشگاه اینترنتی چاپینو</a>
+        <a href="{{ route('home') }}">فروشگاه اینترنتی {{ site_name() }}</a>
         <span class="mx-1.5">/</span>
         @if($product->category)
             <a href="{{ route('categories.show', $product->category) }}">{{ $product->category->name }}</a>
@@ -130,7 +130,7 @@
                 <div class="lg:hidden mt-4">
                     <div class="product-buy-box p-4">
                         <div class="product-buy-box__seller">
-                            <div><span class="text-gray-500">فروشنده:</span> <strong class="text-gray-800 mr-1">چاپینو</strong></div>
+                            <div><span class="text-gray-500">فروشنده:</span> <strong class="text-gray-800 mr-1">{{ site_name() }}</strong></div>
                             <span class="text-brand-green text-[11px] font-bold bg-emerald-50 px-2 py-1 rounded-lg">عملکرد عالی</span>
                         </div>
                         @livewire('product.add-to-cart', ['product' => $product], key('product-add-mobile-'.$product->id))
@@ -145,7 +145,7 @@
         <div class="product-top-grid__buy hidden lg:block">
             <div class="product-buy-box p-4 md:p-5">
                 <div class="product-buy-box__seller">
-                    <div><span class="text-gray-500">فروشنده:</span> <strong class="text-gray-800 mr-1">چاپینو</strong></div>
+                    <div><span class="text-gray-500">فروشنده:</span> <strong class="text-gray-800 mr-1">{{ site_name() }}</strong></div>
                     <span class="text-brand-green text-[11px] font-bold bg-emerald-50 px-2 py-1 rounded-lg">عملکرد عالی</span>
                 </div>
                 @livewire('product.add-to-cart', ['product' => $product], key('product-add-'.$product->id))

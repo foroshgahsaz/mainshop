@@ -16,6 +16,9 @@ $app = Application::configure(basePath: dirname(__DIR__))
             'payment/callback',
             'payment/callback/tara',
         ]);
+        $middleware->web(append: [
+            \App\Http\Middleware\EnsureShopNotInMaintenance::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

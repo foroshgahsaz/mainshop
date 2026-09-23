@@ -18,7 +18,7 @@ class SeoPresenter
     public static function for(?Model $model = null, array $overrides = []): self
     {
         $site = app(\App\Services\Settings\SettingsService::class)->site();
-        $siteName = $site['name'] ?? config('app.name', 'چاپینو');
+        $siteName = $site['name'] ?? config('app.name', 'چینی بازار');
 
         $title = $overrides['title'] ?? null;
         $description = $overrides['description'] ?? null;

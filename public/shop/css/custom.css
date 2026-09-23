@@ -1239,26 +1239,24 @@ body.has-admin-bar .listing-filters {
 }
 
 .site-footer__trust-badge {
-  min-width: 5.5rem;
-  min-height: 5.5rem;
+  width: 6rem;
+  height: 6rem;
+  flex: 0 0 6rem;
   border-radius: 0.75rem;
   border: 1px dashed #d1d5db;
   background: #fff;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.25rem;
-  font-size: 0.625rem;
-  color: #9ca3af;
-  text-align: center;
-  padding: 0.5rem;
+  overflow: hidden;
+  box-sizing: border-box;
+  padding: 0.35rem;
 }
 
-.site-footer__trust-badge--code {
-  border-style: solid;
-  border-color: #e5e7eb;
-  padding: 0.35rem;
+.site-footer__trust-badge-inner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
 .site-footer__trust-badge-code {
@@ -1267,11 +1265,26 @@ body.has-admin-bar .listing-filters {
   justify-content: center;
   width: 100%;
   height: 100%;
+  overflow: hidden;
+  text-align: center;
+  line-height: 1;
+}
+
+.site-footer__trust-badge--code .site-footer__trust-badge-code {
+  transform: scale(0.72);
+  transform-origin: center center;
+}
+
+.site-footer__trust-badge-code img,
+.site-footer__trust-badge-code a,
+.site-footer__trust-badge-code iframe {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  margin: 0 auto;
 }
 
 .site-footer__trust-badge-code img {
-  max-width: 5rem;
-  max-height: 5rem;
   width: auto;
   height: auto;
   object-fit: contain;
@@ -1286,8 +1299,9 @@ body.has-admin-bar .listing-filters {
 }
 
 .site-footer__trust-badge-image {
-  max-width: 5rem;
-  max-height: 5rem;
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
   width: auto;
   height: auto;
   object-fit: contain;

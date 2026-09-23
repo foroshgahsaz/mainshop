@@ -29,10 +29,20 @@ class EnsureShopNotInMaintenance
 
         $site = $settings->site();
 
-        return response()->view('shop.maintenance', [
-            'site' => $site,
-            'message' => $site['maintenance_message'],
-        ], 503);
+        if ($request->expectsJson() || $request->is('livewire/*')) {
+            return response()->json([
+                'message' => $site['maintenance_message'],
+            ], 503);
+        }
+
+        // Use 200 so reverse proxies (e.g. Liara) do not replace the body with a generic 503 page.
+        return response()
+            ->view('shop.maintenance', [
+                'site' => $site,
+                'message' => $site['maintenance_message'],
+            ], 200)
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate')
+            ->header('X-Maintenance-Mode', '1');
     }
 
     protected function shouldBypass(Request $request): bool

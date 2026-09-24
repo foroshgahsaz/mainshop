@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Livewire\Features\SupportFileUploads\FileUploadConfiguration;
 use Livewire\Features\SupportFileUploads\FileUploadController as BaseFileUploadController;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class LivewireFileUploadController extends BaseFileUploadController
 {
@@ -81,9 +82,11 @@ class LivewireFileUploadController extends BaseFileUploadController
         return $fileHashPaths->map(function (string $path) use ($storePath) {
             $prefix = $storePath.'/';
 
-            return str_starts_with($path, $prefix)
+            $relativePath = str_starts_with($path, $prefix)
                 ? substr($path, strlen($prefix))
                 : $path;
+
+            return TemporaryUploadedFile::signPath($relativePath);
         });
     }
 

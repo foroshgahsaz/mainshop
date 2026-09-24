@@ -4,6 +4,7 @@ namespace App\Filament\Resources\PaymentResource\Pages;
 
 use App\Filament\Resources\OrderResource;
 use App\Filament\Resources\PaymentResource;
+use App\Filament\Support\PaymentDeleteActions;
 use App\Models\Payment;
 use App\Services\Payment\PaymentActivityLogger;
 use App\Services\Payment\TaraRefundService;
@@ -55,6 +56,7 @@ class ViewPayment extends ViewRecord
                 ->icon('heroicon-o-arrow-right')
                 ->url(PaymentResource::getUrl('index'))
                 ->color('gray'),
+            PaymentDeleteActions::pageDeleteAction(),
         ];
     }
 

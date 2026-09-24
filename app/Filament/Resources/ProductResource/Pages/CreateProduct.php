@@ -3,10 +3,10 @@
 namespace App\Filament\Resources\ProductResource\Pages;
 
 use App\Filament\Resources\ProductResource;
+use App\Filament\Resources\Pages\EditRecord;
+use App\Filament\Support\ProductDeleteActions;
 use App\Models\Category;
 use App\Models\Product;
-use App\Filament\Resources\Pages\EditRecord;
-use Filament\Actions;
 use Illuminate\Support\Str;
 
 class CreateProduct extends EditRecord
@@ -52,9 +52,7 @@ class CreateProduct extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make()
-                ->label('حذف پیش‌نویس')
-                ->successNotificationTitle('حذف شد'),
+            ProductDeleteActions::pageDeleteAction('حذف پیش‌نویس'),
         ];
     }
 

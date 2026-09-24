@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ProductResource\Pages;
 use App\Filament\Resources\ProductResource\RelationManagers;
 use App\Filament\Support\AdminTable;
+use App\Filament\Support\ProductDeleteActions;
 use App\Filament\Support\Filters\PriceRangeFilter;
 use App\Filament\Support\RichContentEditor;
 use App\Filament\Support\SeoFormSchema;
@@ -14,8 +15,6 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ProductResource extends Resource
 {
@@ -175,12 +174,11 @@ class ProductResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make()->label('ویرایش')->iconButton(),
-                Tables\Actions\DeleteAction::make()->label('حذف')->iconButton()
-                    ->successNotificationTitle('حذف شد'),
+                ProductDeleteActions::tableDeleteAction(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    ProductDeleteActions::tableBulkDeleteAction(),
                 ]),
             ]);
     }

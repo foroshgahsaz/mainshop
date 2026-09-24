@@ -4,7 +4,7 @@ namespace App\Filament\Resources\ProductResource\Pages;
 
 use App\Filament\Resources\ProductResource;
 use App\Filament\Resources\Pages\EditRecord as BaseEditRecord;
-use Filament\Actions;
+use App\Filament\Support\ProductDeleteActions;
 
 class EditProduct extends BaseEditRecord
 {
@@ -18,9 +18,7 @@ class EditProduct extends BaseEditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make()
-                ->label('حذف')
-                ->successNotificationTitle('حذف شد'),
+            ProductDeleteActions::pageDeleteAction(),
         ];
     }
 }

@@ -8,6 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Features\SupportFileUploads\FileUploadConfiguration;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Tests\TestCase;
 
 class LivewireFileUploadControllerTest extends TestCase
@@ -24,8 +25,10 @@ class LivewireFileUploadControllerTest extends TestCase
         $paths = $controller->validateAndStore([$file], 'public');
 
         $this->assertCount(1, $paths);
-        $storedName = $paths->first();
+        $signedPath = $paths->first();
+        $storedName = TemporaryUploadedFile::extractPathFromSignedPath($signedPath);
 
+        $this->assertNotFalse($storedName);
         $this->assertNotSame('livewire-tmp', $storedName);
         $this->assertLessThanOrEqual(LivewireUploadFilename::MAX_FILENAME_LENGTH, strlen($storedName));
         Storage::disk('public')->assertExists(FileUploadConfiguration::path($storedName));
@@ -41,8 +44,12 @@ class LivewireFileUploadControllerTest extends TestCase
         $paths = $controller->validateAndStore([$file], 'livewire-tmp');
 
         $this->assertCount(1, $paths);
+
+        $storedName = TemporaryUploadedFile::extractPathFromSignedPath($paths->first());
+
+        $this->assertNotFalse($storedName);
         Storage::disk('livewire-tmp')->assertExists(
-            FileUploadConfiguration::directory().'/'.$paths->first()
+            FileUploadConfiguration::directory().'/'.$storedName
         );
     }
 }

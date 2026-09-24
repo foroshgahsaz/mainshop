@@ -43,4 +43,20 @@ class TemporaryUploadedFileOverrideTest extends TestCase
         $this->assertTrue($file->isValid());
         $this->assertSame('image/jpeg', $file->getMimeType());
     }
+
+    public function test_signed_upload_paths_round_trip(): void
+    {
+        Storage::disk('tmp-for-tests')->put('livewire-tmp/sample.jpg', 'contents');
+
+        $file = TemporaryUploadedFile::createFromLivewire('sample.jpg');
+        $serialized = $file->serializeForLivewireResponse();
+
+        $this->assertStringStartsWith('livewire-file:', $serialized);
+
+        $restored = TemporaryUploadedFile::unserializeFromLivewireRequest($serialized);
+
+        $this->assertInstanceOf(TemporaryUploadedFile::class, $restored);
+        $this->assertTrue($restored->isValid());
+        $this->assertSame('sample.jpg', $restored->getFilename());
+    }
 }

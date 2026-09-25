@@ -36,7 +36,7 @@ class CategoryDeleteActions
                 static::notify(static::delete($record));
                 $action->redirect(CategoryResource::getUrl('index'));
                 throw new Halt;
-            })
+            });
     }
 
     protected static function delete(Category $category): CategoryDeletionResult

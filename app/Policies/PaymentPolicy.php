@@ -11,4 +11,14 @@ class PaymentPolicy
     {
         return $user->id === $payment->user_id || $user->isAdmin();
     }
+
+    public function delete(User $user, Payment $payment): bool
+    {
+        return $user->isAdmin();
+    }
+
+    public function deleteAny(User $user): bool
+    {
+        return $user->isAdmin();
+    }
 }

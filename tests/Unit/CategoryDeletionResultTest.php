@@ -16,10 +16,10 @@ class CategoryDeletionResultTest extends TestCase
 
     public function test_it_describes_archived_products(): void
     {
-        $result = new CategoryDeletionResult(archivedProducts: 3);
+        $result = new CategoryDeletionResult(archivedProducts: 3, fallbackCategoryName: 'دیجیتال');
 
         $this->assertSame(
-            'دسته‌بندی حذف شد؛ 3 محصول به‌دلیل وجود در سفارش‌ها به دسته «عمومی» منتقل و آرشیو شد.',
+            'دسته‌بندی حذف شد؛ 3 محصول به‌دلیل وجود در سفارش‌ها به دسته «دیجیتال» منتقل و آرشیو شد.',
             $result->message()
         );
     }

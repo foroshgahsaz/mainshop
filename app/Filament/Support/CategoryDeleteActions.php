@@ -20,7 +20,7 @@ class CategoryDeleteActions
             ->label('حذف')
             ->iconButton()
             ->requiresConfirmation()
-            ->modalDescription('محصولاتی که در سفارش‌ها ثبت شده‌اند به دسته «عمومی» منتقل می‌شوند.')
+            ->modalDescription('محصولاتی که در سفارش‌ها ثبت شده‌اند به دسته دیگر منتقل و آرشیو می‌شوند.')
             ->action(function (Category $record): void {
                 static::notify(static::delete($record));
             });
@@ -31,7 +31,7 @@ class CategoryDeleteActions
         return PageDeleteAction::make()
             ->label($label)
             ->requiresConfirmation()
-            ->modalDescription('محصولاتی که در سفارش‌ها ثبت شده‌اند به دسته «عمومی» منتقل می‌شوند.')
+            ->modalDescription('محصولاتی که در سفارش‌ها ثبت شده‌اند به دسته دیگر منتقل و آرشیو می‌شوند.')
             ->action(function (Category $record, PageDeleteAction $action): void {
                 static::notify(static::delete($record));
                 $action->redirect(CategoryResource::getUrl('index'));

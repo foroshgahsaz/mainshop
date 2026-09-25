@@ -32,10 +32,11 @@ class CategoryDeleteActions
             ->label($label)
             ->requiresConfirmation()
             ->modalDescription('محصولاتی که در سفارش‌ها ثبت شده‌اند به دسته «عمومی» منتقل می‌شوند.')
-            ->action(function (Category $record): void {
+            ->action(function (Category $record, PageDeleteAction $action): void {
                 static::notify(static::delete($record));
+                $action->redirect(CategoryResource::getUrl('index'));
+                throw new Halt;
             })
-            ->successRedirectUrl(fn () => CategoryResource::getUrl('index'));
     }
 
     protected static function delete(Category $category): CategoryDeletionResult

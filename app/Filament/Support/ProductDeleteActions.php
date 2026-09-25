@@ -8,6 +8,7 @@ use App\Services\Product\ProductDeletionResult;
 use App\Services\Product\ProductDeletionService;
 use Filament\Actions\DeleteAction as PageDeleteAction;
 use Filament\Notifications\Notification;
+use Filament\Support\Exceptions\Halt;
 use Filament\Tables;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -42,10 +43,17 @@ class ProductDeleteActions
     {
         return PageDeleteAction::make()
             ->label($label)
-            ->action(function (Product $record): void {
+            ->action(function (Product $record, PageDeleteAction $action): void {
                 static::notifySingle(app(ProductDeletionService::class)->delete($record));
-            })
-            ->successRedirectUrl(fn () => ProductResource::getUrl('index'));
+                static::redirectAfterPageDelete($action, ProductResource::getUrl('index'));
+            });
+    }
+
+    protected static function redirectAfterPageDelete(PageDeleteAction $action, string $url): void
+    {
+        $action->redirect($url);
+
+        throw new Halt;
     }
 
     protected static function notifySingle(string $outcome): void

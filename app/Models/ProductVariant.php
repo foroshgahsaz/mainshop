@@ -59,10 +59,15 @@ class ProductVariant extends Model
 
     public function getEffectivePriceAttribute(): int
     {
-        if ($this->sale_price !== null && $this->sale_price < $this->price) {
+        if ($this->hasDiscount()) {
             return (int) $this->sale_price;
         }
 
         return (int) $this->price;
+    }
+
+    public function hasDiscount(): bool
+    {
+        return $this->sale_price !== null && $this->sale_price < $this->price;
     }
 }

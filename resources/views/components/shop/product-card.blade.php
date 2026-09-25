@@ -3,6 +3,7 @@
 @php
     use App\Support\ShopFormatter;
     $discount = ShopFormatter::discountPercent($product);
+    $comparePrice = ShopFormatter::comparePrice($product);
     $image = $section
         ? ShopFormatter::productImageForSection($product, $section)
         : ShopFormatter::productImage($product);
@@ -22,10 +23,11 @@
             <div class="product-card__price-row">
                 @if($discount)<span class="product-card__discount">{{ $discount }}٪</span>@endif
                 <div class="product-card__price-group">
-                    <span class="product-card__price-sale">{{ number_format($product->effective_price) }} <span>تومان</span></span>
-                    @if($discount)
-                        <span class="product-card__price-old">{{ number_format($product->price) }} <span>تومان</span></span>
-                    @endif
+                    <x-shop.price
+                        :amount="$product->effective_price"
+                        :compare="$comparePrice"
+                        inline
+                    />
                 </div>
             </div>
         </div>
@@ -33,12 +35,11 @@
         <div class="p-3 flex flex-col gap-2 flex-1">
             <h4 class="text-xs font-bold line-clamp-2 leading-6">{{ $product->name }}</h4>
             <div class="flex items-center justify-end mt-auto">
-                <div class="product-card__price">
-                    @if($discount)
-                        <p class="product-card__price-old">{{ number_format($product->price) }} <span>تومان</span></p>
-                    @endif
-                    <p class="product-card__price-sale">{{ number_format($product->effective_price) }} <span>تومان</span></p>
-                </div>
+                <x-shop.price
+                    :amount="$product->effective_price"
+                    :compare="$comparePrice"
+                    class="product-card__price items-start text-left mt-2.5"
+                />
             </div>
         </div>
     @endif

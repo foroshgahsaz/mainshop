@@ -65,7 +65,13 @@
                                             </span>
                                         </a>
                                     </td>
-                                    <td data-label="قیمت واحد">{{ number_format($item['price']) }} <span>تومان</span></td>
+                                    <td data-label="قیمت واحد">
+                                        <x-shop.price
+                                            :amount="$item['price']"
+                                            :compare="$item['compare_price'] ?? null"
+                                            class="items-start text-right"
+                                        />
+                                    </td>
                                     <td data-label="تعداد">
                                         <div class="shop-qty-control">
                                             <button type="button"

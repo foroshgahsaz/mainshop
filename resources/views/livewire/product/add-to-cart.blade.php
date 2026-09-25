@@ -31,19 +31,11 @@
     @if ($selectedPrice !== null)
 
         <div class="py-3 border-t border-b border-gray-100 mb-4">
-
-            @if ($comparePrice)
-
-                <p class="text-sm text-gray-400 line-through mb-1">{{ number_format($comparePrice) }} تومان</p>
-
-            @endif
-
-            <p class="product-buy-box__price">
-
-                {{ number_format($selectedPrice) }} <span>تومان</span>
-
-            </p>
-
+            <x-shop.price
+                :amount="$selectedPrice"
+                :compare="$comparePrice"
+                class="items-start text-right product-buy-box__price-wrap"
+            />
         </div>
 
     @endif

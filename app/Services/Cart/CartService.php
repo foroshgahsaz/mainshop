@@ -209,19 +209,34 @@ class CartService
         }
 
         $productIds = $items->pluck('product_id')->unique()->filter()->values();
+        $variantIds = $items->pluck('product_variant_id')->unique()->filter()->values();
+
         $products = Product::with(['images' => fn ($q) => $q->orderBy('position')])
             ->whereIn('id', $productIds)
             ->get()
             ->keyBy('id');
 
-        return $items->map(function (array $item) use ($products) {
+        $variants = ProductVariant::query()
+            ->whereIn('id', $variantIds)
+            ->get()
+            ->keyBy('id');
+
+        return $items->map(function (array $item) use ($products, $variants) {
             $product = $products->get($item['product_id']);
+            $variant = isset($item['product_variant_id'])
+                ? $variants->get($item['product_variant_id'])
+                : null;
+
+            $comparePrice = $variant
+                ? ShopFormatter::comparePrice($variant)
+                : ($product ? ShopFormatter::comparePrice($product) : null);
 
             return [
                 ...$item,
                 'image' => ShopFormatter::productImage($product),
                 'slug' => $product?->slug,
                 'url' => $product ? route('products.show', $product) : route('products.index'),
+                'compare_price' => $comparePrice,
             ];
         });
     }

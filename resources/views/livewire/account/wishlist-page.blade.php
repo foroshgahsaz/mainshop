@@ -9,7 +9,11 @@
                 <a href="{{ route('products.show', $item->product) }}" class="font-bold text-sm text-navy hover:text-brand-green line-clamp-2">
                     {{ $item->product->name }}
                 </a>
-                <p class="text-brand-green font-black mt-2 text-sm">{{ number_format($item->product->effective_price) }} تومان</p>
+                <x-shop.price
+                    :amount="$item->product->effective_price"
+                    :compare="\App\Support\ShopFormatter::comparePrice($item->product)"
+                    class="mt-2 items-start text-right"
+                />
                 <button wire:click="remove({{ $item->product_id }})" class="text-red-500 text-xs mt-3 font-medium">حذف از لیست</button>
             </div>
         @empty

@@ -3,6 +3,7 @@
 @php
     use App\Support\ShopFormatter;
     $discount = ShopFormatter::discountPercent($product);
+    $comparePrice = ShopFormatter::comparePrice($product);
     $image = $section
         ? ShopFormatter::productImageForSection($product, $section)
         : ShopFormatter::productImage($product);
@@ -17,11 +18,10 @@
             <img src="{{ $image }}" alt="{{ $product->name }}" loading="lazy" width="320" height="320">
         </div>
         <h4 class="deal-card__title">{{ $product->name }}</h4>
-        <div class="deal-card__pricing">
-            @if($discount)
-                <span class="deal-card__price-old">{{ number_format($product->price) }}</span>
-            @endif
-            <p class="deal-card__price-sale">{{ number_format($product->effective_price) }} <span>تومان</span></p>
-        </div>
+        <x-shop.price
+            :amount="$product->effective_price"
+            :compare="$comparePrice"
+            class="deal-card__pricing items-start"
+        />
     </a>
 </article>

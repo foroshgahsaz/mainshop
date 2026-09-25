@@ -232,6 +232,73 @@
   min-height: 2.6rem;
 }
 
+.shop-price {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.15rem;
+}
+
+.shop-price--inline {
+  flex-direction: row;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.5rem;
+}
+
+.shop-price__compare,
+.product-card__price-old,
+.deal-card__price-old {
+  color: #9ca3af;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.2;
+  text-decoration-line: line-through !important;
+  text-decoration-thickness: 1px;
+}
+
+.shop-price__compare span,
+.product-card__price-old span,
+.deal-card__price-old span {
+  font-size: 10px;
+}
+
+.shop-price__current {
+  font-size: 15px;
+  font-weight: 800;
+  color: #001a72;
+  line-height: 1.3;
+}
+
+.shop-price__current span {
+  font-size: 10px;
+  font-weight: 400;
+  color: #6b7280;
+}
+
+a .shop-price__compare,
+.product-card-link .shop-price__compare,
+.deal-card__link .shop-price__compare {
+  text-decoration-line: line-through !important;
+}
+
+.clothing-card .shop-price__current {
+  font-size: 14px;
+  color: #111827;
+}
+
+.product-buy-box__price-wrap .shop-price__current {
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #001a72;
+}
+
+.product-buy-box__price-wrap .shop-price__current span {
+  font-size: 11px;
+  font-weight: 400;
+  color: #6b7280;
+}
+
 .clothing-card .product-card__price-row {
   display: flex;
   align-items: center;

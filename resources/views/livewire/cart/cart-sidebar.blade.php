@@ -54,9 +54,11 @@
                             @if (! empty($item['sku']))
                                 <p class="text-[11px] text-gray-400 mt-0.5">کد: {{ $item['sku'] }}</p>
                             @endif
-                            <p class="text-xs sm:text-sm font-black text-brand-green mt-2">
-                                {{ number_format($item['price']) }} تومان
-                            </p>
+                            <x-shop.price
+                                :amount="$item['price']"
+                                :compare="$item['compare_price'] ?? null"
+                                class="mt-2 items-start text-right"
+                            />
                             <div class="flex items-center justify-between mt-2 gap-2">
                                 <div class="shop-qty-control">
                                     <button type="button"

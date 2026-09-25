@@ -23,6 +23,15 @@ class ShopFormatter
         return (int) round((($product->price - $product->sale_price) / $product->price) * 100);
     }
 
+    public static function comparePrice(Product|\App\Models\ProductVariant $model): ?int
+    {
+        if ($model instanceof Product) {
+            return $model->hasDiscount() ? (int) $model->price : null;
+        }
+
+        return $model->hasDiscount() ? (int) $model->price : null;
+    }
+
     public static function productImage(?Product $product, string $fallback = 'shop/images/products/clothing.svg'): string
     {
         $path = self::productImagePath($product);

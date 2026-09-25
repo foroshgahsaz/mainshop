@@ -1,4 +1,5 @@
 @php
+    use App\Filament\Pages\ManageFooterSettings;
     use App\Filament\Pages\ManageGeneralSettings;
     use App\Filament\Pages\ManageTrustBadges;
     use App\Filament\Pages\ManageIntegrations;
@@ -187,12 +188,14 @@
             'routes' => [
                 'filament.admin.pages.manage-general-settings',
                 'filament.admin.pages.trust-badges',
+                'filament.admin.pages.footer-settings',
                 'filament.admin.pages.kavenegar',
                 'filament.admin.pages.sms-ir',
             ],
             'menus' => [
                 ['label' => 'تنظیمات عمومی', 'icon' => 'fa-globe', 'items' => [
                     ['label' => 'مدیریت سایت', 'url' => ManageGeneralSettings::getUrl(), 'icon' => 'fa-cog'],
+                    ['label' => 'فوتر سایت', 'url' => ManageFooterSettings::getUrl(), 'icon' => 'fa-window-maximize'],
                     ['label' => 'مجوزها', 'url' => ManageTrustBadges::getUrl(), 'icon' => 'fa-certificate'],
                 ]],
                 ['label' => 'پیامک', 'icon' => 'fa-sms', 'items' => [

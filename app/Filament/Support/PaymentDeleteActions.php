@@ -8,6 +8,7 @@ use App\Services\Payment\PaymentDeletionResult;
 use App\Services\Payment\PaymentDeletionService;
 use Filament\Actions\DeleteAction as PageDeleteAction;
 use Filament\Notifications\Notification;
+use Filament\Support\Exceptions\Halt;
 use Filament\Tables;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -44,10 +45,15 @@ class PaymentDeleteActions
             ->label($label)
             ->requiresConfirmation()
             ->modalDescription('پرداخت‌های موفق قابل حذف نیستند. برای پرداخت تارا ابتدا مرجوعی انجام دهید.')
-            ->action(function (Payment $record): void {
-                static::notifySingle(app(PaymentDeletionService::class)->delete($record));
-            })
-            ->successRedirectUrl(fn () => PaymentResource::getUrl('index'));
+            ->action(function (Payment $record, PageDeleteAction $action): void {
+                $outcome = app(PaymentDeletionService::class)->delete($record);
+                static::notifySingle($outcome);
+
+                if ($outcome === 'deleted') {
+                    $action->redirect(PaymentResource::getUrl('index'));
+                    throw new Halt;
+                }
+            });
     }
 
     protected static function notifySingle(string $outcome): void

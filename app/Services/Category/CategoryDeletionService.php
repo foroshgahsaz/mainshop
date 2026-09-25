@@ -9,6 +9,8 @@ use RuntimeException;
 
 class CategoryDeletionService
 {
+    public const FALLBACK_SLUG = 'general';
+
     public function delete(Category $category): CategoryDeletionResult
     {
         if ($category->children()->exists()) {
@@ -17,9 +19,11 @@ class CategoryDeletionService
 
         $deletedProducts = 0;
         $archivedProducts = 0;
+        $fallbackCategoryName = null;
 
-        DB::transaction(function () use ($category, &$deletedProducts, &$archivedProducts): void {
+        DB::transaction(function () use ($category, &$deletedProducts, &$archivedProducts, &$fallbackCategoryName): void {
             $fallbackCategory = $this->resolveFallbackCategory($category);
+            $fallbackCategoryName = $fallbackCategory->name;
 
             $category->products()
                 ->withTrashed()
@@ -48,24 +52,32 @@ class CategoryDeletionService
             $category->delete();
         });
 
-        return new CategoryDeletionResult($deletedProducts, $archivedProducts);
+        return new CategoryDeletionResult($deletedProducts, $archivedProducts, $fallbackCategoryName);
     }
 
     protected function resolveFallbackCategory(Category $excluding): Category
     {
-        $existing = Category::query()
-            ->where('slug', 'general')
+        $preferred = Category::query()
+            ->where('slug', self::FALLBACK_SLUG)
             ->whereKeyNot($excluding->id)
             ->first();
 
-        if ($existing) {
-            return $existing;
+        if ($preferred) {
+            return $preferred;
         }
 
-        return Category::query()->create([
-            'name' => 'عمومی',
-            'slug' => 'general',
-            'is_active' => true,
-        ]);
+        $fallback = Category::query()
+            ->whereKeyNot($excluding->id)
+            ->orderBy('position')
+            ->orderBy('id')
+            ->first();
+
+        if ($fallback) {
+            return $fallback;
+        }
+
+        throw new RuntimeException(
+            'برای حذف این دسته، ابتدا حداقل یک دسته دیگر ایجاد کنید تا محصولات موجود در سفارش‌ها به آن منتقل شوند.'
+        );
     }
 }

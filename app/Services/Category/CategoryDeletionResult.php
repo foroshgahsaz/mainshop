@@ -7,6 +7,7 @@ class CategoryDeletionResult
     public function __construct(
         public int $deletedProducts = 0,
         public int $archivedProducts = 0,
+        public ?string $fallbackCategoryName = null,
     ) {}
 
     public function message(): string
@@ -22,7 +23,8 @@ class CategoryDeletionResult
         }
 
         if ($this->archivedProducts > 0) {
-            $parts[] = "{$this->archivedProducts} محصول به‌دلیل وجود در سفارش‌ها به دسته «عمومی» منتقل و آرشیو شد";
+            $target = $this->fallbackCategoryName ?: 'دسته دیگر';
+            $parts[] = "{$this->archivedProducts} محصول به‌دلیل وجود در سفارش‌ها به دسته «{$target}» منتقل و آرشیو شد";
         }
 
         return implode('؛ ', $parts).'.';

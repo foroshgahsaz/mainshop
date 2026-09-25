@@ -37,6 +37,7 @@ class CreateProduct extends EditRecord
             'stock' => 0,
             'category_id' => $categoryId,
             'is_active' => false,
+            'robots' => 'index,follow',
         ]);
 
         $this->authorizeAccess();

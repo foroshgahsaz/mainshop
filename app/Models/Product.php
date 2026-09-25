@@ -14,6 +14,10 @@ class Product extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $attributes = [
+        'robots' => 'index,follow',
+    ];
+
     protected $fillable = [
         'category_id',
         'brand_id',

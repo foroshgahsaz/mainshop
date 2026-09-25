@@ -62,7 +62,8 @@ class SeoFormSchema
                 'noindex,follow' => 'NoIndex, Follow',
                 'noindex,nofollow' => 'NoIndex, NoFollow',
             ])
-            ->default('index,follow');
+            ->default('index,follow')
+            ->dehydrateStateUsing(fn (?string $state): string => filled($state) ? $state : 'index,follow');
 
         return $fields;
     }

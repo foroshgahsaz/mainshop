@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\CategoryResource\Pages;
 use App\Filament\Support\AdminImageColumn;
 use App\Filament\Support\AdminTable;
+use App\Filament\Support\CategoryDeleteActions;
 use App\Filament\Support\SeoFormSchema;
 use App\Filament\Support\ShopMediaPicker;
 use App\Models\Category;
@@ -94,8 +95,7 @@ class CategoryResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make()->label('ویرایش')->iconButton(),
-                Tables\Actions\DeleteAction::make()->label('حذف')->iconButton()
-                    ->successNotificationTitle('حذف شد'),
+                CategoryDeleteActions::tableDeleteAction(),
             ]);
     }
 

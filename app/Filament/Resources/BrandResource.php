@@ -66,8 +66,13 @@ class BrandResource extends Resource
                 Tables\Columns\TextColumn::make('name')->label('نام')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('slug')->label('اسلاگ'),
                 Tables\Columns\IconColumn::make('is_active')->label('فعال')->boolean(),
+                Tables\Columns\TextColumn::make('position')
+                    ->label('ترتیب')
+                    ->sortable()
+                    ->alignCenter(),
                 Tables\Columns\TextColumn::make('products_count')->counts('products')->label('محصولات'),
             ])
+            ->defaultSort('position')
             ->actions([
                 Tables\Actions\EditAction::make()->label('ویرایش')->iconButton(),
                 Tables\Actions\DeleteAction::make()->label('حذف')->iconButton()

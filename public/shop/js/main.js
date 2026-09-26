@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initHeaderMetrics();
   initMobileBottomNavMetrics();
   initMegaMenu();
+  initBrandsNavDropdowns();
   initMainSwiper();
   initProductSwipers();
   initBlogSwiper();
@@ -368,6 +369,54 @@ function initBlogSwiper() {
       1024: { slidesPerView: 3, spaceBetween: 18 },
       1280: { slidesPerView: 4, spaceBetween: 20 },
     },
+  });
+}
+
+function initBrandsNavDropdowns() {
+  document.querySelectorAll('[data-brands-nav]').forEach((wrap) => {
+    if (wrap.dataset.brandsBound === '1') {
+      return;
+    }
+
+    wrap.dataset.brandsBound = '1';
+
+    const panel = wrap.querySelector('.shop-nav-brands__panel');
+    const trigger = wrap.querySelector('button');
+    if (!panel || !trigger) {
+      return;
+    }
+
+    let timer = null;
+
+    const open = () => {
+      if (timer) {
+        clearTimeout(timer);
+        timer = null;
+      }
+
+      wrap.classList.add('is-open');
+      panel.classList.remove('hidden');
+      panel.setAttribute('aria-hidden', 'false');
+      trigger.setAttribute('aria-expanded', 'true');
+    };
+
+    const close = () => {
+      timer = setTimeout(() => {
+        wrap.classList.remove('is-open');
+        panel.classList.add('hidden');
+        panel.setAttribute('aria-hidden', 'true');
+        trigger.setAttribute('aria-expanded', 'false');
+      }, 140);
+    };
+
+    wrap.addEventListener('mouseenter', open);
+    wrap.addEventListener('mouseleave', close);
+    wrap.addEventListener('focusin', open);
+    wrap.addEventListener('focusout', (event) => {
+      if (!wrap.contains(event.relatedTarget)) {
+        close();
+      }
+    });
   });
 }
 

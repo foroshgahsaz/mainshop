@@ -6,7 +6,7 @@
 @endphp
 
 @if ($item->item_type === \App\Models\MenuItem::TYPE_BRANDS_TRIGGER)
-    <div class="relative py-1 shop-nav-brands">
+    <div class="shop-nav-brands py-1" data-brands-nav>
         <button type="button"
                 class="main-nav-link flex items-center gap-1.5 hover:text-brand-green"
                 aria-expanded="false"
@@ -16,14 +16,16 @@
                 <path d="m6 9 6 6 6-6"/>
             </svg>
         </button>
-        <div class="shop-nav-brands__panel" role="menu">
-            @forelse(($navBrands ?? collect()) as $brand)
-                <a href="{{ route('brands.show', $brand) }}"
-                   class="shop-nav-brands__link"
-                   role="menuitem">{{ $brand->name }}</a>
-            @empty
-                <span class="shop-nav-brands__empty">برندی ثبت نشده است.</span>
-            @endforelse
+        <div class="shop-nav-brands__panel hidden" role="menu" aria-hidden="true">
+            <div class="shop-nav-brands__panel-inner">
+                @forelse(($navBrands ?? collect()) as $brand)
+                    <a href="{{ route('brands.show', $brand) }}"
+                       class="shop-nav-brands__link"
+                       role="menuitem">{{ $brand->name }}</a>
+                @empty
+                    <span class="shop-nav-brands__empty">برندی ثبت نشده است.</span>
+                @endforelse
+            </div>
         </div>
     </div>
 @elseif ($item->item_type === \App\Models\MenuItem::TYPE_MEGA_TRIGGER)

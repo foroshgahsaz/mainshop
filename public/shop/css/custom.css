@@ -1171,13 +1171,40 @@ body.mobile-menu-open {
   display: block !important;
 }
 
+.main-nav {
+  overflow: visible;
+  position: relative;
+  z-index: 20;
+  flex-wrap: nowrap;
+}
+
+.shop-nav-brands {
+  position: relative;
+  z-index: 85;
+}
+
 .shop-nav-brands__panel {
-  display: none;
   position: absolute;
-  top: calc(100% + 0.35rem);
+  top: 100%;
   right: 0;
+  padding-top: 0.35rem;
   min-width: 12rem;
   max-width: 16rem;
+  z-index: 90;
+}
+
+.shop-nav-brands__panel.hidden {
+  display: none !important;
+}
+
+.shop-nav-brands.is-open .shop-nav-brands__panel {
+  display: block !important;
+}
+
+.shop-nav-brands__panel-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
   max-height: 18rem;
   overflow-y: auto;
   padding: 0.5rem;
@@ -1185,14 +1212,6 @@ body.mobile-menu-open {
   border: 1px solid #e5e7eb;
   border-radius: 0.75rem;
   box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
-  z-index: 80;
-}
-
-.shop-nav-brands:hover .shop-nav-brands__panel,
-.shop-nav-brands:focus-within .shop-nav-brands__panel {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
 }
 
 .shop-nav-brands__link {

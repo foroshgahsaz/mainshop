@@ -48,7 +48,11 @@ class BrandResource extends Resource
                     Forms\Components\Textarea::make('description')->label('توضیحات')->columnSpanFull(),
                     ShopMediaPicker::image('logo', 'brands', 'لوگو'),
                     Forms\Components\Toggle::make('is_active')->label('فعال')->default(true),
-                    Forms\Components\TextInput::make('position')->label('ترتیب')->numeric()->default(0),
+                    Forms\Components\TextInput::make('position')
+                        ->label('ترتیب')
+                        ->numeric()
+                        ->default(0)
+                        ->helperText('عدد کوچک‌تر = بالاتر در منوی برندها و لیست‌های سایت.'),
                 ])->columns(2),
             ...SeoFormSchema::contentSection(),
         ]);

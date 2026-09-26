@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\MenuItemResource\Pages;
 use App\Filament\Support\AdminTable;
+use App\Models\Brand;
 use App\Models\Category;
 use App\Models\MenuItem;
 use App\Models\Page;
@@ -51,6 +52,7 @@ class MenuItemResource extends Resource
                     ->options([
                         MenuItem::TYPE_LINK => 'لینک معمولی',
                         MenuItem::TYPE_MEGA_TRIGGER => 'مگامنو (دسکتاپ)',
+                        MenuItem::TYPE_BRANDS_TRIGGER => 'منوی برندها (زیرمنوی خودکار)',
                         MenuItem::TYPE_MEGA_PROMO => 'باکس تبلیغ مگامنو',
                         MenuItem::TYPE_ACCORDION => 'آکاردئون موبایل',
                     ])
@@ -72,11 +74,12 @@ class MenuItemResource extends Resource
                         'route' => 'مسیر داخلی (Route)',
                         'url' => 'آدرس خارجی',
                         'category' => 'دسته‌بندی',
+                        'brand' => 'برند',
                         'page' => 'صفحه ثابت',
                     ])
                     ->default('route')
                     ->live()
-                    ->visible(fn (Get $get) => ! in_array($get('item_type'), [MenuItem::TYPE_MEGA_TRIGGER], true)),
+                    ->visible(fn (Get $get) => ! in_array($get('item_type'), [MenuItem::TYPE_MEGA_TRIGGER, MenuItem::TYPE_BRANDS_TRIGGER], true)),
                 Forms\Components\Select::make('link_value')
                     ->label('مسیر')
                     ->options($routes)
@@ -94,6 +97,12 @@ class MenuItemResource extends Resource
                     ->searchable()
                     ->dehydrated(fn (Get $get) => $get('link_type') === 'category')
                     ->visible(fn (Get $get) => $get('link_type') === 'category'),
+                Forms\Components\Select::make('link_value')
+                    ->label('برند')
+                    ->options(fn () => Brand::query()->where('is_active', true)->orderBy('name')->pluck('name', 'id'))
+                    ->searchable()
+                    ->dehydrated(fn (Get $get) => $get('link_type') === 'brand')
+                    ->visible(fn (Get $get) => $get('link_type') === 'brand'),
                 Forms\Components\Select::make('link_value')
                     ->label('صفحه')
                     ->options(fn () => Page::query()->orderBy('title')->pluck('title', 'slug'))

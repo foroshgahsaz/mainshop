@@ -5,7 +5,28 @@
     $isOrders = $item->link_type === 'route' && $item->link_value === 'account.orders';
 @endphp
 
-@if ($item->item_type === \App\Models\MenuItem::TYPE_MEGA_TRIGGER)
+@if ($item->item_type === \App\Models\MenuItem::TYPE_BRANDS_TRIGGER)
+    <div class="relative py-1 shop-nav-brands">
+        <button type="button"
+                class="main-nav-link flex items-center gap-1.5 hover:text-brand-green"
+                aria-expanded="false"
+                aria-haspopup="true">
+            {{ $item->label }}
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="m6 9 6 6 6-6"/>
+            </svg>
+        </button>
+        <div class="shop-nav-brands__panel" role="menu">
+            @forelse(($navBrands ?? collect()) as $brand)
+                <a href="{{ route('brands.show', $brand) }}"
+                   class="shop-nav-brands__link"
+                   role="menuitem">{{ $brand->name }}</a>
+            @empty
+                <span class="shop-nav-brands__empty">برندی ثبت نشده است.</span>
+            @endforelse
+        </div>
+    </div>
+@elseif ($item->item_type === \App\Models\MenuItem::TYPE_MEGA_TRIGGER)
     <div class="relative py-1" id="megaMenuContainer">
         <a href="{{ $url }}"
            class="main-nav-link flex items-center gap-1.5 hover:text-brand-green">

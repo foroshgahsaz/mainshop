@@ -12,6 +12,8 @@ class MenuItem extends Model
 
     public const TYPE_MEGA_TRIGGER = 'mega_trigger';
 
+    public const TYPE_BRANDS_TRIGGER = 'brands_trigger';
+
     public const TYPE_MEGA_PROMO = 'mega_promo';
 
     public const TYPE_ACCORDION = 'accordion';
@@ -62,6 +64,9 @@ class MenuItem extends Model
             'url' => $this->link_value ?: '#',
             'category' => ($category = Category::query()->find($this->link_value))
                 ? route('categories.show', $category)
+                : '#',
+            'brand' => ($brand = Brand::query()->where('is_active', true)->find($this->link_value))
+                ? route('brands.show', $brand)
                 : '#',
             'page' => $this->link_value
                 ? route('pages.show', $this->link_value)

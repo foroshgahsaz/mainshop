@@ -100,6 +100,11 @@ class ShopCacheService
 
                 return [
                     'searchCategories' => Category::where('is_active', true)->orderBy('position')->get(),
+                    'navBrands' => Brand::query()
+                        ->where('is_active', true)
+                        ->orderBy('position')
+                        ->orderBy('name')
+                        ->get(),
                     'navCategories' => Category::query()
                         ->where('is_active', true)
                         ->where('show_in_mega', true)

@@ -16,7 +16,23 @@
 
     <nav class="main-nav flex flex-col gap-1">
       @foreach(($navigation['mobile'] ?? collect()) as $item)
-        @if($item->item_type !== \App\Models\MenuItem::TYPE_MEGA_TRIGGER && $item->item_type !== \App\Models\MenuItem::TYPE_MEGA_PROMO)
+        @if($item->item_type === \App\Models\MenuItem::TYPE_BRANDS_TRIGGER)
+          <button type="button"
+                  onclick="toggleAccordion('mobileBrandsMenu')"
+                  class="main-nav-link flex justify-between items-center py-3 px-2 text-right w-full">
+            {{ $item->label }}
+            <svg class="w-3 h-3 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="m6 9 6 6 6-6"/>
+            </svg>
+          </button>
+          <div id="mobileBrandsMenu" class="hidden flex-col gap-2 pr-4 text-xs text-gray-500 border-r-2 border-emerald-100 mr-2 mb-2">
+            @forelse(($navBrands ?? collect()) as $brand)
+              <a href="{{ route('brands.show', $brand) }}" class="py-1 hover:text-brand-green">{{ $brand->name }}</a>
+            @empty
+              <span class="py-1 text-gray-400">برندی ثبت نشده است.</span>
+            @endforelse
+          </div>
+        @elseif($item->item_type !== \App\Models\MenuItem::TYPE_MEGA_TRIGGER && $item->item_type !== \App\Models\MenuItem::TYPE_MEGA_PROMO)
           @include('shop.partials.menu-mobile-link', ['item' => $item])
         @endif
       @endforeach

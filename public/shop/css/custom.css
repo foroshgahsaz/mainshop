@@ -403,7 +403,7 @@ a .shop-price__compare,
   }
 
   .categorySwiper .swiper-slide {
-    width: calc((100% - 20px) / 3.5) !important;
+    width: calc((100% - 30px) / 3.15) !important;
     flex-shrink: 0;
     height: auto;
     display: flex;

@@ -301,8 +301,8 @@ function initCategorySwiper(el) {
   }
 
   return new Swiper(el, {
-    slidesPerView: 3.5,
-    spaceBetween: 8,
+    slidesPerView: 3.15,
+    spaceBetween: 10,
     grabCursor: true,
     watchOverflow: true,
     resistanceRatio: 0.85,

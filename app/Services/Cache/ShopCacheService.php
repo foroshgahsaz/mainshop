@@ -307,6 +307,8 @@ class ShopCacheService
     public function forgetBrand(): void
     {
         $this->forget('shop:brands:active');
+        $this->forget('shop:header:payload');
+        $this->forget('shop:navigation');
         $this->flushTag('products');
     }
 

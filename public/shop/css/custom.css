@@ -405,6 +405,8 @@ a .shop-price__compare,
   .categorySwiper .swiper-slide {
     width: calc((100% - 20px) / 3.5) !important;
     flex-shrink: 0;
+    height: auto;
+    display: flex;
   }
 }
 
@@ -2531,13 +2533,32 @@ body.has-admin-bar .listing-filters {
     width: 100% !important;
     height: auto !important;
     min-height: 0;
-    aspect-ratio: auto !important;
-    padding: 0.35rem 0.25rem 0.4rem;
-    gap: 0.25rem;
+    aspect-ratio: 1 / 1 !important;
+    padding: 0.4rem 0.3rem 0.45rem;
+    gap: 0.2rem;
+    overflow: hidden;
+    box-sizing: border-box;
   }
 
-  .category-card span {
-    line-height: 1.35;
+  .category-card__image {
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 0;
+    max-height: 58%;
+  }
+
+  .category-card__label {
+    flex: 0 0 auto;
+    width: 100%;
+    min-height: 2.5em;
+    max-height: 2.5em;
+    font-size: 11px;
+    line-height: 1.25;
+    text-align: center;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
   }
 }
 

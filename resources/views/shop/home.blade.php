@@ -57,7 +57,7 @@
                                 <span class="category-card__image">
                                     <img src="{{ \App\Support\ShopFormatter::categoryImage($category->image) }}" alt="{{ $category->name }}" loading="lazy">
                                 </span>
-                                <span>{{ $category->name }}</span>
+                                <span class="category-card__label">{{ $category->name }}</span>
                             </a>
                         </div>
                     @endforeach

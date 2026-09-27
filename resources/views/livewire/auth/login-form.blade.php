@@ -1,5 +1,5 @@
 @php
-    $resendSeconds = app(\App\Services\Settings\SettingsService::class)->otpResendSeconds();
+    $otpResendRemaining = $this->otpResendRemainingSeconds();
 @endphp
 
 @if (session('login_success'))
@@ -13,11 +13,26 @@
             <input type="tel" wire:model="phone" dir="ltr"
                    placeholder="09123456789"
                    autofocus
-                   class="w-full border-2 border-gray-200 rounded-xl py-3 px-4 text-sm outline-none focus:border-brand-green">
-            @error('phone') <span class="text-red-600 text-xs mt-1 block">{{ $message }}</span> @enderror
+                   @disabled($otpResendRemaining > 0)
+                   class="w-full border-2 border-gray-200 rounded-xl py-3 px-4 text-sm outline-none focus:border-brand-green disabled:bg-gray-50 disabled:text-gray-500">
+            @error('phone')
+                @if ($otpResendRemaining <= 0)
+                    <span class="text-red-600 text-xs mt-1 block">{{ $message }}</span>
+                @endif
+            @enderror
         </div>
-        <button type="submit" wire:loading.attr="disabled"
-                class="w-full bg-brand-gold hover:bg-amber-600 text-white font-bold py-3 rounded-xl transition">
+
+        @if ($otpResendRemaining > 0)
+            @include('livewire.auth.otp-resend-timer', [
+                'remaining' => $otpResendRemaining,
+                'showResendButton' => false,
+            ])
+        @endif
+
+        <button type="submit"
+                wire:loading.attr="disabled"
+                @disabled($otpResendRemaining > 0)
+                class="w-full bg-brand-gold hover:bg-amber-600 text-white font-bold py-3 rounded-xl transition disabled:opacity-60 disabled:cursor-not-allowed">
             <span wire:loading.remove wire:target="sendOtp">دریافت کد تایید</span>
             <span wire:loading wire:target="sendOtp">در حال ارسال...</span>
         </button>
@@ -41,43 +56,11 @@
             <span wire:loading.remove wire:target="verifyOtp">تایید و ورود</span>
             <span wire:loading wire:target="verifyOtp">در حال بررسی...</span>
         </button>
-        <div
-            wire:key="otp-timer-{{ $otpSentAt }}"
-            class="text-center"
-            x-data="{
-                remaining: {{ $resendSeconds }},
-                timer: null,
-                get clock() {
-                    const minutes = String(Math.floor(this.remaining / 60)).padStart(2, '0')
-                    const seconds = String(this.remaining % 60).padStart(2, '0')
-                    return minutes + ':' + seconds
-                },
-                start() {
-                    this.timer = setInterval(() => {
-                        if (this.remaining <= 0) {
-                            clearInterval(this.timer)
-                            return
-                        }
-                        this.remaining -= 1
-                    }, 1000)
-                }
-            }"
-            x-init="start()"
-        >
-            <p x-show="remaining > 0" class="text-sm text-gray-500" x-cloak>
-                ارسال مجدد تا <span dir="ltr" x-text="clock"></span>
-            </p>
-            <button
-                type="button"
-                x-show="remaining <= 0"
-                x-cloak
-                wire:click="sendOtp"
-                wire:loading.attr="disabled"
-                class="w-full text-sm text-brand-green hover:text-emerald-700 py-2 font-bold"
-            >
-                ارسال مجدد کد
-            </button>
-        </div>
+
+        @include('livewire.auth.otp-resend-timer', [
+            'remaining' => $otpResendRemaining,
+            'showResendButton' => true,
+        ])
     </form>
 @endif
 

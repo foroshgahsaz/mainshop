@@ -42,7 +42,10 @@
                         </button>
                     </div>
 
-                    <form id="mobileForm" wire:submit="sendAdminOtp" @if($activeTab === 'username') style="display: none;" @endif>
+                    <form id="mobileForm"
+                          wire:submit="sendAdminOtp"
+                          data-resend-remaining="{{ $this->adminOtpResendRemainingSeconds() }}"
+                          @if($activeTab === 'username') style="display: none;" @endif>
                         <div class="mb-3">
                             <label class="form-label" for="mobileInput">شماره موبایل<span class="required">*</span></label>
                             <input type="tel"
@@ -50,12 +53,28 @@
                                    placeholder="09123456789"
                                    id="mobileInput"
                                    wire:model="otpPhone"
-                                   autocomplete="tel">
+                                   autocomplete="tel"
+                                   @disabled($this->adminOtpResendRemainingSeconds() > 0)>
                             <div class="error-message @error('otpPhone') show @enderror" id="mobileError">
-                                @error('otpPhone') {{ $message }} @enderror
+                                @error('otpPhone')
+                                    @if ($this->adminOtpResendRemainingSeconds() <= 0)
+                                        {{ $message }}
+                                    @endif
+                                @enderror
                             </div>
                         </div>
-                        <button type="submit" class="btn-login" wire:loading.attr="disabled" wire:target="sendAdminOtp">
+                        <div class="otp-timer mobile-resend-timer @if($this->adminOtpResendRemainingSeconds() <= 0) hidden @endif" id="mobileResendTimer">
+                            <span id="mobileTimer" class="otp-countdown" dir="ltr">
+                                {{ sprintf('%02d:%02d', intdiv($this->adminOtpResendRemainingSeconds(), 60), $this->adminOtpResendRemainingSeconds() % 60) }}
+                            </span>
+                            <p class="login-subtitle mb-0 mt-1">ارسال مجدد تا پایان شمارنده</p>
+                        </div>
+                        <button type="submit"
+                                class="btn-login"
+                                id="mobileSubmitBtn"
+                                wire:loading.attr="disabled"
+                                wire:target="sendAdminOtp"
+                                @disabled($this->adminOtpResendRemainingSeconds() > 0)>
                             <span wire:loading.remove wire:target="sendAdminOtp">دریافت رمز یکبار مصرف</span>
                             <span wire:loading wire:target="sendAdminOtp">در حال ارسال...</span>
                         </button>
@@ -75,7 +94,7 @@
                 </div>
 
                 <div id="otpPage"
-                     data-resend-seconds="{{ $this->otpResendSeconds() }}"
+                     data-resend-seconds="{{ $this->adminOtpResendRemainingSeconds() }}"
                      wire:key="admin-otp-{{ $otpSentAt }}"
                      @if($otpStep !== 'otp') style="display: none;" @endif>
                     <h2 class="login-title">تایید شماره موبایل</h2>
@@ -96,7 +115,7 @@
                         </div>
 
                         <div class="otp-timer">
-                            <span id="timer" class="otp-countdown">{{ sprintf('%02d:%02d', intdiv($this->otpResendSeconds(), 60), $this->otpResendSeconds() % 60) }}</span>
+                            <span id="timer" class="otp-countdown">{{ sprintf('%02d:%02d', intdiv(max($this->adminOtpResendRemainingSeconds(), 0), 60), max($this->adminOtpResendRemainingSeconds(), 0) % 60) }}</span>
                             <br>
                             <button type="button"
                                     class="resend-link"

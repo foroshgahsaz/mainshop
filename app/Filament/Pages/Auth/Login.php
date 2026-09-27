@@ -34,6 +34,7 @@ class Login extends BaseLogin
     public function sendAdminOtp(OtpService $otp): void
     {
         $this->activeLoginTab = 'mobile';
+        $this->otpPhone = $otp->normalizePhone($this->otpPhone);
 
         $this->validate([
             'otpPhone' => ['required', 'regex:/^09\d{9}$/'],
@@ -51,6 +52,10 @@ class Login extends BaseLogin
             throw ValidationException::withMessages([
                 'otpPhone' => 'تلاش‌های زیاد. لطفاً بعداً دوباره امتحان کنید.',
             ]);
+        }
+
+        if ($otp->resendCooldownRemainingSeconds($this->otpPhone) > 0) {
+            return;
         }
 
         try {
@@ -135,6 +140,15 @@ class Login extends BaseLogin
     public function otpResendSeconds(): int
     {
         return app(SettingsService::class)->otpResendSeconds();
+    }
+
+    public function adminOtpResendRemainingSeconds(): int
+    {
+        if (! preg_match('/^09\d{9}$/', $this->otpPhone)) {
+            return 0;
+        }
+
+        return app(OtpService::class)->resendCooldownRemainingSeconds($this->otpPhone);
     }
 
     protected function getEmailFormComponent(): Component

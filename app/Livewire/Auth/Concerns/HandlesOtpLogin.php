@@ -24,6 +24,8 @@ trait HandlesOtpLogin
 
     public function sendOtp(OtpService $otp): void
     {
+        $this->phone = $otp->normalizePhone($this->phone);
+
         $this->validate([
             'phone' => ['required', 'regex:/^09\d{9}$/'],
         ], [
@@ -43,6 +45,10 @@ trait HandlesOtpLogin
             ]);
         }
 
+        if ($otp->resendCooldownRemainingSeconds($this->phone) > 0) {
+            return;
+        }
+
         try {
             $otp->send($this->phone);
         } catch (\RuntimeException $e) {
@@ -60,6 +66,8 @@ trait HandlesOtpLogin
 
     public function verifyOtp(OtpService $otp, CartService $cart): void
     {
+        $this->phone = $otp->normalizePhone($this->phone);
+
         $this->validate([
             'phone' => ['required', 'regex:/^09\d{9}$/'],
             'otp' => ['required', 'digits:'.config('shop.otp.length')],
@@ -110,6 +118,17 @@ trait HandlesOtpLogin
         $this->step = 'phone';
         $this->otp = '';
         $this->resetValidation();
+    }
+
+    public function otpResendRemainingSeconds(): int
+    {
+        $phone = app(OtpService::class)->normalizePhone($this->phone);
+
+        if (! preg_match('/^09\d{9}$/', $phone)) {
+            return 0;
+        }
+
+        return app(OtpService::class)->resendCooldownRemainingSeconds($phone);
     }
 
     protected function resetLoginForm(): void

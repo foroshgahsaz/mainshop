@@ -14,6 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\HtmlString;
 
 class UserResource extends Resource
 {
@@ -80,6 +81,54 @@ class UserResource extends Resource
                         ->default(true),
                 ])
                 ->columns(2),
+            Forms\Components\Section::make('لیست سفارش‌ها')
+                ->description('سفارش‌های ثبت‌شده با این حساب')
+                ->icon('heroicon-o-shopping-bag')
+                ->schema([
+                    Forms\Components\Placeholder::make('user_orders_list')
+                        ->label('')
+                        ->content(function (?User $record): HtmlString {
+                            if (! $record) {
+                                return new HtmlString('<p class="text-sm text-gray-500">—</p>');
+                            }
+
+                            $orders = $record->orders()
+                                ->withCount('items')
+                                ->latest()
+                                ->limit(100)
+                                ->get();
+
+                            return new HtmlString(
+                                view('filament.users.partials.orders-table', ['orders' => $orders])->render()
+                            );
+                        }),
+                ])
+                ->visibleOn('edit')
+                ->columnSpanFull(),
+            Forms\Components\Section::make('لیست پرداخت‌ها')
+                ->description('تراکنش‌های پرداخت این کاربر')
+                ->icon('heroicon-o-credit-card')
+                ->schema([
+                    Forms\Components\Placeholder::make('user_payments_list')
+                        ->label('')
+                        ->content(function (?User $record): HtmlString {
+                            if (! $record) {
+                                return new HtmlString('<p class="text-sm text-gray-500">—</p>');
+                            }
+
+                            $payments = $record->payments()
+                                ->with('order')
+                                ->latest()
+                                ->limit(100)
+                                ->get();
+
+                            return new HtmlString(
+                                view('filament.users.partials.payments-table', ['payments' => $payments])->render()
+                            );
+                        }),
+                ])
+                ->visibleOn('edit')
+                ->columnSpanFull(),
             Forms\Components\Section::make('نوع کاربر و دسترسی')
                 ->description('مشتری یا نقش‌های سازمانی')
                 ->icon('heroicon-o-shield-check')

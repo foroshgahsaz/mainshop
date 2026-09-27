@@ -6,6 +6,7 @@ use App\Filament\Resources\HomeSliderResource\Pages;
 use App\Filament\Support\AdminImageColumn;
 use App\Filament\Support\ShopMediaPicker;
 use App\Models\HomeSlider;
+use App\Services\Media\HomepageImageService;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -40,7 +41,14 @@ class HomeSliderResource extends Resource
                     ->maxLength(255),
                 ShopMediaPicker::image('image', 'sliders', 'تصویر')
                     ->required()
-                    ->maxSize(4096),
+                    ->maxSize(4096)
+                    ->helperText(function (): string {
+                        $preset = app(HomepageImageService::class)->forSection('hero') ?? [];
+                        $w = (int) ($preset['width'] ?? 1920);
+                        $h = (int) ($preset['height'] ?? 380);
+
+                        return "برای نمایش بدون برش و به‌هم‌ریختگی، بنر را {$w}×{$h} پیکسل (همان نسبت عرض به ارتفاع) طراحی و آپلود کنید. در ادمین: تنظیمات → تامبنیل صفحه اصلی → اسلایدر.";
+                    }),
                 Forms\Components\TextInput::make('link')
                     ->label('لینک')
                     ->url()

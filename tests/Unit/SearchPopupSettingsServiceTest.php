@@ -17,8 +17,8 @@ class SearchPopupSettingsServiceTest extends TestCase
         $service->saveFromAdminForm([
             'placeholder' => 'جستجو کنید...',
             'popular_searches' => [
-                ['term' => 'کفش'],
-                ['term' => 'کیف'],
+                ['term' => 'کفش', 'link' => ''],
+                ['term' => 'فروش ویژه', 'link' => '/products?sort=created_at'],
             ],
             'show_categories' => false,
             'banner' => [
@@ -33,7 +33,11 @@ class SearchPopupSettingsServiceTest extends TestCase
 
         $fresh = app(SearchPopupSettingsService::class);
 
-        $this->assertSame(['کفش', 'کیف'], $fresh->popularSearchTerms());
+        $this->assertSame(['کفش', 'فروش ویژه'], $fresh->popularSearchTerms());
         $this->assertFalse($fresh->all()['show_categories']);
+
+        $links = $fresh->popularSearchLinks();
+        $this->assertStringContainsString('search=', $links[0]['url']);
+        $this->assertStringContainsString('/products', $links[1]['url']);
     }
 }

@@ -36,10 +36,7 @@ class SearchPopupSettingsService
 
         return [
             'placeholder' => $data['placeholder'],
-            'popular_searches' => collect($data['popular_searches'])
-                ->map(fn (string $term): array => ['term' => $term])
-                ->values()
-                ->all(),
+            'popular_searches' => $data['popular_searches'],
             'show_categories' => $data['show_categories'],
             'banner' => $data['banner'],
         ];
@@ -50,11 +47,7 @@ class SearchPopupSettingsService
     {
         $normalized = $this->normalize([
             'placeholder' => $data['placeholder'] ?? '',
-            'popular_searches' => collect($data['popular_searches'] ?? [])
-                ->map(fn (mixed $row): string => is_array($row) ? trim((string) ($row['term'] ?? '')) : trim((string) $row))
-                ->filter()
-                ->values()
-                ->all(),
+            'popular_searches' => $data['popular_searches'] ?? [],
             'show_categories' => $data['show_categories'] ?? true,
             'banner' => $data['banner'] ?? [],
         ]);
@@ -69,9 +62,42 @@ class SearchPopupSettingsService
     /** @return list<string> */
     public function popularSearchTerms(): array
     {
-        $terms = $this->all()['popular_searches'] ?? [];
+        return collect($this->all()['popular_searches'] ?? [])
+            ->pluck('term')
+            ->filter()
+            ->values()
+            ->all();
+    }
 
-        return array_values(array_filter($terms, fn ($t) => is_string($t) && $t !== ''));
+    /** @return list<array{term: string, url: string}> */
+    public function popularSearchLinks(): array
+    {
+        return collect($this->all()['popular_searches'] ?? [])
+            ->map(function (array $row): array {
+                $term = (string) ($row['term'] ?? '');
+                $link = trim((string) ($row['link'] ?? ''));
+
+                return [
+                    'term' => $term,
+                    'url' => $this->resolvePopularLink($term, $link),
+                ];
+            })
+            ->filter(fn (array $row): bool => $row['term'] !== '')
+            ->values()
+            ->all();
+    }
+
+    protected function resolvePopularLink(string $term, string $link): string
+    {
+        if ($link === '') {
+            return route('products.index', ['search' => $term]);
+        }
+
+        if (str_starts_with($link, '/') && ! str_starts_with($link, '//')) {
+            return url($link);
+        }
+
+        return $link;
     }
 
     /** @return array<string, mixed> */
@@ -79,7 +105,12 @@ class SearchPopupSettingsService
     {
         return [
             'placeholder' => 'جستجو در تمام محصولات '.site_name().'...',
-            'popular_searches' => ['پیراهن', 'کفش', 'پوشاک', site_name()],
+            'popular_searches' => [
+                ['term' => 'پیراهن', 'link' => ''],
+                ['term' => 'کفش', 'link' => ''],
+                ['term' => 'پوشاک', 'link' => ''],
+                ['term' => site_name(), 'link' => route('products.index')],
+            ],
             'show_categories' => true,
             'banner' => [
                 'enabled' => true,
@@ -99,10 +130,7 @@ class SearchPopupSettingsService
 
         return [
             'placeholder' => trim((string) ($data['placeholder'] ?? '')),
-            'popular_searches' => array_values(array_filter(
-                array_map('strval', $data['popular_searches'] ?? []),
-                fn (string $t) => $t !== ''
-            )),
+            'popular_searches' => $this->normalizePopularSearches($data['popular_searches'] ?? []),
             'show_categories' => (bool) ($data['show_categories'] ?? true),
             'banner' => [
                 'enabled' => (bool) ($banner['enabled'] ?? true),
@@ -113,5 +141,42 @@ class SearchPopupSettingsService
                 'button_text' => trim((string) ($banner['button_text'] ?? 'مشاهده')),
             ],
         ];
+    }
+
+    /** @return list<array{term: string, link: string}> */
+    protected function normalizePopularSearches(mixed $rows): array
+    {
+        if (! is_array($rows)) {
+            return [];
+        }
+
+        $normalized = [];
+
+        foreach ($rows as $row) {
+            if (is_string($row)) {
+                $term = trim($row);
+                if ($term !== '') {
+                    $normalized[] = ['term' => $term, 'link' => ''];
+                }
+
+                continue;
+            }
+
+            if (! is_array($row)) {
+                continue;
+            }
+
+            $term = trim((string) ($row['term'] ?? ''));
+            if ($term === '') {
+                continue;
+            }
+
+            $normalized[] = [
+                'term' => $term,
+                'link' => trim((string) ($row['link'] ?? '')),
+            ];
+        }
+
+        return $normalized;
     }
 }

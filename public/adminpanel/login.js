@@ -84,6 +84,7 @@ function validateOTP(otp) {
 
 let currentTab = 'mobile';
 let timerInterval;
+let mobileTimerInterval;
 let timerStartedFor = null;
 
 function switchTab(tab) {
@@ -167,6 +168,7 @@ function togglePassword() {
 
 function backToLogin() {
     clearInterval(timerInterval);
+    timerStartedFor = null;
     document.getElementById('loginPage').style.display = 'block';
     document.getElementById('otpPage').style.display = 'none';
     clearError('otp');
@@ -205,6 +207,52 @@ function showAdminResend() {
     resendLink.classList.remove('disabled');
 }
 
+function startMobileResendTimer() {
+    const mobileForm = document.getElementById('mobileForm');
+    const timerWrap = document.getElementById('mobileResendTimer');
+    const timerElement = document.getElementById('mobileTimer');
+    const submitBtn = document.getElementById('mobileSubmitBtn');
+
+    if (!mobileForm || mobileForm.style.display === 'none' || !timerWrap || !timerElement) {
+        return;
+    }
+
+    clearInterval(mobileTimerInterval);
+
+    const timeLeftStart = parseInt(mobileForm.dataset.resendRemaining || '0', 10);
+    if (!Number.isFinite(timeLeftStart) || timeLeftStart <= 0) {
+        timerWrap.classList.add('hidden');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+        }
+
+        return;
+    }
+
+    let timeLeft = timeLeftStart;
+    timerWrap.classList.remove('hidden');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+    }
+    timerElement.textContent = formatOtpClock(timeLeft);
+
+    mobileTimerInterval = setInterval(() => {
+        timeLeft -= 1;
+
+        if (timeLeft <= 0) {
+            clearInterval(mobileTimerInterval);
+            timerWrap.classList.add('hidden');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+            }
+
+            return;
+        }
+
+        timerElement.textContent = formatOtpClock(timeLeft);
+    }, 1000);
+}
+
 function startTimer() {
     const otpPage = document.getElementById('otpPage');
     const timerElement = document.getElementById('timer');
@@ -218,8 +266,16 @@ function startTimer() {
         return;
     }
 
-    const timeLeftStart = parseInt(otpPage.dataset.resendSeconds || '120', 10);
-    let timeLeft = Number.isFinite(timeLeftStart) && timeLeftStart > 0 ? timeLeftStart : 120;
+    const timeLeftStart = parseInt(otpPage.dataset.resendSeconds || '0', 10);
+    if (!Number.isFinite(timeLeftStart) || timeLeftStart <= 0) {
+        timerStartedFor = timerKey;
+        timerElement.hidden = true;
+        showAdminResend();
+
+        return;
+    }
+
+    let timeLeft = timeLeftStart;
 
     timerStartedFor = timerKey;
     clearInterval(timerInterval);
@@ -261,6 +317,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     bindOtpInputs();
     bindOtpFormSubmit();
+
+    startMobileResendTimer();
 
     if (window.Livewire) {
         bindLoginLivewireHooks();
@@ -366,6 +424,7 @@ function bindLoginLivewireHooks() {
             bindOtpInputs();
             bindOtpFormSubmit();
             startTimer();
+            startMobileResendTimer();
         });
     };
 

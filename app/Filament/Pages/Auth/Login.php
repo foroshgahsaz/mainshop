@@ -31,6 +31,11 @@ class Login extends BaseLogin
 
     public int $otpSentAt = 0;
 
+    public function hydrate(): void
+    {
+        $this->advanceAdminToOtpIfPending(app(OtpService::class));
+    }
+
     public function sendAdminOtp(OtpService $otp): void
     {
         $this->activeLoginTab = 'mobile';
@@ -55,6 +60,8 @@ class Login extends BaseLogin
         }
 
         if ($otp->resendCooldownRemainingSeconds($this->otpPhone) > 0) {
+            $this->advanceAdminToOtpIfPending($otp);
+
             return;
         }
 
@@ -149,6 +156,39 @@ class Login extends BaseLogin
         }
 
         return app(OtpService::class)->resendCooldownRemainingSeconds($this->otpPhone);
+    }
+
+    public function adminHasPendingOtp(): bool
+    {
+        $otp = app(OtpService::class);
+        $phone = $otp->normalizePhone($this->otpPhone);
+
+        if (! preg_match('/^09\d{9}$/', $phone)) {
+            return false;
+        }
+
+        return $otp->hasPendingOtp($phone);
+    }
+
+    public function updatedOtpPhone(): void
+    {
+        $otp = app(OtpService::class);
+        $this->otpPhone = $otp->normalizePhone($this->otpPhone);
+        $this->advanceAdminToOtpIfPending($otp);
+    }
+
+    protected function advanceAdminToOtpIfPending(OtpService $otp): void
+    {
+        if ($this->otpStep !== 'phone' || ! preg_match('/^09\d{9}$/', $this->otpPhone)) {
+            return;
+        }
+
+        if (! $otp->hasPendingOtp($this->otpPhone)) {
+            return;
+        }
+
+        $this->otpStep = 'otp';
+        $this->otpSentAt = time();
     }
 
     protected function getEmailFormComponent(): Component

@@ -66,6 +66,17 @@ class OtpService
         $user->forceFill(['phone_verified_at' => now()])->save();
     }
 
+    public function hasPendingOtp(string $phone): bool
+    {
+        $phone = $this->normalizePhone($phone);
+
+        if ($phone === '') {
+            return false;
+        }
+
+        return Cache::has($this->cacheKey($phone));
+    }
+
     public function resendCooldownRemainingSeconds(string $phone): int
     {
         $phone = $this->normalizePhone($phone);

@@ -9,6 +9,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ShopSearchSuggestController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\ThumbnailController;
 use App\Livewire\Account\AccountDashboard;
@@ -23,6 +24,7 @@ use App\Livewire\Auth\Register;
 use App\Livewire\Cart\CartPage;
 use App\Livewire\Checkout\CheckoutPage;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 
 Route::get('/thumb/{section}/{path}', ThumbnailController::class)
     ->where('path', '.*')
@@ -35,7 +37,7 @@ Route::get('/data/{path}', function (string $path) {
         abort(404);
     }
 
-    $disk = \Illuminate\Support\Facades\Storage::disk('public');
+    $disk = Storage::disk('public');
 
     if (! $disk->exists($path)) {
         abort(404);
@@ -45,6 +47,8 @@ Route::get('/data/{path}', function (string $path) {
 })->where('path', '.*')->name('filesystem.public');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
+Route::get('/shop/search/suggest', ShopSearchSuggestController::class)->name('shop.search.suggest');
 
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/products/{product:slug}', [ProductController::class, 'show'])->name('products.show');

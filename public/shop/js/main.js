@@ -92,6 +92,114 @@ function initSearchModalEvents() {
       toggleSearchModal(false);
     }
   });
+
+  initSearchModalLiveSuggest(modal);
+}
+
+function initSearchModalLiveSuggest(modal) {
+  const input = modal.querySelector('#searchModalInput');
+  const liveBox = modal.querySelector('#searchModalLiveResults');
+  const defaultBox = modal.querySelector('#searchModalDefaultContent');
+
+  if (!input || !liveBox || !defaultBox) {
+    return;
+  }
+
+  const suggestUrl = modal.dataset.suggestUrl;
+  const minChars = parseInt(modal.dataset.minChars || '3', 10);
+  let debounceTimer = null;
+  let abortController = null;
+
+  const resetView = () => {
+    liveBox.classList.add('hidden');
+    liveBox.innerHTML = '';
+    defaultBox.classList.remove('hidden');
+  };
+
+  const renderResults = (payload) => {
+    const items = payload.items || [];
+    const total = payload.total || 0;
+    const query = payload.query || '';
+    const allUrl = payload.all_results_url || `/products?search=${encodeURIComponent(query)}`;
+
+    if (items.length === 0) {
+      liveBox.innerHTML = `
+        <p class="search-modal__live-empty">نتیجه‌ای برای «${escapeHtml(query)}» پیدا نشد.</p>
+        <a href="${escapeHtml(allUrl)}" class="search-modal__live-all" onclick="toggleSearchModal(false)">جستجو در همه محصولات</a>
+      `;
+      liveBox.classList.remove('hidden');
+      defaultBox.classList.add('hidden');
+      return;
+    }
+
+    const rows = items.map((item) => `
+      <a href="${escapeHtml(item.url)}" class="search-modal__live-item" onclick="toggleSearchModal(false)">
+        <img src="${escapeHtml(item.image)}" alt="" class="search-modal__live-thumb" loading="lazy">
+        <span class="search-modal__live-name">${escapeHtml(item.name)}</span>
+        <span class="search-modal__live-price">${escapeHtml(item.price)}</span>
+      </a>
+    `).join('');
+
+    liveBox.innerHTML = `
+      <p class="search-modal__live-heading">${items.length} از ${total} نتیجه</p>
+      <div class="search-modal__live-list">${rows}</div>
+      <a href="${escapeHtml(allUrl)}" class="search-modal__live-all" onclick="toggleSearchModal(false)">نمایش همه نتایج</a>
+    `;
+    liveBox.classList.remove('hidden');
+    defaultBox.classList.add('hidden');
+  };
+
+  const fetchSuggestions = (query) => {
+    if (!suggestUrl) {
+      return;
+    }
+
+    if (abortController) {
+      abortController.abort();
+    }
+
+    abortController = new AbortController();
+
+    fetch(`${suggestUrl}?q=${encodeURIComponent(query)}`, {
+      headers: { Accept: 'application/json' },
+      signal: abortController.signal,
+    })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (!data || data.query !== query) {
+          return;
+        }
+        renderResults(data);
+      })
+      .catch(() => {});
+  };
+
+  input.addEventListener('input', () => {
+    const value = input.value.trim();
+
+    clearTimeout(debounceTimer);
+
+    if (value.length < minChars) {
+      resetView();
+      return;
+    }
+
+    debounceTimer = setTimeout(() => fetchSuggestions(value), 280);
+  });
+
+  input.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' && input.value.trim().length >= minChars) {
+      return;
+    }
+  });
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 function toggleSearchModal(show) {
@@ -109,6 +217,10 @@ function toggleSearchModal(show) {
     modal.classList.remove('is-open');
     modal.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
+    if (input) {
+      input.value = '';
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    }
   }
 }
 

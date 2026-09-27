@@ -4,6 +4,7 @@ namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Resources\Pages\EditRecord;
 use App\Filament\Resources\UserResource;
+use App\Filament\Resources\UserResource\UserEditTabs;
 use App\Models\User;
 use Filament\Actions;
 use Illuminate\Contracts\Support\Htmlable;
@@ -39,6 +40,15 @@ class EditUser extends EditRecord
         return [Actions\DeleteAction::make()];
     }
 
+    protected function getFormActions(): array
+    {
+        if (UserEditTabs::isReadOnly(UserEditTabs::resolveActive('edit'))) {
+            return [];
+        }
+
+        return parent::getFormActions();
+    }
+
     protected function getRedirectUrl(): string
     {
         $url = static::getResource()::getUrl('edit', ['record' => $this->getRecord()]);
@@ -62,6 +72,24 @@ class EditUser extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
+        /** @var User $user */
+        $user = $this->getRecord();
+
+        $data = array_merge([
+            'name' => $user->name,
+            'bio' => $user->bio,
+            'avatar' => $user->avatar,
+            'phone' => $user->phone,
+            'email' => $user->email,
+            'status' => $user->status,
+            'is_admin' => $user->is_admin,
+            'is_author' => $user->is_author,
+        ], $data);
+
+        if (! filled($data['password'] ?? null)) {
+            unset($data['password']);
+        }
+
         $data['user_kind'] = $this->form->getState()['user_kind'] ?? 'customer';
 
         return CreateUser::normalizeUserKind($data);

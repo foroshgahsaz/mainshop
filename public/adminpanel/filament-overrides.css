@@ -1132,3 +1132,45 @@ body.fi-body .fi-no {
 .swal2-timer-progress-bar {
     background: linear-gradient(90deg, #7239ea, #50cd89) !important;
 }
+
+/* ویرایش کاربر — تب‌های لینک‌دار (رفرش کامل صفحه) */
+.fi-admin-shell .user-edit-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+    padding: 0.35rem;
+    border-radius: 12px;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+}
+
+.fi-admin-shell .user-edit-tabs__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.55rem 0.9rem;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #4b5563;
+    text-decoration: none;
+    background: transparent;
+    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.fi-admin-shell .user-edit-tabs__link:hover {
+    color: #111827;
+    background: #fff;
+}
+
+.fi-admin-shell .user-edit-tabs__link--active {
+    color: #5b21b6;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+.fi-admin-shell .user-edit-tabs__icon {
+    font-size: 14px;
+    opacity: 0.85;
+}

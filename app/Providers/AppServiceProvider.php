@@ -35,6 +35,7 @@ use App\Policies\UserAddressPolicy;
 use App\Services\Cache\ShopCacheService;
 use App\Services\Media\ImageOptimizer;
 use App\Services\Media\MediaRegistry;
+use App\Services\Settings\SearchPopupSettingsService;
 use App\Services\Sms\SmsSenderFactory;
 use App\Support\MediaPath;
 use App\Support\ShopMedia;
@@ -54,9 +55,9 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Livewire\Features\SupportFileUploads\FileUploadController;
 use League\Flysystem\UnableToCheckExistence;
 use League\Flysystem\UnableToCheckFileExistence;
+use Livewire\Features\SupportFileUploads\FileUploadController;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class AppServiceProvider extends ServiceProvider
@@ -129,7 +130,10 @@ class AppServiceProvider extends ServiceProvider
             'shop.partials.overlays',
             'shop.partials.mobile-menu',
         ], function ($view) {
-            $view->with(app(ShopCacheService::class)->headerPayload());
+            $view->with(array_merge(
+                app(ShopCacheService::class)->headerPayload(),
+                ['searchPopup' => app(SearchPopupSettingsService::class)->all()],
+            ));
         });
 
         Gate::policy(Order::class, OrderPolicy::class);

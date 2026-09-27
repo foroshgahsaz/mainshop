@@ -5,10 +5,12 @@ namespace App\Services\Cache;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\HomeSlider;
+use App\Models\MenuItem;
 use App\Models\Post;
 use App\Models\Product;
 use App\Models\ShippingMethod;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
@@ -69,7 +71,7 @@ class ShopCacheService
             'shop:navigation',
             config('shop.cache.categories_ttl'),
             function () {
-                $items = \App\Models\MenuItem::query()
+                $items = MenuItem::query()
                     ->where('is_active', true)
                     ->whereNull('parent_id')
                     ->orderBy('position')
@@ -78,21 +80,21 @@ class ShopCacheService
                 return [
                     'desktop' => $items->filter(fn ($item) => $item->showsOnDesktop())->values(),
                     'mobile' => $items->filter(fn ($item) => $item->showsOnMobile())->values(),
-                    'megaPromo' => $items->firstWhere('item_type', \App\Models\MenuItem::TYPE_MEGA_PROMO),
+                    'megaPromo' => $items->firstWhere('item_type', MenuItem::TYPE_MEGA_PROMO),
                 ];
             },
             ['shop', 'menus']
         );
     }
 
-    /** @return array{searchCategories: \Illuminate\Support\Collection, navCategories: \Illuminate\Support\Collection, navigation: array} */
+    /** @return array{searchCategories: Collection, navCategories: Collection, navigation: array} */
     public function headerPayload(): array
     {
         return $this->remember(
             'shop:header:payload',
             config('shop.cache.categories_ttl'),
             function () {
-                $items = \App\Models\MenuItem::query()
+                $items = MenuItem::query()
                     ->where('is_active', true)
                     ->whereNull('parent_id')
                     ->orderBy('position')
@@ -115,7 +117,7 @@ class ShopCacheService
                     'navigation' => [
                         'desktop' => $items->filter(fn ($item) => $item->showsOnDesktop())->values(),
                         'mobile' => $items->filter(fn ($item) => $item->showsOnMobile())->values(),
-                        'megaPromo' => $items->firstWhere('item_type', \App\Models\MenuItem::TYPE_MEGA_PROMO),
+                        'megaPromo' => $items->firstWhere('item_type', MenuItem::TYPE_MEGA_PROMO),
                     ],
                 ];
             },
@@ -331,6 +333,32 @@ class ShopCacheService
     public function forgetHome(): void
     {
         $this->flushTag('home');
+    }
+
+    /**
+     * @return array{total: int, items: Collection<int, Product>}
+     */
+    public function searchSuggestions(string $query, int $limit = 5): array
+    {
+        $query = trim($query);
+
+        if (mb_strlen($query) < 3) {
+            return ['total' => 0, 'items' => collect()];
+        }
+
+        $builder = $this->buildProductListingQuery([
+            'search' => $query,
+            'sort' => 'created_at',
+            'direction' => 'desc',
+        ]);
+
+        $total = (clone $builder)->count();
+        $items = $builder->limit($limit)->get();
+
+        return [
+            'total' => $total,
+            'items' => $items,
+        ];
     }
 
     public function forgetProductListings(): void

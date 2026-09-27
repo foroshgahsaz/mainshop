@@ -2374,6 +2374,110 @@ body.has-admin-bar .listing-filters {
   flex-shrink: 0;
 }
 
+.search-modal__promo--image {
+  position: relative;
+  overflow: hidden;
+  min-height: 88px;
+  padding: 0;
+}
+
+.search-modal__promo-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.35;
+}
+
+.search-modal__promo--image .search-modal__promo-content {
+  position: relative;
+  z-index: 1;
+  padding: 1rem 1.25rem;
+  flex: 1;
+}
+
+.search-modal__promo--image .search-modal__promo-btn {
+  position: relative;
+  z-index: 1;
+  margin: 1rem;
+}
+
+.search-modal__live-heading {
+  font-size: 12px;
+  font-weight: 700;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+
+.search-modal__live-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.search-modal__live-item {
+  display: grid;
+  grid-template-columns: 48px 1fr auto;
+  gap: 0.65rem;
+  align-items: center;
+  padding: 0.5rem 0.65rem;
+  border-radius: 12px;
+  background: #f9fafb;
+  border: 1px solid #f3f4f6;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.search-modal__live-item:hover {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.search-modal__live-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  object-fit: contain;
+  background: #fff;
+}
+
+.search-modal__live-name {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: #111827;
+}
+
+.search-modal__live-price {
+  font-size: 12px;
+  font-weight: 800;
+  color: #059669;
+  white-space: nowrap;
+}
+
+.search-modal__live-all {
+  display: block;
+  margin-top: 0.75rem;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 800;
+  color: #7239ea;
+  text-decoration: none;
+}
+
+.search-modal__live-all:hover {
+  text-decoration: underline;
+}
+
+.search-modal__live-empty {
+  font-size: 13px;
+  color: #6b7280;
+  text-align: center;
+  padding: 0.75rem 0;
+}
+
 /* Mobile bottom navigation */
 @media (max-width: 767px) {
   :root {

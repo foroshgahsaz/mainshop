@@ -22,6 +22,7 @@ return [
         'seo' => 'سئو',
         'avatars' => 'آواتار',
         'settings' => 'تنظیمات',
+        'search-popup' => 'پاپ‌آپ جستجو',
         'pages' => 'صفحه',
         'uploads' => 'سایر',
     ],

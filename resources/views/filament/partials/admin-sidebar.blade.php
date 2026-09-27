@@ -1,5 +1,6 @@
 @php
     use App\Filament\Pages\ManageFooterSettings;
+    use App\Filament\Pages\ManageSearchPopupSettings;
     use App\Filament\Pages\ManageGeneralSettings;
     use App\Filament\Pages\ManageTrustBadges;
     use App\Filament\Pages\ManageIntegrations;
@@ -189,6 +190,7 @@
                 'filament.admin.pages.manage-general-settings',
                 'filament.admin.pages.trust-badges',
                 'filament.admin.pages.footer-settings',
+                'filament.admin.pages.search-popup-settings',
                 'filament.admin.pages.kavenegar',
                 'filament.admin.pages.sms-ir',
             ],
@@ -196,6 +198,7 @@
                 ['label' => 'تنظیمات عمومی', 'icon' => 'fa-globe', 'items' => [
                     ['label' => 'مدیریت سایت', 'url' => ManageGeneralSettings::getUrl(), 'icon' => 'fa-cog'],
                     ['label' => 'فوتر سایت', 'url' => ManageFooterSettings::getUrl(), 'icon' => 'fa-window-maximize'],
+                    ['label' => 'پاپ‌آپ جستجو', 'url' => ManageSearchPopupSettings::getUrl(), 'icon' => 'fa-magnifying-glass'],
                     ['label' => 'مجوزها', 'url' => ManageTrustBadges::getUrl(), 'icon' => 'fa-certificate'],
                 ]],
                 ['label' => 'پیامک', 'icon' => 'fa-sms', 'items' => [

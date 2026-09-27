@@ -21,7 +21,12 @@
                     بازگشت به فروشگاه
                 </a>
 
-                @php($activeTab = $this->activeLoginTab)
+                @php
+                    $activeTab = $this->activeLoginTab;
+                    $adminOtpResendRemaining = $this->adminOtpResendRemainingSeconds();
+                    $adminHasPendingOtp = $this->adminHasPendingOtp();
+                    $adminCooldownBlocksSend = $adminOtpResendRemaining > 0 && ! $adminHasPendingOtp;
+                @endphp
 
                 <div id="loginPage" data-active-tab="{{ $activeTab }}" @if($otpStep === 'otp') style="display: none;" @endif>
                     <h2 class="login-title">ورود</h2>
@@ -44,7 +49,7 @@
 
                     <form id="mobileForm"
                           wire:submit="sendAdminOtp"
-                          data-resend-remaining="{{ $this->adminOtpResendRemainingSeconds() }}"
+                          data-resend-remaining="{{ $adminOtpResendRemaining }}"
                           @if($activeTab === 'username') style="display: none;" @endif>
                         <div class="mb-3">
                             <label class="form-label" for="mobileInput">شماره موبایل<span class="required">*</span></label>
@@ -54,28 +59,35 @@
                                    id="mobileInput"
                                    wire:model="otpPhone"
                                    autocomplete="tel"
-                                   @disabled($this->adminOtpResendRemainingSeconds() > 0)>
+                                   @disabled($adminCooldownBlocksSend)>
                             <div class="error-message @error('otpPhone') show @enderror" id="mobileError">
                                 @error('otpPhone')
-                                    @if ($this->adminOtpResendRemainingSeconds() <= 0)
+                                    @if ($adminOtpResendRemaining <= 0)
                                         {{ $message }}
                                     @endif
                                 @enderror
                             </div>
                         </div>
-                        <div class="otp-timer mobile-resend-timer @if($this->adminOtpResendRemainingSeconds() <= 0) hidden @endif" id="mobileResendTimer">
+                        <div class="otp-timer mobile-resend-timer @if($adminOtpResendRemaining <= 0) hidden @endif" id="mobileResendTimer">
                             <span id="mobileTimer" class="otp-countdown" dir="ltr">
-                                {{ sprintf('%02d:%02d', intdiv($this->adminOtpResendRemainingSeconds(), 60), $this->adminOtpResendRemainingSeconds() % 60) }}
+                                {{ sprintf('%02d:%02d', intdiv($adminOtpResendRemaining, 60), $adminOtpResendRemaining % 60) }}
                             </span>
                             <p class="login-subtitle mb-0 mt-1">ارسال مجدد تا پایان شمارنده</p>
                         </div>
+                        @if ($adminHasPendingOtp && $adminOtpResendRemaining > 0)
+                            <p class="login-subtitle text-success mb-2 text-center">کد قبلاً ارسال شده است. برای وارد کردن کد ادامه دهید.</p>
+                        @endif
                         <button type="submit"
                                 class="btn-login"
                                 id="mobileSubmitBtn"
                                 wire:loading.attr="disabled"
                                 wire:target="sendAdminOtp"
-                                @disabled($this->adminOtpResendRemainingSeconds() > 0)>
-                            <span wire:loading.remove wire:target="sendAdminOtp">دریافت رمز یکبار مصرف</span>
+                                @disabled($adminCooldownBlocksSend)>
+                            @if ($adminHasPendingOtp && $adminOtpResendRemaining > 0)
+                                <span wire:loading.remove wire:target="sendAdminOtp">ادامه — وارد کردن کد تایید</span>
+                            @else
+                                <span wire:loading.remove wire:target="sendAdminOtp">دریافت رمز یکبار مصرف</span>
+                            @endif
                             <span wire:loading wire:target="sendAdminOtp">در حال ارسال...</span>
                         </button>
                     </form>

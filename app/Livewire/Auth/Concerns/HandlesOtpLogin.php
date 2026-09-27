@@ -16,6 +16,11 @@ trait HandlesOtpLogin
 {
     public string $step = 'phone';
 
+    public function hydrateHandlesOtpLogin(): void
+    {
+        $this->advanceToOtpIfPending(app(OtpService::class));
+    }
+
     public string $phone = '';
 
     public string $otp = '';
@@ -46,6 +51,8 @@ trait HandlesOtpLogin
         }
 
         if ($otp->resendCooldownRemainingSeconds($this->phone) > 0) {
+            $this->advanceToOtpIfPending($otp);
+
             return;
         }
 
@@ -129,6 +136,39 @@ trait HandlesOtpLogin
         }
 
         return app(OtpService::class)->resendCooldownRemainingSeconds($phone);
+    }
+
+    public function hasPendingOtpForPhone(): bool
+    {
+        $otp = app(OtpService::class);
+        $phone = $otp->normalizePhone($this->phone);
+
+        if (! preg_match('/^09\d{9}$/', $phone)) {
+            return false;
+        }
+
+        return $otp->hasPendingOtp($phone);
+    }
+
+    public function updatedPhone(): void
+    {
+        $otp = app(OtpService::class);
+        $this->phone = $otp->normalizePhone($this->phone);
+        $this->advanceToOtpIfPending($otp);
+    }
+
+    protected function advanceToOtpIfPending(OtpService $otp): void
+    {
+        if ($this->step !== 'phone' || ! preg_match('/^09\d{9}$/', $this->phone)) {
+            return;
+        }
+
+        if (! $otp->hasPendingOtp($this->phone)) {
+            return;
+        }
+
+        $this->step = 'otp';
+        $this->otpSentAt = time();
     }
 
     protected function resetLoginForm(): void

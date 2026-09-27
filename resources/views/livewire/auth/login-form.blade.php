@@ -1,5 +1,7 @@
 @php
     $otpResendRemaining = $this->otpResendRemainingSeconds();
+    $hasPendingOtp = $this->hasPendingOtpForPhone();
+    $otpCooldownBlocksSend = $otpResendRemaining > 0 && ! $hasPendingOtp;
 @endphp
 
 @if (session('login_success'))
@@ -13,7 +15,7 @@
             <input type="tel" wire:model="phone" dir="ltr"
                    placeholder="09123456789"
                    autofocus
-                   @disabled($otpResendRemaining > 0)
+                   @disabled($otpCooldownBlocksSend)
                    class="w-full border-2 border-gray-200 rounded-xl py-3 px-4 text-sm outline-none focus:border-brand-green disabled:bg-gray-50 disabled:text-gray-500">
             @error('phone')
                 @if ($otpResendRemaining <= 0)
@@ -29,11 +31,21 @@
             ])
         @endif
 
+        @if ($hasPendingOtp && $otpResendRemaining > 0)
+            <p class="text-sm text-emerald-700 bg-emerald-50 rounded-xl px-3 py-2 text-center">
+                کد قبلاً برای این شماره ارسال شده است. برای وارد کردن کد ادامه دهید.
+            </p>
+        @endif
+
         <button type="submit"
                 wire:loading.attr="disabled"
-                @disabled($otpResendRemaining > 0)
+                @disabled($otpCooldownBlocksSend)
                 class="w-full bg-brand-gold hover:bg-amber-600 text-white font-bold py-3 rounded-xl transition disabled:opacity-60 disabled:cursor-not-allowed">
-            <span wire:loading.remove wire:target="sendOtp">دریافت کد تایید</span>
+            @if ($hasPendingOtp && $otpResendRemaining > 0)
+                <span wire:loading.remove wire:target="sendOtp">ادامه — وارد کردن کد تایید</span>
+            @else
+                <span wire:loading.remove wire:target="sendOtp">دریافت کد تایید</span>
+            @endif
             <span wire:loading wire:target="sendOtp">در حال ارسال...</span>
         </button>
     </form>

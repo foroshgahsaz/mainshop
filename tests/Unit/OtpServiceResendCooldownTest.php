@@ -35,6 +35,16 @@ class OtpServiceResendCooldownTest extends TestCase
         $this->assertGreaterThan(0, $otp->resendCooldownRemainingSeconds($persianPhone));
     }
 
+    public function test_has_pending_otp_when_code_in_cache(): void
+    {
+        $otp = app(OtpService::class);
+        $phone = '09126667777';
+
+        Cache::put('otp:phone:'.'09126667777', '123456', 300);
+
+        $this->assertTrue($otp->hasPendingOtp($phone));
+    }
+
     public function test_generate_throws_while_cooldown_active(): void
     {
         $otp = app(OtpService::class);

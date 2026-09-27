@@ -4,25 +4,34 @@ namespace App\Services\Sms;
 
 use App\Contracts\SmsSender;
 use App\Models\Order;
+use App\Models\Payment;
 use Illuminate\Support\Facades\Log;
 
 class OrderSmsNotifier
 {
     public function __construct(
-        protected SmsSender $sms
+        protected SmsSender $sms,
+        protected TransactionalSmsDispatcher $transactional,
     ) {}
 
     public function orderPlaced(Order $order): void
     {
-        $this->send($order, sprintf(
-            site_name().': سفارش %s ثبت شد. مبلغ: %s تومان',
-            $order->tracking_code,
-            number_format($order->final_amount)
-        ));
+        $this->transactional->orderPlaced($order);
     }
 
-    public function orderPaid(Order $order): void
+    public function orderPaid(Order $order, ?Payment $payment = null): void
     {
+        $payment ??= $order->payments()
+            ->where('status', Payment::STATUS_SUCCESS)
+            ->latest()
+            ->first();
+
+        if ($payment) {
+            $this->transactional->orderPaid($order, $payment);
+
+            return;
+        }
+
         $this->send($order, sprintf(
             site_name().': پرداخت سفارش %s با موفقیت انجام شد.',
             $order->tracking_code

@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Services\Auth\OtpService;
 use App\Services\Auth\ShopLoginGuard;
 use App\Services\Cart\CartService;
+use App\Services\Sms\TransactionalSmsDispatcher;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
@@ -98,8 +99,10 @@ trait HandlesOtpLogin
         RateLimiter::clear($key);
 
         $user = User::query()->where('phone', $this->phone)->first();
+        $createdAccount = false;
 
         if (! $user) {
+            $createdAccount = true;
             $user = User::query()->create([
                 'phone' => $this->phone,
                 'name' => 'کاربر '.substr($this->phone, -4),
@@ -111,6 +114,10 @@ trait HandlesOtpLogin
         app(ShopLoginGuard::class)->assertAllowed($user, 'otp');
 
         $otp->markPhoneVerified($user);
+
+        if ($createdAccount) {
+            app(TransactionalSmsDispatcher::class)->accountCreated($user);
+        }
 
         $user->forceFill([
             'last_login_at' => now(),

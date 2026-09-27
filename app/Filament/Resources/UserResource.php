@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
+use App\Filament\Resources\UserResource\UserEditTabs;
 use App\Filament\Support\AdminImageColumn;
 use App\Filament\Support\AdminTable;
 use App\Filament\Support\ShopMediaPicker;
@@ -32,37 +33,35 @@ class UserResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form->schema([
-            Forms\Components\Tabs::make('user_edit_tabs')
-                ->columnSpanFull()
-                ->persistTabInQueryString('tab')
-                ->tabs([
-                    Forms\Components\Tabs\Tab::make('profile')
-                        ->label('پروفایل')
-                        ->icon('heroicon-o-user-circle')
-                        ->schema(static::profileTabSchema()),
-                    Forms\Components\Tabs\Tab::make('account')
-                        ->label('اطلاعات حساب')
-                        ->icon('heroicon-o-identification')
-                        ->schema(static::accountTabSchema()),
-                    Forms\Components\Tabs\Tab::make('orders')
-                        ->label('لیست سفارش‌ها')
-                        ->icon('heroicon-o-shopping-bag')
-                        ->schema(static::ordersTabSchema())
-                        ->visibleOn('edit')
-                        ->lazy(),
-                    Forms\Components\Tabs\Tab::make('payments')
-                        ->label('لیست پرداخت‌ها')
-                        ->icon('heroicon-o-credit-card')
-                        ->schema(static::paymentsTabSchema())
-                        ->visibleOn('edit')
-                        ->lazy(),
-                    Forms\Components\Tabs\Tab::make('access')
-                        ->label('نوع کاربر و دسترسی')
-                        ->icon('heroicon-o-shield-check')
-                        ->schema(static::accessTabSchema()),
-                ]),
-        ]);
+        return $form->schema(function (Form $form): array {
+            $operation = $form->getOperation();
+            $activeTab = UserEditTabs::resolveActive($operation);
+
+            return [
+                Forms\Components\View::make('user_edit_tab_nav')
+                    ->view('filament.users.edit-tab-nav')
+                    ->dehydrated(false)
+                    ->columnSpanFull()
+                    ->viewData([
+                        'tabs' => UserEditTabs::definitions($operation),
+                        'activeTab' => $activeTab,
+                        'record' => $operation === 'edit' ? $form->getRecord() : null,
+                    ]),
+                ...static::schemaForTab($activeTab),
+            ];
+        });
+    }
+
+    /** @return array<int, Forms\Components\Component> */
+    protected static function schemaForTab(string $tab): array
+    {
+        return match ($tab) {
+            UserEditTabs::TAB_ACCOUNT => static::accountTabSchema(),
+            UserEditTabs::TAB_ORDERS => static::ordersTabSchema(),
+            UserEditTabs::TAB_PAYMENTS => static::paymentsTabSchema(),
+            UserEditTabs::TAB_ACCESS => static::accessTabSchema(),
+            default => static::profileTabSchema(),
+        };
     }
 
     /** @return array<int, Forms\Components\Component> */

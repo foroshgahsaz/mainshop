@@ -33,9 +33,44 @@ class UserResource extends Resource
     public static function form(Form $form): Form
     {
         return $form->schema([
-            Forms\Components\Section::make('پروفایل')
+            Forms\Components\Tabs::make('user_edit_tabs')
+                ->columnSpanFull()
+                ->persistTabInQueryString('tab')
+                ->tabs([
+                    Forms\Components\Tabs\Tab::make('profile')
+                        ->label('پروفایل')
+                        ->icon('heroicon-o-user-circle')
+                        ->schema(static::profileTabSchema()),
+                    Forms\Components\Tabs\Tab::make('account')
+                        ->label('اطلاعات حساب')
+                        ->icon('heroicon-o-identification')
+                        ->schema(static::accountTabSchema()),
+                    Forms\Components\Tabs\Tab::make('orders')
+                        ->label('لیست سفارش‌ها')
+                        ->icon('heroicon-o-shopping-bag')
+                        ->schema(static::ordersTabSchema())
+                        ->visibleOn('edit')
+                        ->lazy(),
+                    Forms\Components\Tabs\Tab::make('payments')
+                        ->label('لیست پرداخت‌ها')
+                        ->icon('heroicon-o-credit-card')
+                        ->schema(static::paymentsTabSchema())
+                        ->visibleOn('edit')
+                        ->lazy(),
+                    Forms\Components\Tabs\Tab::make('access')
+                        ->label('نوع کاربر و دسترسی')
+                        ->icon('heroicon-o-shield-check')
+                        ->schema(static::accessTabSchema()),
+                ]),
+        ]);
+    }
+
+    /** @return array<int, Forms\Components\Component> */
+    protected static function profileTabSchema(): array
+    {
+        return [
+            Forms\Components\Section::make()
                 ->description('تصویر، نام و معرفی کاربر')
-                ->icon('heroicon-o-user-circle')
                 ->schema([
                     Forms\Components\Grid::make()
                         ->schema([
@@ -57,9 +92,15 @@ class UserResource extends Resource
                         ])
                         ->columns(12),
                 ]),
-            Forms\Components\Section::make('اطلاعات حساب')
+        ];
+    }
+
+    /** @return array<int, Forms\Components\Component> */
+    protected static function accountTabSchema(): array
+    {
+        return [
+            Forms\Components\Section::make()
                 ->description('راه‌های ارتباطی و ورود')
-                ->icon('heroicon-o-identification')
                 ->schema([
                     Forms\Components\TextInput::make('phone')
                         ->label('موبایل')
@@ -81,57 +122,45 @@ class UserResource extends Resource
                         ->default(true),
                 ])
                 ->columns(2),
-            Forms\Components\Section::make('لیست سفارش‌ها')
-                ->description('سفارش‌های ثبت‌شده با این حساب')
-                ->icon('heroicon-o-shopping-bag')
+        ];
+    }
+
+    /** @return array<int, Forms\Components\Component> */
+    protected static function ordersTabSchema(): array
+    {
+        return [
+            Forms\Components\Section::make()
+                ->description('سفارش‌های ثبت‌شده با این حساب (حداکثر ۱۰۰ مورد اخیر)')
                 ->schema([
                     Forms\Components\Placeholder::make('user_orders_list')
                         ->label('')
-                        ->content(function (?User $record): HtmlString {
-                            if (! $record) {
-                                return new HtmlString('<p class="text-sm text-gray-500">—</p>');
-                            }
-
-                            $orders = $record->orders()
-                                ->withCount('items')
-                                ->latest()
-                                ->limit(100)
-                                ->get();
-
-                            return new HtmlString(
-                                view('filament.users.partials.orders-table', ['orders' => $orders])->render()
-                            );
-                        }),
+                        ->content(fn (?User $record): HtmlString => static::renderOrdersTable($record)),
                 ])
-                ->visibleOn('edit')
                 ->columnSpanFull(),
-            Forms\Components\Section::make('لیست پرداخت‌ها')
-                ->description('تراکنش‌های پرداخت این کاربر')
-                ->icon('heroicon-o-credit-card')
+        ];
+    }
+
+    /** @return array<int, Forms\Components\Component> */
+    protected static function paymentsTabSchema(): array
+    {
+        return [
+            Forms\Components\Section::make()
+                ->description('تراکنش‌های پرداخت این کاربر (حداکثر ۱۰۰ مورد اخیر)')
                 ->schema([
                     Forms\Components\Placeholder::make('user_payments_list')
                         ->label('')
-                        ->content(function (?User $record): HtmlString {
-                            if (! $record) {
-                                return new HtmlString('<p class="text-sm text-gray-500">—</p>');
-                            }
-
-                            $payments = $record->payments()
-                                ->with('order')
-                                ->latest()
-                                ->limit(100)
-                                ->get();
-
-                            return new HtmlString(
-                                view('filament.users.partials.payments-table', ['payments' => $payments])->render()
-                            );
-                        }),
+                        ->content(fn (?User $record): HtmlString => static::renderPaymentsTable($record)),
                 ])
-                ->visibleOn('edit')
                 ->columnSpanFull(),
-            Forms\Components\Section::make('نوع کاربر و دسترسی')
+        ];
+    }
+
+    /** @return array<int, Forms\Components\Component> */
+    protected static function accessTabSchema(): array
+    {
+        return [
+            Forms\Components\Section::make()
                 ->description('مشتری یا نقش‌های سازمانی')
-                ->icon('heroicon-o-shield-check')
                 ->schema([
                     Forms\Components\Select::make('user_kind')
                         ->label('نوع کاربر')
@@ -154,7 +183,41 @@ class UserResource extends Resource
                         ->visible(fn (Get $get): bool => $get('user_kind') === 'staff'),
                 ])
                 ->columns(1),
-        ]);
+        ];
+    }
+
+    protected static function renderOrdersTable(?User $record): HtmlString
+    {
+        if (! $record) {
+            return new HtmlString('<p class="text-sm text-gray-500">—</p>');
+        }
+
+        $orders = $record->orders()
+            ->withCount('items')
+            ->latest()
+            ->limit(100)
+            ->get();
+
+        return new HtmlString(
+            view('filament.users.partials.orders-table', ['orders' => $orders])->render()
+        );
+    }
+
+    protected static function renderPaymentsTable(?User $record): HtmlString
+    {
+        if (! $record) {
+            return new HtmlString('<p class="text-sm text-gray-500">—</p>');
+        }
+
+        $payments = $record->payments()
+            ->with('order')
+            ->latest()
+            ->limit(100)
+            ->get();
+
+        return new HtmlString(
+            view('filament.users.partials.payments-table', ['payments' => $payments])->render()
+        );
     }
 
     public static function table(Table $table): Table

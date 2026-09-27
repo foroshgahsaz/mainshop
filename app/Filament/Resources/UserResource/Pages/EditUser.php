@@ -2,20 +2,21 @@
 
 namespace App\Filament\Resources\UserResource\Pages;
 
-use App\Filament\Resources\UserResource;
-use Filament\Actions;
 use App\Filament\Resources\Pages\EditRecord;
+use App\Filament\Resources\UserResource;
+use App\Models\User;
+use Filament\Actions;
 use Illuminate\Contracts\Support\Htmlable;
 
 class EditUser extends EditRecord
 {
     protected static string $resource = UserResource::class;
 
-    public function getHeading(): string | Htmlable
+    public function getHeading(): string|Htmlable
     {
         $record = $this->getRecord();
 
-        if ($record instanceof \App\Models\User && auth()->id() === $record->getKey()) {
+        if ($record instanceof User && auth()->id() === $record->getKey()) {
             return 'مدیریت پروفایل';
         }
 
@@ -26,7 +27,7 @@ class EditUser extends EditRecord
     {
         $record = $this->getRecord();
 
-        if ($record instanceof \App\Models\User && auth()->id() === $record->getKey()) {
+        if ($record instanceof User && auth()->id() === $record->getKey()) {
             return 'اطلاعات حساب، تصویر پروفایل و دسترسی‌های شما';
         }
 
@@ -36,6 +37,18 @@ class EditUser extends EditRecord
     protected function getHeaderActions(): array
     {
         return [Actions\DeleteAction::make()];
+    }
+
+    protected function getRedirectUrl(): string
+    {
+        $url = static::getResource()::getUrl('edit', ['record' => $this->getRecord()]);
+        $tab = request()->query('tab');
+
+        if (is_string($tab) && $tab !== '') {
+            return $url.'?tab='.urlencode($tab);
+        }
+
+        return $url;
     }
 
     protected function mutateFormDataBeforeFill(array $data): array

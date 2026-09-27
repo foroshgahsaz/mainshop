@@ -79,7 +79,7 @@ class PaymentController extends Controller
             $payment->user?->notify(new PaymentSuccessNotification($payment));
 
             if ($order?->isPaid()) {
-                $this->sms->orderPaid($order);
+                $this->sms->orderPaid($order, $payment);
             }
         }
 

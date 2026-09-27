@@ -5,6 +5,7 @@
     use App\Filament\Pages\ManageTrustBadges;
     use App\Filament\Pages\ManageIntegrations;
     use App\Filament\Pages\ManageSmsIr;
+    use App\Filament\Pages\ManageTransactionalSms;
     use App\Filament\Pages\ManageHomepageImages;
     use App\Filament\Pages\ManageMediaPresets;
     use App\Filament\Pages\ManageTara;
@@ -193,6 +194,7 @@
                 'filament.admin.pages.search-popup-settings',
                 'filament.admin.pages.kavenegar',
                 'filament.admin.pages.sms-ir',
+                'filament.admin.pages.transactional-sms',
             ],
             'menus' => [
                 ['label' => 'تنظیمات عمومی', 'icon' => 'fa-globe', 'items' => [
@@ -203,6 +205,7 @@
                 ]],
                 ['label' => 'پیامک', 'icon' => 'fa-sms', 'items' => [
                     ['label' => 'sms.ir', 'url' => ManageSmsIr::getUrl(), 'icon' => 'fa-comment-dots'],
+                    ['label' => 'متن پیامک تراکنشی', 'url' => ManageTransactionalSms::getUrl(), 'icon' => 'fa-sms'],
                     ['label' => 'کاوه‌نگار', 'url' => ManageIntegrations::getUrl(), 'icon' => 'fa-comment-sms'],
                 ]],
             ],

@@ -53,10 +53,16 @@ class ManageSearchPopupSettings extends Page implements HasForms
                             ->label('جستجوهای پرتکرار')
                             ->schema([
                                 Forms\Components\TextInput::make('term')
-                                    ->label('عبارت')
+                                    ->label('عبارت نمایشی')
                                     ->required()
                                     ->maxLength(80),
+                                Forms\Components\TextInput::make('link')
+                                    ->label('لینک (اختیاری)')
+                                    ->placeholder('https://... یا /products?...')
+                                    ->maxLength(500)
+                                    ->helperText('خالی بماند = جستجوی همان عبارت در لیست محصولات.'),
                             ])
+                            ->columns(2)
                             ->reorderable()
                             ->collapsible()
                             ->itemLabel(fn (array $state): ?string => $state['term'] ?? 'عبارت جدید')

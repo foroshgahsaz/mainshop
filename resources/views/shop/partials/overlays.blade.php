@@ -3,7 +3,7 @@
 
     $megaColumns = ($navCategories ?? collect())->take(3);
     $searchPopup = $searchPopup ?? [];
-    $popularSearches = $searchPopup['popular_searches'] ?? [];
+    $popularSearches = app(\App\Services\Settings\SearchPopupSettingsService::class)->popularSearchLinks();
     $searchPlaceholder = $searchPopup['placeholder'] ?? ('جستجو در تمام محصولات '.site_name().'...');
     $showSearchCategories = (bool) ($searchPopup['show_categories'] ?? true);
     $searchBanner = $searchPopup['banner'] ?? [];
@@ -88,10 +88,10 @@
               جستجوهای پر تکرار
             </p>
             <div class="search-modal__tags">
-              @foreach($popularSearches as $term)
-                <a href="{{ route('products.index', ['search' => $term]) }}"
+              @foreach($popularSearches as $item)
+                <a href="{{ $item['url'] }}"
                    class="search-modal__tag"
-                   onclick="toggleSearchModal(false)">{{ $term }}</a>
+                   onclick="toggleSearchModal(false)">{{ $item['term'] }}</a>
               @endforeach
             </div>
           </div>

@@ -11,7 +11,8 @@ return new class extends Migration
         Schema::create('product_families', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('slug')->unique();
+            // 191 chars: safe unique index length on MySQL utf8mb4 (max key ~1000 bytes).
+            $table->string('slug', 191)->unique();
             $table->boolean('is_active')->default(true);
             $table->unsignedInteger('position')->default(0);
             $table->timestamps();
@@ -22,7 +23,7 @@ return new class extends Migration
             $table->foreignId('brand_id')->constrained()->cascadeOnDelete();
             $table->foreignId('product_family_id')->nullable()->constrained()->nullOnDelete();
             $table->string('name');
-            $table->string('slug');
+            $table->string('slug', 191);
             $table->boolean('is_active')->default(true);
             $table->unsignedInteger('position')->default(0);
             $table->timestamps();

@@ -22,6 +22,7 @@ class Product extends Model
         'category_id',
         'brand_id',
         'product_family_id',
+        'product_plant_id',
         'product_template_id',
         'name',
         'slug',
@@ -71,6 +72,11 @@ class Product extends Model
     public function productFamily(): BelongsTo
     {
         return $this->belongsTo(ProductFamily::class);
+    }
+
+    public function productPlant(): BelongsTo
+    {
+        return $this->belongsTo(ProductPlant::class);
     }
 
     public function productTemplate(): BelongsTo

@@ -6,6 +6,7 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductFamily;
+use App\Models\ProductPlant;
 use App\Models\ProductTemplate;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -30,6 +31,14 @@ class ProductFamilyTemplateTest extends TestCase
             'position' => 0,
         ]);
 
+        $plant = ProductPlant::query()->create([
+            'product_family_id' => $family->id,
+            'name' => 'چینی پردیس',
+            'slug' => 'chinese-pardis',
+            'is_active' => true,
+            'position' => 0,
+        ]);
+
         $template = ProductTemplate::query()->create([
             'brand_id' => $brand->id,
             'product_family_id' => $family->id,
@@ -42,10 +51,12 @@ class ProductFamilyTemplateTest extends TestCase
         $product = Product::factory()->create([
             'brand_id' => $brand->id,
             'product_family_id' => $family->id,
+            'product_plant_id' => $plant->id,
             'product_template_id' => $template->id,
         ]);
 
         $this->assertTrue($product->productFamily->is($family));
+        $this->assertTrue($product->productPlant->is($plant));
         $this->assertTrue($product->productTemplate->is($template));
         $this->assertSame($brand->id, $product->productTemplate->brand_id);
     }

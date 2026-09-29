@@ -4,7 +4,11 @@
 
 <x-filament-panels::layout.base :livewire="$livewire">
     <div class="fi-admin-shell" id="fiAdminShell">
-        @include('filament.partials.admin-sidebar')
+        @if (filament()->getId() === 'representative')
+            @include('filament.partials.representative-sidebar')
+        @else
+            @include('filament.partials.admin-sidebar')
+        @endif
 
         <div class="main-content" id="mainContent">
             <div class="content-area">

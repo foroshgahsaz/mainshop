@@ -1,3 +1,6 @@
+@if (request()->routeIs('filament.representative.*'))
+    @include('filament.partials.representative-sidebar')
+@else
 @php
     use App\Filament\Pages\ManageFooterSettings;
     use App\Filament\Pages\ManageSearchPopupSettings;
@@ -33,7 +36,7 @@
     $user = filament()->auth()->user();
     $brand = filament()->getBrandName();
     $isDashboard = request()->routeIs('filament.admin.pages.dashboard');
-    $profileUrl = UserResource::getUrl('edit', ['record' => $user->id]);
+    $profileUrl = UserResource::getUrl('edit', ['record' => $user->id], panel: 'admin');
     $dashboardUrl = filament()->getUrl();
 
     $panels = [
@@ -340,3 +343,4 @@
 <script>
     window.__adminPanelTitles = @json(collect($panels)->mapWithKeys(fn ($p, $id) => [$id => $p['label']]));
 </script>
+@endif

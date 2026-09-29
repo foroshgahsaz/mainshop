@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class CreateCustomer extends CreateRecord
 {
+    protected static string $layout = 'filament-panels::components.layout.representative';
+
     protected static string $resource = CustomerResource::class;
 
     protected function handleRecordCreation(array $data): Model

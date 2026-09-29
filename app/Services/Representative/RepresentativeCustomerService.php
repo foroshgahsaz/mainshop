@@ -2,6 +2,8 @@
 
 namespace App\Services\Representative;
 
+use App\Models\City;
+use App\Models\Province;
 use App\Models\User;
 use App\Models\UserAddress;
 use App\Rules\IranianNationalCode;
@@ -52,7 +54,40 @@ class RepresentativeCustomerService
             ]);
         }
 
-        return DB::transaction(function () use ($representative, $data, $phone, $nationalCode): User {
+        $provinceId = (int) ($data['province_id'] ?? 0);
+        $cityId = (int) ($data['city_id'] ?? 0);
+        $addressLine = trim((string) ($data['address'] ?? ''));
+
+        validator(
+            [
+                'province_id' => $provinceId,
+                'city_id' => $cityId,
+                'address' => $addressLine,
+            ],
+            [
+                'province_id' => ['required', 'integer', Rule::exists('provinces', 'id')],
+                'city_id' => ['required', 'integer', Rule::exists('cities', 'id')],
+                'address' => ['required', 'string', 'max:1000'],
+            ],
+            [
+                'province_id.required' => 'استان را انتخاب کنید.',
+                'city_id.required' => 'شهر را انتخاب کنید.',
+                'address.required' => 'آدرس را وارد کنید.',
+            ]
+        )->validate();
+
+        $city = City::query()->find($cityId);
+
+        if ($city === null || (int) $city->province_id !== $provinceId) {
+            throw ValidationException::withMessages([
+                'city_id' => 'شهر انتخاب‌شده با استان هم‌خوانی ندارد.',
+            ]);
+        }
+
+        $provinceName = Province::query()->find($provinceId)?->name ?? '';
+        $cityName = $city->name;
+
+        return DB::transaction(function () use ($representative, $data, $phone, $nationalCode, $provinceId, $cityId, $addressLine, $provinceName, $cityName): User {
             $customer = User::query()->create([
                 'name' => $data['name'],
                 'phone' => $phone,
@@ -65,18 +100,15 @@ class RepresentativeCustomerService
                 'created_by_representative_id' => $representative->id,
             ]);
 
-            $provinceName = \App\Models\Province::query()->find($data['province_id'])?->name ?? '';
-            $cityName = \App\Models\City::query()->find($data['city_id'])?->name ?? '';
-
             UserAddress::query()->create([
                 'user_id' => $customer->id,
                 'receiver_name' => $data['name'],
                 'receiver_phone' => $phone,
-                'province_id' => $data['province_id'],
-                'city_id' => $data['city_id'],
+                'province_id' => $provinceId,
+                'city_id' => $cityId,
                 'province' => $provinceName,
                 'city' => $cityName,
-                'address' => $data['address'],
+                'address' => $addressLine,
                 'postal_code' => $data['postal_code'] ?? null,
                 'is_default' => true,
             ]);

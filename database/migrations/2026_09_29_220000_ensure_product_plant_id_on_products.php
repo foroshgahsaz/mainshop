@@ -5,27 +5,19 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * Completes product_plant_id when 210000 failed after creating product_plants.
+ */
 return new class extends Migration
 {
     public function up(): void
     {
-        if (! Schema::hasTable('product_plants')) {
-            Schema::create('product_plants', function (Blueprint $table) {
-                $table->id();
-                $table->foreignId('product_family_id')->nullable()->constrained()->nullOnDelete();
-                $table->string('name');
-                $table->string('slug', 191)->unique();
-                $table->boolean('is_active')->default(true);
-                $table->unsignedInteger('position')->default(0);
-                $table->timestamps();
-            });
+        if (! Schema::hasTable('product_plants') || ! Schema::hasTable('products')) {
+            return;
         }
 
         DB::statement('ALTER TABLE `product_plants` ENGINE=InnoDB');
-
-        if (Schema::hasTable('products')) {
-            DB::statement('ALTER TABLE `products` ENGINE=InnoDB');
-        }
+        DB::statement('ALTER TABLE `products` ENGINE=InnoDB');
 
         Schema::table('products', function (Blueprint $table) {
             if (! Schema::hasColumn('products', 'product_plant_id')) {
@@ -47,19 +39,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        if ($this->foreignKeyExists('products', 'products_product_plant_id_foreign')) {
-            Schema::table('products', function (Blueprint $table) {
-                $table->dropForeign('products_product_plant_id_foreign');
-            });
-        }
-
-        Schema::table('products', function (Blueprint $table) {
-            if (Schema::hasColumn('products', 'product_plant_id')) {
-                $table->dropColumn('product_plant_id');
-            }
-        });
-
-        Schema::dropIfExists('product_plants');
+        // Forward-only repair.
     }
 
     private function foreignKeyExists(string $table, string $constraint): bool

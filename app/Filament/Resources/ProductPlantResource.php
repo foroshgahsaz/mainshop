@@ -6,6 +6,7 @@ use App\Filament\Resources\ProductPlantResource\Pages;
 use App\Filament\Support\AdminTable;
 use App\Models\ProductPlant;
 use Filament\Forms;
+use Illuminate\Support\Facades\Schema;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -29,6 +30,11 @@ class ProductPlantResource extends Resource
     protected static ?string $modelLabel = 'کارخانه';
 
     protected static ?string $pluralModelLabel = 'کارخانه‌ها';
+
+    public static function canViewAny(): bool
+    {
+        return Schema::hasColumn('products', 'product_plant_id');
+    }
 
     public static function form(Form $form): Form
     {

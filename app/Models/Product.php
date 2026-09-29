@@ -21,6 +21,8 @@ class Product extends Model
     protected $fillable = [
         'category_id',
         'brand_id',
+        'product_family_id',
+        'product_template_id',
         'name',
         'slug',
         'short_description',
@@ -64,6 +66,16 @@ class Product extends Model
     public function brand(): BelongsTo
     {
         return $this->belongsTo(Brand::class);
+    }
+
+    public function productFamily(): BelongsTo
+    {
+        return $this->belongsTo(ProductFamily::class);
+    }
+
+    public function productTemplate(): BelongsTo
+    {
+        return $this->belongsTo(ProductTemplate::class);
     }
 
     public function getRouteKeyName(): string

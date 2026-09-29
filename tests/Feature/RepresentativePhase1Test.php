@@ -48,10 +48,13 @@ class RepresentativePhase1Test extends TestCase
         $customer = app(RepresentativeCustomerService::class)->create($rep, [
             'name' => 'مشتری تست',
             'phone' => '09121234567',
+            'national_code' => '0013542419',
             'province_id' => $province->id,
             'city_id' => $city->id,
             'address' => 'خیابان تست',
         ]);
+
+        $this->assertSame('0013542419', $customer->national_code);
 
         $this->assertSame($rep->id, $customer->created_by_representative_id);
         $this->assertTrue($customer->addresses()->exists());
@@ -70,6 +73,7 @@ class RepresentativePhase1Test extends TestCase
         app(RepresentativeCustomerService::class)->create($rep, [
             'name' => 'دیگر',
             'phone' => '09121111111',
+            'national_code' => '0067749828',
             'province_id' => $province->id,
             'city_id' => $city->id,
             'address' => 'آدرس',

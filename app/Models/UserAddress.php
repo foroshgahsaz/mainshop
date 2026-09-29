@@ -10,6 +10,8 @@ class UserAddress extends Model
 {
     protected $fillable = [
         'user_id',
+        'province_id',
+        'city_id',
         'receiver_name',
         'receiver_phone',
         'province',
@@ -29,6 +31,16 @@ class UserAddress extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function provinceModel(): BelongsTo
+    {
+        return $this->belongsTo(Province::class, 'province_id');
+    }
+
+    public function cityModel(): BelongsTo
+    {
+        return $this->belongsTo(City::class, 'city_id');
     }
 
     public function orders(): HasMany

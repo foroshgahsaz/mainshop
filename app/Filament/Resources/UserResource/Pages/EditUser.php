@@ -63,7 +63,7 @@ class EditUser extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        $data['user_kind'] = (! empty($data['is_admin']) || ! empty($data['is_author']))
+        $data['user_kind'] = (! empty($data['is_admin']) || ! empty($data['is_author']) || ! empty($data['is_representative']))
             ? 'staff'
             : 'customer';
 
@@ -84,6 +84,7 @@ class EditUser extends EditRecord
             'status' => $user->status,
             'is_admin' => $user->is_admin,
             'is_author' => $user->is_author,
+            'is_representative' => $user->is_representative,
         ], $data);
 
         if (! filled($data['password'] ?? null)) {

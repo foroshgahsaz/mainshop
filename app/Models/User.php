@@ -6,7 +6,9 @@ use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -28,6 +30,8 @@ class User extends Authenticatable implements FilamentUser
         'status',
         'is_admin',
         'is_author',
+        'is_representative',
+        'created_by_representative_id',
         'password',
         'last_login_at',
         'login_count',
@@ -47,12 +51,17 @@ class User extends Authenticatable implements FilamentUser
             'status' => 'boolean',
             'is_admin' => 'boolean',
             'is_author' => 'boolean',
+            'is_representative' => 'boolean',
             'password' => 'hashed',
         ];
     }
 
     public function canAccessPanel(Panel $panel): bool
     {
+        if ($panel->getId() === 'representative') {
+            return $this->isRepresentative() && $this->status;
+        }
+
         return $this->is_admin && $this->status;
     }
 
@@ -61,9 +70,14 @@ class User extends Authenticatable implements FilamentUser
         return (bool) $this->is_admin;
     }
 
+    public function isRepresentative(): bool
+    {
+        return (bool) $this->is_representative;
+    }
+
     public function isCustomer(): bool
     {
-        return ! $this->is_admin && ! $this->is_author;
+        return ! $this->is_admin && ! $this->is_author && ! $this->is_representative;
     }
 
     public function customerTypeLabel(): string
@@ -83,7 +97,26 @@ class User extends Authenticatable implements FilamentUser
             $roles[] = 'نویسنده';
         }
 
+        if ($this->is_representative) {
+            $roles[] = 'نماینده';
+        }
+
         return implode('، ', $roles) ?: '—';
+    }
+
+    public function representativeProfile(): HasOne
+    {
+        return $this->hasOne(RepresentativeProfile::class);
+    }
+
+    public function createdByRepresentative(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by_representative_id');
+    }
+
+    public function customersCreated(): HasMany
+    {
+        return $this->hasMany(User::class, 'created_by_representative_id');
     }
 
     /** @deprecated use customerTypeLabel() or staffRoleLabel() */

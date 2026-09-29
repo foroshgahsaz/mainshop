@@ -16,12 +16,22 @@ class CreateUser extends CreateRecord
         return static::normalizeUserKind($data);
     }
 
+    protected function afterCreate(): void
+    {
+        if ($this->record->is_representative && ! $this->record->representativeProfile) {
+            $this->record->representativeProfile()->create([
+                'max_active_reservations' => 3,
+            ]);
+        }
+    }
+
     /** @param  array<string, mixed>  $data */
     public static function normalizeUserKind(array $data): array
     {
         if (($data['user_kind'] ?? 'customer') === 'customer') {
             $data['is_admin'] = false;
             $data['is_author'] = false;
+            $data['is_representative'] = false;
         }
 
         unset($data['user_kind']);

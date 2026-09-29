@@ -177,9 +177,38 @@ class UserResource extends Resource
                                 ->label('مدیر — دسترسی پنل ادمین'),
                             Forms\Components\Toggle::make('is_author')
                                 ->label('نویسنده — انتشار در بلاگ'),
+                            Forms\Components\Toggle::make('is_representative')
+                                ->label('نماینده — پنل نمایندگی')
+                                ->live(),
                         ])
                         ->columns(2)
                         ->visible(fn (Get $get): bool => $get('user_kind') === 'staff'),
+                    Forms\Components\Fieldset::make('پروفایل نمایندگی')
+                        ->relationship('representativeProfile')
+                        ->schema([
+                            Forms\Components\Select::make('province_id')
+                                ->label('استان فعالیت')
+                                ->relationship('province', 'name')
+                                ->searchable()
+                                ->preload(),
+                            Forms\Components\Select::make('city_id')
+                                ->label('شهر فعالیت')
+                                ->relationship('city', 'name', fn ($query, Get $get) => $query->when(
+                                    $get('province_id'),
+                                    fn ($q, $provinceId) => $q->where('province_id', $provinceId)
+                                ))
+                                ->searchable()
+                                ->preload(),
+                            Forms\Components\TextInput::make('max_active_reservations')
+                                ->label('سقف رزرو همزمان')
+                                ->numeric()
+                                ->default(3)
+                                ->minValue(1)
+                                ->maxValue(50)
+                                ->helperText('حداکثر پیش‌فاکتور باز با رزرو موجودی (پیش‌فرض ۳).'),
+                        ])
+                        ->columns(2)
+                        ->visible(fn (Get $get): bool => (bool) $get('is_representative')),
                 ])
                 ->columns(1),
         ];

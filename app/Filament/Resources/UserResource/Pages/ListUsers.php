@@ -25,10 +25,14 @@ class ListUsers extends ListRecords
             'customers' => Tab::make('مشتریان')
                 ->modifyQueryUsing(fn (Builder $query) => $query
                     ->where('is_admin', false)
-                    ->where('is_author', false)),
+                    ->where('is_author', false)
+                    ->where('is_representative', false)),
             'staff' => Tab::make('غیر مشتری')
                 ->modifyQueryUsing(fn (Builder $query) => $query->where(
-                    fn (Builder $q) => $q->where('is_admin', true)->orWhere('is_author', true)
+                    fn (Builder $q) => $q
+                        ->where('is_admin', true)
+                        ->orWhere('is_author', true)
+                        ->orWhere('is_representative', true)
                 )),
         ];
     }

@@ -3,6 +3,7 @@
 namespace App\Livewire\Auth\Concerns;
 
 use App\Models\User;
+use App\Services\Auth\LoginRedirectService;
 use App\Services\Auth\OtpService;
 use App\Services\Auth\ShopLoginGuard;
 use App\Services\Cart\CartService;
@@ -191,6 +192,8 @@ trait HandlesOtpLogin
         Auth::login($user, remember: true);
         $cart->mergeGuestCartIntoUser($user);
 
-        $this->redirectIntended(default: route('account.dashboard'), navigate: true);
+        $default = app(LoginRedirectService::class)->shopDefaultUrl($user);
+
+        $this->redirectIntended(default: $default, navigate: $user->isRepresentative() && ! $user->isAdmin());
     }
 }

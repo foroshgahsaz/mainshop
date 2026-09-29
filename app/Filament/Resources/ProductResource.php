@@ -11,6 +11,7 @@ use App\Filament\Support\RichContentEditor;
 use App\Filament\Support\SeoFormSchema;
 use App\Models\Product;
 use Filament\Forms;
+use Illuminate\Support\Facades\Schema;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Resources\Resource;
@@ -51,48 +52,7 @@ class ProductResource extends Resource
                             ->live()
                             ->afterStateUpdated(fn (callable $set) => $set('product_template_id', null)),
 
-                        Forms\Components\Select::make('product_family_id')
-                            ->label('خانواده محصول')
-                            ->relationship(
-                                'productFamily',
-                                'name',
-                                fn ($query) => $query->where('is_active', true)->orderBy('position')
-                            )
-                            ->searchable()
-                            ->preload()
-                            ->live()
-                            ->afterStateUpdated(fn (callable $set) => $set('product_template_id', null)),
-
-                        Forms\Components\Select::make('product_template_id')
-                            ->label('قالب محصول')
-                            ->relationship(
-                                'productTemplate',
-                                'name',
-                                modifyQueryUsing: function ($query, Get $get) {
-                                    $brandId = $get('brand_id');
-                                    if (! $brandId) {
-                                        return $query->whereRaw('0 = 1');
-                                    }
-
-                                    $familyId = $get('product_family_id');
-
-                                    return $query
-                                        ->where('brand_id', $brandId)
-                                        ->where('is_active', true)
-                                        ->orderBy('position')
-                                        ->when(
-                                            $familyId,
-                                            fn ($q) => $q->where(function ($q) use ($familyId) {
-                                                $q->where('product_family_id', $familyId)
-                                                    ->orWhereNull('product_family_id');
-                                            })
-                                        );
-                                }
-                            )
-                            ->searchable()
-                            ->preload()
-                            ->disabled(fn (Get $get): bool => ! $get('brand_id'))
-                            ->helperText('ابتدا برند را انتخاب کنید. قالب باید متعلق به همان برند باشد.'),
+                        ...self::catalogTaxonomyFormFields(),
 
                         Forms\Components\TextInput::make('name')
                             ->label('نام محصول')
@@ -256,5 +216,70 @@ class ProductResource extends Resource
             'create' => Pages\CreateProduct::route('/create'),
             'edit' => Pages\EditProduct::route('/{record}/edit'),
         ];
+    }
+
+    /**
+     * @return array<int, Forms\Components\Component>
+     */
+    private static function catalogTaxonomyFormFields(): array
+    {
+        if (! Schema::hasTable('product_families')) {
+            return [];
+        }
+
+        $fields = [
+            Forms\Components\Select::make('product_family_id')
+                ->label('خانواده محصول')
+                ->relationship(
+                    'productFamily',
+                    'name',
+                    fn ($query) => $query->where('is_active', true)->orderBy('position')
+                )
+                ->searchable()
+                ->preload()
+                ->live()
+                ->afterStateUpdated(fn (callable $set) => $set('product_template_id', null)),
+        ];
+
+        if (! Schema::hasTable('product_templates')) {
+            $fields[] = Forms\Components\Placeholder::make('product_templates_missing')
+                ->label('قالب محصول')
+                ->content('جدول قالب محصول هنوز ساخته نشده. روی سرور: php artisan migrate --force');
+
+            return $fields;
+        }
+
+        $fields[] = Forms\Components\Select::make('product_template_id')
+            ->label('قالب محصول')
+            ->relationship(
+                'productTemplate',
+                'name',
+                modifyQueryUsing: function ($query, Get $get) {
+                    $brandId = $get('brand_id');
+                    if (! $brandId) {
+                        return $query->whereRaw('0 = 1');
+                    }
+
+                    $familyId = $get('product_family_id');
+
+                    return $query
+                        ->where('brand_id', $brandId)
+                        ->where('is_active', true)
+                        ->orderBy('position')
+                        ->when(
+                            $familyId,
+                            fn ($q) => $q->where(function ($q) use ($familyId) {
+                                $q->where('product_family_id', $familyId)
+                                    ->orWhereNull('product_family_id');
+                            })
+                        );
+                }
+            )
+            ->searchable()
+            ->preload()
+            ->disabled(fn (Get $get): bool => ! $get('brand_id'))
+            ->helperText('ابتدا برند را انتخاب کنید. قالب باید متعلق به همان برند باشد.');
+
+        return $fields;
     }
 }

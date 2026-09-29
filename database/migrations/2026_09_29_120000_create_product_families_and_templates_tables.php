@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -69,6 +70,9 @@ return new class extends Migration
         if ($this->indexExists('product_families', 'product_families_slug_unique')) {
             return;
         }
+
+        // Table may exist from a failed run with varchar(255) slug (unique index would fail).
+        DB::statement('ALTER TABLE `product_families` MODIFY `slug` VARCHAR(191) NOT NULL');
 
         Schema::table('product_families', function (Blueprint $table) {
             $table->unique('slug');

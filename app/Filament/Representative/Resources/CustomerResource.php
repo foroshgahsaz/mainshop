@@ -63,8 +63,7 @@ class CustomerResource extends Resource
                         ->options(fn () => \App\Models\Province::query()->orderBy('position')->pluck('name', 'id'))
                         ->required()
                         ->searchable()
-                        ->live()
-                        ->dehydrated(false),
+                        ->live(),
                     Forms\Components\Select::make('city_id')
                         ->label('شهر')
                         ->options(fn (Get $get) => City::query()
@@ -73,18 +72,15 @@ class CustomerResource extends Resource
                             ->pluck('name', 'id'))
                         ->required()
                         ->searchable()
-                        ->disabled(fn (Get $get): bool => ! $get('province_id'))
-                        ->dehydrated(false),
+                        ->disabled(fn (Get $get): bool => ! $get('province_id')),
                     Forms\Components\Textarea::make('address')
                         ->label('آدرس')
                         ->required()
                         ->rows(3)
-                        ->columnSpanFull()
-                        ->dehydrated(false),
+                        ->columnSpanFull(),
                     Forms\Components\TextInput::make('postal_code')
                         ->label('کد پستی')
-                        ->maxLength(10)
-                        ->dehydrated(false),
+                        ->maxLength(10),
                 ])
                 ->columns(2)
                 ->visibleOn('create'),

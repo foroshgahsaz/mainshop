@@ -19,16 +19,16 @@ class CreateCustomer extends CreateRecord
         /** @var User $representative */
         $representative = auth()->user();
 
-        $state = $this->form->getState();
+        $raw = $this->form->getRawState();
 
         return app(RepresentativeCustomerService::class)->create($representative, [
-            'name' => (string) ($state['name'] ?? ''),
-            'phone' => (string) ($state['phone'] ?? ''),
-            'national_code' => (string) ($state['national_code'] ?? ''),
-            'province_id' => (int) ($state['province_id'] ?? 0),
-            'city_id' => (int) ($state['city_id'] ?? 0),
-            'address' => (string) ($state['address'] ?? ''),
-            'postal_code' => $state['postal_code'] ?? null,
+            'name' => (string) ($raw['name'] ?? ''),
+            'phone' => (string) ($raw['phone'] ?? ''),
+            'national_code' => (string) ($raw['national_code'] ?? ''),
+            'province_id' => (int) ($raw['province_id'] ?? 0),
+            'city_id' => (int) ($raw['city_id'] ?? 0),
+            'address' => (string) ($raw['address'] ?? ''),
+            'postal_code' => $raw['postal_code'] ?? null,
         ]);
     }
 

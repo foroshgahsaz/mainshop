@@ -21,7 +21,9 @@
     use App\Filament\Resources\PageResource;
     use App\Filament\Resources\PaymentResource;
     use App\Filament\Resources\PostResource;
+    use App\Filament\Resources\ProductFamilyResource;
     use App\Filament\Resources\ProductResource;
+    use App\Filament\Resources\ProductTemplateResource;
     use App\Filament\Resources\ProductQuestionResource;
     use App\Filament\Resources\ProductReviewResource;
     use App\Filament\Resources\ShippingMethodResource;
@@ -53,6 +55,8 @@
                 'filament.admin.resources.products.*',
                 'filament.admin.resources.categories.*',
                 'filament.admin.resources.attributes.*',
+                'filament.admin.resources.product-families.*',
+                'filament.admin.resources.product-templates.*',
             ],
             'menus' => [
                 ['label' => 'محصولات', 'icon' => 'fa-box-open', 'items' => [
@@ -60,6 +64,8 @@
                     ['label' => 'افزودن محصول', 'url' => ProductResource::getUrl('create'), 'icon' => 'fa-plus'],
                     ['label' => 'دسته‌بندی‌ها', 'url' => CategoryResource::getUrl('index'), 'icon' => 'fa-tags'],
                     ['label' => 'ویژگی‌ها', 'url' => AttributeResource::getUrl('index'), 'icon' => 'fa-list-ul'],
+                    ['label' => 'خانواده محصول', 'url' => ProductFamilyResource::getUrl('index'), 'icon' => 'fa-layer-group'],
+                    ['label' => 'قالب محصول', 'url' => ProductTemplateResource::getUrl('index'), 'icon' => 'fa-shapes'],
                 ]],
             ],
         ],

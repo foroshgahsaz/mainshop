@@ -12,6 +12,7 @@ use App\Filament\Support\SeoFormSchema;
 use App\Models\Product;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -46,7 +47,52 @@ class ProductResource extends Resource
                             ->label('برند')
                             ->relationship('brand', 'name')
                             ->searchable()
-                            ->preload(),
+                            ->preload()
+                            ->live()
+                            ->afterStateUpdated(fn (callable $set) => $set('product_template_id', null)),
+
+                        Forms\Components\Select::make('product_family_id')
+                            ->label('خانواده محصول')
+                            ->relationship(
+                                'productFamily',
+                                'name',
+                                fn ($query) => $query->where('is_active', true)->orderBy('position')
+                            )
+                            ->searchable()
+                            ->preload()
+                            ->live()
+                            ->afterStateUpdated(fn (callable $set) => $set('product_template_id', null)),
+
+                        Forms\Components\Select::make('product_template_id')
+                            ->label('قالب محصول')
+                            ->relationship(
+                                'productTemplate',
+                                'name',
+                                modifyQueryUsing: function ($query, Get $get) {
+                                    $brandId = $get('brand_id');
+                                    if (! $brandId) {
+                                        return $query->whereRaw('0 = 1');
+                                    }
+
+                                    $familyId = $get('product_family_id');
+
+                                    return $query
+                                        ->where('brand_id', $brandId)
+                                        ->where('is_active', true)
+                                        ->orderBy('position')
+                                        ->when(
+                                            $familyId,
+                                            fn ($q) => $q->where(function ($q) use ($familyId) {
+                                                $q->where('product_family_id', $familyId)
+                                                    ->orWhereNull('product_family_id');
+                                            })
+                                        );
+                                }
+                            )
+                            ->searchable()
+                            ->preload()
+                            ->disabled(fn (Get $get): bool => ! $get('brand_id'))
+                            ->helperText('ابتدا برند را انتخاب کنید. قالب باید متعلق به همان برند باشد.'),
 
                         Forms\Components\TextInput::make('name')
                             ->label('نام محصول')
@@ -90,7 +136,8 @@ class ProductResource extends Resource
                             ->label('موجودی')
                             ->numeric()
                             ->default(0)
-                            ->minValue(0),
+                            ->minValue(0)
+                            ->helperText('فعلاً از این فرم ثبت می‌شود. پس از راه‌اندازی «مدیر موجودی»، مرجع نهایی موجودی از آن پنل خواهد بود.'),
 
                         Forms\Components\TextInput::make('sku')
                             ->label('SKU')
@@ -137,6 +184,16 @@ class ProductResource extends Resource
                 Tables\Columns\TextColumn::make('category.name')
                     ->label('دسته‌بندی')
                     ->sortable(),
+
+                Tables\Columns\TextColumn::make('productFamily.name')
+                    ->label('خانواده')
+                    ->placeholder('—')
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                Tables\Columns\TextColumn::make('productTemplate.name')
+                    ->label('قالب')
+                    ->placeholder('—')
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 Tables\Columns\TextColumn::make('price')
                     ->label('قیمت')

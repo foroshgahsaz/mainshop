@@ -2,7 +2,6 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -22,7 +21,7 @@ return new class extends Migration
         if (
             Schema::hasColumn('orders', 'representative_id')
             && Schema::hasTable('users')
-            && ! $this->indexExists('orders', 'orders_representative_id_foreign')
+            && ! $this->foreignKeyExists('orders', 'orders_representative_id_foreign')
         ) {
             Schema::table('orders', function (Blueprint $table) {
                 $table->foreign('representative_id')
@@ -53,7 +52,7 @@ return new class extends Migration
             });
         }
 
-        if ($this->indexExists('orders', 'orders_representative_id_foreign')) {
+        if ($this->foreignKeyExists('orders', 'orders_representative_id_foreign')) {
             Schema::table('orders', function (Blueprint $table) {
                 $table->dropForeign(['representative_id']);
             });
@@ -68,11 +67,13 @@ return new class extends Migration
 
     private function ensureDraftOrderStatus(): void
     {
-        if (DB::getDriverName() !== 'mysql') {
+        $connection = Schema::getConnection();
+
+        if ($connection->getDriverName() !== 'mysql') {
             return;
         }
 
-        $column = DB::selectOne("SHOW COLUMNS FROM `orders` WHERE Field = 'status'");
+        $column = $connection->selectOne("SHOW COLUMNS FROM `orders` WHERE Field = 'status'");
 
         if ($column === null || ! str_contains((string) ($column->Type ?? ''), 'enum')) {
             return;
@@ -82,7 +83,7 @@ return new class extends Migration
             return;
         }
 
-        DB::statement("ALTER TABLE `orders` MODIFY COLUMN `status` ENUM(
+        $connection->statement("ALTER TABLE `orders` MODIFY COLUMN `status` ENUM(
             'draft',
             'pending',
             'processing',
@@ -93,19 +94,23 @@ return new class extends Migration
         ) NOT NULL DEFAULT 'pending'");
     }
 
-    private function indexExists(string $table, string $indexName): bool
+    private function foreignKeyExists(string $table, string $constraint): bool
     {
-        if (DB::getDriverName() !== 'mysql') {
+        $connection = Schema::getConnection();
+
+        if ($connection->getDriverName() !== 'mysql') {
             return false;
         }
 
-        $result = DB::selectOne(
-            'SELECT 1 FROM information_schema.statistics
-             WHERE table_schema = ? AND table_name = ? AND index_name = ?
-             LIMIT 1',
-            [DB::getConnection()->getDatabaseName(), $table, $indexName]
+        $database = $connection->getDatabaseName();
+
+        $rows = $connection->select(
+            'SELECT 1 FROM information_schema.table_constraints
+             WHERE constraint_schema = ? AND table_name = ? AND constraint_name = ?
+             AND constraint_type = ? LIMIT 1',
+            [$database, $table, $constraint, 'FOREIGN KEY']
         );
 
-        return $result !== null;
+        return $rows !== [];
     }
 };

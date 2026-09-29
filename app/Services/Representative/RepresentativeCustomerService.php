@@ -52,7 +52,7 @@ class RepresentativeCustomerService
             ]);
         }
 
-        return DB::transaction(function () use ($representative, $data, $phone): User {
+        return DB::transaction(function () use ($representative, $data, $phone, $nationalCode): User {
             $customer = User::query()->create([
                 'name' => $data['name'],
                 'phone' => $phone,

@@ -24,4 +24,10 @@ return [
         'unpaid_ttl_minutes' => (int) env('SHOP_UNPAID_TTL_MINUTES', 60),
     ],
 
+    'representative' => [
+        'catalog_cache_seconds' => (int) env('REP_CATALOG_CACHE_SECONDS', 300),
+        'products_per_page' => (int) env('REP_PRODUCTS_PER_PAGE', 15),
+        'default_shipping_amount' => (int) env('REP_DEFAULT_SHIPPING_AMOUNT', 0),
+    ],
+
 ];

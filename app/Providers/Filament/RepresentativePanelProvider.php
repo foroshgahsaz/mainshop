@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Representative\Pages\Auth\Login;
+use App\Filament\Representative\Pages\CreateDraftOrder;
 use App\Filament\Representative\Pages\Dashboard;
 use App\Http\Middleware\SetPersianLocale;
 use App\Services\Settings\SettingsService;
@@ -43,6 +44,7 @@ class RepresentativePanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Representative/Pages'), for: 'App\\Filament\\Representative\\Pages')
             ->pages([
                 Dashboard::class,
+                CreateDraftOrder::class,
             ])
             ->widgets([])
             ->renderHook(PanelsRenderHook::HEAD_END, fn () => view('filament.hooks.styles'))

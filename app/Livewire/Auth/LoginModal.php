@@ -39,7 +39,7 @@ class LoginModal extends Component
         $this->resetLoginForm();
         $this->js('toggleElement("loginModal", false)');
 
-        $this->redirectIntended(default: route('account.dashboard'), navigate: true);
+        $this->redirectAfterShopLogin($user);
     }
 
     protected function resetLoginForm(): void

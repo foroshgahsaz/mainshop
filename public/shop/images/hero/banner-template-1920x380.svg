@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="380" viewBox="0 0 1920 380">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff7e15"/>
+      <stop offset="100%" style="stop-color:#ff4500"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="380" fill="url(#bg)"/>
+  <rect x="360" y="0" width="1200" height="380" fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="12 8" opacity="0.85"/>
+  <text x="960" y="165" text-anchor="middle" fill="#ffffff" font-family="Tahoma, Arial, sans-serif" font-size="42" font-weight="bold">B'D( (F1 '3D'Ì/1  ñùòð × óøð ~Ì©3D</text>
+  <text x="960" y="220" text-anchor="middle" fill="#ffffff" font-family="Tahoma, Arial, sans-serif" font-size="22" opacity="0.95">E*F H E-5HD 1' /'.D ©'/1 .7†ÌF (ñòððpx) B1'1 /GÌ/</text>
+  <text x="960" y="265" text-anchor="middle" fill="#ffffff" font-family="Tahoma, Arial, sans-serif" font-size="18" opacity="0.85">.1H,Ì: JPG Ì' PNG (' GE'F F3(*  "~DH/ /1 '/EÌF ’ '3D'Ì/1 5A-G '5DÌ</text>
+</svg>

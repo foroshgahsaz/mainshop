@@ -1,0 +1,172 @@
+.rep-order-wizard {
+    max-width: 52rem;
+}
+
+.rep-wizard-steps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-bottom: 1rem;
+}
+
+.rep-wizard-step {
+    border: 1px solid #d1d5db;
+    background: #fff;
+    border-radius: 999px;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.rep-wizard-step.is-active {
+    border-color: #0d9488;
+    background: #ecfdf5;
+    color: #0f766e;
+    font-weight: 600;
+}
+
+.rep-wizard-step:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.rep-wizard-panel {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    padding: 1rem 1.25rem;
+}
+
+.rep-wizard-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+}
+
+.rep-wizard-hint {
+    color: #6b7280;
+    font-size: 0.85rem;
+    margin-bottom: 0.75rem;
+}
+
+.rep-choice-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.5rem;
+}
+
+.rep-choice-btn {
+    width: 100%;
+    text-align: right;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 0.65rem 0.85rem;
+    background: #fafafa;
+    cursor: pointer;
+}
+
+.rep-choice-btn:hover {
+    border-color: #0d9488;
+    background: #f0fdfa;
+}
+
+.rep-choice-title {
+    display: block;
+    font-weight: 600;
+}
+
+.rep-choice-meta {
+    display: block;
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+
+.rep-wizard-search,
+.rep-wizard-qty-input {
+    width: 100%;
+    max-width: 20rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.65rem;
+    margin-bottom: 0.75rem;
+}
+
+.rep-wizard-qty {
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+}
+
+.rep-product-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.rep-product-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.65rem 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.rep-btn-primary,
+.rep-btn-secondary,
+.rep-btn-danger {
+    border-radius: 0.5rem;
+    padding: 0.4rem 0.85rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    border: none;
+}
+
+.rep-btn-primary {
+    background: #0d9488;
+    color: #fff;
+}
+
+.rep-btn-secondary {
+    background: #e5e7eb;
+    color: #111827;
+}
+
+.rep-btn-danger {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.rep-order-totals {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.rep-order-final {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-top: 0.25rem;
+}
+
+.rep-wizard-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.rep-wizard-empty {
+    color: #6b7280;
+    padding: 0.75rem 0;
+}
+
+.rep-wizard-error {
+    color: #b91c1c;
+    margin-top: 0.5rem;
+}
+
+.rep-pagination {
+    margin-top: 0.75rem;
+}

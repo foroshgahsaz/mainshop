@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Order extends Model
 {
+    public const STATUS_DRAFT = 'draft';
+
     public const STATUS_PENDING = 'pending';
 
     public const STATUS_PROCESSING = 'processing';
@@ -23,6 +25,7 @@ class Order extends Model
 
     protected $fillable = [
         'user_id',
+        'representative_id',
         'address_id',
         'coupon_id',
         'shipping_method_id',
@@ -36,6 +39,7 @@ class Order extends Model
         'tracking_code',
         'shipping_tracking_code',
         'note',
+        'catalog_filters',
         'shipped_at',
         'delivered_at',
     ];
@@ -50,7 +54,18 @@ class Order extends Model
             'shipped_at' => 'datetime',
             'delivered_at' => 'datetime',
             'stock_reserved' => 'boolean',
+            'catalog_filters' => 'array',
         ];
+    }
+
+    public function isDraft(): bool
+    {
+        return $this->status === self::STATUS_DRAFT;
+    }
+
+    public function representative(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'representative_id');
     }
 
     public function user(): BelongsTo

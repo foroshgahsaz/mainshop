@@ -1,5 +1,7 @@
 @php
+    use App\Filament\Representative\Pages\CreateDraftOrder;
     use App\Filament\Representative\Resources\CustomerResource;
+    use App\Filament\Representative\Resources\DraftOrderResource;
 
     $user = filament()->auth()->user();
     $brand = filament()->getBrandName();
@@ -16,6 +18,20 @@
                 ['label' => 'مشتریان', 'icon' => 'fa-users', 'items' => [
                     ['label' => 'لیست مشتریان', 'url' => CustomerResource::getUrl('index'), 'icon' => 'fa-list'],
                     ['label' => 'افزودن مشتری', 'url' => CustomerResource::getUrl('create'), 'icon' => 'fa-plus'],
+                ]],
+            ],
+        ],
+        'orders' => [
+            'label' => 'پیش‌سفارش',
+            'icon' => 'fa-shopping-bag',
+            'routes' => [
+                'filament.representative.resources.draft-orders.*',
+                'filament.representative.pages.create-draft-order',
+            ],
+            'menus' => [
+                ['label' => 'سفارش', 'icon' => 'fa-shopping-bag', 'items' => [
+                    ['label' => 'سفارش جدید', 'url' => CreateDraftOrder::getUrl(), 'icon' => 'fa-plus'],
+                    ['label' => 'پیش‌سفارش‌ها', 'url' => DraftOrderResource::getUrl('index'), 'icon' => 'fa-list'],
                 ]],
             ],
         ],
@@ -41,6 +57,7 @@
     $navIcons = [
         ['id' => 'dashboard', 'icon' => 'fa-chart-pie', 'tooltip' => 'داشبورد', 'href' => $dashboardUrl, 'isLink' => true],
         ['id' => 'customers', 'icon' => 'fa-users', 'tooltip' => 'مشتریان', 'panel' => 'customers'],
+        ['id' => 'orders', 'icon' => 'fa-shopping-bag', 'tooltip' => 'پیش‌سفارش', 'panel' => 'orders'],
     ];
 
     $isMenuItemActive = function (string $url): bool {

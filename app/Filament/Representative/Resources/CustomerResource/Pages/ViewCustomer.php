@@ -20,6 +20,7 @@ class ViewCustomer extends ViewRecord
             Section::make('مشتری')->schema([
                 TextEntry::make('name')->label('نام'),
                 TextEntry::make('phone')->label('موبایل'),
+                TextEntry::make('national_code')->label('کد ملی')->placeholder('—'),
             ])->columns(2),
             Section::make('آدرس پیش‌فرض')
                 ->schema([

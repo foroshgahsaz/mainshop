@@ -4,7 +4,9 @@ namespace App\Services\Representative;
 
 use App\Models\User;
 use App\Models\UserAddress;
+use App\Rules\IranianNationalCode;
 use App\Services\Auth\OtpService;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -13,10 +15,27 @@ use Illuminate\Validation\ValidationException;
 class RepresentativeCustomerService
 {
     /**
-     * @param  array{name: string, phone: string, province_id: int, city_id: int, address: string, postal_code?: ?string}  $data
+     * @param  array{name: string, phone: string, national_code: string, province_id: int, city_id: int, address: string, postal_code?: ?string}  $data
      */
     public function create(User $representative, array $data): User
     {
+        $nationalCode = IranianNationalCode::normalize((string) ($data['national_code'] ?? ''));
+
+        validator(
+            ['national_code' => $nationalCode],
+            [
+                'national_code' => [
+                    'required',
+                    new IranianNationalCode,
+                    Rule::unique('users', 'national_code'),
+                ],
+            ],
+            [
+                'national_code.required' => 'کد ملی الزامی است.',
+                'national_code.unique' => 'مشتری با این کد ملی قبلاً ثبت شده است.',
+            ]
+        )->validate();
+
         $phone = app(OtpService::class)->normalizePhone($data['phone']);
 
         if (! preg_match('/^09\d{9}$/', $phone)) {
@@ -37,6 +56,7 @@ class RepresentativeCustomerService
             $customer = User::query()->create([
                 'name' => $data['name'],
                 'phone' => $phone,
+                'national_code' => $nationalCode,
                 'password' => Hash::make(Str::random(32)),
                 'status' => true,
                 'is_admin' => false,

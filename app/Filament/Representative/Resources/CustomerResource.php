@@ -5,6 +5,7 @@ namespace App\Filament\Representative\Resources;
 use App\Filament\Representative\Resources\CustomerResource\Pages;
 use App\Models\City;
 use App\Models\User;
+use App\Rules\IranianNationalCode;
 use App\Services\Representative\RepresentativeCustomerService;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -43,6 +44,15 @@ class CustomerResource extends Resource
                         ->unique(ignoreRecord: true)
                         ->validationMessages([
                             'unique' => 'مشتری با این شماره موبایل موجود است.',
+                        ]),
+                    Forms\Components\TextInput::make('national_code')
+                        ->label('کد ملی')
+                        ->required()
+                        ->length(10)
+                        ->rules([new IranianNationalCode])
+                        ->unique(User::class, 'national_code', ignoreRecord: true)
+                        ->validationMessages([
+                            'unique' => 'مشتری با این کد ملی قبلاً ثبت شده است.',
                         ]),
                 ])
                 ->columns(2),
@@ -87,6 +97,7 @@ class CustomerResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')->label('نام')->searchable(),
                 Tables\Columns\TextColumn::make('phone')->label('موبایل')->searchable(),
+                Tables\Columns\TextColumn::make('national_code')->label('کد ملی')->searchable(),
                 Tables\Columns\TextColumn::make('addresses.city')
                     ->label('شهر')
                     ->formatStateUsing(fn (User $record) => $record->addresses->firstWhere('is_default', true)?->city

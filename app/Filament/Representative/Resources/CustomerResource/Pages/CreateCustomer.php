@@ -24,6 +24,7 @@ class CreateCustomer extends CreateRecord
         return app(RepresentativeCustomerService::class)->create($representative, [
             'name' => (string) ($state['name'] ?? ''),
             'phone' => (string) ($state['phone'] ?? ''),
+            'national_code' => (string) ($state['national_code'] ?? ''),
             'province_id' => (int) ($state['province_id'] ?? 0),
             'city_id' => (int) ($state['city_id'] ?? 0),
             'address' => (string) ($state['address'] ?? ''),

@@ -23,6 +23,7 @@
     use App\Filament\Resources\PostResource;
     use App\Filament\Resources\ProductFamilyResource;
     use App\Filament\Resources\ProductPlantResource;
+    use Illuminate\Support\Facades\Schema;
     use App\Filament\Resources\ProductResource;
     use App\Filament\Resources\ProductTemplateResource;
     use App\Filament\Resources\ProductQuestionResource;
@@ -67,7 +68,7 @@
                     ['label' => 'دسته‌بندی‌ها', 'url' => CategoryResource::getUrl('index'), 'icon' => 'fa-tags'],
                     ['label' => 'ویژگی‌ها', 'url' => AttributeResource::getUrl('index'), 'icon' => 'fa-list-ul'],
                     ['label' => 'خانواده محصول', 'url' => ProductFamilyResource::getUrl('index'), 'icon' => 'fa-layer-group'],
-                    ['label' => 'کارخانه', 'url' => ProductPlantResource::getUrl('index'), 'icon' => 'fa-industry'],
+                    ...(Schema::hasTable('product_plants') ? [['label' => 'کارخانه', 'url' => ProductPlantResource::getUrl('index'), 'icon' => 'fa-industry']] : []),
                     ['label' => 'قالب محصول', 'url' => ProductTemplateResource::getUrl('index'), 'icon' => 'fa-shapes'],
                 ]],
             ],

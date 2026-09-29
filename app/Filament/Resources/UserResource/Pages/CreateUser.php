@@ -18,11 +18,17 @@ class CreateUser extends CreateRecord
 
     protected function afterCreate(): void
     {
-        if ($this->record->is_representative && ! $this->record->representativeProfile) {
-            $this->record->representativeProfile()->create([
-                'max_active_reservations' => 3,
-            ]);
+        if (! $this->record->is_representative) {
+            return;
         }
+
+        $state = $this->form->getState();
+
+        $this->record->representativeProfile()->create([
+            'province_id' => $state['rep_province_id'] ?? null,
+            'city_id' => $state['rep_city_id'] ?? null,
+            'max_active_reservations' => (int) ($state['rep_max_active_reservations'] ?? 3),
+        ]);
     }
 
     /** @param  array<string, mixed>  $data */

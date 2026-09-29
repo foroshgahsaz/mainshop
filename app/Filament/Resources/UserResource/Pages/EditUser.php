@@ -95,4 +95,22 @@ class EditUser extends EditRecord
 
         return CreateUser::normalizeUserKind($data);
     }
+
+    protected function afterSave(): void
+    {
+        /** @var User $user */
+        $user = $this->getRecord()->refresh();
+
+        if (! $user->is_representative) {
+            return;
+        }
+
+        if ($user->representativeProfile) {
+            return;
+        }
+
+        $user->representativeProfile()->create([
+            'max_active_reservations' => 3,
+        ]);
+    }
 }

@@ -200,8 +200,7 @@ class UserResource extends Resource
                 ])
                 ->default('customer')
                 ->required()
-                ->live()
-                ->dehydrated(false),
+                ->live(),
             Forms\Components\Fieldset::make('نقش‌های غیر مشتری')
                 ->schema([
                     Forms\Components\Toggle::make('is_admin')
@@ -215,6 +214,35 @@ class UserResource extends Resource
                 ->columns(2)
                 ->visible(fn (Get $get): bool => $get('user_kind') === 'staff'),
         ];
+
+        if (! $forCreate) {
+            $fields[] = Forms\Components\Placeholder::make('staff_roles_summary')
+                ->label('نقش‌های فعال (ذخیره‌شده)')
+                ->content(fn (?User $record): string => $record && ! $record->isCustomer()
+                    ? $record->staffRoleLabel()
+                    : '—')
+                ->visible(fn (?User $record): bool => $record && ! $record->isCustomer());
+
+            $fields[] = Forms\Components\Placeholder::make('representative_location_summary')
+                ->label('خلاصه نمایندگی (ذخیره‌شده)')
+                ->content(function (?User $record): string {
+                    if (! $record?->isRepresentative()) {
+                        return '—';
+                    }
+
+                    $profile = $record->representativeProfile;
+                    if (! $profile) {
+                        return 'پروفایل نمایندگی هنوز ثبت نشده — نقش نماینده را ذخیره کنید و استان/شهر را تکمیل کنید.';
+                    }
+
+                    $province = $profile->province?->name ?? '—';
+                    $city = $profile->city?->name ?? '—';
+                    $cap = $profile->max_active_reservations;
+
+                    return "استان: {$province} · شهر: {$city} · سقف رزرو همزمان: {$cap}";
+                })
+                ->visible(fn (?User $record): bool => (bool) $record?->isRepresentative());
+        }
 
         if ($includeRepresentativeProfile && Schema::hasTable('provinces')) {
             if ($forCreate) {

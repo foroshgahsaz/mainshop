@@ -192,8 +192,21 @@ trait HandlesOtpLogin
         Auth::login($user, remember: true);
         $cart->mergeGuestCartIntoUser($user);
 
+        $this->redirectAfterShopLogin($user);
+    }
+
+    protected function redirectAfterShopLogin(User $user): void
+    {
         $default = app(LoginRedirectService::class)->shopDefaultUrl($user);
 
-        $this->redirectIntended(default: $default, navigate: $user->isRepresentative() && ! $user->isAdmin());
+        if ($user->isRepresentative() && ! $user->isAdmin()) {
+            session()->forget('url.intended');
+
+            $this->redirect($default, navigate: false);
+
+            return;
+        }
+
+        $this->redirectIntended(default: $default, navigate: true);
     }
 }

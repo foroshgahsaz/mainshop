@@ -341,16 +341,21 @@ function initMainSwiper() {
   if (!root || typeof Swiper === 'undefined') return null;
 
   const swiper = new Swiper(root, {
-    slidesPerView: 1,
-    centeredSlides: false,
-    spaceBetween: 12,
+    slidesPerView: 'auto',
+    centeredSlides: true,
+    spaceBetween: 10,
     grabCursor: true,
     loop: true,
-    loopAdditionalSlides: 2,
-    loopedSlides: 2,
+    loopAdditionalSlides: 3,
+    loopedSlides: 3,
+    watchSlidesProgress: true,
     pagination: {
       el: root.querySelector('.swiper-pagination'),
       clickable: true,
+    },
+    breakpoints: {
+      768: { spaceBetween: 18 },
+      1200: { spaceBetween: 20 },
     },
     on: {
       init(instance) {

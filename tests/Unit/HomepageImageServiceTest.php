@@ -52,12 +52,12 @@ class HomepageImageServiceTest extends TestCase
         $this->assertFalse($preset['enabled'] ?? true);
     }
 
-    public function test_optimizer_preset_uses_fit_dimensions_for_hero(): void
+    public function test_optimizer_preset_uses_cover_dimensions_for_hero(): void
     {
         $optimizerPreset = app(HomepageImageService::class)->optimizerPreset('hero');
 
-        $this->assertSame(1920, $optimizerPreset['max_width'] ?? null);
-        $this->assertSame(380, $optimizerPreset['max_height'] ?? null);
-        $this->assertArrayNotHasKey('cover_width', $optimizerPreset);
+        $this->assertSame(1920, $optimizerPreset['cover_width'] ?? null);
+        $this->assertSame(380, $optimizerPreset['cover_height'] ?? null);
+        $this->assertArrayNotHasKey('max_width', $optimizerPreset);
     }
 }

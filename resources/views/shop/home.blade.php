@@ -9,16 +9,8 @@
         </div>
     @endif
 
-    @php
-        $heroPreset = app(\App\Services\Media\HomepageImageService::class)->forSection('hero') ?? [];
-        $heroWidth = max(1, (int) ($heroPreset['width'] ?? 1920));
-        $heroHeight = max(1, (int) ($heroPreset['height'] ?? 380));
-    @endphp
     {{-- HERO --}}
-    <section
-        class="main-slider-outer mt-2 md:mt-4"
-        style="--hero-aspect-ratio: {{ $heroWidth }} / {{ $heroHeight }};"
-    >
+    <section class="main-slider-outer mt-2 md:mt-4">
         <div class="swiper mainSwiper relative" aria-label="اسلایدر بنر">
             <div class="swiper-wrapper">
                 @forelse($sliders as $i => $slider)
@@ -28,11 +20,11 @@
                         @endphp
                         @if($slider->link)
                             <a href="{{ $slider->link }}" class="hero-slide__link">
-                                <img src="{{ $url }}" alt="{{ $slider->title ?? 'بنر' }}" width="{{ $heroWidth }}" height="{{ $heroHeight }}" loading="{{ $i === 0 ? 'eager' : 'lazy' }}" draggable="false">
+                                <img src="{{ $url }}" alt="{{ $slider->title ?? 'بنر' }}" loading="{{ $i === 0 ? 'eager' : 'lazy' }}" draggable="false">
                             </a>
                         @else
                             <div class="hero-slide__link">
-                                <img src="{{ $url }}" alt="{{ $slider->title ?? 'بنر' }}" width="{{ $heroWidth }}" height="{{ $heroHeight }}" loading="{{ $i === 0 ? 'eager' : 'lazy' }}" draggable="false">
+                                <img src="{{ $url }}" alt="{{ $slider->title ?? 'بنر' }}" loading="{{ $i === 0 ? 'eager' : 'lazy' }}" draggable="false">
                             </div>
                         @endif
                     </div>

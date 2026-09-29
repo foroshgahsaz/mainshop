@@ -47,7 +47,9 @@ class HomeSliderResource extends Resource
                         $w = (int) ($preset['width'] ?? 1920);
                         $h = (int) ($preset['height'] ?? 380);
 
-                        return "برای نمایش بدون برش و به‌هم‌ریختگی، بنر را {$w}×{$h} پیکسل (همان نسبت عرض به ارتفاع) طراحی و آپلود کنید. در ادمین: تنظیمات → تامبنیل صفحه اصلی → اسلایدر.";
+                        $templateUrl = asset('shop/images/hero/banner-template-1920x380.svg');
+
+                        return "سایز استاندارد بنر: {$w}×{$h} پیکسل (عرض×ارتفاع). متن و لوگو را در مرکز کادر نگه دارید؛ لبه‌ها در موبایل کمی برش می‌خورد. قالب نمونه: {$templateUrl}";
                     }),
                 Forms\Components\TextInput::make('link')
                     ->label('لینک')

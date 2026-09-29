@@ -8,6 +8,8 @@ use Filament\Resources\Pages\ListRecords;
 
 class ListCustomers extends ListRecords
 {
+    protected static string $layout = 'filament-panels::components.layout.representative';
+
     protected static string $resource = CustomerResource::class;
 
     protected function getHeaderActions(): array

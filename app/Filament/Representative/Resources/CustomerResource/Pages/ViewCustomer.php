@@ -10,6 +10,8 @@ use Filament\Resources\Pages\ViewRecord;
 
 class ViewCustomer extends ViewRecord
 {
+    protected static string $layout = 'filament-panels::components.layout.representative';
+
     protected static string $resource = CustomerResource::class;
 
     public function infolist(Infolist $infolist): Infolist

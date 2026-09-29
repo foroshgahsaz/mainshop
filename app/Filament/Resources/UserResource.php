@@ -7,8 +7,11 @@ use App\Filament\Resources\UserResource\UserEditTabs;
 use App\Filament\Support\AdminImageColumn;
 use App\Filament\Support\AdminTable;
 use App\Filament\Support\ShopMediaPicker;
+use App\Models\City;
+use App\Models\Province;
 use App\Models\User;
 use Filament\Forms;
+use Illuminate\Support\Facades\Schema;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Resources\Resource;
@@ -35,6 +38,11 @@ class UserResource extends Resource
     {
         return $form->schema(function (Form $form): array {
             $operation = $form->getOperation();
+
+            if ($operation === 'create') {
+                return static::createFormSchema();
+            }
+
             $activeTab = UserEditTabs::resolveActive($operation);
 
             return [
@@ -45,11 +53,24 @@ class UserResource extends Resource
                     ->viewData([
                         'tabs' => UserEditTabs::definitions($operation),
                         'activeTab' => $activeTab,
-                        'record' => $operation === 'edit' ? $form->getRecord() : null,
+                        'record' => $form->getRecord(),
                     ]),
                 ...static::schemaForTab($activeTab),
             ];
         });
+    }
+
+    /** @return array<int, Forms\Components\Component> */
+    protected static function createFormSchema(): array
+    {
+        return [
+            ...static::profileTabSchema(),
+            ...static::accountTabSchema(),
+            Forms\Components\Section::make('نوع کاربر و دسترسی')
+                ->description('نقش‌ها و تنظیمات نمایندگی')
+                ->schema(static::accessFieldsSchema(includeRepresentativeProfile: true, forCreate: true))
+                ->columnSpanFull(),
+        ];
     }
 
     /** @return array<int, Forms\Components\Component> */
@@ -160,57 +181,118 @@ class UserResource extends Resource
         return [
             Forms\Components\Section::make()
                 ->description('مشتری یا نقش‌های سازمانی')
-                ->schema([
-                    Forms\Components\Select::make('user_kind')
-                        ->label('نوع کاربر')
-                        ->options([
-                            'customer' => 'مشتری',
-                            'staff' => 'غیر مشتری (مدیر، نویسنده و ...)',
-                        ])
-                        ->default('customer')
-                        ->required()
-                        ->live()
-                        ->dehydrated(false),
-                    Forms\Components\Fieldset::make('نقش‌های غیر مشتری')
-                        ->schema([
-                            Forms\Components\Toggle::make('is_admin')
-                                ->label('مدیر — دسترسی پنل ادمین'),
-                            Forms\Components\Toggle::make('is_author')
-                                ->label('نویسنده — انتشار در بلاگ'),
-                            Forms\Components\Toggle::make('is_representative')
-                                ->label('نماینده — پنل نمایندگی')
-                                ->live(),
-                        ])
-                        ->columns(2)
-                        ->visible(fn (Get $get): bool => $get('user_kind') === 'staff'),
-                    Forms\Components\Fieldset::make('پروفایل نمایندگی')
-                        ->relationship('representativeProfile')
-                        ->schema([
-                            Forms\Components\Select::make('province_id')
-                                ->label('استان فعالیت')
-                                ->relationship('province', 'name')
-                                ->searchable()
-                                ->preload(),
-                            Forms\Components\Select::make('city_id')
-                                ->label('شهر فعالیت')
-                                ->relationship('city', 'name', fn ($query, Get $get) => $query->when(
-                                    $get('province_id'),
-                                    fn ($q, $provinceId) => $q->where('province_id', $provinceId)
-                                ))
-                                ->searchable()
-                                ->preload(),
-                            Forms\Components\TextInput::make('max_active_reservations')
-                                ->label('سقف رزرو همزمان')
-                                ->numeric()
-                                ->default(3)
-                                ->minValue(1)
-                                ->maxValue(50)
-                                ->helperText('حداکثر پیش‌فاکتور باز با رزرو موجودی (پیش‌فرض ۳).'),
-                        ])
-                        ->columns(2)
-                        ->visible(fn (Get $get): bool => (bool) $get('is_representative')),
-                ])
+                ->schema(static::accessFieldsSchema(includeRepresentativeProfile: true, forCreate: false))
                 ->columns(1),
+        ];
+    }
+
+    /**
+     * @return array<int, Forms\Components\Component>
+     */
+    protected static function accessFieldsSchema(bool $includeRepresentativeProfile, bool $forCreate): array
+    {
+        $fields = [
+            Forms\Components\Select::make('user_kind')
+                ->label('نوع کاربر')
+                ->options([
+                    'customer' => 'مشتری',
+                    'staff' => 'غیر مشتری (مدیر، نویسنده، نماینده و ...)',
+                ])
+                ->default('customer')
+                ->required()
+                ->live()
+                ->dehydrated(false),
+            Forms\Components\Fieldset::make('نقش‌های غیر مشتری')
+                ->schema([
+                    Forms\Components\Toggle::make('is_admin')
+                        ->label('مدیر — دسترسی پنل ادمین'),
+                    Forms\Components\Toggle::make('is_author')
+                        ->label('نویسنده — انتشار در بلاگ'),
+                    Forms\Components\Toggle::make('is_representative')
+                        ->label('نماینده — پنل نمایندگی')
+                        ->live(),
+                ])
+                ->columns(2)
+                ->visible(fn (Get $get): bool => $get('user_kind') === 'staff'),
+        ];
+
+        if ($includeRepresentativeProfile && Schema::hasTable('provinces')) {
+            if ($forCreate) {
+                $fields[] = Forms\Components\Fieldset::make('پروفایل نمایندگی')
+                    ->schema(static::representativeProfileFieldsForCreate())
+                    ->columns(2)
+                    ->visible(fn (Get $get): bool => $get('user_kind') === 'staff' && (bool) $get('is_representative'));
+            } else {
+                $fields[] = Forms\Components\Fieldset::make('پروفایل نمایندگی')
+                    ->relationship('representativeProfile')
+                    ->schema(static::representativeProfileFieldsForEdit())
+                    ->columns(2)
+                    ->visible(fn (Get $get): bool => $get('user_kind') === 'staff' && (bool) $get('is_representative'));
+            }
+        }
+
+        return $fields;
+    }
+
+    /** @return array<int, Forms\Components\Component> */
+    protected static function representativeProfileFieldsForEdit(): array
+    {
+        return [
+            Forms\Components\Select::make('province_id')
+                ->label('استان فعالیت')
+                ->relationship('province', 'name', fn ($query) => $query->orderBy('position'))
+                ->searchable()
+                ->preload()
+                ->live(),
+            Forms\Components\Select::make('city_id')
+                ->label('شهر فعالیت')
+                ->relationship(
+                    'city',
+                    'name',
+                    fn ($query, Get $get) => $query
+                        ->when($get('province_id'), fn ($q, $provinceId) => $q->where('province_id', $provinceId))
+                        ->orderBy('position')
+                )
+                ->searchable()
+                ->preload()
+                ->disabled(fn (Get $get): bool => ! $get('province_id')),
+            Forms\Components\TextInput::make('max_active_reservations')
+                ->label('سقف رزرو همزمان')
+                ->numeric()
+                ->default(3)
+                ->minValue(1)
+                ->maxValue(50)
+                ->helperText('حداکثر پیش‌فاکتور باز با رزرو موجودی (پیش‌فرض ۳).'),
+        ];
+    }
+
+    /** @return array<int, Forms\Components\Component> */
+    protected static function representativeProfileFieldsForCreate(): array
+    {
+        return [
+            Forms\Components\Select::make('rep_province_id')
+                ->label('استان فعالیت')
+                ->options(fn () => Province::query()->orderBy('position')->pluck('name', 'id'))
+                ->searchable()
+                ->live()
+                ->dehydrated(false),
+            Forms\Components\Select::make('rep_city_id')
+                ->label('شهر فعالیت')
+                ->options(fn (Get $get) => City::query()
+                    ->when($get('rep_province_id'), fn ($q, $id) => $q->where('province_id', $id))
+                    ->orderBy('position')
+                    ->pluck('name', 'id'))
+                ->searchable()
+                ->disabled(fn (Get $get): bool => ! $get('rep_province_id'))
+                ->dehydrated(false),
+            Forms\Components\TextInput::make('rep_max_active_reservations')
+                ->label('سقف رزرو همزمان')
+                ->numeric()
+                ->default(3)
+                ->minValue(1)
+                ->maxValue(50)
+                ->dehydrated(false)
+                ->helperText('حداکثر پیش‌فاکتور باز با رزرو موجودی (پیش‌فرض ۳).'),
         ];
     }
 
@@ -291,8 +373,11 @@ class UserResource extends Resource
                     ])
                     ->query(function ($query, array $data) {
                         return match ($data['value'] ?? null) {
-                            'customer' => $query->where('is_admin', false)->where('is_author', false),
-                            'staff' => $query->where(fn ($q) => $q->where('is_admin', true)->orWhere('is_author', true)),
+                            'customer' => $query->where('is_admin', false)->where('is_author', false)->where('is_representative', false),
+                            'staff' => $query->where(fn ($q) => $q
+                                ->where('is_admin', true)
+                                ->orWhere('is_author', true)
+                                ->orWhere('is_representative', true)),
                             default => $query,
                         };
                     }),

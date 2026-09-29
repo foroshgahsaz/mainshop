@@ -61,15 +61,6 @@ class EditUser extends EditRecord
         return $url;
     }
 
-    protected function mutateFormDataBeforeFill(array $data): array
-    {
-        $data['user_kind'] = (! empty($data['is_admin']) || ! empty($data['is_author']) || ! empty($data['is_representative']))
-            ? 'staff'
-            : 'customer';
-
-        return $data;
-    }
-
     protected function mutateFormDataBeforeSave(array $data): array
     {
         /** @var User $user */
@@ -91,9 +82,26 @@ class EditUser extends EditRecord
             unset($data['password']);
         }
 
-        $data['user_kind'] = $this->form->getState()['user_kind'] ?? 'customer';
+        return CreateUser::applyAccessFieldsFromForm($this->form, $data);
+    }
 
-        return CreateUser::normalizeUserKind($data);
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        $data = parent::mutateFormDataBeforeFill($data);
+
+        $data['user_kind'] = CreateUser::resolveUserKindFromFlags($data);
+
+        return $data;
+    }
+
+    public function mount(int | string $record): void
+    {
+        parent::mount($record);
+
+        $this->getRecord()->loadMissing([
+            'representativeProfile.province',
+            'representativeProfile.city',
+        ]);
     }
 
     protected function afterSave(): void

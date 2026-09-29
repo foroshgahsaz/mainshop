@@ -4,6 +4,7 @@ namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Resources\UserResource;
 use App\Filament\Resources\Pages\CreateRecord;
+use Filament\Forms\Form;
 
 class CreateUser extends CreateRecord
 {
@@ -11,9 +12,7 @@ class CreateUser extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $data['user_kind'] = $this->form->getState()['user_kind'] ?? 'customer';
-
-        return static::normalizeUserKind($data);
+        return static::applyAccessFieldsFromForm($this->form, $data);
     }
 
     protected function afterCreate(): void
@@ -22,13 +21,42 @@ class CreateUser extends CreateRecord
             return;
         }
 
-        $state = $this->form->getState();
+        $raw = $this->form->getRawState();
 
         $this->record->representativeProfile()->create([
-            'province_id' => $state['rep_province_id'] ?? null,
-            'city_id' => $state['rep_city_id'] ?? null,
-            'max_active_reservations' => (int) ($state['rep_max_active_reservations'] ?? 3),
+            'province_id' => $raw['rep_province_id'] ?? null,
+            'city_id' => $raw['rep_city_id'] ?? null,
+            'max_active_reservations' => (int) ($raw['rep_max_active_reservations'] ?? 3),
         ]);
+    }
+
+    /** @param  array<string, mixed>  $data */
+    public static function applyAccessFieldsFromForm(Form $form, array $data): array
+    {
+        $raw = $form->getRawState();
+
+        $userKind = $raw['user_kind'] ?? $data['user_kind'] ?? 'customer';
+        $data['user_kind'] = $userKind;
+
+        if ($userKind === 'staff') {
+            $data['is_admin'] = (bool) ($raw['is_admin'] ?? $data['is_admin'] ?? false);
+            $data['is_author'] = (bool) ($raw['is_author'] ?? $data['is_author'] ?? false);
+            $data['is_representative'] = (bool) ($raw['is_representative'] ?? $data['is_representative'] ?? false);
+        }
+
+        return static::normalizeUserKind($data);
+    }
+
+    /** @param  array<string, mixed>  $data */
+    public static function resolveUserKindFromFlags(array $data): string
+    {
+        foreach (['is_admin', 'is_author', 'is_representative'] as $flag) {
+            if (filter_var($data[$flag] ?? false, FILTER_VALIDATE_BOOLEAN)) {
+                return 'staff';
+            }
+        }
+
+        return 'customer';
     }
 
     /** @param  array<string, mixed>  $data */

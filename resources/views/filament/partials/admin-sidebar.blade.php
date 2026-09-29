@@ -22,6 +22,7 @@
     use App\Filament\Resources\PaymentResource;
     use App\Filament\Resources\PostResource;
     use App\Filament\Resources\ProductFamilyResource;
+    use App\Filament\Resources\ProductPlantResource;
     use App\Filament\Resources\ProductResource;
     use App\Filament\Resources\ProductTemplateResource;
     use App\Filament\Resources\ProductQuestionResource;
@@ -56,6 +57,7 @@
                 'filament.admin.resources.categories.*',
                 'filament.admin.resources.attributes.*',
                 'filament.admin.resources.product-families.*',
+                'filament.admin.resources.product-plants.*',
                 'filament.admin.resources.product-templates.*',
             ],
             'menus' => [
@@ -65,6 +67,7 @@
                     ['label' => 'دسته‌بندی‌ها', 'url' => CategoryResource::getUrl('index'), 'icon' => 'fa-tags'],
                     ['label' => 'ویژگی‌ها', 'url' => AttributeResource::getUrl('index'), 'icon' => 'fa-list-ul'],
                     ['label' => 'خانواده محصول', 'url' => ProductFamilyResource::getUrl('index'), 'icon' => 'fa-layer-group'],
+                    ['label' => 'کارخانه', 'url' => ProductPlantResource::getUrl('index'), 'icon' => 'fa-industry'],
                     ['label' => 'قالب محصول', 'url' => ProductTemplateResource::getUrl('index'), 'icon' => 'fa-shapes'],
                 ]],
             ],

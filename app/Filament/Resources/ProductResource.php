@@ -150,6 +150,11 @@ class ProductResource extends Resource
                     ->placeholder('—')
                     ->toggleable(isToggledHiddenByDefault: true),
 
+                Tables\Columns\TextColumn::make('productPlant.name')
+                    ->label('کارخانه')
+                    ->placeholder('—')
+                    ->toggleable(isToggledHiddenByDefault: true),
+
                 Tables\Columns\TextColumn::make('productTemplate.name')
                     ->label('قالب')
                     ->placeholder('—')
@@ -238,8 +243,37 @@ class ProductResource extends Resource
                 ->searchable()
                 ->preload()
                 ->live()
-                ->afterStateUpdated(fn (callable $set) => $set('product_template_id', null)),
+                ->afterStateUpdated(function (callable $set) {
+                    $set('product_plant_id', null);
+                    $set('product_template_id', null);
+                }),
         ];
+
+        if (Schema::hasTable('product_plants')) {
+            $fields[] = Forms\Components\Select::make('product_plant_id')
+                ->label('کارخانه')
+                ->relationship(
+                    'productPlant',
+                    'name',
+                    modifyQueryUsing: function ($query, Get $get) {
+                        $familyId = $get('product_family_id');
+
+                        return $query
+                            ->where('is_active', true)
+                            ->orderBy('position')
+                            ->when(
+                                $familyId,
+                                fn ($q) => $q->where(function ($q) use ($familyId) {
+                                    $q->where('product_family_id', $familyId)
+                                        ->orWhereNull('product_family_id');
+                                })
+                            );
+                    }
+                )
+                ->searchable()
+                ->preload()
+                ->helperText('مثال: چینی پردیس، چینی اصفهان. با انتخاب خانواده، لیست فیلتر می‌شود.');
+        }
 
         if (! Schema::hasTable('product_templates')) {
             $fields[] = Forms\Components\Placeholder::make('product_templates_missing')

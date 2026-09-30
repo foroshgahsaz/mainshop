@@ -240,4 +240,17 @@ class Order extends Model
 
         return null;
     }
+
+    public function canRepresentativePayProforma(): bool
+    {
+        if (! $this->isProforma() || ! $this->isRepresentativeOrder()) {
+            return false;
+        }
+
+        if ($this->remainingAmount() <= 0 || ! $this->hasActiveStockReservation()) {
+            return false;
+        }
+
+        return app(PaymentGatewayCatalog::class)->isEnabled((string) $this->payment_method);
+    }
 }

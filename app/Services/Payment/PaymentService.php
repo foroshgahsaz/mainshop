@@ -23,7 +23,7 @@ class PaymentService
         return $this->gateways->driver($name);
     }
 
-    public function createForOrder(Order $order, ?string $gateway = null): Payment
+    public function createForOrder(Order $order, ?string $gateway = null, ?int $paidByRepresentativeId = null): Payment
     {
         $remaining = $order->remainingAmount();
 
@@ -37,6 +37,7 @@ class PaymentService
         $payment = Payment::create([
             'order_id' => $order->id,
             'user_id' => $order->user_id,
+            'paid_by_representative_id' => $paidByRepresentativeId,
             'amount' => $remaining,
             'gateway' => $gatewayName,
             'status' => Payment::STATUS_PENDING,
@@ -44,7 +45,12 @@ class PaymentService
         ]);
 
         $this->paymentLog->created($payment);
-        $this->orderLog->paymentLinked($payment->order, $payment->tracking_code, $payment->status, 'در انتظار پرداخت در درگاه');
+
+        $note = $paidByRepresentativeId
+            ? 'نماینده به درگاه پرداخت هدایت شد.'
+            : 'در انتظار پرداخت در درگاه';
+
+        $this->orderLog->paymentLinked($payment->order, $payment->tracking_code, $payment->status, $note);
 
         return $payment;
     }
@@ -180,6 +186,18 @@ class PaymentService
 
             if ($paidInFull && $orderPrevious !== Order::STATUS_PROCESSING) {
                 $this->orderLog->statusChanged($order->fresh(), $orderPrevious, Order::STATUS_PROCESSING);
+            }
+
+            if ($locked->wasPaidByRepresentative()) {
+                $locked->loadMissing('paidByRepresentative');
+                $order->loadMissing('user');
+                $repName = $locked->paidByRepresentative?->name ?? 'نماینده';
+                $customerName = $order->user?->name ?? 'مشتری';
+                $this->orderLog->system(
+                    $order->fresh(),
+                    "پرداخت توسط نماینده {$repName} برای مشتری {$customerName} تأیید شد.",
+                    'rep_payment_success'
+                );
             }
 
             return $locked;

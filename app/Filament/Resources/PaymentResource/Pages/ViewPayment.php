@@ -80,6 +80,7 @@ class ViewPayment extends ViewRecord
     {
         $this->record = $this->record->fresh([
             'user',
+            'paidByRepresentative',
             'order.user',
             'order.address',
             'order.items',

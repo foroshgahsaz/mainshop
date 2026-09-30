@@ -65,6 +65,50 @@
     font-weight: 600;
 }
 
+.rep-payment-info__pay {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.rep-btn-primary {
+    border-radius: 0.5rem;
+    padding: 0.55rem 1rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: none;
+    background: #0d9488;
+    color: #fff;
+    font-weight: 700;
+}
+
+.rep-btn-primary:hover {
+    background: #0f766e;
+}
+
+.rep-btn-primary:disabled {
+    opacity: 0.65;
+    cursor: wait;
+}
+
+.rep-payment-flash {
+    margin-bottom: 0.75rem;
+    padding: 0.65rem 0.85rem;
+    border-radius: 0.5rem;
+    font-size: 0.85rem;
+}
+
+.rep-payment-flash--ok {
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid #99f6e4;
+}
+
+.rep-payment-flash--fail {
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+
 .rep-order-wizard [x-cloak] {
     display: none !important;
 }

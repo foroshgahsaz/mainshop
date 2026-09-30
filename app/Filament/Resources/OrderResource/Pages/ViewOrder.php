@@ -177,6 +177,8 @@ class ViewOrder extends ViewRecord
             'freightCarrier.province',
             'freightCarrier.city',
             'coupon',
+            'payments.paidByRepresentative',
+            'payments.user',
             'payments.notes.author',
             'notes.author',
         ]);

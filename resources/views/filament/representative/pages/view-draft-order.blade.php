@@ -1,10 +1,20 @@
 <x-filament-panels::page>
     @php
         /** @var \App\Models\Order $order */
-        $order = $this->record->loadMissing(['items', 'user', 'freightCarrier.province', 'freightCarrier.city']);
+        $order = $this->record->loadMissing(['items', 'user', 'freightCarrier.province', 'freightCarrier.city', 'payments']);
     @endphp
 
     <link rel="stylesheet" href="{{ asset('css/rep-order-wizard.css') }}">
+
+    @if (session('payment_status'))
+        <div class="rep-payment-flash {{ session('payment_status') === 'success' ? 'rep-payment-flash--ok' : 'rep-payment-flash--fail' }}">
+            @if (session('payment_status') === 'success')
+                پرداخت با موفقیت ثبت شد.
+            @else
+                پرداخت ناموفق یا لغو شد.
+            @endif
+        </div>
+    @endif
 
     <section class="rep-wizard-panel">
         <p class="rep-wizard-hint">
@@ -13,6 +23,7 @@
         <p class="rep-wizard-hint">
             وضعیت: <strong>پیش‌فاکتور ثبت‌شده</strong> — فقط مشاهده
         </p>
+
         <ul class="rep-product-list">
             @forelse ($order->items as $item)
                 <li class="rep-product-row">
@@ -39,48 +50,36 @@
         </div>
 
         @if ($order->isProforma() && $order->remainingAmount() > 0)
-            @php
-                $customerPayUrl = route('account.orders.show', $order);
-            @endphp
             <div class="rep-payment-info">
-                <h3 class="rep-payment-info__title">پرداخت آنلاین (سمت مشتری)</h3>
+                <h3 class="rep-payment-info__title">پرداخت پیش‌فاکتور</h3>
                 <p class="rep-wizard-hint rep-payment-info__lead">
-                    نماینده از این پنل پرداخت نمی‌کند. مشتری باید با <strong>همان حساب کاربری</strong> که برایش ثبت کرده‌اید
-                    در فروشگاه وارد شود و پیش‌فاکتور را بپردازد.
+                    پرداخت از <strong>پنل نماینده</strong> انجام می‌شود؛ در درگاه مشخص می‌شود این پرداخت
+                    برای کدام <strong>مشتری</strong> و توسط کدام <strong>نماینده</strong> است.
                 </p>
-                <label class="rep-payment-info__label" for="repCustomerPayUrl">لینک پرداخت برای ارسال به مشتری</label>
-                <div class="rep-payment-info__url-row">
-                    <input type="text"
-                           id="repCustomerPayUrl"
-                           class="rep-payment-info__url"
-                           value="{{ $customerPayUrl }}"
-                           readonly
-                           dir="ltr">
+                <p class="rep-wizard-hint">
+                    درگاه: <strong>{{ \App\Support\ShopLabels::paymentMethod($order->payment_method) }}</strong>
+                    — مبلغ: <strong>{{ \App\Support\ShopFormatter::money($order->remainingAmount()) }}</strong>
+                </p>
+
+                @if ($order->canRepresentativePayProforma())
                     <button type="button"
-                            class="rep-btn-secondary rep-payment-info__copy"
-                            onclick="navigator.clipboard.writeText(@js($customerPayUrl)); this.textContent='کپی شد'; setTimeout(() => this.textContent='کپی لینک', 2000);">
-                        کپی لینک
+                            class="rep-btn-primary rep-payment-info__pay"
+                            wire:click="payProformaFromPage"
+                            wire:loading.attr="disabled">
+                        <span wire:loading.remove wire:target="payProformaFromPage">پرداخت و رفتن به درگاه</span>
+                        <span wire:loading wire:target="payProformaFromPage">در حال اتصال…</span>
                     </button>
-                </div>
-                <p class="rep-wizard-hint rep-payment-info__steps">
-                    تست: ۱) <code>php artisan migrate</code> روی سرور ۲) پیش‌فاکتور <strong>جدید</strong> ثبت کنید (ثبت مجدد رزرو موجودی می‌سازد)
-                    ۳) با موبایل/مرورگر دیگر به‌عنوان <strong>مشتری</strong> لاگین کنید ۴) منوی کاربری → سفارش‌ها → جزئیات → «پرداخت پیش‌فاکتور».
-                </p>
-                @if (! $order->stock_reserved)
+                    @if ($order->stock_reserved_until)
+                        <p class="rep-wizard-hint">
+                            مهلت رزرو موجودی تا <strong>{{ $order->stock_reserved_until->format('Y/m/d H:i') }}</strong>
+                        </p>
+                    @endif
+                @elseif (! $order->stock_reserved)
                     <p class="rep-wizard-error">
-                        این پیش‌فاکتور قبل از فعال‌سازی رزرو موجودی ثبت شده؛ دکمه پرداخت درگاه برای مشتری کار نمی‌کند.
-                        یک پیش‌فاکتور جدید بسازید یا از ادمین وضعیت رزرو را بررسی کنید.
+                        رزرو موجودی فعال نیست (پیش‌فاکتور قبل از به‌روزرسانی سیستم). یک پیش‌فاکتور جدید ثبت کنید یا migrate را اجرا کنید.
                     </p>
                 @elseif (! $order->hasActiveStockReservation())
-                    <p class="rep-wizard-error">
-                        مهلت رزرو موجودی تمام شده؛ مشتری نمی‌تواند پرداخت کند. ادمین می‌تواند از جزئیات سفارش، «تمدید رزرو موجودی» را بزند.
-                    </p>
-                @else
-                    <p class="rep-wizard-hint">
-                        رزرو موجودی فعال است — مشتری تا
-                        <strong>{{ $order->stock_reserved_until?->format('Y/m/d H:i') }}</strong>
-                        می‌تواند پرداخت کند.
-                    </p>
+                    <p class="rep-wizard-error">مهلت رزرو تمام شده — از ادمین «تمدید رزرو موجودی» بگیرید.</p>
                 @endif
             </div>
         @elseif ($order->isProforma() && $order->isPaid())
@@ -94,6 +93,9 @@
             @endif
             <div>درگاه پرداخت: {{ \App\Support\ShopLabels::paymentMethod($order->payment_method) }}</div>
             <div class="rep-order-final">مبلغ نهایی: {{ \App\Support\ShopFormatter::money((int) $order->final_amount) }}</div>
+            @if ($order->paidAmount() > 0)
+                <div>پرداخت‌شده: {{ \App\Support\ShopFormatter::money($order->paidAmount()) }}</div>
+            @endif
         </div>
 
     </section>

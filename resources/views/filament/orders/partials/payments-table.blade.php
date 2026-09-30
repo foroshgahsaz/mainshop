@@ -8,6 +8,7 @@
                     <th>درگاه</th>
                     <th>مبلغ</th>
                     <th>وضعیت</th>
+                    <th>پرداخت‌کننده</th>
                     <th>تاریخ</th>
                     <th></th>
                 </tr>
@@ -22,6 +23,14 @@
                             <span class="admin-order__badge admin-order__badge--payment-status admin-order__badge--pay-{{ $payment->status }}">
                                 {{ \App\Support\ShopLabels::paymentStatus($payment->status) }}
                             </span>
+                        </td>
+                        <td>
+                            @if ($payment->wasPaidByRepresentative())
+                                نماینده: {{ $payment->paidByRepresentative?->name ?? '—' }}
+                                <span class="text-gray-500 text-xs block">مشتری: {{ $payment->user?->name }}</span>
+                            @else
+                                {{ $payment->user?->name ?? '—' }}
+                            @endif
                         </td>
                         <td>
                             @if($payment->paid_at)

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Filament\Representative\Resources\DraftOrderResource;
 use App\Models\Payment;
 use App\Notifications\PaymentSuccessNotification;
 use App\Services\Payment\PaymentService;
@@ -37,7 +38,7 @@ class PaymentController extends Controller
 
         if ($model->status !== Payment::STATUS_PENDING || ! $model->transaction_id) {
             return redirect()
-                ->route('account.orders.show', $model->order_id)
+                ->to($this->paymentReturnUrl($model))
                 ->with('error', 'این درخواست پرداخت تارا معتبر نیست.');
         }
 
@@ -68,7 +69,7 @@ class PaymentController extends Controller
             ]);
 
             return redirect()
-                ->route('account.orders.show', $payment->order_id)
+                ->to($this->paymentReturnUrl($payment))
                 ->with('payment_status', Payment::STATUS_FAILED);
         }
 
@@ -90,8 +91,19 @@ class PaymentController extends Controller
         }
 
         return redirect()
-            ->route('account.orders.show', $payment->order_id)
+            ->to($this->paymentReturnUrl($payment))
             ->with($flash);
+    }
+
+    protected function paymentReturnUrl(Payment $payment): string
+    {
+        $payment->loadMissing('order');
+
+        if ($payment->wasPaidByRepresentative() && $payment->order?->isRepresentativeOrder()) {
+            return DraftOrderResource::getUrl('view', ['record' => $payment->order_id], panel: 'representative');
+        }
+
+        return route('account.orders.show', $payment->order_id);
     }
 
     protected function resolvePayment(Request $request): Payment

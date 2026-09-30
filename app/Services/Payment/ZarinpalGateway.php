@@ -35,11 +35,13 @@ class ZarinpalGateway implements PaymentGatewayInterface
 
         $callbackUrl = url($config['callback_url']).'?payment='.$payment->tracking_code;
 
+        $description = $this->paymentDescription($payment, $order);
+
         $response = Http::post("{$baseUrl}/request.json", [
             'merchant_id' => $config['merchant_id'],
             'amount' => AmountConverter::toGateway($payment->amount, $config['amount_unit'] ?? AmountConverter::UNIT_TOMAN),
             'callback_url' => $callbackUrl,
-            'description' => "پرداخت سفارش {$order->tracking_code}",
+            'description' => $description,
             'metadata' => [
                 'mobile' => $order->user->phone,
                 'email' => $order->user->email,
@@ -109,5 +111,20 @@ class ZarinpalGateway implements PaymentGatewayInterface
         }
 
         return GatewayVerificationResult::failed($response->json(), 'تأیید درگاه ناموفق');
+    }
+
+    protected function paymentDescription(Payment $payment, Order $order): string
+    {
+        if ($payment->wasPaidByRepresentative()) {
+            $payment->loadMissing('paidByRepresentative');
+            $order->loadMissing('user');
+
+            $repName = $payment->paidByRepresentative?->name ?? 'نماینده';
+            $customerName = $order->user?->name ?? 'مشتری';
+
+            return "پیش‌فاکتور {$order->tracking_code} — پرداخت نماینده: {$repName} — مشتری: {$customerName}";
+        }
+
+        return "پرداخت سفارش {$order->tracking_code}";
     }
 }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Payment extends Model
 {
@@ -20,6 +21,7 @@ class Payment extends Model
     protected $fillable = [
         'order_id',
         'user_id',
+        'paid_by_representative_id',
         'amount',
         'gateway',
         'status',
@@ -49,7 +51,17 @@ class Payment extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function notes(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function paidByRepresentative(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'paid_by_representative_id');
+    }
+
+    public function wasPaidByRepresentative(): bool
+    {
+        return $this->paid_by_representative_id !== null;
+    }
+
+    public function notes(): HasMany
     {
         return $this->hasMany(PaymentNote::class)->latest();
     }

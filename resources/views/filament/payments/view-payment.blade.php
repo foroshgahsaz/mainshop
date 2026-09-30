@@ -60,7 +60,17 @@
             </div>
 
             <aside class="admin-order__sidebar">
-                @if($payment->user)
+                @if($payment->wasPaidByRepresentative())
+                    <section class="admin-order__box">
+                        <h3 class="admin-order__box-title">پرداخت نمایندگی</h3>
+                        <dl class="admin-order__meta-list">
+                            <div><dt>نماینده</dt><dd>{{ $payment->paidByRepresentative?->name }}</dd></div>
+                            <div><dt>موبایل نماینده</dt><dd dir="ltr">{{ $payment->paidByRepresentative?->phone }}</dd></div>
+                            <div><dt>مشتری</dt><dd>{{ $payment->user?->name }}</dd></div>
+                            <div><dt>موبایل مشتری</dt><dd dir="ltr">{{ $payment->user?->phone }}</dd></div>
+                        </dl>
+                    </section>
+                @elseif($payment->user)
                     <section class="admin-order__box">
                         <h3 class="admin-order__box-title">پرداخت‌کننده</h3>
                         <dl class="admin-order__meta-list">

@@ -69,6 +69,27 @@ class RepresentativeDraftOrderService
 
         $unitPrice = $product->effective_price;
 
+        $existing = OrderItem::query()
+            ->where('order_id', $order->id)
+            ->where('product_id', $product->id)
+            ->first();
+
+        if ($existing !== null) {
+            $newQuantity = $existing->quantity + $quantity;
+
+            $existing->update([
+                'quantity' => $newQuantity,
+                'price' => $unitPrice,
+                'total_price' => $unitPrice * $newQuantity,
+                'product_name' => $product->name,
+                'sku' => $product->sku,
+            ]);
+
+            $this->recalculateTotals($order);
+
+            return $existing->refresh();
+        }
+
         $item = OrderItem::query()->create([
             'order_id' => $order->id,
             'product_id' => $product->id,
@@ -98,6 +119,8 @@ class RepresentativeDraftOrderService
 
     public function recalculateTotals(Order $order): void
     {
+        $this->consolidateDuplicateItems($order);
+
         $order->loadMissing('items');
 
         $itemsTotal = (int) $order->items->sum('total_price');
@@ -147,5 +170,37 @@ class RepresentativeDraftOrderService
     private function generateTrackingCode(): string
     {
         return 'DR-'.strtoupper(Str::random(10));
+    }
+
+    /**
+     * Merge legacy duplicate lines (same product) into one row per product.
+     */
+    private function consolidateDuplicateItems(Order $order): void
+    {
+        $order->loadMissing('items');
+
+        foreach ($order->items->groupBy('product_id') as $items) {
+            if ($items->count() <= 1) {
+                continue;
+            }
+
+            $keep = $items->first();
+            $totalQuantity = (int) $items->sum('quantity');
+            $totalPrice = (int) $items->sum('total_price');
+
+            $keep->update([
+                'quantity' => $totalQuantity,
+                'total_price' => $totalPrice,
+                'price' => $totalQuantity > 0 ? (int) round($totalPrice / $totalQuantity) : (int) $keep->price,
+            ]);
+
+            OrderItem::query()
+                ->where('order_id', $order->id)
+                ->where('product_id', $keep->product_id)
+                ->whereKeyNot($keep->id)
+                ->delete();
+        }
+
+        $order->unsetRelation('items');
     }
 }

@@ -129,9 +129,16 @@
                                     · موجودی {{ $product->stock }}
                                 </div>
                             </div>
-                            <button type="button" class="rep-btn-primary" wire:click="addProduct({{ $product->id }})">
-                                افزودن
-                            </button>
+                            <div class="rep-product-row-actions">
+                                <button type="button"
+                                        class="rep-btn-secondary"
+                                        wire:click="openProductImages({{ $product->id }})">
+                                    مشاهده تصویر محصول
+                                </button>
+                                <button type="button" class="rep-btn-primary" wire:click="addProduct({{ $product->id }})">
+                                    افزودن
+                                </button>
+                            </div>
                         </li>
                     @empty
                         <li class="rep-wizard-empty">محصولی مطابق فیلترها نیست.</li>
@@ -342,5 +349,25 @@
             @error('order') <p class="rep-wizard-error">{{ $message }}</p> @enderror
             @error('quantity') <p class="rep-wizard-error">{{ $message }}</p> @enderror
         </section>
+    @endif
+
+    @if ($showProductImagesModal)
+        <div class="rep-modal-backdrop" wire:click="closeProductImagesModal">
+            <div class="rep-modal rep-modal--gallery" role="dialog" aria-modal="true" wire:click.stop>
+                <div class="rep-modal__header">
+                    <h3 class="rep-modal__title">{{ $productImagesModalTitle }}</h3>
+                    <button type="button" class="rep-modal__close" wire:click="closeProductImagesModal" aria-label="بستن">×</button>
+                </div>
+                <div class="rep-modal__body rep-product-gallery">
+                    @forelse ($productImagesModalUrls as $url)
+                        <a href="{{ $url }}" target="_blank" rel="noopener" class="rep-product-gallery__item">
+                            <img src="{{ $url }}" alt="{{ $productImagesModalTitle }}" loading="lazy">
+                        </a>
+                    @empty
+                        <p class="rep-wizard-empty">تصویری برای این محصول ثبت نشده است.</p>
+                    @endforelse
+                </div>
+            </div>
+        </div>
     @endif
 </div>

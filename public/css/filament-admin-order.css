@@ -450,3 +450,75 @@
 .admin-order__input--amount {
     max-width: none;
 }
+
+.admin-order__btn--compact {
+    padding: 0.35rem 0.55rem;
+    font-size: 0.75rem;
+    margin-top: 0.35rem;
+}
+
+.admin-order__discount-pill {
+    display: block;
+    font-size: 0.8rem;
+    color: #374151;
+    margin-bottom: 0.15rem;
+}
+
+.admin-order__row-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    justify-content: flex-end;
+}
+
+.admin-order__input--full {
+    width: 100%;
+}
+
+.admin-order-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    background: rgba(15, 23, 42, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.admin-order-modal {
+    width: min(100%, 26rem);
+    background: #fff;
+    border-radius: 0.75rem;
+    padding: 1.1rem 1.15rem;
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.18);
+}
+
+.admin-order-modal__title {
+    margin: 0 0 0.85rem;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.admin-order-modal__choices {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    margin-bottom: 0.85rem;
+}
+
+.admin-order-modal__choice {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.45rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    cursor: pointer;
+}
+
+.admin-order-modal__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}

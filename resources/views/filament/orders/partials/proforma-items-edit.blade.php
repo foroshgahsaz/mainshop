@@ -1,7 +1,7 @@
 <section class="admin-order__box admin-order__box--proforma-edit">
     <h3 class="admin-order__box-title">ویرایش اقلام پیش‌فاکتور (ادمین)</h3>
     <p class="admin-order__hint">
-        تعداد و تخفیف هر ردیف (مبلغ ثابت یا درصد). تغییرات در یادداشت خصوصی ثبت می‌شود و در PDF به‌صورت ردیف فاکتور نمایش داده می‌شود.
+        تعداد را در جدول تنظیم کنید؛ برای تخفیف هر ردیف دکمه «تخفیف ردیف» را بزنید.
     </p>
 
     <form wire:submit="saveProformaItems" class="admin-order__proforma-items-form">
@@ -12,13 +12,21 @@
                         <th>محصول</th>
                         <th>قیمت واحد</th>
                         <th>تعداد</th>
-                        <th>نوع تخفیف</th>
-                        <th>مقدار تخفیف</th>
+                        <th>تخفیف</th>
                         <th>جمع ردیف</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($order->items as $item)
+                        @php
+                            $dType = $editItemDiscountTypes[$item->id] ?? 'none';
+                            $dVal = (int) ($editItemDiscountValues[$item->id] ?? 0);
+                            $dLabel = match ($dType) {
+                                'fixed' => number_format($dVal).' تومان',
+                                'percent' => $dVal.'٪',
+                                default => '—',
+                            };
+                        @endphp
                         <tr wire:key="proforma-edit-item-{{ $item->id }}">
                             <td>{{ $item->product_name }}</td>
                             <td>{{ number_format($item->price) }} تومان</td>
@@ -30,20 +38,12 @@
                                        wire:model="editItemQuantities.{{ $item->id }}">
                             </td>
                             <td>
-                                <select class="admin-order__select"
-                                        wire:model="editItemDiscountTypes.{{ $item->id }}">
-                                    <option value="none">بدون تخفیف</option>
-                                    <option value="fixed">مبلغ (تومان)</option>
-                                    <option value="percent">درصد</option>
-                                </select>
-                            </td>
-                            <td>
-                                <input type="number"
-                                       min="0"
-                                       max="999999999"
-                                       class="admin-order__input admin-order__input--qty"
-                                       wire:model="editItemDiscountValues.{{ $item->id }}"
-                                       @disabled(($editItemDiscountTypes[$item->id] ?? 'none') === 'none')>
+                                <span class="admin-order__discount-pill">{{ $dLabel }}</span>
+                                <button type="button"
+                                        class="admin-order__btn admin-order__btn--secondary admin-order__btn--compact"
+                                        wire:click="openItemDiscountModal({{ $item->id }})">
+                                    تخفیف ردیف
+                                </button>
                             </td>
                             <td>{{ number_format($item->total_price) }} تومان</td>
                         </tr>

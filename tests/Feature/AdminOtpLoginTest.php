@@ -96,6 +96,7 @@ class AdminOtpLoginTest extends TestCase
             ->assertDontSee('بازگشت به صفحه ورود')
             ->html();
 
+        $this->assertStringContainsString('class="otp-container" dir="ltr"', $html);
         $this->assertStringContainsString('id="resendLink"', $html);
         $this->assertMatchesRegularExpression('/id="resendLink"[^>]*(hidden|disabled)/', $html);
     }

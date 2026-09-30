@@ -320,6 +320,8 @@ body {
 
 .otp-container {
     display: flex;
+    flex-direction: row;
+    direction: ltr;
     gap: 0.5rem;
     justify-content: center;
     margin: 2rem 0;

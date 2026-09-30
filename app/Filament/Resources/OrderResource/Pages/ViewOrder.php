@@ -131,7 +131,6 @@ class ViewOrder extends ViewRecord
         if (
             $order->isRepresentativeOrder()
             && ($order->isDraft() || $order->isProforma())
-            && ! ($order->isProforma() && $order->hasActiveStockReservation())
         ) {
             app(RepresentativeOrderAdminService::class)->updateFulfillment(
                 $order,
@@ -176,11 +175,9 @@ class ViewOrder extends ViewRecord
     {
         $order = $this->record;
 
-        if (! $order->isRepresentativeOrder() || ! $order->isProforma() || $order->isPaid()) {
-            return false;
-        }
-
-        return ! $order->hasActiveStockReservation();
+        return $order->isRepresentativeOrder()
+            && $order->isProforma()
+            && ! $order->isPaid();
     }
 
     protected function syncFormFields(): void

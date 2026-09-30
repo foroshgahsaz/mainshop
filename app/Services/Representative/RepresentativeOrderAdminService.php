@@ -5,6 +5,7 @@ namespace App\Services\Representative;
 use App\Models\FreightCarrier;
 use App\Models\Order;
 use App\Models\User;
+use App\Services\Cart\StockService;
 use App\Services\Order\OrderActivityLogger;
 use App\Services\Payment\PaymentGatewayCatalog;
 use App\Support\ShopLabels;
@@ -16,6 +17,7 @@ class RepresentativeOrderAdminService
         private readonly RepresentativeDraftOrderService $draftOrders,
         private readonly PaymentGatewayCatalog $gateways,
         private readonly OrderActivityLogger $orderLog,
+        private readonly StockService $stockService,
     ) {}
 
     public function updateFulfillment(Order $order, ?int $freightCarrierId, string $paymentGateway, ?User $actor = null): Order
@@ -111,11 +113,32 @@ class RepresentativeOrderAdminService
                 ]);
             }
 
-            if ($quantity === (int) $item->quantity) {
+            $previousQuantity = (int) $item->quantity;
+
+            if ($quantity === $previousQuantity) {
                 continue;
             }
 
-            $changes[] = sprintf('%s: %d → %d', $item->product_name, $item->quantity, $quantity);
+            if ($order->stock_reserved) {
+                $item->loadMissing('product', 'variant');
+
+                if (! $item->product) {
+                    throw ValidationException::withMessages([
+                        'quantity' => 'محصول یکی از اقلام یافت نشد.',
+                    ]);
+                }
+
+                $delta = $quantity - $previousQuantity;
+
+                if ($delta > 0) {
+                    $this->stockService->assertAvailable($item->product, $item->variant, $delta);
+                    $this->stockService->decrement($item->product, $item->variant, $delta);
+                } elseif ($delta < 0) {
+                    $this->stockService->restore($item->product, $item->variant, abs($delta));
+                }
+            }
+
+            $changes[] = sprintf('%s: %d → %d', $item->product_name, $previousQuantity, $quantity);
 
             $unitPrice = (int) $item->price;
             $item->update([
@@ -161,12 +184,6 @@ class RepresentativeOrderAdminService
         }
 
         if ($order->isProforma()) {
-            if ($order->hasActiveStockReservation()) {
-                throw ValidationException::withMessages([
-                    'order' => 'تا پایان مهلت رزرو موجودی، ویرایش پیش‌فاکتور ممکن نیست. رزرو را تمدید کنید یا منتظر انقضای مهلت بمانید.',
-                ]);
-            }
-
             return;
         }
 

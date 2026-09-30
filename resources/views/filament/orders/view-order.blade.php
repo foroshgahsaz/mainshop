@@ -38,14 +38,6 @@
 
                 @if($this->canAdminEditProforma)
                     @include('filament.orders.partials.proforma-items-edit', ['order' => $order])
-                @elseif($order->isProforma() && $order->isRepresentativeOrder() && $order->hasActiveStockReservation())
-                    <p class="admin-order__hint admin-order__hint--warning">
-                        تا پایان مهلت رزرو موجودی
-                        @if($order->stock_reserved_until)
-                            ({{ $order->stock_reserved_until->format('Y/m/d H:i') }})
-                        @endif
-                        ویرایش پیش‌فاکتور غیرفعال است. می‌توانید «تمدید رزرو موجودی» را از بالای صفحه بزنید.
-                    </p>
                 @endif
 
                 @include('filament.orders.partials.totals', ['order' => $order])

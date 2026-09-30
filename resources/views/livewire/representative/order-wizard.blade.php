@@ -204,32 +204,95 @@
                 </ul>
                 <div class="rep-fulfillment-grid">
                     <div class="rep-fulfillment-field">
-                        <label class="rep-fulfillment-label" for="freightCarrierSearch">باربری</label>
-                        @if ($this->freightCarriers->isNotEmpty())
-                            <input type="search"
-                                   id="freightCarrierSearch"
-                                   class="rep-fulfillment-search"
-                                   wire:model.live.debounce.250ms="freightCarrierSearch"
-                                   placeholder="جستجو نام، شماره، شهر یا استان…"
-                                   autocomplete="off">
-                        @endif
-                        <select id="freightCarrierSelect"
-                                class="rep-fulfillment-select rep-fulfillment-select-list"
-                                wire:model="freightCarrierId"
-                                @disabled($this->freightCarriers->isEmpty())>
-                            <option value="">انتخاب باربری…</option>
-                            @forelse ($this->filteredFreightCarriers as $carrier)
-                                <option value="{{ $carrier->id }}">{{ $carrier->displayLabel() }}</option>
-                            @empty
-                                @if ($this->freightCarriers->isNotEmpty())
-                                    <option value="" disabled>موردی برای «{{ $freightCarrierSearch }}» نیست</option>
-                                @endif
-                            @endforelse
-                        </select>
-                        @error('freight_carrier_id') <p class="rep-wizard-error">{{ $message }}</p> @enderror
+                        <label class="rep-fulfillment-label" for="freightCarrierSelectTrigger">باربری</label>
                         @if ($this->freightCarriers->isEmpty())
+                            <button type="button"
+                                    id="freightCarrierSelectTrigger"
+                                    class="rep-searchable-select__trigger"
+                                    disabled>
+                                انتخاب باربری…
+                            </button>
                             <p class="rep-wizard-hint">باربری فعالی ثبت نشده — از پنل مدیریت، منوی ارسال → باربری‌ها را تعریف کنید.</p>
+                        @else
+                            <div class="rep-searchable-select"
+                                 wire:ignore.self
+                                 x-data="{
+                                     open: false,
+                                     search: '',
+                                     selectedId: @entangle('freightCarrierId').live,
+                                     carriers: @js($this->freightCarriers->map(fn ($carrier) => [
+                                         'id' => $carrier->id,
+                                         'label' => $carrier->displayLabel(),
+                                     ])->values()->all()),
+                                     get filteredCarriers() {
+                                         const query = this.search.trim().toLocaleLowerCase('fa');
+                                         if (query === '') {
+                                             return this.carriers;
+                                         }
+                                         return this.carriers.filter((carrier) => carrier.label.toLocaleLowerCase('fa').includes(query));
+                                     },
+                                     get selectedLabel() {
+                                         const match = this.carriers.find((carrier) => carrier.id === this.selectedId);
+                                         return match ? match.label : '';
+                                     },
+                                     toggle() {
+                                         this.open = !this.open;
+                                         if (this.open) {
+                                             this.$nextTick(() => this.$refs.freightSearch?.focus());
+                                         } else {
+                                             this.search = '';
+                                         }
+                                     },
+                                     close() {
+                                         this.open = false;
+                                         this.search = '';
+                                     },
+                                     pick(id) {
+                                         this.selectedId = id;
+                                         this.close();
+                                     },
+                                 }"
+                                 @click.outside="close()"
+                                 @keydown.escape.window="close()">
+                                <button type="button"
+                                        id="freightCarrierSelectTrigger"
+                                        class="rep-searchable-select__trigger"
+                                        :class="{ 'is-open': open }"
+                                        @click="toggle()"
+                                        aria-haspopup="listbox"
+                                        :aria-expanded="open">
+                                    <span class="rep-searchable-select__value" x-text="selectedLabel || 'انتخاب باربری…'"></span>
+                                </button>
+                                <div class="rep-searchable-select__dropdown" x-show="open" x-cloak>
+                                    <div class="rep-searchable-select__search-wrap">
+                                        <input type="search"
+                                               x-ref="freightSearch"
+                                               class="rep-searchable-select__search"
+                                               x-model="search"
+                                               placeholder="جستجو نام، شماره، شهر یا استان…"
+                                               autocomplete="off"
+                                               @keydown.enter.prevent>
+                                    </div>
+                                    <ul class="rep-searchable-select__list" role="listbox">
+                                        <template x-for="carrier in filteredCarriers" :key="carrier.id">
+                                            <li>
+                                                <button type="button"
+                                                        class="rep-searchable-select__option"
+                                                        :class="{ 'is-selected': selectedId === carrier.id }"
+                                                        role="option"
+                                                        :aria-selected="selectedId === carrier.id"
+                                                        @click="pick(carrier.id)"
+                                                        x-text="carrier.label"></button>
+                                            </li>
+                                        </template>
+                                        <li x-show="filteredCarriers.length === 0" class="rep-searchable-select__empty">
+                                            موردی برای جستجو پیدا نشد.
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
                         @endif
+                        @error('freight_carrier_id') <p class="rep-wizard-error">{{ $message }}</p> @enderror
                     </div>
                     <div class="rep-fulfillment-field">
                         <label class="rep-fulfillment-label" for="paymentGatewaySelect">درگاه پرداخت</label>

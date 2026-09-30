@@ -8,6 +8,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\Representative\ProformaPdfController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ShopSearchSuggestController;
 use App\Http\Controllers\SitemapController;
@@ -91,6 +92,9 @@ Route::get('/checkout', CheckoutPage::class)->name('checkout');
 Route::match(['get', 'post'], '/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');
 Route::match(['get', 'post'], '/payment/callback/tara', [PaymentController::class, 'taraCallback'])->name('payment.callback.tara');
 Route::get('/payment/tara/{tracking}', [PaymentController::class, 'taraRedirect'])->name('payment.tara.redirect');
+
+Route::middleware('auth')->get('/representative/proforma/{order}/pdf', ProformaPdfController::class)
+    ->name('representative.proforma.pdf');
 
 Route::middleware('auth')->prefix('account')->name('account.')->group(function () {
     Route::get('/', AccountDashboard::class)->name('dashboard');

@@ -5,6 +5,7 @@ namespace App\Filament\Representative\Resources\DraftOrderResource\Pages;
 use App\Filament\Representative\Resources\DraftOrderResource;
 use App\Models\Order;
 use App\Services\Representative\RepresentativeDraftOrderService;
+use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Contracts\Support\Htmlable;
 
@@ -38,6 +39,12 @@ class ViewDraftOrder extends ViewRecord
 
     protected function getHeaderActions(): array
     {
-        return [];
+        return [
+            Actions\Action::make('downloadPdf')
+                ->label('دانلود PDF')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->url(fn (): string => route('representative.proforma.pdf', $this->getRecord()))
+                ->openUrlInNewTab(),
+        ];
     }
 }

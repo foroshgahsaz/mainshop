@@ -30,6 +30,15 @@
             @endforelse
         </ul>
 
+        <div class="rep-wizard-actions" style="margin-top: 0.75rem;">
+            <a href="{{ route('representative.proforma.pdf', $order) }}"
+               class="rep-btn-secondary"
+               target="_blank"
+               rel="noopener">
+                دانلود PDF پیش‌فاکتور
+            </a>
+        </div>
+
         <div class="rep-order-totals">
             <div>جمع اقلام: {{ \App\Support\ShopFormatter::money((int) $order->total_amount) }}</div>
             @if ($order->freightCarrier)

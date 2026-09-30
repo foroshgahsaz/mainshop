@@ -41,13 +41,27 @@ class ViewOrder extends ViewRecord
 
     protected function getHeaderActions(): array
     {
-        return [
+        $actions = [
             Actions\Action::make('back')
                 ->label('لیست سفارش‌ها')
                 ->icon('heroicon-o-arrow-right')
                 ->url(OrderResource::getUrl('index'))
                 ->color('gray'),
         ];
+
+        $order = $this->record;
+        if (
+            $order->isRepresentativeOrder()
+            && ($order->isDraft() || $order->isProforma())
+        ) {
+            $actions[] = Actions\Action::make('downloadProformaPdf')
+                ->label('PDF پیش‌فاکتور')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->url(fn (): string => route('representative.proforma.pdf', $order))
+                ->openUrlInNewTab();
+        }
+
+        return $actions;
     }
 
     public function getTitle(): string

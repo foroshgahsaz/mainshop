@@ -47,6 +47,8 @@ class OrderWizard extends Component
 
     public ?int $freightCarrierId = null;
 
+    public string $freightCarrierSearch = '';
+
     public string $paymentGateway = '';
 
     public function mount(): void
@@ -264,6 +266,30 @@ class OrderWizard extends Component
             ->where('is_active', true)
             ->orderBy('name')
             ->get();
+    }
+
+    #[Computed]
+    public function filteredFreightCarriers(): Collection
+    {
+        $carriers = $this->freightCarriers;
+        $query = mb_strtolower(trim($this->freightCarrierSearch));
+
+        if ($query === '') {
+            return $carriers;
+        }
+
+        return $carriers
+            ->filter(function (FreightCarrier $carrier) use ($query): bool {
+                $blob = mb_strtolower(implode(' ', array_filter([
+                    $carrier->name,
+                    $carrier->carrier_number,
+                    $carrier->province?->name,
+                    $carrier->city?->name,
+                ])));
+
+                return str_contains($blob, $query);
+            })
+            ->values();
     }
 
     #[Computed]

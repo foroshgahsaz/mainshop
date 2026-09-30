@@ -2958,6 +2958,34 @@ body.has-admin-bar .listing-filters {
   }
 }
 
+.cart-invoice__cart-actions {
+  margin: 1rem 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.cart-invoice__cart-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  background: #f9fafb;
+}
+
+.cart-invoice__cart-row-title {
+  flex: 1 1 12rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.cart-invoice__totals--compact {
+  border-top: 0;
+  padding-top: 0;
+}
+
 /* Cart page: WooCommerce-like invoice / factor */
 .cart-invoice {
   background: #fff;

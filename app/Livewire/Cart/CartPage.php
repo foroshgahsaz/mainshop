@@ -3,6 +3,8 @@
 namespace App\Livewire\Cart;
 
 use App\Services\Cart\CartService;
+use App\Services\Settings\SettingsService;
+use App\Support\SalesInvoice\SalesInvoiceBuilder;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -56,11 +58,15 @@ class CartPage extends Component
         });
     }
 
-    public function render(CartService $cart)
+    public function render(CartService $cart, SettingsService $settings)
     {
+        $items = $cart->getItems()->values();
+        $summary = $cart->summary();
+
         return view('livewire.cart.cart-page', [
-            'items' => $cart->getItems()->values(),
-            'summary' => $cart->summary(),
+            'items' => $items,
+            'summary' => $summary,
+            'invoice' => SalesInvoiceBuilder::fromCartItems($items, $summary, $settings->site()),
         ]);
     }
 }

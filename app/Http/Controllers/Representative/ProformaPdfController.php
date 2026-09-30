@@ -4,13 +4,14 @@ namespace App\Http\Controllers\Representative;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Services\Pdf\PersianPdfGenerator;
 use App\Services\Settings\SettingsService;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Support\SalesInvoice\SalesInvoiceBuilder;
 use Illuminate\Http\Response;
 
 class ProformaPdfController extends Controller
 {
-    public function __invoke(Order $order): Response
+    public function __invoke(Order $order, PersianPdfGenerator $pdf): Response
     {
         $this->authorizeOrder($order);
 
@@ -25,15 +26,15 @@ class ProformaPdfController extends Controller
         ]);
 
         $site = app(SettingsService::class)->site();
+        $title = $order->isProforma() ? 'پیش‌فاکتور' : 'فاکتور فروش';
 
-        $pdf = Pdf::loadView('pdf.representative-proforma', [
-            'order' => $order,
-            'siteName' => (string) ($site['name'] ?? config('app.name')),
-        ])->setPaper('a4');
+        $document = SalesInvoiceBuilder::fromOrder($order, $title, $site);
 
-        $filename = 'proforma-'.$order->tracking_code.'.pdf';
+        $filename = ($order->isProforma() ? 'proforma-' : 'invoice-').$order->tracking_code.'.pdf';
 
-        return $pdf->download($filename);
+        return $pdf->download('pdf.sales-invoice', [
+            'document' => $document,
+        ], $filename);
     }
 
     private function authorizeOrder(Order $order): void
@@ -42,7 +43,14 @@ class ProformaPdfController extends Controller
             abort(404);
         }
 
-        if (! $order->isDraft() && ! $order->isProforma()) {
+        $allowedStatuses = [
+            Order::STATUS_DRAFT,
+            Order::STATUS_PROFORMA,
+            Order::STATUS_PROCESSING,
+            Order::STATUS_PENDING,
+        ];
+
+        if (! in_array($order->status, $allowedStatuses, true)) {
             abort(404);
         }
 

@@ -5,6 +5,7 @@
     @endphp
 
     <link rel="stylesheet" href="{{ asset('css/rep-order-wizard.css') }}">
+    <link rel="stylesheet" href="{{ asset('shop/css/sales-invoice.css') }}">
 
     @if (session('payment_status'))
         <div class="rep-payment-flash {{ session('payment_status') === 'success' ? 'rep-payment-flash--ok' : 'rep-payment-flash--fail' }}">
@@ -24,21 +25,19 @@
             وضعیت: <strong>پیش‌فاکتور ثبت‌شده</strong> — فقط مشاهده
         </p>
 
-        <ul class="rep-product-list">
-            @forelse ($order->items as $item)
-                <li class="rep-product-row">
-                    <div>
-                        <div class="rep-choice-title">{{ $item->product_name }}</div>
-                        <div class="rep-choice-meta">
-                            {{ $item->quantity }} × {{ \App\Support\ShopFormatter::money($item->price) }}
-                            = {{ \App\Support\ShopFormatter::money($item->total_price) }}
-                        </div>
-                    </div>
-                </li>
-            @empty
-                <li class="rep-wizard-empty">اقلامی ثبت نشده.</li>
-            @endforelse
-        </ul>
+        @php
+            $invoicePreview = \App\Support\SalesInvoice\SalesInvoiceBuilder::fromOrder(
+                $order,
+                'پیش‌فاکتور',
+                app(\App\Services\Settings\SettingsService::class)->site(),
+            );
+        @endphp
+        <div class="si-document--cart-wrap" style="margin-bottom: 1rem;">
+            @include('components.sales-invoice.document', ['document' => $invoicePreview, 'context' => 'web'])
+        </div>
+        @push('styles')
+            <link rel="stylesheet" href="{{ asset('shop/css/sales-invoice.css') }}">
+        @endpush
 
         <div class="rep-wizard-actions" style="margin-top: 0.75rem;">
             <a href="{{ route('representative.proforma.pdf', $order) }}"

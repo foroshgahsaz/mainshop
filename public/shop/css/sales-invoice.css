@@ -1,0 +1,96 @@
+/* Unified sales / proforma invoice (web) */
+.si-document {
+  background: #fff;
+  color: #111;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+}
+
+.si-document .si-k {
+  color: #4b5563;
+  font-weight: 700;
+}
+
+.si-document .si-meta {
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.si-document .si-meta td {
+  padding: 0.15rem 0;
+  border: none;
+}
+
+.si-document .si-title {
+  text-align: center;
+  font-size: 1.35rem;
+  font-weight: 900;
+  margin: 0.5rem 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #111;
+}
+
+.si-document table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.si-document .si-party th,
+.si-document .si-party td,
+.si-document .si-lines th,
+.si-document .si-lines td,
+.si-document .si-footer td,
+.si-document .si-sign td {
+  border: 1px solid #111;
+  padding: 0.45rem 0.5rem;
+  vertical-align: top;
+}
+
+.si-document .si-party-label {
+  background: #f3f4f6;
+  font-weight: 800;
+  text-align: center;
+}
+
+.si-document .si-lines th {
+  background: #f8fafc;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.si-document .si-lines td {
+  text-align: center;
+}
+
+.si-document .si-lines td.si-desc {
+  text-align: right;
+}
+
+.si-document .si-sum {
+  font-weight: 800;
+  background: #f9fafb;
+}
+
+.si-document .si-sign td {
+  height: 4.5rem;
+  text-align: center;
+  vertical-align: bottom;
+  color: #6b7280;
+  font-size: 0.75rem;
+}
+
+.si-document--cart-wrap {
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+  .si-document .si-party td,
+  .si-document .si-footer td {
+    display: block;
+    width: 100% !important;
+  }
+}

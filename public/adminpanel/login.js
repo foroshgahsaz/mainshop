@@ -222,6 +222,7 @@ function startMobileResendTimer() {
     const timeLeftStart = parseInt(mobileForm.dataset.resendRemaining || '0', 10);
     if (!Number.isFinite(timeLeftStart) || timeLeftStart <= 0) {
         timerWrap.classList.add('hidden');
+        timerWrap.hidden = true;
         if (submitBtn) {
             submitBtn.disabled = false;
         }
@@ -231,6 +232,7 @@ function startMobileResendTimer() {
 
     let timeLeft = timeLeftStart;
     timerWrap.classList.remove('hidden');
+    timerWrap.hidden = false;
     if (submitBtn) {
         submitBtn.disabled = true;
     }
@@ -242,6 +244,7 @@ function startMobileResendTimer() {
         if (timeLeft <= 0) {
             clearInterval(mobileTimerInterval);
             timerWrap.classList.add('hidden');
+            timerWrap.hidden = true;
             if (submitBtn) {
                 submitBtn.disabled = false;
             }

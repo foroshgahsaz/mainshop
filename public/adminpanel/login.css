@@ -361,6 +361,11 @@ body {
     display: none !important;
 }
 
+.hidden,
+.mobile-resend-timer.hidden {
+    display: none !important;
+}
+
 .resend-link {
     color: #7239ea;
     text-decoration: none;

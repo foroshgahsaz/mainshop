@@ -66,8 +66,117 @@
 }
 
 .rep-payment-info__pay {
+    margin-top: 0.75rem;
+    margin-bottom: 0.35rem;
+}
+
+.rep-proforma-pay-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem 1rem;
     margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
+}
+
+@media (max-width: 480px) {
+    .rep-proforma-pay-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.rep-proforma-gateway__label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 0.2rem;
+}
+
+.rep-proforma-gateway__value {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.9rem;
+}
+
+.rep-proforma-gateway__value .checkout-option__icon,
+.rep-proforma-summary__gateway .checkout-option__icon {
+    width: 1.75rem;
+    height: 1.75rem;
+    object-fit: contain;
+    border-radius: 0.35rem;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    padding: 0.15rem;
+}
+
+.rep-proforma-amount__value {
+    display: block;
+    font-size: 1rem;
+    color: #115e59;
+}
+
+.rep-proforma-reservation {
+    margin-top: 0.35rem;
+    font-size: 0.78rem;
+    color: #64748b;
+}
+
+.rep-proforma-summary {
+    margin: 1.25rem 0 0;
+    padding: 0.85rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    background: #f9fafb;
+    display: grid;
+    gap: 0.55rem;
+}
+
+.rep-proforma-summary__row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.35rem 1rem;
+    font-size: 0.88rem;
+}
+
+.rep-proforma-summary__row dt {
+    margin: 0;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.rep-proforma-summary__row dd {
+    margin: 0;
+    text-align: end;
+    font-weight: 600;
+    color: #111827;
+}
+
+.rep-proforma-summary__gateway {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 600;
+}
+
+.rep-proforma-summary__gateway .checkout-option__icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    object-fit: contain;
+}
+
+.rep-proforma-summary__row--total {
+    margin-top: 0.35rem;
+    padding-top: 0.55rem;
+    border-top: 1px solid #e5e7eb;
+    font-size: 0.95rem;
+}
+
+.rep-proforma-summary__row--total dt,
+.rep-proforma-summary__row--total dd {
+    color: #0f172a;
+    font-weight: 700;
 }
 
 .rep-btn-primary {

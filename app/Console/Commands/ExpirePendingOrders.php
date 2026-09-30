@@ -57,7 +57,7 @@ class ExpirePendingOrders extends Command
         }
 
         if ($proformaExpired > 0) {
-            $this->info("{$proformaExpired} پیش‌فاکتور منقضی لغو شد.");
+            $this->info("{$proformaExpired} پیش‌فاکتور: مهلت رزرو تمام شد و موجودی آزاد گردید.");
         }
 
         return self::SUCCESS;

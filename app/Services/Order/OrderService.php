@@ -62,20 +62,15 @@ class OrderService
             $locked->update([
                 'stock_reserved' => false,
                 'stock_reserved_until' => null,
-                'status' => Order::STATUS_CANCELED,
             ]);
 
             $locked = $locked->fresh(['user']);
 
             $this->orderLog->system(
                 $locked,
-                'مهلت رزرو پیش‌فاکتور به پایان رسید؛ سفارش لغو و موجودی آزاد شد.',
+                'مهلت رزرو پیش‌فاکتور به پایان رسید؛ موجودی آزاد شد. پیش‌فاکتور برای ویرایش ادمین باز است.',
                 'proforma_reservation_expired'
             );
-
-            $this->orderLog->statusChanged($locked, $previousStatus, Order::STATUS_CANCELED);
-            $locked->user?->notify(new OrderCanceledNotification($locked));
-            $this->sms->orderCanceled($locked);
 
             return $locked;
         });

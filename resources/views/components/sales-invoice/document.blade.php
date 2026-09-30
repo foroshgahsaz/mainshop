@@ -75,8 +75,11 @@
                 <th style="width: 34%;">شرح کالا</th>
                 <th style="width: 8%;">واحد</th>
                 <th style="width: 8%;">تعداد</th>
-                <th style="width: 17%;">بهای واحد (تومان)</th>
-                <th style="width: 17%;">مبلغ کل (تومان)</th>
+                <th style="width: 14%;">بهای واحد (تومان)</th>
+                @if ($document->showsLineDiscountColumn())
+                    <th style="width: 12%;">تخفیف (تومان)</th>
+                @endif
+                <th style="width: 14%;">مبلغ کل (تومان)</th>
             </tr>
         </thead>
         <tbody>
@@ -88,13 +91,19 @@
                     <td>{{ $line['unit'] }}</td>
                     <td>{{ number_format($line['quantity']) }}</td>
                     <td dir="ltr">{{ number_format($line['unit_price']) }}</td>
+                    @if ($document->showsLineDiscountColumn())
+                        <td dir="ltr">{{ number_format((int) ($line['line_discount'] ?? 0)) }}</td>
+                    @endif
                     <td dir="ltr">{{ number_format($line['line_total']) }}</td>
                 </tr>
             @endforeach
             <tr class="si-sum">
-                <td colspan="4">جمع</td>
+                <td colspan="4">جمع اقلام</td>
                 <td>{{ number_format($document->quantityTotal) }}</td>
                 <td></td>
+                @if ($document->showsLineDiscountColumn())
+                    <td></td>
+                @endif
                 <td dir="ltr">{{ number_format($document->itemsTotal) }}</td>
             </tr>
         </tbody>
@@ -115,7 +124,10 @@
             </td>
             <td style="width: 50%; vertical-align: top;">
                 @if ($document->discountAmount > 0)
-                    <div><span class="si-k">تخفیف:</span> {{ number_format($document->discountAmount) }} تومان</div>
+                    <div><span class="si-k">جمع تخفیف‌ها:</span> {{ number_format($document->discountAmount) }} تومان</div>
+                @endif
+                @if ($document->feesTotal > 0)
+                    <div><span class="si-k">جمع هزینه‌های اضافه:</span> {{ number_format($document->feesTotal) }} تومان</div>
                 @endif
                 @if ($document->shippingAmount > 0)
                     <div><span class="si-k">هزینه ارسال:</span> {{ number_format($document->shippingAmount) }} تومان</div>

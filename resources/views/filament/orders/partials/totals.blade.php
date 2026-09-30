@@ -7,8 +7,19 @@
         </div>
         @if($order->discount_amount > 0)
             <div class="admin-order__totals-row admin-order__totals-row--discount">
-                <dt>تخفیف @if($order->coupon)({{ $order->coupon->code }})@endif</dt>
+                <dt>جمع تخفیف‌ها @if($order->coupon)(کوپن: {{ $order->coupon->code }})@endif</dt>
                 <dd>−{{ number_format($order->discount_amount) }} تومان</dd>
+            </div>
+        @endif
+        @php
+            $feesTotal = $order->relationLoaded('invoiceLines')
+                ? (int) $order->invoiceLines->where('kind', \App\Models\OrderInvoiceLine::KIND_FEE)->sum('amount')
+                : (int) $order->invoiceLines()->where('kind', \App\Models\OrderInvoiceLine::KIND_FEE)->sum('amount');
+        @endphp
+        @if($feesTotal > 0)
+            <div class="admin-order__totals-row">
+                <dt>هزینه‌های اضافه فاکتور</dt>
+                <dd>{{ number_format($feesTotal) }} تومان</dd>
             </div>
         @endif
         <div class="admin-order__totals-row">

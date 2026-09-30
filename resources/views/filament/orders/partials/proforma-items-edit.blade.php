@@ -1,11 +1,10 @@
 <section class="admin-order__box admin-order__box--proforma-edit">
     <h3 class="admin-order__box-title">ویرایش اقلام پیش‌فاکتور (ادمین)</h3>
     <p class="admin-order__hint">
-        در هر زمان (حتی در حین رزرو موجودی) می‌توانید تعداد اقلام را تغییر دهید. در صورت رزرو فعال، موجودی انبار هم‌زمان تنظیم می‌شود.
-        تغییرات در یادداشت‌های سفارش ثبت می‌شود و در PDF پیش‌فاکتور نمایش داده نمی‌شود.
+        تعداد و تخفیف هر ردیف (مبلغ ثابت یا درصد). تغییرات در یادداشت خصوصی ثبت می‌شود و در PDF به‌صورت ردیف فاکتور نمایش داده می‌شود.
     </p>
 
-    <form wire:submit="saveProformaItemQuantities" class="admin-order__proforma-items-form">
+    <form wire:submit="saveProformaItems" class="admin-order__proforma-items-form">
         <div class="admin-order__table-wrap">
             <table class="admin-order__table">
                 <thead>
@@ -13,7 +12,9 @@
                         <th>محصول</th>
                         <th>قیمت واحد</th>
                         <th>تعداد</th>
-                        <th>جمع فعلی</th>
+                        <th>نوع تخفیف</th>
+                        <th>مقدار تخفیف</th>
+                        <th>جمع ردیف</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -27,9 +28,22 @@
                                        max="999"
                                        class="admin-order__input admin-order__input--qty"
                                        wire:model="editItemQuantities.{{ $item->id }}">
-                                @error('editItemQuantities.'.$item->id)
-                                    <p class="admin-order__error">{{ $message }}</p>
-                                @enderror
+                            </td>
+                            <td>
+                                <select class="admin-order__select"
+                                        wire:model="editItemDiscountTypes.{{ $item->id }}">
+                                    <option value="none">بدون تخفیف</option>
+                                    <option value="fixed">مبلغ (تومان)</option>
+                                    <option value="percent">درصد</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input type="number"
+                                       min="0"
+                                       max="999999999"
+                                       class="admin-order__input admin-order__input--qty"
+                                       wire:model="editItemDiscountValues.{{ $item->id }}"
+                                       @disabled(($editItemDiscountTypes[$item->id] ?? 'none') === 'none')>
                             </td>
                             <td>{{ number_format($item->total_price) }} تومان</td>
                         </tr>
@@ -38,10 +52,12 @@
             </table>
         </div>
 
+        @error('quantity') <p class="admin-order__error">{{ $message }}</p> @enderror
+        @error('discount') <p class="admin-order__error">{{ $message }}</p> @enderror
         @error('order') <p class="admin-order__error">{{ $message }}</p> @enderror
 
         <button type="submit" class="admin-order__btn admin-order__btn--primary admin-order__btn--block">
-            ذخیره تعداد اقلام
+            ذخیره اقلام و تخفیف ردیف
         </button>
     </form>
 </section>

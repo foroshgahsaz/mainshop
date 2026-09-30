@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\User;
+use App\Services\Order\OrderInvoiceTotalsService;
 use App\Services\Payment\PaymentGatewayCatalog;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -255,16 +256,7 @@ class RepresentativeDraftOrderService
 
         $this->consolidateDuplicateItems($order);
 
-        $order->loadMissing('items');
-
-        $itemsTotal = (int) $order->items->sum('total_price');
-        $shipping = (int) $order->shipping_amount;
-
-        $order->update([
-            'total_amount' => $itemsTotal,
-            'discount_amount' => 0,
-            'final_amount' => $itemsTotal + $shipping,
-        ]);
+        app(OrderInvoiceTotalsService::class)->recalculate($order->fresh());
     }
 
     public function assertDraftOwnedBy(Order $order, ?User $representative): void

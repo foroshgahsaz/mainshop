@@ -14,6 +14,8 @@ class OrderItem extends Model
         'quantity',
         'price',
         'total_price',
+        'line_discount_type',
+        'line_discount_value',
         'product_name',
         'sku',
     ];
@@ -24,6 +26,7 @@ class OrderItem extends Model
             'quantity' => 'integer',
             'price' => 'integer',
             'total_price' => 'integer',
+            'line_discount_value' => 'integer',
         ];
     }
 

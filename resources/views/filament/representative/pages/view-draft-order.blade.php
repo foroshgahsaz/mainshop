@@ -35,9 +35,6 @@
         <div class="si-document--cart-wrap" style="margin-bottom: 1rem;">
             @include('components.sales-invoice.document', ['document' => $invoicePreview, 'context' => 'web'])
         </div>
-        @push('styles')
-            <link rel="stylesheet" href="{{ asset('shop/css/sales-invoice.css') }}">
-        @endpush
 
         <div class="rep-wizard-actions" style="margin-top: 0.75rem;">
             <a href="{{ route('representative.proforma.pdf', $order) }}"

@@ -159,27 +159,38 @@
                 </p>
                 <ul class="rep-product-list">
                     @forelse ($order->items as $item)
-                        <li class="rep-product-row">
-                            <div>
+                        @php
+                            $lineQty = (int) ($lineQuantities[$item->id] ?? $item->quantity);
+                            $lineTotal = (int) $item->price * $lineQty;
+                        @endphp
+                        <li class="rep-product-row" wire:key="rep-line-{{ $item->id }}">
+                            <div class="rep-product-row-main">
                                 <div class="rep-choice-title">{{ $item->product_name }}</div>
                                 <div class="rep-choice-meta">
-                                    {{ $item->quantity }} × {{ $this->formatMoney($item->price) }}
-                                    = {{ $this->formatMoney($item->total_price) }}
+                                    {{ $lineQty }} × {{ $this->formatMoney($item->price) }}
+                                    = {{ $this->formatMoney($lineTotal) }}
                                 </div>
                             </div>
                             <div class="rep-item-actions">
-                                <label class="rep-item-qty">
+                                <div class="rep-qty-stepper">
                                     <span class="rep-item-qty-label">تعداد</span>
-                                    <input type="number"
-                                           class="rep-item-qty-input"
-                                           min="1"
-                                           max="999"
-                                           inputmode="numeric"
-                                           value="{{ $item->quantity }}"
-                                           wire:change="updateItemQuantity({{ $item->id }}, $event.target.value)"
-                                           wire:loading.attr="disabled"
-                                           wire:target="updateItemQuantity">
-                                </label>
+                                    <div class="rep-qty-stepper-control">
+                                        <button type="button"
+                                                class="rep-qty-stepper-btn"
+                                                wire:click="decrementLineQuantity({{ $item->id }})"
+                                                aria-label="کاهش تعداد">−</button>
+                                        <input type="number"
+                                               class="rep-qty-stepper-input"
+                                               min="1"
+                                               max="999"
+                                               inputmode="numeric"
+                                               wire:model.live="lineQuantities.{{ $item->id }}">
+                                        <button type="button"
+                                                class="rep-qty-stepper-btn"
+                                                wire:click="incrementLineQuantity({{ $item->id }})"
+                                                aria-label="افزایش تعداد">+</button>
+                                    </div>
+                                </div>
                                 <button type="button"
                                         class="rep-btn-danger"
                                         wire:click="removeItem({{ $item->id }})">
@@ -196,9 +207,27 @@
                     <div>حمل: {{ $this->formatMoney((int) $order->shipping_amount) }}</div>
                     <div class="rep-order-final">مبلغ نهایی: {{ $this->formatMoney((int) $order->final_amount) }}</div>
                 </div>
-                <div class="rep-wizard-actions">
+                <p class="rep-wizard-hint rep-review-hint">
+                    پس از تغییر تعداد، دکمه <strong>بروزرسانی</strong> را بزنید تا جمع‌ها ذخیره شود؛ سپس ثبت پیش‌فاکتور.
+                </p>
+                <div class="rep-wizard-actions rep-review-actions">
                     <button type="button" class="rep-btn-secondary" wire:click="goToStep('product')">افزودن محصول دیگر</button>
-                    <button type="button" class="rep-btn-primary" wire:click="finishDraft">ثبت پیش‌فاکتور (بدون ویرایش بعدی)</button>
+                    <button type="button"
+                            class="rep-btn-update"
+                            wire:click="refreshReviewTotals"
+                            wire:loading.attr="disabled"
+                            wire:target="refreshReviewTotals,finishDraft">
+                        <span wire:loading.remove wire:target="refreshReviewTotals">بروزرسانی</span>
+                        <span wire:loading wire:target="refreshReviewTotals">در حال محاسبه…</span>
+                    </button>
+                    <button type="button"
+                            class="rep-btn-primary"
+                            wire:click="finishDraft"
+                            wire:loading.attr="disabled"
+                            wire:target="finishDraft,refreshReviewTotals">
+                        <span wire:loading.remove wire:target="finishDraft">ثبت پیش‌فاکتور (بدون ویرایش بعدی)</span>
+                        <span wire:loading wire:target="finishDraft">در حال ثبت…</span>
+                    </button>
                 </div>
             @endif
             @error('order') <p class="rep-wizard-error">{{ $message }}</p> @enderror

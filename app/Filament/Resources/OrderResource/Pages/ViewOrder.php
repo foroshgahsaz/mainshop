@@ -5,9 +5,10 @@ namespace App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Resources\OrderResource;
 use App\Models\Order;
 use App\Models\OrderNote;
-use App\Models\ShippingMethod;
+use App\Models\FreightCarrier;
 use App\Services\Order\OrderActivityLogger;
 use App\Services\Order\OrderService;
+use App\Services\Payment\PaymentGatewayCatalog;
 use App\Services\Representative\RepresentativeOrderAdminService;
 use Filament\Actions;
 use Filament\Notifications\Notification;
@@ -27,9 +28,9 @@ class ViewOrder extends ViewRecord
 
     public string $editTracking = '';
 
-    public ?int $editShippingMethodId = null;
+    public ?int $editFreightCarrierId = null;
 
-    public string $editPaymentMethod = 'online';
+    public string $editPaymentGateway = 'zarinpal';
 
     public function mount(int|string $record): void
     {
@@ -95,8 +96,8 @@ class ViewOrder extends ViewRecord
         ) {
             app(RepresentativeOrderAdminService::class)->updateFulfillment(
                 $order,
-                $this->editShippingMethodId,
-                $this->editPaymentMethod,
+                $this->editFreightCarrierId,
+                $this->editPaymentGateway,
             );
         }
 
@@ -110,17 +111,25 @@ class ViewOrder extends ViewRecord
     {
         $this->editStatus = $this->record->status;
         $this->editTracking = (string) ($this->record->shipping_tracking_code ?? '');
-        $this->editShippingMethodId = $this->record->shipping_method_id;
-        $this->editPaymentMethod = (string) ($this->record->payment_method ?: 'online');
+        $this->editFreightCarrierId = $this->record->freight_carrier_id;
+        $enabled = app(PaymentGatewayCatalog::class)->enabledNames();
+        $this->editPaymentGateway = (string) ($this->record->payment_method ?: ($enabled[0] ?? 'zarinpal'));
     }
 
-    /** @return \Illuminate\Support\Collection<int, ShippingMethod> */
-    public function getShippingMethodOptionsProperty()
+    /** @return \Illuminate\Support\Collection<int, FreightCarrier> */
+    public function getFreightCarrierOptionsProperty()
     {
-        return ShippingMethod::query()
+        return FreightCarrier::query()
+            ->with(['province', 'city'])
             ->where('is_active', true)
-            ->orderBy('price')
-            ->get(['id', 'name', 'price']);
+            ->orderBy('name')
+            ->get();
+    }
+
+    /** @return list<array<string, mixed>> */
+    public function getPaymentGatewayOptionsProperty(): array
+    {
+        return app(PaymentGatewayCatalog::class)->enabled();
     }
 
     protected function refreshRecord(): void
@@ -131,6 +140,8 @@ class ViewOrder extends ViewRecord
             'items.product',
             'items.variant',
             'shippingMethod',
+            'freightCarrier.province',
+            'freightCarrier.city',
             'coupon',
             'payments.notes.author',
             'notes.author',

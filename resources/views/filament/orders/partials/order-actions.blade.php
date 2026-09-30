@@ -26,19 +26,20 @@
 
         @if($order->isRepresentativeOrder() && ($order->isDraft() || $order->isProforma()))
             <div class="admin-order__field">
-                <label class="admin-order__label">روش ارسال (باربری)</label>
-                <select wire:model="editShippingMethodId" class="admin-order__select admin-order__select--full">
+                <label class="admin-order__label">باربری (نمایندگی)</label>
+                <select wire:model="editFreightCarrierId" class="admin-order__select admin-order__select--full">
                     <option value="">— انتخاب —</option>
-                    @foreach($this->shippingMethodOptions as $method)
-                        <option value="{{ $method->id }}">{{ $method->name }} — {{ number_format($method->price) }} تومان</option>
+                    @foreach($this->freightCarrierOptions as $carrier)
+                        <option value="{{ $carrier->id }}">{{ $carrier->displayLabel() }}</option>
                     @endforeach
                 </select>
             </div>
             <div class="admin-order__field">
-                <label class="admin-order__label">روش پرداخت</label>
-                <select wire:model="editPaymentMethod" class="admin-order__select admin-order__select--full">
-                    <option value="online">پرداخت آنلاین</option>
-                    <option value="cod">پرداخت در محل</option>
+                <label class="admin-order__label">درگاه پرداخت</label>
+                <select wire:model="editPaymentGateway" class="admin-order__select admin-order__select--full">
+                    @foreach($this->paymentGatewayOptions as $gateway)
+                        <option value="{{ $gateway['name'] }}">{{ $gateway['label'] }}</option>
+                    @endforeach
                 </select>
             </div>
         @endif

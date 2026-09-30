@@ -1,7 +1,7 @@
 <x-filament-panels::page>
     @php
         /** @var \App\Models\Order $order */
-        $order = $this->record->loadMissing(['items', 'user', 'shippingMethod']);
+        $order = $this->record->loadMissing(['items', 'user', 'freightCarrier.province', 'freightCarrier.city']);
     @endphp
 
     <link rel="stylesheet" href="{{ asset('css/rep-order-wizard.css') }}">
@@ -32,19 +32,12 @@
 
         <div class="rep-order-totals">
             <div>جمع اقلام: {{ \App\Support\ShopFormatter::money((int) $order->total_amount) }}</div>
-            <div>
-                حمل
-                @if ($order->shippingMethod)
-                    ({{ $order->shippingMethod->name }})
-                @endif
-                : {{ \App\Support\ShopFormatter::money((int) $order->shipping_amount) }}
-            </div>
-            <div>روش پرداخت: {{ \App\Support\ShopLabels::paymentMethod($order->payment_method) }}</div>
+            @if ($order->freightCarrier)
+                <div>باربری: {{ $order->freightCarrier->displayLabel() }}</div>
+            @endif
+            <div>درگاه پرداخت: {{ \App\Support\ShopLabels::paymentMethod($order->payment_method) }}</div>
             <div class="rep-order-final">مبلغ نهایی: {{ \App\Support\ShopFormatter::money((int) $order->final_amount) }}</div>
         </div>
 
-        <p class="rep-wizard-hint mt-3">
-            انتخاب باربری و درگاه پرداخت در فاز بعدی تکمیل می‌شود؛ فعلاً مقادیر پیش‌فرض سیستم اعمال شده است.
-        </p>
     </section>
 </x-filament-panels::page>

@@ -61,6 +61,10 @@ class OrderWizard extends Component
         $this->brandId = $filters['brand_id'] ?? null;
         $this->templateId = $filters['template_id'] ?? null;
         $this->step = $order->items()->exists() ? 'review' : 'family';
+
+        if ($order->items()->exists()) {
+            $this->refreshDraftLineItems();
+        }
     }
 
     public function updatedProductSearch(): void
@@ -158,6 +162,10 @@ class OrderWizard extends Component
         }
 
         $this->step = $step;
+
+        if ($step === 'review') {
+            $this->refreshDraftLineItems();
+        }
     }
 
     public function finishDraft(): void
@@ -309,5 +317,17 @@ class OrderWizard extends Component
             ->where('representative_id', auth()->id())
             ->where('status', Order::STATUS_DRAFT)
             ->first();
+    }
+
+    private function refreshDraftLineItems(): void
+    {
+        $order = $this->findOwnedDraft();
+
+        if ($order === null) {
+            return;
+        }
+
+        app(RepresentativeDraftOrderService::class)->recalculateTotals($order);
+        unset($this->draftOrder);
     }
 }

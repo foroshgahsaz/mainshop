@@ -141,6 +141,7 @@ class Login extends BaseLogin
     {
         $this->otpStep = 'phone';
         $this->otpCode = '';
+        $this->otpSentAt = 0;
         $this->resetValidation();
     }
 

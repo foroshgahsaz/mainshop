@@ -1,6 +1,3 @@
-@if (request()->routeIs('filament.representative.*'))
-    @include('filament.partials.representative-sidebar')
-@else
 @php
     use App\Filament\Pages\ManageFooterSettings;
     use App\Filament\Pages\ManageSearchPopupSettings;
@@ -343,4 +340,3 @@
 <script>
     window.__adminPanelTitles = @json(collect($panels)->mapWithKeys(fn ($p, $id) => [$id => $p['label']]));
 </script>
-@endif

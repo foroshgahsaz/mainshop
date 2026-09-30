@@ -37,6 +37,29 @@ class ExpirePendingOrders extends Command
 
         $this->info("{$expired} سفارش منقضی لغو شد.");
 
+        $proformaExpired = 0;
+
+        $proformas = Order::query()
+            ->where('status', Order::STATUS_PROFORMA)
+            ->where('stock_reserved', true)
+            ->whereNotNull('stock_reserved_until')
+            ->where('stock_reserved_until', '<', now())
+            ->whereDoesntHave('payments', fn ($q) => $q->where('status', 'success'))
+            ->get();
+
+        foreach ($proformas as $order) {
+            try {
+                $orders->expireProformaReservation($order);
+                $proformaExpired++;
+            } catch (\RuntimeException) {
+                continue;
+            }
+        }
+
+        if ($proformaExpired > 0) {
+            $this->info("{$proformaExpired} پیش‌فاکتور منقضی لغو شد.");
+        }
+
         return self::SUCCESS;
     }
 }

@@ -34,9 +34,13 @@
                 <span class="text-xs text-gray-400">{{ $order->created_at->format('Y/m/d H:i') }}</span>
                 <span class="text-xs text-gray-500">کد: {{ $order->tracking_code }}</span>
             </div>
-            @if ($order->canPayAgain())
+            @if ($order->canInitiateOnlinePayment())
                 <span class="text-xs bg-amber-50 text-amber-700 px-3 py-1 rounded-full">
                     مانده: {{ number_format($order->remainingAmount()) }} تومان
+                </span>
+            @elseif ($order->isReservationExpired())
+                <span class="text-xs bg-red-50 text-red-700 px-3 py-1 rounded-full">
+                    مهلت رزرو به پایان رسیده
                 </span>
             @endif
         </div>
@@ -96,8 +100,19 @@
                     @endif
                 </p>
             @endif
-            @if($order->shippingMethod)
+            @if($order->freightCarrier)
+                <p class="text-sm text-gray-500 mt-2">باربری: {{ $order->freightCarrier->displayLabel() }}</p>
+            @elseif($order->shippingMethod)
                 <p class="text-sm text-gray-500 mt-2">روش ارسال: {{ $order->shippingMethod->name }}</p>
+            @endif
+            @if ($order->stock_reserved_until && $order->isProforma())
+                <p class="text-sm mt-2 {{ $order->hasActiveStockReservation() ? 'text-amber-700' : 'text-red-700' }}">
+                    @if ($order->hasActiveStockReservation())
+                        مهلت پرداخت تا {{ $order->stock_reserved_until->format('Y/m/d H:i') }}
+                    @else
+                        مهلت پرداخت این پیش‌فاکتور به پایان رسیده است.
+                    @endif
+                </p>
             @endif
             @if($order->shipping_tracking_code)
                 <p class="text-sm mt-2">کد رهگیری پست: <strong dir="ltr">{{ $order->shipping_tracking_code }}</strong></p>
@@ -120,52 +135,66 @@
         </div>
     @endif
 
-    @if ($order->canPayAgain())
+    @if ($order->canInitiateOnlinePayment())
         <div class="shop-card p-5 mb-4">
-            <h2 class="font-bold text-navy mb-2">ادامه پرداخت</h2>
+            <h2 class="font-bold text-navy mb-2">{{ $order->isProforma() ? 'پرداخت پیش‌فاکتور' : 'ادامه پرداخت' }}</h2>
             <p class="text-sm text-gray-600 mb-4">
                 مانده این سفارش {{ number_format($order->remainingAmount()) }} تومان است.
-                تا وقتی مجموع پرداخت اعتباری و نقدی با مبلغ سفارش برابر نشود، سفارش تکمیل نمی‌شود.
+                @if ($order->isProforma())
+                    پرداخت از درگاه «{{ ShopLabels::paymentMethod($order->payment_method) }}» انتخاب‌شده توسط نماینده انجام می‌شود.
+                @else
+                    تا وقتی مجموع پرداخت اعتباری و نقدی با مبلغ سفارش برابر نشود، سفارش تکمیل نمی‌شود.
+                @endif
             </p>
 
-            @if (count($creditGateways))
-                <div class="checkout-pay-group">
-                    <h3 class="checkout-pay-group__title">پرداخت اعتباری</h3>
-                    @foreach ($creditGateways as $gateway)
-                        <label wire:key="remain-pay-{{ $gateway['name'] }}" class="checkout-option {{ $selectedGateway === $gateway['name'] ? 'checkout-option-active' : '' }}">
-                            <input type="radio" name="selectedGateway" wire:model.live="selectedGateway" value="{{ $gateway['name'] }}" class="checkout-option__radio">
-                            <x-checkout-option-icon :src="$gateway['icon'] ?? null" :alt="$gateway['label']" />
-                            <div class="checkout-option__body">
-                                <p class="font-bold text-sm">{{ $gateway['label'] }}</p>
-                                <p class="text-xs text-gray-400 mt-0.5">{{ $gateway['description'] }}</p>
-                            </div>
-                        </label>
-                    @endforeach
-                </div>
+            @if ($order->proformaPaymentGateway())
+                <p class="text-sm text-gray-700 mb-4">
+                    درگاه: <strong>{{ ShopLabels::paymentMethod($order->payment_method) }}</strong>
+                </p>
+                <button type="button" wire:click="payAgain" wire:loading.attr="disabled"
+                    class="bg-brand-green hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-bold">
+                    پرداخت {{ number_format($order->remainingAmount()) }} تومان
+                </button>
+            @else
+                @if (count($creditGateways))
+                    <div class="checkout-pay-group">
+                        <h3 class="checkout-pay-group__title">پرداخت اعتباری</h3>
+                        @foreach ($creditGateways as $gateway)
+                            <label wire:key="remain-pay-{{ $gateway['name'] }}" class="checkout-option {{ $selectedGateway === $gateway['name'] ? 'checkout-option-active' : '' }}">
+                                <input type="radio" name="selectedGateway" wire:model.live="selectedGateway" value="{{ $gateway['name'] }}" class="checkout-option__radio">
+                                <x-checkout-option-icon :src="$gateway['icon'] ?? null" :alt="$gateway['label']" />
+                                <div class="checkout-option__body">
+                                    <p class="font-bold text-sm">{{ $gateway['label'] }}</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">{{ $gateway['description'] }}</p>
+                                </div>
+                            </label>
+                        @endforeach
+                    </div>
+                @endif
+
+                @if (count($cashGateways))
+                    <div class="checkout-pay-group">
+                        <h3 class="checkout-pay-group__title">درگاه‌های نقدی</h3>
+                        @foreach ($cashGateways as $gateway)
+                            <label wire:key="remain-pay-{{ $gateway['name'] }}" class="checkout-option {{ $selectedGateway === $gateway['name'] ? 'checkout-option-active' : '' }}">
+                                <input type="radio" name="selectedGateway" wire:model.live="selectedGateway" value="{{ $gateway['name'] }}" class="checkout-option__radio">
+                                <x-checkout-option-icon :src="$gateway['icon'] ?? null" :alt="$gateway['label']" />
+                                <div class="checkout-option__body">
+                                    <p class="font-bold text-sm">{{ $gateway['label'] }}</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">{{ $gateway['description'] }}</p>
+                                </div>
+                            </label>
+                        @endforeach
+                    </div>
+                @endif
+
+                @error('selectedGateway') <span class="text-red-600 text-xs mb-2 block">{{ $message }}</span> @enderror
+
+                <button wire:click="payAgain" wire:loading.attr="disabled"
+                    class="bg-brand-green hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-bold">
+                    پرداخت مانده
+                </button>
             @endif
-
-            @if (count($cashGateways))
-                <div class="checkout-pay-group">
-                    <h3 class="checkout-pay-group__title">درگاه‌های نقدی</h3>
-                    @foreach ($cashGateways as $gateway)
-                        <label wire:key="remain-pay-{{ $gateway['name'] }}" class="checkout-option {{ $selectedGateway === $gateway['name'] ? 'checkout-option-active' : '' }}">
-                            <input type="radio" name="selectedGateway" wire:model.live="selectedGateway" value="{{ $gateway['name'] }}" class="checkout-option__radio">
-                            <x-checkout-option-icon :src="$gateway['icon'] ?? null" :alt="$gateway['label']" />
-                            <div class="checkout-option__body">
-                                <p class="font-bold text-sm">{{ $gateway['label'] }}</p>
-                                <p class="text-xs text-gray-400 mt-0.5">{{ $gateway['description'] }}</p>
-                            </div>
-                        </label>
-                    @endforeach
-                </div>
-            @endif
-
-            @error('selectedGateway') <span class="text-red-600 text-xs mb-2 block">{{ $message }}</span> @enderror
-
-            <button wire:click="payAgain" wire:loading.attr="disabled"
-                class="bg-brand-green hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-bold">
-                پرداخت مانده
-            </button>
         </div>
     @endif
 

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\Payment\PaymentGatewayCatalog;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -40,6 +41,7 @@ class Order extends Model
         'payment_method',
         'status',
         'stock_reserved',
+        'stock_reserved_until',
         'tracking_code',
         'shipping_tracking_code',
         'note',
@@ -58,6 +60,7 @@ class Order extends Model
             'shipped_at' => 'datetime',
             'delivered_at' => 'datetime',
             'stock_reserved' => 'boolean',
+            'stock_reserved_until' => 'datetime',
             'catalog_filters' => 'array',
         ];
     }
@@ -189,8 +192,52 @@ class Order extends Model
 
     public function canPayAgain(): bool
     {
-        return $this->payment_method === 'online'
-            && $this->status === self::STATUS_PENDING
-            && $this->remainingAmount() > 0;
+        return $this->canInitiateOnlinePayment();
+    }
+
+    public function hasActiveStockReservation(): bool
+    {
+        if (! $this->stock_reserved) {
+            return false;
+        }
+
+        if ($this->stock_reserved_until === null) {
+            return true;
+        }
+
+        return $this->stock_reserved_until->isFuture();
+    }
+
+    public function isReservationExpired(): bool
+    {
+        return $this->stock_reserved
+            && $this->stock_reserved_until !== null
+            && $this->stock_reserved_until->isPast();
+    }
+
+    public function canInitiateOnlinePayment(): bool
+    {
+        if ($this->remainingAmount() <= 0 || ! $this->hasActiveStockReservation()) {
+            return false;
+        }
+
+        if ($this->status === self::STATUS_PENDING && $this->payment_method === 'online') {
+            return true;
+        }
+
+        if ($this->isProforma() && $this->isRepresentativeOrder()) {
+            return app(PaymentGatewayCatalog::class)->isEnabled((string) $this->payment_method);
+        }
+
+        return false;
+    }
+
+    public function proformaPaymentGateway(): ?string
+    {
+        if ($this->isProforma() && $this->isRepresentativeOrder()) {
+            return (string) $this->payment_method;
+        }
+
+        return null;
     }
 }

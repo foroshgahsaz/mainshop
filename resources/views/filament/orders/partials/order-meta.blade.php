@@ -19,5 +19,20 @@
         @elseif($order->shippingMethod)
             <div><dt>روش ارسال</dt><dd>{{ $order->shippingMethod->name }}</dd></div>
         @endif
+        @if ($order->stock_reserved)
+            <div>
+                <dt>رزرو موجودی</dt>
+                <dd>
+                    @if ($order->stock_reserved_until)
+                        تا {{ $order->stock_reserved_until->format('Y/m/d H:i') }}
+                        @if ($order->isReservationExpired())
+                            <span class="text-red-600">(منقضی)</span>
+                        @endif
+                    @else
+                        فعال
+                    @endif
+                </dd>
+            </div>
+        @endif
     </dl>
 </section>

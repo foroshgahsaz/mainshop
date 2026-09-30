@@ -13,6 +13,15 @@
         <p class="rep-wizard-hint">
             وضعیت: <strong>پیش‌فاکتور ثبت‌شده</strong> — فقط مشاهده
         </p>
+        @if ($order->stock_reserved_until)
+            <p class="rep-wizard-hint {{ $order->hasActiveStockReservation() ? '' : 'rep-wizard-error' }}">
+                @if ($order->hasActiveStockReservation())
+                    مهلت پرداخت مشتری تا: <strong>{{ $order->stock_reserved_until->format('Y/m/d H:i') }}</strong>
+                @else
+                    مهلت رزرو موجودی به پایان رسیده است.
+                @endif
+            </p>
+        @endif
 
         <ul class="rep-product-list">
             @forelse ($order->items as $item)
@@ -37,6 +46,14 @@
                rel="noopener">
                 دانلود PDF پیش‌فاکتور
             </a>
+            @if ($order->hasActiveStockReservation() && $order->remainingAmount() > 0)
+                <a href="{{ route('account.orders.show', $order) }}"
+                   class="rep-btn-secondary"
+                   target="_blank"
+                   rel="noopener">
+                    صفحه پرداخت مشتری
+                </a>
+            @endif
         </div>
 
         <div class="rep-order-totals">

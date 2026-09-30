@@ -39,6 +39,48 @@ class OrderService
         return $order;
     }
 
+    public function expireProformaReservation(Order $order): Order
+    {
+        return DB::transaction(function () use ($order) {
+            /** @var Order $locked */
+            $locked = Order::query()->whereKey($order->id)->lockForUpdate()->firstOrFail();
+
+            if (! $locked->isProforma() || ! $locked->stock_reserved) {
+                throw new \RuntimeException('این پیش‌فاکتور برای انقضای رزرو واجد شرایط نیست.');
+            }
+
+            if ($locked->hasSuccessfulPayment()) {
+                throw new \RuntimeException('پیش‌فاکتور پرداخت‌شده قابل انقضای رزرو نیست.');
+            }
+
+            $previousStatus = $locked->status;
+
+            if ($locked->stock_reserved) {
+                $this->stockService->restoreOrderItems($locked);
+            }
+
+            $locked->update([
+                'stock_reserved' => false,
+                'stock_reserved_until' => null,
+                'status' => Order::STATUS_CANCELED,
+            ]);
+
+            $locked = $locked->fresh(['user']);
+
+            $this->orderLog->system(
+                $locked,
+                'مهلت رزرو پیش‌فاکتور به پایان رسید؛ سفارش لغو و موجودی آزاد شد.',
+                'proforma_reservation_expired'
+            );
+
+            $this->orderLog->statusChanged($locked, $previousStatus, Order::STATUS_CANCELED);
+            $locked->user?->notify(new OrderCanceledNotification($locked));
+            $this->sms->orderCanceled($locked);
+
+            return $locked;
+        });
+    }
+
     public function markShipped(Order $order, ?string $trackingCode = null, ?User $actor = null): Order
     {
         $previousStatus = $order->status;
@@ -151,9 +193,11 @@ class OrderService
             /** @var Order $order */
             $order = Order::query()->whereKey($order->id)->lockForUpdate()->firstOrFail();
 
-            $allowed = $systemExpire || ! $actor?->isAdmin()
-                ? $order->canBeCanceledByCustomer()
-                : $order->canBeCanceledByAdmin();
+            $allowed = $systemExpire
+                ? ($order->canBeCanceledByCustomer() || ($order->isProforma() && ! $order->hasSuccessfulPayment()))
+                : (! $actor?->isAdmin()
+                    ? $order->canBeCanceledByCustomer()
+                    : $order->canBeCanceledByAdmin());
 
             if (! $allowed) {
                 throw new \RuntimeException('این سفارش قابل لغو نیست.');

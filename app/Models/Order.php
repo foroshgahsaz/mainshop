@@ -11,6 +11,9 @@ class Order extends Model
 {
     public const STATUS_DRAFT = 'draft';
 
+    /** پیش‌فاکتور ثبت‌شده توسط نماینده — فقط مشاهده برای نماینده */
+    public const STATUS_PROFORMA = 'proforma';
+
     public const STATUS_PENDING = 'pending';
 
     public const STATUS_PROCESSING = 'processing';
@@ -61,6 +64,21 @@ class Order extends Model
     public function isDraft(): bool
     {
         return $this->status === self::STATUS_DRAFT;
+    }
+
+    public function isProforma(): bool
+    {
+        return $this->status === self::STATUS_PROFORMA;
+    }
+
+    public function isRepresentativeEditable(): bool
+    {
+        return $this->isDraft();
+    }
+
+    public function isRepresentativeOrder(): bool
+    {
+        return $this->representative_id !== null;
     }
 
     public function representative(): BelongsTo

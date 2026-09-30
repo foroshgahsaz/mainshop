@@ -10,6 +10,8 @@ class ShopLabels
     public static function orderStatus(?string $status): string
     {
         return match ($status) {
+            Order::STATUS_DRAFT => 'پیش‌نویس نماینده',
+            Order::STATUS_PROFORMA => 'پیش‌فاکتور',
             Order::STATUS_PENDING => 'در انتظار',
             Order::STATUS_PROCESSING => 'در حال پردازش',
             Order::STATUS_SHIPPED => 'ارسال شده',

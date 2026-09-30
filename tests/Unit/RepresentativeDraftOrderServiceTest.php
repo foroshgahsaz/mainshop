@@ -11,6 +11,7 @@ class RepresentativeDraftOrderServiceTest extends TestCase
     public function test_draft_status_constant_exists(): void
     {
         $this->assertSame('draft', Order::STATUS_DRAFT);
+        $this->assertSame('proforma', Order::STATUS_PROFORMA);
     }
 
     public function test_service_class_is_instantiable(): void

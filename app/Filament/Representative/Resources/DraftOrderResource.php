@@ -17,11 +17,11 @@ class DraftOrderResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
-    protected static ?string $navigationLabel = 'پیش‌سفارش‌ها';
+    protected static ?string $navigationLabel = 'پیش‌فاکتورها';
 
-    protected static ?string $modelLabel = 'پیش‌سفارش';
+    protected static ?string $modelLabel = 'پیش‌فاکتور';
 
-    protected static ?string $pluralModelLabel = 'پیش‌سفارش‌ها';
+    protected static ?string $pluralModelLabel = 'پیش‌فاکتورها';
 
     protected static ?int $navigationSort = 3;
 
@@ -38,6 +38,14 @@ class DraftOrderResource extends Resource
                 Tables\Columns\TextColumn::make('items_count')
                     ->label('اقلام')
                     ->counts('items'),
+                Tables\Columns\TextColumn::make('status')
+                    ->label('وضعیت')
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        Order::STATUS_DRAFT => 'در حال تکمیل',
+                        Order::STATUS_PROFORMA => 'ثبت‌شده',
+                        default => $state,
+                    }),
                 Tables\Columns\TextColumn::make('final_amount')
                     ->label('مبلغ')
                     ->formatStateUsing(fn (int $state): string => ShopFormatter::money($state)),
@@ -48,9 +56,13 @@ class DraftOrderResource extends Resource
             ->defaultSort('updated_at', 'desc')
             ->actions([
                 Tables\Actions\Action::make('continue')
-                    ->label('ادامه')
+                    ->label('ادامه ویرایش')
                     ->icon('heroicon-o-pencil-square')
+                    ->visible(fn (Order $record): bool => $record->isDraft())
                     ->url(fn (Order $record): string => CreateDraftOrder::getUrl(panel: 'representative').'?order='.$record->id),
+                Tables\Actions\ViewAction::make()
+                    ->label('مشاهده')
+                    ->visible(fn (Order $record): bool => $record->isProforma()),
             ]);
     }
 
@@ -58,7 +70,7 @@ class DraftOrderResource extends Resource
     {
         return parent::getEloquentQuery()
             ->where('representative_id', auth()->id())
-            ->where('status', Order::STATUS_DRAFT)
+            ->whereIn('status', [Order::STATUS_DRAFT, Order::STATUS_PROFORMA])
             ->withCount('items');
     }
 
@@ -71,6 +83,14 @@ class DraftOrderResource extends Resource
     {
         return [
             'index' => Pages\ListDraftOrders::route('/'),
+            'view' => Pages\ViewDraftOrder::route('/{record}'),
         ];
+    }
+
+    public static function canView($record): bool
+    {
+        return $record instanceof Order
+            && $record->representative_id === auth()->id()
+            && ($record->isDraft() || $record->isProforma());
     }
 }

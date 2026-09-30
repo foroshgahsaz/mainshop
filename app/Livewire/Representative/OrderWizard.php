@@ -11,6 +11,7 @@ use App\Services\Payment\PaymentGatewayCatalog;
 use App\Services\Representative\RepresentativeCatalogLookup;
 use App\Services\Representative\RepresentativeDraftOrderService;
 use App\Support\ShopFormatter;
+use App\Support\ShopMedia;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -48,6 +49,13 @@ class OrderWizard extends Component
     public ?int $freightCarrierId = null;
 
     public string $paymentGateway = '';
+
+    public bool $showProductImagesModal = false;
+
+    public string $productImagesModalTitle = '';
+
+    /** @var list<string> */
+    public array $productImagesModalUrls = [];
 
     public function mount(): void
     {
@@ -159,6 +167,43 @@ class OrderWizard extends Component
         unset($this->draftOrder);
         $this->syncLineQuantitiesFromOrder();
         $this->syncFulfillmentFromOrder();
+    }
+
+    public function openProductImages(int $productId): void
+    {
+        $query = Product::query()
+            ->with(['images' => fn ($q) => $q->orderBy('position')])
+            ->whereKey($productId);
+
+        if ($this->familyId && $this->plantId && $this->brandId && $this->templateId) {
+            $query
+                ->where('product_family_id', $this->familyId)
+                ->where('product_plant_id', $this->plantId)
+                ->where('brand_id', $this->brandId)
+                ->where('product_template_id', $this->templateId);
+        }
+
+        $product = $query->first();
+
+        if ($product === null) {
+            return;
+        }
+
+        $this->productImagesModalTitle = $product->name;
+        $this->productImagesModalUrls = $product->images
+            ->map(fn ($image) => ShopMedia::url((string) $image->image))
+            ->filter()
+            ->values()
+            ->all();
+
+        $this->showProductImagesModal = true;
+    }
+
+    public function closeProductImagesModal(): void
+    {
+        $this->showProductImagesModal = false;
+        $this->productImagesModalTitle = '';
+        $this->productImagesModalUrls = [];
     }
 
     public function removeItem(int $itemId): void

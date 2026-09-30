@@ -46,6 +46,24 @@ class ViewOrder extends ViewRecord
     /** @var list<array{id: int|null, kind: string, title: string, amount: int|string}> */
     public array $editInvoiceLines = [];
 
+    public bool $showInvoiceLineModal = false;
+
+    public ?int $invoiceLineModalIndex = null;
+
+    public string $modalInvoiceLineKind = 'fee';
+
+    public string $modalInvoiceLineTitle = '';
+
+    public string $modalInvoiceLineAmount = '';
+
+    public bool $showItemDiscountModal = false;
+
+    public ?int $itemDiscountModalItemId = null;
+
+    public string $modalItemDiscountType = 'none';
+
+    public int $modalItemDiscountValue = 0;
+
     public function mount(int|string $record): void
     {
         parent::mount($record);
@@ -204,14 +222,105 @@ class ViewOrder extends ViewRecord
         Notification::make()->title('ردیف‌های فاکتور ذخیره شد')->success()->send();
     }
 
-    public function addInvoiceLineRow(): void
+    public function openInvoiceLineModal(?int $index = null): void
     {
-        $this->editInvoiceLines[] = [
-            'id' => null,
-            'kind' => 'fee',
-            'title' => '',
-            'amount' => '',
+        $this->invoiceLineModalIndex = $index;
+
+        if ($index !== null && isset($this->editInvoiceLines[$index])) {
+            $line = $this->editInvoiceLines[$index];
+            $this->modalInvoiceLineKind = (string) $line['kind'];
+            $this->modalInvoiceLineTitle = (string) $line['title'];
+            $this->modalInvoiceLineAmount = (string) $line['amount'];
+        } else {
+            $this->modalInvoiceLineKind = 'fee';
+            $this->modalInvoiceLineTitle = '';
+            $this->modalInvoiceLineAmount = '';
+        }
+
+        $this->showInvoiceLineModal = true;
+    }
+
+    public function closeInvoiceLineModal(): void
+    {
+        $this->showInvoiceLineModal = false;
+        $this->invoiceLineModalIndex = null;
+    }
+
+    public function confirmInvoiceLineModal(): void
+    {
+        $this->validate([
+            'modalInvoiceLineKind' => ['required', 'in:fee,order_discount'],
+            'modalInvoiceLineTitle' => ['required', 'string', 'max:200'],
+            'modalInvoiceLineAmount' => ['required', 'integer', 'min:1'],
+        ], [], [
+            'modalInvoiceLineKind' => 'نوع',
+            'modalInvoiceLineTitle' => 'شرح',
+            'modalInvoiceLineAmount' => 'مبلغ',
+        ]);
+
+        $payload = [
+            'id' => $this->invoiceLineModalIndex !== null
+                ? ($this->editInvoiceLines[$this->invoiceLineModalIndex]['id'] ?? null)
+                : null,
+            'kind' => $this->modalInvoiceLineKind,
+            'title' => trim($this->modalInvoiceLineTitle),
+            'amount' => (int) $this->modalInvoiceLineAmount,
         ];
+
+        if ($this->invoiceLineModalIndex !== null) {
+            $this->editInvoiceLines[$this->invoiceLineModalIndex] = $payload;
+        } else {
+            $this->editInvoiceLines[] = $payload;
+        }
+
+        $this->closeInvoiceLineModal();
+    }
+
+    public function openItemDiscountModal(int $itemId): void
+    {
+        $this->itemDiscountModalItemId = $itemId;
+        $this->modalItemDiscountType = (string) ($this->editItemDiscountTypes[$itemId] ?? 'none');
+        $this->modalItemDiscountValue = (int) ($this->editItemDiscountValues[$itemId] ?? 0);
+        $this->showItemDiscountModal = true;
+    }
+
+    public function closeItemDiscountModal(): void
+    {
+        $this->showItemDiscountModal = false;
+        $this->itemDiscountModalItemId = null;
+    }
+
+    public function confirmItemDiscountModal(): void
+    {
+        if ($this->itemDiscountModalItemId === null) {
+            return;
+        }
+
+        $this->validate([
+            'modalItemDiscountType' => ['required', 'in:none,fixed,percent'],
+            'modalItemDiscountValue' => ['required', 'integer', 'min:0'],
+        ]);
+
+        $type = $this->modalItemDiscountType;
+        $value = (int) $this->modalItemDiscountValue;
+
+        if ($type === 'none') {
+            $value = 0;
+        } elseif ($type === 'percent' && ($value < 1 || $value > 100)) {
+            throw ValidationException::withMessages([
+                'modalItemDiscountValue' => 'درصد تخفیف باید بین ۱ تا ۱۰۰ باشد.',
+            ]);
+        } elseif ($type === 'fixed' && $value < 1) {
+            throw ValidationException::withMessages([
+                'modalItemDiscountValue' => 'مبلغ تخفیف باید بزرگ‌تر از صفر باشد.',
+            ]);
+        }
+
+        $itemId = $this->itemDiscountModalItemId;
+        $this->editItemDiscountTypes[$itemId] = $type;
+        $this->editItemDiscountValues[$itemId] = $value;
+
+        $this->closeItemDiscountModal();
     }
 
     public function removeInvoiceLineRow(int $index): void

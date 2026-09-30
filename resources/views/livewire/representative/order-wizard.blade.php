@@ -204,14 +204,26 @@
                 </ul>
                 <div class="rep-fulfillment-grid">
                     <div class="rep-fulfillment-field">
-                        <label class="rep-fulfillment-label" for="freightCarrierSelect">باربری</label>
+                        <label class="rep-fulfillment-label" for="freightCarrierSearch">باربری</label>
+                        @if ($this->freightCarriers->isNotEmpty())
+                            <input type="search"
+                                   id="freightCarrierSearch"
+                                   class="rep-fulfillment-search"
+                                   wire:model.live.debounce.250ms="freightCarrierSearch"
+                                   placeholder="جستجو نام، شماره، شهر یا استان…"
+                                   autocomplete="off">
+                        @endif
                         <select id="freightCarrierSelect"
-                                class="rep-fulfillment-select"
-                                wire:model="freightCarrierId">
+                                class="rep-fulfillment-select rep-fulfillment-select-list"
+                                wire:model="freightCarrierId"
+                                @disabled($this->freightCarriers->isEmpty())>
                             <option value="">انتخاب باربری…</option>
-                            @forelse ($this->freightCarriers as $carrier)
+                            @forelse ($this->filteredFreightCarriers as $carrier)
                                 <option value="{{ $carrier->id }}">{{ $carrier->displayLabel() }}</option>
                             @empty
+                                @if ($this->freightCarriers->isNotEmpty())
+                                    <option value="" disabled>موردی برای «{{ $freightCarrierSearch }}» نیست</option>
+                                @endif
                             @endforelse
                         </select>
                         @error('freight_carrier_id') <p class="rep-wizard-error">{{ $message }}</p> @enderror

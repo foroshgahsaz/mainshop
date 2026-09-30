@@ -1,7 +1,8 @@
 <section class="admin-order__box admin-order__box--proforma-edit">
     <h3 class="admin-order__box-title">ویرایش اقلام پیش‌فاکتور (ادمین)</h3>
     <p class="admin-order__hint">
-        پس از انقضای مهلت رزرو، می‌توانید تعداد اقلام را تغییر دهید. تغییرات در یادداشت‌های سفارش ثبت می‌شود و در PDF پیش‌فاکتور نمایش داده نمی‌شود.
+        در هر زمان (حتی در حین رزرو موجودی) می‌توانید تعداد اقلام را تغییر دهید. در صورت رزرو فعال، موجودی انبار هم‌زمان تنظیم می‌شود.
+        تغییرات در یادداشت‌های سفارش ثبت می‌شود و در PDF پیش‌فاکتور نمایش داده نمی‌شود.
     </p>
 
     <form wire:submit="saveProformaItemQuantities" class="admin-order__proforma-items-form">

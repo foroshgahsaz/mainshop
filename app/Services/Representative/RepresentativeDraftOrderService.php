@@ -8,8 +8,6 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\User;
 use App\Services\Payment\PaymentGatewayCatalog;
-use App\Models\UserAddress;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -237,11 +235,16 @@ class RepresentativeDraftOrderService
 
         $this->recalculateTotals($order);
 
+        $representative = auth()->user();
+        if ($representative !== null) {
+            app(RepresentativeProformaService::class)->reserveStockForProforma($order, $representative);
+        }
+
         $order->update([
             'status' => Order::STATUS_PROFORMA,
         ]);
 
-        return $order->fresh(['items', 'user', 'shippingMethod']);
+        return $order->fresh(['items', 'user', 'shippingMethod', 'freightCarrier']);
     }
 
     public function recalculateTotals(Order $order): void

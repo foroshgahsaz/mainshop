@@ -25,12 +25,19 @@ class OrderShow extends Component
             'items.product',
             'address',
             'shippingMethod',
+            'freightCarrier.province',
+            'freightCarrier.city',
             'payments',
             'coupon',
             'notes' => fn ($q) => $q->where('type', OrderNote::TYPE_CUSTOMER)->with('author'),
         ]);
 
-        $this->selectedGateway = $this->defaultGateway($catalog);
+        $proformaGateway = $this->order->proformaPaymentGateway();
+        if ($proformaGateway !== null && $catalog->isEnabled($proformaGateway)) {
+            $this->selectedGateway = $proformaGateway;
+        } else {
+            $this->selectedGateway = $this->defaultGateway($catalog);
+        }
     }
 
     public function cancel(OrderService $orderService): void
@@ -47,21 +54,27 @@ class OrderShow extends Component
 
     public function payAgain(PaymentService $payments, PaymentGatewayCatalog $catalog): void
     {
-        if (! $this->order->canPayAgain()) {
-            session()->flash('error', 'این سفارش قابل پرداخت مجدد نیست.');
+        if (! $this->order->canInitiateOnlinePayment()) {
+            session()->flash('error', 'این سفارش قابل پرداخت نیست.');
 
             return;
         }
 
-        $this->validate([
-            'selectedGateway' => ['required', Rule::in($catalog->enabledNames())],
-        ], [
-            'selectedGateway.required' => 'درگاه پرداخت را انتخاب کنید.',
-            'selectedGateway.in' => 'درگاه پرداخت معتبر نیست.',
-        ]);
+        $gateway = $this->order->proformaPaymentGateway();
+
+        if ($gateway === null) {
+            $this->validate([
+                'selectedGateway' => ['required', Rule::in($catalog->enabledNames())],
+            ], [
+                'selectedGateway.required' => 'درگاه پرداخت را انتخاب کنید.',
+                'selectedGateway.in' => 'درگاه پرداخت معتبر نیست.',
+            ]);
+
+            $gateway = $this->selectedGateway;
+        }
 
         try {
-            $payment = $payments->createForOrder($this->order, $this->selectedGateway);
+            $payment = $payments->createForOrder($this->order, $gateway);
             $url = $payments->initiate($payment, $this->order);
             $this->redirect($url);
         } catch (\RuntimeException $e) {

@@ -3,16 +3,17 @@
 namespace App\Filament\Resources\OrderResource\Pages;
 
 use App\Filament\Resources\OrderResource;
-use App\Models\Order;
-use App\Models\OrderNote;
 use App\Models\FreightCarrier;
+use App\Models\OrderNote;
 use App\Services\Order\OrderActivityLogger;
 use App\Services\Order\OrderService;
 use App\Services\Payment\PaymentGatewayCatalog;
 use App\Services\Representative\RepresentativeOrderAdminService;
+use App\Services\Representative\RepresentativeProformaService;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use Illuminate\Support\Collection;
 
 class ViewOrder extends ViewRecord
 {
@@ -59,6 +60,25 @@ class ViewOrder extends ViewRecord
                 ->icon('heroicon-o-arrow-down-tray')
                 ->url(fn (): string => route('representative.proforma.pdf', $order))
                 ->openUrlInNewTab();
+        }
+
+        if ($order->isProforma() && $order->hasActiveStockReservation()) {
+            $actions[] = Actions\Action::make('extendProformaReservation')
+                ->label('تمدید رزرو موجودی')
+                ->icon('heroicon-o-clock')
+                ->color('warning')
+                ->requiresConfirmation()
+                ->modalDescription('مهلت رزرو موجودی این پیش‌فاکتور تمدید می‌شود.')
+                ->action(function () use ($order): void {
+                    $minutes = (int) config('shop.representative.proforma_reservation_extend_minutes', 1440);
+                    app(RepresentativeProformaService::class)->extendReservation(
+                        $order->fresh(),
+                        $minutes,
+                        auth()->user(),
+                    );
+                    $this->refreshRecord();
+                    Notification::make()->title('مهلت رزرو تمدید شد')->success()->send();
+                });
         }
 
         return $actions;
@@ -130,7 +150,7 @@ class ViewOrder extends ViewRecord
         $this->editPaymentGateway = (string) ($this->record->payment_method ?: ($enabled[0] ?? 'zarinpal'));
     }
 
-    /** @return \Illuminate\Support\Collection<int, FreightCarrier> */
+    /** @return Collection<int, FreightCarrier> */
     public function getFreightCarrierOptionsProperty()
     {
         return FreightCarrier::query()

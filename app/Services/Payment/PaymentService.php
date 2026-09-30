@@ -167,8 +167,11 @@ class PaymentService
                 ? 'پرداخت آنلاین موفق؛ سفارش تسویه شد'
                 : 'پرداخت جزئی ثبت شد. مانده: '.number_format((int) $order->final_amount - $alreadyPaid - $captured).' تومان';
 
-            if ($paidInFull && $order->status === Order::STATUS_PENDING) {
-                $order->update(['status' => Order::STATUS_PROCESSING]);
+            if ($paidInFull && in_array($order->status, [Order::STATUS_PENDING, Order::STATUS_PROFORMA], true)) {
+                $order->update([
+                    'status' => Order::STATUS_PROCESSING,
+                    'stock_reserved_until' => null,
+                ]);
             }
 
             $card = $locked->card_number ? ' مرجع: '.$locked->card_number : '';

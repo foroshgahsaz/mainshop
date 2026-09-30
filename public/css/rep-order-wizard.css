@@ -1,3 +1,70 @@
+.rep-payment-info {
+    margin-top: 1rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid #99f6e4;
+    border-radius: 0.5rem;
+    background: #f0fdfa;
+}
+
+.rep-payment-info__title {
+    margin: 0 0 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #115e59;
+}
+
+.rep-payment-info__lead {
+    margin-bottom: 0.65rem;
+}
+
+.rep-payment-info__label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.35rem;
+}
+
+.rep-payment-info__url-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: stretch;
+    margin-bottom: 0.65rem;
+}
+
+.rep-payment-info__url {
+    flex: 1 1 12rem;
+    min-width: 0;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    padding: 0.45rem 0.6rem;
+    font-size: 0.75rem;
+    background: #fff;
+}
+
+.rep-payment-info__copy {
+    flex-shrink: 0;
+}
+
+.rep-payment-info__steps {
+    font-size: 0.78rem;
+    line-height: 1.65;
+}
+
+.rep-payment-info__steps code {
+    font-size: 0.72rem;
+    background: #e5e7eb;
+    padding: 0.1rem 0.35rem;
+    border-radius: 0.25rem;
+}
+
+.rep-payment-info__paid {
+    margin-top: 0.75rem;
+    color: #047857;
+    font-weight: 600;
+}
+
 .rep-order-wizard [x-cloak] {
     display: none !important;
 }

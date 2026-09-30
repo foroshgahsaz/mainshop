@@ -13,16 +13,6 @@
         <p class="rep-wizard-hint">
             وضعیت: <strong>پیش‌فاکتور ثبت‌شده</strong> — فقط مشاهده
         </p>
-        @if ($order->stock_reserved_until)
-            <p class="rep-wizard-hint {{ $order->hasActiveStockReservation() ? '' : 'rep-wizard-error' }}">
-                @if ($order->hasActiveStockReservation())
-                    مهلت پرداخت مشتری تا: <strong>{{ $order->stock_reserved_until->format('Y/m/d H:i') }}</strong>
-                @else
-                    مهلت رزرو موجودی به پایان رسیده است.
-                @endif
-            </p>
-        @endif
-
         <ul class="rep-product-list">
             @forelse ($order->items as $item)
                 <li class="rep-product-row">
@@ -46,15 +36,56 @@
                rel="noopener">
                 دانلود PDF پیش‌فاکتور
             </a>
-            @if ($order->hasActiveStockReservation() && $order->remainingAmount() > 0)
-                <a href="{{ route('account.orders.show', $order) }}"
-                   class="rep-btn-secondary"
-                   target="_blank"
-                   rel="noopener">
-                    صفحه پرداخت مشتری
-                </a>
-            @endif
         </div>
+
+        @if ($order->isProforma() && $order->remainingAmount() > 0)
+            @php
+                $customerPayUrl = route('account.orders.show', $order);
+            @endphp
+            <div class="rep-payment-info">
+                <h3 class="rep-payment-info__title">پرداخت آنلاین (سمت مشتری)</h3>
+                <p class="rep-wizard-hint rep-payment-info__lead">
+                    نماینده از این پنل پرداخت نمی‌کند. مشتری باید با <strong>همان حساب کاربری</strong> که برایش ثبت کرده‌اید
+                    در فروشگاه وارد شود و پیش‌فاکتور را بپردازد.
+                </p>
+                <label class="rep-payment-info__label" for="repCustomerPayUrl">لینک پرداخت برای ارسال به مشتری</label>
+                <div class="rep-payment-info__url-row">
+                    <input type="text"
+                           id="repCustomerPayUrl"
+                           class="rep-payment-info__url"
+                           value="{{ $customerPayUrl }}"
+                           readonly
+                           dir="ltr">
+                    <button type="button"
+                            class="rep-btn-secondary rep-payment-info__copy"
+                            onclick="navigator.clipboard.writeText(@js($customerPayUrl)); this.textContent='کپی شد'; setTimeout(() => this.textContent='کپی لینک', 2000);">
+                        کپی لینک
+                    </button>
+                </div>
+                <p class="rep-wizard-hint rep-payment-info__steps">
+                    تست: ۱) <code>php artisan migrate</code> روی سرور ۲) پیش‌فاکتور <strong>جدید</strong> ثبت کنید (ثبت مجدد رزرو موجودی می‌سازد)
+                    ۳) با موبایل/مرورگر دیگر به‌عنوان <strong>مشتری</strong> لاگین کنید ۴) منوی کاربری → سفارش‌ها → جزئیات → «پرداخت پیش‌فاکتور».
+                </p>
+                @if (! $order->stock_reserved)
+                    <p class="rep-wizard-error">
+                        این پیش‌فاکتور قبل از فعال‌سازی رزرو موجودی ثبت شده؛ دکمه پرداخت درگاه برای مشتری کار نمی‌کند.
+                        یک پیش‌فاکتور جدید بسازید یا از ادمین وضعیت رزرو را بررسی کنید.
+                    </p>
+                @elseif (! $order->hasActiveStockReservation())
+                    <p class="rep-wizard-error">
+                        مهلت رزرو موجودی تمام شده؛ مشتری نمی‌تواند پرداخت کند. ادمین می‌تواند از جزئیات سفارش، «تمدید رزرو موجودی» را بزند.
+                    </p>
+                @else
+                    <p class="rep-wizard-hint">
+                        رزرو موجودی فعال است — مشتری تا
+                        <strong>{{ $order->stock_reserved_until?->format('Y/m/d H:i') }}</strong>
+                        می‌تواند پرداخت کند.
+                    </p>
+                @endif
+            </div>
+        @elseif ($order->isProforma() && $order->isPaid())
+            <p class="rep-wizard-hint rep-payment-info__paid">این پیش‌فاکتور تسویه شده است.</p>
+        @endif
 
         <div class="rep-order-totals">
             <div>جمع اقلام: {{ \App\Support\ShopFormatter::money((int) $order->total_amount) }}</div>

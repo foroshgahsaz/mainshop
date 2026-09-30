@@ -4,6 +4,7 @@ namespace App\Services\Pdf;
 
 use Illuminate\Contracts\View\View as ViewContract;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\File;
 use Mpdf\Config\ConfigVariables;
 use Mpdf\Config\FontVariables;
 use Mpdf\Mpdf;
@@ -31,6 +32,7 @@ class PersianPdfGenerator
         $fontDir = resource_path('fonts');
 
         return new Mpdf([
+            'tempDir' => $this->mpdfTempDirectory(),
             'mode' => 'utf-8',
             'format' => 'A4',
             'margin_left' => 10,
@@ -48,5 +50,17 @@ class PersianPdfGenerator
             'autoScriptToLang' => true,
             'autoLangToFont' => true,
         ]);
+    }
+
+    /**
+     * mPDF needs a writable temp directory; vendor/mpdf/tmp is not writable on many hosts.
+     */
+    protected function mpdfTempDirectory(): string
+    {
+        $directory = storage_path('app/mpdf');
+
+        File::ensureDirectoryExists($directory, 0755, true);
+
+        return $directory;
     }
 }

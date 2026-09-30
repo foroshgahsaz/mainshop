@@ -117,8 +117,31 @@ class RepresentativeDraftOrderService
         $this->recalculateTotals($order);
     }
 
+    public function submitProforma(Order $order): Order
+    {
+        $this->assertDraftOwnedBy($order, auth()->user());
+
+        if (! $order->items()->exists()) {
+            throw ValidationException::withMessages([
+                'order' => 'حداقل یک محصول به پیش‌فاکتور اضافه کنید.',
+            ]);
+        }
+
+        $this->recalculateTotals($order);
+
+        $order->update([
+            'status' => Order::STATUS_PROFORMA,
+        ]);
+
+        return $order->fresh(['items', 'user', 'shippingMethod']);
+    }
+
     public function recalculateTotals(Order $order): void
     {
+        if (! $order->isDraft() && ! $order->isProforma()) {
+            return;
+        }
+
         $this->consolidateDuplicateItems($order);
 
         $order->loadMissing('items');
@@ -138,6 +161,19 @@ class RepresentativeDraftOrderService
         if ($representative === null || $order->representative_id !== $representative->id || ! $order->isDraft()) {
             throw ValidationException::withMessages([
                 'order' => 'دسترسی به این پیش‌سفارش مجاز نیست.',
+            ]);
+        }
+    }
+
+    public function assertRepCanView(Order $order, ?User $representative): void
+    {
+        if (
+            $representative === null
+            || $order->representative_id !== $representative->id
+            || (! $order->isDraft() && ! $order->isProforma())
+        ) {
+            throw ValidationException::withMessages([
+                'order' => 'دسترسی به این پیش‌فاکتور مجاز نیست.',
             ]);
         }
     }

@@ -27,7 +27,7 @@ class OrderResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->with(['user']);
+        return parent::getEloquentQuery()->with(['user', 'representative']);
     }
 
     public static function table(Table $table): Table
@@ -36,6 +36,10 @@ class OrderResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('tracking_code')->label('کد سفارش')->searchable()->copyable(),
                 Tables\Columns\TextColumn::make('user.name')->label('کاربر')->placeholder('—'),
+                Tables\Columns\TextColumn::make('representative.name')
+                    ->label('نماینده')
+                    ->placeholder('—')
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('user.phone')->label('موبایل')->placeholder('—')->toggleable(),
                 Tables\Columns\TextColumn::make('final_amount')
                     ->label('مبلغ')
@@ -77,6 +81,8 @@ class OrderResource extends Resource
     protected static function statusFilterOptions(): array
     {
         return [
+            Order::STATUS_DRAFT => ShopLabels::orderStatus(Order::STATUS_DRAFT),
+            Order::STATUS_PROFORMA => ShopLabels::orderStatus(Order::STATUS_PROFORMA),
             Order::STATUS_PENDING => ShopLabels::orderStatus(Order::STATUS_PENDING),
             Order::STATUS_PROCESSING => ShopLabels::orderStatus(Order::STATUS_PROCESSING),
             Order::STATUS_SHIPPED => ShopLabels::orderStatus(Order::STATUS_SHIPPED),

@@ -5,8 +5,10 @@ namespace App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Resources\OrderResource;
 use App\Models\Order;
 use App\Models\OrderNote;
+use App\Models\ShippingMethod;
 use App\Services\Order\OrderActivityLogger;
 use App\Services\Order\OrderService;
+use App\Services\Representative\RepresentativeOrderAdminService;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
@@ -24,6 +26,10 @@ class ViewOrder extends ViewRecord
     public string $editStatus = '';
 
     public string $editTracking = '';
+
+    public ?int $editShippingMethodId = null;
+
+    public string $editPaymentMethod = 'online';
 
     public function mount(int|string $record): void
     {
@@ -81,6 +87,19 @@ class ViewOrder extends ViewRecord
             $order = $orders->updateTracking($order, $this->editTracking ?: null, $actor);
         }
 
+        $order = $order->fresh();
+
+        if (
+            $order->isRepresentativeOrder()
+            && ($order->isDraft() || $order->isProforma())
+        ) {
+            app(RepresentativeOrderAdminService::class)->updateFulfillment(
+                $order,
+                $this->editShippingMethodId,
+                $this->editPaymentMethod,
+            );
+        }
+
         $this->refreshRecord();
         $this->syncFormFields();
 
@@ -91,6 +110,17 @@ class ViewOrder extends ViewRecord
     {
         $this->editStatus = $this->record->status;
         $this->editTracking = (string) ($this->record->shipping_tracking_code ?? '');
+        $this->editShippingMethodId = $this->record->shipping_method_id;
+        $this->editPaymentMethod = (string) ($this->record->payment_method ?: 'online');
+    }
+
+    /** @return \Illuminate\Support\Collection<int, ShippingMethod> */
+    public function getShippingMethodOptionsProperty()
+    {
+        return ShippingMethod::query()
+            ->where('is_active', true)
+            ->orderBy('price')
+            ->get(['id', 'name', 'price']);
     }
 
     protected function refreshRecord(): void

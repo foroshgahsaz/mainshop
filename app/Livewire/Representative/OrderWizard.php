@@ -46,10 +46,19 @@ class OrderWizard extends Component
             return;
         }
 
-        $order = $this->findOwnedDraft();
+        $order = $this->findOwnedRepresentativeOrder();
 
         if ($order === null) {
             $this->orderId = null;
+
+            return;
+        }
+
+        if ($order->isProforma()) {
+            $this->redirect(
+                DraftOrderResource::getUrl('view', ['record' => $order->id], panel: 'representative'),
+                navigate: false,
+            );
 
             return;
         }
@@ -178,14 +187,18 @@ class OrderWizard extends Component
             return;
         }
 
-        app(RepresentativeDraftOrderService::class)->recalculateTotals($order);
+        app(RepresentativeDraftOrderService::class)->submitProforma($order);
 
         Notification::make()
-            ->title('پیش‌سفارش ذخیره شد')
+            ->title('پیش‌فاکتور ثبت شد')
+            ->body('پس از ثبت، امکان ویرایش توسط نمایندگی وجود ندارد.')
             ->success()
             ->send();
 
-        $this->redirect(DraftOrderResource::getUrl('index', panel: 'representative'), navigate: false);
+        $this->redirect(
+            DraftOrderResource::getUrl('view', ['record' => $order->id], panel: 'representative'),
+            navigate: false,
+        );
     }
 
     #[Computed]
@@ -308,6 +321,13 @@ class OrderWizard extends Component
 
     private function findOwnedDraft(): ?Order
     {
+        $order = $this->findOwnedRepresentativeOrder();
+
+        return $order?->isDraft() ? $order : null;
+    }
+
+    private function findOwnedRepresentativeOrder(): ?Order
+    {
         if ($this->orderId === null) {
             return null;
         }
@@ -315,7 +335,7 @@ class OrderWizard extends Component
         return Order::query()
             ->whereKey($this->orderId)
             ->where('representative_id', auth()->id())
-            ->where('status', Order::STATUS_DRAFT)
+            ->whereIn('status', [Order::STATUS_DRAFT, Order::STATUS_PROFORMA])
             ->first();
     }
 

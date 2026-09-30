@@ -180,7 +180,7 @@
                 </div>
                 <div class="rep-wizard-actions">
                     <button type="button" class="rep-btn-secondary" wire:click="goToStep('product')">افزودن محصول دیگر</button>
-                    <button type="button" class="rep-btn-primary" wire:click="finishDraft">ذخیره پیش‌سفارش</button>
+                    <button type="button" class="rep-btn-primary" wire:click="finishDraft">ثبت پیش‌فاکتور (بدون ویرایش بعدی)</button>
                 </div>
             @endif
             @error('order') <p class="rep-wizard-error">{{ $message }}</p> @enderror

@@ -5,6 +5,8 @@
             <label class="admin-order__label">وضعیت سفارش</label>
             <select wire:model="editStatus" class="admin-order__select admin-order__select--full">
                 @foreach([
+                    'draft' => 'پیش‌نویس نماینده',
+                    'proforma' => 'پیش‌فاکتور نماینده',
                     'pending' => 'در انتظار',
                     'processing' => 'در حال پردازش',
                     'shipped' => 'ارسال شده',
@@ -21,6 +23,25 @@
             <label class="admin-order__label">کد رهگیری پست</label>
             <input type="text" wire:model="editTracking" class="admin-order__input" dir="ltr" placeholder="POST-...">
         </div>
+
+        @if($order->isRepresentativeOrder() && ($order->isDraft() || $order->isProforma()))
+            <div class="admin-order__field">
+                <label class="admin-order__label">روش ارسال (باربری)</label>
+                <select wire:model="editShippingMethodId" class="admin-order__select admin-order__select--full">
+                    <option value="">— انتخاب —</option>
+                    @foreach($this->shippingMethodOptions as $method)
+                        <option value="{{ $method->id }}">{{ $method->name }} — {{ number_format($method->price) }} تومان</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="admin-order__field">
+                <label class="admin-order__label">روش پرداخت</label>
+                <select wire:model="editPaymentMethod" class="admin-order__select admin-order__select--full">
+                    <option value="online">پرداخت آنلاین</option>
+                    <option value="cod">پرداخت در محل</option>
+                </select>
+            </div>
+        @endif
 
         <button type="submit" class="admin-order__btn admin-order__btn--primary admin-order__btn--block">
             ذخیره تغییرات

@@ -381,3 +381,31 @@
 .admin-order__sidebar .admin-order__box {
     margin-bottom: 1rem;
 }
+
+.admin-order__hint {
+    margin: 0 0 0.75rem;
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    color: var(--ao-muted);
+}
+
+.admin-order__hint--warning {
+    padding: 0.65rem 0.75rem;
+    border-radius: 0.5rem;
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    color: #92400e;
+}
+
+.admin-order__input--qty {
+    max-width: 5.5rem;
+    text-align: center;
+}
+
+.admin-order__proforma-items-form {
+    margin-top: 0.75rem;
+}
+
+.admin-order__box--proforma-edit {
+    margin-top: 1rem;
+}

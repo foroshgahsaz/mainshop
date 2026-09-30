@@ -2,6 +2,9 @@
     @php
         /** @var \App\Models\Order $order */
         $order = $this->record->loadMissing(['items', 'user', 'freightCarrier.province', 'freightCarrier.city', 'payments']);
+        $gatewayDef = app(\App\Services\Payment\PaymentGatewayCatalog::class)->definition((string) $order->payment_method);
+        $gatewayLabel = $gatewayDef['label'] ?? \App\Support\ShopLabels::paymentMethod($order->payment_method);
+        $gatewayIcon = $gatewayDef['icon'] ?? null;
     @endphp
 
     <link rel="stylesheet" href="{{ asset('css/rep-order-wizard.css') }}">
@@ -52,10 +55,20 @@
                     پرداخت از <strong>پنل نماینده</strong> انجام می‌شود؛ در درگاه مشخص می‌شود این پرداخت
                     برای کدام <strong>مشتری</strong> و توسط کدام <strong>نماینده</strong> است.
                 </p>
-                <p class="rep-wizard-hint">
-                    درگاه: <strong>{{ \App\Support\ShopLabels::paymentMethod($order->payment_method) }}</strong>
-                    — مبلغ: <strong>{{ \App\Support\ShopFormatter::money($order->remainingAmount()) }}</strong>
-                </p>
+
+                <div class="rep-proforma-pay-row">
+                    <div class="rep-proforma-gateway">
+                        <span class="rep-proforma-gateway__label">درگاه پرداخت</span>
+                        <span class="rep-proforma-gateway__value">
+                            <x-checkout-option-icon :src="$gatewayIcon" :alt="$gatewayLabel" />
+                            <strong>{{ $gatewayLabel }}</strong>
+                        </span>
+                    </div>
+                    <div class="rep-proforma-amount">
+                        <span class="rep-proforma-gateway__label">مبلغ قابل پرداخت</span>
+                        <strong class="rep-proforma-amount__value">{{ \App\Support\ShopFormatter::money($order->remainingAmount()) }}</strong>
+                    </div>
+                </div>
 
                 @if ($order->canRepresentativePayProforma())
                     <button type="button"
@@ -66,33 +79,53 @@
                         <span wire:loading wire:target="payProformaFromPage">در حال اتصال…</span>
                     </button>
                     @if ($order->stock_reserved_until)
-                        <p class="rep-wizard-hint">
+                        <p class="rep-wizard-hint rep-proforma-reservation">
                             مهلت رزرو موجودی تا <strong>{{ $order->stock_reserved_until->format('Y/m/d H:i') }}</strong>
                         </p>
                     @endif
                 @elseif (! $order->stock_reserved)
                     <p class="rep-wizard-error">
-                        رزرو موجودی فعال نیست (پیش‌فاکتور قبل از به‌روزرسانی سیستم). یک پیش‌فاکتور جدید ثبت کنید یا migrate را اجرا کنید.
+                        رزرو موجودی فعال نیست. با ادمین هماهنگ کنید تا پیش‌فاکتور ویرایش یا رزرو مجدد شود.
                     </p>
                 @elseif (! $order->hasActiveStockReservation())
-                    <p class="rep-wizard-error">مهلت رزرو تمام شده — از ادمین «تمدید رزرو موجودی» بگیرید.</p>
+                    <p class="rep-wizard-error">
+                        مهلت رزرو تمام شده. ادمین می‌تواند پیش‌فاکتور را ویرایش کند؛ برای پرداخت، از ادمین «تمدید رزرو موجودی» بگیرید.
+                    </p>
                 @endif
             </div>
         @elseif ($order->isProforma() && $order->isPaid())
             <p class="rep-wizard-hint rep-payment-info__paid">این پیش‌فاکتور تسویه شده است.</p>
         @endif
 
-        <div class="rep-order-totals">
-            <div>جمع اقلام: {{ \App\Support\ShopFormatter::money((int) $order->total_amount) }}</div>
+        <dl class="rep-proforma-summary">
+            <div class="rep-proforma-summary__row">
+                <dt>جمع اقلام</dt>
+                <dd>{{ \App\Support\ShopFormatter::money((int) $order->total_amount) }}</dd>
+            </div>
             @if ($order->freightCarrier)
-                <div>باربری: {{ $order->freightCarrier->displayLabel() }}</div>
+                <div class="rep-proforma-summary__row">
+                    <dt>باربری</dt>
+                    <dd>{{ $order->freightCarrier->displayLabel() }}</dd>
+                </div>
             @endif
-            <div>درگاه پرداخت: {{ \App\Support\ShopLabels::paymentMethod($order->payment_method) }}</div>
-            <div class="rep-order-final">مبلغ نهایی: {{ \App\Support\ShopFormatter::money((int) $order->final_amount) }}</div>
+            <div class="rep-proforma-summary__row rep-proforma-summary__row--gateway">
+                <dt>درگاه پرداخت</dt>
+                <dd class="rep-proforma-summary__gateway">
+                    <x-checkout-option-icon :src="$gatewayIcon" :alt="$gatewayLabel" />
+                    <span>{{ $gatewayLabel }}</span>
+                </dd>
+            </div>
             @if ($order->paidAmount() > 0)
-                <div>پرداخت‌شده: {{ \App\Support\ShopFormatter::money($order->paidAmount()) }}</div>
+                <div class="rep-proforma-summary__row">
+                    <dt>پرداخت‌شده</dt>
+                    <dd>{{ \App\Support\ShopFormatter::money($order->paidAmount()) }}</dd>
+                </div>
             @endif
-        </div>
+            <div class="rep-proforma-summary__row rep-proforma-summary__row--total">
+                <dt>مبلغ نهایی</dt>
+                <dd>{{ \App\Support\ShopFormatter::money((int) $order->final_amount) }}</dd>
+            </div>
+        </dl>
 
     </section>
 </x-filament-panels::page>

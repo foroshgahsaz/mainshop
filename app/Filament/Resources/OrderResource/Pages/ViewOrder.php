@@ -14,6 +14,7 @@ use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Support\Collection;
+use Illuminate\Validation\ValidationException;
 
 class ViewOrder extends ViewRecord
 {
@@ -32,6 +33,9 @@ class ViewOrder extends ViewRecord
     public ?int $editFreightCarrierId = null;
 
     public string $editPaymentGateway = 'zarinpal';
+
+    /** @var array<int, int> */
+    public array $editItemQuantities = [];
 
     public function mount(int|string $record): void
     {
@@ -127,11 +131,13 @@ class ViewOrder extends ViewRecord
         if (
             $order->isRepresentativeOrder()
             && ($order->isDraft() || $order->isProforma())
+            && ! ($order->isProforma() && $order->hasActiveStockReservation())
         ) {
             app(RepresentativeOrderAdminService::class)->updateFulfillment(
                 $order,
                 $this->editFreightCarrierId,
                 $this->editPaymentGateway,
+                $actor,
             );
         }
 
@@ -141,6 +147,42 @@ class ViewOrder extends ViewRecord
         Notification::make()->title('سفارش به‌روزرسانی شد')->success()->send();
     }
 
+    public function saveProformaItemQuantities(RepresentativeOrderAdminService $admin): void
+    {
+        if (! $this->canAdminEditProforma) {
+            throw ValidationException::withMessages([
+                'order' => 'در حال حاضر ویرایش اقلام پیش‌فاکتور مجاز نیست.',
+            ]);
+        }
+
+        $this->validate([
+            'editItemQuantities' => ['required', 'array'],
+            'editItemQuantities.*' => ['required', 'integer', 'min:1', 'max:999'],
+        ]);
+
+        $admin->syncProformaItemQuantities(
+            $this->record->fresh(['items']),
+            $this->editItemQuantities,
+            auth()->user(),
+        );
+
+        $this->refreshRecord();
+        $this->syncFormFields();
+
+        Notification::make()->title('تعداد اقلام به‌روزرسانی شد')->success()->send();
+    }
+
+    public function getCanAdminEditProformaProperty(): bool
+    {
+        $order = $this->record;
+
+        if (! $order->isRepresentativeOrder() || ! $order->isProforma() || $order->isPaid()) {
+            return false;
+        }
+
+        return ! $order->hasActiveStockReservation();
+    }
+
     protected function syncFormFields(): void
     {
         $this->editStatus = $this->record->status;
@@ -148,6 +190,11 @@ class ViewOrder extends ViewRecord
         $this->editFreightCarrierId = $this->record->freight_carrier_id;
         $enabled = app(PaymentGatewayCatalog::class)->enabledNames();
         $this->editPaymentGateway = (string) ($this->record->payment_method ?: ($enabled[0] ?? 'zarinpal'));
+
+        $this->editItemQuantities = [];
+        foreach ($this->record->items as $item) {
+            $this->editItemQuantities[$item->id] = (int) $item->quantity;
+        }
     }
 
     /** @return Collection<int, FreightCarrier> */

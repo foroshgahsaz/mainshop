@@ -25,9 +25,16 @@
         </div>
 
         @if($order->isRepresentativeOrder() && ($order->isDraft() || $order->isProforma()))
+            @if($order->isProforma() && $order->hasActiveStockReservation())
+                <p class="admin-order__hint admin-order__hint--warning">
+                    ویرایش باربری/درگاه و اقلام تا پایان مهلت رزرو غیرفعال است.
+                </p>
+            @endif
             <div class="admin-order__field">
                 <label class="admin-order__label">باربری (نمایندگی)</label>
-                <select wire:model="editFreightCarrierId" class="admin-order__select admin-order__select--full">
+                <select wire:model="editFreightCarrierId"
+                        class="admin-order__select admin-order__select--full"
+                        @disabled($order->isProforma() && $order->hasActiveStockReservation())>
                     <option value="">— انتخاب —</option>
                     @foreach($this->freightCarrierOptions as $carrier)
                         <option value="{{ $carrier->id }}">{{ $carrier->displayLabel() }}</option>
@@ -36,7 +43,9 @@
             </div>
             <div class="admin-order__field">
                 <label class="admin-order__label">درگاه پرداخت</label>
-                <select wire:model="editPaymentGateway" class="admin-order__select admin-order__select--full">
+                <select wire:model="editPaymentGateway"
+                        class="admin-order__select admin-order__select--full"
+                        @disabled($order->isProforma() && $order->hasActiveStockReservation())>
                     @foreach($this->paymentGatewayOptions as $gateway)
                         <option value="{{ $gateway['name'] }}">{{ $gateway['label'] }}</option>
                     @endforeach

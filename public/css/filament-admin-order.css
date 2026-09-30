@@ -409,3 +409,44 @@
 .admin-order__box--proforma-edit {
     margin-top: 1rem;
 }
+
+.admin-order__invoice-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.admin-order__invoice-line-row {
+    display: grid;
+    grid-template-columns: 8rem 1fr 7rem auto;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+@media (max-width: 640px) {
+    .admin-order__invoice-line-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.admin-order__invoice-line-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.admin-order__btn--secondary {
+    background: #e5e7eb;
+    color: #111827;
+}
+
+.admin-order__btn--ghost {
+    background: transparent;
+    border: 1px solid var(--ao-border);
+    color: #6b7280;
+}
+
+.admin-order__input--amount {
+    max-width: none;
+}

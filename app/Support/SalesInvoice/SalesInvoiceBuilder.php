@@ -3,6 +3,9 @@
 namespace App\Support\SalesInvoice;
 
 use App\Models\Order;
+use App\Models\OrderInvoiceLine;
+use App\Services\Order\OrderInvoiceTotalsService;
+use App\Support\Order\OrderItemLinePricing;
 use App\Support\ShopLabels;
 use Illuminate\Support\Collection;
 
@@ -13,22 +16,53 @@ class SalesInvoiceBuilder
      */
     public static function fromOrder(Order $order, string $title, array $site): SalesInvoiceDocument
     {
-        $order->loadMissing(['items', 'user', 'address.provinceModel', 'address.cityModel', 'freightCarrier', 'representative']);
+        $order->loadMissing([
+            'items',
+            'invoiceLines',
+            'user',
+            'address.provinceModel',
+            'address.cityModel',
+            'freightCarrier',
+            'representative',
+        ]);
+
+        $totals = app(OrderInvoiceTotalsService::class);
+        $feesTotal = $totals->feesTotal($order);
 
         $lines = [];
         $qtyTotal = 0;
+        $row = 0;
 
-        foreach ($order->items as $index => $item) {
+        foreach ($order->items as $item) {
+            $row++;
             $lines[] = [
-                'row' => $index + 1,
+                'row' => $row,
                 'sku' => (string) ($item->sku ?? ''),
                 'name' => (string) $item->product_name,
                 'unit' => 'عدد',
                 'quantity' => (int) $item->quantity,
                 'unit_price' => (int) $item->price,
+                'line_discount' => OrderItemLinePricing::discountAmount($item),
                 'line_total' => (int) $item->total_price,
             ];
             $qtyTotal += (int) $item->quantity;
+        }
+
+        foreach ($order->invoiceLines as $invoiceLine) {
+            $row++;
+            $amount = (int) $invoiceLine->amount;
+            $isDiscount = $invoiceLine->kind === OrderInvoiceLine::KIND_ORDER_DISCOUNT;
+            $lines[] = [
+                'row' => $row,
+                'sku' => '',
+                'name' => (string) $invoiceLine->title,
+                'unit' => '—',
+                'quantity' => 1,
+                'unit_price' => $isDiscount ? -$amount : $amount,
+                'line_discount' => 0,
+                'line_total' => $isDiscount ? -$amount : $amount,
+                'is_adjustment' => true,
+            ];
         }
 
         $address = $order->address;
@@ -75,6 +109,7 @@ class SalesInvoiceBuilder
             discountAmount: (int) $order->discount_amount,
             shippingAmount: (int) $order->shipping_amount,
             finalAmount: (int) $order->final_amount,
+            feesTotal: $feesTotal,
             paymentMethodLabel: ShopLabels::paymentMethod((string) $order->payment_method),
             freightLabel: $order->freightCarrier?->displayLabel(),
             notes: $notes,

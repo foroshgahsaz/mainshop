@@ -38,6 +38,7 @@
 
                 @if($this->canAdminEditProforma)
                     @include('filament.orders.partials.proforma-items-edit', ['order' => $order])
+                    @include('filament.orders.partials.proforma-invoice-lines-edit', ['order' => $order])
                 @endif
 
                 @include('filament.orders.partials.totals', ['order' => $order])

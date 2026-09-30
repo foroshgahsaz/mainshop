@@ -37,6 +37,15 @@ class ViewOrder extends ViewRecord
     /** @var array<int, int> */
     public array $editItemQuantities = [];
 
+    /** @var array<int, string> */
+    public array $editItemDiscountTypes = [];
+
+    /** @var array<int, int> */
+    public array $editItemDiscountValues = [];
+
+    /** @var list<array{id: int|null, kind: string, title: string, amount: int|string}> */
+    public array $editInvoiceLines = [];
+
     public function mount(int|string $record): void
     {
         parent::mount($record);
@@ -146,7 +155,7 @@ class ViewOrder extends ViewRecord
         Notification::make()->title('سفارش به‌روزرسانی شد')->success()->send();
     }
 
-    public function saveProformaItemQuantities(RepresentativeOrderAdminService $admin): void
+    public function saveProformaItems(RepresentativeOrderAdminService $admin): void
     {
         if (! $this->canAdminEditProforma) {
             throw ValidationException::withMessages([
@@ -157,18 +166,62 @@ class ViewOrder extends ViewRecord
         $this->validate([
             'editItemQuantities' => ['required', 'array'],
             'editItemQuantities.*' => ['required', 'integer', 'min:1', 'max:999'],
+            'editItemDiscountTypes' => ['required', 'array'],
+            'editItemDiscountValues' => ['required', 'array'],
         ]);
 
-        $admin->syncProformaItemQuantities(
+        $admin->syncProformaItems(
             $this->record->fresh(['items']),
             $this->editItemQuantities,
+            $this->editItemDiscountTypes,
+            $this->editItemDiscountValues,
             auth()->user(),
         );
 
         $this->refreshRecord();
         $this->syncFormFields();
 
-        Notification::make()->title('تعداد اقلام به‌روزرسانی شد')->success()->send();
+        Notification::make()->title('اقلام پیش‌فاکتور به‌روزرسانی شد')->success()->send();
+    }
+
+    public function saveInvoiceLines(RepresentativeOrderAdminService $admin): void
+    {
+        if (! $this->canAdminEditProforma) {
+            throw ValidationException::withMessages([
+                'order' => 'در حال حاضر ویرایش ردیف‌های فاکتور مجاز نیست.',
+            ]);
+        }
+
+        $admin->syncInvoiceLines(
+            $this->record->fresh(['invoiceLines']),
+            $this->editInvoiceLines,
+            auth()->user(),
+        );
+
+        $this->refreshRecord();
+        $this->syncFormFields();
+
+        Notification::make()->title('ردیف‌های فاکتور ذخیره شد')->success()->send();
+    }
+
+    public function addInvoiceLineRow(): void
+    {
+        $this->editInvoiceLines[] = [
+            'id' => null,
+            'kind' => 'fee',
+            'title' => '',
+            'amount' => '',
+        ];
+    }
+
+    public function removeInvoiceLineRow(int $index): void
+    {
+        if (! array_key_exists($index, $this->editInvoiceLines)) {
+            return;
+        }
+
+        unset($this->editInvoiceLines[$index]);
+        $this->editInvoiceLines = array_values($this->editInvoiceLines);
     }
 
     public function getCanAdminEditProformaProperty(): bool
@@ -189,9 +242,24 @@ class ViewOrder extends ViewRecord
         $this->editPaymentGateway = (string) ($this->record->payment_method ?: ($enabled[0] ?? 'zarinpal'));
 
         $this->editItemQuantities = [];
+        $this->editItemDiscountTypes = [];
+        $this->editItemDiscountValues = [];
+
         foreach ($this->record->items as $item) {
             $this->editItemQuantities[$item->id] = (int) $item->quantity;
+            $this->editItemDiscountTypes[$item->id] = (string) ($item->line_discount_type ?? 'none');
+            $this->editItemDiscountValues[$item->id] = (int) ($item->line_discount_value ?? 0);
         }
+
+        $this->editInvoiceLines = $this->record->invoiceLines
+            ->map(fn ($line) => [
+                'id' => $line->id,
+                'kind' => $line->kind,
+                'title' => $line->title,
+                'amount' => $line->amount,
+            ])
+            ->values()
+            ->all();
     }
 
     /** @return Collection<int, FreightCarrier> */
@@ -225,6 +293,7 @@ class ViewOrder extends ViewRecord
             'payments.user',
             'payments.notes.author',
             'notes.author',
+            'invoiceLines',
         ]);
     }
 }

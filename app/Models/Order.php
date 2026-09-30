@@ -120,6 +120,11 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
+    public function invoiceLines(): HasMany
+    {
+        return $this->hasMany(OrderInvoiceLine::class)->orderBy('sort_order')->orderBy('id');
+    }
+
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);

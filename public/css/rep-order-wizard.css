@@ -113,6 +113,36 @@
     border-bottom: 1px solid #f3f4f6;
 }
 
+.rep-item-actions {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.rep-item-qty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+    margin: 0;
+}
+
+.rep-item-qty-label {
+    font-size: 0.7rem;
+    color: #6b7280;
+}
+
+.rep-item-qty-input {
+    width: 4.25rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    padding: 0.35rem 0.4rem;
+    text-align: center;
+    font-size: 0.9rem;
+    direction: ltr;
+}
+
 .rep-btn-primary,
 .rep-btn-secondary,
 .rep-btn-danger {

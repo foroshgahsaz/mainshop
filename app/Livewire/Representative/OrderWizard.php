@@ -156,6 +156,27 @@ class OrderWizard extends Component
         }
 
         app(RepresentativeDraftOrderService::class)->removeItem($order, $itemId);
+        unset($this->draftOrder);
+    }
+
+    public function updateItemQuantity(int $itemId, $quantity): void
+    {
+        $order = $this->findOwnedDraft();
+
+        if ($order === null) {
+            return;
+        }
+
+        $parsed = (int) $quantity;
+
+        if ($parsed < 1) {
+            $this->addError('quantity', 'تعداد باید حداقل ۱ باشد.');
+
+            return;
+        }
+
+        app(RepresentativeDraftOrderService::class)->updateItemQuantity($order, $itemId, $parsed);
+        unset($this->draftOrder);
     }
 
     public function goToStep(string $step): void

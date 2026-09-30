@@ -167,7 +167,25 @@
                                     = {{ $this->formatMoney($item->total_price) }}
                                 </div>
                             </div>
-                            <button type="button" class="rep-btn-danger" wire:click="removeItem({{ $item->id }})">حذف</button>
+                            <div class="rep-item-actions">
+                                <label class="rep-item-qty">
+                                    <span class="rep-item-qty-label">تعداد</span>
+                                    <input type="number"
+                                           class="rep-item-qty-input"
+                                           min="1"
+                                           max="999"
+                                           inputmode="numeric"
+                                           value="{{ $item->quantity }}"
+                                           wire:change="updateItemQuantity({{ $item->id }}, $event.target.value)"
+                                           wire:loading.attr="disabled"
+                                           wire:target="updateItemQuantity">
+                                </label>
+                                <button type="button"
+                                        class="rep-btn-danger"
+                                        wire:click="removeItem({{ $item->id }})">
+                                    حذف
+                                </button>
+                            </div>
                         </li>
                     @empty
                         <li class="rep-wizard-empty">هنوز محصولی اضافه نشده.</li>
@@ -184,6 +202,7 @@
                 </div>
             @endif
             @error('order') <p class="rep-wizard-error">{{ $message }}</p> @enderror
+            @error('quantity') <p class="rep-wizard-error">{{ $message }}</p> @enderror
         </section>
     @endif
 </div>

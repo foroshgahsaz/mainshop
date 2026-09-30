@@ -117,6 +117,37 @@ class RepresentativeDraftOrderService
         $this->recalculateTotals($order);
     }
 
+    public function updateItemQuantity(Order $order, int $orderItemId, int $quantity): void
+    {
+        $this->assertDraftOwnedBy($order, auth()->user());
+
+        if ($quantity < 1) {
+            throw ValidationException::withMessages([
+                'quantity' => 'تعداد باید حداقل ۱ باشد.',
+            ]);
+        }
+
+        if ($quantity > 999) {
+            throw ValidationException::withMessages([
+                'quantity' => 'تعداد نباید بیشتر از ۹۹۹ باشد.',
+            ]);
+        }
+
+        $item = OrderItem::query()
+            ->where('order_id', $order->id)
+            ->whereKey($orderItemId)
+            ->firstOrFail();
+
+        $unitPrice = (int) $item->price;
+
+        $item->update([
+            'quantity' => $quantity,
+            'total_price' => $unitPrice * $quantity,
+        ]);
+
+        $this->recalculateTotals($order);
+    }
+
     public function submitProforma(Order $order): Order
     {
         $this->assertDraftOwnedBy($order, auth()->user());

@@ -40,6 +40,9 @@ class OrderWizard extends Component
 
     public int $quantity = 1;
 
+    /** @var array<int, int> */
+    public array $lineQuantities = [];
+
     public function mount(): void
     {
         if ($this->orderId === null) {
@@ -73,6 +76,7 @@ class OrderWizard extends Component
 
         if ($order->items()->exists()) {
             $this->refreshDraftLineItems();
+            $this->syncLineQuantitiesFromOrder();
         }
     }
 
@@ -145,6 +149,8 @@ class OrderWizard extends Component
         app(RepresentativeDraftOrderService::class)->addProduct($order, $product, $this->quantity);
         $this->quantity = 1;
         $this->step = 'review';
+        unset($this->draftOrder);
+        $this->syncLineQuantitiesFromOrder();
     }
 
     public function removeItem(int $itemId): void
@@ -156,27 +162,37 @@ class OrderWizard extends Component
         }
 
         app(RepresentativeDraftOrderService::class)->removeItem($order, $itemId);
+        unset($this->lineQuantities[$itemId]);
         unset($this->draftOrder);
+        $this->syncLineQuantitiesFromOrder();
     }
 
-    public function updateItemQuantity(int $itemId, $quantity): void
+    public function incrementLineQuantity(int $itemId): void
     {
-        $order = $this->findOwnedDraft();
+        $current = (int) ($this->lineQuantities[$itemId] ?? 1);
+        if ($current < 999) {
+            $this->lineQuantities[$itemId] = $current + 1;
+        }
+    }
 
-        if ($order === null) {
+    public function decrementLineQuantity(int $itemId): void
+    {
+        $current = (int) ($this->lineQuantities[$itemId] ?? 1);
+        if ($current > 1) {
+            $this->lineQuantities[$itemId] = $current - 1;
+        }
+    }
+
+    public function refreshReviewTotals(): void
+    {
+        if (! $this->persistLineQuantities()) {
             return;
         }
 
-        $parsed = (int) $quantity;
-
-        if ($parsed < 1) {
-            $this->addError('quantity', 'تعداد باید حداقل ۱ باشد.');
-
-            return;
-        }
-
-        app(RepresentativeDraftOrderService::class)->updateItemQuantity($order, $itemId, $parsed);
-        unset($this->draftOrder);
+        Notification::make()
+            ->title('محاسبات به‌روزرسانی شد')
+            ->success()
+            ->send();
     }
 
     public function goToStep(string $step): void
@@ -195,11 +211,16 @@ class OrderWizard extends Component
 
         if ($step === 'review') {
             $this->refreshDraftLineItems();
+            $this->syncLineQuantitiesFromOrder();
         }
     }
 
     public function finishDraft(): void
     {
+        if (! $this->persistLineQuantities()) {
+            return;
+        }
+
         $order = $this->findOwnedDraft();
 
         if ($order === null || ! $order->items()->exists()) {
@@ -370,5 +391,49 @@ class OrderWizard extends Component
 
         app(RepresentativeDraftOrderService::class)->recalculateTotals($order);
         unset($this->draftOrder);
+        $this->syncLineQuantitiesFromOrder();
+    }
+
+    private function syncLineQuantitiesFromOrder(): void
+    {
+        $order = $this->draftOrder;
+
+        if ($order === null) {
+            $this->lineQuantities = [];
+
+            return;
+        }
+
+        $quantities = [];
+        foreach ($order->items as $item) {
+            $quantities[$item->id] = (int) $item->quantity;
+        }
+
+        $this->lineQuantities = $quantities;
+    }
+
+    private function persistLineQuantities(): bool
+    {
+        $order = $this->findOwnedDraft();
+
+        if ($order === null) {
+            return false;
+        }
+
+        $this->resetErrorBag('quantity');
+
+        try {
+            app(RepresentativeDraftOrderService::class)->syncItemQuantities($order, $this->lineQuantities);
+        } catch (\Illuminate\Validation\ValidationException $exception) {
+            $message = collect($exception->errors())->flatten()->first() ?? 'تعداد نامعتبر است.';
+            $this->addError('quantity', $message);
+
+            return false;
+        }
+
+        unset($this->draftOrder);
+        $this->syncLineQuantitiesFromOrder();
+
+        return true;
     }
 }

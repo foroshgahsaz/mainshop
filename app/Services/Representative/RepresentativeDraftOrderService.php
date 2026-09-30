@@ -121,17 +121,7 @@ class RepresentativeDraftOrderService
     {
         $this->assertDraftOwnedBy($order, auth()->user());
 
-        if ($quantity < 1) {
-            throw ValidationException::withMessages([
-                'quantity' => 'تعداد باید حداقل ۱ باشد.',
-            ]);
-        }
-
-        if ($quantity > 999) {
-            throw ValidationException::withMessages([
-                'quantity' => 'تعداد نباید بیشتر از ۹۹۹ باشد.',
-            ]);
-        }
+        $this->validateLineQuantity($quantity);
 
         $item = OrderItem::query()
             ->where('order_id', $order->id)
@@ -146,6 +136,52 @@ class RepresentativeDraftOrderService
         ]);
 
         $this->recalculateTotals($order);
+    }
+
+    /**
+     * @param  array<int, int|string>  $quantitiesByItemId
+     */
+    public function syncItemQuantities(Order $order, array $quantitiesByItemId): void
+    {
+        $this->assertDraftOwnedBy($order, auth()->user());
+
+        $order->loadMissing('items');
+
+        foreach ($order->items as $item) {
+            if (! array_key_exists($item->id, $quantitiesByItemId)) {
+                continue;
+            }
+
+            $quantity = (int) $quantitiesByItemId[$item->id];
+            $this->validateLineQuantity($quantity);
+
+            if ($quantity === (int) $item->quantity) {
+                continue;
+            }
+
+            $unitPrice = (int) $item->price;
+            $item->update([
+                'quantity' => $quantity,
+                'total_price' => $unitPrice * $quantity,
+            ]);
+        }
+
+        $this->recalculateTotals($order);
+    }
+
+    private function validateLineQuantity(int $quantity): void
+    {
+        if ($quantity < 1) {
+            throw ValidationException::withMessages([
+                'quantity' => 'تعداد باید حداقل ۱ باشد.',
+            ]);
+        }
+
+        if ($quantity > 999) {
+            throw ValidationException::withMessages([
+                'quantity' => 'تعداد نباید بیشتر از ۹۹۹ باشد.',
+            ]);
+        }
     }
 
     public function submitProforma(Order $order): Order

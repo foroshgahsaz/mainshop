@@ -231,10 +231,6 @@ class RepresentativeOrderAdminService
             $quantityChanged = $quantity !== $previousQuantity;
             $discountChanged = $discountType !== $previousType || $discountValue !== $previousValue;
 
-            if (! $quantityChanged && ! $discountChanged) {
-                continue;
-            }
-
             if ($quantityChanged && $order->stock_reserved) {
                 $item->loadMissing('product', 'variant');
 
@@ -281,9 +277,9 @@ class RepresentativeOrderAdminService
             }
         }
 
-        if ($changes !== []) {
-            $this->draftOrders->recalculateTotals($order);
+        $this->draftOrders->recalculateTotals($order->fresh(['items', 'invoiceLines']));
 
+        if ($changes !== []) {
             $this->orderLog->byUser(
                 $order->fresh(),
                 $actor,
@@ -384,9 +380,9 @@ class RepresentativeOrderAdminService
             $changes[] = count($deleteIds).' ردیف حذف شد';
         }
 
-        if ($changes !== []) {
-            $this->draftOrders->recalculateTotals($order->fresh());
+        $this->draftOrders->recalculateTotals($order->fresh(['items', 'invoiceLines']));
 
+        if ($changes !== []) {
             $this->orderLog->byUser(
                 $order->fresh(),
                 $actor,

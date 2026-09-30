@@ -4,7 +4,7 @@
         تخفیف کل یا هزینه‌های اضافه با دکمه زیر اضافه می‌شوند و در PDF به‌صورت ردیف جدا نمایش داده می‌شوند.
     </p>
 
-    <form wire:submit="saveInvoiceLines" class="admin-order__proforma-items-form">
+    <div class="admin-order__proforma-items-form">
         @if (count($editInvoiceLines) > 0)
             <div class="admin-order__table-wrap">
                 <table class="admin-order__table">
@@ -49,10 +49,8 @@
                     wire:click="openInvoiceLineModal">
                 افزودن تخفیف یا هزینه
             </button>
-            <button type="submit" class="admin-order__btn admin-order__btn--primary">
-                ذخیره ردیف‌های فاکتور
-            </button>
         </div>
+        <p class="admin-order__hint">با تأیید پاپ‌آپ، ردیف بلافاصله ذخیره می‌شود.</p>
 
         @error('invoice_lines') <p class="admin-order__error">{{ $message }}</p> @enderror
     </form>

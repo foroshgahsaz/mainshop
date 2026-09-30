@@ -25,11 +25,11 @@
     <p><strong>مشتری:</strong> {{ $order->user?->name }} — {{ $order->user?->phone }}</p>
     @if ($order->address)
         <p><strong>آدرس:</strong> {{ $order->address->address }}
-            @if ($order->address->city?->name)
-                — {{ $order->address->city->name }}
+            @if ($order->address->cityModel?->name ?? $order->address->city)
+                — {{ $order->address->cityModel?->name ?? $order->address->city }}
             @endif
-            @if ($order->address->province?->name)
-                ، {{ $order->address->province->name }}
+            @if ($order->address->provinceModel?->name ?? $order->address->province)
+                ، {{ $order->address->provinceModel?->name ?? $order->address->province }}
             @endif
         </p>
     @endif

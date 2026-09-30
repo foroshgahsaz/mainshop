@@ -17,8 +17,8 @@ class ProformaPdfController extends Controller
         $order->load([
             'items',
             'user',
-            'address.province',
-            'address.city',
+            'address.provinceModel',
+            'address.cityModel',
             'freightCarrier.province',
             'freightCarrier.city',
             'representative',

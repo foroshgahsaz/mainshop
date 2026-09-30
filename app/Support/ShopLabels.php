@@ -36,10 +36,16 @@ class ShopLabels
 
     public static function paymentMethod(?string $method): string
     {
+        if ($method === null || $method === '') {
+            return '—';
+        }
+
+        $label = config("payment.gateways.{$method}.label");
+
         return match ($method) {
             'online' => 'پرداخت آنلاین',
             'cod' => 'پرداخت در محل',
-            default => $method ?? '—',
+            default => is_string($label) && $label !== '' ? $label : self::gateway($method),
         };
     }
 

@@ -32,6 +32,7 @@ class Order extends Model
         'address_id',
         'coupon_id',
         'shipping_method_id',
+        'freight_carrier_id',
         'total_amount',
         'final_amount',
         'shipping_amount',
@@ -104,6 +105,11 @@ class Order extends Model
     public function shippingMethod(): BelongsTo
     {
         return $this->belongsTo(ShippingMethod::class);
+    }
+
+    public function freightCarrier(): BelongsTo
+    {
+        return $this->belongsTo(FreightCarrier::class);
     }
 
     public function items(): HasMany

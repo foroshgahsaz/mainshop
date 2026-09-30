@@ -3,9 +3,11 @@
 namespace App\Livewire\Representative;
 
 use App\Filament\Representative\Resources\DraftOrderResource;
+use App\Models\FreightCarrier;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
+use App\Services\Payment\PaymentGatewayCatalog;
 use App\Services\Representative\RepresentativeCatalogLookup;
 use App\Services\Representative\RepresentativeDraftOrderService;
 use App\Support\ShopFormatter;
@@ -43,6 +45,10 @@ class OrderWizard extends Component
     /** @var array<int, int> */
     public array $lineQuantities = [];
 
+    public ?int $freightCarrierId = null;
+
+    public string $paymentGateway = '';
+
     public function mount(): void
     {
         if ($this->orderId === null) {
@@ -77,6 +83,7 @@ class OrderWizard extends Component
         if ($order->items()->exists()) {
             $this->refreshDraftLineItems();
             $this->syncLineQuantitiesFromOrder();
+            $this->syncFulfillmentFromOrder();
         }
     }
 
@@ -151,6 +158,7 @@ class OrderWizard extends Component
         $this->step = 'review';
         unset($this->draftOrder);
         $this->syncLineQuantitiesFromOrder();
+        $this->syncFulfillmentFromOrder();
     }
 
     public function removeItem(int $itemId): void
@@ -185,7 +193,7 @@ class OrderWizard extends Component
 
     public function refreshReviewTotals(): void
     {
-        if (! $this->persistLineQuantities()) {
+        if (! $this->persistLineQuantities() || ! $this->persistFulfillment()) {
             return;
         }
 
@@ -212,12 +220,13 @@ class OrderWizard extends Component
         if ($step === 'review') {
             $this->refreshDraftLineItems();
             $this->syncLineQuantitiesFromOrder();
+            $this->syncFulfillmentFromOrder();
         }
     }
 
     public function finishDraft(): void
     {
-        if (! $this->persistLineQuantities()) {
+        if (! $this->persistLineQuantities() || ! $this->persistFulfillment()) {
             return;
         }
 
@@ -241,6 +250,30 @@ class OrderWizard extends Component
             DraftOrderResource::getUrl('view', ['record' => $order->id], panel: 'representative'),
             navigate: false,
         );
+    }
+
+    #[Computed]
+    public function freightCarriers(): Collection
+    {
+        if ($this->step !== 'review') {
+            return collect();
+        }
+
+        return FreightCarrier::query()
+            ->with(['province', 'city'])
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+    }
+
+    #[Computed]
+    public function paymentGateways(): array
+    {
+        if ($this->step !== 'review') {
+            return [];
+        }
+
+        return app(PaymentGatewayCatalog::class)->enabled();
     }
 
     #[Computed]
@@ -328,7 +361,7 @@ class OrderWizard extends Component
         }
 
         return Order::query()
-            ->with(['items', 'user:id,name,phone'])
+            ->with(['items', 'user:id,name,phone', 'freightCarrier.province', 'freightCarrier.city'])
             ->whereKey($this->orderId)
             ->where('representative_id', auth()->id())
             ->where('status', Order::STATUS_DRAFT)
@@ -433,6 +466,68 @@ class OrderWizard extends Component
 
         unset($this->draftOrder);
         $this->syncLineQuantitiesFromOrder();
+
+        return true;
+    }
+
+    private function syncFulfillmentFromOrder(): void
+    {
+        $order = $this->draftOrder;
+
+        if ($order === null) {
+            $this->freightCarrierId = null;
+            $this->paymentGateway = app(PaymentGatewayCatalog::class)->enabledNames()[0] ?? 'zarinpal';
+
+            return;
+        }
+
+        $this->freightCarrierId = $order->freight_carrier_id;
+        $this->paymentGateway = (string) ($order->payment_method ?: app(PaymentGatewayCatalog::class)->enabledNames()[0] ?? 'zarinpal');
+    }
+
+    private function persistFulfillment(): bool
+    {
+        $order = $this->findOwnedDraft();
+
+        if ($order === null) {
+            return false;
+        }
+
+        $this->resetErrorBag('freight_carrier_id');
+        $this->resetErrorBag('payment_gateway');
+
+        if ($this->freightCarrierId === null) {
+            $this->addError('freight_carrier_id', 'باربری را انتخاب کنید.');
+
+            return false;
+        }
+
+        if ($this->paymentGateway === '') {
+            $this->addError('payment_gateway', 'درگاه پرداخت را انتخاب کنید.');
+
+            return false;
+        }
+
+        try {
+            app(RepresentativeDraftOrderService::class)->syncFulfillment(
+                $order,
+                (int) $this->freightCarrierId,
+                $this->paymentGateway,
+            );
+        } catch (\Illuminate\Validation\ValidationException $exception) {
+            foreach ($exception->errors() as $field => $messages) {
+                $this->addError($field, $messages[0] ?? 'مقدار نامعتبر است.');
+            }
+
+            return false;
+        } catch (\RuntimeException $exception) {
+            $this->addError('payment_gateway', $exception->getMessage());
+
+            return false;
+        }
+
+        unset($this->draftOrder);
+        $this->syncFulfillmentFromOrder();
 
         return true;
     }

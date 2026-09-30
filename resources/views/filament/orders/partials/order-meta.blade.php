@@ -14,7 +14,9 @@
         @if($order->shipping_tracking_code)
             <div><dt>رهگیری پست</dt><dd dir="ltr">{{ $order->shipping_tracking_code }}</dd></div>
         @endif
-        @if($order->shippingMethod)
+        @if($order->freightCarrier)
+            <div><dt>باربری</dt><dd>{{ $order->freightCarrier->displayLabel() }}</dd></div>
+        @elseif($order->shippingMethod)
             <div><dt>روش ارسال</dt><dd>{{ $order->shippingMethod->name }}</dd></div>
         @endif
     </dl>

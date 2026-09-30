@@ -2,11 +2,12 @@
 
 namespace App\Services\Representative;
 
+use App\Models\FreightCarrier;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
-use App\Models\ShippingMethod;
 use App\Models\User;
+use App\Services\Payment\PaymentGatewayCatalog;
 use App\Models\UserAddress;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -34,12 +35,13 @@ class RepresentativeDraftOrderService
             'address_id' => $address->id,
             'total_amount' => 0,
             'final_amount' => 0,
-            'shipping_amount' => $this->defaultShippingAmount(),
+            'shipping_amount' => 0,
             'discount_amount' => 0,
-            'payment_method' => 'online',
+            'payment_method' => $this->defaultRepresentativePaymentGateway(),
             'status' => Order::STATUS_DRAFT,
             'tracking_code' => $this->generateTrackingCode(),
-            'shipping_method_id' => $this->defaultShippingMethodId(),
+            'shipping_method_id' => null,
+            'freight_carrier_id' => null,
         ]);
     }
 
@@ -184,6 +186,33 @@ class RepresentativeDraftOrderService
         }
     }
 
+    public function syncFulfillment(Order $order, int $freightCarrierId, string $paymentGateway): void
+    {
+        $this->assertDraftOwnedBy($order, auth()->user());
+
+        $carrier = FreightCarrier::query()
+            ->whereKey($freightCarrierId)
+            ->where('is_active', true)
+            ->first();
+
+        if ($carrier === null) {
+            throw ValidationException::withMessages([
+                'freight_carrier_id' => 'باربری انتخاب‌شده معتبر نیست.',
+            ]);
+        }
+
+        app(PaymentGatewayCatalog::class)->assertEnabled($paymentGateway);
+
+        $order->update([
+            'freight_carrier_id' => $carrier->id,
+            'shipping_method_id' => null,
+            'shipping_amount' => 0,
+            'payment_method' => $paymentGateway,
+        ]);
+
+        $this->recalculateTotals($order);
+    }
+
     public function submitProforma(Order $order): Order
     {
         $this->assertDraftOwnedBy($order, auth()->user());
@@ -191,6 +220,18 @@ class RepresentativeDraftOrderService
         if (! $order->items()->exists()) {
             throw ValidationException::withMessages([
                 'order' => 'حداقل یک محصول به پیش‌فاکتور اضافه کنید.',
+            ]);
+        }
+
+        if ($order->freight_carrier_id === null) {
+            throw ValidationException::withMessages([
+                'freight_carrier_id' => 'باربری را انتخاب کنید.',
+            ]);
+        }
+
+        if (! app(PaymentGatewayCatalog::class)->isEnabled((string) $order->payment_method)) {
+            throw ValidationException::withMessages([
+                'payment_gateway' => 'درگاه پرداخت را انتخاب کنید.',
             ]);
         }
 
@@ -254,20 +295,11 @@ class RepresentativeDraftOrderService
         }
     }
 
-    private function defaultShippingAmount(): int
+    private function defaultRepresentativePaymentGateway(): string
     {
-        $configured = (int) config('shop.representative.default_shipping_amount', 0);
+        $enabled = app(PaymentGatewayCatalog::class)->enabledNames();
 
-        if ($configured > 0) {
-            return $configured;
-        }
-
-        return (int) (ShippingMethod::query()->where('is_active', true)->orderBy('price')->value('price') ?? 0);
-    }
-
-    private function defaultShippingMethodId(): ?int
-    {
-        return ShippingMethod::query()->where('is_active', true)->orderBy('price')->value('id');
+        return $enabled[0] ?? 'zarinpal';
     }
 
     private function generateTrackingCode(): string

@@ -27,6 +27,7 @@
     use App\Filament\Resources\ProductTemplateResource;
     use App\Filament\Resources\ProductQuestionResource;
     use App\Filament\Resources\ProductReviewResource;
+    use App\Filament\Resources\FreightCarrierResource;
     use App\Filament\Resources\ShippingMethodResource;
     use App\Filament\Resources\UserResource;
 
@@ -153,11 +154,18 @@
         'shipping' => [
             'label' => 'ارسال',
             'icon' => 'fa-truck',
-            'routes' => ['filament.admin.resources.shipping-methods.*'],
+            'routes' => [
+                'filament.admin.resources.shipping-methods.*',
+                'filament.admin.resources.freight-carriers.*',
+            ],
             'menus' => [
                 ['label' => 'روش‌های ارسال', 'icon' => 'fa-truck', 'items' => [
                     ['label' => 'لیست همه', 'url' => ShippingMethodResource::getUrl('index'), 'icon' => 'fa-list'],
                     ['label' => 'افزودن روش', 'url' => ShippingMethodResource::getUrl('create'), 'icon' => 'fa-plus'],
+                ]],
+                ['label' => 'باربری نمایندگی', 'icon' => 'fa-dolly', 'items' => [
+                    ['label' => 'لیست باربری‌ها', 'url' => FreightCarrierResource::getUrl('index'), 'icon' => 'fa-list'],
+                    ['label' => 'افزودن باربری', 'url' => FreightCarrierResource::getUrl('create'), 'icon' => 'fa-plus'],
                 ]],
             ],
         ],

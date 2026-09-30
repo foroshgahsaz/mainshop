@@ -202,13 +202,47 @@
                         <li class="rep-wizard-empty">هنوز محصولی اضافه نشده.</li>
                     @endforelse
                 </ul>
+                <div class="rep-fulfillment-grid">
+                    <div class="rep-fulfillment-field">
+                        <label class="rep-fulfillment-label" for="freightCarrierSelect">باربری</label>
+                        <select id="freightCarrierSelect"
+                                class="rep-fulfillment-select"
+                                wire:model="freightCarrierId">
+                            <option value="">انتخاب باربری…</option>
+                            @forelse ($this->freightCarriers as $carrier)
+                                <option value="{{ $carrier->id }}">{{ $carrier->displayLabel() }}</option>
+                            @empty
+                            @endforelse
+                        </select>
+                        @error('freight_carrier_id') <p class="rep-wizard-error">{{ $message }}</p> @enderror
+                        @if ($this->freightCarriers->isEmpty())
+                            <p class="rep-wizard-hint">باربری فعالی ثبت نشده — از پنل مدیریت، منوی ارسال → باربری‌ها را تعریف کنید.</p>
+                        @endif
+                    </div>
+                    <div class="rep-fulfillment-field">
+                        <label class="rep-fulfillment-label" for="paymentGatewaySelect">درگاه پرداخت</label>
+                        <select id="paymentGatewaySelect"
+                                class="rep-fulfillment-select"
+                                wire:model="paymentGateway">
+                            @forelse ($this->paymentGateways as $gateway)
+                                <option value="{{ $gateway['name'] }}">{{ $gateway['label'] }}</option>
+                            @empty
+                                <option value="">درگاه فعالی نیست</option>
+                            @endforelse
+                        </select>
+                        @error('payment_gateway') <p class="rep-wizard-error">{{ $message }}</p> @enderror
+                    </div>
+                </div>
                 <div class="rep-order-totals">
                     <div>جمع اقلام: {{ $this->formatMoney((int) $order->total_amount) }}</div>
-                    <div>حمل: {{ $this->formatMoney((int) $order->shipping_amount) }}</div>
+                    @if ($order->freightCarrier)
+                        <div>باربری: {{ $order->freightCarrier->displayLabel() }}</div>
+                    @endif
+                    <div>درگاه: {{ \App\Support\ShopLabels::paymentMethod($order->payment_method) }}</div>
                     <div class="rep-order-final">مبلغ نهایی: {{ $this->formatMoney((int) $order->final_amount) }}</div>
                 </div>
                 <p class="rep-wizard-hint rep-review-hint">
-                    پس از تغییر تعداد، دکمه <strong>بروزرسانی</strong> را بزنید تا جمع‌ها ذخیره شود؛ سپس ثبت پیش‌فاکتور.
+                    پس از تغییر تعداد یا باربری/درگاه، <strong>بروزرسانی</strong> را بزنید؛ سپس ثبت پیش‌فاکتور.
                 </p>
                 <div class="rep-wizard-actions rep-review-actions">
                     <button type="button" class="rep-btn-secondary" wire:click="goToStep('product')">افزودن محصول دیگر</button>

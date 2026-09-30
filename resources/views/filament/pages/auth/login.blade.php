@@ -68,12 +68,16 @@
                                 @enderror
                             </div>
                         </div>
-                        <div class="otp-timer mobile-resend-timer @if($adminOtpResendRemaining <= 0) hidden @endif" id="mobileResendTimer">
-                            <span id="mobileTimer" class="otp-countdown" dir="ltr">
-                                {{ sprintf('%02d:%02d', intdiv($adminOtpResendRemaining, 60), $adminOtpResendRemaining % 60) }}
-                            </span>
-                            <p class="login-subtitle mb-0 mt-1">ارسال مجدد تا پایان شمارنده</p>
-                        </div>
+                        @if ($this->shouldShowMobileResendTimer())
+                            <div class="otp-timer mobile-resend-timer" id="mobileResendTimer">
+                                <span id="mobileTimer" class="otp-countdown" dir="ltr">
+                                    {{ sprintf('%02d:%02d', intdiv($adminOtpResendRemaining, 60), $adminOtpResendRemaining % 60) }}
+                                </span>
+                                <p class="login-subtitle mb-0 mt-1">ارسال مجدد تا پایان شمارنده</p>
+                            </div>
+                        @else
+                            <div class="otp-timer mobile-resend-timer hidden" id="mobileResendTimer" hidden></div>
+                        @endif
                         @if ($adminHasPendingOtp && $adminOtpResendRemaining > 0)
                             <p class="login-subtitle text-success mb-2 text-center">کد قبلاً ارسال شده است. برای وارد کردن کد ادامه دهید.</p>
                         @endif

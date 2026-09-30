@@ -170,6 +170,23 @@ class Login extends BaseLogin
         return $otp->hasPendingOtp($phone);
     }
 
+    public function shouldShowMobileResendTimer(): bool
+    {
+        if ($this->otpStep === 'otp') {
+            return false;
+        }
+
+        if ($this->adminOtpResendRemainingSeconds() <= 0) {
+            return false;
+        }
+
+        if (! preg_match('/^09\d{9}$/', $this->otpPhone)) {
+            return false;
+        }
+
+        return $this->adminHasPendingOtp() || $this->otpSentAt > 0;
+    }
+
     public function updatedOtpPhone(): void
     {
         $otp = app(OtpService::class);

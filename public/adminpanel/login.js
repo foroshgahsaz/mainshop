@@ -330,12 +330,50 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-function syncAdminOtpCode() {
-    const otpInputs = document.querySelectorAll('.otp-input');
-    let code = '';
-    otpInputs.forEach((input) => {
-        code += input.value;
+function getAdminOtpInputs() {
+    return Array.from(document.querySelectorAll('#otpForm .otp-input')).sort(
+        (left, right) => Number(left.dataset.index ?? 0) - Number(right.dataset.index ?? 0),
+    );
+}
+
+function collectAdminOtpCode() {
+    return getAdminOtpInputs()
+        .map((input) => input.value.replace(/\D/g, ''))
+        .join('');
+}
+
+function distributeAdminOtpDigits(digits, startIndex = 0) {
+    const otpInputs = getAdminOtpInputs();
+    const onlyDigits = digits.replace(/\D/g, '').slice(0, otpInputs.length - startIndex);
+
+    onlyDigits.split('').forEach((digit, offset) => {
+        const input = otpInputs[startIndex + offset];
+        if (input) {
+            input.value = digit;
+        }
     });
+
+    syncAdminOtpCode();
+
+    const nextIndex = Math.min(startIndex + onlyDigits.length, otpInputs.length - 1);
+    otpInputs[nextIndex]?.focus();
+
+    return onlyDigits.length;
+}
+
+function focusAdminOtpInput() {
+    const otpPage = document.getElementById('otpPage');
+    if (!otpPage || otpPage.style.display === 'none') {
+        return;
+    }
+
+    const otpInputs = getAdminOtpInputs();
+    const firstEmpty = otpInputs.find((input) => input.value === '') ?? otpInputs[0];
+    firstEmpty?.focus();
+}
+
+function syncAdminOtpCode() {
+    const code = collectAdminOtpCode();
 
     const hidden = document.getElementById('otpCodeHidden');
     if (hidden && hidden.value !== code) {
@@ -356,7 +394,7 @@ function syncAdminOtpCode() {
 }
 
 function bindOtpInputs() {
-    const otpInputs = document.querySelectorAll('.otp-input');
+    const otpInputs = getAdminOtpInputs();
 
     otpInputs.forEach((input, index) => {
         if (input.dataset.bound === '1') {
@@ -367,7 +405,16 @@ function bindOtpInputs() {
         input.addEventListener('input', function () {
             clearError('otp');
             otpInputs.forEach((item) => item.classList.remove('error'));
-            this.value = this.value.replace(/[^0-9]/g, '');
+
+            const digits = this.value.replace(/[^0-9]/g, '');
+            if (digits.length > 1) {
+                this.value = digits.charAt(0);
+                distributeAdminOtpDigits(digits.slice(1), index + 1);
+
+                return;
+            }
+
+            this.value = digits;
 
             if (this.value.length === 1 && index < otpInputs.length - 1) {
                 otpInputs[index + 1].focus();
@@ -379,7 +426,28 @@ function bindOtpInputs() {
         input.addEventListener('keydown', function (event) {
             if (event.key === 'Backspace' && this.value === '' && index > 0) {
                 otpInputs[index - 1].focus();
+                otpInputs[index - 1].select?.();
             }
+
+            if (event.key === 'ArrowLeft' && index > 0) {
+                event.preventDefault();
+                otpInputs[index - 1].focus();
+            }
+
+            if (event.key === 'ArrowRight' && index < otpInputs.length - 1) {
+                event.preventDefault();
+                otpInputs[index + 1].focus();
+            }
+        });
+
+        input.addEventListener('paste', function (event) {
+            event.preventDefault();
+            const pasted = event.clipboardData?.getData('text') ?? '';
+            if (!pasted.replace(/\D/g, '')) {
+                return;
+            }
+
+            distributeAdminOtpDigits(pasted, index);
         });
     });
 }
@@ -395,11 +463,9 @@ function bindOtpFormSubmit() {
         event.preventDefault();
         event.stopImmediatePropagation();
 
-        const otpInputs = document.querySelectorAll('.otp-input');
-        let code = '';
-        otpInputs.forEach((input) => {
-            code += input.value;
-        });
+        syncAdminOtpCode();
+        const code = collectAdminOtpCode();
+        const otpInputs = getAdminOtpInputs();
 
         const validation = validateOTP(code);
         if (!validation.valid) {
@@ -426,6 +492,7 @@ function bindLoginLivewireHooks() {
             restoreLoginTab();
             bindOtpInputs();
             bindOtpFormSubmit();
+            focusAdminOtpInput();
             startTimer();
             startMobileResendTimer();
         });

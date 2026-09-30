@@ -118,13 +118,13 @@
 
                     <form id="otpForm" wire:submit="verifyAdminOtp">
                         <input type="hidden" wire:model="otpCode" id="otpCodeHidden">
-                        <div class="otp-container">
-                            <input type="text" maxlength="1" class="otp-input" data-index="0" inputmode="numeric" autocomplete="one-time-code">
-                            <input type="text" maxlength="1" class="otp-input" data-index="1" inputmode="numeric">
-                            <input type="text" maxlength="1" class="otp-input" data-index="2" inputmode="numeric">
-                            <input type="text" maxlength="1" class="otp-input" data-index="3" inputmode="numeric">
-                            <input type="text" maxlength="1" class="otp-input" data-index="4" inputmode="numeric">
-                            <input type="text" maxlength="1" class="otp-input" data-index="5" inputmode="numeric">
+                        <div class="otp-container" dir="ltr">
+                            <input type="text" maxlength="1" class="otp-input" data-index="0" dir="ltr" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code">
+                            <input type="text" maxlength="1" class="otp-input" data-index="1" dir="ltr" inputmode="numeric" pattern="[0-9]*">
+                            <input type="text" maxlength="1" class="otp-input" data-index="2" dir="ltr" inputmode="numeric" pattern="[0-9]*">
+                            <input type="text" maxlength="1" class="otp-input" data-index="3" dir="ltr" inputmode="numeric" pattern="[0-9]*">
+                            <input type="text" maxlength="1" class="otp-input" data-index="4" dir="ltr" inputmode="numeric" pattern="[0-9]*">
+                            <input type="text" maxlength="1" class="otp-input" data-index="5" dir="ltr" inputmode="numeric" pattern="[0-9]*">
                         </div>
                         <div class="error-message text-center @error('otpCode') show @enderror" id="otpError">
                             @error('otpCode') {{ $message }} @enderror

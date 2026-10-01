@@ -204,6 +204,8 @@ class OrderWizard extends Component
         $this->showProductImagesModal = false;
         $this->productImagesModalTitle = '';
         $this->productImagesModalUrls = [];
+
+        $this->dispatch('rep-product-images-modal-closed');
     }
 
     public function removeItem(int $itemId): void

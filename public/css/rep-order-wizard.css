@@ -336,15 +336,70 @@
     justify-content: flex-end;
 }
 
+html.rep-modal-open {
+    overflow: hidden;
+}
+
 .rep-modal-backdrop {
     position: fixed;
     inset: 0;
-    z-index: 80;
-    background: rgba(15, 23, 42, 0.5);
+    z-index: 120;
+    background: rgba(15, 23, 42, 0.62);
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 1rem;
+}
+
+.rep-modal-backdrop--preparing {
+    z-index: 119;
+}
+
+.rep-modal--compact {
+    width: min(100%, 20rem);
+    padding: 1.25rem 1rem;
+    text-align: center;
+    align-items: center;
+}
+
+.rep-modal__spinner {
+    width: 2.25rem;
+    height: 2.25rem;
+    margin: 0 auto 0.75rem;
+    border: 3px solid #e5e7eb;
+    border-top-color: #0d9488;
+    border-radius: 50%;
+    animation: rep-spin 0.75s linear infinite;
+}
+
+@keyframes rep-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes rep-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.rep-modal__status {
+    margin: 0.35rem 0 0;
+    font-size: 0.85rem;
+    color: #374151;
+}
+
+.rep-modal__status--hint {
+    font-size: 0.78rem;
+    color: #6b7280;
+}
+
+.rep-modal-backdrop--preparing .rep-modal__status {
+    color: #111827;
 }
 
 .rep-modal {
@@ -396,11 +451,21 @@
 }
 
 .rep-product-gallery__item {
+    position: relative;
     display: block;
     border: 1px solid #e5e7eb;
     border-radius: 0.5rem;
     overflow: hidden;
     background: #f9fafb;
+    min-height: 9rem;
+}
+
+.rep-product-gallery__skeleton {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+    background-size: 200% 100%;
+    animation: rep-shimmer 1.2s ease-in-out infinite;
 }
 
 .rep-product-gallery__item img {
@@ -408,6 +473,22 @@
     height: 9rem;
     object-fit: contain;
     display: block;
+    background: #fff;
+}
+
+.rep-product-gallery__error {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    color: #b91c1c;
+    background: #fef2f2;
+}
+
+[x-cloak] {
+    display: none !important;
 }
 
 .rep-product-row {

@@ -1,4 +1,6 @@
-<div class="rep-order-wizard" wire:loading.class="opacity-75">
+<div class="rep-order-wizard"
+     wire:loading.class="opacity-75"
+     @rep-product-images-modal-closed.window="document.documentElement.classList.remove('rep-modal-open')">
     <nav class="rep-wizard-steps" aria-label="مراحل سفارش">
         @foreach ([
             'customer' => 'مشتری',
@@ -132,8 +134,11 @@
                             <div class="rep-product-row-actions">
                                 <button type="button"
                                         class="rep-btn-secondary"
-                                        wire:click="openProductImages({{ $product->id }})">
-                                    مشاهده تصویر محصول
+                                        wire:click="openProductImages({{ $product->id }})"
+                                        wire:loading.attr="disabled"
+                                        wire:target="openProductImages">
+                                    <span wire:loading.remove wire:target="openProductImages">مشاهده تصویر محصول</span>
+                                    <span wire:loading wire:target="openProductImages">در حال آماده‌سازی…</span>
                                 </button>
                                 <button type="button" class="rep-btn-primary" wire:click="addProduct({{ $product->id }})">
                                     افزودن
@@ -351,23 +356,62 @@
         </section>
     @endif
 
-    @if ($showProductImagesModal)
-        <div class="rep-modal-backdrop" wire:click="closeProductImagesModal">
-            <div class="rep-modal rep-modal--gallery" role="dialog" aria-modal="true" wire:click.stop>
-                <div class="rep-modal__header">
-                    <h3 class="rep-modal__title">{{ $productImagesModalTitle }}</h3>
-                    <button type="button" class="rep-modal__close" wire:click="closeProductImagesModal" aria-label="بستن">×</button>
-                </div>
-                <div class="rep-modal__body rep-product-gallery">
-                    @forelse ($productImagesModalUrls as $url)
-                        <a href="{{ $url }}" target="_blank" rel="noopener" class="rep-product-gallery__item">
-                            <img src="{{ $url }}" alt="{{ $productImagesModalTitle }}" loading="lazy">
-                        </a>
-                    @empty
-                        <p class="rep-wizard-empty">تصویری برای این محصول ثبت نشده است.</p>
-                    @endforelse
-                </div>
+    @teleport('body')
+        <div wire:loading.flex
+             wire:target="openProductImages"
+             class="rep-modal-backdrop rep-modal-backdrop--preparing"
+             aria-live="polite"
+             aria-busy="true">
+            <div class="rep-modal rep-modal--compact" role="status">
+                <div class="rep-modal__spinner" aria-hidden="true"></div>
+                <p class="rep-modal__status">در حال آماده‌سازی تصاویر…</p>
+                <p class="rep-modal__status rep-modal__status--hint">لطفاً چند لحظه صبر کنید.</p>
             </div>
         </div>
+    @endteleport
+
+    @if ($showProductImagesModal)
+        @teleport('body')
+            <div class="rep-modal-backdrop"
+                 wire:click="closeProductImagesModal"
+                 x-data
+                 x-init="document.documentElement.classList.add('rep-modal-open')"
+                 x-on:keydown.escape.window="$wire.closeProductImagesModal()">
+                <div class="rep-modal rep-modal--gallery" role="dialog" aria-modal="true" wire:click.stop>
+                    <div class="rep-modal__header">
+                        <h3 class="rep-modal__title">{{ $productImagesModalTitle }}</h3>
+                        <button type="button" class="rep-modal__close" wire:click="closeProductImagesModal" aria-label="بستن">×</button>
+                    </div>
+                    <div class="rep-modal__body">
+                        <div class="rep-product-gallery">
+                            @forelse ($productImagesModalUrls as $index => $url)
+                                <a href="{{ $url }}"
+                                   target="_blank"
+                                   rel="noopener"
+                                   class="rep-product-gallery__item"
+                                   x-data="{ loaded: false, failed: false }">
+                                    <div class="rep-product-gallery__skeleton" x-show="!loaded && !failed" x-cloak></div>
+                                    <img src="{{ $url }}"
+                                         alt="{{ $productImagesModalTitle }}"
+                                         loading="{{ $index === 0 ? 'eager' : 'lazy' }}"
+                                         @if ($index === 0) fetchpriority="high" @endif
+                                         decoding="async"
+                                         x-show="loaded && !failed"
+                                         x-on:load="loaded = true"
+                                         x-on:error="failed = true; loaded = true"
+                                         x-cloak>
+                                    <span class="rep-product-gallery__error" x-show="failed" x-cloak>بارگذاری نشد</span>
+                                </a>
+                            @empty
+                                <p class="rep-wizard-empty">تصویری برای این محصول ثبت نشده است.</p>
+                            @endforelse
+                        </div>
+                        @if (count($productImagesModalUrls) > 0)
+                            <p class="rep-modal__status rep-modal__status--hint">تا بارگذاری کامل هر تصویر، جای خالی با انیمیشن نمایش داده می‌شود. برای اندازه کامل کلیک کنید.</p>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        @endteleport
     @endif
 </div>

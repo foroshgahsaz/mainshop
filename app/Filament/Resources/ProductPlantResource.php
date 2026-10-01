@@ -5,12 +5,13 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ProductPlantResource\Pages;
 use App\Filament\Support\AdminTable;
 use App\Models\ProductPlant;
+use App\Support\AdminAccess;
 use Filament\Forms;
-use Illuminate\Support\Facades\Schema;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class ProductPlantResource extends Resource
@@ -33,7 +34,8 @@ class ProductPlantResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return Schema::hasColumn('products', 'product_plant_id');
+        return AdminAccess::canAccessAdminResource(static::class)
+            && Schema::hasColumn('products', 'product_plant_id');
     }
 
     public static function form(Form $form): Form

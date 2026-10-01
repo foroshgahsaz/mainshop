@@ -10,6 +10,7 @@ use App\Filament\Support\ProductDeleteActions;
 use App\Filament\Support\RichContentEditor;
 use App\Filament\Support\SeoFormSchema;
 use App\Models\Product;
+use App\Support\AdminAccess;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -33,6 +34,11 @@ class ProductResource extends Resource
     protected static ?int $navigationSort = 2;
 
     protected static bool $shouldRegisterNavigation = false;
+
+    public static function canViewAny(): bool
+    {
+        return AdminAccess::canAccessAdminResource(static::class);
+    }
 
     public static function form(Form $form): Form
     {

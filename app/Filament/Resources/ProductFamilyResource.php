@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ProductFamilyResource\Pages;
 use App\Filament\Support\AdminTable;
 use App\Models\ProductFamily;
+use App\Support\AdminAccess;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -29,6 +30,11 @@ class ProductFamilyResource extends Resource
     protected static ?string $modelLabel = 'خانواده محصول';
 
     protected static ?string $pluralModelLabel = 'خانواده‌های محصول';
+
+    public static function canViewAny(): bool
+    {
+        return AdminAccess::canAccessAdminResource(static::class);
+    }
 
     public static function form(Form $form): Form
     {

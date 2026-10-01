@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\MediaFileResource\Pages;
 use App\Models\MediaFile;
 use App\Services\Media\MediaRegistry;
+use App\Support\AdminAccess;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
@@ -30,6 +31,11 @@ class MediaFileResource extends Resource
     protected static ?int $navigationSort = 4;
 
     protected static bool $shouldRegisterNavigation = false;
+
+    public static function canViewAny(): bool
+    {
+        return AdminAccess::canAccessAdminResource(static::class);
+    }
 
     public static function form(Form $form): Form
     {

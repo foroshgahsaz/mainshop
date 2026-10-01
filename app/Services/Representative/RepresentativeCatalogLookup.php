@@ -31,43 +31,57 @@ class RepresentativeCatalogLookup
     /** @return Collection<int, ProductPlant> */
     public function plants(int $familyId): Collection
     {
-        return ProductPlant::query()
-            ->where('product_family_id', $familyId)
-            ->where('is_active', true)
-            ->whereHas('products', fn (Builder $q) => $this->baseProductQuery($q)->where('product_family_id', $familyId))
-            ->orderBy('position')
-            ->get(['id', 'name']);
+        return Cache::remember(
+            'rep:catalog:plants:'.$familyId,
+            $this->cacheTtl(),
+            fn () => ProductPlant::query()
+                ->where('product_family_id', $familyId)
+                ->where('is_active', true)
+                ->whereHas('products', fn (Builder $q) => $this->baseProductQuery($q)->where('product_family_id', $familyId))
+                ->orderBy('position')
+                ->get(['id', 'name'])
+        );
     }
 
     /** @return Collection<int, Brand> */
     public function brands(int $familyId, int $plantId): Collection
     {
-        $brandIds = Product::query()
-            ->where('product_family_id', $familyId)
-            ->where('product_plant_id', $plantId)
-            ->tap(fn (Builder $q) => $this->baseProductQuery($q))
-            ->whereNotNull('brand_id')
-            ->distinct()
-            ->pluck('brand_id');
+        return Cache::remember(
+            'rep:catalog:brands:'.$familyId.':'.$plantId,
+            $this->cacheTtl(),
+            function () use ($familyId, $plantId): Collection {
+                $brandIds = Product::query()
+                    ->where('product_family_id', $familyId)
+                    ->where('product_plant_id', $plantId)
+                    ->tap(fn (Builder $q) => $this->baseProductQuery($q))
+                    ->whereNotNull('brand_id')
+                    ->distinct()
+                    ->pluck('brand_id');
 
-        return Brand::query()
-            ->whereIn('id', $brandIds)
-            ->orderBy('name')
-            ->get(['id', 'name']);
+                return Brand::query()
+                    ->whereIn('id', $brandIds)
+                    ->orderBy('name')
+                    ->get(['id', 'name']);
+            }
+        );
     }
 
     /** @return Collection<int, ProductTemplate> */
     public function templates(int $familyId, int $brandId): Collection
     {
-        return ProductTemplate::query()
-            ->where('product_family_id', $familyId)
-            ->where('brand_id', $brandId)
-            ->where('is_active', true)
-            ->whereHas('products', fn (Builder $q) => $this->baseProductQuery($q)
+        return Cache::remember(
+            'rep:catalog:templates:'.$familyId.':'.$brandId,
+            $this->cacheTtl(),
+            fn () => ProductTemplate::query()
                 ->where('product_family_id', $familyId)
-                ->where('brand_id', $brandId))
-            ->orderBy('position')
-            ->get(['id', 'name']);
+                ->where('brand_id', $brandId)
+                ->where('is_active', true)
+                ->whereHas('products', fn (Builder $q) => $this->baseProductQuery($q)
+                    ->where('product_family_id', $familyId)
+                    ->where('brand_id', $brandId))
+                ->orderBy('position')
+                ->get(['id', 'name'])
+        );
     }
 
     public function products(

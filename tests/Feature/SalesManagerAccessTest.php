@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Resources\OrderResource;
 use App\Filament\Resources\ProductResource;
 use App\Models\User;
 use App\Support\AdminAccess;
@@ -21,6 +22,7 @@ class SalesManagerAccessTest extends TestCase
         $this->actingAs($manager);
 
         $this->assertTrue($manager->canAccessPanel(filament()->getPanel('admin')));
+        $this->assertTrue(AdminAccess::canAccessAdminResource(OrderResource::class));
         $this->assertTrue(AdminAccess::canAccessAdminResource(ProductResource::class));
         $this->assertTrue(AdminAccess::canManageProductsInAdmin($manager));
         $this->assertFalse(AdminAccess::canManageShopInAdmin($manager));

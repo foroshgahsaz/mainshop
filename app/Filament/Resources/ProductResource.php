@@ -17,6 +17,7 @@ use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
@@ -209,6 +210,17 @@ class ProductResource extends Resource
                     ProductDeleteActions::tableBulkDeleteAction(),
                 ]),
             ]);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->with([
+            'category:id,name',
+            'brand:id,name',
+            'productFamily:id,name',
+            'productPlant:id,name',
+            'productTemplate:id,name',
+        ]);
     }
 
     public static function getRelations(): array

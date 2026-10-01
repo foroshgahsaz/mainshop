@@ -12,6 +12,12 @@ class PaymentGatewayCatalog
 
     public const TYPE_CREDIT = 'credit';
 
+    /** @var array<string, array<string, mixed>>|null */
+    protected ?array $allMemo = null;
+
+    /** @var list<array<string, mixed>>|null */
+    protected ?array $enabledMemo = null;
+
     public function __construct(
         protected SettingsService $settings,
     ) {}
@@ -19,13 +25,17 @@ class PaymentGatewayCatalog
     /** @return array<string, array<string, mixed>> */
     public function all(): array
     {
+        if ($this->allMemo !== null) {
+            return $this->allMemo;
+        }
+
         $gateways = [];
 
         foreach (array_keys(config('payment.gateways', [])) as $name) {
             $gateways[$name] = $this->definition($name);
         }
 
-        return $gateways;
+        return $this->allMemo = $gateways;
     }
 
     /** @return array<string, mixed> */
@@ -60,6 +70,10 @@ class PaymentGatewayCatalog
     /** @return list<array<string, mixed>> */
     public function enabled(?string $type = null): array
     {
+        if ($type === null && $this->enabledMemo !== null) {
+            return $this->enabledMemo;
+        }
+
         $items = [];
 
         foreach ($this->all() as $gateway) {
@@ -72,6 +86,10 @@ class PaymentGatewayCatalog
             }
 
             $items[] = $gateway;
+        }
+
+        if ($type === null) {
+            $this->enabledMemo = $items;
         }
 
         return $items;

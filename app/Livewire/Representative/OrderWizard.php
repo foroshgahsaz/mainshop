@@ -89,9 +89,10 @@ class OrderWizard extends Component
         $this->plantId = $filters['plant_id'] ?? null;
         $this->brandId = $filters['brand_id'] ?? null;
         $this->templateId = $filters['template_id'] ?? null;
-        $this->step = $order->items()->exists() ? 'review' : 'family';
+        $hasItems = $order->items()->exists();
+        $this->step = $hasItems ? 'review' : 'family';
 
-        if ($order->items()->exists()) {
+        if ($hasItems) {
             $this->refreshDraftLineItems();
             $this->syncLineQuantitiesFromOrder();
             $this->syncFulfillmentFromOrder();

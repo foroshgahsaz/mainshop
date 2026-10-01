@@ -2,9 +2,10 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\Order;
 use App\Support\IranCityCoordinates;
 use Filament\Widgets\Widget;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class OrdersMapWidget extends Widget
 {
@@ -21,42 +22,45 @@ class OrdersMapWidget extends Widget
      */
     public function getMapPoints(): array
     {
+        return Cache::remember('admin:dashboard:orders_map_points', 600, function (): array {
+            return $this->buildMapPoints();
+        });
+    }
+
+    /**
+     * @return array<int, array{name: string, lat: float, lng: float, count: int, color: string}>
+     */
+    protected function buildMapPoints(): array
+    {
         $colors = ['#7239ea', '#3699ff', '#ffc700', '#50cd89', '#f1416c'];
-        $counts = [];
 
-        Order::query()
-            ->with('address:id,city')
-            ->whereNotNull('address_id')
-            ->latest()
-            ->limit(500)
-            ->get()
-            ->each(function (Order $order) use (&$counts) {
-                $city = $order->address?->city;
-
-                if (blank($city)) {
-                    return;
-                }
-
-                $counts[$city] = ($counts[$city] ?? 0) + 1;
-            });
-
-        arsort($counts);
+        $counts = DB::table('orders')
+            ->join('user_addresses', 'orders.address_id', '=', 'user_addresses.id')
+            ->whereNotNull('orders.address_id')
+            ->whereNotNull('user_addresses.city')
+            ->where('user_addresses.city', '!=', '')
+            ->selectRaw('user_addresses.city as city, COUNT(*) as aggregate')
+            ->groupBy('user_addresses.city')
+            ->orderByDesc('aggregate')
+            ->limit(40)
+            ->pluck('aggregate', 'city')
+            ->all();
 
         $points = [];
         $index = 0;
 
         foreach ($counts as $city => $count) {
-            $coords = IranCityCoordinates::resolve($city);
+            $coords = IranCityCoordinates::resolve((string) $city);
 
             if (! $coords) {
                 continue;
             }
 
             $points[] = [
-                'name' => $city,
+                'name' => (string) $city,
                 'lat' => $coords[0],
                 'lng' => $coords[1],
-                'count' => $count,
+                'count' => (int) $count,
                 'color' => $colors[$index % count($colors)],
             ];
 

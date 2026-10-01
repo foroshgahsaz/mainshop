@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Support\AdminTable;
+use App\Filament\Support\OrderDeleteActions;
 use App\Models\Order;
 use App\Support\AdminAccess;
 use App\Support\ShopLabels;
@@ -29,6 +30,11 @@ class OrderResource extends Resource
     public static function canViewAny(): bool
     {
         return AdminAccess::canAccessAdminResource(static::class);
+    }
+
+    public static function canDelete($record): bool
+    {
+        return AdminAccess::canManageShopInAdmin();
     }
 
     public static function getEloquentQuery(): Builder
@@ -71,6 +77,12 @@ class OrderResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->actions([
                 Tables\Actions\ViewAction::make()->label('جزئیات'),
+                OrderDeleteActions::tableDeleteAction(),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    OrderDeleteActions::tableBulkDeleteAction(),
+                ]),
             ]);
     }
 

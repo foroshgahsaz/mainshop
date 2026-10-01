@@ -12,6 +12,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Http\Responses\Auth\Contracts\LoginResponse;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Pages\Auth\Login as BaseLogin;
+use Filament\Panel;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
 
@@ -34,7 +35,7 @@ class Login extends BaseLogin
     public function mount(): void
     {
         if (Filament::auth()->check()) {
-            app(LoginResponse::class)->toResponse(request());
+            $this->redirectAfterAdminLogin();
 
             return;
         }
@@ -125,9 +126,11 @@ class Login extends BaseLogin
 
         Filament::auth()->login($user, remember: true);
 
+        $panel = $this->adminPanel();
+
         if (
             ($user instanceof FilamentUser)
-            && (! $user->canAccessPanel(Filament::getCurrentPanel()))
+            && (! $user->canAccessPanel($panel))
         ) {
             Filament::auth()->logout();
 
@@ -145,7 +148,9 @@ class Login extends BaseLogin
 
         session()->regenerate();
 
-        return app(LoginResponse::class);
+        $this->redirectAfterAdminLogin();
+
+        return null;
     }
 
     public function backToAdminPhone(): void
@@ -280,7 +285,25 @@ class Login extends BaseLogin
     {
         $this->activeLoginTab = 'username';
 
-        return parent::authenticate();
+        $response = parent::authenticate();
+
+        if ($response !== null) {
+            $this->redirectAfterAdminLogin();
+
+            return null;
+        }
+
+        return null;
+    }
+
+    protected function adminPanel(): Panel
+    {
+        return Filament::getCurrentPanel() ?? Filament::getPanel('admin');
+    }
+
+    protected function redirectAfterAdminLogin(): void
+    {
+        $this->redirectIntended($this->adminPanel()->getUrl(), navigate: false);
     }
 
     protected function throwFailureValidationException(): never

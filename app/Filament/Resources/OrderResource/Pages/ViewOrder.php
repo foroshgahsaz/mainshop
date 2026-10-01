@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\OrderResource\Pages;
 
 use App\Filament\Resources\OrderResource;
+use App\Filament\Support\OrderDeleteActions;
 use App\Models\FreightCarrier;
 use App\Models\OrderNote;
 use App\Services\Order\OrderActivityLogger;
@@ -94,6 +95,8 @@ class ViewOrder extends ViewRecord
                 ->url(fn (): string => route('representative.proforma.pdf', $order))
                 ->openUrlInNewTab();
         }
+
+        $actions[] = OrderDeleteActions::pageDeleteAction();
 
         if ($order->isProforma() && $order->hasActiveStockReservation()) {
             $actions[] = Actions\Action::make('extendProformaReservation')

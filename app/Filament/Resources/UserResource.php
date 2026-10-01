@@ -10,14 +10,16 @@ use App\Filament\Support\ShopMediaPicker;
 use App\Models\City;
 use App\Models\Province;
 use App\Models\User;
+use App\Support\AdminAccess;
 use Filament\Forms;
-use Illuminate\Support\Facades\Schema;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\HtmlString;
 
 class UserResource extends Resource
@@ -33,6 +35,30 @@ class UserResource extends Resource
     protected static ?int $navigationSort = 1;
 
     protected static bool $shouldRegisterNavigation = false;
+
+    public static function canViewAny(): bool
+    {
+        return AdminAccess::canAccessAdminResource(static::class);
+    }
+
+    public static function canCreate(): bool
+    {
+        return AdminAccess::canManageShopInAdmin();
+    }
+
+    public static function canDelete($record): bool
+    {
+        return AdminAccess::canManageShopInAdmin();
+    }
+
+    public static function canEdit($record): bool
+    {
+        if (AdminAccess::canManageShopInAdmin()) {
+            return true;
+        }
+
+        return AdminAccess::isSalesManagerOnly();
+    }
 
     public static function form(Form $form): Form
     {
@@ -140,6 +166,23 @@ class UserResource extends Resource
                     Forms\Components\Toggle::make('status')
                         ->label('حساب فعال')
                         ->default(true),
+                    Forms\Components\Placeholder::make('created_by_representative_info')
+                        ->label('ثبت توسط نماینده')
+                        ->content(function (?User $record): string {
+                            if (! $record?->created_by_representative_id) {
+                                return '—';
+                            }
+
+                            $rep = $record->createdByRepresentative;
+                            if (! $rep) {
+                                return 'شناسه نماینده: '.$record->created_by_representative_id;
+                            }
+
+                            $phone = $rep->phone ? ' — '.$rep->phone : '';
+
+                            return $rep->name.$phone;
+                        })
+                        ->visible(fn (?User $record): bool => (bool) $record?->created_by_representative_id),
                 ])
                 ->columns(2),
         ];
@@ -210,6 +253,9 @@ class UserResource extends Resource
                     Forms\Components\Toggle::make('is_representative')
                         ->label('نماینده — پنل نمایندگی')
                         ->live(),
+                    Forms\Components\Toggle::make('is_sales_manager')
+                        ->label('مدیر فروش — مشاهده سفارش‌ها، پرداخت‌ها و نمایندگان (بدون ویرایش)')
+                        ->disabled(fn (): bool => AdminAccess::isSalesManagerOnly()),
                 ])
                 ->columns(2)
                 ->visible(fn (Get $get): bool => $get('user_kind') === 'staff'),
@@ -358,6 +404,11 @@ class UserResource extends Resource
         );
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->with('createdByRepresentative');
+    }
+
     public static function table(Table $table): Table
     {
         return AdminTable::configure($table)
@@ -378,6 +429,12 @@ class UserResource extends Resource
                     ->description(fn (User $record) => $record->isCustomer() ? null : $record->staffRoleLabel())
                     ->badge()
                     ->color(fn (User $record) => $record->roleColor()),
+                Tables\Columns\TextColumn::make('createdByRepresentative.name')
+                    ->label('نماینده ثبت‌کننده')
+                    ->description(fn (User $record) => $record->createdByRepresentative?->phone)
+                    ->placeholder('—')
+                    ->toggleable()
+                    ->visible(fn (): bool => AdminAccess::canManageShopInAdmin() || AdminAccess::isSalesManagerOnly()),
                 Tables\Columns\TextColumn::make('last_login_at')
                     ->label('آخرین ورود')
                     ->since()
@@ -405,7 +462,8 @@ class UserResource extends Resource
                             'staff' => $query->where(fn ($q) => $q
                                 ->where('is_admin', true)
                                 ->orWhere('is_author', true)
-                                ->orWhere('is_representative', true)),
+                                ->orWhere('is_representative', true)
+                                ->orWhere('is_sales_manager', true)),
                             default => $query,
                         };
                     }),

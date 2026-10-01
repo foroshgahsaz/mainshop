@@ -6,6 +6,7 @@ use App\Filament\Resources\Pages\EditRecord;
 use App\Filament\Resources\UserResource;
 use App\Filament\Resources\UserResource\UserEditTabs;
 use App\Models\User;
+use App\Support\AdminAccess;
 use Filament\Actions;
 use Illuminate\Contracts\Support\Htmlable;
 
@@ -37,11 +38,19 @@ class EditUser extends EditRecord
 
     protected function getHeaderActions(): array
     {
+        if (! AdminAccess::canManageShopInAdmin()) {
+            return [];
+        }
+
         return [Actions\DeleteAction::make()];
     }
 
     protected function getFormActions(): array
     {
+        if (AdminAccess::isSalesManagerOnly() && auth()->id() !== $this->getRecord()->getKey()) {
+            return [];
+        }
+
         if (UserEditTabs::isReadOnly(UserEditTabs::resolveActive('edit'))) {
             return [];
         }
@@ -63,6 +72,10 @@ class EditUser extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
+        if (AdminAccess::isSalesManagerOnly() && auth()->id() !== $this->getRecord()->getKey()) {
+            return $data;
+        }
+
         /** @var User $user */
         $user = $this->getRecord();
 
@@ -76,6 +89,7 @@ class EditUser extends EditRecord
             'is_admin' => $user->is_admin,
             'is_author' => $user->is_author,
             'is_representative' => $user->is_representative,
+            'is_sales_manager' => $user->is_sales_manager,
         ], $data);
 
         if (! filled($data['password'] ?? null)) {
@@ -94,7 +108,16 @@ class EditUser extends EditRecord
         return $data;
     }
 
-    public function mount(int | string $record): void
+    public function save(bool $shouldRedirect = true, bool $shouldSendSavedNotification = true): void
+    {
+        if (AdminAccess::isSalesManagerOnly() && auth()->id() !== $this->getRecord()->getKey()) {
+            return;
+        }
+
+        parent::save($shouldRedirect, $shouldSendSavedNotification);
+    }
+
+    public function mount(int|string $record): void
     {
         parent::mount($record);
 

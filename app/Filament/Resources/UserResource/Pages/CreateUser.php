@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\UserResource\Pages;
 
-use App\Filament\Resources\UserResource;
 use App\Filament\Resources\Pages\CreateRecord;
+use App\Filament\Resources\UserResource;
 use Filament\Forms\Form;
 
 class CreateUser extends CreateRecord
@@ -42,6 +42,7 @@ class CreateUser extends CreateRecord
             $data['is_admin'] = (bool) ($raw['is_admin'] ?? $data['is_admin'] ?? false);
             $data['is_author'] = (bool) ($raw['is_author'] ?? $data['is_author'] ?? false);
             $data['is_representative'] = (bool) ($raw['is_representative'] ?? $data['is_representative'] ?? false);
+            $data['is_sales_manager'] = (bool) ($raw['is_sales_manager'] ?? $data['is_sales_manager'] ?? false);
         }
 
         return static::normalizeUserKind($data);
@@ -50,7 +51,7 @@ class CreateUser extends CreateRecord
     /** @param  array<string, mixed>  $data */
     public static function resolveUserKindFromFlags(array $data): string
     {
-        foreach (['is_admin', 'is_author', 'is_representative'] as $flag) {
+        foreach (['is_admin', 'is_author', 'is_representative', 'is_sales_manager'] as $flag) {
             if (filter_var($data[$flag] ?? false, FILTER_VALIDATE_BOOLEAN)) {
                 return 'staff';
             }
@@ -66,6 +67,7 @@ class CreateUser extends CreateRecord
             $data['is_admin'] = false;
             $data['is_author'] = false;
             $data['is_representative'] = false;
+            $data['is_sales_manager'] = false;
         }
 
         unset($data['user_kind']);

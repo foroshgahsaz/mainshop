@@ -1,12 +1,14 @@
 <section class="admin-order__section admin-order__section--notes">
     <h2 class="admin-order__section-title">یادداشت‌ها و تاریخچه پرداخت</h2>
 
+    @if(\App\Support\AdminAccess::canManageShopInAdmin())
     <form wire:submit="addNote" class="admin-order__note-form">
         <label class="admin-order__label">افزودن یادداشت</label>
         <textarea wire:model="newNote" rows="3" class="admin-order__textarea" placeholder="یادداشت خصوصی..."></textarea>
         @error('newNote') <p class="admin-order__error">{{ $message }}</p> @enderror
         <button type="submit" class="admin-order__btn admin-order__btn--primary">افزودن یادداشت</button>
     </form>
+    @endif
 
     <ul class="admin-order__notes-timeline">
         @forelse($payment->notes as $note)

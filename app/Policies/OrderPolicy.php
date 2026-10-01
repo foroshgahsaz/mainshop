@@ -9,7 +9,7 @@ class OrderPolicy
 {
     public function view(User $user, Order $order): bool
     {
-        return $user->id === $order->user_id || $user->isAdmin();
+        return $user->id === $order->user_id || $user->isAdmin() || $user->isSalesManager();
     }
 
     public function cancel(User $user, Order $order): bool

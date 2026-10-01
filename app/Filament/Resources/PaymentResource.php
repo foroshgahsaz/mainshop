@@ -7,6 +7,7 @@ use App\Filament\Support\AdminTable;
 use App\Filament\Support\PaymentDeleteActions;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Support\AdminAccess;
 use App\Support\ShopLabels;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -27,6 +28,11 @@ class PaymentResource extends Resource
     protected static ?int $navigationSort = 4;
 
     protected static bool $shouldRegisterNavigation = false;
+
+    public static function canViewAny(): bool
+    {
+        return AdminAccess::canAccessAdminResource(static::class);
+    }
 
     public static function form(Form $form): Form
     {
@@ -84,11 +90,13 @@ class PaymentResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()->label('جزئیات'),
-                PaymentDeleteActions::tableDeleteAction(),
+                PaymentDeleteActions::tableDeleteAction()
+                    ->visible(fn (): bool => AdminAccess::canManageShopInAdmin()),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    PaymentDeleteActions::tableBulkDeleteAction(),
+                    PaymentDeleteActions::tableBulkDeleteAction()
+                        ->visible(fn (): bool => AdminAccess::canManageShopInAdmin()),
                 ]),
             ]);
     }

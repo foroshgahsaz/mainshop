@@ -8,6 +8,7 @@ use App\Filament\Support\PaymentDeleteActions;
 use App\Models\Payment;
 use App\Services\Payment\PaymentActivityLogger;
 use App\Services\Payment\TaraRefundService;
+use App\Support\AdminAccess;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
@@ -36,7 +37,9 @@ class ViewPayment extends ViewRecord
                 ->requiresConfirmation()
                 ->modalHeading('مرجوعی پرداخت تارا')
                 ->modalDescription('مبلغ این پرداخت در درگاه تارا مرجوع می‌شود. اگر سفارش دیگر تسویه نباشد، به حالت در انتظار برمی‌گردد.')
-                ->visible(fn () => $this->record->gateway === 'tara' && $this->record->status === Payment::STATUS_SUCCESS)
+                ->visible(fn () => AdminAccess::canManageShopInAdmin()
+                    && $this->record->gateway === 'tara'
+                    && $this->record->status === Payment::STATUS_SUCCESS)
                 ->action(function (TaraRefundService $refunds): void {
                     try {
                         $this->record = $refunds->refund($this->record);
@@ -56,7 +59,8 @@ class ViewPayment extends ViewRecord
                 ->icon('heroicon-o-arrow-right')
                 ->url(PaymentResource::getUrl('index'))
                 ->color('gray'),
-            PaymentDeleteActions::pageDeleteAction(),
+            PaymentDeleteActions::pageDeleteAction()
+                ->visible(fn (): bool => AdminAccess::canManageShopInAdmin()),
         ];
     }
 
@@ -67,6 +71,10 @@ class ViewPayment extends ViewRecord
 
     public function addNote(PaymentActivityLogger $logger): void
     {
+        if (! AdminAccess::canManageShopInAdmin()) {
+            return;
+        }
+
         $this->validate(['newNote' => ['required', 'string', 'max:2000']]);
 
         $logger->byUser($this->record, auth()->user(), trim($this->newNote));

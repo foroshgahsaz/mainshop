@@ -10,6 +10,7 @@ use App\Services\Order\OrderService;
 use App\Services\Payment\PaymentGatewayCatalog;
 use App\Services\Representative\RepresentativeOrderAdminService;
 use App\Services\Representative\RepresentativeProformaService;
+use App\Support\AdminAccess;
 use App\Support\Order\OrderItemLinePricing;
 use Filament\Actions;
 use Filament\Notifications\Notification;
@@ -123,6 +124,10 @@ class ViewOrder extends ViewRecord
 
     public function addNote(OrderActivityLogger $logger): void
     {
+        if (! AdminAccess::canManageShopInAdmin()) {
+            return;
+        }
+
         $this->validate([
             'newNote' => ['required', 'string', 'max:2000'],
             'newNoteType' => ['required', 'in:private,customer'],
@@ -137,6 +142,10 @@ class ViewOrder extends ViewRecord
 
     public function saveOrderMeta(OrderService $orders): void
     {
+        if (! AdminAccess::canManageShopInAdmin()) {
+            return;
+        }
+
         $this->validate([
             'editStatus' => ['required', 'string'],
             'editTracking' => ['nullable', 'string', 'max:100'],
@@ -372,7 +381,8 @@ class ViewOrder extends ViewRecord
     {
         $order = $this->record;
 
-        return $order->isRepresentativeOrder()
+        return AdminAccess::canManageShopInAdmin()
+            && $order->isRepresentativeOrder()
             && $order->isProforma()
             && ! $order->isPaid();
     }

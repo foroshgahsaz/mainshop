@@ -352,6 +352,29 @@
                 </div>
             @endif
             @error('order') <p class="rep-wizard-error">{{ $message }}</p> @enderror
+            @if ($step === 'review' && $this->activeReservedProformas->isNotEmpty())
+                <div class="rep-active-proformas" role="region" aria-label="پیش‌فاکتورهای با رزرو فعال">
+                    <p class="rep-active-proformas__title">پیش‌فاکتورهای با رزرو فعال</p>
+                    <p class="rep-active-proformas__hint">برای ثبت پیش‌فاکتور جدید، یکی را پرداخت کنید یا منتظر انقضای رزرو بمانید.</p>
+                    <ul class="rep-active-proformas__list">
+                        @foreach ($this->activeReservedProformas as $reservedOrder)
+                            <li class="rep-active-proformas__item">
+                                <a class="rep-active-proformas__link"
+                                   href="{{ \App\Filament\Representative\Resources\DraftOrderResource::getUrl('view', ['record' => $reservedOrder->id], panel: 'representative') }}">
+                                    <span class="rep-active-proformas__code">#{{ $reservedOrder->tracking_code }}</span>
+                                    @if ($reservedOrder->user)
+                                        <span class="rep-active-proformas__customer">{{ $reservedOrder->user->name }}</span>
+                                    @endif
+                                    <span class="rep-active-proformas__amount">{{ $this->formatMoney((int) $reservedOrder->final_amount) }}</span>
+                                    @if ($reservedOrder->stock_reserved_until)
+                                        <span class="rep-active-proformas__until">انقضای رزرو: {{ $reservedOrder->stock_reserved_until->format('Y/m/d H:i') }}</span>
+                                    @endif
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
             @error('quantity') <p class="rep-wizard-error">{{ $message }}</p> @enderror
         </section>
     @endif

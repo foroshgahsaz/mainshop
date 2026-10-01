@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\User;
 use App\Services\Cart\StockService;
 use App\Services\Order\OrderActivityLogger;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use RuntimeException;
@@ -76,6 +77,23 @@ class RepresentativeProformaService
 
     public function countActiveReservations(User $representative): int
     {
+        return $this->activeReservedProformasQuery($representative)->count();
+    }
+
+    /**
+     * @return Collection<int, Order>
+     */
+    public function activeReservedProformas(User $representative): Collection
+    {
+        return $this->activeReservedProformasQuery($representative)
+            ->with(['user:id,name,phone', 'freightCarrier'])
+            ->orderByDesc('stock_reserved_until')
+            ->orderByDesc('id')
+            ->get();
+    }
+
+    protected function activeReservedProformasQuery(User $representative)
+    {
         return Order::query()
             ->where('representative_id', $representative->id)
             ->where('status', Order::STATUS_PROFORMA)
@@ -83,8 +101,7 @@ class RepresentativeProformaService
             ->where(function ($query) {
                 $query->whereNull('stock_reserved_until')
                     ->orWhere('stock_reserved_until', '>', now());
-            })
-            ->count();
+            });
     }
 
     public function extendReservation(Order $order, int $extraMinutes, ?User $actor = null): Order

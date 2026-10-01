@@ -31,7 +31,10 @@
     use App\Filament\Resources\ShippingMethodResource;
     use App\Filament\Resources\UserResource;
 
+    use App\Support\AdminAccess;
+
     $user = filament()->auth()->user();
+    $salesManagerOnly = AdminAccess::isSalesManagerOnly($user);
     $brand = filament()->getBrandName();
     $isDashboard = request()->routeIs('filament.admin.pages.dashboard');
     $profileUrl = UserResource::getUrl('edit', ['record' => $user->id], panel: 'admin');
@@ -229,6 +232,16 @@
         ],
     ];
 
+    if ($salesManagerOnly) {
+        $panels = array_intersect_key($panels, array_flip(['orders', 'payments', 'users']));
+        $panels['users']['menus'] = [
+            ['label' => 'کاربران', 'icon' => 'fa-users', 'items' => [
+                ['label' => 'نمایندگان', 'url' => UserResource::getUrl('index', ['activeTab' => 'representatives']), 'icon' => 'fa-user-tie'],
+                ['label' => 'مشتریان نمایندگان', 'url' => UserResource::getUrl('index', ['activeTab' => 'rep_customers']), 'icon' => 'fa-user'],
+            ]],
+        ];
+    }
+
     $activePanel = 'users';
     $sidebarPanel = 'users';
     if ($isDashboard) {
@@ -260,6 +273,14 @@
         ['id' => 'media', 'icon' => 'fa-folder-open', 'tooltip' => 'مدیریت فایل', 'panel' => 'media'],
         ['id' => 'settings', 'icon' => 'fa-cog', 'tooltip' => 'تنظیمات', 'panel' => 'settings'],
     ];
+
+    if ($salesManagerOnly) {
+        $navIcons = array_values(array_filter(
+            $navIcons,
+            fn (array $icon): bool => ($icon['isLink'] ?? false)
+                || in_array($icon['panel'] ?? '', ['orders', 'payments', 'users'], true)
+        ));
+    }
 
     $isMenuItemActive = function (string $url): bool {
         $current = url()->current();

@@ -6,6 +6,7 @@ use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\ManageTara;
 use App\Filament\Pages\ManageZarinpal;
+use App\Http\Middleware\RestrictSalesManagerAdminAccess;
 use App\Http\Middleware\SetPersianLocale;
 use App\Services\Settings\SettingsService;
 use Filament\FontProviders\LocalFontProvider;
@@ -75,6 +76,7 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                RestrictSalesManagerAdminAccess::class,
             ])
             ->authMiddleware([
                 Authenticate::class,

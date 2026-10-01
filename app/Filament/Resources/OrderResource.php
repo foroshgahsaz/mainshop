@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Support\AdminTable;
 use App\Models\Order;
+use App\Support\AdminAccess;
 use App\Support\ShopLabels;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -24,6 +25,11 @@ class OrderResource extends Resource
     protected static ?int $navigationSort = 1;
 
     protected static bool $shouldRegisterNavigation = false;
+
+    public static function canViewAny(): bool
+    {
+        return AdminAccess::canAccessAdminResource(static::class);
+    }
 
     public static function getEloquentQuery(): Builder
     {

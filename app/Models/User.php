@@ -31,6 +31,7 @@ class User extends Authenticatable implements FilamentUser
         'is_admin',
         'is_author',
         'is_representative',
+        'is_sales_manager',
         'created_by_representative_id',
         'password',
         'last_login_at',
@@ -52,6 +53,7 @@ class User extends Authenticatable implements FilamentUser
             'is_admin' => 'boolean',
             'is_author' => 'boolean',
             'is_representative' => 'boolean',
+            'is_sales_manager' => 'boolean',
             'password' => 'hashed',
         ];
     }
@@ -60,6 +62,10 @@ class User extends Authenticatable implements FilamentUser
     {
         if ($panel->getId() === 'representative') {
             return $this->isRepresentative() && $this->status;
+        }
+
+        if ($panel->getId() === 'admin') {
+            return $this->status && ($this->is_admin || $this->isSalesManager());
         }
 
         return $this->is_admin && $this->status;
@@ -75,9 +81,17 @@ class User extends Authenticatable implements FilamentUser
         return (bool) $this->is_representative;
     }
 
+    public function isSalesManager(): bool
+    {
+        return (bool) $this->is_sales_manager;
+    }
+
     public function isCustomer(): bool
     {
-        return ! $this->is_admin && ! $this->is_author && ! $this->is_representative;
+        return ! $this->is_admin
+            && ! $this->is_author
+            && ! $this->is_representative
+            && ! $this->is_sales_manager;
     }
 
     public function customerTypeLabel(): string
@@ -99,6 +113,10 @@ class User extends Authenticatable implements FilamentUser
 
         if ($this->is_representative) {
             $roles[] = 'نماینده';
+        }
+
+        if ($this->is_sales_manager) {
+            $roles[] = 'مدیر فروش';
         }
 
         return implode('، ', $roles) ?: '—';

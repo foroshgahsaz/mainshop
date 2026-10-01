@@ -55,11 +55,13 @@
             <aside class="admin-order__sidebar">
                 @include('filament.orders.partials.customer-box', ['order' => $order])
                 @include('filament.orders.partials.address-box', ['order' => $order])
-                @include('filament.orders.partials.order-actions', [
-                    'order' => $order,
-                    'editStatus' => $editStatus,
-                    'editTracking' => $editTracking,
-                ])
+                @if(\App\Support\AdminAccess::canManageShopInAdmin())
+                    @include('filament.orders.partials.order-actions', [
+                        'order' => $order,
+                        'editStatus' => $editStatus,
+                        'editTracking' => $editTracking,
+                    ])
+                @endif
                 @include('filament.orders.partials.order-meta', ['order' => $order])
             </aside>
         </div>

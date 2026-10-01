@@ -11,11 +11,13 @@ use App\Services\Media\DisplayImageService;
 use App\Services\Payment\PaymentGatewayCatalog;
 use App\Services\Representative\RepresentativeCatalogLookup;
 use App\Services\Representative\RepresentativeDraftOrderService;
+use App\Services\Representative\RepresentativeProformaService;
 use App\Support\ShopFormatter;
 use App\Support\ShopMedia;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -339,6 +341,22 @@ class OrderWizard extends Component
     }
 
     #[Computed]
+    public function activeReservedProformas(): Collection
+    {
+        if ($this->step !== 'review') {
+            return collect();
+        }
+
+        $representative = auth()->user();
+
+        if ($representative === null) {
+            return collect();
+        }
+
+        return app(RepresentativeProformaService::class)->activeReservedProformas($representative);
+    }
+
+    #[Computed]
     public function customers(): Collection
     {
         if ($this->step !== 'customer') {
@@ -519,7 +537,7 @@ class OrderWizard extends Component
 
         try {
             app(RepresentativeDraftOrderService::class)->syncItemQuantities($order, $this->lineQuantities);
-        } catch (\Illuminate\Validation\ValidationException $exception) {
+        } catch (ValidationException $exception) {
             $message = collect($exception->errors())->flatten()->first() ?? 'تعداد نامعتبر است.';
             $this->addError('quantity', $message);
 
@@ -576,7 +594,7 @@ class OrderWizard extends Component
                 (int) $this->freightCarrierId,
                 $this->paymentGateway,
             );
-        } catch (\Illuminate\Validation\ValidationException $exception) {
+        } catch (ValidationException $exception) {
             foreach ($exception->errors() as $field => $messages) {
                 $this->addError($field, $messages[0] ?? 'مقدار نامعتبر است.');
             }

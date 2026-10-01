@@ -10,6 +10,7 @@ use App\Services\Order\OrderService;
 use App\Services\Payment\PaymentGatewayCatalog;
 use App\Services\Representative\RepresentativeOrderAdminService;
 use App\Services\Representative\RepresentativeProformaService;
+use App\Support\Order\OrderItemLinePricing;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
@@ -175,6 +176,18 @@ class ViewOrder extends ViewRecord
 
     public function saveProformaItems(RepresentativeOrderAdminService $admin): void
     {
+        $this->persistProformaItemsToDatabase($admin);
+
+        Notification::make()->title('اقلام پیش‌فاکتور به‌روزرسانی شد')->success()->send();
+    }
+
+    public function saveInvoiceLines(RepresentativeOrderAdminService $admin): void
+    {
+        $this->persistInvoiceLinesToDatabase($admin);
+    }
+
+    protected function persistProformaItemsToDatabase(?RepresentativeOrderAdminService $admin = null): void
+    {
         if (! $this->canAdminEditProforma) {
             throw ValidationException::withMessages([
                 'order' => 'در حال حاضر ویرایش اقلام پیش‌فاکتور مجاز نیست.',
@@ -188,7 +201,7 @@ class ViewOrder extends ViewRecord
             'editItemDiscountValues' => ['required', 'array'],
         ]);
 
-        $admin->syncProformaItems(
+        ($admin ?? app(RepresentativeOrderAdminService::class))->syncProformaItems(
             $this->record->fresh(['items']),
             $this->editItemQuantities,
             $this->editItemDiscountTypes,
@@ -198,11 +211,9 @@ class ViewOrder extends ViewRecord
 
         $this->refreshRecord();
         $this->syncFormFields();
-
-        Notification::make()->title('اقلام پیش‌فاکتور به‌روزرسانی شد')->success()->send();
     }
 
-    public function saveInvoiceLines(RepresentativeOrderAdminService $admin): void
+    protected function persistInvoiceLinesToDatabase(?RepresentativeOrderAdminService $admin = null): void
     {
         if (! $this->canAdminEditProforma) {
             throw ValidationException::withMessages([
@@ -210,7 +221,7 @@ class ViewOrder extends ViewRecord
             ]);
         }
 
-        $admin->syncInvoiceLines(
+        ($admin ?? app(RepresentativeOrderAdminService::class))->syncInvoiceLines(
             $this->record->fresh(['invoiceLines']),
             $this->editInvoiceLines,
             auth()->user(),
@@ -274,6 +285,8 @@ class ViewOrder extends ViewRecord
         }
 
         $this->closeInvoiceLineModal();
+
+        $this->persistInvoiceLinesToDatabase();
     }
 
     public function openItemDiscountModal(int $itemId): void
@@ -321,6 +334,26 @@ class ViewOrder extends ViewRecord
         $this->editItemDiscountValues[$itemId] = $value;
 
         $this->closeItemDiscountModal();
+
+        $this->persistProformaItemsToDatabase();
+
+        Notification::make()->title('تخفیف ردیف ذخیره شد')->success()->send();
+    }
+
+    public function previewItemLineTotal(int $itemId): int
+    {
+        $item = $this->record->items->firstWhere('id', $itemId);
+
+        if ($item === null) {
+            return 0;
+        }
+
+        $preview = $item->replicate();
+        $preview->quantity = (int) ($this->editItemQuantities[$itemId] ?? $item->quantity);
+        $preview->line_discount_type = (string) ($this->editItemDiscountTypes[$itemId] ?? $item->line_discount_type ?? OrderItemLinePricing::DISCOUNT_NONE);
+        $preview->line_discount_value = (int) ($this->editItemDiscountValues[$itemId] ?? $item->line_discount_value ?? 0);
+
+        return OrderItemLinePricing::netAmount($preview);
     }
 
     public function removeInvoiceLineRow(int $index): void
@@ -331,6 +364,8 @@ class ViewOrder extends ViewRecord
 
         unset($this->editInvoiceLines[$index]);
         $this->editInvoiceLines = array_values($this->editInvoiceLines);
+
+        $this->persistInvoiceLinesToDatabase();
     }
 
     public function getCanAdminEditProformaProperty(): bool

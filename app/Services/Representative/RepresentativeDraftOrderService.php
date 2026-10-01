@@ -322,6 +322,8 @@ class RepresentativeDraftOrderService
                 'quantity' => $totalQuantity,
                 'total_price' => $totalPrice,
                 'price' => $totalQuantity > 0 ? (int) round($totalPrice / $totalQuantity) : (int) $keep->price,
+                'line_discount_type' => 'none',
+                'line_discount_value' => 0,
             ]);
 
             OrderItem::query()

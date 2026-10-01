@@ -1,7 +1,7 @@
 <section class="admin-order__box admin-order__box--proforma-edit">
     <h3 class="admin-order__box-title">ویرایش اقلام پیش‌فاکتور (ادمین)</h3>
     <p class="admin-order__hint">
-        تعداد را در جدول تنظیم کنید؛ برای تخفیف هر ردیف دکمه «تخفیف ردیف» را بزنید.
+        تعداد را در جدول تنظیم کنید؛ تخفیف هر ردیف از پاپ‌آپ بلافاصله ذخیره می‌شود (دکمه «ویرایش تخفیف»).
     </p>
 
     <form wire:submit="saveProformaItems" class="admin-order__proforma-items-form">
@@ -42,10 +42,10 @@
                                 <button type="button"
                                         class="admin-order__btn admin-order__btn--secondary admin-order__btn--compact"
                                         wire:click="openItemDiscountModal({{ $item->id }})">
-                                    تخفیف ردیف
+                                    {{ $dType === 'none' ? 'تخفیف ردیف' : 'ویرایش تخفیف' }}
                                 </button>
                             </td>
-                            <td>{{ number_format($item->total_price) }} تومان</td>
+                            <td>{{ number_format($this->previewItemLineTotal($item->id)) }} تومان</td>
                         </tr>
                     @endforeach
                 </tbody>

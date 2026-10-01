@@ -152,6 +152,12 @@
 }
 
 .admin-order__totals-row--discount dd { color: var(--ao-success); }
+
+.admin-order__totals-row--indented dt {
+    padding-inline-start: 0.75rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
 .admin-order__totals-row--final {
     border-bottom: none;
     padding-top: 0.75rem;

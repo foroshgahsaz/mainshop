@@ -74,6 +74,16 @@ return [
             'enabled' => true,
         ],
 
+        'rep_gallery' => [
+            'label' => 'گالری پاپ‌آپ نماینده',
+            'mode' => 'contain',
+            'width' => 320,
+            'height' => 320,
+            'quality' => 80,
+            'format' => 'webp',
+            'enabled' => true,
+        ],
+
     ],
 
 ];

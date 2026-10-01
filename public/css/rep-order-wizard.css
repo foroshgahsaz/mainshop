@@ -343,7 +343,7 @@ html.rep-modal-open {
 .rep-modal-backdrop {
     position: fixed;
     inset: 0;
-    z-index: 120;
+    z-index: 9999;
     background: rgba(15, 23, 42, 0.62);
     display: flex;
     align-items: center;
@@ -352,7 +352,7 @@ html.rep-modal-open {
 }
 
 .rep-modal-backdrop--preparing {
-    z-index: 119;
+    z-index: 9998;
 }
 
 .rep-modal--compact {
@@ -458,6 +458,46 @@ html.rep-modal-open {
     overflow: hidden;
     background: #f9fafb;
     min-height: 9rem;
+}
+
+.rep-product-gallery__trigger {
+    width: 100%;
+    padding: 0;
+    cursor: zoom-in;
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+}
+
+.rep-modal-fullimage {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: rgba(0, 0, 0, 0.88);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+
+.rep-modal-fullimage__img {
+    max-width: min(96vw, 1100px);
+    max-height: 90vh;
+    object-fit: contain;
+    background: #fff;
+    border-radius: 0.35rem;
+}
+
+.rep-modal-fullimage__close {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    border: none;
+    background: #fff;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 999px;
+    font-size: 1.35rem;
+    cursor: pointer;
 }
 
 .rep-product-gallery__skeleton {

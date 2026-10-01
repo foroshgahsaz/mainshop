@@ -377,38 +377,51 @@
                  x-data
                  x-init="document.documentElement.classList.add('rep-modal-open')"
                  x-on:keydown.escape.window="$wire.closeProductImagesModal()">
-                <div class="rep-modal rep-modal--gallery" role="dialog" aria-modal="true" wire:click.stop>
+                <div class="rep-modal rep-modal--gallery"
+                     role="dialog"
+                     aria-modal="true"
+                     wire:click.stop
+                     x-data="{ fullImageUrl: null }">
                     <div class="rep-modal__header">
                         <h3 class="rep-modal__title">{{ $productImagesModalTitle }}</h3>
                         <button type="button" class="rep-modal__close" wire:click="closeProductImagesModal" aria-label="بستن">×</button>
                     </div>
                     <div class="rep-modal__body">
                         <div class="rep-product-gallery">
-                            @forelse ($productImagesModalUrls as $index => $url)
-                                <a href="{{ $url }}"
-                                   target="_blank"
-                                   rel="noopener"
-                                   class="rep-product-gallery__item"
-                                   x-data="{ loaded: false, failed: false }">
+                            @forelse ($productImagesModalItems as $index => $image)
+                                <button type="button"
+                                        class="rep-product-gallery__item rep-product-gallery__trigger"
+                                        x-data="{ loaded: false, failed: false }"
+                                        x-on:click="fullImageUrl = @js($image['full'])">
                                     <div class="rep-product-gallery__skeleton" x-show="!loaded && !failed" x-cloak></div>
-                                    <img src="{{ $url }}"
+                                    <img src="{{ $image['thumb'] }}"
                                          alt="{{ $productImagesModalTitle }}"
                                          loading="{{ $index === 0 ? 'eager' : 'lazy' }}"
                                          @if ($index === 0) fetchpriority="high" @endif
                                          decoding="async"
+                                         width="160"
+                                         height="160"
                                          x-show="loaded && !failed"
                                          x-on:load="loaded = true"
                                          x-on:error="failed = true; loaded = true"
                                          x-cloak>
                                     <span class="rep-product-gallery__error" x-show="failed" x-cloak>بارگذاری نشد</span>
-                                </a>
+                                </button>
                             @empty
                                 <p class="rep-wizard-empty">تصویری برای این محصول ثبت نشده است.</p>
                             @endforelse
                         </div>
-                        @if (count($productImagesModalUrls) > 0)
-                            <p class="rep-modal__status rep-modal__status--hint">تا بارگذاری کامل هر تصویر، جای خالی با انیمیشن نمایش داده می‌شود. برای اندازه کامل کلیک کنید.</p>
+                        @if (count($productImagesModalItems) > 0)
+                            <p class="rep-modal__status rep-modal__status--hint">پیش‌نمایش سبک برای سرعت بیشتر است. برای کیفیت کامل روی تصویر کلیک کنید.</p>
                         @endif
+                    </div>
+                    <div class="rep-modal-fullimage"
+                         x-show="fullImageUrl"
+                         x-cloak
+                         x-on:click.self="fullImageUrl = null"
+                         x-on:keydown.escape.window="fullImageUrl = null">
+                        <button type="button" class="rep-modal-fullimage__close" x-on:click="fullImageUrl = null" aria-label="بستن">×</button>
+                        <img :src="fullImageUrl" alt="{{ $productImagesModalTitle }}" class="rep-modal-fullimage__img">
                     </div>
                 </div>
             </div>

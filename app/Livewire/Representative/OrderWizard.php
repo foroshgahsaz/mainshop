@@ -7,6 +7,7 @@ use App\Models\FreightCarrier;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
+use App\Services\Media\DisplayImageService;
 use App\Services\Payment\PaymentGatewayCatalog;
 use App\Services\Representative\RepresentativeCatalogLookup;
 use App\Services\Representative\RepresentativeDraftOrderService;
@@ -54,8 +55,8 @@ class OrderWizard extends Component
 
     public string $productImagesModalTitle = '';
 
-    /** @var list<string> */
-    public array $productImagesModalUrls = [];
+    /** @var list<array{thumb: string, full: string}> */
+    public array $productImagesModalItems = [];
 
     public function mount(): void
     {
@@ -189,9 +190,23 @@ class OrderWizard extends Component
             return;
         }
 
+        $displayImages = app(DisplayImageService::class);
+
         $this->productImagesModalTitle = $product->name;
-        $this->productImagesModalUrls = $product->images
-            ->map(fn ($image) => ShopMedia::url((string) $image->image))
+        $this->productImagesModalItems = $product->images
+            ->map(function ($image) use ($displayImages) {
+                $path = (string) $image->image;
+                $full = ShopMedia::url($path);
+
+                if ($full === null || $full === '') {
+                    return null;
+                }
+
+                return [
+                    'thumb' => $displayImages->url('rep_gallery', $path) ?? $full,
+                    'full' => $full,
+                ];
+            })
             ->filter()
             ->values()
             ->all();
@@ -203,7 +218,7 @@ class OrderWizard extends Component
     {
         $this->showProductImagesModal = false;
         $this->productImagesModalTitle = '';
-        $this->productImagesModalUrls = [];
+        $this->productImagesModalItems = [];
 
         $this->dispatch('rep-product-images-modal-closed');
     }

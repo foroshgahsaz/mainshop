@@ -5,11 +5,13 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ProductTemplateResource\Pages;
 use App\Filament\Support\AdminTable;
 use App\Models\ProductTemplate;
+use App\Support\AdminAccess;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 
 class ProductTemplateResource extends Resource
@@ -29,6 +31,11 @@ class ProductTemplateResource extends Resource
     protected static ?string $modelLabel = 'قالب محصول';
 
     protected static ?string $pluralModelLabel = 'قالب‌های محصول';
+
+    public static function canViewAny(): bool
+    {
+        return AdminAccess::canAccessAdminResource(static::class);
+    }
 
     public static function form(Form $form): Form
     {
@@ -102,7 +109,7 @@ class ProductTemplateResource extends Resource
         ];
     }
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()->with(['brand', 'productFamily']);
     }

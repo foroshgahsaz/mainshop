@@ -8,6 +8,7 @@ use App\Filament\Support\AdminTable;
 use App\Filament\Support\SeoFormSchema;
 use App\Filament\Support\ShopMediaPicker;
 use App\Models\Brand;
+use App\Support\AdminAccess;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -30,6 +31,11 @@ class BrandResource extends Resource
     protected static bool $shouldRegisterNavigation = false;
 
     protected static ?string $modelLabel = 'برند';
+
+    public static function canViewAny(): bool
+    {
+        return AdminAccess::canAccessAdminResource(static::class);
+    }
 
     public static function form(Form $form): Form
     {

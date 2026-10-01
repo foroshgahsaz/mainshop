@@ -254,7 +254,7 @@ class UserResource extends Resource
                         ->label('نماینده — پنل نمایندگی')
                         ->live(),
                     Forms\Components\Toggle::make('is_sales_manager')
-                        ->label('مدیر فروش — مشاهده سفارش‌ها، پرداخت‌ها و نمایندگان (بدون ویرایش)')
+                        ->label('مدیر فروش — سفارش‌ها، پرداخت‌ها، کاربران و مدیریت کامل محصولات')
                         ->disabled(fn (): bool => AdminAccess::isSalesManagerOnly()),
                 ])
                 ->columns(2)

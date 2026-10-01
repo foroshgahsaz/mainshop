@@ -483,6 +483,13 @@ function bindOtpFormSubmit() {
         const component = Livewire.find(wireId);
         await component.set('otpCode', code);
         await component.call('verifyAdminOtp');
+
+        const redirectUrl = component?.__livewire?.effects?.redirect
+            || component?.effects?.redirect;
+
+        if (redirectUrl) {
+            window.location.assign(redirectUrl);
+        }
     }, true);
 }
 

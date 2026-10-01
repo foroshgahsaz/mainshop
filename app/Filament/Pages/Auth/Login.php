@@ -31,6 +31,17 @@ class Login extends BaseLogin
 
     public int $otpSentAt = 0;
 
+    public function mount(): void
+    {
+        if (Filament::auth()->check()) {
+            app(LoginResponse::class)->toResponse(request());
+
+            return;
+        }
+
+        parent::mount();
+    }
+
     public function hydrate(): void
     {
         $this->advanceAdminToOtpIfPending(app(OtpService::class));

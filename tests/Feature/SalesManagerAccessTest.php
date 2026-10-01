@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Filament\Resources\OrderResource;
 use App\Filament\Resources\ProductResource;
 use App\Models\User;
+use App\Services\Auth\AdminLoginGuard;
 use App\Support\AdminAccess;
 use Tests\TestCase;
 
@@ -26,6 +27,20 @@ class SalesManagerAccessTest extends TestCase
         $this->assertTrue(AdminAccess::canAccessAdminResource(ProductResource::class));
         $this->assertTrue(AdminAccess::canManageProductsInAdmin($manager));
         $this->assertFalse(AdminAccess::canManageShopInAdmin($manager));
+    }
+
+    public function test_sales_manager_passes_admin_login_guard(): void
+    {
+        $manager = new User([
+            'is_sales_manager' => true,
+            'is_admin' => false,
+            'status' => true,
+        ]);
+
+        $guard = app(AdminLoginGuard::class);
+
+        $this->assertTrue($guard->canAccessAdminLogin($manager));
+        $guard->assertAllowed($manager);
     }
 
     public function test_customer_type_excludes_sales_manager(): void

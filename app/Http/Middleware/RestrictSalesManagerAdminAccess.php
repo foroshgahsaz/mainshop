@@ -10,15 +10,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RestrictSalesManagerAdminAccess
 {
-    /** @var list<string> */
-    protected const ALLOWED_ROUTE_PATTERNS = [
-        'filament.admin.pages.dashboard',
-        'filament.admin.resources.orders.*',
-        'filament.admin.resources.payments.*',
-        'filament.admin.resources.users.index',
-        'filament.admin.resources.users.edit',
-    ];
-
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
@@ -41,7 +32,7 @@ class RestrictSalesManagerAdminAccess
             }
         }
 
-        foreach (self::ALLOWED_ROUTE_PATTERNS as $pattern) {
+        foreach (AdminAccess::salesManagerAllowedRoutePatterns() as $pattern) {
             if ($request->routeIs($pattern)) {
                 return $next($request);
             }

@@ -5,18 +5,20 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ProductResource\Pages;
 use App\Filament\Resources\ProductResource\RelationManagers;
 use App\Filament\Support\AdminTable;
-use App\Filament\Support\ProductDeleteActions;
 use App\Filament\Support\Filters\PriceRangeFilter;
+use App\Filament\Support\ProductDeleteActions;
 use App\Filament\Support\RichContentEditor;
 use App\Filament\Support\SeoFormSchema;
 use App\Models\Product;
+use App\Support\AdminAccess;
 use Filament\Forms;
-use Illuminate\Support\Facades\Schema;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 class ProductResource extends Resource
 {
@@ -31,6 +33,12 @@ class ProductResource extends Resource
     protected static ?int $navigationSort = 2;
 
     protected static bool $shouldRegisterNavigation = false;
+
+    public static function canViewAny(): bool
+    {
+        return AdminAccess::canAccessAdminResource(static::class);
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -60,8 +68,7 @@ class ProductResource extends Resource
                             ->maxLength(255)
                             ->live(onBlur: true)
                             ->afterStateUpdated(
-                                fn($state, callable $set) =>
-                                $set('slug', \Illuminate\Support\Str::slug($state))
+                                fn ($state, callable $set) => $set('slug', Str::slug($state))
                             ),
 
                         Forms\Components\TextInput::make('slug')
@@ -126,7 +133,6 @@ class ProductResource extends Resource
                 ...SeoFormSchema::productSection(),
             ]);
     }
-
 
     public static function table(Table $table): Table
     {

@@ -233,11 +233,16 @@
     ];
 
     if ($salesManagerOnly) {
-        $panels = array_intersect_key($panels, array_flip(['orders', 'payments', 'users']));
+        $panels = array_intersect_key($panels, array_flip(['products', 'brands', 'orders', 'payments', 'users', 'media']));
         $panels['users']['menus'] = [
             ['label' => 'کاربران', 'icon' => 'fa-users', 'items' => [
                 ['label' => 'نمایندگان', 'url' => UserResource::getUrl('index', ['activeTab' => 'representatives']), 'icon' => 'fa-user-tie'],
                 ['label' => 'مشتریان نمایندگان', 'url' => UserResource::getUrl('index', ['activeTab' => 'rep_customers']), 'icon' => 'fa-user'],
+            ]],
+        ];
+        $panels['media']['menus'] = [
+            ['label' => 'کتابخانه رسانه', 'icon' => 'fa-photo-film', 'items' => [
+                ['label' => 'همه فایل‌ها', 'url' => MediaFileResource::getUrl('index'), 'icon' => 'fa-images'],
             ]],
         ];
     }
@@ -278,7 +283,7 @@
         $navIcons = array_values(array_filter(
             $navIcons,
             fn (array $icon): bool => ($icon['isLink'] ?? false)
-                || in_array($icon['panel'] ?? '', ['orders', 'payments', 'users'], true)
+                || in_array($icon['panel'] ?? '', ['products', 'brands', 'orders', 'payments', 'users', 'media'], true)
         ));
     }
 

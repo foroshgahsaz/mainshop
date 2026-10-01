@@ -17,14 +17,22 @@ document.addEventListener('DOMContentLoaded', () => {
 function openLoginModal(redirectUrl) {
   const redirect = redirectUrl || window.location.href;
 
-  if (typeof Livewire !== 'undefined') {
+  toggleElement('loginModal', true);
+
+  const dispatchOpen = () => {
+    if (typeof Livewire === 'undefined') {
+      return false;
+    }
+
     Livewire.dispatch('open-login-modal', { redirect });
+
+    return true;
+  };
+
+  if (!dispatchOpen()) {
+    document.addEventListener('livewire:init', () => dispatchOpen(), { once: true });
     return;
   }
-
-  const loginUrl = new URL('/login', window.location.origin);
-  loginUrl.searchParams.set('redirect', redirect);
-  window.location.href = loginUrl.toString();
 }
 
 function initLoginTriggers() {

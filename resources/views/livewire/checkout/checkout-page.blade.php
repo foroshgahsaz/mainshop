@@ -15,6 +15,13 @@
                 <p class="text-gray-600 mb-4">برای تکمیل خرید ابتدا وارد حساب کاربری شوید.</p>
                 <x-shop.login-trigger class="shop-btn-primary inline-flex" :redirect="route('checkout')" />
             </div>
+            @push('scripts')
+                <script>
+                    document.addEventListener('DOMContentLoaded', () => {
+                        window.openLoginModal?.(@js(route('checkout')));
+                    });
+                </script>
+            @endpush
         @elseif ($error)
             <div class="mb-4 p-3 bg-red-50 text-red-700 rounded-xl text-sm">{{ $error }}</div>
         @endif

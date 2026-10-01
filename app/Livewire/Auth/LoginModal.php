@@ -22,7 +22,6 @@ class LoginModal extends Component
     {
         $this->rememberIntendedUrl($redirect);
         $this->resetLoginForm();
-        $this->js('toggleElement("loginModal", true)');
     }
 
     public function closeModal(): void

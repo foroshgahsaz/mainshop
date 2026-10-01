@@ -1,33 +1,38 @@
 <section class="admin-order__section admin-order__section--totals">
     <h2 class="admin-order__section-title">خلاصه مبالغ</h2>
+    @php
+        $discountLines = \App\Support\Order\OrderInvoiceSummaryBreakdown::discountLines($order);
+        $feeLines = \App\Support\Order\OrderInvoiceSummaryBreakdown::feeLines($order);
+    @endphp
     <dl class="admin-order__totals">
         <div class="admin-order__totals-row">
-            <dt>جمع اقلام</dt>
+            <dt>جمع اقلام (قبل از تخفیف)</dt>
             <dd>{{ number_format($order->total_amount) }} تومان</dd>
         </div>
-        @if($order->discount_amount > 0)
+        @foreach($discountLines as $discountLine)
+            <div class="admin-order__totals-row admin-order__totals-row--discount admin-order__totals-row--indented">
+                <dt>{{ $discountLine['label'] }}</dt>
+                <dd>−{{ number_format($discountLine['amount']) }} تومان</dd>
+            </div>
+        @endforeach
+        @if($order->discount_amount > 0 && $discountLines === [])
             <div class="admin-order__totals-row admin-order__totals-row--discount">
-                <dt>جمع تخفیف‌ها @if($order->coupon)(کوپن: {{ $order->coupon->code }})@endif</dt>
+                <dt>تخفیف</dt>
                 <dd>−{{ number_format($order->discount_amount) }} تومان</dd>
             </div>
         @endif
-        @php
-            $feesTotal = $order->relationLoaded('invoiceLines')
-                ? (int) $order->invoiceLines->where('kind', \App\Models\OrderInvoiceLine::KIND_FEE)->sum('amount')
-                : (int) $order->invoiceLines()->where('kind', \App\Models\OrderInvoiceLine::KIND_FEE)->sum('amount');
-        @endphp
-        @if($feesTotal > 0)
-            <div class="admin-order__totals-row">
-                <dt>هزینه‌های اضافه فاکتور</dt>
-                <dd>{{ number_format($feesTotal) }} تومان</dd>
+        @foreach($feeLines as $feeLine)
+            <div class="admin-order__totals-row admin-order__totals-row--indented">
+                <dt>{{ $feeLine['label'] }}</dt>
+                <dd>+{{ number_format($feeLine['amount']) }} تومان</dd>
             </div>
-        @endif
+        @endforeach
         <div class="admin-order__totals-row">
             <dt>هزینه ارسال @if($order->shippingMethod)({{ $order->shippingMethod->name }})@endif</dt>
             <dd>{{ number_format($order->shipping_amount) }} تومان</dd>
         </div>
         <div class="admin-order__totals-row admin-order__totals-row--final">
-            <dt>مبلغ نهایی</dt>
+            <dt>مبلغ نهایی فاکتور</dt>
             <dd>{{ number_format($order->final_amount) }} تومان</dd>
         </div>
         @if($order->paidAmount() > 0)

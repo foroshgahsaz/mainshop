@@ -9,6 +9,15 @@ class SettingsService
 {
     protected const CACHE_KEY = 'shop:settings:all';
 
+    /** @var array<string, mixed>|null */
+    protected static ?array $siteMemo = null;
+
+    /** @var array<string, mixed>|null */
+    protected static ?array $zarinpalMemo = null;
+
+    /** @var array<string, mixed>|null */
+    protected static ?array $taraMemo = null;
+
     public function get(string $group, string $key, mixed $default = null): mixed
     {
         $settings = $this->all();
@@ -24,6 +33,9 @@ class SettingsService
         );
 
         Cache::forget(self::CACHE_KEY);
+        static::$siteMemo = null;
+        static::$zarinpalMemo = null;
+        static::$taraMemo = null;
     }
 
     /** @param  array<string, mixed>  $values */
@@ -49,7 +61,11 @@ class SettingsService
     /** @return array<string, mixed> */
     public function zarinpal(): array
     {
-        return [
+        if (static::$zarinpalMemo !== null) {
+            return static::$zarinpalMemo;
+        }
+
+        return static::$zarinpalMemo = [
             'merchant_id' => $this->get('zarinpal', 'merchant_id') ?: config('payment.gateways.zarinpal.merchant_id'),
             'sandbox' => filter_var(
                 $this->get('zarinpal', 'sandbox', config('payment.gateways.zarinpal.sandbox')),
@@ -65,6 +81,10 @@ class SettingsService
     /** @return array<string, mixed> */
     public function tara(): array
     {
+        if (static::$taraMemo !== null) {
+            return static::$taraMemo;
+        }
+
         $cfg = config('payment.gateways.tara', []);
         $sandbox = filter_var($this->get('tara', 'sandbox', $cfg['sandbox'] ?? true), FILTER_VALIDATE_BOOLEAN);
 
@@ -75,7 +95,7 @@ class SettingsService
             ? ($cfg['sandbox_refund_base_url'] ?? 'https://stage.tara-club.ir/club')
             : ($cfg['refund_base_url'] ?? 'https://club.tara-club.ir/club');
 
-        return [
+        return static::$taraMemo = [
             'enabled' => filter_var($this->get('tara', 'enabled', false), FILTER_VALIDATE_BOOLEAN),
             'sandbox' => $sandbox,
             'username' => (string) ($this->get('tara', 'username') ?: ($cfg['username'] ?? '')),
@@ -106,7 +126,11 @@ class SettingsService
     /** @return array<string, mixed> */
     public function site(): array
     {
-        return [
+        if (static::$siteMemo !== null) {
+            return static::$siteMemo;
+        }
+
+        return static::$siteMemo = [
             'name' => $this->get('site', 'name') ?: config('app.name', 'چینی بازار'),
             'description' => $this->get('site', 'description', ''),
             'logo' => $this->get('site', 'logo'),

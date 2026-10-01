@@ -9,6 +9,12 @@ use App\Models\User;
 
 class AdminAccess
 {
+    private static ?User $memoUser = null;
+
+    private static ?bool $memoIsFullAdmin = null;
+
+    private static ?bool $memoIsSalesManagerOnly = null;
+
     /** @var array<class-string, true> */
     protected const SALES_MANAGER_RESOURCES = [
         OrderResource::class => true,
@@ -18,23 +24,48 @@ class AdminAccess
 
     public static function user(): ?User
     {
+        if (static::$memoUser !== null) {
+            return static::$memoUser;
+        }
+
         $user = auth()->user();
 
-        return $user instanceof User ? $user : null;
+        static::$memoUser = $user instanceof User ? $user : null;
+
+        return static::$memoUser;
     }
 
     public static function isFullAdmin(?User $user = null): bool
     {
-        $user ??= static::user();
+        if ($user !== null) {
+            return $user->isAdmin();
+        }
 
-        return $user?->isAdmin() ?? false;
+        if (static::$memoIsFullAdmin !== null) {
+            return static::$memoIsFullAdmin;
+        }
+
+        static::$memoIsFullAdmin = static::user()?->isAdmin() ?? false;
+
+        return static::$memoIsFullAdmin;
     }
 
     public static function isSalesManagerOnly(?User $user = null): bool
     {
-        $user ??= static::user();
+        if ($user !== null) {
+            return $user->isSalesManager() && ! $user->isAdmin();
+        }
 
-        return $user !== null && $user->isSalesManager() && ! $user->isAdmin();
+        if (static::$memoIsSalesManagerOnly !== null) {
+            return static::$memoIsSalesManagerOnly;
+        }
+
+        $current = static::user();
+        static::$memoIsSalesManagerOnly = $current !== null
+            && $current->isSalesManager()
+            && ! $current->isAdmin();
+
+        return static::$memoIsSalesManagerOnly;
     }
 
     public static function canAccessAdminResource(string $resourceClass): bool

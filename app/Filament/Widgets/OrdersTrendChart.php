@@ -6,9 +6,12 @@ use App\Models\Order;
 use App\Models\Payment;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 class OrdersTrendChart extends ChartWidget
 {
+    protected static ?string $pollingInterval = null;
+
     protected static ?string $heading = 'روند فروش ۳۰ روز اخیر';
 
     protected static ?int $sort = 2;
@@ -19,48 +22,50 @@ class OrdersTrendChart extends ChartWidget
 
     protected function getData(): array
     {
-        $days = collect(range(29, 0))->map(fn (int $i) => now()->subDays($i)->startOfDay());
+        return Cache::remember('admin:dashboard:orders_trend_chart', 300, function (): array {
+            $days = collect(range(29, 0))->map(fn (int $i) => now()->subDays($i)->startOfDay());
 
-        $ordersByDay = Order::query()
-            ->where('created_at', '>=', now()->subDays(29)->startOfDay())
-            ->selectRaw('DATE(created_at) as day, COUNT(*) as total')
-            ->groupBy('day')
-            ->pluck('total', 'day');
+            $ordersByDay = Order::query()
+                ->where('created_at', '>=', now()->subDays(29)->startOfDay())
+                ->selectRaw('DATE(created_at) as day, COUNT(*) as total')
+                ->groupBy('day')
+                ->pluck('total', 'day');
 
-        $revenueByDay = Payment::query()
-            ->where('status', Payment::STATUS_SUCCESS)
-            ->where('paid_at', '>=', now()->subDays(29)->startOfDay())
-            ->selectRaw('DATE(paid_at) as day, SUM(amount) as total')
-            ->groupBy('day')
-            ->pluck('total', 'day');
+            $revenueByDay = Payment::query()
+                ->where('status', Payment::STATUS_SUCCESS)
+                ->where('paid_at', '>=', now()->subDays(29)->startOfDay())
+                ->selectRaw('DATE(paid_at) as day, SUM(amount) as total')
+                ->groupBy('day')
+                ->pluck('total', 'day');
 
-        $labels = $days->map(fn (Carbon $d) => $d->format('m/d'))->values()->all();
-        $orderCounts = $days->map(fn (Carbon $d) => (int) ($ordersByDay[$d->toDateString()] ?? 0))->values()->all();
-        $revenues = $days->map(fn (Carbon $d) => (int) (($revenueByDay[$d->toDateString()] ?? 0) / 1000))->values()->all();
+            $labels = $days->map(fn (Carbon $d) => $d->format('m/d'))->values()->all();
+            $orderCounts = $days->map(fn (Carbon $d) => (int) ($ordersByDay[$d->toDateString()] ?? 0))->values()->all();
+            $revenues = $days->map(fn (Carbon $d) => (int) (($revenueByDay[$d->toDateString()] ?? 0) / 1000))->values()->all();
 
-        return [
-            'datasets' => [
-                [
-                    'label' => 'تعداد سفارش',
-                    'data' => $orderCounts,
-                    'borderColor' => '#10b981',
-                    'backgroundColor' => 'rgba(16, 185, 129, 0.1)',
-                    'fill' => true,
-                    'tension' => 0.35,
-                    'yAxisID' => 'y',
+            return [
+                'datasets' => [
+                    [
+                        'label' => 'تعداد سفارش',
+                        'data' => $orderCounts,
+                        'borderColor' => '#10b981',
+                        'backgroundColor' => 'rgba(16, 185, 129, 0.1)',
+                        'fill' => true,
+                        'tension' => 0.35,
+                        'yAxisID' => 'y',
+                    ],
+                    [
+                        'label' => 'درآمد (هزار تومان)',
+                        'data' => $revenues,
+                        'borderColor' => '#f59e0b',
+                        'backgroundColor' => 'rgba(245, 158, 11, 0.08)',
+                        'fill' => true,
+                        'tension' => 0.35,
+                        'yAxisID' => 'y1',
+                    ],
                 ],
-                [
-                    'label' => 'درآمد (هزار تومان)',
-                    'data' => $revenues,
-                    'borderColor' => '#f59e0b',
-                    'backgroundColor' => 'rgba(245, 158, 11, 0.08)',
-                    'fill' => true,
-                    'tension' => 0.35,
-                    'yAxisID' => 'y1',
-                ],
-            ],
-            'labels' => $labels,
-        ];
+                'labels' => $labels,
+            ];
+        });
     }
 
     protected function getType(): string

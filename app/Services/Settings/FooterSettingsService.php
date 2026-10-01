@@ -2,9 +2,13 @@
 
 namespace App\Services\Settings;
 
+use Illuminate\Support\Facades\Cache;
+
 class FooterSettingsService
 {
     public const SETTINGS_GROUP = 'footer';
+
+    protected const CACHE_KEY = 'shop:footer:settings:all';
 
     public function __construct(
         protected SettingsService $settings,
@@ -13,20 +17,22 @@ class FooterSettingsService
     /** @return array<string, mixed> */
     public function all(): array
     {
-        $defaults = $this->defaults();
-        $stored = $this->settings->get(self::SETTINGS_GROUP, 'data');
+        return Cache::remember(self::CACHE_KEY, 3600, function (): array {
+            $defaults = $this->defaults();
+            $stored = $this->settings->get(self::SETTINGS_GROUP, 'data');
 
-        if (! is_string($stored) || $stored === '') {
-            return $defaults;
-        }
+            if (! is_string($stored) || $stored === '') {
+                return $defaults;
+            }
 
-        $decoded = json_decode($stored, true);
+            $decoded = json_decode($stored, true);
 
-        if (! is_array($decoded)) {
-            return $defaults;
-        }
+            if (! is_array($decoded)) {
+                return $defaults;
+            }
 
-        return array_replace_recursive($defaults, $this->normalize($decoded));
+            return array_replace_recursive($defaults, $this->normalize($decoded));
+        });
     }
 
     /** @return array<string, mixed> */
@@ -78,6 +84,8 @@ class FooterSettingsService
             'copyright' => $data['copyright'] ?? '',
             'bottom_links' => $data['bottom_links'] ?? [],
         ]);
+
+        Cache::forget(self::CACHE_KEY);
 
         $this->settings->set(
             self::SETTINGS_GROUP,

@@ -35,7 +35,9 @@ use App\Policies\UserAddressPolicy;
 use App\Services\Cache\ShopCacheService;
 use App\Services\Media\ImageOptimizer;
 use App\Services\Media\MediaRegistry;
+use App\Services\Payment\PaymentGatewayCatalog;
 use App\Services\Settings\SearchPopupSettingsService;
+use App\Services\Settings\SettingsService;
 use App\Services\Sms\SmsSenderFactory;
 use App\Support\MediaPath;
 use App\Support\ShopMedia;
@@ -62,11 +64,16 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class AppServiceProvider extends ServiceProvider
 {
+    private static bool $storageDirectoriesEnsured = false;
+
     public function register(): void
     {
         $this->app->bind(FileUploadController::class, LivewireFileUploadController::class);
 
         $this->app->bind(SmsSender::class, fn () => app(SmsSenderFactory::class)->make());
+
+        $this->app->singleton(PaymentGatewayCatalog::class);
+        $this->app->singleton(SettingsService::class);
     }
 
     public function boot(): void
@@ -90,23 +97,27 @@ class AppServiceProvider extends ServiceProvider
             URL::forceRootUrl($scheme.'://'.request()->getHttpHost());
         }
 
-        $productsPath = Storage::disk('public')->path('products');
+        if (! self::$storageDirectoriesEnsured) {
+            $productsPath = Storage::disk('public')->path('products');
 
-        if (! is_dir($productsPath)) {
-            Storage::disk('public')->makeDirectory('products');
+            if (! is_dir($productsPath)) {
+                Storage::disk('public')->makeDirectory('products');
+            }
+
+            $this->ensureWritableDirectory($productsPath);
+
+            $tempDisk = config('livewire.temporary_file_upload.disk', 'livewire-tmp');
+            $tempDirectory = config('livewire.temporary_file_upload.directory', 'livewire-tmp');
+            $tempDirectoryPath = Storage::disk($tempDisk)->path($tempDirectory);
+
+            if (! is_dir($tempDirectoryPath)) {
+                Storage::disk($tempDisk)->makeDirectory($tempDirectory);
+            }
+
+            $this->ensureWritableDirectory($tempDirectoryPath);
+
+            self::$storageDirectoriesEnsured = true;
         }
-
-        $this->ensureWritableDirectory($productsPath);
-
-        $tempDisk = config('livewire.temporary_file_upload.disk', 'livewire-tmp');
-        $tempDirectory = config('livewire.temporary_file_upload.directory', 'livewire-tmp');
-        $tempDirectoryPath = Storage::disk($tempDisk)->path($tempDirectory);
-
-        if (! is_dir($tempDirectoryPath)) {
-            Storage::disk($tempDisk)->makeDirectory($tempDirectory);
-        }
-
-        $this->ensureWritableDirectory($tempDirectoryPath);
 
         Product::observe(ProductObserver::class);
         ProductImage::observe(ProductImageObserver::class);
@@ -219,7 +230,7 @@ class AppServiceProvider extends ServiceProvider
 
         FileUpload::configureUsing(function (FileUpload $component): void {
             $component
-                ->fetchFileInformation(true)
+                ->fetchFileInformation(false)
                 ->maxSize(51200)
                 ->imagePreviewHeight('150')
                 ->helperText('تا پایان آپلود (نوار پیشرفت) صبر کنید، بعد ذخیره کنید. حداکثر ۵۰ مگابایت.')

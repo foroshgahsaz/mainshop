@@ -50,6 +50,7 @@ use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\ViewAction;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
@@ -78,6 +79,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        $this->ensureRuntimeCacheAndSessionAreReachable();
+
         if ($this->app->runningInConsole() && StoragePermissionFixer::runningAsRoot()) {
             StoragePermissionFixer::fix();
         }
@@ -362,6 +365,33 @@ class AppServiceProvider extends ServiceProvider
         }
 
         FileUploadSanitizer::sanitize($livewire, $form, $record);
+    }
+
+    protected function ensureRuntimeCacheAndSessionAreReachable(): void
+    {
+        if ($this->app->runningInConsole()) {
+            return;
+        }
+
+        $cacheStore = (string) config('cache.default');
+        $sessionDriver = (string) config('session.driver');
+
+        if ($cacheStore !== 'redis' && $sessionDriver !== 'redis') {
+            return;
+        }
+
+        try {
+            if ($cacheStore === 'redis') {
+                Redis::connection(config('cache.stores.redis.connection', 'cache'))->ping();
+            } elseif ($sessionDriver === 'redis') {
+                Redis::connection(config('session.connection') ?: 'default')->ping();
+            }
+        } catch (\Throwable) {
+            config([
+                'cache.default' => 'database',
+                'session.driver' => 'database',
+            ]);
+        }
     }
 
     protected function shouldForceHttps(): bool

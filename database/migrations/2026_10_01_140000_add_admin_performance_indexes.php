@@ -14,6 +14,7 @@ return new class extends Migration
                     $table->index(['status', 'created_at'], 'orders_status_created_at_index');
                 }
                 if (Schema::hasColumn('orders', 'representative_id')
+                    && Schema::hasColumn('orders', 'stock_reserved')
                     && ! $this->indexExists('orders', 'orders_rep_status_reserved_index')) {
                     $table->index(
                         ['representative_id', 'status', 'stock_reserved'],

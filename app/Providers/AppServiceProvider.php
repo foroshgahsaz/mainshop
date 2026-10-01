@@ -8,6 +8,7 @@ use App\Filament\Support\CrudSuccessNotification;
 use App\Filament\Support\FileUploadSanitizer;
 use App\Filament\Support\MissingUploadPathCleaner;
 use App\Http\Controllers\LivewireFileUploadController;
+use App\Http\Responses\Filament\AdminLoginResponse;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\HomeSlider;
@@ -46,6 +47,7 @@ use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\FileUpload;
+use Filament\Http\Responses\Auth\Contracts\LoginResponse;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\ViewAction;
 use Illuminate\Database\Eloquent\Model;
@@ -75,6 +77,8 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(PaymentGatewayCatalog::class);
         $this->app->singleton(SettingsService::class);
+
+        $this->app->singleton(LoginResponse::class, AdminLoginResponse::class);
     }
 
     public function boot(): void

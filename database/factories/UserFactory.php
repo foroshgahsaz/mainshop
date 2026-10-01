@@ -34,6 +34,14 @@ class UserFactory extends Factory
         ]);
     }
 
+    public function salesManager(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_admin' => false,
+            'is_sales_manager' => true,
+        ]);
+    }
+
     public function unverified(): static
     {
         return $this->state(fn (array $attributes) => [

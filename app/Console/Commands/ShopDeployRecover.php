@@ -17,6 +17,8 @@ class ShopDeployRecover extends Command
     {
         $this->components->info('Clearing cached config, routes, views, and application cache…');
 
+        $this->useDatabaseCacheIfRedisIsDown();
+
         Artisan::call('optimize:clear');
         $this->line(trim(Artisan::output()));
 
@@ -25,13 +27,13 @@ class ShopDeployRecover extends Command
         $this->line(trim(Artisan::output()));
 
         if (! $this->option('optimize')) {
-            $this->components->warn('Skipped config/route/view cache. Run with --optimize when Redis/cache is confirmed working.');
+            $this->warnIfRedisMisconfigured();
 
             return self::SUCCESS;
         }
 
         if (! $this->canUseRedis()) {
-            $this->components->warn('Redis is not reachable. Keep CACHE_STORE=database and SESSION_DRIVER=database in .env, then run without --optimize or fix Redis first.');
+            $this->components->warn('Redis is not reachable. Skipping config/route/view cache. Use database drivers in .env or enable Redis on the platform.');
 
             return self::SUCCESS;
         }
@@ -46,9 +48,36 @@ class ShopDeployRecover extends Command
         return self::SUCCESS;
     }
 
+    protected function useDatabaseCacheIfRedisIsDown(): void
+    {
+        if ($this->canUseRedis()) {
+            return;
+        }
+
+        config([
+            'cache.default' => 'database',
+            'session.driver' => 'database',
+        ]);
+    }
+
+    protected function warnIfRedisMisconfigured(): void
+    {
+        if ($this->canUseRedis()) {
+            return;
+        }
+
+        $this->newLine();
+        $this->components->warn('Redis is configured in .env but not reachable (Connection refused).');
+        $this->line('  • Either enable/link Redis on Liara and set REDIS_HOST / REDIS_PASSWORD');
+        $this->line('  • Or set CACHE_STORE=database and SESSION_DRIVER=database in environment variables');
+        $this->line('  The web app falls back to database when Redis fails, but artisan cache:clear needs a working store.');
+    }
+
     protected function canUseRedis(): bool
     {
-        if (config('cache.default') !== 'redis' && config('session.driver') !== 'redis') {
+        $usesRedis = config('cache.default') === 'redis' || config('session.driver') === 'redis';
+
+        if (! $usesRedis) {
             return true;
         }
 

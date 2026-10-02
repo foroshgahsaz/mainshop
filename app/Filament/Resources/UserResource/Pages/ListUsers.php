@@ -22,7 +22,7 @@ class ListUsers extends ListRecords
             'icon' => 'fa-users',
             'section' => 'کاربران',
             'title' => 'لیست کاربران',
-            'actions' => $this->getCachedHeaderActions(),
+            'actions' => [],
         ]);
     }
 

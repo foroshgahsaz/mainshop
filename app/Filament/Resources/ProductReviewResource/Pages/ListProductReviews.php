@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\ProductReviewResource\Pages;
 
+use App\Filament\Resources\Pages\AdminListRecords;
 use App\Filament\Resources\ProductReviewResource;
-use Filament\Resources\Pages\ListRecords;
 
-class ListProductReviews extends ListRecords
+class ListProductReviews extends AdminListRecords
 {
     protected static string $resource = ProductReviewResource::class;
 }

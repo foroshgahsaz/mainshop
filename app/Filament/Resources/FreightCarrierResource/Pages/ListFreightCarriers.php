@@ -3,10 +3,10 @@
 namespace App\Filament\Resources\FreightCarrierResource\Pages;
 
 use App\Filament\Resources\FreightCarrierResource;
+use App\Filament\Resources\Pages\AdminListRecords;
 use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
 
-class ListFreightCarriers extends ListRecords
+class ListFreightCarriers extends AdminListRecords
 {
     protected static string $resource = FreightCarrierResource::class;
 

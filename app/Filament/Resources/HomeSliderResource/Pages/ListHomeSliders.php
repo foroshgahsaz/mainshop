@@ -3,10 +3,10 @@
 namespace App\Filament\Resources\HomeSliderResource\Pages;
 
 use App\Filament\Resources\HomeSliderResource;
+use App\Filament\Resources\Pages\AdminListRecords;
 use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
 
-class ListHomeSliders extends ListRecords
+class ListHomeSliders extends AdminListRecords
 {
     protected static string $resource = HomeSliderResource::class;
 

@@ -511,8 +511,8 @@ body.fi-body .fi-no-notification-icon {
 }
 
 /* ===== هدر صفحات (مثل نمونه user-list) ===== */
-.fi-admin-shell .fi-page > header.fi-header,
-.fi-admin-shell .fi-resource-list-records-page > header.fi-header,
+.fi-admin-shell .fi-page > header.fi-header:not(.fi-admin-list-header),
+.fi-admin-shell .fi-resource-list-records-page > header.fi-header:not(.fi-admin-list-header),
 .fi-admin-shell .fi-resource-manage-related-records-page > header.fi-header {
     padding: 20px 24px 12px !important;
     margin: 0 !important;
@@ -808,7 +808,9 @@ body.fi-body .fi-no-notification-icon {
 }
 
 .fi-admin-list-header .fi-admin-btn-create,
-.fi-admin-list-header .fi-admin-btn-create.fi-btn {
+.fi-admin-list-header .fi-admin-btn-create.fi-btn,
+.fi-admin-list-header .fi-ac-btn-action.fi-btn.fi-color-primary,
+.fi-admin-list-header .fi-btn.fi-color-primary {
     background: #1e1e2d !important;
     border-color: #1e1e2d !important;
     color: #fff !important;
@@ -817,7 +819,9 @@ body.fi-body .fi-no-notification-icon {
     border-radius: 8px;
 }
 
-.fi-admin-list-header .fi-admin-btn-create:hover {
+.fi-admin-list-header .fi-admin-btn-create:hover,
+.fi-admin-list-header .fi-ac-btn-action.fi-btn.fi-color-primary:hover,
+.fi-admin-list-header .fi-btn.fi-color-primary:hover {
     background: #2a2a3d !important;
 }
 

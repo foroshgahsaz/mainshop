@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\ProductFamilyResource\Pages;
 
+use App\Filament\Resources\Pages\AdminListRecords;
 use App\Filament\Resources\ProductFamilyResource;
 use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
 
-class ListProductFamilies extends ListRecords
+class ListProductFamilies extends AdminListRecords
 {
     protected static string $resource = ProductFamilyResource::class;
 

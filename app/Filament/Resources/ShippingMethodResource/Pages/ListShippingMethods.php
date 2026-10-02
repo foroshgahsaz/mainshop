@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\ShippingMethodResource\Pages;
 
+use App\Filament\Resources\Pages\AdminListRecords;
 use App\Filament\Resources\ShippingMethodResource;
 use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
 
-class ListShippingMethods extends ListRecords
+class ListShippingMethods extends AdminListRecords
 {
     protected static string $resource = ShippingMethodResource::class;
 

@@ -712,14 +712,23 @@ composer dump-autoload -o                # برای override Livewire
 
 ## 13. SMS و Notification
 
-### SMS
+### SMS (OTP و تراکنشی)
 
 | Driver | کلاس | زمان |
 |--------|------|------|
 | `log` | `LogSmsSender` | dev |
-| `kavenegar` | `KavenegarSmsSender` | production |
+| `kavenegar` / sms.ir | `KavenegarSmsSender`, `SmsIrSmsSender` | production |
 
-تنظیم از admin (Manage Integrations) یا `.env`
+تنظیم درگاه از ادمین (یکپارچه‌سازی‌ها) یا `.env` — `config/sms.php`
+
+### پیامک‌های تراکنشی (قابل ویرایش)
+
+- ادمین: `/admin/transactional-sms` — `ManageTransactionalSms`
+- پیش‌فرض: `config/transactional-sms.php`؛ ذخیره در `settings.transactional_sms`
+- ارسال: `TransactionalSmsDispatcher` → `SendTransactionalSmsJob` (`afterResponse()` + queue)
+- سفارش/پرداخت: `OrderSmsNotifier` از `CheckoutService`, `PaymentController`, `OrderService`, سرویس‌های نماینده
+
+جزئیات رویدادها و افزودن قالب جدید: [`docs/dev/09-transactional-sms.md`](dev/09-transactional-sms.md)
 
 ### Notification — `app/Notifications/`
 
@@ -1230,6 +1239,10 @@ resources/views/layouts/shop.blade.php
 | [dev/04-code-map.md](dev/04-code-map.md) | نقشه فایل و `shop:*` |
 | [dev/05-troubleshooting-playbook.md](dev/05-troubleshooting-playbook.md) | عیب‌یابی copy-paste |
 | [dev/06-feature-recipes.md](dev/06-feature-recipes.md) | الگوی فیچر جدید |
+| [dev/07-add-payment-gateway.md](dev/07-add-payment-gateway.md) | افزودن درگاه پرداخت |
+| [dev/08-add-limited-access.md](dev/08-add-limited-access.md) | دسترسی محدود / مدیر فروش |
+| [dev/00-doc-maintenance.md](dev/00-doc-maintenance.md) | سیاست به‌روز doc با هر PR |
+| [PROJECT-PHASES.md](PROJECT-PHASES.md) | وضعیت فازهای محصول |
 | [representative/PHASE-PLAN-FA.md](representative/PHASE-PLAN-FA.md) | پنل نماینده |
 | [../AGENTS.md](../AGENTS.md) | اشاره برای Cursor |
 
@@ -1243,5 +1256,6 @@ resources/views/layouts/shop.blade.php
 | 2026-08-23 | نسخه 1.1 — تکمیل درگاه‌ها، variant، coupon، settings، SEO، tests |
 | 2026-10-01 | نسخه 1.2 — لینک به docs/README، مدیر فروش، `/admin/login` |
 | 2026-10-02 | نسخه 1.3 — dev/07 درگاه، dev/08 دسترسی، PROJECT-PHASES، سیاست doc |
+| 2026-10-02 | نسخه 1.4 — پیامک تراکنشی (dev/09)، ادمین ریسپانسیو |
 
 > اگر بخش جدیدی به پروژه اضافه شد، همین فایل را در `docs/DEVELOPER_GUIDE.md` به‌روز کنید و در صورت نیاز `docs/README.md` و `docs/dev/*`.

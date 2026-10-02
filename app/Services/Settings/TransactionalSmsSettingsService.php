@@ -65,8 +65,38 @@ class TransactionalSmsSettingsService
             ->all();
     }
 
+    public function staffPhonesRaw(): string
+    {
+        $stored = $this->settings->get(self::SETTINGS_GROUP, 'staff_phones');
+
+        if (is_string($stored) && $stored !== '') {
+            return $stored;
+        }
+
+        return (string) config('transactional-sms.staff_phones_default', '');
+    }
+
+    /** @return list<string> */
+    public function staffPhoneList(): array
+    {
+        $raw = $this->staffPhonesRaw();
+        $parts = preg_split('/[\s,;]+/u', $raw) ?: [];
+
+        return collect($parts)
+            ->map(fn (string $phone) => preg_replace('/\D+/', '', $phone) ?? '')
+            ->filter(fn (string $phone) => preg_match('/^09\d{9}$/', $phone))
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    public function saveStaffPhones(string $raw): void
+    {
+        $this->settings->set(self::SETTINGS_GROUP, 'staff_phones', trim($raw));
+    }
+
     /** @param  list<array{key: string, enabled?: bool, body?: string}>  $rows */
-    public function saveFromAdminForm(array $rows): void
+    public function saveFromAdminForm(array $rows, ?string $staffPhones = null): void
     {
         $defaults = config('transactional-sms.templates', []);
         $templates = [];
@@ -96,6 +126,10 @@ class TransactionalSmsSettingsService
             'templates',
             json_encode($this->normalize($templates), JSON_UNESCAPED_UNICODE)
         );
+
+        if ($staffPhones !== null) {
+            $this->saveStaffPhones($staffPhones);
+        }
     }
 
     /** @param  array<string, array<string, mixed>>  $templates */

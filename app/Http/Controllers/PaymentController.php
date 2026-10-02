@@ -60,6 +60,8 @@ class PaymentController extends Controller
         $authority = (string) ($request->input('Authority') ?: $request->input('token') ?: $payment->transaction_id);
         $status = (string) ($request->input('Status') ?: $request->input('result') ?: '');
 
+        $order = $payment->order()->first();
+
         try {
             $payment = $this->paymentService->verify($payment, $authority, $status);
         } catch (\Throwable $e) {
@@ -68,20 +70,28 @@ class PaymentController extends Controller
                 'error' => $e->getMessage(),
             ]);
 
+            if ($order) {
+                $this->sms->paymentFailed($order->fresh(['user']), $payment);
+            }
+
             return redirect()
                 ->to($this->paymentReturnUrl($payment))
                 ->with('payment_status', Payment::STATUS_FAILED);
         }
 
-        $order = $payment->order()->first();
-
         if ($payment->status === Payment::STATUS_SUCCESS) {
             $payment->loadMissing('user', 'order');
             $payment->user?->notify(new PaymentSuccessNotification($payment));
 
-            if ($order?->isPaid()) {
+            if ($order) {
                 $this->sms->orderPaid($order, $payment);
+
+                if (! $order->isPaid()) {
+                    $this->sms->paymentPartialRemaining($order, (int) $order->remainingAmount());
+                }
             }
+        } elseif ($order && in_array($payment->status, [Payment::STATUS_FAILED, Payment::STATUS_CANCELED], true)) {
+            $this->sms->paymentFailed($order->fresh(['user']), $payment);
         }
 
         $flash = ['payment_status' => $payment->status];

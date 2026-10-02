@@ -2,25 +2,23 @@
 
 namespace App\Services\Sms;
 
-use App\Contracts\SmsSender;
+use App\Jobs\SendTransactionalSmsJob;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\User;
 use App\Services\Settings\TransactionalSmsSettingsService;
 use App\Support\ShopLabels;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Bus;
 
 class TransactionalSmsDispatcher
 {
     public function __construct(
-        protected SmsSender $sms,
         protected TransactionalSmsSettingsService $settings,
-        protected SmsTemplateRenderer $renderer,
     ) {}
 
     public function accountCreated(User $user): void
     {
-        $this->dispatch('account_created', $user->phone, [
+        $this->queue('account_created', $user->phone, [
             'site_name' => site_name(),
             'name' => $user->name,
             'phone' => $user->phone,
@@ -30,23 +28,15 @@ class TransactionalSmsDispatcher
     public function orderPlaced(Order $order): void
     {
         $order->loadMissing(['user', 'items']);
-
         $phone = $order->user?->phone;
 
         if (! $phone) {
             return;
         }
 
-        $this->dispatch('order_placed', $phone, [
-            'site_name' => site_name(),
-            'name' => $order->user?->name ?? 'مشتری',
-            'phone' => $phone,
-            'order_code' => (string) $order->tracking_code,
-            'amount' => number_format((int) $order->final_amount),
-            'payment_method' => ShopLabels::paymentMethod($order->payment_method),
-            'items' => $this->formatOrderItems($order),
-            'items_count' => (string) $order->items->sum('quantity'),
-        ]);
+        $vars = $this->orderVariables($order);
+        $this->queue('order_placed', $phone, $vars);
+        $this->dispatchStaff('staff_new_order', $vars);
     }
 
     public function orderPaid(Order $order, Payment $payment): void
@@ -58,45 +48,151 @@ class TransactionalSmsDispatcher
             return;
         }
 
-        $this->dispatch('order_paid', $phone, [
-            'site_name' => site_name(),
-            'name' => $order->user?->name ?? 'مشتری',
-            'phone' => $phone,
-            'order_code' => (string) $order->tracking_code,
-            'amount' => number_format((int) $order->final_amount),
+        $this->queue('order_paid', $phone, array_merge($this->orderVariables($order), [
             'paid_amount' => number_format((int) $payment->amount),
             'gateway' => ShopLabels::gateway($payment->gateway),
-            'payment_method' => ShopLabels::paymentMethod($order->payment_method),
             'payment_tracking' => (string) ($payment->tracking_code ?? '—'),
-            'items' => $this->formatOrderItems($order),
-            'items_count' => (string) $order->items->sum('quantity'),
+        ]));
+    }
+
+    public function paymentFailed(Order $order, ?Payment $payment = null): void
+    {
+        $order->loadMissing('user');
+        $phone = $order->user?->phone;
+
+        if (! $phone) {
+            return;
+        }
+
+        $this->queue('payment_failed', $phone, $this->orderVariables($order));
+    }
+
+    public function paymentPartialRemaining(Order $order, int $remainingAmount): void
+    {
+        $order->loadMissing('user');
+        $phone = $order->user?->phone;
+
+        if (! $phone) {
+            return;
+        }
+
+        $this->queue('payment_partial_remaining', $phone, array_merge($this->orderVariables($order), [
+            'remaining_amount' => number_format($remainingAmount),
+        ]));
+    }
+
+    public function orderShipped(Order $order): void
+    {
+        $this->statusSms($order, 'order_shipped', [
+            'tracking_suffix' => $order->shipping_tracking_code
+                ? ' رهگیری: '.$order->shipping_tracking_code
+                : '',
         ]);
     }
 
-    /** @param  array<string, string>  $variables */
-    protected function dispatch(string $templateKey, string $phone, array $variables): void
+    public function orderDelivered(Order $order): void
     {
-        $template = $this->settings->template($templateKey);
+        $this->statusSms($order, 'order_delivered');
+    }
 
-        if ($template === null || ! $template['enabled'] || $template['body'] === '') {
-            return;
-        }
+    public function orderCanceled(Order $order): void
+    {
+        $this->statusSms($order, 'order_canceled');
+    }
 
-        $message = $this->renderer->render($template['body'], $variables);
+    public function orderExpiredUnpaid(Order $order): void
+    {
+        $this->statusSms($order, 'order_expired_unpaid');
+    }
 
-        if ($message === '') {
-            return;
-        }
+    public function proformaCreated(Order $order): void
+    {
+        $order->loadMissing(['user', 'items', 'representative']);
+        $phone = $order->user?->phone;
 
-        try {
-            $this->sms->sendTransactional($phone, $message);
-        } catch (\Throwable $e) {
-            Log::warning('Transactional SMS failed', [
-                'template' => $templateKey,
-                'phone' => $phone,
-                'error' => $e->getMessage(),
+        if ($phone) {
+            $vars = array_merge($this->orderVariables($order), [
+                'reserved_until' => $order->stock_reserved_until?->format('Y/m/d H:i') ?? '—',
             ]);
+            $this->queue('proforma_created', $phone, $vars);
         }
+
+        $repVars = array_merge($this->orderVariables($order), [
+            'representative_name' => $order->representative?->name ?? '—',
+            'reserved_until' => $order->stock_reserved_until?->format('Y/m/d H:i') ?? '—',
+        ]);
+        $this->dispatchStaff('staff_new_proforma', $repVars);
+    }
+
+    public function proformaReservationExpired(Order $order): void
+    {
+        $this->statusSms($order, 'proforma_reservation_expired');
+    }
+
+    public function proformaReservationExtended(Order $order): void
+    {
+        $order->loadMissing('user');
+        $phone = $order->user?->phone;
+
+        if (! $phone) {
+            return;
+        }
+
+        $this->queue('proforma_reservation_extended', $phone, array_merge($this->orderVariables($order), [
+            'reserved_until' => $order->stock_reserved_until?->format('Y/m/d H:i') ?? '—',
+        ]));
+    }
+
+    /** @param  array<string, string>  $extra */
+    protected function statusSms(Order $order, string $templateKey, array $extra = []): void
+    {
+        $order->loadMissing('user');
+        $phone = $order->user?->phone;
+
+        if (! $phone) {
+            return;
+        }
+
+        $this->queue($templateKey, $phone, array_merge($this->orderVariables($order), $extra));
+    }
+
+    /** @return array<string, string> */
+    protected function orderVariables(Order $order): array
+    {
+        $order->loadMissing(['user', 'items']);
+
+        return [
+            'site_name' => site_name(),
+            'name' => $order->user?->name ?? 'مشتری',
+            'phone' => $order->user?->phone ?? '—',
+            'order_code' => (string) $order->tracking_code,
+            'amount' => number_format((int) $order->final_amount),
+            'payment_method' => ShopLabels::paymentMethod($order->payment_method),
+            'items' => $this->formatOrderItems($order),
+            'items_count' => (string) $order->items->sum('quantity'),
+            'tracking_suffix' => '',
+            'remaining_amount' => number_format((int) $order->remainingAmount()),
+            'reserved_until' => $order->stock_reserved_until?->format('Y/m/d H:i') ?? '—',
+            'representative_name' => $order->representative?->name ?? '—',
+        ];
+    }
+
+    /** @param  array<string, string>  $variables */
+    protected function dispatchStaff(string $templateKey, array $variables): void
+    {
+        foreach ($this->settings->staffPhoneList() as $phone) {
+            $this->queue($templateKey, $phone, $variables);
+        }
+    }
+
+    /** @param  array<string, string>  $variables */
+    protected function queue(string $templateKey, string $phone, array $variables): void
+    {
+        if ($phone === '') {
+            return;
+        }
+
+        Bus::dispatch((new SendTransactionalSmsJob($templateKey, $phone, $variables))->afterResponse());
     }
 
     protected function formatOrderItems(Order $order): string

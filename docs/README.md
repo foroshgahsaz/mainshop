@@ -20,6 +20,7 @@
 | ۸ | [dev/06-feature-recipes.md](dev/06-feature-recipes.md) | الگوی افزودن فیچر (سبد، ادمین، سرویس) |
 | ۹ | [dev/07-add-payment-gateway.md](dev/07-add-payment-gateway.md) | **افزودن درگاه پرداخت** — فایل‌به‌فایل |
 | ۱۰ | [dev/08-add-limited-access.md](dev/08-add-limited-access.md) | **دسترسی محدود / مدیر فروش / Resource جدید** |
+| ۱۱ | [dev/09-transactional-sms.md](dev/09-transactional-sms.md) | **پیامک تراکنشی** — قالب‌ها، رویدادها، صف |
 | — | [PROJECT-PHASES.md](PROJECT-PHASES.md) | تا کجا پیش رفته‌ایم (فازهای محصول) |
 | — | [dev/00-doc-maintenance.md](dev/00-doc-maintenance.md) | **الزام:** هر فیچر = به‌روز doc |
 

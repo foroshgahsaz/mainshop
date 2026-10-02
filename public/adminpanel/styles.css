@@ -1530,13 +1530,17 @@ select.form-control-modal {
     .main-content.expanded {
         margin-right: 90px;
     }
-    
+
     .toggle-sidebar-btn {
-        right: 415px;
+        right: 98px;
     }
-    
+
+    .sidebar-primary:not(.closed) ~ .toggle-sidebar-btn {
+        right: min(398px, calc(100vw - 12px));
+    }
+
     .sidebar-primary.closed ~ .toggle-sidebar-btn {
-        right: 90px;
+        right: 98px;
     }
 
     .modal-container {

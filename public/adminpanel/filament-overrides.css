@@ -461,17 +461,94 @@ body.fi-body .fi-modal-slide-over-window-hiding {
     font-family: inherit;
 }
 
+.sidebar-backdrop {
+    display: none;
+}
+
 @media (max-width: 991px) {
-    .fi-admin-shell .main-content {
-        margin-right: 110px !important;
+    .fi-admin-shell .main-content,
+    .fi-admin-shell .main-content.expanded {
+        margin-right: 90px !important;
     }
 
     .fi-admin-shell .sidebar-primary {
+        width: min(300px, calc(100vw - 90px));
+        box-shadow: -4px 0 24px rgba(24, 28, 50, 0.12);
+        z-index: 900 !important;
+    }
+
+    .fi-admin-shell .sidebar-primary.closed {
         transform: translateX(100%);
     }
 
-    .fi-admin-shell .sidebar-primary.open {
+    .fi-admin-shell .sidebar-primary:not(.closed) {
         transform: translateX(0);
+    }
+
+    .fi-admin-shell .toggle-sidebar-btn {
+        right: 98px !important;
+    }
+
+    .fi-admin-shell .sidebar-primary:not(.closed) ~ .toggle-sidebar-btn {
+        right: min(398px, calc(100vw - 12px)) !important;
+    }
+
+    body.fi-sidebar-menu-open .sidebar-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 850;
+        background: rgba(24, 28, 50, 0.45);
+    }
+
+    .fi-admin-shell .content-area {
+        padding: 16px 14px;
+    }
+
+    .fi-admin-shell .fi-header {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .fi-admin-shell .content-area .fi-ta-ctn {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .fi-admin-shell .fi-ta-table {
+        min-width: 640px;
+    }
+}
+
+@media (max-width: 767px) {
+    .fi-admin-shell .sidebar-secondary {
+        width: 72px;
+    }
+
+    .fi-admin-shell .sidebar-primary {
+        right: 72px;
+        width: min(280px, calc(100vw - 72px));
+    }
+
+    .fi-admin-shell .main-content,
+    .fi-admin-shell .main-content.expanded {
+        margin-right: 72px !important;
+    }
+
+    .fi-admin-shell .toggle-sidebar-btn {
+        right: 80px !important;
+    }
+
+    .fi-admin-shell .sidebar-primary:not(.closed) ~ .toggle-sidebar-btn {
+        right: min(352px, calc(100vw - 8px)) !important;
+    }
+
+    .fi-admin-shell .content-area {
+        padding: 12px 10px;
+    }
+
+    .fi-admin-shell .fi-ta-header-toolbar {
+        flex-wrap: wrap;
     }
 }
 

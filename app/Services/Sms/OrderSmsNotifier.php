@@ -2,15 +2,12 @@
 
 namespace App\Services\Sms;
 
-use App\Contracts\SmsSender;
 use App\Models\Order;
 use App\Models\Payment;
-use Illuminate\Support\Facades\Log;
 
 class OrderSmsNotifier
 {
     public function __construct(
-        protected SmsSender $sms,
         protected TransactionalSmsDispatcher $transactional,
     ) {}
 
@@ -28,58 +25,51 @@ class OrderSmsNotifier
 
         if ($payment) {
             $this->transactional->orderPaid($order, $payment);
-
-            return;
         }
+    }
 
-        $this->send($order, sprintf(
-            site_name().': پرداخت سفارش %s با موفقیت انجام شد.',
-            $order->tracking_code
-        ));
+    public function paymentFailed(Order $order, ?Payment $payment = null): void
+    {
+        $this->transactional->paymentFailed($order, $payment);
+    }
+
+    public function paymentPartialRemaining(Order $order, int $remainingAmount): void
+    {
+        $this->transactional->paymentPartialRemaining($order, $remainingAmount);
     }
 
     public function orderShipped(Order $order): void
     {
-        $msg = sprintf(site_name().': سفارش %s ارسال شد.', $order->tracking_code);
-
-        if ($order->shipping_tracking_code) {
-            $msg .= ' رهگیری: '.$order->shipping_tracking_code;
-        }
-
-        $this->send($order, $msg);
+        $this->transactional->orderShipped($order);
     }
 
     public function orderDelivered(Order $order): void
     {
-        $this->send($order, sprintf(
-            site_name().': سفارش %s تحویل داده شد. از خرید شما سپاسگزاریم.',
-            $order->tracking_code
-        ));
+        $this->transactional->orderDelivered($order);
     }
 
     public function orderCanceled(Order $order): void
     {
-        $this->send($order, sprintf(
-            site_name().': سفارش %s لغو شد.',
-            $order->tracking_code
-        ));
+        $this->transactional->orderCanceled($order);
     }
 
-    protected function send(Order $order, string $message): void
+    public function orderExpiredUnpaid(Order $order): void
     {
-        $phone = $order->user?->phone;
+        $this->transactional->orderExpiredUnpaid($order);
+    }
 
-        if (! $phone) {
-            return;
-        }
+    public function proformaCreated(Order $order): void
+    {
+        $this->transactional->proformaCreated($order);
+    }
 
-        try {
-            $this->sms->sendTransactional($phone, $message);
-        } catch (\Throwable $e) {
-            Log::warning('Order SMS failed', [
-                'order_id' => $order->id,
-                'error' => $e->getMessage(),
-            ]);
-        }
+    public function proformaReservationExpired(Order $order): void
+    {
+        $this->transactional->proformaReservationExpired($order);
+    }
+
+    public function proformaReservationExtended(Order $order): void
+    {
+        $this->transactional->proformaReservationExtended($order);
     }
 }

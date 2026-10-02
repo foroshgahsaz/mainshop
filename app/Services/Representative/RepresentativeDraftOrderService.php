@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\User;
 use App\Services\Order\OrderInvoiceTotalsService;
 use App\Services\Payment\PaymentGatewayCatalog;
+use App\Services\Sms\OrderSmsNotifier;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -245,7 +246,11 @@ class RepresentativeDraftOrderService
             'status' => Order::STATUS_PROFORMA,
         ]);
 
-        return $order->fresh(['items', 'user', 'shippingMethod', 'freightCarrier']);
+        $order = $order->fresh(['items', 'user', 'shippingMethod', 'freightCarrier', 'representative']);
+
+        app(OrderSmsNotifier::class)->proformaCreated($order);
+
+        return $order;
     }
 
     public function recalculateTotals(Order $order): void

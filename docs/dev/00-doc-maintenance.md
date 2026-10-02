@@ -6,7 +6,7 @@
 
 - [ ] فیچر/رفع bug در کد
 - [ ] **حداقل یک** به‌روزرسانی doc:
-  - رفتار جدید → `docs/DEVELOPER_GUIDE.md` (بخش مربوط) **یا** `docs/dev/07` / `08` / recipe در `06`
+  - رفتار جدید → `docs/DEVELOPER_GUIDE.md` (بخش مربوط) **یا** `docs/dev/07` / `08` / `09` / recipe در `06`
   - نقش یا URL جدید → `docs/dev/01-roles-and-auth.md`
   - deploy/env جدید → `docs/dev/03-production-k8s-liara.md`
   - فایل/کلاس جدید مهم → `docs/dev/04-code-map.md`

@@ -10,6 +10,8 @@
             @include('filament.partials.admin-sidebar')
         @endif
 
+        <div class="sidebar-backdrop" id="sidebarBackdrop" hidden aria-hidden="true"></div>
+
         <div class="main-content" id="mainContent">
             <div class="content-area">
                 <main class="fi-main mx-auto w-full">

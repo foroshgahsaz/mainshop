@@ -4,7 +4,7 @@ namespace App\Filament\Resources\ProductFamilyResource\Pages;
 
 use App\Filament\Resources\ProductFamilyResource;
 use Filament\Actions;
-use Filament\Resources\Pages\EditRecord;
+use App\Filament\Resources\Pages\EditRecord;
 
 class EditProductFamily extends EditRecord
 {

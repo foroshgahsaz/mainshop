@@ -67,4 +67,16 @@ class AdminListHeader
     {
         return 'لیست '.$resourceClass::getPluralModelLabel();
     }
+
+    /** @param  class-string<resource>  $resourceClass */
+    public static function createTitle(string $resourceClass): string
+    {
+        return 'افزودن '.$resourceClass::getModelLabel();
+    }
+
+    /** @param  class-string<resource>  $resourceClass */
+    public static function editTitle(string $resourceClass): string
+    {
+        return 'ویرایش '.$resourceClass::getModelLabel();
+    }
 }

@@ -608,14 +608,17 @@ $middleware->validateCsrfTokens(except: [
 
 ### 9.12 افزودن درگاه جدید (recipe)
 
+**آموزش کامل گام‌به‌گام:** [dev/07-add-payment-gateway.md](dev/07-add-payment-gateway.md)
+
+خلاصه:
+
 1. کلاس جدید implements `PaymentGatewayInterface` در `app/Services/Payment/`
 2. ثبت در `config/payment.php` → `gateways.{name}`
-3. `PaymentGatewayCatalog::isEnabled()` — case جدید
-4. `SettingsService::{gateway}()` اگر admin لازم است
-5. Filament Page مثل `ManageZarinpal` (اختیاری)
-6. Route callback + CSRF exempt
-7. `CheckoutPage` / catalog — معمولاً خودکار از config
-8. Feature test
+3. **`PaymentGatewayCatalog::isEnabled()` و `iconUrl()`** — `match` برای نام درگاه (بدون این در checkout دیده نمی‌شود)
+4. `SettingsService::{gateway}()` + صفحه Filament مثل `ManageZarinpal`
+5. Route callback در `routes/web.php` + `PaymentController` + CSRF exempt در `bootstrap/app.php`
+6. Validation در `CheckoutPage::checkoutRules()` از `enabledNames()`
+7. Feature test + به‌روزرسانی مستندات ([00-doc-maintenance.md](dev/00-doc-maintenance.md))
 
 ---
 
@@ -627,8 +630,8 @@ $middleware->validateCsrfTokens(except: [
 | `config/shop.php` → `otp` | length، expire، throttle |
 | Cache key | `otp:{phone}` |
 
-**Shop login:** فقط کاربران `!is_admin`  
-**Admin login:** `/admin` — فقط `is_admin && status`
+**Shop login:** مشتری — مودال/`/login` (staff نباید از این مسیر برای ادمین استفاده کند).  
+**Admin login:** `/admin/login` — `AdminLoginGuard`: `is_admin` یا `is_sales_manager` + `status`. جزئیات: [dev/01-roles-and-auth.md](dev/01-roles-and-auth.md)
 
 ---
 
@@ -1239,5 +1242,6 @@ resources/views/layouts/shop.blade.php
 | 2026-08-23 | نسخه اول — راهنمای جامع offline |
 | 2026-08-23 | نسخه 1.1 — تکمیل درگاه‌ها، variant، coupon، settings، SEO، tests |
 | 2026-10-01 | نسخه 1.2 — لینک به docs/README، مدیر فروش، `/admin/login` |
+| 2026-10-02 | نسخه 1.3 — dev/07 درگاه، dev/08 دسترسی، PROJECT-PHASES، سیاست doc |
 
 > اگر بخش جدیدی به پروژه اضافه شد، همین فایل را در `docs/DEVELOPER_GUIDE.md` به‌روز کنید و در صورت نیاز `docs/README.md` و `docs/dev/*`.

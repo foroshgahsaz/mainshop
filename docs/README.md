@@ -18,8 +18,12 @@
 | ۶ | [dev/04-code-map.md](dev/04-code-map.md) | نقشهٔ فایل‌ها و کلاس‌ها (جستجوی سریع) |
 | ۷ | [dev/05-troubleshooting-playbook.md](dev/05-troubleshooting-playbook.md) | سناریوهای رایج + دستورات copy-paste |
 | ۸ | [dev/06-feature-recipes.md](dev/06-feature-recipes.md) | الگوی افزودن فیچر (سبد، ادمین، سرویس) |
+| ۹ | [dev/07-add-payment-gateway.md](dev/07-add-payment-gateway.md) | **افزودن درگاه پرداخت** — فایل‌به‌فایل |
+| ۱۰ | [dev/08-add-limited-access.md](dev/08-add-limited-access.md) | **دسترسی محدود / مدیر فروش / Resource جدید** |
+| — | [PROJECT-PHASES.md](PROJECT-PHASES.md) | تا کجا پیش رفته‌ایم (فازهای محصول) |
+| — | [dev/00-doc-maintenance.md](dev/00-doc-maintenance.md) | **الزام:** هر فیچر = به‌روز doc |
 
-**برای AI (Cursor):** در ریشهٔ پروژه فایل [`AGENTS.md`](../AGENTS.md) را ببینید — فقط اشاره به این مستندات است.
+**برای AI (Cursor):** [`AGENTS.md`](../AGENTS.md) — هر تغییر کد باید doc هم به‌روز شود.
 
 ---
 
@@ -65,7 +69,7 @@
 | 3.2 | ورود OTP/رمز (`admin/login`) | [dev/01-roles-and-auth.md](dev/01-roles-and-auth.md) |
 | 3.3 | Resourceها و Relation Manager | [DEVELOPER_GUIDE §5.2–5.3](DEVELOPER_GUIDE.md#52-resourceها--appfilamentresources) |
 | 3.4 | صفحات تنظیمات | [DEVELOPER_GUIDE §5.4](DEVELOPER_GUIDE.md#54-صفحات-سفارشی) · §22 Settings |
-| 3.5 | مدیر فروش (دسترسی محدود) | [dev/01-roles-and-auth.md](dev/01-roles-and-auth.md#مدیر-فروش) |
+| 3.5 | مدیر فروش (دسترسی محدود) | [dev/01-roles-and-auth.md](dev/01-roles-and-auth.md#۴-مدیر-فروش) · [dev/08](dev/08-add-limited-access.md) |
 | 3.6 | سفارش و پرداخت در ادمین | [DEVELOPER_GUIDE §24](DEVELOPER_GUIDE.md#24-مدیریت-سفارش-و-پرداخت-در-ادمین) |
 | 3.7 | Sidebar و hookهای Filament | [DEVELOPER_GUIDE §5.5](DEVELOPER_GUIDE.md#55-sidebar-سفارشی) |
 
@@ -94,6 +98,7 @@
 | 6.1 | زرین‌پال | [DEVELOPER_GUIDE §9.3](DEVELOPER_GUIDE.md#93-زرین‌پال-zarinpal) |
 | 6.2 | تارا و پرداخت ترکیبی | [DEVELOPER_GUIDE §9.4–9.5](DEVELOPER_GUIDE.md#9-پرداخت-و-درگاه‌ها-جزئیات-کامل) |
 | 6.3 | Callback و CSRF | [DEVELOPER_GUIDE §9](DEVELOPER_GUIDE.md#9-پرداخت-و-درگاه‌ها-جزئیات-کامل) · `bootstrap/app.php` |
+| 6.4 | **افزودن درگاه جدید** | [dev/07-add-payment-gateway.md](dev/07-add-payment-gateway.md) |
 
 ### فاز ۷ — احراز هویت و پیامک
 

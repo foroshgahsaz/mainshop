@@ -569,43 +569,61 @@ body.fi-body .fi-no-notification-icon {
     color: #181c32 !important;
 }
 
-/* ===== نوار بالای محتوا (پروفایل، خروج، فروشگاه) ===== */
+/* ===== نوار بالای محتوا (مطابق نمونه — ارتفاع کم) ===== */
 .admin-top-bar {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 14px 24px;
+    min-height: 56px;
+    max-height: 56px;
+    padding: 0 24px;
     background: #fff;
     border-bottom: 1px solid #eff2f5;
     position: sticky;
     top: 0;
     z-index: 700;
+    box-sizing: border-box;
+}
+
+.admin-top-bar__primary {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.admin-top-bar__create-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px;
+    border-radius: 8px;
+    background: #1e1e2d;
+    color: #fff !important;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    font-family: Yekan, YekanBakh, Tahoma, Arial, sans-serif;
+    white-space: nowrap;
+    border: none;
+    line-height: 1.2;
+}
+
+.admin-top-bar__create-btn:hover {
+    background: #2a2a3d;
+    color: #fff !important;
 }
 
 .admin-top-bar__spacer {
     flex: 1 1 auto;
+    min-width: 8px;
 }
 
 .admin-top-bar__utilities {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
-    justify-content: flex-end;
-    gap: 10px;
-}
-
-.admin-top-bar__avatar {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #7239ea 0%, #9d5cff 100%);
-    color: #fff;
-    font-size: 15px;
-    font-weight: 700;
-    text-decoration: none;
+    justify-content: flex-start;
+    gap: 8px;
     flex-shrink: 0;
 }
 
@@ -613,20 +631,68 @@ body.fi-body .fi-no-notification-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 8px;
     border: 1px solid #e4e6ef;
     background: #fff;
-    color: #5e6278;
-    font-size: 16px;
-    cursor: default;
+    color: #3f4254;
+    font-size: 17px;
+    cursor: pointer;
     flex-shrink: 0;
+    text-decoration: none;
+    line-height: 1;
+}
+
+.admin-top-bar__icon-btn--profile {
+    border-color: transparent;
+    background: #fff;
+    color: #181c32;
+    font-size: 18px;
+}
+
+.admin-top-bar__icon-btn--profile:hover {
+    background: #f5f8fa;
+    color: #181c32;
+}
+
+.admin-top-bar__icon-btn--logout {
+    background: #f1416c;
+    border-color: #f1416c;
+    color: #fff;
+}
+
+.admin-top-bar__icon-btn--logout:hover {
+    background: #d9214e;
+    border-color: #d9214e;
+    color: #fff;
+}
+
+.admin-top-bar__icon-btn:disabled {
+    cursor: default;
+    opacity: 1;
+}
+
+.admin-top-bar__vsep {
+    display: block;
+    width: 1px;
+    height: 28px;
+    background: #e4e6ef;
+    flex-shrink: 0;
+    margin: 0 2px;
 }
 
 .admin-top-bar__logout-form {
-    display: inline;
+    display: inline-flex;
     margin: 0;
+    padding: 0;
+}
+
+.admin-top-bar .fi-admin-global-btn-store--outline {
+    padding: 8px 14px;
+    font-size: 13px;
+    min-height: 36px;
 }
 
 /* ===== هدر لیست (کاربران | لیست کاربران + افزودن) ===== */
@@ -744,7 +810,10 @@ body.fi-body .fi-no-notification-icon {
 
 @media (max-width: 991px) {
     .admin-top-bar {
-        padding: 12px 14px;
+        min-height: 52px;
+        max-height: none;
+        padding: 8px 12px;
+        flex-wrap: wrap;
     }
 
     .fi-admin-list-header {
@@ -756,9 +825,17 @@ body.fi-body .fi-no-notification-icon {
         padding: 0 14px;
     }
 
-    .admin-top-bar__utilities {
+    .admin-top-bar__primary {
+        order: 1;
         width: 100%;
-        justify-content: flex-start;
+        margin-bottom: 4px;
+    }
+
+    .admin-top-bar__utilities {
+        order: 2;
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 6px;
     }
 
     .admin-top-bar__spacer {

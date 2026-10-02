@@ -12,7 +12,7 @@ class AdminTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->striped()
+            ->striped(false)
             ->defaultPaginationPageOption(10)
             ->paginationPageOptions([10, 25, 50])
             ->emptyStateHeading('موردی یافت نشد')

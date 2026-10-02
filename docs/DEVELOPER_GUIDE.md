@@ -1,6 +1,8 @@
 # راهنمای جامع توسعه — فروشگاه چینی بازار (ExportOS / mainshop)
 
 > این سند برای زمانی است که به AI دسترسی ندارید. هدف: پیدا کردن سریع فایل‌ها، رفع مشکل، و افزودن قابلیت جدید بدون گم شدن در پروژه.
+>
+> **فهرست ۰ تا ۱۰۰ و اسناد تکمیلی:** [docs/README.md](README.md) · نقش‌ها/URL: [docs/dev/01-roles-and-auth.md](dev/01-roles-and-auth.md) · Production/K8s: [docs/dev/03-production-k8s-liara.md](dev/03-production-k8s-liara.md)
 
 **Stack:** Laravel 12 · Livewire 3 · Filament 3 · Redis · PHP 8.2+  
 **زبان UI:** فارسی (RTL) · **Admin brand:** چینی بازار
@@ -36,6 +38,7 @@
 25. [Support، Middleware و Blade Components](#25-support-middleware-و-blade-components)
 26. [فهرست کامل تست‌ها](#26-فهرست-کامل-تست‌ها)
 27. [چک‌لیست پوشش راهنما](#27-چک‌لیست-پوشش-راهنما)
+28. [مستندات تکمیلی (فهرست ۰ تا ۱۰۰)](#28-مستندات-تکمیلی-فهرست-۰-تا-۱۰۰)
 
 ---
 
@@ -259,8 +262,9 @@ components/shop/
 |-------|--------|
 | URL | `/admin` |
 | Panel ID | `admin` |
-| ورود | `App\Filament\Pages\Auth\Login` |
-| دسترسی | `User::canAccessPanel()` → `is_admin && status` |
+| ورود | **`/admin/login`** — `App\Filament\Pages\Auth\Login` |
+| دسترسی | `User::canAccessPanel(admin)` → `status && (is_admin \|\| is_sales_manager)` |
+| مدیر فروش | همان پنل؛ محدودیت در `AdminAccess` + `RestrictSalesManagerAdminAccess` — جزئیات [dev/01-roles-and-auth.md](dev/01-roles-and-auth.md) |
 
 ### 5.2 Resourceها — `app/Filament/Resources/`
 
@@ -1212,11 +1216,28 @@ resources/views/layouts/shop.blade.php
 
 ---
 
+## 28. مستندات تکمیلی (فهرست ۰ تا ۱۰۰)
+
+| سند | محتوا |
+|-----|--------|
+| [docs/README.md](README.md) | فهرست کامل فازهای ۰–۱۰۰ با لینک |
+| [dev/01-roles-and-auth.md](dev/01-roles-and-auth.md) | مشتری / ادمین / مدیر فروش / نماینده |
+| [dev/02-local-setup.md](dev/02-local-setup.md) | نصب لوکال |
+| [dev/03-production-k8s-liara.md](dev/03-production-k8s-liara.md) | deploy، env بدون `.env`، Redis، `/data` |
+| [dev/04-code-map.md](dev/04-code-map.md) | نقشه فایل و `shop:*` |
+| [dev/05-troubleshooting-playbook.md](dev/05-troubleshooting-playbook.md) | عیب‌یابی copy-paste |
+| [dev/06-feature-recipes.md](dev/06-feature-recipes.md) | الگوی فیچر جدید |
+| [representative/PHASE-PLAN-FA.md](representative/PHASE-PLAN-FA.md) | پنل نماینده |
+| [../AGENTS.md](../AGENTS.md) | اشاره برای Cursor |
+
+---
+
 ## Changelog این سند
 
 | تاریخ | توضیح |
 |-------|--------|
 | 2026-08-23 | نسخه اول — راهنمای جامع offline |
 | 2026-08-23 | نسخه 1.1 — تکمیل درگاه‌ها، variant، coupon، settings، SEO، tests |
+| 2026-10-01 | نسخه 1.2 — لینک به docs/README، مدیر فروش، `/admin/login` |
 
-> اگر بخش جدیدی به پروژه اضافه شد، همین فایل را در `docs/DEVELOPER_GUIDE.md` به‌روز کنید.
+> اگر بخش جدیدی به پروژه اضافه شد، همین فایل را در `docs/DEVELOPER_GUIDE.md` به‌روز کنید و در صورت نیاز `docs/README.md` و `docs/dev/*`.

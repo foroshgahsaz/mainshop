@@ -1515,32 +1515,13 @@ select.form-control-modal {
 }
 
 @media (max-width: 991px) {
-    .sidebar-secondary {
-        width: 90px;
-    }
-
-    .sidebar-primary {
-        right: 90px;
-    }
-
-    .main-content {
-        margin-right: 90px;
-    }
-
+    .main-content,
     .main-content.expanded {
-        margin-right: 90px;
+        margin-right: 0;
     }
 
     .toggle-sidebar-btn {
-        right: 98px;
-    }
-
-    .sidebar-primary:not(.closed) ~ .toggle-sidebar-btn {
-        right: min(398px, calc(100vw - 12px));
-    }
-
-    .sidebar-primary.closed ~ .toggle-sidebar-btn {
-        right: 98px;
+        right: 16px;
     }
 
     .modal-container {

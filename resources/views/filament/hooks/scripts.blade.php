@@ -4,4 +4,7 @@
 @endif
 <script src="{{ asset('vendor/sweetalert2/11/sweetalert2.all.min.js') }}"></script>
 <script src="{{ asset('adminpanel/sweetalert-notifications.js') }}"></script>
-<script src="{{ asset('adminpanel/script.js') }}" defer></script>
+@php
+    $adminScriptV = @filemtime(public_path('adminpanel/script.js')) ?: 0;
+@endphp
+<script src="{{ asset('adminpanel/script.js') }}?v={{ $adminScriptV }}" defer></script>

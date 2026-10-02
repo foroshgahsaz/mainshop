@@ -56,4 +56,4 @@
 
 ## پنل ادمین — موبایل
 
-استایل‌های ریسپانسیو در `public/adminpanel/filament-overrides.css` و `script.js` (`initCompactSidebar`) — بدون asset اضافه؛ جدول‌ها اسکرول افقی دارند.
+استایل‌های ریسپانسیو در `public/adminpanel/filament-overrides.css` و `script.js` — در موبایل منو کاملاً مخفی است و فقط دکمهٔ گوشهٔ پایین باز/بسته می‌کند؛ backdrop زیر لایهٔ منو (z-index) تا لینک‌ها کلیک‌پذیر باشند.

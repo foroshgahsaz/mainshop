@@ -3,9 +3,10 @@
     use App\Support\AdminAccess;
 
     $user = filament()->auth()->user();
-    $profileUrl = $user
-        ? UserResource::getUrl('edit', ['record' => $user->id], panel: 'admin')
-        : filament()->getUrl();
+    $profileUrl = filament()->getUrl();
+    if ($user !== null && UserResource::canEdit($user)) {
+        $profileUrl = UserResource::getUrl('edit', ['record' => $user], panel: 'admin');
+    }
 
     $showCreateUser = request()->routeIs('filament.admin.resources.users.index')
         && AdminAccess::canManageShopInAdmin();

@@ -36,6 +36,8 @@ class OrderService
             'auto_canceled'
         );
 
+        $this->sms->orderExpiredUnpaid($order->fresh(['user']));
+
         return $order;
     }
 
@@ -71,6 +73,8 @@ class OrderService
                 'مهلت رزرو پیش‌فاکتور به پایان رسید؛ موجودی آزاد شد. پیش‌فاکتور برای ویرایش ادمین باز است.',
                 'proforma_reservation_expired'
             );
+
+            $this->sms->proformaReservationExpired($locked);
 
             return $locked;
         });
@@ -230,7 +234,10 @@ class OrderService
 
             $order = $order->fresh(['user']);
             $order->user?->notify(new OrderCanceledNotification($order));
-            $this->sms->orderCanceled($order);
+
+            if (! $systemExpire) {
+                $this->sms->orderCanceled($order);
+            }
 
             return $order;
         });

@@ -62,7 +62,15 @@
 1. merge به `master`
 2. production: `composer install --no-dev`, `migrate --force`, `shop:deploy-recover`
 3. اگر migration ENUM MySQL دارد — فقط روی MySQL تست integration
-4. مستندات: `docs/README.md` + بخش مربوط در `DEVELOPER_GUIDE.md`
+4. مستندات: [00-doc-maintenance.md](00-doc-maintenance.md) — **الزامی**
+
+## Recipe 8 — درگاه پرداخت
+
+→ [07-add-payment-gateway.md](07-add-payment-gateway.md)
+
+## Recipe 9 — دسترسی محدود / مدیر فروش
+
+→ [08-add-limited-access.md](08-add-limited-access.md)
 
 ---
 

@@ -1,7 +1,35 @@
+function isCompactAdminSidebar() {
+    return window.matchMedia('(max-width: 991px)').matches;
+}
+
+function syncSidebarBackdrop() {
+    const backdrop = document.getElementById('sidebarBackdrop');
+    const sidebar = document.getElementById('sidebarPrimary');
+
+    if (!backdrop || !sidebar || !isCompactAdminSidebar()) {
+        document.body.classList.remove('fi-sidebar-menu-open');
+        if (backdrop) {
+            backdrop.hidden = true;
+            backdrop.setAttribute('aria-hidden', 'true');
+        }
+
+        return;
+    }
+
+    const open = !sidebar.classList.contains('closed');
+    backdrop.hidden = !open;
+    backdrop.setAttribute('aria-hidden', open ? 'false' : 'true');
+    document.body.classList.toggle('fi-sidebar-menu-open', open);
+}
+
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebarPrimary');
     const mainContent = document.getElementById('mainContent');
     const toggleIcon = document.getElementById('toggleIcon');
+
+    if (!sidebar || !mainContent || !toggleIcon) {
+        return;
+    }
 
     sidebar.classList.toggle('closed');
     mainContent.classList.toggle('expanded');
@@ -13,6 +41,37 @@ function toggleSidebar() {
         toggleIcon.classList.remove('fa-chevron-right');
         toggleIcon.classList.add('fa-chevron-left');
     }
+
+    syncSidebarBackdrop();
+}
+
+function initCompactSidebar() {
+    const sidebar = document.getElementById('sidebarPrimary');
+    const mainContent = document.getElementById('mainContent');
+    const toggleIcon = document.getElementById('toggleIcon');
+    const backdrop = document.getElementById('sidebarBackdrop');
+
+    if (!sidebar || !mainContent) {
+        return;
+    }
+
+    if (isCompactAdminSidebar()) {
+        sidebar.classList.add('closed');
+        mainContent.classList.add('expanded');
+        if (toggleIcon) {
+            toggleIcon.classList.remove('fa-chevron-left');
+            toggleIcon.classList.add('fa-chevron-right');
+        }
+    }
+
+    backdrop?.addEventListener('click', () => {
+        if (!sidebar.classList.contains('closed')) {
+            toggleSidebar();
+        }
+    });
+
+    window.addEventListener('resize', syncSidebarBackdrop, { passive: true });
+    syncSidebarBackdrop();
 }
 
 function initAdminSidebar() {
@@ -193,6 +252,7 @@ function initPriceRangeSliders() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    initCompactSidebar();
     initAdminSidebar();
     initModalFix();
     initPriceRangeSliders();

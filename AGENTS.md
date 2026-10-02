@@ -11,6 +11,10 @@
 - Production/K8s: [docs/dev/03-production-k8s-liara.md](docs/dev/03-production-k8s-liara.md)
 - نماینده: [docs/representative/PHASE-PLAN-FA.md](docs/representative/PHASE-PLAN-FA.md)
 
+## مستندات (الزامی با هر تغییر کد)
+
+Follow [docs/dev/00-doc-maintenance.md](docs/dev/00-doc-maintenance.md): every feature/fix must update the relevant doc in the same PR (DEVELOPER_GUIDE, dev/07 gateway, dev/08 access, PROJECT-PHASES, README index).
+
 ## قوانین معماری
 
 - منطق کسب‌وکار در `app/Services/` — نه در Livewire/Filament ضخیم

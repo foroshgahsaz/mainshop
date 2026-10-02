@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\User;
 use App\Services\Cart\StockService;
 use App\Services\Order\OrderActivityLogger;
+use App\Services\Sms\OrderSmsNotifier;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -16,6 +17,7 @@ class RepresentativeProformaService
     public function __construct(
         protected StockService $stockService,
         protected OrderActivityLogger $orderLog,
+        protected OrderSmsNotifier $sms,
     ) {}
 
     public function reserveStockForProforma(Order $order, User $representative): Order
@@ -129,6 +131,10 @@ class RepresentativeProformaService
             $this->orderLog->system($order->fresh(), $message, 'proforma_reservation_extended');
         }
 
-        return $order->fresh();
+        $order = $order->fresh(['user']);
+
+        $this->sms->proformaReservationExtended($order);
+
+        return $order;
     }
 }

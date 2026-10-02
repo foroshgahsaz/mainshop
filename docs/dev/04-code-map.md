@@ -81,7 +81,8 @@ app/Services/
   Media/          MediaLibrary, ImageOptimizer, ...
   Auth/           OtpService, *Guard
   Representative/ DraftOrder, Proforma, CatalogLookup, ...
-  Sms/            SmsSenderFactory, TransactionalSmsDispatcher
+  Sms/            SmsSenderFactory, TransactionalSmsDispatcher, OrderSmsNotifier
+  Jobs/           SendTransactionalSmsJob
   Pdf/            PersianPdfGenerator
 ```
 

@@ -4,7 +4,7 @@ namespace App\Filament\Resources\ProductTemplateResource\Pages;
 
 use App\Filament\Resources\ProductTemplateResource;
 use Filament\Actions;
-use Filament\Resources\Pages\EditRecord;
+use App\Filament\Resources\Pages\EditRecord;
 
 class EditProductTemplate extends EditRecord
 {

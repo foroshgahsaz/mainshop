@@ -4,7 +4,7 @@ namespace App\Filament\Resources\FreightCarrierResource\Pages;
 
 use App\Filament\Resources\FreightCarrierResource;
 use Filament\Actions;
-use Filament\Resources\Pages\EditRecord;
+use App\Filament\Resources\Pages\EditRecord;
 
 class EditFreightCarrier extends EditRecord
 {

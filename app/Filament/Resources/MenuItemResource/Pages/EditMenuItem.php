@@ -4,7 +4,7 @@ namespace App\Filament\Resources\MenuItemResource\Pages;
 
 use App\Filament\Resources\MenuItemResource;
 use Filament\Actions;
-use Filament\Resources\Pages\EditRecord;
+use App\Filament\Resources\Pages\EditRecord;
 
 class EditMenuItem extends EditRecord
 {

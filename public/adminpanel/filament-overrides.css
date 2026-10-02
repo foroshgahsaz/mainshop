@@ -308,9 +308,25 @@ body.fi-body .tippy-box {
     border-radius: 8px !important;
 }
 
-.fi-admin-shell .fi-ta-col-wrapped .fi-ta-split {
+.fi-admin-user-cell {
+    display: flex;
     align-items: center;
     gap: 12px;
+    min-width: 0;
+}
+
+.fi-admin-user-cell__avatar {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.fi-admin-user-cell__name {
+    font-weight: 600;
+    color: #181c32;
+    font-size: 13px;
 }
 
 .fi-admin-shell .fi-ta-cell .text-primary-600,

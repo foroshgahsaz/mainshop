@@ -15,8 +15,7 @@ use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Columns\ImageColumn;
-use Filament\Tables\Columns\Layout\Split;
+use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Hash;
@@ -415,19 +414,10 @@ class UserResource extends Resource
         return AdminTable::configure($table)
             ->searchPlaceholder('جستجوی کاربر')
             ->columns([
-                Split::make([
-                    ImageColumn::make('avatar')
-                        ->label('')
-                        ->disk('public')
-                        ->visibility('public')
-                        ->height(40)
-                        ->width(40)
-                        ->extraImgAttributes(['class' => 'rounded-lg object-cover'])
-                        ->defaultImageUrl(fn (User $record) => 'https://ui-avatars.com/api/?name='.urlencode($record->name).'&background=7239ea&color=fff&size=128&rounded=false'),
-                    Tables\Columns\TextColumn::make('name')
-                        ->searchable(['name', 'email', 'phone'])
-                        ->weight('bold'),
-                ])->label('کاربر'),
+                ViewColumn::make('name')
+                    ->label('کاربر')
+                    ->view('filament.tables.columns.user-cell')
+                    ->searchable(['name', 'email', 'phone']),
                 Tables\Columns\TextColumn::make('customer_type')
                     ->label('نوع')
                     ->state(fn (User $record) => $record->customerTypeLabel())

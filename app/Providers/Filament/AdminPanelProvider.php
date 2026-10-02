@@ -64,7 +64,6 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([])
             ->renderHook(PanelsRenderHook::HEAD_END, fn () => view('filament.hooks.styles'))
             ->renderHook(PanelsRenderHook::BODY_END, fn () => view('filament.hooks.scripts'))
-            ->renderHook(PanelsRenderHook::PAGE_HEADER_ACTIONS_AFTER, fn () => view('filament.partials.global-header-actions'))
             ->middleware([
                 SetPersianLocale::class,
                 EncryptCookies::class,

@@ -84,7 +84,7 @@ body.fi-body .fi-panel-admin {
 
 /* ===== Admin shell (عرض‌ها مطابق نمونه داشبورد) ===== */
 .fi-admin-shell {
-    --ax-sidebar-rail: 148px;
+    --ax-sidebar-rail: 156px;
     --ax-sidebar-menu: 268px;
     --ax-sidebar-total: calc(var(--ax-sidebar-rail) + var(--ax-sidebar-menu));
     min-height: 100vh;
@@ -93,10 +93,18 @@ body.fi-body .fi-panel-admin {
 
 .fi-admin-shell .sidebar-secondary {
     width: var(--ax-sidebar-rail) !important;
-    padding: 14px 10px 18px !important;
+    padding: 14px 8px 18px !important;
     align-items: stretch !important;
     overflow-y: auto;
     overflow-x: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.fi-admin-shell .sidebar-secondary::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
 }
 
 .fi-admin-shell .sidebar-divider {
@@ -107,26 +115,36 @@ body.fi-body .fi-panel-admin {
 .fi-admin-shell .sidebar-icon-item {
     width: 100% !important;
     height: auto !important;
-    min-height: 54px;
-    flex-direction: column;
-    gap: 5px;
-    padding: 9px 6px 8px;
-    margin-bottom: 4px;
-    font-size: 17px;
+    min-height: 42px;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    margin-bottom: 2px;
+    font-size: 16px;
+    direction: rtl;
 }
 
 .fi-admin-shell .sidebar-icon-label {
     display: block;
-    font-size: 11px;
+    flex: 1;
+    min-width: 0;
+    font-size: 12px;
     font-weight: 500;
-    line-height: 1.3;
-    text-align: center;
+    line-height: 1.35;
+    text-align: right;
     color: rgba(255, 255, 255, 0.88);
     font-family: Yekan, YekanBakh, Tahoma, Arial, sans-serif;
-    max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    order: 2;
+}
+
+.fi-admin-shell .sidebar-icon-item > i {
+    flex-shrink: 0;
+    order: 1;
 }
 
 .fi-admin-shell .sidebar-icon-item.active .sidebar-icon-label {
@@ -276,6 +294,27 @@ body.fi-body .tippy-box {
     font-weight: 500;
 }
 
+/* منوی سفید — بدون پس‌زمینه بنفش روی گروه اصلی (مثل نمونه محصولات) */
+.fi-admin-shell .sidebar-menu .menu-item,
+.fi-admin-shell .sidebar-menu .menu-item.active,
+.fi-admin-shell .sidebar-menu .menu-item:hover {
+    background: transparent !important;
+}
+
+.fi-admin-shell .sidebar-menu .menu-item.active,
+.fi-admin-shell .sidebar-menu .menu-item.active .menu-icon,
+.fi-admin-shell .sidebar-menu .menu-item:hover {
+    color: #7239ea;
+}
+
+.fi-admin-shell .sidebar-menu .menu-item.active .menu-icon {
+    color: #7239ea;
+}
+
+.fi-admin-shell .sidebar-menu .menu-item:hover .menu-icon {
+    color: #7239ea;
+}
+
 .fi-admin-shell .sidebar-secondary .sidebar-icon-item,
 .fi-admin-shell .sidebar-secondary .sidebar-icon-item i,
 .fi-admin-shell .sidebar-secondary .sidebar-icon-link,
@@ -420,18 +459,69 @@ body.fi-body .fi-no-notification-icon {
     color: #fff !important;
 }
 
-/* ===== Global header actions (shop + logout) ===== */
-.fi-admin-shell .fi-header {
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 8px;
+/* ===== هدر صفحات (مثل نمونه user-list) ===== */
+.fi-admin-shell .fi-page > header.fi-header,
+.fi-admin-shell .fi-resource-list-records-page > header.fi-header,
+.fi-admin-shell .fi-resource-manage-related-records-page > header.fi-header {
+    padding: 20px 24px 12px !important;
+    margin: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: 12px 16px !important;
+}
+
+.fi-admin-shell .fi-header .fi-header-heading {
+    font-size: 22px !important;
+    font-weight: 600 !important;
+    color: #181c32 !important;
+    line-height: 1.3 !important;
+}
+
+.fi-admin-shell .fi-header .fi-breadcrumbs {
+    margin-top: 4px;
+    font-size: 13px !important;
+    color: #a1a5b7 !important;
+}
+
+.fi-admin-shell .fi-header .fi-breadcrumbs li,
+.fi-admin-shell .fi-header .fi-breadcrumbs a {
+    color: #a1a5b7 !important;
+    font-size: 13px !important;
+}
+
+.fi-admin-shell .fi-header > div:first-child {
+    flex: 1 1 auto;
+    min-width: 0;
+    text-align: right;
 }
 
 .fi-admin-shell .fi-header > div:last-child {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+    flex: 0 1 auto;
+}
+
+.fi-admin-shell .fi-header .fi-ac-btn-action.fi-btn.fi-color-primary,
+.fi-admin-shell .fi-header .fi-btn.fi-color-primary {
+    background: #7239ea !important;
+    border-color: #7239ea !important;
+    color: #fff !important;
+    font-weight: 600;
+    padding: 0.55rem 1.15rem;
+    border-radius: 8px;
+}
+
+.fi-admin-shell .fi-header .fi-ac-btn-action.fi-btn.fi-color-primary:hover {
+    background: #6528e0 !important;
 }
 
 .fi-admin-global-actions {
@@ -558,8 +648,11 @@ body.fi-body .fi-modal-slide-over-window-hiding {
         transform: translateX(0) !important;
     }
 
-    .fi-admin-shell .toggle-sidebar-btn {
-        right: 16px !important;
+    html.fi-admin-compact .fi-admin-shell .toggle-sidebar-btn,
+    html.fi-admin-compact .fi-admin-shell .sidebar-primary.closed ~ .toggle-sidebar-btn,
+    html.fi-admin-compact body:not(.fi-sidebar-menu-open) .fi-admin-shell .toggle-sidebar-btn {
+        right: 10px !important;
+        left: auto !important;
         bottom: 20px !important;
     }
 
@@ -568,6 +661,7 @@ body.fi-body .fi-modal-slide-over-window-hiding {
             calc(var(--ax-sidebar-total) - 12px),
             calc(100vw - 12px)
         ) !important;
+        left: auto !important;
     }
 
     body.fi-sidebar-menu-open .sidebar-backdrop {

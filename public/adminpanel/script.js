@@ -100,7 +100,10 @@ function initAdminSidebar() {
         if (!panel) return;
         panel.querySelectorAll('.submenu').forEach(sub => sub.classList.add('expanded'));
         panel.querySelectorAll('.menu-item[data-submenu]').forEach(item => {
-            item.classList.add('active');
+            const submenuId = item.getAttribute('data-submenu');
+            const submenu = submenuId ? document.getElementById(submenuId) : null;
+            const hasActiveChild = !!submenu?.querySelector('.submenu-item.active');
+            item.classList.toggle('active', hasActiveChild);
             item.setAttribute('aria-expanded', 'true');
             const arrow = item.querySelector('.menu-arrow');
             if (arrow) arrow.style.transform = 'rotate(180deg)';
@@ -154,7 +157,8 @@ function initAdminSidebar() {
 
             const isExpanded = submenu.classList.contains('expanded');
             submenu.classList.toggle('expanded', !isExpanded);
-            this.classList.toggle('active', !isExpanded);
+            const hasActiveChild = !!submenu.querySelector('.submenu-item.active');
+            this.classList.toggle('active', hasActiveChild);
             this.setAttribute('aria-expanded', isExpanded ? 'false' : 'true');
             const arrow = this.querySelector('.menu-arrow');
             if (arrow) arrow.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';

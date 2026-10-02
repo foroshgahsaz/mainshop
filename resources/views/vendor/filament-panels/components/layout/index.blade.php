@@ -13,6 +13,9 @@
         <div class="sidebar-backdrop" id="sidebarBackdrop" hidden aria-hidden="true"></div>
 
         <div class="main-content" id="mainContent">
+            @unless (request()->routeIs('filament.representative.*'))
+                @include('filament.partials.admin-top-bar')
+            @endunless
             <div class="content-area">
                 <main class="fi-main mx-auto w-full">
                     {{ $slot }}

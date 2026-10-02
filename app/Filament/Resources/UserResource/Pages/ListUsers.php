@@ -7,6 +7,7 @@ use App\Support\AdminAccess;
 use Filament\Actions;
 use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 
 class ListUsers extends ListRecords
@@ -14,6 +15,16 @@ class ListUsers extends ListRecords
     protected static string $resource = UserResource::class;
 
     protected static ?string $title = 'کاربران';
+
+    public function getHeader(): ?View
+    {
+        return view('filament.partials.admin-list-header', [
+            'icon' => 'fa-users',
+            'section' => 'کاربران',
+            'title' => 'لیست کاربران',
+            'actions' => $this->getCachedHeaderActions(),
+        ]);
+    }
 
     public function getDefaultActiveTab(): string|int|null
     {
@@ -62,7 +73,8 @@ class ListUsers extends ListRecords
         return [
             Actions\CreateAction::make()
                 ->label('افزودن کاربر')
-                ->icon('heroicon-o-plus'),
+                ->icon('heroicon-o-plus')
+                ->extraAttributes(['class' => 'fi-admin-btn-create']),
         ];
     }
 }

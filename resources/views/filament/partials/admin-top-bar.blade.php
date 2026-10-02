@@ -1,27 +1,14 @@
 @php
     use App\Filament\Resources\UserResource;
-    use App\Support\AdminAccess;
 
     $user = filament()->auth()->user();
     $profileUrl = filament()->getUrl();
     if ($user !== null && UserResource::canEdit($user)) {
         $profileUrl = UserResource::getUrl('edit', ['record' => $user], panel: 'admin');
     }
-
-    $showCreateUser = request()->routeIs('filament.admin.resources.users.index')
-        && AdminAccess::canManageShopInAdmin();
 @endphp
 
 <div class="admin-top-bar" role="banner">
-    <div class="admin-top-bar__primary">
-        @if ($showCreateUser)
-            <a href="{{ UserResource::getUrl('create') }}" class="admin-top-bar__create-btn">
-                <i class="fas fa-plus" aria-hidden="true"></i>
-                افزودن کاربر
-            </a>
-        @endif
-    </div>
-
     <div class="admin-top-bar__spacer" aria-hidden="true"></div>
 
     <div class="admin-top-bar__utilities">

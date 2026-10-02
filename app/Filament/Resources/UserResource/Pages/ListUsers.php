@@ -2,28 +2,22 @@
 
 namespace App\Filament\Resources\UserResource\Pages;
 
+use App\Filament\Resources\Pages\AdminListRecords;
 use App\Filament\Resources\UserResource;
 use App\Support\AdminAccess;
 use Filament\Actions;
 use Filament\Resources\Components\Tab;
-use Filament\Resources\Pages\ListRecords;
-use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 
-class ListUsers extends ListRecords
+class ListUsers extends AdminListRecords
 {
     protected static string $resource = UserResource::class;
 
     protected static ?string $title = 'کاربران';
 
-    public function getHeader(): ?View
+    protected function adminListTitle(): ?string
     {
-        return view('filament.partials.admin-list-header', [
-            'icon' => 'fa-users',
-            'section' => 'کاربران',
-            'title' => 'لیست کاربران',
-            'actions' => [],
-        ]);
+        return 'لیست کاربران';
     }
 
     public function getDefaultActiveTab(): string|int|null

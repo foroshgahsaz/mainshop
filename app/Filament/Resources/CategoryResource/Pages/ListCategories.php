@@ -3,10 +3,10 @@
 namespace App\Filament\Resources\CategoryResource\Pages;
 
 use App\Filament\Resources\CategoryResource;
+use App\Filament\Resources\Pages\AdminListRecords;
 use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
 
-class ListCategories extends ListRecords
+class ListCategories extends AdminListRecords
 {
     protected static string $resource = CategoryResource::class;
 

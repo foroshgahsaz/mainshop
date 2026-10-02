@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\PostResource\Pages;
 
+use App\Filament\Resources\Pages\AdminListRecords;
 use App\Filament\Resources\PostResource;
 use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
 
-class ListPosts extends ListRecords
+class ListPosts extends AdminListRecords
 {
     protected static string $resource = PostResource::class;
 

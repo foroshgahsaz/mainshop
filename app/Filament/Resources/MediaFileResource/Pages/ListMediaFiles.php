@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\MediaFileResource\Pages;
 
 use App\Filament\Resources\MediaFileResource;
-use Filament\Resources\Pages\ListRecords;
+use App\Filament\Resources\Pages\AdminListRecords;
 
-class ListMediaFiles extends ListRecords
+class ListMediaFiles extends AdminListRecords
 {
     protected static string $resource = MediaFileResource::class;
 

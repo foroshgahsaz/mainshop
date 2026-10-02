@@ -3,10 +3,10 @@
 namespace App\Filament\Resources\MenuItemResource\Pages;
 
 use App\Filament\Resources\MenuItemResource;
+use App\Filament\Resources\Pages\AdminListRecords;
 use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
 
-class ListMenuItems extends ListRecords
+class ListMenuItems extends AdminListRecords
 {
     protected static string $resource = MenuItemResource::class;
 

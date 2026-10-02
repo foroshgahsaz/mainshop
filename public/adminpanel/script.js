@@ -82,7 +82,12 @@ function initCompactSidebar() {
         }
     });
 
-    window.addEventListener('resize', syncSidebarBackdrop, { passive: true });
+    window.addEventListener('resize', () => {
+        document.documentElement.classList.toggle('fi-admin-compact', isCompactAdminSidebar());
+        syncSidebarBackdrop();
+    }, { passive: true });
+
+    document.documentElement.classList.toggle('fi-admin-compact', isCompactAdminSidebar());
     syncSidebarBackdrop();
 }
 

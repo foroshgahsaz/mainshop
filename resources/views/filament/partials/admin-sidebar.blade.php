@@ -305,6 +305,7 @@
                data-tooltip="{{ $navIcon['tooltip'] }}"
                aria-label="{{ $navIcon['tooltip'] }}">
                 <i class="fas {{ $navIcon['icon'] }}"></i>
+                <span class="sidebar-icon-label">{{ $navIcon['tooltip'] }}</span>
             </a>
         @else
             <div class="sidebar-icon-item {{ $activePanel === $navIcon['id'] ? 'active' : '' }}"
@@ -314,6 +315,7 @@
                  tabindex="0"
                  aria-label="{{ $navIcon['tooltip'] }}">
                 <i class="fas {{ $navIcon['icon'] }}"></i>
+                <span class="sidebar-icon-label">{{ $navIcon['tooltip'] }}</span>
             </div>
         @endif
         @if ($loop->first)

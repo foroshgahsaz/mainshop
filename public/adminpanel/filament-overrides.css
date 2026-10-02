@@ -468,28 +468,38 @@ body.fi-body .fi-modal-slide-over-window-hiding {
 @media (max-width: 991px) {
     .fi-admin-shell .main-content,
     .fi-admin-shell .main-content.expanded {
-        margin-right: 90px !important;
+        margin-right: 0 !important;
     }
 
-    .fi-admin-shell .sidebar-primary {
+    body:not(.fi-sidebar-menu-open) .fi-admin-shell .sidebar-secondary,
+    body:not(.fi-sidebar-menu-open) .fi-admin-shell .sidebar-primary {
+        transform: translateX(100%);
+        pointer-events: none;
+        visibility: hidden;
+    }
+
+    body.fi-sidebar-menu-open .fi-admin-shell .sidebar-secondary {
+        transform: translateX(0);
+        pointer-events: auto;
+        visibility: visible;
+        z-index: 922 !important;
+    }
+
+    body.fi-sidebar-menu-open .fi-admin-shell .sidebar-primary {
         width: min(300px, calc(100vw - 90px));
         box-shadow: -4px 0 24px rgba(24, 28, 50, 0.12);
-        z-index: 900 !important;
-    }
-
-    .fi-admin-shell .sidebar-primary.closed {
-        transform: translateX(100%);
-    }
-
-    .fi-admin-shell .sidebar-primary:not(.closed) {
-        transform: translateX(0);
+        transform: translateX(0) !important;
+        pointer-events: auto;
+        visibility: visible;
+        z-index: 921 !important;
     }
 
     .fi-admin-shell .toggle-sidebar-btn {
-        right: 98px !important;
+        right: 16px !important;
+        bottom: 20px !important;
     }
 
-    .fi-admin-shell .sidebar-primary:not(.closed) ~ .toggle-sidebar-btn {
+    body.fi-sidebar-menu-open .fi-admin-shell .toggle-sidebar-btn {
         right: min(398px, calc(100vw - 12px)) !important;
     }
 
@@ -497,8 +507,9 @@ body.fi-body .fi-modal-slide-over-window-hiding {
         display: block;
         position: fixed;
         inset: 0;
-        z-index: 850;
+        z-index: 910;
         background: rgba(24, 28, 50, 0.45);
+        pointer-events: auto;
     }
 
     .fi-admin-shell .content-area {
@@ -521,25 +532,16 @@ body.fi-body .fi-modal-slide-over-window-hiding {
 }
 
 @media (max-width: 767px) {
-    .fi-admin-shell .sidebar-secondary {
+    body.fi-sidebar-menu-open .fi-admin-shell .sidebar-secondary {
         width: 72px;
     }
 
-    .fi-admin-shell .sidebar-primary {
+    body.fi-sidebar-menu-open .fi-admin-shell .sidebar-primary {
         right: 72px;
         width: min(280px, calc(100vw - 72px));
     }
 
-    .fi-admin-shell .main-content,
-    .fi-admin-shell .main-content.expanded {
-        margin-right: 72px !important;
-    }
-
-    .fi-admin-shell .toggle-sidebar-btn {
-        right: 80px !important;
-    }
-
-    .fi-admin-shell .sidebar-primary:not(.closed) ~ .toggle-sidebar-btn {
+    body.fi-sidebar-menu-open .fi-admin-shell .toggle-sidebar-btn {
         right: min(352px, calc(100vw - 8px)) !important;
     }
 

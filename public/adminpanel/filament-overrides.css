@@ -288,6 +288,41 @@ body.fi-body .tippy-box {
     height: 34px;
 }
 
+/* جدول‌های لیست — استایل نمونه (همه Resourceها) */
+.fi-admin-shell .content-area .fi-ta-ctn {
+    border-right: 1px solid #eff2f5;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.fi-admin-shell .fi-ta-table tbody tr {
+    background: #fff !important;
+}
+
+.fi-admin-shell .fi-ta-table tbody tr:nth-child(even) {
+    background: #fff !important;
+}
+
+.fi-admin-shell .fi-ta-image img,
+.fi-admin-shell .fi-ta-image-column img {
+    border-radius: 8px !important;
+}
+
+.fi-admin-shell .fi-ta-col-wrapped .fi-ta-split {
+    align-items: center;
+    gap: 12px;
+}
+
+.fi-admin-shell .fi-ta-cell .text-primary-600,
+.fi-admin-shell .fi-ta-text-item-date {
+    color: #3699ff !important;
+}
+
+.fi-admin-shell .fi-badge.fi-color-success {
+    background: #e8fff3 !important;
+    color: #50cd89 !important;
+}
+
 .fi-admin-shell .sidebar-menu a.submenu-item:hover,
 .fi-admin-shell .sidebar-menu a.submenu-item.active {
     color: #7239ea;
@@ -569,13 +604,12 @@ body.fi-body .fi-no-notification-icon {
     color: #181c32 !important;
 }
 
-/* ===== نوار بالای محتوا (مطابق نمونه — ارتفاع کم) ===== */
+/* ===== نوار بالای محتوا ===== */
 .admin-top-bar {
     display: flex;
     align-items: center;
     gap: 12px;
-    min-height: 56px;
-    max-height: 56px;
+    height: 85px;
     padding: 0 24px;
     background: #fff;
     border-bottom: 1px solid #eff2f5;
@@ -583,6 +617,7 @@ body.fi-body .fi-no-notification-icon {
     top: 0;
     z-index: 700;
     box-sizing: border-box;
+    border-right: 1px solid #eff2f5;
 }
 
 .admin-top-bar__primary {
@@ -695,7 +730,7 @@ body.fi-body .fi-no-notification-icon {
     min-height: 36px;
 }
 
-/* ===== هدر لیست (کاربران | لیست کاربران + افزودن) ===== */
+/* ===== هدر لیست (کاربران | لیست کاربران) ===== */
 .fi-admin-list-header {
     display: flex !important;
     flex-direction: row !important;
@@ -705,8 +740,9 @@ body.fi-body .fi-no-notification-icon {
     gap: 12px 16px !important;
     padding: 16px 24px 12px !important;
     margin: 0 !important;
-    background: transparent !important;
-    border: none !important;
+    background: white;
+    border-bottom: 1px solid #eff2f5;
+    border-right: 1px solid #eff2f5;
 }
 
 .fi-admin-list-header__trail {
@@ -726,7 +762,6 @@ body.fi-body .fi-no-notification-icon {
     width: 36px;
     height: 36px;
     border-radius: 8px;
-    background: #f5f8fa;
     color: #7239ea;
     font-size: 15px;
 }
@@ -773,10 +808,12 @@ body.fi-body .fi-no-notification-icon {
 /* تب‌های مشتریان / غیر مشتری */
 .fi-admin-shell .fi-resource-list-records-page .fi-tabs,
 .fi-admin-shell .fi-page .fi-tabs {
-    padding: 0 24px;
-    margin-top: -4px;
-    margin-bottom: 8px;
-    border-bottom: none;
+    padding: 0 24px 12px;
+    margin-top: 0;
+    margin-bottom: 0;
+    background: #fff;
+    border-bottom: 1px solid #eff2f5;
+    border-right: 1px solid #eff2f5;
     gap: 8px;
 }
 

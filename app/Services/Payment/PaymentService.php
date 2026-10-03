@@ -15,6 +15,7 @@ class PaymentService
         protected PaymentGatewayManager $gateways,
         protected PaymentGatewayCatalog $catalog,
         protected PaymentActivityLogger $paymentLog,
+        protected PaymentAuditLogger $audit,
         protected OrderActivityLogger $orderLog,
     ) {}
 
@@ -44,11 +45,27 @@ class PaymentService
             'tracking_code' => strtoupper(Str::random(12)),
         ]);
 
+        $this->audit->step(
+            $payment,
+            PaymentAuditStep::RECORD_CREATED,
+            'payment_created',
+            'رکورد پرداخت در سیستم ایجاد شد.',
+            ['amount' => $remaining, 'gateway' => $gatewayName]
+        );
+
         $this->paymentLog->created($payment);
 
         $note = $paidByRepresentativeId
             ? 'نماینده به درگاه پرداخت هدایت شد.'
             : 'در انتظار پرداخت در درگاه';
+
+        $this->audit->step(
+            $payment,
+            PaymentAuditStep::ORDER_LINKED,
+            'order_linked',
+            'پرداخت به سفارش متصل شد.',
+            ['order_id' => $order->id, 'order_tracking' => $order->tracking_code]
+        );
 
         $this->orderLog->paymentLinked($payment->order, $payment->tracking_code, $payment->status, $note);
 
@@ -57,28 +74,119 @@ class PaymentService
 
     public function initiate(Payment $payment, Order $order): string
     {
+        $this->audit->step(
+            $payment,
+            PaymentAuditStep::INITIATE_START,
+            'initiate_start',
+            'شروع اتصال به درگاه پرداخت.',
+            ['order_id' => $order->id]
+        );
+
         if (! $order->stock_reserved) {
+            $this->audit->failure(
+                $payment,
+                PaymentAuditStep::GATEWAY_CHECK,
+                'stock_not_reserved',
+                'موجودی سفارش رزرو نشده است.'
+            );
+
             throw new RuntimeException('موجودی این سفارش رزرو نشده است.');
         }
 
         if ($order->remainingAmount() <= 0) {
+            $this->audit->failure(
+                $payment,
+                PaymentAuditStep::GATEWAY_CHECK,
+                'order_already_paid',
+                'سفارش قبلاً تسویه شده است.'
+            );
+
             throw new RuntimeException('این سفارش تسویه شده است.');
         }
 
         $this->catalog->assertEnabled($payment->gateway);
 
-        return $this->gateway($payment->gateway)->initiate($payment, $order);
+        $this->audit->step(
+            $payment,
+            PaymentAuditStep::GATEWAY_CHECK,
+            'gateway_enabled',
+            'درگاه پرداخت فعال است.',
+            ['gateway' => $payment->gateway]
+        );
+
+        try {
+            $redirectUrl = $this->gateway($payment->gateway)->initiate($payment, $order);
+        } catch (\Throwable $e) {
+            $this->audit->failure(
+                $payment->fresh(),
+                PaymentAuditStep::GATEWAY_RESPONSE,
+                'initiate_failed',
+                'خطا در شروع پرداخت در درگاه.',
+                $e
+            );
+
+            throw $e;
+        }
+
+        $this->audit->step(
+            $payment->fresh(),
+            PaymentAuditStep::REDIRECT_USER,
+            'redirect_user',
+            'آدرس هدایت کاربر به درگاه آماده شد.',
+            ['redirect_host' => parse_url($redirectUrl, PHP_URL_HOST)]
+        );
+
+        return $redirectUrl;
     }
 
     public function verify(Payment $payment, string $authority, string $status): Payment
     {
+        $this->audit->step(
+            $payment,
+            PaymentAuditStep::VERIFY_START,
+            'verify_start',
+            'شروع تأیید پرداخت از درگاه.',
+            ['authority' => $authority, 'callback_status' => $status]
+        );
+
         $fresh = $payment->fresh();
 
         if ($fresh && $fresh->status === Payment::STATUS_SUCCESS) {
+            $this->audit->step(
+                $fresh,
+                PaymentAuditStep::FINALIZED,
+                'already_success',
+                'پرداخت قبلاً موفق ثبت شده بود (بدون تغییر).'
+            );
+
             return $fresh;
         }
 
-        $result = $this->gateway($payment->gateway)->verify($payment, $authority, $status);
+        try {
+            $result = $this->gateway($payment->gateway)->verify($payment, $authority, $status);
+        } catch (\Throwable $e) {
+            $this->audit->failure(
+                $payment,
+                PaymentAuditStep::VERIFY_RESULT,
+                'verify_exception',
+                'خطای غیرمنتظره هنگام تأیید درگاه.',
+                $e
+            );
+
+            throw $e;
+        }
+
+        $this->audit->step(
+            $payment,
+            PaymentAuditStep::VERIFY_RESULT,
+            'verify_gateway_result',
+            'پاسخ تأیید درگاه دریافت شد.',
+            [
+                'successful' => $result->successful,
+                'canceled' => $result->canceled,
+                'message' => $result->message,
+            ]
+        );
 
         return DB::transaction(function () use ($payment, $result) {
             /** @var Payment $locked */
@@ -109,6 +217,13 @@ class PaymentService
                     'پرداخت تکراری؛ سفارش قبلاً تسویه شده است'
                 );
 
+                $this->audit->step(
+                    $locked->fresh(),
+                    PaymentAuditStep::FINALIZED,
+                    'duplicate_payment_canceled',
+                    'پرداخت تکراری لغو شد؛ سفارش قبلاً تسویه شده بود.'
+                );
+
                 return $locked->fresh();
             }
 
@@ -122,6 +237,14 @@ class PaymentService
                 $this->paymentLog->statusChanged($locked->fresh(), $previous, Payment::STATUS_CANCELED, $result->message);
                 $this->orderLog->paymentLinked($order, $locked->tracking_code, Payment::STATUS_CANCELED);
 
+                $this->audit->step(
+                    $locked->fresh(),
+                    PaymentAuditStep::FINALIZED,
+                    'payment_canceled',
+                    'پرداخت توسط کاربر لغو شد یا ناموفق بود.',
+                    ['detail' => $result->message]
+                );
+
                 return $locked->fresh();
             }
 
@@ -134,6 +257,15 @@ class PaymentService
 
                 $this->paymentLog->statusChanged($locked->fresh(), $previous, Payment::STATUS_FAILED, $result->message);
                 $this->orderLog->paymentLinked($order, $locked->tracking_code, Payment::STATUS_FAILED);
+
+                $this->audit->failure(
+                    $locked->fresh(),
+                    PaymentAuditStep::FINALIZED,
+                    'payment_failed',
+                    'تأیید درگاه ناموفق بود.',
+                    null,
+                    ['detail' => $result->message]
+                );
 
                 return $locked->fresh();
             }
@@ -200,7 +332,16 @@ class PaymentService
                 );
             }
 
-            return $locked;
+            $final = $locked->fresh();
+            $this->audit->step(
+                $final,
+                PaymentAuditStep::FINALIZED,
+                'payment_finalized',
+                'فرایند پرداخت در سیستم نهایی شد.',
+                ['status' => $final->status]
+            );
+
+            return $final;
         });
     }
 }

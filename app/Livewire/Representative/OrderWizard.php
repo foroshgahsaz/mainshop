@@ -5,7 +5,11 @@ namespace App\Livewire\Representative;
 use App\Filament\Representative\Resources\DraftOrderResource;
 use App\Models\FreightCarrier;
 use App\Models\Order;
+use App\Models\Brand;
 use App\Models\Product;
+use App\Models\ProductFamily;
+use App\Models\ProductPlant;
+use App\Models\ProductTemplate;
 use App\Models\User;
 use App\Services\Media\DisplayImageService;
 use App\Services\Payment\PaymentGatewayCatalog;
@@ -17,7 +21,10 @@ use App\Support\ShopMedia;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
+use RuntimeException;
+use Throwable;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -303,7 +310,31 @@ class OrderWizard extends Component
             return;
         }
 
-        app(RepresentativeDraftOrderService::class)->submitProforma($order);
+        try {
+            $order = app(RepresentativeDraftOrderService::class)->submitProforma($order);
+        } catch (ValidationException $e) {
+            foreach ($e->errors() as $field => $messages) {
+                foreach ($messages as $message) {
+                    $this->addError($field, $message);
+                }
+            }
+
+            return;
+        } catch (RuntimeException $e) {
+            $this->addError('order', $e->getMessage());
+
+            return;
+        } catch (Throwable $e) {
+            Log::error('representative_finish_draft_failed', [
+                'order_id' => $order->id,
+                'representative_id' => auth()->id(),
+                'error' => $e->getMessage(),
+            ]);
+
+            $this->addError('order', 'ثبت پیش‌فاکتور ناموفق بود. جزئیات در لاگ سرور (storage/logs/laravel.log) ثبت شد.');
+
+            return;
+        }
 
         Notification::make()
             ->title('پیش‌فاکتور ثبت شد')
@@ -432,6 +463,30 @@ class OrderWizard extends Component
             trim($this->productSearch),
             $this->getPage()
         );
+    }
+
+    #[Computed]
+    public function catalogSelectionSummary(): array
+    {
+        $familyId = $this->familyId;
+        $plantId = $this->plantId;
+        $brandId = $this->brandId;
+        $templateId = $this->templateId;
+
+        if ($familyId === null && $this->orderId !== null) {
+            $filters = $this->findOwnedRepresentativeOrder()?->catalog_filters ?? [];
+            $familyId = $filters['family_id'] ?? null;
+            $plantId = $filters['plant_id'] ?? null;
+            $brandId = $filters['brand_id'] ?? null;
+            $templateId = $filters['template_id'] ?? null;
+        }
+
+        return [
+            'family' => $familyId ? ProductFamily::query()->whereKey($familyId)->value('name') : null,
+            'plant' => $plantId ? ProductPlant::query()->whereKey($plantId)->value('name') : null,
+            'brand' => $brandId ? Brand::query()->whereKey($brandId)->value('name') : null,
+            'template' => $templateId ? ProductTemplate::query()->whereKey($templateId)->value('name') : null,
+        ];
     }
 
     #[Computed]

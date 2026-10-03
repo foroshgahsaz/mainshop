@@ -17,7 +17,10 @@ use App\Models\Order;
 use App\Models\Payment;
 use App\Models\Post;
 use App\Models\Product;
+use App\Models\ProductFamily;
 use App\Models\ProductImage;
+use App\Models\ProductPlant;
+use App\Models\ProductTemplate;
 use App\Models\ShippingMethod;
 use App\Models\User;
 use App\Models\UserAddress;
@@ -29,6 +32,7 @@ use App\Observers\MenuItemObserver;
 use App\Observers\PostObserver;
 use App\Observers\ProductImageObserver;
 use App\Observers\ProductObserver;
+use App\Observers\RepresentativeCatalogObserver;
 use App\Observers\ShippingMethodObserver;
 use App\Policies\OrderPolicy;
 use App\Policies\PaymentPolicy;
@@ -129,6 +133,10 @@ class AppServiceProvider extends ServiceProvider
         }
 
         Product::observe(ProductObserver::class);
+        $representativeCatalogObserver = app(RepresentativeCatalogObserver::class);
+        ProductFamily::observe($representativeCatalogObserver);
+        ProductPlant::observe($representativeCatalogObserver);
+        ProductTemplate::observe($representativeCatalogObserver);
         ProductImage::observe(ProductImageObserver::class);
         Category::observe(CategoryObserver::class);
         Brand::observe(BrandObserver::class);

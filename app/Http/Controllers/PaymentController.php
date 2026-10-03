@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Filament\Representative\Resources\DraftOrderResource;
 use App\Models\Payment;
 use App\Notifications\PaymentSuccessNotification;
+use App\Services\Payment\PaymentAuditLogger;
+use App\Services\Payment\PaymentAuditStep;
 use App\Services\Payment\PaymentService;
 use App\Services\Payment\TaraGateway;
 use App\Services\Settings\SettingsService;
@@ -16,6 +18,7 @@ class PaymentController extends Controller
 {
     public function __construct(
         protected PaymentService $paymentService,
+        protected PaymentAuditLogger $paymentAudit,
         protected OrderSmsNotifier $sms,
     ) {}
 
@@ -62,9 +65,29 @@ class PaymentController extends Controller
 
         $order = $payment->order()->first();
 
+        $this->paymentAudit->step(
+            $payment,
+            PaymentAuditStep::CALLBACK_RECEIVED,
+            'callback_received',
+            'بازگشت کاربر از درگاه به سایت.',
+            [
+                'query' => $request->query(),
+                'authority' => $authority,
+                'status' => $status,
+            ]
+        );
+
         try {
             $payment = $this->paymentService->verify($payment, $authority, $status);
         } catch (\Throwable $e) {
+            $this->paymentAudit->failure(
+                $payment,
+                PaymentAuditStep::VERIFY_RESULT,
+                'callback_verify_exception',
+                'خطا هنگام پردازش بازگشت از درگاه.',
+                $e
+            );
+
             Log::error('Payment verify failed', [
                 'payment_id' => $payment->id,
                 'error' => $e->getMessage(),

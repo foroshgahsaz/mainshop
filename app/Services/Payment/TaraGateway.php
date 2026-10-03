@@ -16,6 +16,7 @@ class TaraGateway implements PaymentGatewayInterface
 {
     public function __construct(
         protected PaymentActivityLogger $paymentLog,
+        protected PaymentAuditLogger $audit,
         protected OrderActivityLogger $orderLog,
         protected SettingsService $settings,
     ) {}
@@ -59,6 +60,14 @@ class TaraGateway implements PaymentGatewayInterface
             'vat' => 0,
         ];
 
+        $this->audit->step(
+            $payment,
+            PaymentAuditStep::GATEWAY_REQUEST,
+            'tara_get_token',
+            'درخواست توکن به تارا ارسال شد.',
+            ['amount' => $payment->amount]
+        );
+
         $response = $this->http($config['base_url'])
             ->withToken($accessToken, 'bearer')
             ->post('/api/getToken', $payload);
@@ -74,6 +83,15 @@ class TaraGateway implements PaymentGatewayInterface
                 'raw_response' => $data,
             ]);
 
+            $this->audit->failure(
+                $payment->fresh(),
+                PaymentAuditStep::GATEWAY_RESPONSE,
+                'tara_token_failed',
+                'دریافت توکن تارا ناموفق بود.',
+                null,
+                ['result' => $result]
+            );
+
             $this->paymentLog->statusChanged($payment->fresh(), $previous, Payment::STATUS_FAILED, 'خطا در دریافت توکن تارا');
             $this->orderLog->paymentLinked($order, $payment->tracking_code, Payment::STATUS_FAILED);
 
@@ -84,6 +102,14 @@ class TaraGateway implements PaymentGatewayInterface
             'transaction_id' => $token,
             'raw_response' => $data,
         ]);
+
+        $this->audit->step(
+            $payment->fresh(),
+            PaymentAuditStep::GATEWAY_RESPONSE,
+            'tara_token_received',
+            'توکن تارا دریافت شد.',
+            ['token_prefix' => mb_substr($token, 0, 8)]
+        );
 
         $this->paymentLog->gatewayResponse(
             $payment->fresh(),

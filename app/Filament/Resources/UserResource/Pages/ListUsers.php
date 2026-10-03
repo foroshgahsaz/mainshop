@@ -6,6 +6,7 @@ use App\Filament\Resources\Pages\AdminListRecords;
 use App\Filament\Resources\UserResource;
 use App\Support\AdminAccess;
 use Filament\Actions;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Components\Tab;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -47,7 +48,7 @@ class ListUsers extends AdminListRecords
                     ->where('is_author', false)
                     ->where('is_representative', false)
                     ->where('is_sales_manager', false)),
-            'staff' => Tab::make('غیر مشتری')
+            'staff' => Tab::make('مدیران')
                 ->modifyQueryUsing(fn (Builder $query) => $query->where(
                     fn (Builder $q) => $q
                         ->where('is_admin', true)
@@ -58,17 +59,17 @@ class ListUsers extends AdminListRecords
         ];
     }
 
-    protected function getHeaderActions(): array
+    protected function listCreateActionLabel(): ?string
+    {
+        return 'افزودن کاربر';
+    }
+
+    protected function makeListCreateAction(): ?CreateAction
     {
         if (! AdminAccess::canManageShopInAdmin()) {
-            return [];
+            return null;
         }
 
-        return [
-            Actions\CreateAction::make()
-                ->label('افزودن کاربر')
-                ->icon('heroicon-o-plus')
-                ->extraAttributes(['class' => 'fi-admin-btn-create']),
-        ];
+        return parent::makeListCreateAction();
     }
 }

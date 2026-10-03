@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Dashboard;
+use App\Filament\Pages\ManageBajetPay;
 use App\Filament\Pages\ManageTara;
 use App\Filament\Pages\ManageZarinpal;
 use App\Http\Middleware\RestrictSalesManagerAdminAccess;
@@ -59,6 +60,7 @@ class AdminPanelProvider extends PanelProvider
                 Dashboard::class,
                 ManageZarinpal::class,
                 ManageTara::class,
+                ManageBajetPay::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([])

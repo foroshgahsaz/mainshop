@@ -7,6 +7,7 @@ use App\Filament\Resources\PaymentResource;
 use App\Filament\Support\PaymentDeleteActions;
 use App\Models\Payment;
 use App\Services\Payment\PaymentActivityLogger;
+use App\Services\Payment\BajetRefundService;
 use App\Services\Payment\TaraRefundService;
 use App\Support\AdminAccess;
 use Filament\Actions;
@@ -47,6 +48,25 @@ class ViewPayment extends ViewRecord
                         Notification::make()->title('مرجوعی تارا انجام شد')->success()->send();
                     } catch (\RuntimeException $e) {
                         Notification::make()->title('مرجوعی ناموفق')->body($e->getMessage())->danger()->send();
+                    }
+                }),
+            Actions\Action::make('bajetRefund')
+                ->label('استرداد باجت‌پی')
+                ->icon('heroicon-o-arrow-uturn-left')
+                ->color('danger')
+                ->requiresConfirmation()
+                ->modalHeading('استرداد پرداخت باجت‌پی')
+                ->modalDescription('استرداد در درگاه جت‌پی ثبت می‌شود؛ وضعیت نهایی با استعلام refund-inquiry بررسی می‌شود.')
+                ->visible(fn () => AdminAccess::canManageShopInAdmin()
+                    && $this->record->gateway === 'bajet'
+                    && $this->record->status === Payment::STATUS_SUCCESS)
+                ->action(function (BajetRefundService $refunds): void {
+                    try {
+                        $this->record = $refunds->refund($this->record);
+                        $this->refreshRecord();
+                        Notification::make()->title('استرداد باجت‌پی انجام شد')->success()->send();
+                    } catch (\RuntimeException $e) {
+                        Notification::make()->title('استرداد ناموفق')->body($e->getMessage())->danger()->send();
                     }
                 }),
             Actions\Action::make('order')

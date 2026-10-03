@@ -54,6 +54,7 @@ class ShopLabels
         return match ($gateway) {
             'zarinpal' => 'زرین‌پال',
             'tara' => 'تارا',
+            'bajet' => 'باجت‌پی',
             default => $gateway ?? '—',
         };
     }

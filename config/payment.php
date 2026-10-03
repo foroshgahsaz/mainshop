@@ -1,5 +1,6 @@
 <?php
 
+use App\Services\Payment\BajetPayGateway;
 use App\Services\Payment\TaraGateway;
 use App\Services\Payment\ZarinpalGateway;
 
@@ -18,6 +19,23 @@ return [
             'sandbox' => env('ZARINPAL_SANDBOX', true),
             'callback_url' => env('ZARINPAL_CALLBACK_URL', '/payment/callback'),
             'amount_unit' => env('ZARINPAL_AMOUNT_UNIT', 'toman'),
+        ],
+
+        'bajet' => [
+            'driver' => BajetPayGateway::class,
+            'type' => 'credit',
+            'label' => 'باجت‌پی',
+            'description' => 'پرداخت اعتباری جت‌پی (باجت)',
+            'username' => env('BAJET_USERNAME', ''),
+            'password' => env('BAJET_PASSWORD', ''),
+            'terminal_id' => env('BAJET_TERMINAL_ID', ''),
+            'sandbox' => env('BAJET_SANDBOX', true),
+            'base_url' => env('BAJET_BASE_URL', ''),
+            'sandbox_base_url' => env('BAJET_SANDBOX_BASE_URL', ''),
+            'callback_url' => env('BAJET_CALLBACK_URL', '/payment/callback/bajet'),
+            'amount_unit' => env('BAJET_AMOUNT_UNIT', 'toman'),
+            'default_product_type' => env('BAJET_DEFAULT_PRODUCT_TYPE', 2),
+            'default_brand' => env('BAJET_DEFAULT_BRAND', 'general'),
         ],
 
         'tara' => [

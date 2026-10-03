@@ -58,6 +58,7 @@ class PaymentGatewayCatalog
         return match ($name) {
             'zarinpal' => (bool) ($this->settings->zarinpal()['enabled'] ?? false),
             'tara' => (bool) ($this->settings->tara()['enabled'] ?? false),
+            'bajet' => (bool) ($this->settings->bajet()['enabled'] ?? false),
             default => false,
         };
     }
@@ -118,6 +119,7 @@ class PaymentGatewayCatalog
         $path = match ($name) {
             'zarinpal' => $this->settings->zarinpal()['icon'] ?? null,
             'tara' => $this->settings->tara()['icon'] ?? null,
+            'bajet' => $this->settings->bajet()['icon'] ?? null,
             default => null,
         };
 

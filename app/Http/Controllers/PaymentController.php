@@ -32,6 +32,11 @@ class PaymentController extends Controller
         return $this->handleCallback($request);
     }
 
+    public function bajetCallback(Request $request)
+    {
+        return $this->handleCallback($request);
+    }
+
     public function taraRedirect(string $tracking, TaraGateway $gateway, SettingsService $settings)
     {
         $model = Payment::query()
@@ -60,8 +65,13 @@ class PaymentController extends Controller
     {
         $payment = $this->resolvePayment($request);
 
-        $authority = (string) ($request->input('Authority') ?: $request->input('token') ?: $payment->transaction_id);
-        $status = (string) ($request->input('Status') ?: $request->input('result') ?: '');
+        if ($payment->gateway === 'bajet') {
+            $authority = (string) ($request->input('id') ?: $payment->transaction_id);
+            $status = (string) $request->input('status', '');
+        } else {
+            $authority = (string) ($request->input('Authority') ?: $request->input('token') ?: $payment->transaction_id);
+            $status = (string) ($request->input('Status') ?: $request->input('result') ?: '');
+        }
 
         $order = $payment->order()->first();
 

@@ -420,21 +420,20 @@ class UserResource extends Resource
                     ->searchable(['name', 'email', 'phone']),
                 Tables\Columns\TextColumn::make('customer_type')
                     ->label('نوع')
-                    ->state(fn (User $record) => $record->customerTypeLabel())
-                    ->description(fn (User $record) => $record->isCustomer() ? null : $record->staffRoleLabel())
-                    ->badge()
-                    ->color(fn (User $record) => $record->roleColor()),
+                    ->state(fn (User $record) => $record->isCustomer()
+                        ? $record->customerTypeLabel()
+                        : $record->staffRoleLabel())
+                    ->badge(fn (User $record): bool => $record->isCustomer())
+                    ->color(fn (User $record) => $record->isCustomer() ? $record->roleColor() : null),
                 Tables\Columns\TextColumn::make('createdByRepresentative.name')
                     ->label('نماینده ثبت‌کننده')
-                    ->description(fn (User $record) => $record->createdByRepresentative?->phone)
                     ->placeholder('—')
                     ->toggleable()
                     ->visible(fn (): bool => AdminAccess::canManageShopInAdmin() || AdminAccess::isSalesManagerOnly()),
                 Tables\Columns\TextColumn::make('last_login_at')
                     ->label('آخرین ورود')
                     ->since()
-                    ->placeholder('هرگز')
-                    ->color('info'),
+                    ->placeholder('هرگز'),
                 Tables\Columns\TextColumn::make('phone_verified_at')
                     ->label('احراز موبایل')
                     ->formatStateUsing(fn ($state) => $state ? 'فعال' : 'غیرفعال')
@@ -443,15 +442,14 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاریخ عضویت')
                     ->dateTime('Y/m/d H:i')
-                    ->sortable()
-                    ->color('info'),
+                    ->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('user_kind')
                     ->label('نوع کاربر')
                     ->options([
                         'customer' => 'مشتری',
-                        'staff' => 'غیر مشتری',
+                        'staff' => 'مدیران',
                     ])
                     ->query(function ($query, array $data) {
                         return match ($data['value'] ?? null) {

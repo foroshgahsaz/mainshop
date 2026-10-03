@@ -169,7 +169,9 @@
                 <p class="rep-wizard-hint">
                     مشتری: <strong>{{ $order->user?->name }}</strong> ({{ $order->user?->phone }})
                 </p>
-                @php($catalog = $this->catalogSelectionSummary)
+                @php
+                    $catalog = $this->catalogSelectionSummary;
+                @endphp
                 @if ($catalog['family'] || $catalog['plant'] || $catalog['brand'] || $catalog['template'])
                     <dl class="rep-catalog-summary">
                         @if ($catalog['family'])

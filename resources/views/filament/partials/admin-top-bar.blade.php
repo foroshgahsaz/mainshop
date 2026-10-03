@@ -8,7 +8,21 @@
     }
 @endphp
 
-<div class="admin-top-bar" role="banner">
+<div class="admin-top-bar"
+     role="banner"
+     x-data
+     x-init="$wire.setCurrentPath(window.location.pathname)"
+     @livewire:navigated.window="$wire.setCurrentPath(window.location.pathname)">
+    <div class="admin-top-bar__primary">
+        @if (! empty($adminTopBarCreate['url'] ?? null))
+            <a href="{{ $adminTopBarCreate['url'] }}"
+               class="admin-top-bar__create-btn">
+                <i class="fas fa-plus" aria-hidden="true"></i>
+                {{ $adminTopBarCreate['label'] }}
+            </a>
+        @endif
+    </div>
+
     <div class="admin-top-bar__spacer" aria-hidden="true"></div>
 
     <div class="admin-top-bar__utilities">

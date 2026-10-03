@@ -458,7 +458,7 @@ body.fi-body .fi-admin-shell .fi-wi-widget {
 }
 
 .fi-admin-shell .fi-ta-cell {
-    padding: 14px 16px !important;
+    padding: 0 !important;
     color: #3f4254;
     vertical-align: middle;
 }
@@ -758,21 +758,6 @@ body.fi-body .fi-no-notification-icon {
 }
 
 /* ===== هدر لیست (کاربران | لیست کاربران) ===== */
-.fi-admin-list-header-wrap {
-    background: #fff;
-    border-bottom: 1px solid #eff2f5;
-    border-right: 1px solid #eff2f5;
-}
-
-.fi-admin-list-header__toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 8px;
-    padding: 16px 24px 0;
-}
-
 .fi-admin-list-header {
     display: flex !important;
     flex-direction: row !important;
@@ -780,10 +765,11 @@ body.fi-body .fi-no-notification-icon {
     align-items: center !important;
     justify-content: space-between !important;
     gap: 12px 16px !important;
-    padding: 12px 24px 12px !important;
+    padding: 16px 24px 12px !important;
     margin: 0 !important;
     background: white;
-    border: none;
+    border-bottom: 1px solid #eff2f5;
+    border-right: 1px solid #eff2f5;
 }
 
 .fi-admin-list-header__trail {
@@ -823,24 +809,6 @@ body.fi-body .fi-no-notification-icon {
     font-size: 14px;
     font-weight: 500;
     color: #5e6278;
-}
-
-.fi-admin-list-header-wrap .fi-admin-btn-create,
-.fi-admin-list-header-wrap .fi-admin-btn-create.fi-btn,
-.fi-admin-list-header-wrap .fi-ac-btn-action.fi-btn.fi-color-primary,
-.fi-admin-list-header-wrap .fi-btn.fi-color-primary {
-    background: #1e1e2d !important;
-    border-color: #1e1e2d !important;
-    color: #fff !important;
-    font-weight: 600;
-    padding: 0.55rem 1.1rem;
-    border-radius: 8px;
-}
-
-.fi-admin-list-header-wrap .fi-admin-btn-create:hover,
-.fi-admin-list-header-wrap .fi-ac-btn-action.fi-btn.fi-color-primary:hover,
-.fi-admin-list-header-wrap .fi-btn.fi-color-primary:hover {
-    background: #2a2a3d !important;
 }
 
 /* تب‌های مشتریان / مدیران */
@@ -895,9 +863,6 @@ body.fi-body .fi-no-notification-icon {
         padding: 12px 14px 8px !important;
     }
 
-    .fi-admin-list-header__toolbar {
-        padding: 12px 14px 0;
-    }
 
     .fi-admin-shell .fi-resource-list-records-page .fi-tabs,
     .fi-admin-shell .fi-page .fi-tabs {

@@ -14,7 +14,7 @@
 
         <div class="main-content" id="mainContent">
             @unless (request()->routeIs('filament.representative.*'))
-                @include('filament.partials.admin-top-bar')
+                @livewire(\App\Livewire\AdminTopBar::class)
             @endunless
             <div class="content-area">
                 <main class="fi-main mx-auto w-full">

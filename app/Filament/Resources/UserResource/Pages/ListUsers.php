@@ -6,7 +6,6 @@ use App\Filament\Resources\Pages\AdminListRecords;
 use App\Filament\Resources\UserResource;
 use App\Support\AdminAccess;
 use Filament\Actions;
-use Filament\Actions\CreateAction;
 use Filament\Resources\Components\Tab;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -59,17 +58,13 @@ class ListUsers extends AdminListRecords
         ];
     }
 
-    protected function listCreateActionLabel(): ?string
+    public static function topBarCreateLabel(): ?string
     {
         return 'افزودن کاربر';
     }
 
-    protected function makeListCreateAction(): ?CreateAction
+    public static function canShowTopBarCreate(): bool
     {
-        if (! AdminAccess::canManageShopInAdmin()) {
-            return null;
-        }
-
-        return parent::makeListCreateAction();
+        return AdminAccess::canManageShopInAdmin();
     }
 }

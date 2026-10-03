@@ -13,6 +13,7 @@ class ZarinpalGateway implements PaymentGatewayInterface
 {
     public function __construct(
         protected PaymentActivityLogger $paymentLog,
+        protected PaymentAuditLogger $audit,
         protected OrderActivityLogger $orderLog,
         protected SettingsService $settings,
     ) {}
@@ -37,6 +38,14 @@ class ZarinpalGateway implements PaymentGatewayInterface
 
         $description = $this->paymentDescription($payment, $order);
 
+        $this->audit->step(
+            $payment,
+            PaymentAuditStep::GATEWAY_REQUEST,
+            'zarinpal_request',
+            'درخواست authority به زرین‌پال ارسال شد.',
+            ['amount' => $payment->amount]
+        );
+
         $response = Http::post("{$baseUrl}/request.json", [
             'merchant_id' => $config['merchant_id'],
             'amount' => AmountConverter::toGateway($payment->amount, $config['amount_unit'] ?? AmountConverter::UNIT_TOMAN),
@@ -57,6 +66,15 @@ class ZarinpalGateway implements PaymentGatewayInterface
                 'raw_response' => $response->json(),
             ]);
 
+            $this->audit->failure(
+                $payment->fresh(),
+                PaymentAuditStep::GATEWAY_RESPONSE,
+                'zarinpal_request_failed',
+                'پاسخ نامعتبر از زرین‌پال (request).',
+                null,
+                ['http_status' => $response->status()]
+            );
+
             $this->paymentLog->statusChanged($payment->fresh(), $previous, Payment::STATUS_FAILED, 'خطا در اتصال به درگاه');
             $this->orderLog->paymentLinked($order, $payment->tracking_code, Payment::STATUS_FAILED);
 
@@ -67,6 +85,14 @@ class ZarinpalGateway implements PaymentGatewayInterface
             'transaction_id' => $data['authority'],
             'raw_response' => $response->json(),
         ]);
+
+        $this->audit->step(
+            $payment->fresh(),
+            PaymentAuditStep::GATEWAY_RESPONSE,
+            'zarinpal_authority_received',
+            'Authority از زرین‌پال دریافت شد.',
+            ['authority' => $data['authority']]
+        );
 
         $this->paymentLog->gatewayResponse(
             $payment->fresh(),
@@ -94,6 +120,14 @@ class ZarinpalGateway implements PaymentGatewayInterface
         $baseUrl = $config['sandbox']
             ? 'https://sandbox.zarinpal.com/pg/v4/payment'
             : 'https://payment.zarinpal.com/pg/v4/payment';
+
+        $this->audit->step(
+            $payment,
+            PaymentAuditStep::GATEWAY_REQUEST,
+            'zarinpal_verify_request',
+            'درخواست verify به زرین‌پال ارسال شد.',
+            ['authority' => $authority]
+        );
 
         $response = Http::post("{$baseUrl}/verify.json", [
             'merchant_id' => $config['merchant_id'],

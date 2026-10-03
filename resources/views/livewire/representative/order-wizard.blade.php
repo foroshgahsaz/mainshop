@@ -169,6 +169,23 @@
                 <p class="rep-wizard-hint">
                     مشتری: <strong>{{ $order->user?->name }}</strong> ({{ $order->user?->phone }})
                 </p>
+                @php($catalog = $this->catalogSelectionSummary)
+                @if ($catalog['family'] || $catalog['plant'] || $catalog['brand'] || $catalog['template'])
+                    <dl class="rep-catalog-summary">
+                        @if ($catalog['family'])
+                            <div><dt>خانواده</dt><dd>{{ $catalog['family'] }}</dd></div>
+                        @endif
+                        @if ($catalog['plant'])
+                            <div><dt>کارخانه</dt><dd>{{ $catalog['plant'] }}</dd></div>
+                        @endif
+                        @if ($catalog['brand'])
+                            <div><dt>برند</dt><dd>{{ $catalog['brand'] }}</dd></div>
+                        @endif
+                        @if ($catalog['template'])
+                            <div><dt>قالب</dt><dd>{{ $catalog['template'] }}</dd></div>
+                        @endif
+                    </dl>
+                @endif
                 <ul class="rep-product-list">
                     @forelse ($order->items as $item)
                         @php

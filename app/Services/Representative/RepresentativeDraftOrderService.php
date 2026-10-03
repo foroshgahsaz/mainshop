@@ -10,8 +10,11 @@ use App\Models\User;
 use App\Services\Order\OrderInvoiceTotalsService;
 use App\Services\Payment\PaymentGatewayCatalog;
 use App\Services\Sms\OrderSmsNotifier;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use RuntimeException;
+use Throwable;
 
 class RepresentativeDraftOrderService
 {
@@ -238,8 +241,15 @@ class RepresentativeDraftOrderService
         $this->recalculateTotals($order);
 
         $representative = auth()->user();
-        if ($representative !== null) {
-            app(RepresentativeProformaService::class)->reserveStockForProforma($order, $representative);
+
+        try {
+            if ($representative !== null) {
+                app(RepresentativeProformaService::class)->reserveStockForProforma($order, $representative);
+            }
+        } catch (RuntimeException $e) {
+            throw ValidationException::withMessages([
+                'order' => $e->getMessage(),
+            ]);
         }
 
         $order->update([
@@ -248,7 +258,14 @@ class RepresentativeDraftOrderService
 
         $order = $order->fresh(['items', 'user', 'shippingMethod', 'freightCarrier', 'representative']);
 
-        app(OrderSmsNotifier::class)->proformaCreated($order);
+        try {
+            app(OrderSmsNotifier::class)->proformaCreated($order);
+        } catch (Throwable $e) {
+            Log::error('proforma_created_sms_failed', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         return $order;
     }

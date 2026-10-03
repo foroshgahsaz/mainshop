@@ -10,14 +10,17 @@ use App\Models\ProductTemplate;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
 
 class RepresentativeCatalogLookup
 {
+    public function __construct(
+        protected RepresentativeCatalogCache $catalogCache,
+    ) {}
+
     /** @return Collection<int, ProductFamily> */
     public function families(): Collection
     {
-        return Cache::remember(
+        return $this->catalogCache->remember(
             'rep:catalog:families',
             $this->cacheTtl(),
             fn () => ProductFamily::query()
@@ -31,7 +34,7 @@ class RepresentativeCatalogLookup
     /** @return Collection<int, ProductPlant> */
     public function plants(int $familyId): Collection
     {
-        return Cache::remember(
+        return $this->catalogCache->remember(
             'rep:catalog:plants:'.$familyId,
             $this->cacheTtl(),
             fn () => ProductPlant::query()
@@ -46,7 +49,7 @@ class RepresentativeCatalogLookup
     /** @return Collection<int, Brand> */
     public function brands(int $familyId, int $plantId): Collection
     {
-        return Cache::remember(
+        return $this->catalogCache->remember(
             'rep:catalog:brands:'.$familyId.':'.$plantId,
             $this->cacheTtl(),
             function () use ($familyId, $plantId): Collection {
@@ -69,7 +72,7 @@ class RepresentativeCatalogLookup
     /** @return Collection<int, ProductTemplate> */
     public function templates(int $familyId, int $brandId): Collection
     {
-        return Cache::remember(
+        return $this->catalogCache->remember(
             'rep:catalog:templates:'.$familyId.':'.$brandId,
             $this->cacheTtl(),
             fn () => ProductTemplate::query()

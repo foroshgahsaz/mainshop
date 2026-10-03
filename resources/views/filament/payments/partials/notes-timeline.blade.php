@@ -1,5 +1,6 @@
 <section class="admin-order__section admin-order__section--notes">
-    <h2 class="admin-order__section-title">یادداشت‌ها و تاریخچه پرداخت</h2>
+    <h2 class="admin-order__section-title">یادداشت‌ها و مسیر پرداخت (۰ تا ۱۰۰)</h2>
+    <p class="admin-order__hint">هر مرحله با درصد در یادداشت‌های سیستم و فایل <code dir="ltr">storage/logs/payments.log</code> روی سرور ثبت می‌شود.</p>
 
     @if(\App\Support\AdminAccess::canManageShopInAdmin())
     <form wire:submit="addNote" class="admin-order__note-form">
@@ -15,6 +16,9 @@
             <li class="admin-order__note admin-order__note--{{ $note->type }}" wire:key="payment-note-{{ $note->id }}">
                 <div class="admin-order__note-meta">
                     <time>{{ $note->created_at?->format('Y/m/d H:i') }}</time>
+                    @if(is_array($note->metadata) && isset($note->metadata['progress']))
+                        <span class="admin-order__badge admin-order__badge--audit">{{ $note->metadata['progress'] }}٪</span>
+                    @endif
                     @if($note->author)
                         <span class="admin-order__note-author">{{ $note->author->name }}</span>
                     @else

@@ -6,21 +6,22 @@
     if ($user !== null && UserResource::canEdit($user)) {
         $profileUrl = UserResource::getUrl('edit', ['record' => $user], panel: 'admin');
     }
+
+    $initialCreate = $adminTopBarCreate ?? null;
 @endphp
 
 <div class="admin-top-bar"
      role="banner"
-     x-data
-     x-init="$wire.setCurrentPath(window.location.pathname)"
-     @livewire:navigated.window="$wire.setCurrentPath(window.location.pathname)">
+     x-data="{ create: @js($initialCreate) }"
+     @admin-top-bar-create.window="create = $event.detail.create ?? null">
     <div class="admin-top-bar__primary">
-        @if (! empty($adminTopBarCreate['url'] ?? null))
-            <a href="{{ $adminTopBarCreate['url'] }}"
+        <template x-if="create && create.url">
+            <a :href="create.url"
                class="admin-top-bar__create-btn">
                 <i class="fas fa-plus" aria-hidden="true"></i>
-                {{ $adminTopBarCreate['label'] }}
+                <span x-text="create.label"></span>
             </a>
-        @endif
+        </template>
     </div>
 
     <div class="admin-top-bar__spacer" aria-hidden="true"></div>

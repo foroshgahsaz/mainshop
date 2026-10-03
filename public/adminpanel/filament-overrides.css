@@ -457,10 +457,23 @@ body.fi-body .fi-admin-shell .fi-wi-widget {
     padding: 12px 16px !important;
 }
 
-.fi-admin-shell .fi-ta-cell {
+.fi-admin-shell .fi-ta-cell,
+.fi-admin-shell .fi-ta-actions-cell {
     padding: 0 !important;
     color: #3f4254;
     vertical-align: middle;
+}
+
+.fi-admin-shell .fi-ta-cell .fi-ta-text,
+.fi-admin-shell .fi-ta-cell .fi-ta-text-item,
+.fi-admin-shell .fi-ta-cell > div {
+    padding: 0 !important;
+}
+
+/* دکمه ایجاد فقط در admin-top-bar — نه داخل جدول */
+.fi-admin-shell .fi-resource-list-records-page .fi-ta-header-toolbar a.fi-btn.fi-color-primary,
+.fi-admin-shell .fi-resource-list-records-page .fi-ta-header-toolbar button.fi-btn.fi-color-primary {
+    display: none !important;
 }
 
 .fi-admin-shell .fi-ta-row:hover .fi-ta-cell {

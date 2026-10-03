@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Pages;
 
 use App\Filament\Resources\Pages\Concerns\ProvidesAdminFormHeader;
 use App\Filament\Support\AdminListHeader;
+use App\Filament\Support\Concerns\ClearsAdminTopBarCreate;
 use App\Filament\Support\CrudSuccessNotification;
 use App\Filament\Support\FileUploadSanitizer;
 use App\Filament\Support\FileUploadStateNormalizer;
@@ -12,6 +13,7 @@ use Filament\Notifications\Notification;
 
 abstract class CreateRecord extends \Filament\Resources\Pages\CreateRecord
 {
+    use ClearsAdminTopBarCreate;
     use NormalizesFileUploadFormState;
     use ProvidesAdminFormHeader;
 

@@ -3,12 +3,14 @@
 namespace App\Filament\Resources\Pages;
 
 use App\Filament\Support\AdminListHeader;
+use App\Filament\Support\Concerns\SyncsAdminTopBarCreate;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Contracts\View\View;
 
 abstract class AdminListRecords extends ListRecords
 {
+    use SyncsAdminTopBarCreate;
     protected function adminListIcon(): ?string
     {
         return null;

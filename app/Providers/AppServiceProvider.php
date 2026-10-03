@@ -83,6 +83,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        View::share('adminTopBarCreate', null);
+
         $this->ensureRuntimeCacheAndSessionAreReachable();
 
         if ($this->app->runningInConsole() && StoragePermissionFixer::runningAsRoot()) {

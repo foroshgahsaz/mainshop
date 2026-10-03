@@ -9,7 +9,7 @@ class ListHomeSliders extends AdminListRecords
 {
     protected static string $resource = HomeSliderResource::class;
 
-    protected function listCreateActionLabel(): ?string
+    public static function topBarCreateLabel(): ?string
     {
         return 'اسلاید جدید';
     }

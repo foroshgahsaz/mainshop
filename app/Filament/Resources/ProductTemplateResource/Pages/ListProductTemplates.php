@@ -9,7 +9,7 @@ class ListProductTemplates extends AdminListRecords
 {
     protected static string $resource = ProductTemplateResource::class;
 
-    protected function listCreateActionLabel(): ?string
+    public static function topBarCreateLabel(): ?string
     {
         return 'افزودن قالب';
     }

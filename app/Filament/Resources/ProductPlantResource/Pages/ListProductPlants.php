@@ -9,7 +9,7 @@ class ListProductPlants extends AdminListRecords
 {
     protected static string $resource = ProductPlantResource::class;
 
-    protected function listCreateActionLabel(): ?string
+    public static function topBarCreateLabel(): ?string
     {
         return 'افزودن کارخانه';
     }

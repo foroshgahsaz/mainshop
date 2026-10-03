@@ -9,7 +9,7 @@ class ListProductFamilies extends AdminListRecords
 {
     protected static string $resource = ProductFamilyResource::class;
 
-    protected function listCreateActionLabel(): ?string
+    public static function topBarCreateLabel(): ?string
     {
         return 'افزودن خانواده';
     }

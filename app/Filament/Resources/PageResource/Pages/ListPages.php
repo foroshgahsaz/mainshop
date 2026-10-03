@@ -9,7 +9,7 @@ class ListPages extends AdminListRecords
 {
     protected static string $resource = PageResource::class;
 
-    protected function listCreateActionLabel(): ?string
+    public static function topBarCreateLabel(): ?string
     {
         return 'صفحه جدید';
     }

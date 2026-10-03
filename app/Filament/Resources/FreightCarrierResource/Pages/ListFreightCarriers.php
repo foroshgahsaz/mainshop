@@ -9,7 +9,7 @@ class ListFreightCarriers extends AdminListRecords
 {
     protected static string $resource = FreightCarrierResource::class;
 
-    protected function listCreateActionLabel(): ?string
+    public static function topBarCreateLabel(): ?string
     {
         return 'افزودن باربری';
     }

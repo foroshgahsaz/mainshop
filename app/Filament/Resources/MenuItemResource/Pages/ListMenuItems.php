@@ -9,7 +9,7 @@ class ListMenuItems extends AdminListRecords
 {
     protected static string $resource = MenuItemResource::class;
 
-    protected function listCreateActionLabel(): ?string
+    public static function topBarCreateLabel(): ?string
     {
         return 'افزودن آیتم';
     }

@@ -49,6 +49,7 @@ class ManageBajetPay extends Page implements HasForms
             'base_url' => $bajet['production_base_url'],
             'default_product_type' => $bajet['default_product_type'],
             'default_brand' => $bajet['default_brand'],
+            'server_ip' => $bajet['server_ip'],
             'icon' => ShopIconUpload::forForm($bajet['icon'] ?? null),
         ]);
     }
@@ -92,12 +93,17 @@ class ManageBajetPay extends Page implements HasForms
                         ->required(),
                     Forms\Components\TextInput::make('sandbox_base_url')
                         ->label('Base URL تست API')
-                        ->placeholder('https://host:port')
-                        ->helperText('بدون اسلش انتهایی؛ مسیرها /api/v1/jetpay/... به‌صورت خودکار اضافه می‌شوند')
+                        ->placeholder('https://jetpay.mybajet.ir')
+                        ->helperText('بدون اسلش انتهایی؛ پورت ۴۴۳ در HTTPS پیش‌فرض است')
                         ->columnSpanFull(),
                     Forms\Components\TextInput::make('base_url')
                         ->label('Base URL عملیاتی API')
-                        ->placeholder('https://host:port')
+                        ->placeholder('https://jetpay.mybajet.ir')
+                        ->columnSpanFull(),
+                    Forms\Components\TextInput::make('server_ip')
+                        ->label('IP سرور فروشگاه (whitelist باجت)')
+                        ->placeholder('11.9.115.162')
+                        ->helperText('این IP را در پنل پذیرنده باجت ثبت کنید؛ در درخواست API ارسال نمی‌شود')
                         ->columnSpanFull(),
                 ])->columns(2),
                 Forms\Components\Section::make('سبد خرید (basketItems)')->schema([
@@ -131,6 +137,7 @@ class ManageBajetPay extends Page implements HasForms
             'base_url' => $data['base_url'] ?? '',
             'default_product_type' => (string) ($data['default_product_type'] ?? '2'),
             'default_brand' => $data['default_brand'] ?? 'general',
+            'server_ip' => $data['server_ip'] ?? '',
             'icon' => ShopIconUpload::fromState($data['icon'] ?? null),
         ]);
 

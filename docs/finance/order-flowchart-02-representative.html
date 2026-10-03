@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8">
+    <title>فلوچارت ۲ — نماینده</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700&display=swap');
+        body { margin: 0; padding: 20mm 15mm; font-family: 'Vazirmatn', Tahoma, sans-serif; color: #181c32; background: #fff; }
+        h1 { font-size: 20px; margin: 0 0 6px; }
+        p.desc { font-size: 13px; color: #5e6278; margin: 0 0 20px; }
+        .mermaid { direction: ltr; text-align: center; }
+        .foot { margin-top: 24px; font-size: 11px; color: #a1a5b7; }
+        @media print { body { padding: 12mm; } .no-print { display: none; } }
+    </style>
+</head>
+<body>
+    <h1>۲) نماینده — پیش‌سفارش تا پیش‌فاکتور و پرداخت</h1>
+    <p class="desc">draft، proforma، رزرو موجودی با مهلت، پرداخت نماینده یا مشتری، انقضای رزرو.</p>
+    <pre class="mermaid">
+flowchart TD
+    A[انتخاب مشتری ثبت‌شده توسط نماینده] --> B[ویزارد: کاتالوگ + اقلام]
+    B --> C[status: draft<br/>کد DR-*<br/>موجودی رزرو نشده]
+    C --> D[ویرایش اقلام / باربری / درگاه]
+    D --> E{ثبت پیش‌فاکتور؟}
+    E -->|خیر| D
+    E -->|بله| F{سقف پیش‌فاکتور باز<br/>با رزرو؟ پیش‌فرض ۳}
+    F -->|خیر| G[خطا — ابتدا تسویه/انقضا]
+    F -->|بله| H[رزرو موجودی + مهلت TTL<br/>پیش‌فرض ۲۴ ساعت]
+    H --> I[status: proforma]
+    I --> J[نماینده فقط مشاهده + PDF]
+    J --> K{پرداخت؟}
+    K -->|نماینده از پنل| L[Payment با paid_by_representative]
+    K -->|مشتری از سایت| M[پرداخت مجدد حساب کاربری]
+    L --> N[درگاه زرین‌پال / تارا]
+    M --> N
+    N --> O{موفق؟}
+    O -->|بله| P{تسویه کامل؟}
+    O -->|خیر| Q[مانده + رزرو اگر فعال]
+    P -->|بله| R[status: processing<br/>پایان مهلت رزرو]
+    P -->|خیر| Q
+    I --> T{مهلت رزرو تمام شد؟}
+    T -->|بله| U[موجودی آزاد<br/>status همچنان proforma<br/>پرداخت تا تمدید رزرو ممکن نیست]
+    T -->|خیر| K
+    U --> V[ادمین: تمدید رزرو / ویرایش پیش‌فاکتور]
+    V --> K
+    </pre>
+    <p class="foot no-print">چاپ: Ctrl+P — پس از بارگذاری نمودار</p>
+    <script>mermaid.initialize({ startOnLoad: true, theme: 'neutral', flowchart: { useMaxWidth: true, htmlLabels: true }, securityLevel: 'loose' });</script>
+</body>
+</html>

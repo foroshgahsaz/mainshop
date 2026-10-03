@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8">
+    <title>فلوچارت ۳ — مدیر فروش و ادمین</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700&display=swap');
+        body { margin: 0; padding: 20mm 15mm; font-family: 'Vazirmatn', Tahoma, sans-serif; color: #181c32; background: #fff; }
+        h1 { font-size: 20px; margin: 0 0 6px; }
+        p.desc { font-size: 13px; color: #5e6278; margin: 0 0 20px; }
+        .mermaid { direction: ltr; text-align: center; }
+        .foot { margin-top: 24px; font-size: 11px; color: #a1a5b7; }
+        @media print { body { padding: 12mm; } .no-print { display: none; } }
+    </style>
+</head>
+<body>
+    <h1>۳) مدیر فروش در مقابل ادمین — دسترسی سفارش و پرداخت</h1>
+    <p class="desc">مدیر فروش: مشاهده. ادمین: تغییر وضعیت، ویرایش پیش‌فاکتور، تمدید رزرو، حذف، مرجوعی.</p>
+    <pre class="mermaid">
+flowchart LR
+    subgraph SM[مدیر فروش]
+        SM1[مشاهده لیست سفارش‌ها]
+        SM2[مشاهده جزئیات سفارش]
+        SM3[مشاهده لیست پرداخت‌ها]
+        SM4[مشاهده جزئیات پرداخت]
+    end
+    subgraph AD[ادمین کامل]
+        AD1[تغییر وضعیت و رهگیری]
+        AD2[ویرایش پیش‌فاکتور نماینده<br/>قبل از تسویه]
+        AD3[تمدید رزرو proforma]
+        AD4[یادداشت سفارش/پرداخت]
+        AD5[حذف سفارش/پرداخت<br/>فقط بدون پرداخت موفق]
+        AD6[مرجوعی تارا]
+        AD7[لغو — استرداد درگاه دستی اگر پرداخت شده]
+    end
+    O[(سفارش / پرداخت در DB)] --> SM
+    O --> AD
+    </pre>
+    <p class="foot no-print">چاپ: Ctrl+P — پس از بارگذاری نمودار</p>
+    <script>mermaid.initialize({ startOnLoad: true, theme: 'neutral', flowchart: { useMaxWidth: true, htmlLabels: true }, securityLevel: 'loose' });</script>
+</body>
+</html>

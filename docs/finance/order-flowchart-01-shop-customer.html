@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8">
+    <title>فلوچارت ۱ — مشتری فروشگاه</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700&display=swap');
+        body { margin: 0; padding: 20mm 15mm; font-family: 'Vazirmatn', Tahoma, sans-serif; color: #181c32; background: #fff; }
+        h1 { font-size: 20px; margin: 0 0 6px; }
+        p.desc { font-size: 13px; color: #5e6278; margin: 0 0 20px; }
+        .mermaid { direction: ltr; text-align: center; }
+        .foot { margin-top: 24px; font-size: 11px; color: #a1a5b7; }
+        @media print { body { padding: 12mm; } .no-print { display: none; } }
+    </style>
+</head>
+<body>
+    <h1>۱) مشتری — فروشگاه اینترنتی</h1>
+    <p class="desc">سبد خرید، پرداخت آنلاین یا COD، رزرو موجودی، انقضای پرداخت‌نشده، processing.</p>
+    <pre class="mermaid">
+flowchart TD
+    A[سبد خرید + آدرس + ارسال] --> B{روش پرداخت؟}
+    B -->|پرداخت آنلاین| C[ثبت سفارش status: pending]
+    B -->|پرداخت در محل COD| D[ثبت سفارش status: pending<br/>payment_method: cod]
+    C --> E[رزرو موجودی انبار]
+    D --> E
+    E --> F{آنلاین؟}
+    F -->|بله| G[ایجاد Payment + ریدایرکت درگاه]
+    F -->|خیر COD| H[بدون Payment درگاه<br/>منتظر اقدام ادمین]
+    G --> I{نتیجه درگاه؟}
+    I -->|موفق| J{جمع پرداخت‌ها = مبلغ نهایی؟}
+    I -->|ناموفق/انصراف| K[Payment: failed/canceled<br/>سفارش pending + رزرو فعال]
+    J -->|بله| L[status: processing]
+    J -->|خیر جزئی| M[مانده بدهی]
+    M --> N[پرداخت مجدد از حساب کاربری]
+    N --> G
+    K --> O{گذشت TTL پرداخت؟<br/>حدود ۶۰ دقیقه}
+    O -->|بله| P[لغو سفارش + آزاد موجودی<br/>status: canceled]
+    O -->|خیر| N
+    H --> Q[ادمین: پردازش / ارسال / لغو]
+    L --> R[shipped → delivered]
+    C --> S{مشتری لغو کند؟}
+    S -->|pending و بدون پرداخت موفق| P
+    </pre>
+    <p class="foot no-print">چاپ: Ctrl+P — پس از بارگذاری نمودار</p>
+    <script>mermaid.initialize({ startOnLoad: true, theme: 'neutral', flowchart: { useMaxWidth: true, htmlLabels: true }, securityLevel: 'loose' });</script>
+</body>
+</html>

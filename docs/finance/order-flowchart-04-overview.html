@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8">
+    <title>فلوچارت ۴ — نمای کلی</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700&display=swap');
+        body { margin: 0; padding: 20mm 15mm; font-family: 'Vazirmatn', Tahoma, sans-serif; color: #181c32; background: #fff; }
+        h1 { font-size: 20px; margin: 0 0 6px; }
+        p.desc { font-size: 13px; color: #5e6278; margin: 0 0 20px; }
+        .mermaid { direction: ltr; text-align: center; }
+        .foot { margin-top: 24px; font-size: 11px; color: #a1a5b7; }
+        @media print { body { padding: 12mm; } .no-print { display: none; } }
+    </style>
+</head>
+<body>
+    <h1>۴) نمای کلی — سه مسیر سفارش</h1>
+    <p class="desc">خلاصه وضعیت‌ها از ثبت تا ارسال: فروشگاه، نماینده، عملیات ادمین.</p>
+    <pre class="mermaid">
+flowchart TB
+    subgraph Shop[مشتری — سایت]
+        S1[pending] --> S2{پرداخت؟}
+        S2 -->|آنلاین| S3[processing]
+        S2 -->|COD| S4[pending تا ادمین]
+        S2 -->|انقضا/لغو| S5[canceled]
+    end
+    subgraph Rep[نماینده]
+        R1[draft] --> R2[proforma + رزرو]
+        R2 --> R3{پرداخت کامل}
+        R3 -->|بله| R4[processing]
+        R3 -->|رزرو منقضی| R5[proforma بدون رزرو]
+    end
+    subgraph Ops[ادمین — پس از processing]
+        O1[shipped] --> O2[delivered]
+        O1 --> O3[canceled / returned]
+    end
+    S3 --> Ops
+    R4 --> Ops
+    S4 --> Ops
+    </pre>
+    <p class="foot no-print">چاپ: Ctrl+P — پس از بارگذاری نمودار</p>
+    <script>mermaid.initialize({ startOnLoad: true, theme: 'neutral', flowchart: { useMaxWidth: true, htmlLabels: true }, securityLevel: 'loose' });</script>
+</body>
+</html>

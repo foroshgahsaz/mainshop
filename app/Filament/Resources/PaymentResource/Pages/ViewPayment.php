@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\PaymentResource\Pages;
 
+use App\Filament\Pages\ViewPaymentLogs;
 use App\Filament\Resources\OrderResource;
 use App\Filament\Resources\PaymentResource;
 use App\Filament\Support\PaymentDeleteActions;
@@ -69,6 +70,11 @@ class ViewPayment extends ViewRecord
                         Notification::make()->title('استرداد ناموفق')->body($e->getMessage())->danger()->send();
                     }
                 }),
+            Actions\Action::make('paymentFileLog')
+                ->label('لاگ فایل پرداخت')
+                ->icon('heroicon-o-document-magnifying-glass')
+                ->url(fn () => ViewPaymentLogs::getUrl().'?tracking='.urlencode($this->record->tracking_code))
+                ->visible(fn (): bool => AdminAccess::canManageShopInAdmin()),
             Actions\Action::make('order')
                 ->label('مشاهده سفارش')
                 ->icon('heroicon-o-shopping-bag')

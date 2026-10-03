@@ -20,6 +20,7 @@
     use App\Filament\Resources\MenuItemResource;
     use App\Filament\Resources\OrderResource;
     use App\Filament\Resources\PageResource;
+    use App\Filament\Pages\ViewPaymentLogs;
     use App\Filament\Resources\PaymentResource;
     use App\Filament\Resources\PostResource;
     use App\Filament\Resources\ProductFamilyResource;
@@ -80,10 +81,11 @@
         'payments' => [
             'label' => 'پرداخت‌ها',
             'icon' => 'fa-credit-card',
-            'routes' => ['filament.admin.resources.payments.*'],
+            'routes' => ['filament.admin.resources.payments.*', 'filament.admin.pages.payment-logs'],
             'menus' => [
                 ['label' => 'پرداخت‌ها', 'icon' => 'fa-credit-card', 'items' => [
                     ['label' => 'لیست همه', 'url' => PaymentResource::getUrl('index'), 'icon' => 'fa-list'],
+                    ['label' => 'لاگ فایل پرداخت', 'url' => ViewPaymentLogs::getUrl(), 'icon' => 'fa-file-lines'],
                 ]],
             ],
         ],

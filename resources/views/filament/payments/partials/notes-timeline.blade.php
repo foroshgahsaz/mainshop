@@ -1,6 +1,13 @@
 <section class="admin-order__section admin-order__section--notes">
     <h2 class="admin-order__section-title">یادداشت‌ها و مسیر پرداخت (۰ تا ۱۰۰)</h2>
-    <p class="admin-order__hint">هر مرحله با درصد در یادداشت‌های سیستم و فایل <code dir="ltr">storage/logs/payments.log</code> روی سرور ثبت می‌شود.</p>
+    <p class="admin-order__hint">
+        هر مرحله با درصد در یادداشت‌های سیستم و فایل
+        <code dir="ltr">storage/logs/payments-*.log</code>
+        ثبت می‌شود.
+        @if(\App\Support\AdminAccess::canManageShopInAdmin())
+            <a href="{{ \App\Filament\Pages\ViewPaymentLogs::getUrl() }}?tracking={{ urlencode($payment->tracking_code) }}" class="admin-order__link">جستجو در لاگ فایل با کد رهگیری</a>
+        @endif
+    </p>
 
     @if(\App\Support\AdminAccess::canManageShopInAdmin())
     <form wire:submit="addNote" class="admin-order__note-form">

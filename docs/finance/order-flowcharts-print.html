@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>فلوچارت روال سفارش — چینی بازار</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700&display=swap');
+
+        :root {
+            --text: #181c32;
+            --muted: #5e6278;
+            --border: #e4e6ef;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 24px 32px 48px;
+            font-family: 'Vazirmatn', Tahoma, Arial, sans-serif;
+            color: var(--text);
+            background: #fff;
+            line-height: 1.6;
+        }
+
+        .cover {
+            text-align: center;
+            padding: 48px 24px 64px;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 32px;
+        }
+
+        .cover h1 {
+            font-size: 26px;
+            margin: 0 0 12px;
+        }
+
+        .cover p {
+            color: var(--muted);
+            margin: 8px 0;
+            font-size: 14px;
+        }
+
+        section.chart-page {
+            break-inside: avoid;
+            page-break-inside: avoid;
+            margin-bottom: 40px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        section.chart-page:last-of-type {
+            border-bottom: none;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin: 0 0 8px;
+            color: var(--text);
+        }
+
+        .chart-desc {
+            font-size: 13px;
+            color: var(--muted);
+            margin: 0 0 20px;
+        }
+
+        .mermaid {
+            display: flex;
+            justify-content: center;
+            overflow: visible;
+            direction: ltr;
+            text-align: center;
+        }
+
+        .mermaid svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .print-hint {
+            margin-top: 32px;
+            padding: 16px;
+            background: #f5f8fa;
+            border-radius: 8px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        @media print {
+            body {
+                padding: 12mm 15mm;
+            }
+
+            .print-hint,
+            .no-print {
+                display: none !important;
+            }
+
+            section.chart-page {
+                page-break-after: always;
+                break-after: page;
+                margin-bottom: 0;
+                padding-bottom: 16mm;
+                border-bottom: none;
+            }
+
+            section.chart-page:last-of-type {
+                page-break-after: auto;
+            }
+
+            .cover {
+                page-break-after: always;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cover">
+        <h1>فلوچارت روال ثبت سفارش</h1>
+        <p>سامانه فروشگاه — مشتری، نماینده، مدیر فروش / ادمین</p>
+        <p>نسخه قابل چاپ — هر بخش در یک صفحه جدا</p>
+    </div>
+
+    <section class="chart-page">
+        <h2>۱) مشتری — فروشگاه اینترنتی</h2>
+        <p class="chart-desc">سبد خرید، پرداخت آنلاین یا COD، رزرو موجودی، انقضای پرداخت‌نشده، وضعیت processing.</p>
+        <pre class="mermaid">
+flowchart TD
+    A[سبد خرید + آدرس + ارسال] --> B{روش پرداخت؟}
+    B -->|پرداخت آنلاین| C[ثبت سفارش status: pending]
+    B -->|پرداخت در محل COD| D[ثبت سفارش status: pending<br/>payment_method: cod]
+    C --> E[رزرو موجودی انبار]
+    D --> E
+    E --> F{آنلاین؟}
+    F -->|بله| G[ایجاد Payment + ریدایرکت درگاه]
+    F -->|خیر COD| H[بدون Payment درگاه<br/>منتظر اقدام ادمین]
+    G --> I{نتیجه درگاه؟}
+    I -->|موفق| J{جمع پرداخت‌ها = مبلغ نهایی؟}
+    I -->|ناموفق/انصراف| K[Payment: failed/canceled<br/>سفارش pending + رزرو فعال]
+    J -->|بله| L[status: processing]
+    J -->|خیر جزئی| M[مانده بدهی]
+    M --> N[پرداخت مجدد از حساب کاربری]
+    N --> G
+    K --> O{گذشت TTL پرداخت؟<br/>حدود ۶۰ دقیقه}
+    O -->|بله| P[لغو سفارش + آزاد موجودی<br/>status: canceled]
+    O -->|خیر| N
+    H --> Q[ادمین: پردازش / ارسال / لغو]
+    L --> R[shipped → delivered]
+    C --> S{مشتری لغو کند؟}
+    S -->|pending و بدون پرداخت موفق| P
+        </pre>
+    </section>
+
+    <section class="chart-page">
+        <h2>۲) نماینده — پیش‌سفارش تا پیش‌فاکتور و پرداخت</h2>
+        <p class="chart-desc">draft، proforma، رزرو موجودی با مهلت، پرداخت توسط نماینده یا مشتری، انقضای رزرو.</p>
+        <pre class="mermaid">
+flowchart TD
+    A[انتخاب مشتری ثبت‌شده توسط نماینده] --> B[ویزارد: کاتالوگ + اقلام]
+    B --> C[status: draft<br/>کد DR-*<br/>موجودی رزرو نشده]
+    C --> D[ویرایش اقلام / باربری / درگاه]
+    D --> E{ثبت پیش‌فاکتور؟}
+    E -->|خیر| D
+    E -->|بله| F{سقف پیش‌فاکتور باز<br/>با رزرو؟ پیش‌فرض ۳}
+    F -->|خیر| G[خطا — ابتدا تسویه/انقضا]
+    F -->|بله| H[رزرو موجودی + مهلت TTL<br/>پیش‌فرض ۲۴ ساعت]
+    H --> I[status: proforma]
+    I --> J[نماینده فقط مشاهده + PDF]
+    J --> K{پرداخت؟}
+    K -->|نماینده از پنل| L[Payment با paid_by_representative]
+    K -->|مشتری از سایت| M[پرداخت مجدد حساب کاربری]
+    L --> N[درگاه زرین‌پال / تارا]
+    M --> N
+    N --> O{موفق؟}
+    O -->|بله| P{تسویه کامل؟}
+    O -->|خیر| Q[مانده + رزرو اگر فعال]
+    P -->|بله| R[status: processing<br/>پایان مهلت رزرو]
+    P -->|خیر| Q
+    I --> T{مهلت رزرو تمام شد؟}
+    T -->|بله| U[موجودی آزاد<br/>status همچنان proforma<br/>پرداخت تا تمدید رزرو ممکن نیست]
+    T -->|خیر| K
+    U --> V[ادمین: تمدید رزرو / ویرایش پیش‌فاکتور]
+    V --> K
+        </pre>
+    </section>
+
+    <section class="chart-page">
+        <h2>۳) مدیر فروش در مقابل ادمین — دسترسی سفارش و پرداخت</h2>
+        <p class="chart-desc">مدیر فروش: مشاهده. ادمین: تغییر وضعیت، ویرایش پیش‌فاکتور، تمدید رزرو، حذف، مرجوعی.</p>
+        <pre class="mermaid">
+flowchart LR
+    subgraph SM[مدیر فروش]
+        SM1[مشاهده لیست سفارش‌ها]
+        SM2[مشاهده جزئیات سفارش]
+        SM3[مشاهده لیست پرداخت‌ها]
+        SM4[مشاهده جزئیات پرداخت]
+    end
+    subgraph AD[ادمین کامل]
+        AD1[تغییر وضعیت و رهگیری]
+        AD2[ویرایش پیش‌فاکتور نماینده<br/>قبل از تسویه]
+        AD3[تمدید رزرو proforma]
+        AD4[یادداشت سفارش/پرداخت]
+        AD5[حذف سفارش/پرداخت<br/>فقط بدون پرداخت موفق]
+        AD6[مرجوعی تارا]
+        AD7[لغو — استرداد درگاه دستی اگر پرداخت شده]
+    end
+    O[(سفارش / پرداخت در DB)] --> SM
+    O --> AD
+        </pre>
+    </section>
+
+    <section class="chart-page">
+        <h2>۴) نمای کلی — سه مسیر</h2>
+        <p class="chart-desc">خلاصه وضعیت‌ها از ثبت تا ارسال برای فروشگاه، نماینده و عملیات ادمین.</p>
+        <pre class="mermaid">
+flowchart TB
+    subgraph Shop[مشتری — سایت]
+        S1[pending] --> S2{پرداخت؟}
+        S2 -->|آنلاین| S3[processing]
+        S2 -->|COD| S4[pending تا ادمین]
+        S2 -->|انقضا/لغو| S5[canceled]
+    end
+    subgraph Rep[نماینده]
+        R1[draft] --> R2[proforma + رزرو]
+        R2 --> R3{پرداخت کامل}
+        R3 -->|بله| R4[processing]
+        R3 -->|رزرو منقضی| R5[proforma بدون رزرو]
+    end
+    subgraph Ops[ادمین — پس از processing]
+        O1[shipped] --> O2[delivered]
+        O1 --> O3[canceled / returned]
+    end
+    S3 --> Ops
+    R4 --> Ops
+    S4 --> Ops
+        </pre>
+    </section>
+
+    <p class="print-hint no-print">
+        برای چاپ: <strong>Ctrl+P</strong> (یا Cmd+P) — پیشنهاد: حاشیه معمولی، پس‌زمینه گرافیک خاموش (Background graphics روشن در صورت نیاز).
+        اگر نمودارها خالی بودند، یک بار اتصال اینترنت برای بارگذاری Mermaid لازم است؛ سپس دوباره چاپ بگیرید.
+    </p>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'neutral',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis',
+            },
+            securityLevel: 'loose',
+        });
+    </script>
+</body>
+</html>

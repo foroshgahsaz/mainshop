@@ -8,6 +8,7 @@
     use App\Filament\Pages\ManageTransactionalSms;
     use App\Filament\Pages\ManageHomepageImages;
     use App\Filament\Pages\ManageMediaPresets;
+    use App\Filament\Pages\ManageBajetPay;
     use App\Filament\Pages\ManageTara;
     use App\Filament\Pages\ManageZarinpal;
     use App\Filament\Resources\AttributeResource;
@@ -178,11 +179,13 @@
             'routes' => [
                 'filament.admin.pages.zarinpal',
                 'filament.admin.pages.tara',
+                'filament.admin.pages.bajet',
             ],
             'menus' => [
                 ['label' => 'درگاه‌های پرداخت', 'icon' => 'fa-plug', 'items' => [
                     ['label' => 'زرین‌پال', 'url' => ManageZarinpal::getUrl(), 'icon' => 'fa-university'],
                     ['label' => 'تارا', 'url' => ManageTara::getUrl(), 'icon' => 'fa-wallet'],
+                    ['label' => 'باجت‌پی', 'url' => ManageBajetPay::getUrl(), 'icon' => 'fa-credit-card'],
                 ]],
             ],
         ],

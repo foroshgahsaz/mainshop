@@ -18,6 +18,9 @@ class SettingsService
     /** @var array<string, mixed>|null */
     protected static ?array $taraMemo = null;
 
+    /** @var array<string, mixed>|null */
+    protected static ?array $bajetMemo = null;
+
     public function get(string $group, string $key, mixed $default = null): mixed
     {
         $settings = $this->all();
@@ -36,6 +39,7 @@ class SettingsService
         static::$siteMemo = null;
         static::$zarinpalMemo = null;
         static::$taraMemo = null;
+        static::$bajetMemo = null;
     }
 
     /** @param  array<string, mixed>  $values */
@@ -115,6 +119,37 @@ class SettingsService
             'sandbox_refund_base_url' => (string) ($this->get('tara', 'sandbox_refund_base_url') ?: ($cfg['sandbox_refund_base_url'] ?? '')),
             'production_refund_base_url' => (string) ($this->get('tara', 'refund_base_url') ?: ($cfg['refund_base_url'] ?? '')),
             'icon' => $this->get('tara', 'icon') ?: null,
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    public function bajet(): array
+    {
+        if (static::$bajetMemo !== null) {
+            return static::$bajetMemo;
+        }
+
+        $cfg = config('payment.gateways.bajet', []);
+        $sandbox = filter_var($this->get('bajet', 'sandbox', $cfg['sandbox'] ?? true), FILTER_VALIDATE_BOOLEAN);
+
+        $apiDefault = $sandbox
+            ? ($cfg['sandbox_base_url'] ?? '')
+            : ($cfg['base_url'] ?? '');
+
+        return static::$bajetMemo = [
+            'enabled' => filter_var($this->get('bajet', 'enabled', false), FILTER_VALIDATE_BOOLEAN),
+            'sandbox' => $sandbox,
+            'username' => (string) ($this->get('bajet', 'username') ?: ($cfg['username'] ?? '')),
+            'password' => (string) ($this->get('bajet', 'password') ?: ($cfg['password'] ?? '')),
+            'terminal_id' => (string) ($this->get('bajet', 'terminal_id') ?: ($cfg['terminal_id'] ?? '')),
+            'amount_unit' => (string) ($this->get('bajet', 'amount_unit') ?: ($cfg['amount_unit'] ?? 'toman')),
+            'callback_url' => (string) ($this->get('bajet', 'callback_url') ?: ($cfg['callback_url'] ?? '/payment/callback/bajet')),
+            'default_product_type' => (int) ($this->get('bajet', 'default_product_type') ?: ($cfg['default_product_type'] ?? 2)),
+            'default_brand' => (string) ($this->get('bajet', 'default_brand') ?: ($cfg['default_brand'] ?? 'general')),
+            'base_url' => rtrim((string) ($this->get('bajet', $sandbox ? 'sandbox_base_url' : 'base_url') ?: $apiDefault), '/'),
+            'sandbox_base_url' => (string) ($this->get('bajet', 'sandbox_base_url') ?: ($cfg['sandbox_base_url'] ?? '')),
+            'production_base_url' => (string) ($this->get('bajet', 'base_url') ?: ($cfg['base_url'] ?? '')),
+            'icon' => $this->get('bajet', 'icon') ?: null,
         ];
     }
 

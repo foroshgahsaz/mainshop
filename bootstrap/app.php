@@ -15,6 +15,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'payment/callback',
             'payment/callback/tara',
+            'payment/callback/bajet',
         ]);
         $middleware->redirectGuestsTo(function ($request) {
             if ($request->expectsJson()) {

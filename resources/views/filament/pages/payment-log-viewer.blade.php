@@ -1,90 +1,91 @@
 <x-filament-panels::page>
     <div class="admin-payment-log-viewer" data-admin-payment-log>
         <section class="admin-order__section">
-            <h2 class="admin-order__section-title">جستجو در فایل لاگ</h2>
+            <h2 class="admin-order__section-title">۲۰ روز اخیر</h2>
             <p class="admin-order__hint">
-                فقط خواندنی — منبع: <code dir="ltr">storage/logs/payments-YYYY-MM-DD.log</code>
-                (یا <code dir="ltr">payments.log</code> در صورت نبود فایل روزانه).
+                فایل‌های روزانه در <code dir="ltr">storage/logs/payments-YYYY-MM-DD.log</code> ذخیره می‌شوند.
+                لاگ‌های قدیمی‌تر از ۲۰ روز به‌صورت خودکار فشرده (<code dir="ltr">.log.zip</code>) می‌شوند.
             </p>
 
-            <form wire:submit="search" class="admin-payment-log-viewer__form">
-                <div class="admin-payment-log-viewer__fields">
-                    <div class="admin-payment-log-viewer__field">
-                        <label class="admin-order__label" for="paymentLogTracking">کد رهگیری پرداخت</label>
-                        <input id="paymentLogTracking"
-                               type="search"
-                               class="admin-order__textarea admin-payment-log-viewer__input"
-                               dir="ltr"
-                               wire:model="trackingCode"
-                               placeholder="مثال: AB12CD34EF56"
-                               autocomplete="off"
-                               required>
-                        @error('trackingCode')
-                            <p class="admin-order__error">{{ $message }}</p>
-                        @enderror
-                    </div>
-                    <div class="admin-payment-log-viewer__field">
-                        <label class="admin-order__label" for="paymentLogDate">تاریخ فایل لاگ</label>
-                        <select id="paymentLogDate" class="admin-order__textarea admin-payment-log-viewer__input" wire:model="logDate">
-                            @foreach ($this->logDateOptions as $option)
-                                <option value="{{ $option['value'] }}">{{ $option['label'] }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-                <div class="admin-payment-log-viewer__actions">
-                    <x-filament::button type="submit" wire:loading.attr="disabled">
-                        <span wire:loading.remove wire:target="search">نمایش رکوردها</span>
-                        <span wire:loading wire:target="search">در حال خواندن فایل…</span>
-                    </x-filament::button>
-                    <x-filament::button type="button" color="gray" wire:click="searchAllRecentDays">
-                        جستجو در ۷ روز اخیر
-                    </x-filament::button>
-                </div>
-            </form>
-
-            @if ($paymentUrl)
-                <p class="admin-payment-log-viewer__link-wrap">
-                    <a href="{{ $paymentUrl }}" class="admin-order__link">مشاهده پرداخت در ادمین (یادداشت‌های ۰–۱۰۰)</a>
+            @if ($this->legacyLogEntry)
+                <p class="admin-order__hint admin-payment-log-viewer__legacy">
+                    فایل قدیمی یک‌تکه:
+                    <a href="{{ $this->legacyLogEntry['download_url'] }}" class="admin-order__link">{{ $this->legacyLogEntry['basename'] }}</a>
+                    <span dir="ltr">({{ $this->formatSize($this->legacyLogEntry['size_bytes']) }})</span>
                 </p>
             @endif
+
+            <div class="admin-payment-log-viewer__table-wrap">
+                <table class="admin-payment-log-viewer__table">
+                    <thead>
+                        <tr>
+                            <th>تاریخ</th>
+                            <th>وضعیت</th>
+                            <th>حجم</th>
+                            <th>دانلود</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($this->recentEntries as $entry)
+                            <tr>
+                                <td>{{ $entry['label'] }}</td>
+                                <td>
+                                    @if ($entry['kind'] === 'log')
+                                        <span class="admin-payment-log-viewer__badge admin-payment-log-viewer__badge--ok">فایل روزانه</span>
+                                    @elseif ($entry['kind'] === 'zip')
+                                        <span class="admin-payment-log-viewer__badge admin-payment-log-viewer__badge--zip">فشرده</span>
+                                    @else
+                                        <span class="admin-payment-log-viewer__badge admin-payment-log-viewer__badge--empty">بدون فایل</span>
+                                    @endif
+                                </td>
+                                <td dir="ltr">{{ $this->formatSize($entry['size_bytes']) }}</td>
+                                <td>
+                                    @if ($entry['download_url'])
+                                        <a href="{{ $entry['download_url'] }}" class="admin-order__link admin-payment-log-viewer__download-btn">
+                                            دانلود
+                                        </a>
+                                    @else
+                                        <span class="admin-payment-log-viewer__muted">—</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </section>
 
-        @if ($searchMessage)
-            <p class="admin-order__empty admin-payment-log-viewer__empty">{{ $searchMessage }}</p>
-        @endif
-
-        @if ($scannedFiles !== [])
-            <div class="admin-payment-log-viewer__meta">
-                <p class="admin-order__label">فایل‌های اسکن‌شده</p>
-                <ul class="admin-payment-log-viewer__file-list">
-                    @foreach ($scannedFiles as $file)
-                        <li class="admin-payment-log-viewer__file-item" dir="ltr">
-                            <code>{{ $file }}</code>
-                            @if ($downloadUrl = $this->downloadUrlFor($file))
-                                <a href="{{ $downloadUrl }}" class="admin-order__link admin-payment-log-viewer__download" download>
-                                    دانلود فایل
-                                </a>
-                            @endif
-                        </li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-        @if ($truncated)
-            <p class="admin-order__hint admin-payment-log-viewer__warn">
-                بیش از ۸۰۰ خط هم‌خوان پیدا شد؛ فقط بخش اول نمایش داده شده است.
-            </p>
-        @endif
-
-        @if ($logLines !== [])
+        @if ($this->archiveEntries !== [])
             <section class="admin-order__section">
-                <h2 class="admin-order__section-title">
-                    {{ count($logLines) }} رکورد برای <span dir="ltr">{{ $trackingCode }}</span>
-                </h2>
-                <pre class="admin-payment-log-viewer__pre" dir="ltr">@foreach ($logLines as $line){{ $line }}
-@endforeach</pre>
+                <h2 class="admin-order__section-title">آرشیو (بیش از ۲۰ روز)</h2>
+                <p class="admin-order__hint">فایل‌های فشردهٔ روزهای قدیمی‌تر — همان نام تاریخ در نام فایل حفظ شده است.</p>
+
+                <div class="admin-payment-log-viewer__table-wrap">
+                    <table class="admin-payment-log-viewer__table">
+                        <thead>
+                            <tr>
+                                <th>تاریخ</th>
+                                <th>حجم</th>
+                                <th>دانلود</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($this->archiveEntries as $entry)
+                                <tr>
+                                    <td>{{ $entry['label'] }}</td>
+                                    <td dir="ltr">{{ $this->formatSize($entry['size_bytes']) }}</td>
+                                    <td>
+                                        @if ($entry['download_url'])
+                                            <a href="{{ $entry['download_url'] }}" class="admin-order__link admin-payment-log-viewer__download-btn">
+                                                دانلود ZIP
+                                            </a>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </section>
         @endif
     </div>

@@ -6,6 +6,8 @@ use Carbon\Carbon;
 
 class PaymentLogReader
 {
+    public const RECENT_DAYS = 20;
+
     private const MAX_MATCH_LINES = 800;
 
     public function logDirectory(): string
@@ -13,18 +15,203 @@ class PaymentLogReader
         return storage_path('logs');
     }
 
+    public function dailyLogBasename(string $dateYmd): string
+    {
+        return 'payments-'.$dateYmd.'.log';
+    }
+
+    public function archiveBasename(string $dateYmd): string
+    {
+        return 'payments-'.$dateYmd.'.log.zip';
+    }
+
+    public function pathForDailyLog(string $dateYmd): ?string
+    {
+        $candidate = $this->logDirectory().DIRECTORY_SEPARATOR.$this->dailyLogBasename($dateYmd);
+
+        return is_readable($candidate) ? $candidate : null;
+    }
+
+    public function pathForArchive(string $dateYmd): ?string
+    {
+        $candidate = $this->logDirectory().DIRECTORY_SEPARATOR.$this->archiveBasename($dateYmd);
+
+        return is_readable($candidate) ? $candidate : null;
+    }
+
     public function resolveLogPath(?string $dateYmd = null): ?string
     {
         $date = $dateYmd ?: now()->format('Y-m-d');
-        $daily = $this->logDirectory().'/payments-'.$date.'.log';
+        $daily = $this->pathForDailyLog($date);
 
-        if (is_readable($daily)) {
+        if ($daily !== null) {
             return $daily;
         }
 
         $single = $this->logDirectory().'/payments.log';
 
         return is_readable($single) ? $single : null;
+    }
+
+    /**
+     * @return list<array{
+     *     date: string,
+     *     label: string,
+     *     basename: ?string,
+     *     size_bytes: ?int,
+     *     kind: 'log'|'zip'|'missing',
+     *     download_url: ?string
+     * }>
+     */
+    public function recentDayEntries(int $days = self::RECENT_DAYS): array
+    {
+        $days = max(1, min(60, $days));
+        $entries = [];
+
+        for ($i = 0; $i < $days; $i++) {
+            $date = now()->subDays($i)->format('Y-m-d');
+            $logPath = $this->pathForDailyLog($date);
+            $zipPath = $this->pathForArchive($date);
+
+            if ($logPath !== null) {
+                $basename = $this->dailyLogBasename($date);
+                $entries[] = [
+                    'date' => $date,
+                    'label' => $this->formatDisplayDate($date),
+                    'basename' => $basename,
+                    'size_bytes' => @filesize($logPath) ?: null,
+                    'kind' => 'log',
+                    'download_url' => $this->downloadUrlForBasename($basename),
+                ];
+
+                continue;
+            }
+
+            if ($zipPath !== null) {
+                $basename = $this->archiveBasename($date);
+                $entries[] = [
+                    'date' => $date,
+                    'label' => $this->formatDisplayDate($date),
+                    'basename' => $basename,
+                    'size_bytes' => @filesize($zipPath) ?: null,
+                    'kind' => 'zip',
+                    'download_url' => $this->downloadUrlForBasename($basename),
+                ];
+
+                continue;
+            }
+
+            $entries[] = [
+                'date' => $date,
+                'label' => $this->formatDisplayDate($date),
+                'basename' => null,
+                'size_bytes' => null,
+                'kind' => 'missing',
+                'download_url' => null,
+            ];
+        }
+
+        return $entries;
+    }
+
+    /**
+     * @return list<array{
+     *     date: string,
+     *     label: string,
+     *     basename: string,
+     *     size_bytes: ?int,
+     *     kind: 'zip',
+     *     download_url: ?string
+     * }>
+     */
+    public function archivedZipEntries(): array
+    {
+        $cutoff = now()->subDays(self::RECENT_DAYS)->startOfDay();
+        $entries = [];
+
+        foreach (glob($this->logDirectory().DIRECTORY_SEPARATOR.'payments-*.log.zip') ?: [] as $path) {
+            $basename = basename($path);
+
+            if (! preg_match('/^payments-(\d{4}-\d{2}-\d{2})\.log\.zip$/', $basename, $matches)) {
+                continue;
+            }
+
+            try {
+                $fileDate = Carbon::createFromFormat('Y-m-d', $matches[1])->startOfDay();
+            } catch (\Throwable) {
+                continue;
+            }
+
+            if ($fileDate->greaterThanOrEqualTo($cutoff)) {
+                continue;
+            }
+
+            $entries[] = [
+                'date' => $matches[1],
+                'label' => $this->formatDisplayDate($matches[1]),
+                'basename' => $basename,
+                'size_bytes' => @filesize($path) ?: null,
+                'kind' => 'zip',
+                'download_url' => $this->downloadUrlForBasename($basename),
+            ];
+        }
+
+        usort($entries, fn (array $a, array $b): int => strcmp($b['date'], $a['date']));
+
+        return $entries;
+    }
+
+    public function downloadUrlForBasename(string $basename): ?string
+    {
+        if ($this->resolvePathByBasename($basename) === null) {
+            return null;
+        }
+
+        return route('filament.admin.payment-logs.download', ['file' => $basename]);
+    }
+
+    /**
+     * @return array{
+     *     label: string,
+     *     basename: string,
+     *     size_bytes: ?int,
+     *     kind: 'log',
+     *     download_url: ?string
+     * }|null
+     */
+    public function legacySingleLogEntry(): ?array
+    {
+        $basename = 'payments.log';
+        $path = $this->logDirectory().DIRECTORY_SEPARATOR.$basename;
+
+        if (! is_readable($path)) {
+            return null;
+        }
+
+        return [
+            'label' => 'فایل تجمیعی (payments.log)',
+            'basename' => $basename,
+            'size_bytes' => @filesize($path) ?: null,
+            'kind' => 'log',
+            'download_url' => $this->downloadUrlForBasename($basename),
+        ];
+    }
+
+    public function formatFileSize(?int $bytes): string
+    {
+        if ($bytes === null || $bytes < 0) {
+            return '—';
+        }
+
+        if ($bytes < 1024) {
+            return $bytes.' B';
+        }
+
+        if ($bytes < 1024 * 1024) {
+            return round($bytes / 1024, 1).' KB';
+        }
+
+        return round($bytes / (1024 * 1024), 2).' MB';
     }
 
     /**
@@ -36,7 +223,7 @@ class PaymentLogReader
 
         for ($i = 0; $i < $daysBack; $i++) {
             $date = now()->subDays($i)->format('Y-m-d');
-            if ($this->resolveLogPath($date) !== null) {
+            if ($this->pathForDailyLog($date) !== null || $this->pathForArchive($date) !== null) {
                 $dates[] = $date;
             }
         }
@@ -106,7 +293,7 @@ class PaymentLogReader
 
         for ($i = 0; $i < $daySpan; $i++) {
             $date = now()->subDays($i)->format('Y-m-d');
-            $path = $this->resolveLogPath($date);
+            $path = $this->pathForDailyLog($date) ?? $this->pathForArchive($date);
             if ($path !== null && ! in_array($path, $files, true)) {
                 $files[] = $path;
             }
@@ -120,6 +307,10 @@ class PaymentLogReader
      */
     private function readMatchingLines(string $path, string $needle): \Generator
     {
+        if (str_ends_with($path, '.zip')) {
+            return;
+        }
+
         $handle = @fopen($path, 'rb');
 
         if ($handle === false) {
@@ -149,7 +340,7 @@ class PaymentLogReader
     public function formatDisplayDate(?string $dateYmd): string
     {
         if ($dateYmd === null || $dateYmd === '') {
-            return '۷ روز اخیر';
+            return '';
         }
 
         try {
@@ -159,16 +350,16 @@ class PaymentLogReader
         }
     }
 
-    public function isPaymentLogBasename(string $basename): bool
+    public function isDownloadableBasename(string $basename): bool
     {
-        return (bool) preg_match('/^payments(-\d{4}-\d{2}-\d{2})?\.log$/', $basename);
+        return (bool) preg_match('/^payments(-\d{4}-\d{2}-\d{2})?\.log(\.zip)?$/', basename($basename));
     }
 
     public function resolvePathByBasename(string $basename): ?string
     {
         $basename = basename($basename);
 
-        if (! $this->isPaymentLogBasename($basename)) {
+        if (! $this->isDownloadableBasename($basename)) {
             return null;
         }
 
@@ -187,26 +378,10 @@ class PaymentLogReader
         return is_readable($realFile) ? $realFile : null;
     }
 
-    public function safeBasenameFromAbsolutePath(string $absolutePath): ?string
+    public function mimeTypeForBasename(string $basename): string
     {
-        $basename = basename($absolutePath);
-
-        if (! $this->isPaymentLogBasename($basename)) {
-            return null;
-        }
-
-        $resolved = $this->resolvePathByBasename($basename);
-
-        if ($resolved === null) {
-            return null;
-        }
-
-        $realInput = realpath($absolutePath);
-
-        if ($realInput !== false && $realInput !== $resolved) {
-            return null;
-        }
-
-        return $basename;
+        return str_ends_with($basename, '.zip')
+            ? 'application/zip'
+            : 'text/plain; charset=UTF-8';
     }
 }

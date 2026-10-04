@@ -9,3 +9,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('shop:expire-pending-orders')->everyFiveMinutes();
+Schedule::command('payments:archive-logs')->daily();

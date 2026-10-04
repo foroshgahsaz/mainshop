@@ -7,6 +7,14 @@
                 لاگ‌های قدیمی‌تر از ۲۰ روز به‌صورت خودکار فشرده (<code dir="ltr">.log.zip</code>) می‌شوند.
             </p>
 
+            @if ($this->legacyLogEntry)
+                <p class="admin-order__hint admin-payment-log-viewer__legacy">
+                    فایل قدیمی یک‌تکه:
+                    <a href="{{ $this->legacyLogEntry['download_url'] }}" class="admin-order__link">{{ $this->legacyLogEntry['basename'] }}</a>
+                    <span dir="ltr">({{ $this->formatSize($this->legacyLogEntry['size_bytes']) }})</span>
+                </p>
+            @endif
+
             <div class="admin-payment-log-viewer__table-wrap">
                 <table class="admin-payment-log-viewer__table">
                     <thead>

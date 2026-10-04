@@ -1,17 +1,19 @@
 <x-filament-panels::page>
-    <div class="admin-payment-log-viewer" data-admin-payment-log>
+    <div class="admin-payment-log-viewer" data-admin-payment-log data-ui-version="{{ \App\Filament\Pages\ViewPaymentLogs::UI_VERSION }}">
         <section class="admin-order__section">
             <h2 class="admin-order__section-title">۲۰ روز اخیر</h2>
             <p class="admin-order__hint">
-                فایل‌های روزانه در <code dir="ltr">storage/logs/payments-YYYY-MM-DD.log</code> ذخیره می‌شوند.
-                لاگ‌های قدیمی‌تر از ۲۰ روز به‌صورت خودکار فشرده (<code dir="ltr">.log.zip</code>) می‌شوند.
+                مسیر لاگ: <code dir="ltr">{{ $logsDirectory }}</code>
+                — فایل روزانه: <code dir="ltr">payments-YYYY-MM-DD.log</code>
             </p>
 
-            @if ($this->legacyLogEntry)
+            @if ($legacyLogEntry)
                 <p class="admin-order__hint admin-payment-log-viewer__legacy">
                     فایل قدیمی یک‌تکه:
-                    <a href="{{ $this->legacyLogEntry['download_url'] }}" class="admin-order__link">{{ $this->legacyLogEntry['basename'] }}</a>
-                    <span dir="ltr">({{ $this->formatSize($this->legacyLogEntry['size_bytes']) }})</span>
+                    <x-filament::button tag="a" href="{{ $legacyLogEntry['download_url'] }}" size="sm" color="gray">
+                        دانلود {{ $legacyLogEntry['basename'] }}
+                    </x-filament::button>
+                    <span dir="ltr">({{ $this->formatSize($legacyLogEntry['size_bytes']) }})</span>
                 </p>
             @endif
 
@@ -20,18 +22,22 @@
                     <thead>
                         <tr>
                             <th>تاریخ</th>
+                            <th>نام فایل</th>
                             <th>وضعیت</th>
                             <th>حجم</th>
                             <th>دانلود</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($this->recentEntries as $entry)
+                        @foreach ($recentEntries as $entry)
                             <tr>
                                 <td>{{ $entry['label'] }}</td>
+                                <td dir="ltr" class="admin-payment-log-viewer__filename">
+                                    {{ $entry['basename'] ?? '—' }}
+                                </td>
                                 <td>
                                     @if ($entry['kind'] === 'log')
-                                        <span class="admin-payment-log-viewer__badge admin-payment-log-viewer__badge--ok">فایل روزانه</span>
+                                        <span class="admin-payment-log-viewer__badge admin-payment-log-viewer__badge--ok">موجود</span>
                                     @elseif ($entry['kind'] === 'zip')
                                         <span class="admin-payment-log-viewer__badge admin-payment-log-viewer__badge--zip">فشرده</span>
                                     @else
@@ -41,9 +47,9 @@
                                 <td dir="ltr">{{ $this->formatSize($entry['size_bytes']) }}</td>
                                 <td>
                                     @if ($entry['download_url'])
-                                        <a href="{{ $entry['download_url'] }}" class="admin-order__link admin-payment-log-viewer__download-btn">
+                                        <x-filament::button tag="a" href="{{ $entry['download_url'] }}" size="sm">
                                             دانلود
-                                        </a>
+                                        </x-filament::button>
                                     @else
                                         <span class="admin-payment-log-viewer__muted">—</span>
                                     @endif
@@ -55,31 +61,29 @@
             </div>
         </section>
 
-        @if ($this->archiveEntries !== [])
+        @if ($archiveEntries !== [])
             <section class="admin-order__section">
                 <h2 class="admin-order__section-title">آرشیو (بیش از ۲۰ روز)</h2>
-                <p class="admin-order__hint">فایل‌های فشردهٔ روزهای قدیمی‌تر — همان نام تاریخ در نام فایل حفظ شده است.</p>
-
                 <div class="admin-payment-log-viewer__table-wrap">
                     <table class="admin-payment-log-viewer__table">
                         <thead>
                             <tr>
                                 <th>تاریخ</th>
+                                <th>نام فایل</th>
                                 <th>حجم</th>
                                 <th>دانلود</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($this->archiveEntries as $entry)
+                            @foreach ($archiveEntries as $entry)
                                 <tr>
                                     <td>{{ $entry['label'] }}</td>
+                                    <td dir="ltr">{{ $entry['basename'] }}</td>
                                     <td dir="ltr">{{ $this->formatSize($entry['size_bytes']) }}</td>
                                     <td>
-                                        @if ($entry['download_url'])
-                                            <a href="{{ $entry['download_url'] }}" class="admin-order__link admin-payment-log-viewer__download-btn">
-                                                دانلود ZIP
-                                            </a>
-                                        @endif
+                                        <x-filament::button tag="a" href="{{ $entry['download_url'] }}" size="sm" color="gray">
+                                            دانلود ZIP
+                                        </x-filament::button>
                                     </td>
                                 </tr>
                             @endforeach

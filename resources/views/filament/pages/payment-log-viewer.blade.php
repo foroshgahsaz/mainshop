@@ -55,12 +55,21 @@
         @endif
 
         @if ($scannedFiles !== [])
-            <p class="admin-payment-log-viewer__meta" dir="ltr">
-                فایل‌های اسکن‌شده:
-                @foreach ($scannedFiles as $file)
-                    <code>{{ $file }}</code>@if (! $loop->last)، @endif
-                @endforeach
-            </p>
+            <div class="admin-payment-log-viewer__meta">
+                <p class="admin-order__label">فایل‌های اسکن‌شده</p>
+                <ul class="admin-payment-log-viewer__file-list">
+                    @foreach ($scannedFiles as $file)
+                        <li class="admin-payment-log-viewer__file-item" dir="ltr">
+                            <code>{{ $file }}</code>
+                            @if ($downloadUrl = $this->downloadUrlFor($file))
+                                <a href="{{ $downloadUrl }}" class="admin-order__link admin-payment-log-viewer__download" download>
+                                    دانلود فایل
+                                </a>
+                            @endif
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
         @endif
 
         @if ($truncated)

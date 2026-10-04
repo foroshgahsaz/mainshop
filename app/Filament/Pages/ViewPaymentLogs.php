@@ -106,6 +106,17 @@ class ViewPaymentLogs extends Page
         $this->search($reader);
     }
 
+    public function downloadUrlFor(string $absolutePath): ?string
+    {
+        $basename = app(PaymentLogReader::class)->safeBasenameFromAbsolutePath($absolutePath);
+
+        if ($basename === null) {
+            return null;
+        }
+
+        return route('filament.admin.payment-logs.download', ['file' => $basename]);
+    }
+
     /** @return list<array{value: string, label: string}> */
     #[Computed]
     public function logDateOptions(): array

@@ -158,4 +158,55 @@ class PaymentLogReader
             return $dateYmd;
         }
     }
+
+    public function isPaymentLogBasename(string $basename): bool
+    {
+        return (bool) preg_match('/^payments(-\d{4}-\d{2}-\d{2})?\.log$/', $basename);
+    }
+
+    public function resolvePathByBasename(string $basename): ?string
+    {
+        $basename = basename($basename);
+
+        if (! $this->isPaymentLogBasename($basename)) {
+            return null;
+        }
+
+        $candidate = $this->logDirectory().DIRECTORY_SEPARATOR.$basename;
+        $realDir = realpath($this->logDirectory());
+        $realFile = realpath($candidate);
+
+        if ($realDir === false || $realFile === false) {
+            return null;
+        }
+
+        if (! str_starts_with($realFile, $realDir.DIRECTORY_SEPARATOR)) {
+            return null;
+        }
+
+        return is_readable($realFile) ? $realFile : null;
+    }
+
+    public function safeBasenameFromAbsolutePath(string $absolutePath): ?string
+    {
+        $basename = basename($absolutePath);
+
+        if (! $this->isPaymentLogBasename($basename)) {
+            return null;
+        }
+
+        $resolved = $this->resolvePathByBasename($basename);
+
+        if ($resolved === null) {
+            return null;
+        }
+
+        $realInput = realpath($absolutePath);
+
+        if ($realInput !== false && $realInput !== $resolved) {
+            return null;
+        }
+
+        return $basename;
+    }
 }

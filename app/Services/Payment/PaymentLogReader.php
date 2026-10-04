@@ -29,14 +29,14 @@ class PaymentLogReader
     {
         $candidate = $this->logDirectory().DIRECTORY_SEPARATOR.$this->dailyLogBasename($dateYmd);
 
-        return is_readable($candidate) ? $candidate : null;
+        return $this->readableFile($candidate);
     }
 
     public function pathForArchive(string $dateYmd): ?string
     {
         $candidate = $this->logDirectory().DIRECTORY_SEPARATOR.$this->archiveBasename($dateYmd);
 
-        return is_readable($candidate) ? $candidate : null;
+        return $this->readableFile($candidate);
     }
 
     public function resolveLogPath(?string $dateYmd = null): ?string
@@ -167,7 +167,7 @@ class PaymentLogReader
             return null;
         }
 
-        return route('filament.admin.payment-logs.download', ['file' => $basename]);
+        return route('filament.admin.payment-logs.download', ['file' => $basename], absolute: true);
     }
 
     /**
@@ -364,18 +364,29 @@ class PaymentLogReader
         }
 
         $candidate = $this->logDirectory().DIRECTORY_SEPARATOR.$basename;
-        $realDir = realpath($this->logDirectory());
-        $realFile = realpath($candidate);
 
-        if ($realDir === false || $realFile === false) {
+        if (! $this->readableFile($candidate)) {
             return null;
         }
 
-        if (! str_starts_with($realFile, $realDir.DIRECTORY_SEPARATOR)) {
+        $normalizedDir = $this->normalizePath($this->logDirectory());
+        $normalizedFile = $this->normalizePath($candidate);
+
+        if (! str_starts_with($normalizedFile, $normalizedDir.'/')) {
             return null;
         }
 
-        return is_readable($realFile) ? $realFile : null;
+        return $candidate;
+    }
+
+    protected function readableFile(string $path): ?string
+    {
+        return is_file($path) && is_readable($path) ? $path : null;
+    }
+
+    protected function normalizePath(string $path): string
+    {
+        return rtrim(str_replace('\\', '/', $path), '/');
     }
 
     public function mimeTypeForBasename(string $basename): string

@@ -7,6 +7,11 @@ use ZipArchive;
 
 class PaymentLogArchiveService
 {
+    public function zipAvailable(): bool
+    {
+        return class_exists(ZipArchive::class) && extension_loaded('zip');
+    }
+
     public function __construct(
         protected PaymentLogReader $reader,
     ) {}
@@ -21,6 +26,10 @@ class PaymentLogArchiveService
      */
     public function archiveLogsOlderThanRetention(): int
     {
+        if (! $this->zipAvailable()) {
+            return 0;
+        }
+
         $archived = 0;
         $cutoff = now()->subDays($this->keepDays())->startOfDay();
         $directory = $this->reader->logDirectory();
@@ -63,6 +72,10 @@ class PaymentLogArchiveService
             @unlink($logPath);
 
             return true;
+        }
+
+        if (! $this->zipAvailable()) {
+            return false;
         }
 
         $zip = new ZipArchive;

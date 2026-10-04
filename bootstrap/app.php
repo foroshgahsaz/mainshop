@@ -1,5 +1,6 @@
 <?php
 
+use App\Console\Commands\ArchivePaymentLogsCommand;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -32,7 +33,11 @@ $app = Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
-    })->create();
+    })
+    ->withCommands([
+        ArchivePaymentLogsCommand::class,
+    ])
+    ->create();
 
 // Windows / junction paths: realpath() may fail namespace auto-detection
 try {

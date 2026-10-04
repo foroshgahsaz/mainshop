@@ -2,15 +2,14 @@
 
 namespace App\Filament\Pages;
 
-use App\Services\Payment\PaymentLogArchiveService;
 use App\Services\Payment\PaymentLogReader;
 use App\Support\AdminAccess;
 use Filament\Pages\Page;
-use Illuminate\Support\Facades\Cache;
-use Livewire\Attributes\Computed;
 
 class ViewPaymentLogs extends Page
 {
+    public const UI_VERSION = '2026-10-04-list-v2';
+
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     protected static ?string $navigationLabel = 'لاگ فایل پرداخت';
@@ -25,43 +24,32 @@ class ViewPaymentLogs extends Page
 
     protected static string $view = 'filament.pages.payment-log-viewer';
 
+    /** @var list<array<string, mixed>> */
+    public array $recentEntries = [];
+
+    /** @var list<array<string, mixed>> */
+    public array $archiveEntries = [];
+
+    /** @var array<string, mixed>|null */
+    public ?array $legacyLogEntry = null;
+
+    public string $logsDirectory = '';
+
     public static function canAccess(): bool
     {
         return AdminAccess::canManageShopInAdmin();
     }
 
-    public function mount(PaymentLogArchiveService $archive): void
+    public function mount(PaymentLogReader $reader): void
     {
-        Cache::remember('payment_logs_archive_tick', now()->addHour(), function () use ($archive): bool {
-            $archive->archiveLogsOlderThanRetention();
-
-            return true;
-        });
-    }
-
-    /** @return list<array<string, mixed>> */
-    #[Computed]
-    public function recentEntries(): array
-    {
-        return app(PaymentLogReader::class)->recentDayEntries(PaymentLogReader::RECENT_DAYS);
-    }
-
-    /** @return list<array<string, mixed>> */
-    #[Computed]
-    public function archiveEntries(): array
-    {
-        return app(PaymentLogReader::class)->archivedZipEntries();
+        $this->logsDirectory = $reader->logDirectory();
+        $this->recentEntries = $reader->recentDayEntries(PaymentLogReader::RECENT_DAYS);
+        $this->archiveEntries = $reader->archivedZipEntries();
+        $this->legacyLogEntry = $reader->legacySingleLogEntry();
     }
 
     public function formatSize(?int $bytes): string
     {
         return app(PaymentLogReader::class)->formatFileSize($bytes);
-    }
-
-    /** @return array<string, mixed>|null */
-    #[Computed]
-    public function legacyLogEntry(): ?array
-    {
-        return app(PaymentLogReader::class)->legacySingleLogEntry();
     }
 }

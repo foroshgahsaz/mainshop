@@ -559,6 +559,34 @@
     gap: 0.5rem;
 }
 
+.admin-payment-log-viewer__file-list {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.admin-payment-log-viewer__file-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  font-size: 12px;
+  color: #4b5563;
+}
+
+.admin-payment-log-viewer__file-item code {
+  word-break: break-all;
+}
+
+.admin-payment-log-viewer__download {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .admin-payment-log-viewer__meta {
     margin: 0.75rem 0;
     font-size: 0.75rem;

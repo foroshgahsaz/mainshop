@@ -16,11 +16,11 @@ class ManageHomepageImages extends Page implements HasForms
 
     protected static ?string $navigationIcon = 'heroicon-o-photo';
 
-    protected static ?string $navigationLabel = 'تامبنیل صفحه اصلی';
+    protected static ?string $navigationLabel = 'تامبنیل بخش‌های فروشگاه';
 
     protected static ?string $slug = 'homepage-images';
 
-    protected static ?string $title = 'تامبنیل بخش‌های صفحه اصلی';
+    protected static ?string $title = 'تامبنیل بخش‌های فروشگاه';
 
     protected static ?string $navigationGroup = 'تنظیمات';
 
@@ -43,11 +43,11 @@ class ManageHomepageImages extends Page implements HasForms
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('تامبنیل نمایش صفحه اصلی')
-                    ->description('ابعاد و کیفیت تصاویر نمایشی هر بخش صفحه اصلی. فایل اصلی در سرور باقی می‌ماند و نسخه کوچک‌شده هنگام بازدید ساخته و کش می‌شود.')
+                Forms\Components\Section::make('تامبنیل نمایش فروشگاه')
+                    ->description('ابعاد و کیفیت تصاویر هر بخش (صفحه اصلی، لیست محصولات، صفحه محصول و …). فایل اصلی در سرور می‌ماند و نسخه به‌اندازهٔ نیاز هنگام بازدید ساخته و کش می‌شود.')
                     ->schema([
                         Forms\Components\Repeater::make('sections')
-                            ->label('بخش‌های صفحه اصلی')
+                            ->label('بخش‌ها')
                             ->schema([
                                 Forms\Components\Hidden::make('key'),
                                 Forms\Components\TextInput::make('label')
@@ -108,7 +108,7 @@ class ManageHomepageImages extends Page implements HasForms
 
         CrudSuccessNotification::saved()
             ->title('ذخیره شد')
-            ->body('تنظیمات تامبنیل صفحه اصلی ذخیره شد. تصاویر جدید هنگام بازدید کاربران ساخته می‌شوند.')
+            ->body('تنظیمات تامبنیل فروشگاه ذخیره شد. تصاویر جدید هنگام بازدید کاربران ساخته می‌شوند.')
             ->send();
     }
 }

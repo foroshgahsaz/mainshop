@@ -135,7 +135,7 @@
                     <div class="swiper-wrapper">
                         @foreach($best_sellers as $product)
                             <div class="swiper-slide h-auto">
-                                <x-shop.product-card :product="$product" variant="scroll" section="best_sellers" />
+                                <x-shop.product-card :product="$product" variant="overlay" section="best_sellers" />
                             </div>
                         @endforeach
                     </div>

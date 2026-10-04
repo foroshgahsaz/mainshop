@@ -15,7 +15,7 @@
         || request('sort', 'created_at') !== 'created_at';
 @endphp
 
-<div class="max-w-site mx-auto px-4 md:px-6 py-6 md:py-10">
+<div class="max-w-site mx-auto px-4 md:px-6 py-6 md:py-10 listing-page__inner">
     <nav class="listing-breadcrumb mb-4" aria-label="مسیر">
         <a href="{{ route('home') }}">فروشگاه</a>
         <span>/</span>
@@ -147,10 +147,10 @@
             @else
                 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
                     @foreach($products as $product)
-                        <x-shop.product-card :product="$product" variant="clothing" />
+                        <x-shop.product-card :product="$product" variant="clothing" section="product_listing" />
                     @endforeach
                 </div>
-                <div class="mt-8">{{ $products->withQueryString()->links() }}</div>
+                <div class="listing-pagination">{{ $products->withQueryString()->links('shop.pagination') }}</div>
             @endif
         </div>
     </div>

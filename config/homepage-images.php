@@ -7,8 +7,8 @@ return [
   | Homepage display image presets
   |--------------------------------------------------------------------------
   |
-  | These control thumbnail/display sizes per homepage section (not upload).
-  | Admin can override via settings group "homepage_images".
+    | Display image presets per shop section (homepage, listing, product page, etc.).
+    | Admin can override via settings group "homepage_images".
   |
   */
 
@@ -56,10 +56,50 @@ return [
 
         'best_sellers' => [
             'label' => 'پرفروش‌ترین‌ها',
-            'mode' => 'contain',
-            'width' => 264,
-            'height' => 264,
+            'mode' => 'cover',
+            'width' => 320,
+            'height' => 400,
             'quality' => 85,
+            'format' => 'webp',
+            'enabled' => true,
+        ],
+
+        'related_products' => [
+            'label' => 'محصولات مشابه',
+            'mode' => 'cover',
+            'width' => 320,
+            'height' => 400,
+            'quality' => 85,
+            'format' => 'webp',
+            'enabled' => true,
+        ],
+
+        'product_listing' => [
+            'label' => 'لیست محصولات (گرید)',
+            'mode' => 'cover',
+            'width' => 480,
+            'height' => 600,
+            'quality' => 85,
+            'format' => 'webp',
+            'enabled' => true,
+        ],
+
+        'product_main' => [
+            'label' => 'صفحه محصول — تصویر اصلی',
+            'mode' => 'cover',
+            'width' => 900,
+            'height' => 900,
+            'quality' => 88,
+            'format' => 'webp',
+            'enabled' => true,
+        ],
+
+        'product_thumb' => [
+            'label' => 'صفحه محصول — تامبنیل گالری',
+            'mode' => 'cover',
+            'width' => 144,
+            'height' => 144,
+            'quality' => 82,
             'format' => 'webp',
             'enabled' => true,
         ],

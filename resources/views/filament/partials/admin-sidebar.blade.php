@@ -205,7 +205,7 @@
                 ]],
                 ['label' => 'تنظیمات تصویر', 'icon' => 'fa-crop', 'items' => [
                     ['label' => 'سایز آپلود', 'url' => ManageMediaPresets::getUrl(), 'icon' => 'fa-sliders'],
-                    ['label' => 'تامبنیل صفحه اصلی', 'url' => ManageHomepageImages::getUrl(), 'icon' => 'fa-image'],
+                    ['label' => 'تامبنیل بخش‌های فروشگاه', 'url' => ManageHomepageImages::getUrl(), 'icon' => 'fa-image'],
                 ]],
             ],
         ],

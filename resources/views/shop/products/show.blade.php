@@ -4,7 +4,13 @@
     use App\Support\ShopFormatter;
     $discount = ShopFormatter::discountPercent($product);
     $images = $product->images;
-    $mainImage = ShopFormatter::productImage($product);
+    $primaryImagePath = ShopFormatter::productImagePath($product);
+    $mainImage = $primaryImagePath
+        ? ShopFormatter::sectionImage('product_main', $primaryImagePath)
+        : ShopFormatter::productImage($product);
+    $mainZoomImage = $primaryImagePath
+        ? ShopFormatter::storageImageUrl($primaryImagePath)
+        : $mainImage;
     $reviewCount = (int) ($product->approved_reviews_count ?? 0);
     $avgRating = round((float) ($product->approved_reviews_avg ?? 0), 1);
     $questionCount = (int) ($product->approved_questions_count ?? 0);
@@ -59,7 +65,9 @@
         <span class="text-gray-800">{{ $product->name }}</span>
     </nav>
 
-    <section class="product-top-grid gap-6 lg:gap-8 mb-4 lg:mb-12">
+    <div class="product-page-shell">
+        <div class="product-page-shell__content">
+    <section class="product-top-grid gap-6 lg:gap-8 mb-4 lg:mb-8">
         @if($product->variants->isNotEmpty())
             <div class="product-variant-overlay" id="productVariantOverlay" aria-hidden="true">
                 <div class="product-variant-overlay__panel">
@@ -74,7 +82,7 @@
                     <div class="product-gallery__main">
                         <div class="product-zoom">
                             <div class="product-zoom__stage" data-open-lightbox role="button" tabindex="0" aria-label="بزرگنمایی و مشاهده گالری">
-                                <img id="productMainImage" src="{{ $mainImage }}" data-zoom="{{ $mainImage }}" data-initial-src="{{ $mainImage }}" alt="{{ $product->name }}">
+                                <img id="productMainImage" src="{{ $mainImage }}" data-zoom="{{ $mainZoomImage }}" data-initial-src="{{ $mainImage }}" alt="{{ $product->name }}">
                                 <div class="product-zoom__lens"></div>
                             </div>
                             <div class="product-zoom__result" aria-hidden="true"></div>
@@ -84,9 +92,12 @@
                         <div class="swiper productGalleryThumbs product-gallery-thumbs">
                             <div class="swiper-wrapper">
                                 @foreach($images as $index => $image)
-                                    @php $url = ShopFormatter::storageImageUrl($image->image); @endphp
+                                    @php
+                                        $thumbUrl = ShopFormatter::sectionImage('product_thumb', $image->image);
+                                        $zoomUrl = ShopFormatter::storageImageUrl($image->image);
+                                    @endphp
                                     <div class="swiper-slide @if($index === 0) swiper-slide-thumb-active @endif" data-gallery-index="{{ $index }}">
-                                        <img src="{{ $url }}" data-zoom="{{ $url }}" alt="نمای {{ $index + 1 }}" loading="lazy">
+                                        <img src="{{ $thumbUrl }}" data-zoom="{{ $zoomUrl }}" alt="نمای {{ $index + 1 }}" loading="lazy">
                                     </div>
                                 @endforeach
                             </div>
@@ -142,18 +153,6 @@
             </div>
         </div>
 
-        <div class="product-top-grid__buy hidden lg:block">
-            <div class="product-buy-box p-4 md:p-5">
-                <div class="product-buy-box__seller">
-                    <div><span class="text-gray-500">فروشنده:</span> <strong class="text-gray-800 mr-1">{{ site_name() }}</strong></div>
-                    <span class="text-brand-green text-[11px] font-bold bg-emerald-50 px-2 py-1 rounded-lg">عملکرد عالی</span>
-                </div>
-                @livewire('product.add-to-cart', ['product' => $product], key('product-add-'.$product->id))
-                <div class="mt-3">
-                    @livewire('product.toggle-wishlist', ['product' => $product], key('wishlist-'.$product->id))
-                </div>
-            </div>
-        </div>
     </section>
 
     <section class="product-trust-row mb-8 md:mb-12">
@@ -167,6 +166,21 @@
         'reviewCount' => $reviewCount,
         'questionCount' => $questionCount,
     ])
+        </div>
+
+        <aside class="product-page-shell__aside hidden lg:block" aria-label="خرید محصول">
+            <div class="product-buy-box p-4 md:p-5">
+                <div class="product-buy-box__seller">
+                    <div><span class="text-gray-500">فروشنده:</span> <strong class="text-gray-800 mr-1">{{ site_name() }}</strong></div>
+                    <span class="text-brand-green text-[11px] font-bold bg-emerald-50 px-2 py-1 rounded-lg">عملکرد عالی</span>
+                </div>
+                @livewire('product.add-to-cart', ['product' => $product], key('product-add-'.$product->id))
+                <div class="mt-3">
+                    @livewire('product.toggle-wishlist', ['product' => $product], key('wishlist-'.$product->id))
+                </div>
+            </div>
+        </aside>
+    </div>
 
     @if($relatedProducts->isNotEmpty())
         <section class="mb-10 md:mb-14 related-products-slider">
@@ -177,7 +191,7 @@
                 <div class="swiper-wrapper">
                     @foreach($relatedProducts as $related)
                         <div class="swiper-slide">
-                            <x-shop.product-card :product="$related" variant="scroll" />
+                            <x-shop.product-card :product="$related" variant="overlay" section="related_products" />
                         </div>
                     @endforeach
                 </div>

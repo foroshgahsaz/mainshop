@@ -2,13 +2,12 @@
 
 namespace App\Filament\Pages;
 
-use App\Filament\Resources\PaymentResource;
-use App\Models\Payment;
+use App\Services\Payment\PaymentLogArchiveService;
 use App\Services\Payment\PaymentLogReader;
 use App\Support\AdminAccess;
 use Filament\Pages\Page;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Computed;
-use Livewire\Attributes\Url;
 
 class ViewPaymentLogs extends Page
 {
@@ -18,7 +17,7 @@ class ViewPaymentLogs extends Page
 
     protected static ?string $slug = 'payment-logs';
 
-    protected static ?string $title = 'رهگیری لاگ فایل پرداخت‌ها';
+    protected static ?string $title = 'فایل‌های لاگ پرداخت';
 
     protected static ?string $navigationGroup = 'فروشگاه';
 
@@ -26,111 +25,43 @@ class ViewPaymentLogs extends Page
 
     protected static string $view = 'filament.pages.payment-log-viewer';
 
-    #[Url(as: 'tracking')]
-    public string $trackingCode = '';
-
-    #[Url(as: 'date')]
-    public ?string $logDate = null;
-
-    /** @var list<string> */
-    public array $logLines = [];
-
-    /** @var list<string> */
-    public array $scannedFiles = [];
-
-    public bool $truncated = false;
-
-    public ?string $paymentUrl = null;
-
-    public ?string $searchMessage = null;
-
     public static function canAccess(): bool
     {
         return AdminAccess::canManageShopInAdmin();
     }
 
-    public function mount(): void
+    public function mount(PaymentLogArchiveService $archive): void
     {
-        if ($this->logDate === null || $this->logDate === '') {
-            $this->logDate = now()->format('Y-m-d');
-        }
+        Cache::remember('payment_logs_archive_tick', now()->addHour(), function () use ($archive): bool {
+            $archive->archiveLogsOlderThanRetention();
 
-        if (trim($this->trackingCode) !== '') {
-            $this->search();
-        }
+            return true;
+        });
     }
 
-    public function search(PaymentLogReader $reader): void
-    {
-        $this->validate([
-            'trackingCode' => ['required', 'string', 'min:4', 'max:32'],
-            'logDate' => ['nullable', 'date_format:Y-m-d'],
-        ], [
-            'trackingCode.required' => 'کد رهگیری پرداخت را وارد کنید.',
-        ]);
-
-        $code = strtoupper(trim($this->trackingCode));
-        $this->trackingCode = $code;
-
-        $payment = Payment::query()->where('tracking_code', $code)->first();
-        $this->paymentUrl = $payment
-            ? PaymentResource::getUrl('view', ['record' => $payment->id])
-            : null;
-
-        $result = $reader->searchByTrackingCode(
-            $code,
-            $this->logDate !== '' ? $this->logDate : null,
-            daySpan: $this->logDate !== '' ? 1 : 7,
-        );
-
-        $this->logLines = $result['lines'];
-        $this->scannedFiles = $result['scanned_files'];
-        $this->truncated = $result['truncated'];
-
-        if ($this->logLines === []) {
-            $this->searchMessage = $result['scanned_files'] === []
-                ? 'فایل لاگ پرداخت برای تاریخ انتخاب‌شده روی سرور پیدا نشد (مسیر: storage/logs/payments-YYYY-MM-DD.log).'
-                : 'ردیفی با این کد رهگیری در فایل(های) اسکن‌شده نیست. تاریخ دیگر را امتحان کنید یا «همه روزهای اخیر» را بزنید.';
-        } else {
-            $this->searchMessage = null;
-        }
-    }
-
-    public function searchAllRecentDays(PaymentLogReader $reader): void
-    {
-        $this->validate([
-            'trackingCode' => ['required', 'string', 'min:4', 'max:32'],
-        ]);
-
-        $this->logDate = '';
-        $this->search($reader);
-    }
-
-    public function downloadUrlFor(string $absolutePath): ?string
-    {
-        $basename = app(PaymentLogReader::class)->safeBasenameFromAbsolutePath($absolutePath);
-
-        if ($basename === null) {
-            return null;
-        }
-
-        return route('filament.admin.payment-logs.download', ['file' => $basename]);
-    }
-
-    /** @return list<array{value: string, label: string}> */
+    /** @return list<array<string, mixed>> */
     #[Computed]
-    public function logDateOptions(): array
+    public function recentEntries(): array
     {
-        $reader = app(PaymentLogReader::class);
-        $options = [['value' => '', 'label' => '۷ روز اخیر']];
+        return app(PaymentLogReader::class)->recentDayEntries(PaymentLogReader::RECENT_DAYS);
+    }
 
-        foreach ($reader->availableLogDates(30) as $date) {
-            $options[] = [
-                'value' => $date,
-                'label' => $reader->formatDisplayDate($date),
-            ];
-        }
+    /** @return list<array<string, mixed>> */
+    #[Computed]
+    public function archiveEntries(): array
+    {
+        return app(PaymentLogReader::class)->archivedZipEntries();
+    }
 
-        return $options;
+    public function formatSize(?int $bytes): string
+    {
+        return app(PaymentLogReader::class)->formatFileSize($bytes);
+    }
+
+    /** @return array<string, mixed>|null */
+    #[Computed]
+    public function legacyLogEntry(): ?array
+    {
+        return app(PaymentLogReader::class)->legacySingleLogEntry();
     }
 }

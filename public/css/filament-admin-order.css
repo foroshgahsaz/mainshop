@@ -616,6 +616,68 @@
     color: #b45309;
 }
 
+.admin-payment-log-viewer__table-wrap {
+    margin-top: 1rem;
+    overflow-x: auto;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+}
+
+.admin-payment-log-viewer__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.admin-payment-log-viewer__table th,
+.admin-payment-log-viewer__table td {
+    padding: 0.65rem 0.85rem;
+    text-align: right;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.admin-payment-log-viewer__table th {
+    background: #f9fafb;
+    font-weight: 700;
+    color: #374151;
+}
+
+.admin-payment-log-viewer__table tr:last-child td {
+    border-bottom: none;
+}
+
+.admin-payment-log-viewer__badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.admin-payment-log-viewer__badge--ok {
+    background: #ecfdf5;
+    color: #047857;
+}
+
+.admin-payment-log-viewer__badge--zip {
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.admin-payment-log-viewer__badge--empty {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.admin-payment-log-viewer__download-btn {
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.admin-payment-log-viewer__muted {
+    color: #9ca3af;
+}
+
 .admin-payment-log-viewer__link-wrap {
     margin-top: 0.75rem;
 }

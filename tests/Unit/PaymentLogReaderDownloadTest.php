@@ -13,8 +13,17 @@ class PaymentLogReaderDownloadTest extends TestCase
 
         $this->assertNull($reader->resolvePathByBasename('laravel.log'));
         $this->assertNull($reader->resolvePathByBasename('payments-evil.txt'));
-        $this->assertFalse($reader->isPaymentLogBasename('other.log'));
-        $this->assertTrue($reader->isPaymentLogBasename('payments-2026-10-04.log'));
-        $this->assertTrue($reader->isPaymentLogBasename('payments.log'));
+        $this->assertFalse($reader->isDownloadableBasename('other.log'));
+        $this->assertTrue($reader->isDownloadableBasename('payments-2026-10-04.log'));
+        $this->assertTrue($reader->isDownloadableBasename('payments-2026-10-04.log.zip'));
+        $this->assertTrue($reader->isDownloadableBasename('payments.log'));
+    }
+
+    public function test_recent_entries_always_lists_twenty_days(): void
+    {
+        $entries = app(PaymentLogReader::class)->recentDayEntries(20);
+
+        $this->assertCount(20, $entries);
+        $this->assertSame(now()->format('Y-m-d'), $entries[0]['date']);
     }
 }

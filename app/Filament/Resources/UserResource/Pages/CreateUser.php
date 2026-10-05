@@ -35,7 +35,10 @@ class CreateUser extends CreateRecord
     {
         $raw = $form->getRawState();
 
-        $userKind = $raw['user_kind'] ?? $data['user_kind'] ?? 'customer';
+        $userKind = $raw['user_kind'] ?? $data['user_kind'] ?? null;
+        if ($userKind === null || $userKind === '') {
+            $userKind = static::resolveUserKindFromFlags($data);
+        }
         $data['user_kind'] = $userKind;
 
         if ($userKind === 'staff') {
@@ -71,6 +74,19 @@ class CreateUser extends CreateRecord
         }
 
         unset($data['user_kind']);
+
+        return $data;
+    }
+
+    /** @param  array<string, mixed>  $data */
+    public static function stripVirtualAccessFormKeys(array $data): array
+    {
+        unset(
+            $data['user_kind'],
+            $data['rep_province_id'],
+            $data['rep_city_id'],
+            $data['rep_max_active_reservations'],
+        );
 
         return $data;
     }

@@ -74,7 +74,7 @@ class UserResource extends Resource
                 return static::createFormSchema();
             }
 
-            $activeTab = UserEditTabs::resolveActive($operation);
+            $activeTab = UserEditTabs::resolveActiveForForm($form, $operation);
 
             return [
                 Forms\Components\View::make('user_edit_tab_nav')

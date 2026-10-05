@@ -6,6 +6,8 @@ use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\ManageBajetPay;
 use App\Filament\Pages\ViewPaymentLogs;
+use App\Filament\Pages\ViewSiteErrorLogs;
+use App\Http\Controllers\Admin\DownloadApplicationLogFileController;
 use App\Http\Controllers\Admin\DownloadPaymentLogFileController;
 use App\Filament\Pages\ManageTara;
 use App\Filament\Pages\ManageZarinpal;
@@ -65,6 +67,7 @@ class AdminPanelProvider extends PanelProvider
                 ManageTara::class,
                 ManageBajetPay::class,
                 ViewPaymentLogs::class,
+                ViewSiteErrorLogs::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([])
@@ -89,6 +92,8 @@ class AdminPanelProvider extends PanelProvider
             ->routes(function (): void {
                 Route::get('/payment-logs/download', DownloadPaymentLogFileController::class)
                     ->name('payment-logs.download');
+                Route::get('/site-logs/download', DownloadApplicationLogFileController::class)
+                    ->name('site-logs.download');
             });
     }
 }

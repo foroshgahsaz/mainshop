@@ -31,8 +31,8 @@
 
     <table class="si-meta">
         <tr>
-            <td style="width: 50%; text-align: right;">شماره فاکتور: <strong>{{ $document->invoiceNumber }}</strong></td>
-            <td style="width: 50%; text-align: left;">تاریخ فاکتور: <strong>{{ $document->invoiceDate }}</strong></td>
+            <td class="si-meta__num">شماره فاکتور: <strong>{{ $document->invoiceNumber }}</strong></td>
+            <td class="si-meta__date">تاریخ فاکتور: <strong>{{ $document->invoiceDate }}</strong></td>
         </tr>
     </table>
 
@@ -67,51 +67,102 @@
         </tr>
     </table>
 
-    <table class="si-lines" style="margin-top: 8px;">
-        <thead>
-            <tr>
-                <th style="width: 4%;">ردیف</th>
-                <th style="width: 12%;">کد کالا</th>
-                <th style="width: 34%;">شرح کالا</th>
-                <th style="width: 8%;">واحد</th>
-                <th style="width: 8%;">تعداد</th>
-                <th style="width: 14%;">بهای واحد (تومان)</th>
-                @if ($document->showsLineDiscountColumn())
-                    <th style="width: 12%;">تخفیف (تومان)</th>
-                @endif
-                <th style="width: 14%;">مبلغ کل (تومان)</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($document->lines as $line)
+    <div class="si-lines-section">
+        <table class="si-lines si-lines--table">
+            <thead>
                 <tr>
-                    <td>{{ $line['row'] }}</td>
-                    <td dir="ltr">{{ $line['sku'] ?: '—' }}</td>
-                    <td class="si-desc">{{ $line['name'] }}</td>
-                    <td>{{ $line['unit'] }}</td>
-                    <td>{{ number_format($line['quantity']) }}</td>
-                    <td dir="ltr">{{ number_format($line['unit_price']) }}</td>
+                    <th style="width: 4%;">ردیف</th>
+                    <th style="width: 12%;">کد کالا</th>
+                    <th style="width: 34%;">شرح کالا</th>
+                    <th style="width: 8%;">واحد</th>
+                    <th style="width: 8%;">تعداد</th>
+                    <th style="width: 14%;">بهای واحد (تومان)</th>
                     @if ($document->showsLineDiscountColumn())
-                        <td dir="ltr">{{ number_format((int) ($line['line_discount'] ?? 0)) }}</td>
+                        <th style="width: 12%;">تخفیف (تومان)</th>
                     @endif
-                    <td dir="ltr">{{ number_format($line['line_total']) }}</td>
+                    <th style="width: 14%;">مبلغ کل (تومان)</th>
                 </tr>
-            @endforeach
-            <tr class="si-sum">
-                <td colspan="4">جمع اقلام</td>
-                <td>{{ number_format($document->quantityTotal) }}</td>
-                <td></td>
-                @if ($document->showsLineDiscountColumn())
+            </thead>
+            <tbody>
+                @foreach ($document->lines as $line)
+                    <tr>
+                        <td>{{ $line['row'] }}</td>
+                        <td dir="ltr">{{ $line['sku'] ?: '—' }}</td>
+                        <td class="si-desc">{{ $line['name'] }}</td>
+                        <td>{{ $line['unit'] }}</td>
+                        <td>{{ number_format($line['quantity']) }}</td>
+                        <td dir="ltr">{{ number_format($line['unit_price']) }}</td>
+                        @if ($document->showsLineDiscountColumn())
+                            <td dir="ltr">{{ number_format((int) ($line['line_discount'] ?? 0)) }}</td>
+                        @endif
+                        <td dir="ltr">{{ number_format($line['line_total']) }}</td>
+                    </tr>
+                @endforeach
+                <tr class="si-sum">
+                    <td colspan="4">جمع اقلام</td>
+                    <td>{{ number_format($document->quantityTotal) }}</td>
                     <td></td>
-                @endif
-                <td dir="ltr">{{ number_format($document->itemsTotal) }}</td>
-            </tr>
-        </tbody>
-    </table>
+                    @if ($document->showsLineDiscountColumn())
+                        <td></td>
+                    @endif
+                    <td dir="ltr">{{ number_format($document->itemsTotal) }}</td>
+                </tr>
+            </tbody>
+        </table>
 
-    <table class="si-footer" style="margin-top: 8px;">
+        @if (! $forPdf)
+        <div class="si-lines--cards" aria-label="اقلام فاکتور">
+            @foreach ($document->lines as $line)
+                <article class="si-line-card">
+                    <header class="si-line-card__head">
+                        <span class="si-line-card__row">ردیف {{ $line['row'] }}</span>
+                        @if (filled($line['sku'] ?? null))
+                            <span class="si-line-card__sku" dir="ltr">{{ $line['sku'] }}</span>
+                        @endif
+                    </header>
+                    <p class="si-line-card__name">{{ $line['name'] }}</p>
+                    <dl class="si-line-card__grid">
+                        <div>
+                            <dt>واحد</dt>
+                            <dd>{{ $line['unit'] }}</dd>
+                        </div>
+                        <div>
+                            <dt>تعداد</dt>
+                            <dd>{{ number_format($line['quantity']) }}</dd>
+                        </div>
+                        <div>
+                            <dt>بهای واحد</dt>
+                            <dd dir="ltr">{{ number_format($line['unit_price']) }} <span class="si-line-card__unit">تومان</span></dd>
+                        </div>
+                        @if ($document->showsLineDiscountColumn())
+                            <div>
+                                <dt>تخفیف</dt>
+                                <dd dir="ltr">{{ number_format((int) ($line['line_discount'] ?? 0)) }} <span class="si-line-card__unit">تومان</span></dd>
+                            </div>
+                        @endif
+                        <div class="si-line-card__total">
+                            <dt>مبلغ کل</dt>
+                            <dd dir="ltr">{{ number_format($line['line_total']) }} <span class="si-line-card__unit">تومان</span></dd>
+                        </div>
+                    </dl>
+                </article>
+            @endforeach
+            <div class="si-line-card si-line-card--sum">
+                <div class="si-line-card__sum-row">
+                    <span>جمع اقلام</span>
+                    <strong dir="ltr">{{ number_format($document->itemsTotal) }} تومان</strong>
+                </div>
+                <div class="si-line-card__sum-qty">
+                    تعداد کل: <strong>{{ number_format($document->quantityTotal) }}</strong>
+                </div>
+            </div>
+        </div>
+        @endif
+    </div>
+
+    <table class="si-footer">
         <tr>
-            <td style="width: 50%; vertical-align: top;">
+            <td class="si-footer__notes">
                 @if ($document->paymentMethodLabel)
                     <div><span class="si-k">نحوه پرداخت:</span> {{ $document->paymentMethodLabel }}</div>
                 @endif
@@ -122,7 +173,7 @@
                     <div style="margin-top: 6px;"><span class="si-k">توضیحات:</span> {{ $document->notes }}</div>
                 @endif
             </td>
-            <td style="width: 50%; vertical-align: top;">
+            <td class="si-footer__totals">
                 @if ($document->discountAmount > 0)
                     <div><span class="si-k">جمع تخفیف‌ها:</span> {{ number_format($document->discountAmount) }} تومان</div>
                 @endif

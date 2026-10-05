@@ -259,6 +259,15 @@
     border: 1px solid #e5e7eb;
     border-radius: 0.75rem;
     padding: 1rem 1.25rem;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+    .rep-wizard-panel {
+        padding: 0.75rem 0.5rem;
+    }
 }
 
 .rep-wizard-title {

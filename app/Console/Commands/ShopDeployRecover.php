@@ -26,6 +26,13 @@ class ShopDeployRecover extends Command
         Artisan::call('migrate', ['--force' => true]);
         $this->line(trim(Artisan::output()));
 
+        if (array_key_exists('payments:archive-logs', Artisan::all())) {
+            Artisan::call('payments:archive-logs');
+            $this->line(trim(Artisan::output()));
+        } else {
+            $this->components->warn('payments:archive-logs is missing — deploy the latest application image/code (master after PR #150).');
+        }
+
         if (! $this->option('optimize')) {
             $this->warnIfRedisMisconfigured();
 

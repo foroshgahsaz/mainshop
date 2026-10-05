@@ -98,6 +98,8 @@ class HealthCheck extends Command
             'DisplayImageService' => DisplayImageService::class,
             'HomepageImageService' => HomepageImageService::class,
             'RepairProductImages command' => RepairProductImages::class,
+            'ArchivePaymentLogs command' => \App\Console\Commands\ArchivePaymentLogsCommand::class,
+            'PaymentLogArchiveService' => \App\Services\Payment\PaymentLogArchiveService::class,
         ];
 
         foreach ($classes as $label => $class) {

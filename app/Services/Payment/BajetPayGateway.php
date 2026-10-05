@@ -54,6 +54,8 @@ class BajetPayGateway implements PaymentGatewayInterface
             $payload['nationalId'] = $nationalId;
         }
 
+        $token = $this->accessToken($config);
+
         $this->audit->step(
             $payment,
             PaymentAuditStep::GATEWAY_REQUEST,
@@ -63,7 +65,7 @@ class BajetPayGateway implements PaymentGatewayInterface
         );
 
         $response = $this->http($config)
-            ->withToken($this->accessToken($config), 'Bearer')
+            ->withToken($token, 'Bearer')
             ->post('/api/v1/jetpay/order', $payload);
 
         $data = $this->json($response);
@@ -305,9 +307,19 @@ class BajetPayGateway implements PaymentGatewayInterface
             return $fa;
         }
 
-        $en = data_get($data, 'result.error.en', data_get($data, 'message'));
+        $en = data_get($data, 'result.error.en');
         if (is_string($en) && $en !== '') {
             return $en;
+        }
+
+        $result = data_get($data, 'result');
+        if (is_string($result) && trim($result) !== '') {
+            return trim($result);
+        }
+
+        $message = data_get($data, 'message');
+        if (is_string($message) && trim($message) !== '') {
+            return trim($message);
         }
 
         return $fallback;

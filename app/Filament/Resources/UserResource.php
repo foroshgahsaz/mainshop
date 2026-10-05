@@ -9,6 +9,7 @@ use App\Filament\Support\ShopMediaPicker;
 use App\Models\City;
 use App\Models\Province;
 use App\Models\User;
+use App\Services\Auth\OtpService;
 use App\Support\AdminAccess;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -155,6 +156,15 @@ class UserResource extends Resource
                     Forms\Components\TextInput::make('phone')
                         ->label('موبایل')
                         ->required()
+                        ->tel()
+                        ->maxLength(15)
+                        ->dehydrateStateUsing(fn (?string $state): ?string => filled($state)
+                            ? app(OtpService::class)->normalizePhone($state)
+                            : null)
+                        ->rule('regex:/^09\d{9}$/')
+                        ->validationMessages([
+                            'regex' => 'شماره موبایل باید با 09 شروع شود و ۱۱ رقم باشد.',
+                        ])
                         ->unique(ignoreRecord: true),
                     Forms\Components\TextInput::make('email')
                         ->label('ایمیل')

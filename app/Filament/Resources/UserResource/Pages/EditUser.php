@@ -7,6 +7,7 @@ use App\Filament\Resources\UserResource;
 use App\Filament\Resources\UserResource\UserEditTabs;
 use App\Models\User;
 use App\Support\AdminAccess;
+use App\Services\Auth\OtpService;
 use Filament\Actions;
 use Illuminate\Contracts\Support\Htmlable;
 
@@ -79,7 +80,29 @@ class EditUser extends EditRecord
         /** @var User $user */
         $user = $this->getRecord();
 
-        $data = array_merge([
+        $data = array_merge($this->preservedAttributesFromUser($user), $data);
+
+        if (! filled($data['password'] ?? null)) {
+            unset($data['password']);
+        }
+
+        if (filled($data['phone'] ?? null)) {
+            $data['phone'] = app(OtpService::class)->normalizePhone((string) $data['phone']);
+        }
+
+        $tab = UserEditTabs::resolveActive('edit');
+
+        if ($tab === UserEditTabs::TAB_ACCESS) {
+            return CreateUser::applyAccessFieldsFromForm($this->form, $data);
+        }
+
+        return CreateUser::stripVirtualAccessFormKeys($data);
+    }
+
+    /** @return array<string, mixed> */
+    protected function preservedAttributesFromUser(User $user): array
+    {
+        return [
             'name' => $user->name,
             'bio' => $user->bio,
             'avatar' => $user->avatar,
@@ -90,13 +113,7 @@ class EditUser extends EditRecord
             'is_author' => $user->is_author,
             'is_representative' => $user->is_representative,
             'is_sales_manager' => $user->is_sales_manager,
-        ], $data);
-
-        if (! filled($data['password'] ?? null)) {
-            unset($data['password']);
-        }
-
-        return CreateUser::applyAccessFieldsFromForm($this->form, $data);
+        ];
     }
 
     protected function mutateFormDataBeforeFill(array $data): array

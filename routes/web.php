@@ -8,8 +8,9 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\Representative\ProformaPdfController;
+use App\Http\Controllers\PaymentResultController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\Representative\ProformaPdfController;
 use App\Http\Controllers\ShopSearchSuggestController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\ThumbnailController;
@@ -93,6 +94,9 @@ Route::match(['get', 'post'], '/payment/callback', [PaymentController::class, 'c
 Route::match(['get', 'post'], '/payment/callback/tara', [PaymentController::class, 'taraCallback'])->name('payment.callback.tara');
 Route::match(['get', 'post'], '/payment/callback/bajet', [PaymentController::class, 'bajetCallback'])->name('payment.callback.bajet');
 Route::get('/payment/tara/{tracking}', [PaymentController::class, 'taraRedirect'])->name('payment.tara.redirect');
+Route::get('/payment/result/{payment:tracking_code}', [PaymentResultController::class, 'show'])
+    ->middleware('signed')
+    ->name('payment.result');
 
 Route::middleware('auth')->get('/representative/proforma/{order}/pdf', ProformaPdfController::class)
     ->name('representative.proforma.pdf');

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Filament\Representative\Pages\Dashboard as RepresentativeDashboard;
 use App\Filament\Representative\Resources\DraftOrderResource;
 use App\Models\Payment;
 use App\Notifications\PaymentSuccessNotification;
@@ -113,18 +114,34 @@ class PaymentController extends Controller
         }
 
         if ($payment->status === Payment::STATUS_SUCCESS) {
-            $payment->loadMissing('user', 'order');
-            $payment->user?->notify(new PaymentSuccessNotification($payment));
+            try {
+                $payment->loadMissing('user', 'order');
+                $payment->user?->notify(new PaymentSuccessNotification($payment));
 
-            if ($order) {
-                $this->sms->orderPaid($order, $payment);
+                if ($order) {
+                    $order = $order->fresh();
+                    $this->sms->orderPaid($order, $payment);
 
-                if (! $order->isPaid()) {
-                    $this->sms->paymentPartialRemaining($order, (int) $order->remainingAmount());
+                    if (! $order->isPaid()) {
+                        $this->sms->paymentPartialRemaining($order, (int) $order->remainingAmount());
+                    }
                 }
+            } catch (\Throwable $e) {
+                Log::error('Payment callback post-success notification failed', [
+                    'payment_id' => $payment->id,
+                    'tracking_code' => $payment->tracking_code,
+                    'error' => $e->getMessage(),
+                ]);
             }
         } elseif ($order && in_array($payment->status, [Payment::STATUS_FAILED, Payment::STATUS_CANCELED], true)) {
-            $this->sms->paymentFailed($order->fresh(['user']), $payment);
+            try {
+                $this->sms->paymentFailed($order->fresh(['user']), $payment);
+            } catch (\Throwable $e) {
+                Log::error('Payment callback payment-failed sms failed', [
+                    'payment_id' => $payment->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
 
         $flash = ['payment_status' => $payment->status];
@@ -141,9 +158,16 @@ class PaymentController extends Controller
     protected function paymentReturnUrl(Payment $payment): string
     {
         $payment->loadMissing('order');
+        $order = $payment->order;
 
-        if ($payment->wasPaidByRepresentative() && $payment->order?->isRepresentativeOrder()) {
-            return DraftOrderResource::getUrl('view', ['record' => $payment->order_id], panel: 'representative');
+        if ($payment->wasPaidByRepresentative() && $order?->isRepresentativeOrder()) {
+            $order = $order->fresh();
+
+            if ($order->isProforma() || $order->isDraft()) {
+                return DraftOrderResource::getUrl('view', ['record' => $order->getKey()], panel: 'representative');
+            }
+
+            return RepresentativeDashboard::getUrl(panel: 'representative');
         }
 
         return route('account.orders.show', $payment->order_id);

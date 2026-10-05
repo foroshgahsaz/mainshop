@@ -2,15 +2,18 @@
 
 namespace App\Filament\Resources\ProductResource\Pages;
 
-use App\Filament\Resources\ProductResource;
 use App\Filament\Resources\Pages\EditRecord;
+use App\Filament\Resources\ProductResource;
 use App\Filament\Support\ProductDeleteActions;
+use App\Filament\Support\RecordsProductLastEditor;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Support\Str;
 
 class CreateProduct extends EditRecord
 {
+    use RecordsProductLastEditor;
+
     protected static string $resource = ProductResource::class;
 
     protected static ?string $title = 'افزودن محصول';

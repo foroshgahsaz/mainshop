@@ -5,10 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
 {
@@ -36,6 +36,7 @@ class Product extends Model
         'is_active',
         'is_featured',
         'views',
+        'last_edited_by_user_id',
         'meta_title',
         'meta_description',
         'meta_keywords',
@@ -67,6 +68,11 @@ class Product extends Model
     public function brand(): BelongsTo
     {
         return $this->belongsTo(Brand::class);
+    }
+
+    public function lastEditedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'last_edited_by_user_id');
     }
 
     public function productFamily(): BelongsTo

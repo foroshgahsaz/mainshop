@@ -15,6 +15,13 @@ class EditUser extends EditRecord
 {
     protected static string $resource = UserResource::class;
 
+    public string $userEditTab = UserEditTabs::TAB_PROFILE;
+
+    public function getActiveUserEditTab(): string
+    {
+        return $this->userEditTab;
+    }
+
     public function getHeading(): string|Htmlable
     {
         $record = $this->getRecord();
@@ -52,7 +59,7 @@ class EditUser extends EditRecord
             return [];
         }
 
-        if (UserEditTabs::isReadOnly(UserEditTabs::resolveActive('edit'))) {
+        if (UserEditTabs::isReadOnly($this->userEditTab)) {
             return [];
         }
 
@@ -62,13 +69,8 @@ class EditUser extends EditRecord
     protected function getRedirectUrl(): string
     {
         $url = static::getResource()::getUrl('edit', ['record' => $this->getRecord()]);
-        $tab = request()->query('tab');
 
-        if (is_string($tab) && $tab !== '') {
-            return $url.'?tab='.urlencode($tab);
-        }
-
-        return $url;
+        return $url.'?tab='.urlencode($this->userEditTab);
     }
 
     protected function mutateFormDataBeforeSave(array $data): array
@@ -90,9 +92,7 @@ class EditUser extends EditRecord
             $data['phone'] = app(OtpService::class)->normalizePhone((string) $data['phone']);
         }
 
-        $tab = UserEditTabs::resolveActive('edit');
-
-        if ($tab === UserEditTabs::TAB_ACCESS) {
+        if ($this->userEditTab === UserEditTabs::TAB_ACCESS) {
             return CreateUser::applyAccessFieldsFromForm($this->form, $data);
         }
 
@@ -137,6 +137,8 @@ class EditUser extends EditRecord
     public function mount(int|string $record): void
     {
         parent::mount($record);
+
+        $this->userEditTab = UserEditTabs::resolveActive('edit');
 
         $this->getRecord()->loadMissing([
             'representativeProfile.province',

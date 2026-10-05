@@ -2,6 +2,9 @@
 
 namespace App\Filament\Resources\UserResource;
 
+use App\Filament\Resources\UserResource\Pages\EditUser;
+use Filament\Forms\Form;
+
 class UserEditTabs
 {
     public const TAB_PROFILE = 'profile';
@@ -42,6 +45,20 @@ class UserEditTabs
         }
 
         return $tab;
+    }
+
+    /**
+     * Livewire save requests do not include ?tab=…; keep the tab from the EditUser page component.
+     */
+    public static function resolveActiveForForm(Form $form, string $operation): string
+    {
+        $livewire = $form->getLivewire();
+
+        if ($livewire instanceof EditUser) {
+            return $livewire->getActiveUserEditTab();
+        }
+
+        return self::resolveActive($operation);
     }
 
     public static function isReadOnly(string $tab): bool

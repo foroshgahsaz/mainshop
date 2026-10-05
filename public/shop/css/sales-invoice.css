@@ -4,6 +4,8 @@
   color: #111;
   font-size: 0.8125rem;
   line-height: 1.55;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .si-document .si-k {
@@ -21,6 +23,14 @@
   border: none;
 }
 
+.si-document .si-meta__num {
+  text-align: right;
+}
+
+.si-document .si-meta__date {
+  text-align: left;
+}
+
 .si-document .si-title {
   text-align: center;
   font-size: 1.35rem;
@@ -33,6 +43,7 @@
 .si-document table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 .si-document .si-party th,
@@ -44,6 +55,8 @@
   border: 1px solid #111;
   padding: 0.45rem 0.5rem;
   vertical-align: top;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
 }
 
 .si-document .si-party-label {
@@ -72,6 +85,10 @@
   background: #f9fafb;
 }
 
+.si-document .si-footer {
+  margin-top: 8px;
+}
+
 .si-document .si-sign td {
   height: 4.5rem;
   text-align: center;
@@ -85,12 +102,205 @@
   border-radius: 0.5rem;
   padding: 1rem;
   margin-bottom: 1rem;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Desktop: table lines; mobile: cards (see media query) */
+.si-lines--cards {
+  display: none;
+}
+
+.si-line-card {
+  border: 1px solid #111;
+  border-radius: 0.375rem;
+  padding: 0.65rem 0.75rem;
+  margin-bottom: 0.5rem;
+  background: #fff;
+}
+
+.si-line-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  color: #4b5563;
+  margin-bottom: 0.35rem;
+}
+
+.si-line-card__sku {
+  font-family: ui-monospace, monospace;
+  font-size: 0.7rem;
+}
+
+.si-line-card__name {
+  margin: 0 0 0.5rem;
+  font-weight: 700;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  text-align: right;
+}
+
+.si-line-card__grid {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem 0.75rem;
+  font-size: 0.78rem;
+}
+
+.si-line-card__grid > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.si-line-card__grid dt {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #6b7280;
+}
+
+.si-line-card__grid dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.si-line-card__total {
+  grid-column: 1 / -1;
+  padding-top: 0.35rem;
+  margin-top: 0.15rem;
+  border-top: 1px dashed #d1d5db;
+}
+
+.si-line-card__total dd {
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.si-line-card__unit {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.si-line-card--sum {
+  background: #f9fafb;
+  font-weight: 800;
+}
+
+.si-line-card__sum-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.si-line-card__sum-qty {
+  margin-top: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #4b5563;
 }
 
 @media (max-width: 768px) {
-  .si-document .si-party td,
+  .si-document {
+    font-size: 0.8rem;
+  }
+
+  .si-document--cart-wrap {
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .si-document .si-title {
+    font-size: 1.1rem;
+    margin: 0.35rem 0 0.75rem;
+  }
+
+  .si-document .si-meta tr,
+  .si-document .si-meta td {
+    display: block;
+    width: 100%;
+  }
+
+  .si-document .si-meta__date {
+    text-align: right;
+    margin-top: 0.25rem;
+  }
+
+  .si-document .si-party,
+  .si-document .si-party tbody,
+  .si-document .si-party tr {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .si-document .si-party td {
+    display: block;
+    width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  .si-document .si-party-label {
+    width: 100%;
+  }
+
+  .si-lines-section {
+    margin-top: 8px;
+  }
+
+  .si-document table.si-lines--table {
+    display: none !important;
+  }
+
+  .si-lines--cards {
+    display: block;
+  }
+
+  .si-document .si-footer tr {
+    display: flex;
+    flex-direction: column;
+  }
+
   .si-document .si-footer td {
     display: block;
     width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  .si-document .si-footer__totals {
+    margin-top: 0;
+    border-top: none;
+  }
+
+  .si-document .si-sign tr {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .si-document .si-sign td {
+    display: block;
+    width: 100% !important;
+    height: auto;
+    min-height: 3rem;
+    padding: 0.75rem;
+    box-sizing: border-box;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .si-lines-section {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-top: 8px;
+  }
+
+  .si-lines--table {
+    min-width: 720px;
   }
 }

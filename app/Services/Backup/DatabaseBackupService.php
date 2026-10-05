@@ -207,23 +207,100 @@ class DatabaseBackupService
     {
         $config = Config::get("database.connections.{$connection}");
         $database = (string) ($config['database'] ?? '');
+        $username = (string) ($config['username'] ?? '');
+
+        if ($database === '' || $username === '') {
+            throw new RuntimeException('تنظیمات اتصال MySQL برای بک‌آپ ناقص است.');
+        }
+
+        $binary = $this->resolveMysqldumpBinary();
+        $usePhpFallback = filter_var(config('backup.database.php_fallback', true), FILTER_VALIDATE_BOOLEAN);
+
+        if ($binary !== null) {
+            try {
+                $this->dumpMysqlWithBinary($binary, $connection, $targetPath);
+
+                return;
+            } catch (RuntimeException $e) {
+                if (! $usePhpFallback) {
+                    throw $e;
+                }
+            }
+        }
+
+        if (! $usePhpFallback) {
+            throw new RuntimeException(
+                $binary === null
+                    ? 'دستور mysqldump روی سرور پیدا نشد. مسیر را در DB_BACKUP_MYSQLDUMP_PATH تنظیم کنید یا DB_BACKUP_PHP_FALLBACK=true بگذارید.'
+                    : 'mysqldump و fallback PHP هر دو ناموفق بودند.'
+            );
+        }
+
+        app(MysqlPhpDumper::class)->dumpConnectionToGzipFile($connection, $targetPath);
+    }
+
+    protected function resolveMysqldumpBinary(): ?string
+    {
+        $candidates = array_values(array_filter([
+            (string) config('backup.database.mysqldump_path'),
+            'mysqldump',
+            'mariadb-dump',
+            '/usr/bin/mysqldump',
+            '/usr/bin/mariadb-dump',
+        ]));
+
+        foreach ($candidates as $candidate) {
+            if (str_contains($candidate, '/')) {
+                if (is_executable($candidate)) {
+                    return $candidate;
+                }
+
+                continue;
+            }
+
+            if ($this->commandExistsOnPath($candidate)) {
+                return $candidate;
+            }
+        }
+
+        return null;
+    }
+
+    protected function commandExistsOnPath(string $command): bool
+    {
+        $process = new Process(['sh', '-c', 'command -v '.escapeshellarg($command).' 2>/dev/null']);
+        $process->run();
+
+        return $process->isSuccessful() && trim($process->getOutput()) !== '';
+    }
+
+    protected function dumpMysqlWithBinary(string $binary, string $connection, string $targetPath): void
+    {
+        $config = Config::get("database.connections.{$connection}");
+        $database = (string) ($config['database'] ?? '');
         $host = (string) ($config['host'] ?? '127.0.0.1');
         $port = (string) ($config['port'] ?? '3306');
         $username = (string) ($config['username'] ?? '');
         $password = (string) ($config['password'] ?? '');
         $socket = (string) ($config['unix_socket'] ?? '');
 
-        if ($database === '' || $username === '') {
-            throw new RuntimeException('تنظیمات اتصال MySQL برای بک‌آپ ناقص است.');
-        }
+        $command = [
+            $binary,
+            '--single-transaction',
+            '--quick',
+            '--routines',
+            '--triggers',
+            '--column-statistics=0',
+            '--no-tablespaces',
+        ];
 
-        $command = ['mysqldump', '--single-transaction', '--quick', '--routines', '--triggers'];
         if ($socket !== '') {
             $command[] = '--socket='.$socket;
         } else {
             $command[] = '--host='.$host;
             $command[] = '--port='.$port;
         }
+
         $command[] = '--user='.$username;
         $command[] = $database;
 
@@ -232,10 +309,20 @@ class DatabaseBackupService
         $process->run();
 
         if (! $process->isSuccessful()) {
-            throw new RuntimeException('اجرای mysqldump ناموفق بود: '.trim($process->getErrorOutput()));
+            $detail = trim($process->getErrorOutput()."\n".$process->getOutput());
+            if ($detail === '') {
+                $detail = 'خروجی خالی (کد خروج: '.$process->getExitCode().'). احتمالاً mysqldump نصب نیست یا به دیتابیس دسترسی ندارد.';
+            }
+
+            throw new RuntimeException('اجرای mysqldump ناموفق بود: '.$detail);
         }
 
-        $gz = gzencode($process->getOutput(), 6);
+        $output = $process->getOutput();
+        if ($output === '') {
+            throw new RuntimeException('اجرای mysqldump خروجی تولید نکرد.');
+        }
+
+        $gz = gzencode($output, 6);
         if ($gz === false) {
             throw new RuntimeException('فشرده‌سازی بک‌آپ MySQL ناموفق بود.');
         }

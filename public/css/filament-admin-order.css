@@ -687,3 +687,27 @@
 .admin-payment-log-viewer__link-wrap {
     margin-top: 0.75rem;
 }
+
+.database-backup-manual-card {
+    border: 2px dashed #f59e0b;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.06), rgba(255, 255, 255, 0));
+}
+
+.database-backup-manual-card__actions {
+    margin-top: 0.75rem;
+}
+
+.database-backup-manual-btn {
+    font-weight: 600;
+}
+
+.database-backup-badge--manual {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.database-backup-row--manual td {
+    background: rgba(254, 243, 199, 0.25);
+}

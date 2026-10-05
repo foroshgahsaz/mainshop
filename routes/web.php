@@ -10,7 +10,9 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PaymentResultController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\Representative\PaymentReceiptPdfController;
 use App\Http\Controllers\Representative\ProformaPdfController;
+use App\Http\Controllers\Representative\RepresentativePaymentResultController;
 use App\Http\Controllers\ShopSearchSuggestController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\ThumbnailController;
@@ -97,6 +99,14 @@ Route::get('/payment/tara/{tracking}', [PaymentController::class, 'taraRedirect'
 Route::get('/payment/result/{payment:tracking_code}', [PaymentResultController::class, 'show'])
     ->middleware('signed')
     ->name('payment.result');
+
+Route::get('/representative/payment/result/{payment:tracking_code}', [RepresentativePaymentResultController::class, 'show'])
+    ->middleware('signed')
+    ->name('representative.payment.result');
+
+Route::get('/representative/payment/{payment:tracking_code}/receipt.pdf', PaymentReceiptPdfController::class)
+    ->middleware('signed')
+    ->name('representative.payment.receipt.pdf');
 
 Route::middleware('auth')->get('/representative/proforma/{order}/pdf', ProformaPdfController::class)
     ->name('representative.proforma.pdf');

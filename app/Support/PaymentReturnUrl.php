@@ -2,7 +2,6 @@
 
 namespace App\Support;
 
-use App\Filament\Representative\Pages\Dashboard as RepresentativeDashboard;
 use App\Filament\Representative\Resources\DraftOrderResource;
 use App\Models\Payment;
 
@@ -14,13 +13,7 @@ class PaymentReturnUrl
         $order = $payment->order;
 
         if ($payment->wasPaidByRepresentative() && $order?->isRepresentativeOrder()) {
-            $order = $order->fresh();
-
-            if ($order->isProforma() || $order->isDraft()) {
-                return DraftOrderResource::getUrl('view', ['record' => $order->getKey()], panel: 'representative');
-            }
-
-            return RepresentativeDashboard::getUrl(panel: 'representative');
+            return DraftOrderResource::getUrl('view', ['record' => $order->getKey()], panel: 'representative');
         }
 
         return route('account.orders.show', $payment->order_id);

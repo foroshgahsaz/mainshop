@@ -295,7 +295,12 @@ class RepresentativeDraftOrderService
         if (
             $representative === null
             || $order->representative_id !== $representative->id
-            || (! $order->isDraft() && ! $order->isProforma())
+            || ! in_array($order->status, [
+                Order::STATUS_DRAFT,
+                Order::STATUS_PROFORMA,
+                Order::STATUS_PENDING,
+                Order::STATUS_PROCESSING,
+            ], true)
         ) {
             throw ValidationException::withMessages([
                 'order' => 'دسترسی به این پیش‌فاکتور مجاز نیست.',

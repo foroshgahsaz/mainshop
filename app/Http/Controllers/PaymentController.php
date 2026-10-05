@@ -156,8 +156,13 @@ class PaymentController extends Controller
             $flash['payment_remaining'] = $order->remainingAmount();
         }
 
+        $resultRoute = 'payment.result';
+        if ($payment->wasPaidByRepresentative() && $payment->order?->isRepresentativeOrder()) {
+            $resultRoute = 'representative.payment.result';
+        }
+
         return redirect()
-            ->to(URL::temporarySignedRoute('payment.result', now()->addHours(6), [
+            ->to(URL::temporarySignedRoute($resultRoute, now()->addHours(6), [
                 'payment' => $payment->tracking_code,
             ]))
             ->with($flash);

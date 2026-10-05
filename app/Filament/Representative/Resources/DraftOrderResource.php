@@ -70,7 +70,12 @@ class DraftOrderResource extends Resource
     {
         return parent::getEloquentQuery()
             ->where('representative_id', auth()->id())
-            ->whereIn('status', [Order::STATUS_DRAFT, Order::STATUS_PROFORMA])
+            ->whereIn('status', [
+                Order::STATUS_DRAFT,
+                Order::STATUS_PROFORMA,
+                Order::STATUS_PENDING,
+                Order::STATUS_PROCESSING,
+            ])
             ->withCount('items');
     }
 
@@ -90,7 +95,12 @@ class DraftOrderResource extends Resource
     public static function canView($record): bool
     {
         return $record instanceof Order
-            && $record->representative_id === auth()->id()
-            && ($record->isDraft() || $record->isProforma());
+            && (int) $record->representative_id === (int) auth()->id()
+            && in_array($record->status, [
+                Order::STATUS_DRAFT,
+                Order::STATUS_PROFORMA,
+                Order::STATUS_PENDING,
+                Order::STATUS_PROCESSING,
+            ], true);
     }
 }

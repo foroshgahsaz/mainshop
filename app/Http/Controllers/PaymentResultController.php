@@ -18,6 +18,7 @@ class PaymentResultController extends Controller
             'order' => $payment->order,
             'gatewayLabel' => ShopLabels::paymentMethod($payment->gateway),
             'returnUrl' => PaymentReturnUrl::for($payment),
+            'receiptPdfUrl' => null,
         ]);
     }
 }

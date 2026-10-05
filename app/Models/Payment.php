@@ -65,4 +65,16 @@ class Payment extends Model
     {
         return $this->hasMany(PaymentNote::class)->latest();
     }
+
+    public function gatewayReference(): ?string
+    {
+        if (is_array($this->raw_response)) {
+            $rrn = (string) data_get($this->raw_response, 'rrn', data_get($this->raw_response, 'data.rrn', ''));
+            if ($rrn !== '') {
+                return $rrn;
+            }
+        }
+
+        return $this->transaction_id ?: null;
+    }
 }

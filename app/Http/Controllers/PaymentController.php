@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Filament\Representative\Pages\Dashboard as RepresentativeDashboard;
-use App\Filament\Representative\Resources\DraftOrderResource;
 use App\Models\Payment;
 use App\Notifications\PaymentSuccessNotification;
 use App\Services\Payment\PaymentAuditLogger;
@@ -12,8 +10,10 @@ use App\Services\Payment\PaymentService;
 use App\Services\Payment\TaraGateway;
 use App\Services\Settings\SettingsService;
 use App\Services\Sms\OrderSmsNotifier;
+use App\Support\PaymentReturnUrl;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\URL;
 
 class PaymentController extends Controller
 {
@@ -108,9 +108,9 @@ class PaymentController extends Controller
                 $this->sms->paymentFailed($order->fresh(['user']), $payment);
             }
 
-            return redirect()
-                ->to($this->paymentReturnUrl($payment))
-                ->with('payment_status', Payment::STATUS_FAILED);
+            $payment = $payment->fresh();
+
+            return $this->redirectToPaymentResult($payment);
         }
 
         if ($payment->status === Payment::STATUS_SUCCESS) {
@@ -144,33 +144,28 @@ class PaymentController extends Controller
             }
         }
 
+        return $this->redirectToPaymentResult($payment->fresh());
+    }
+
+    protected function redirectToPaymentResult(Payment $payment)
+    {
         $flash = ['payment_status' => $payment->status];
+        $order = $payment->order;
 
         if ($payment->status === Payment::STATUS_SUCCESS && $order && ! $order->isPaid()) {
             $flash['payment_remaining'] = $order->remainingAmount();
         }
 
         return redirect()
-            ->to($this->paymentReturnUrl($payment))
+            ->to(URL::temporarySignedRoute('payment.result', now()->addHours(6), [
+                'payment' => $payment->tracking_code,
+            ]))
             ->with($flash);
     }
 
     protected function paymentReturnUrl(Payment $payment): string
     {
-        $payment->loadMissing('order');
-        $order = $payment->order;
-
-        if ($payment->wasPaidByRepresentative() && $order?->isRepresentativeOrder()) {
-            $order = $order->fresh();
-
-            if ($order->isProforma() || $order->isDraft()) {
-                return DraftOrderResource::getUrl('view', ['record' => $order->getKey()], panel: 'representative');
-            }
-
-            return RepresentativeDashboard::getUrl(panel: 'representative');
-        }
-
-        return route('account.orders.show', $payment->order_id);
+        return PaymentReturnUrl::for($payment);
     }
 
     protected function resolvePayment(Request $request): Payment

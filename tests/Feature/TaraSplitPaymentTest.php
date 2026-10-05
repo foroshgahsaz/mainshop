@@ -121,7 +121,16 @@ class TaraSplitPaymentTest extends TestCase
             'orderId' => $payment->tracking_code,
         ]);
 
-        $response->assertRedirect(route('account.orders.show', $order));
+        $response->assertRedirect();
+        $target = (string) $response->headers->get('Location');
+        $this->assertStringContainsString('/payment/result/', $target);
+        $this->assertStringContainsString('signature=', $target);
+
+        $this->get($target)
+            ->assertOk()
+            ->assertSee('پرداخت با موفقیت انجام شد', false)
+            ->assertSee($payment->tracking_code, false);
+
         $this->assertSame(Payment::STATUS_SUCCESS, $payment->fresh()->status);
         $this->assertSame(Order::STATUS_PROCESSING, $order->fresh()->status);
     }

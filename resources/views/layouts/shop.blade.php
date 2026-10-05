@@ -41,6 +41,7 @@
     <style>[x-cloak]{display:none!important}</style>
     @stack('styles')
     @livewireStyles
+    @include('shop.partials.site-header-snippets')
 </head>
 <body class="bg-white min-h-screen font-yekan text-gray-800 has-mobile-bottom-nav @if(auth()->check() && auth()->user()->isAdmin()) has-admin-bar @endif @yield('body_class')">
 

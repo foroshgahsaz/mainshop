@@ -100,10 +100,10 @@ class ManageTara extends Page implements HasForms
                         ->placeholder('101'),
                     Forms\Components\TextInput::make('default_group')
                         ->label('کد گروه کالایی تارا')
-                        ->placeholder('1'),
+                        ->placeholder('15'),
                     Forms\Components\TextInput::make('default_group_title')
                         ->label('عنوان گروه کالایی')
-                        ->placeholder('عمومی'),
+                        ->placeholder('خانه و آشپزخانه'),
                     Forms\Components\TextInput::make('sandbox_base_url')
                         ->label('Base URL تست خرید')
                         ->placeholder('https://stage-pay.tara360.ir/pay')
@@ -147,8 +147,8 @@ class ManageTara extends Page implements HasForms
             'amount_unit' => $data['amount_unit'] ?? 'toman',
             'callback_url' => $data['callback_url'] ?? '/payment/callback/tara',
             'client_ip' => $data['client_ip'] ?? '',
-            'default_group' => $data['default_group'] ?? '1',
-            'default_group_title' => $data['default_group_title'] ?? 'عمومی',
+            'default_group' => $data['default_group'] ?? '15',
+            'default_group_title' => $data['default_group_title'] ?? 'خانه و آشپزخانه',
             'sandbox_base_url' => $data['sandbox_base_url'] ?? '',
             'base_url' => $data['base_url'] ?? '',
             'refund_principal' => $data['refund_principal'] ?? '',

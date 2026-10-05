@@ -21,6 +21,7 @@
     use App\Filament\Resources\MenuItemResource;
     use App\Filament\Resources\OrderResource;
     use App\Filament\Resources\PageResource;
+    use App\Filament\Pages\ViewDatabaseBackups;
     use App\Filament\Pages\ViewPaymentLogs;
     use App\Filament\Pages\ViewSiteErrorLogs;
     use App\Filament\Resources\PaymentResource;
@@ -212,6 +213,16 @@
                 ]],
             ],
         ],
+        'backup' => [
+            'label' => 'بک‌آپ',
+            'icon' => 'fa-database',
+            'routes' => ['filament.admin.pages.database-backups'],
+            'menus' => [
+                ['label' => 'بک‌آپ', 'icon' => 'fa-database', 'items' => [
+                    ['label' => 'دیتابیس', 'url' => ViewDatabaseBackups::getUrl(), 'icon' => 'fa-download'],
+                ]],
+            ],
+        ],
         'settings' => [
             'label' => 'تنظیمات',
             'icon' => 'fa-cog',
@@ -286,6 +297,7 @@
         ['id' => 'shipping', 'icon' => 'fa-truck', 'tooltip' => 'ارسال', 'panel' => 'shipping'],
         ['id' => 'gateways', 'icon' => 'fa-plug', 'tooltip' => 'درگاه‌ها', 'panel' => 'gateways'],
         ['id' => 'media', 'icon' => 'fa-folder-open', 'tooltip' => 'مدیریت فایل', 'panel' => 'media'],
+        ['id' => 'backup', 'icon' => 'fa-database', 'tooltip' => 'بک‌آپ', 'panel' => 'backup'],
         ['id' => 'settings', 'icon' => 'fa-cog', 'tooltip' => 'تنظیمات', 'panel' => 'settings'],
     ];
 

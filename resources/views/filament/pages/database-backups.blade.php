@@ -26,6 +26,8 @@
             <p class="admin-order__hint">
                 مسیر ذخیره: <code dir="ltr">{{ $backupDirectory }}</code>
                 — {{ $scheduleSummary }}
+                <br>
+                اگر روی سرور <code dir="ltr">mysqldump</code> نصب نباشد، بک‌آپ با اتصال PHP (PDO) ساخته می‌شود.
             </p>
 
             <div class="admin-payment-log-viewer__table-wrap">

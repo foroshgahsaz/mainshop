@@ -1017,7 +1017,7 @@ body.fi-body .fi-modal-slide-over-window-hiding {
     }
 
     .fi-admin-shell .content-area {
-        padding: 16px 14px;
+        padding: 16px 14px !important;
     }
 
     .fi-admin-shell .fi-header {
@@ -1046,7 +1046,7 @@ body.fi-body .fi-modal-slide-over-window-hiding {
     }
 
     .fi-admin-shell .content-area {
-        padding: 12px 10px;
+        padding: 12px 12px !important;
     }
 
     .fi-admin-shell .fi-ta-header-toolbar {

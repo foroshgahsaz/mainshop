@@ -7,8 +7,8 @@
         $gatewayIcon = $gatewayDef['icon'] ?? null;
     @endphp
 
-    <link rel="stylesheet" href="{{ asset('css/rep-order-wizard.css') }}">
-    <link rel="stylesheet" href="{{ asset('shop/css/sales-invoice.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/rep-order-wizard.css') }}?v={{ filemtime(public_path('css/rep-order-wizard.css')) }}">
+    <link rel="stylesheet" href="{{ asset('shop/css/sales-invoice.css') }}?v={{ filemtime(public_path('shop/css/sales-invoice.css')) }}">
 
     @if (session('payment_status'))
         <div class="rep-payment-flash {{ session('payment_status') === 'success' ? 'rep-payment-flash--ok' : 'rep-payment-flash--fail' }}">
@@ -35,8 +35,10 @@
                 app(\App\Services\Settings\SettingsService::class)->site(),
             );
         @endphp
-        <div class="si-document--cart-wrap" style="margin-bottom: 1rem;">
-            @include('components.sales-invoice.document', ['document' => $invoicePreview, 'context' => 'web'])
+        <div class="rep-proforma-invoice">
+            <div class="si-document--cart-wrap">
+                @include('components.sales-invoice.document', ['document' => $invoicePreview, 'context' => 'web'])
+            </div>
         </div>
 
         <div class="rep-wizard-actions" style="margin-top: 0.75rem;">

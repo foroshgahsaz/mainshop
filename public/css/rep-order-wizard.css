@@ -264,9 +264,23 @@
     box-sizing: border-box;
 }
 
+.rep-proforma-invoice {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
 @media (max-width: 768px) {
     .rep-wizard-panel {
-        padding: 0.75rem 0.5rem;
+        padding: 0.75rem 0;
+        border-left: none;
+        border-right: none;
+        border-radius: 0;
+    }
+
+    .rep-proforma-invoice .si-document--cart-wrap {
+        border-radius: 0.5rem;
     }
 }
 

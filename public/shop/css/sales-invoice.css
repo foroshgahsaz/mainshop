@@ -104,6 +104,7 @@
   margin-bottom: 1rem;
   max-width: 100%;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 /* Desktop: table lines; mobile: cards (see media query) */
@@ -206,8 +207,13 @@
 }
 
 @media (max-width: 768px) {
+  .si-document {
+    font-size: 0.8rem;
+  }
+
   .si-document--cart-wrap {
-    padding: 0.65rem 0.5rem;
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
   }
 
   .si-document .si-title {
@@ -226,9 +232,12 @@
     margin-top: 0.25rem;
   }
 
+  .si-document .si-party,
+  .si-document .si-party tbody,
   .si-document .si-party tr {
-    display: flex;
-    flex-direction: column;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .si-document .si-party td {
@@ -245,8 +254,8 @@
     margin-top: 8px;
   }
 
-  .si-lines--table {
-    display: none;
+  .si-document table.si-lines--table {
+    display: none !important;
   }
 
   .si-lines--cards {

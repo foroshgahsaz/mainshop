@@ -190,8 +190,22 @@ class ProductResource extends Resource
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاریخ ایجاد')
-                    ->dateTime('Y-m-d'),
+                    ->dateTime('Y/m/d H:i')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->label('تاریخ ویرایش')
+                    ->dateTime('Y/m/d H:i')
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('lastEditedBy.name')
+                    ->label('آخرین ویرایش توسط')
+                    ->placeholder('—')
+                    ->searchable()
+                    ->sortable(),
             ])
+            ->defaultSort('updated_at', 'desc')
             ->filters([
                 Tables\Filters\SelectFilter::make('category_id')
                     ->relationship('category', 'name')
@@ -224,6 +238,7 @@ class ProductResource extends Resource
             'productFamily:id,name',
             'productPlant:id,name',
             'productTemplate:id,name',
+            'lastEditedBy:id,name',
         ]);
     }
 

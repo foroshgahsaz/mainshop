@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Filament\Support\CrudSuccessNotification;
 use App\Filament\Support\ShopIconUpload;
+use App\Services\Payment\BajetReturnUrl;
 use App\Services\Settings\SettingsService;
 use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -144,7 +145,7 @@ class ManageBajetPay extends Page implements HasForms
             'password' => $data['password'] ?? '',
             'terminal_id' => $data['terminal_id'] ?? '',
             'amount_unit' => $data['amount_unit'] ?? 'toman',
-            'return_url_base' => $data['return_url_base'] ?? '',
+            'return_url_base' => BajetReturnUrl::normalizeStoredBase((string) ($data['return_url_base'] ?? '')),
             'callback_url' => $data['callback_url'] ?? '/payment/callback/bajet',
             'sandbox_base_url' => $data['sandbox_base_url'] ?? '',
             'portal_sandbox_base_url' => $data['portal_sandbox_base_url'] ?? '',

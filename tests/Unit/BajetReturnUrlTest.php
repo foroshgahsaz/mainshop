@@ -37,4 +37,27 @@ class BajetReturnUrlTest extends TestCase
             $url,
         );
     }
+
+    public function test_prefixes_https_when_only_hostname_is_configured(): void
+    {
+        $payment = new Payment(['tracking_code' => 'Z9']);
+
+        $url = BajetReturnUrl::forPayment($payment, [
+            'return_url_base' => 'www.chinibazar.ir',
+            'callback_url' => '/payment/callback/bajet',
+        ]);
+
+        $this->assertSame(
+            'https://www.chinibazar.ir/payment/callback/bajet?payment=Z9',
+            $url,
+        );
+    }
+
+    public function test_normalize_stored_base_adds_https(): void
+    {
+        $this->assertSame(
+            'https://www.chinibazar.ir',
+            BajetReturnUrl::normalizeStoredBase('www.chinibazar.ir'),
+        );
+    }
 }

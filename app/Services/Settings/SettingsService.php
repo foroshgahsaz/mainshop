@@ -149,6 +149,8 @@ class SettingsService
             'base_url' => rtrim((string) ($this->get('bajet', $sandbox ? 'sandbox_base_url' : 'base_url') ?: $apiDefault), '/'),
             'sandbox_base_url' => (string) ($this->get('bajet', 'sandbox_base_url') ?: ($cfg['sandbox_base_url'] ?? '')),
             'production_base_url' => (string) ($this->get('bajet', 'base_url') ?: ($cfg['base_url'] ?? '')),
+            'portal_sandbox_base_url' => (string) ($this->get('bajet', 'portal_sandbox_base_url') ?: ($cfg['portal_sandbox_base_url'] ?? '')),
+            'portal_base_url' => (string) ($this->get('bajet', 'portal_base_url') ?: ($cfg['portal_base_url'] ?? '')),
             'icon' => $this->get('bajet', 'icon') ?: null,
         ];
     }

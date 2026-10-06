@@ -69,11 +69,12 @@ class BajetPayGateway implements PaymentGatewayInterface
             ->post('/api/v1/jetpay/order', $payload);
 
         $data = $this->json($response);
-        $referUrl = (string) data_get($data, 'result.referUrl', '');
+        $referUrlRaw = (string) data_get($data, 'result.referUrl', '');
         $referenceId = (string) data_get($data, 'result.referenceId', '');
         $success = (bool) data_get($data, 'success', false);
+        $referUrl = BajetReferUrl::resolve($referUrlRaw, $referenceId, $config);
 
-        if ($response->failed() || ! $success || $referUrl === '' || $referenceId === '') {
+        if ($response->failed() || ! $success || $referUrlRaw === '' || $referenceId === '' || $referUrl === '') {
             $previous = $payment->status;
             $payment->update([
                 'status' => Payment::STATUS_FAILED,
@@ -105,13 +106,21 @@ class BajetPayGateway implements PaymentGatewayInterface
             PaymentAuditStep::GATEWAY_RESPONSE,
             'bajet_order_created',
             'سفارش باجت‌پی ایجاد شد.',
-            ['reference_id' => $referenceId]
+            [
+                'reference_id' => $referenceId,
+                'refer_url' => $referUrl,
+                'refer_url_raw' => $referUrlRaw,
+            ]
         );
 
         $this->paymentLog->gatewayResponse(
             $payment->fresh(),
             'کاربر به پرتال باجت‌پی (جت‌پی) هدایت می‌شود.',
-            ['referenceId' => $referenceId, 'referUrl' => $referUrl]
+            [
+                'referenceId' => $referenceId,
+                'referUrl' => $referUrl,
+                'referUrlRaw' => $referUrlRaw,
+            ]
         );
 
         return $referUrl;

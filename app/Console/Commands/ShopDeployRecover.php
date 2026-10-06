@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Support\ShopStoragePaths;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Redis;
@@ -15,6 +16,8 @@ class ShopDeployRecover extends Command
 
     public function handle(): int
     {
+        $this->ensurePersistentStorageDirectories();
+
         $this->components->info('Clearing cached config, routes, views, and application cache…');
 
         $this->useDatabaseCacheIfRedisIsDown();
@@ -53,6 +56,13 @@ class ShopDeployRecover extends Command
         $this->components->info('Deploy recovery finished.');
 
         return self::SUCCESS;
+    }
+
+    protected function ensurePersistentStorageDirectories(): void
+    {
+        foreach (ShopStoragePaths::persistentDirectories() as $directory) {
+            ShopStoragePaths::ensureDirectory($directory);
+        }
     }
 
     protected function useDatabaseCacheIfRedisIsDown(): void

@@ -32,4 +32,22 @@ return [
         'proforma_reservation_extend_minutes' => (int) env('REP_PROFORMA_RESERVATION_EXTEND_MINUTES', 1440),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Persistent storage paths (Runflare / multi-pod)
+    |--------------------------------------------------------------------------
+    |
+    | On Runflare, mount ONE shared disk at /data (images already use this).
+    | Point logs and DB backups under /data — separate mounts at /storage/logs
+    | often miss Laravel's real path (e.g. /var/www/storage/logs).
+    |
+    */
+    'storage' => [
+        'logs_directory' => env('SHOP_LOGS_DIRECTORY') ?: (
+            rtrim((string) env('FILESYSTEM_PUBLIC_ROOT', ''), '/\\') === '/data'
+                ? '/data/logs'
+                : null
+        ),
+    ],
+
 ];

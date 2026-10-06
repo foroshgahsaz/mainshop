@@ -2,6 +2,7 @@
 
 namespace App\Services\Payment;
 
+use App\Support\ShopStoragePaths;
 use Carbon\Carbon;
 
 class PaymentLogReader
@@ -12,7 +13,7 @@ class PaymentLogReader
 
     public function logDirectory(): string
     {
-        return storage_path('logs');
+        return ShopStoragePaths::logsDirectory();
     }
 
     public function dailyLogBasename(string $dateYmd): string

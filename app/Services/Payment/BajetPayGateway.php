@@ -212,7 +212,7 @@ class BajetPayGateway implements PaymentGatewayInterface
 
         $expiresIn = (int) data_get($data, 'result.expiresIn', 3600);
         // JetPay often invalidates tokens before the advertised expiresIn; keep cache conservative.
-        $ttl = min(max(60, $expiresIn - 120), 600);
+        $ttl = min(max(30, $expiresIn - 120), 180);
         Cache::put($cacheKey, $token, $ttl);
 
         return $token;
@@ -225,18 +225,19 @@ class BajetPayGateway implements PaymentGatewayInterface
      */
     protected function postCreateOrder(array $config, array $payload): array
     {
-        $response = $this->http($config)
-            ->withToken($this->accessToken($config), 'Bearer')
-            ->post('/api/v1/jetpay/order', $payload);
+        $response = null;
+        $data = [];
 
-        $data = $this->json($response);
-
-        if ($this->isExpiredAccessTokenResponse($response, $data)) {
+        for ($attempt = 1; $attempt <= 3; $attempt++) {
             $response = $this->http($config)
                 ->withToken($this->accessToken($config, true), 'Bearer')
                 ->post('/api/v1/jetpay/order', $payload);
 
             $data = $this->json($response);
+
+            if (! $this->isExpiredAccessTokenResponse($response, $data)) {
+                break;
+            }
         }
 
         return [$response, $data];

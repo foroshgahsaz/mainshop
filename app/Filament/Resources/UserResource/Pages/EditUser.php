@@ -104,11 +104,16 @@ class EditUser extends EditRecord
     {
         return [
             'name' => $user->name,
+            'slug' => $user->slug,
             'bio' => $user->bio,
             'avatar' => $user->avatar,
             'phone' => $user->phone,
+            'national_code' => $user->national_code,
             'email' => $user->email,
             'status' => $user->status,
+            'phone_verified_at' => $user->phone_verified_at,
+            'email_verified_at' => $user->email_verified_at,
+            'created_by_representative_id' => $user->created_by_representative_id,
             'is_admin' => $user->is_admin,
             'is_author' => $user->is_author,
             'is_representative' => $user->is_representative,

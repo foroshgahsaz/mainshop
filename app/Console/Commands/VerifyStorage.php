@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Support\ShopStoragePaths;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 
@@ -18,13 +19,42 @@ class VerifyStorage extends Command
         $legacyRoot = rtrim(storage_path('app/public'), '/');
 
         $this->info('Storage verification');
+        $logsDir = ShopStoragePaths::logsDirectory();
+        $backupDir = ShopStoragePaths::backupDirectory();
+        $defaultLogsDir = storage_path('logs');
+
         $this->table(['Key', 'Value'], [
             ['hostname', (string) gethostname()],
             ['public disk root', $publicRoot],
             ['legacy root', $legacyRoot],
             ['roots equal', $publicRoot === $legacyRoot ? 'yes (sync not needed)' : 'no'],
             ['public url', (string) config('filesystems.disks.public.url')],
+            ['logs directory (active)', $logsDir],
+            ['logs default (storage/logs)', $defaultLogsDir],
+            ['DB backup directory', $backupDir],
         ]);
+
+        $this->newLine();
+        $this->line('Persistent logs & backups (filesystem):');
+        $this->line('  log files: '.$this->countPath($logsDir).' in '.$logsDir.(is_writable($logsDir) ? ' (writable)' : ' (NOT writable)'));
+        $this->line('  backup files: '.$this->countPath($backupDir).' in '.$backupDir.(is_dir($backupDir) && is_writable($backupDir) ? ' (writable)' : ' (missing or NOT writable)'));
+
+        if ($publicRoot === '/data' && ! ShopStoragePaths::usesCustomLogsDirectory()) {
+            $this->newLine();
+            $this->warn('Runflare: /data persists across deploys, but Laravel still writes logs to storage/logs inside the container image.');
+            $this->line('Set in environment (same panel as FILESYSTEM_PUBLIC_ROOT):');
+            $this->line('  SHOP_LOGS_DIRECTORY=/data/logs');
+            $this->line('  DB_BACKUP_DIRECTORY=/data/database-backups');
+            $this->line('Then remove extra disks mounted at /storage/logs — use subfolders on the /data volume instead.');
+        } elseif ($logsDir !== $defaultLogsDir && str_starts_with($logsDir, '/data')) {
+            $this->info('Logs are configured on the /data volume — they should survive deploys.');
+        }
+
+        if (is_dir('/storage/logs') && $logsDir !== '/storage/logs' && $defaultLogsDir !== '/storage/logs') {
+            $this->newLine();
+            $this->warn('A disk may be mounted at /storage/logs, but Laravel writes to '.$logsDir.'.');
+            $this->line('Either set SHOP_LOGS_DIRECTORY=/storage/logs (only if that path is correct) or mount under /data as above.');
+        }
 
         $this->newLine();
         $this->line('Counts via Laravel Storage (public disk):');

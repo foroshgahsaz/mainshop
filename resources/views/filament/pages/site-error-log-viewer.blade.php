@@ -81,7 +81,7 @@
             @if (empty($logDiagnostics['directory_writable']))
                 <p class="admin-payment-log-viewer__warn">
                     پوشهٔ لاگ روی سرور وجود ندارد یا قابل نوشتن نیست — Laravel ممکن است اصلاً فایلی نسازد.
-                    دسترسی <code dir="ltr">storage/logs</code> را در Runflare بررسی کنید.
+                    در Runflare لاگ را روی همان دیسک <code dir="ltr">/data</code> نگه دارید (<code dir="ltr">SHOP_LOGS_DIRECTORY=/data/logs</code> یا <code dir="ltr">FILESYSTEM_PUBLIC_ROOT=/data</code>).
                 </p>
             @endif
 

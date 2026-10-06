@@ -58,7 +58,7 @@ class DraftOrderResource extends Resource
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('آخرین تغییر')
                     ->since()
-                    ->jalaliDateTimeTooltip(),
+                    ->tooltip(fn (Order $record): string => shop_jalali($record->updated_at)),
             ])
             ->defaultSort('updated_at', 'desc')
             ->actions([

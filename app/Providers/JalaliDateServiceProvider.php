@@ -5,8 +5,6 @@ namespace App\Providers;
 use App\Support\ShopDate;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\DateTimePicker;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Facades\Date;
@@ -24,40 +22,34 @@ class JalaliDateServiceProvider extends ServiceProvider
             return ShopDate::format($this, $format ?? 'Y/m/d H:i');
         });
 
-        TextColumn::configureUsing(function (TextColumn $column): void {
+        $formatState = function (mixed $state, string $name): ?string {
+            if (blank($state)) {
+                return null;
+            }
+
+            $format = $name === 'published_at' ? 'Y/m/d' : 'Y/m/d H:i';
+
+            return ShopDate::format($state, $format);
+        };
+
+        TextColumn::configureUsing(function (TextColumn $column) use ($formatState): void {
             $name = $column->getName();
 
             if (! self::isJalaliDateAttribute($name)) {
                 return;
             }
 
-            if ($name === 'published_at') {
-                $column->jalaliDate();
-            } else {
-                $column->jalaliDateTime();
-            }
+            $column->formatStateUsing(fn ($state) => $formatState($state, $name));
         }, isImportant: true);
 
-        TextEntry::configureUsing(function (TextEntry $entry): void {
+        TextEntry::configureUsing(function (TextEntry $entry) use ($formatState): void {
             $name = $entry->getName();
 
             if (! self::isJalaliDateAttribute($name)) {
                 return;
             }
 
-            if ($name === 'published_at') {
-                $entry->jalaliDate();
-            } else {
-                $entry->jalaliDateTime();
-            }
-        }, isImportant: true);
-
-        DateTimePicker::configureUsing(function (DateTimePicker $picker): void {
-            $picker->jalali();
-        }, isImportant: true);
-
-        DatePicker::configureUsing(function (DatePicker $picker): void {
-            $picker->jalali();
+            $entry->formatStateUsing(fn ($state) => $formatState($state, $name));
         }, isImportant: true);
     }
 

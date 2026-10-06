@@ -9,6 +9,7 @@ use App\Filament\Support\ShopMediaPicker;
 use App\Models\City;
 use App\Models\Province;
 use App\Models\User;
+use App\Rules\IranianNationalCode;
 use App\Services\Auth\OtpService;
 use App\Support\AdminAccess;
 use Filament\Forms;
@@ -138,6 +139,12 @@ class UserResource extends Resource
                                         ->rows(3)
                                         ->maxLength(500)
                                         ->placeholder('برای نویسندگان و پروفایل عمومی نمایش داده می‌شود.'),
+                                    Forms\Components\TextInput::make('slug')
+                                        ->label('نامک (slug)')
+                                        ->maxLength(191)
+                                        ->unique(ignoreRecord: true)
+                                        ->helperText('برای URL عمومی نویسنده؛ فقط حروف انگلیسی، عدد و خط تیره.')
+                                        ->visible(fn (): bool => AdminAccess::canManageShopInAdmin()),
                                 ])
                                 ->columnSpan(['default' => 12, 'lg' => 8]),
                         ])
@@ -166,6 +173,18 @@ class UserResource extends Resource
                             'regex' => 'شماره موبایل باید با 09 شروع شود و ۱۱ رقم باشد.',
                         ])
                         ->unique(ignoreRecord: true),
+                    Forms\Components\TextInput::make('national_code')
+                        ->label('کد ملی')
+                        ->length(10)
+                        ->dehydrateStateUsing(fn (?string $state): ?string => filled($state)
+                            ? IranianNationalCode::normalize($state)
+                            : null)
+                        ->rules(fn (): array => [
+                            'nullable',
+                            new IranianNationalCode,
+                        ])
+                        ->unique(ignoreRecord: true)
+                        ->helperText('برای پرداخت باجت‌پی باید با موبایل مشتری در باجت یکی باشد.'),
                     Forms\Components\TextInput::make('email')
                         ->label('ایمیل')
                         ->email()
@@ -180,23 +199,40 @@ class UserResource extends Resource
                     Forms\Components\Toggle::make('status')
                         ->label('حساب فعال')
                         ->default(true),
-                    Forms\Components\Placeholder::make('created_by_representative_info')
-                        ->label('ثبت توسط نماینده')
-                        ->content(function (?User $record): string {
-                            if (! $record?->created_by_representative_id) {
-                                return '—';
-                            }
+                    Forms\Components\Fieldset::make('تأیید و متادیتا (مدیر سیستم)')
+                        ->schema([
+                            Forms\Components\DateTimePicker::make('phone_verified_at')
+                                ->label('زمان تأیید موبایل')
+                                ->seconds(false)
+                                ->native(false),
+                            Forms\Components\DateTimePicker::make('email_verified_at')
+                                ->label('زمان تأیید ایمیل')
+                                ->seconds(false)
+                                ->native(false),
+                            Forms\Components\Select::make('created_by_representative_id')
+                                ->label('ثبت‌شده توسط نماینده')
+                                ->relationship(
+                                    'createdByRepresentative',
+                                    'name',
+                                    fn ($query) => $query->where('is_representative', true)->orderBy('name')
+                                )
+                                ->searchable(['name', 'phone'])
+                                ->preload()
+                                ->nullable(),
+                            Forms\Components\Placeholder::make('login_stats')
+                                ->label('آمار ورود')
+                                ->content(function (?User $record): string {
+                                    if (! $record) {
+                                        return '—';
+                                    }
 
-                            $rep = $record->createdByRepresentative;
-                            if (! $rep) {
-                                return 'شناسه نماینده: '.$record->created_by_representative_id;
-                            }
+                                    $last = $record->last_login_at?->shopJalali('Y/m/d H:i') ?? 'هرگز';
 
-                            $phone = $rep->phone ? ' — '.$rep->phone : '';
-
-                            return $rep->name.$phone;
-                        })
-                        ->visible(fn (?User $record): bool => (bool) $record?->created_by_representative_id),
+                                    return "آخرین ورود: {$last} · تعداد: ".(int) $record->login_count;
+                                }),
+                        ])
+                        ->columns(2)
+                        ->visible(fn (): bool => AdminAccess::canManageShopInAdmin()),
                 ])
                 ->columns(2),
         ];
@@ -439,6 +475,11 @@ class UserResource extends Resource
                         : $record->staffRoleLabel())
                     ->badge(fn (User $record): bool => $record->isCustomer())
                     ->color(fn (User $record) => $record->isCustomer() ? $record->roleColor() : null),
+                Tables\Columns\TextColumn::make('national_code')
+                    ->label('کد ملی')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->visible(fn (): bool => AdminAccess::canManageShopInAdmin()),
                 Tables\Columns\TextColumn::make('createdByRepresentative.name')
                     ->label('نماینده ثبت‌کننده')
                     ->placeholder('—')

@@ -52,6 +52,7 @@ class PaymentResource extends Resource
     public static function table(Table $table): Table
     {
         return AdminTable::configure($table)
+            ->recordUrl(fn (Payment $record): string => static::getUrl('view', ['record' => $record]))
             ->columns([
                 Tables\Columns\TextColumn::make('tracking_code')->label('پیگیری')->searchable(),
                 Tables\Columns\TextColumn::make('order.tracking_code')->label('سفارش'),
@@ -89,10 +90,16 @@ class PaymentResource extends Resource
                     ->options(static::paymentStatusFilterOptions()),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make()->label('جزئیات'),
+                Tables\Actions\ViewAction::make()
+                    ->label('جزئیات')
+                    ->icon('heroicon-o-eye')
+                    ->color('primary')
+                    ->button()
+                    ->outlined(),
                 PaymentDeleteActions::tableDeleteAction()
                     ->visible(fn (): bool => AdminAccess::canManageShopInAdmin()),
             ])
+            ->actionsColumnLabel('عملیات')
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     PaymentDeleteActions::tableBulkDeleteAction()

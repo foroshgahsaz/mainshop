@@ -1,5 +1,53 @@
 /* Admin order & payment detail — WooCommerce-style layout hooks for custom HTML */
 
+.admin-tara-payload__hint {
+    margin: 0 0 1rem;
+    font-size: 13px;
+    color: var(--ao-muted);
+    line-height: 1.55;
+}
+
+.admin-tara-payload__highlights {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+    gap: 0.75rem 1.25rem;
+    margin: 0 0 1rem;
+    padding: 1rem 1.1rem;
+    background: #f8f5ff;
+    border: 1px solid #e9e3ff;
+    border-radius: 10px;
+}
+
+.admin-tara-payload__highlights dt {
+    font-size: 11px;
+    font-weight: 600;
+    color: #7e8299;
+    margin: 0 0 0.2rem;
+}
+
+.admin-tara-payload__highlights dd {
+    margin: 0;
+    font-weight: 700;
+    color: #181c32;
+    font-size: 14px;
+}
+
+.admin-tara-payload__highlights code {
+    font-size: 13px;
+    background: #fff;
+    padding: 0.15rem 0.45rem;
+    border-radius: 6px;
+    border: 1px solid #e4e6ef;
+}
+
+.admin-tara-payload__details summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--ao-primary);
+    font-size: 13px;
+    margin-bottom: 0.5rem;
+}
+
 .admin-order {
     --ao-border: #e5e7eb;
     --ao-muted: #6b7280;

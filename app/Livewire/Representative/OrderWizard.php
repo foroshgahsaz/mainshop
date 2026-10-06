@@ -435,11 +435,11 @@ class OrderWizard extends Component
     #[Computed]
     public function templates(): Collection
     {
-        if ($this->step !== 'template' || ! $this->familyId || ! $this->brandId) {
+        if ($this->step !== 'template' || ! $this->familyId || ! $this->plantId || ! $this->brandId) {
             return collect();
         }
 
-        return app(RepresentativeCatalogLookup::class)->templates($this->familyId, $this->brandId);
+        return app(RepresentativeCatalogLookup::class)->templates($this->familyId, $this->plantId, $this->brandId);
     }
 
     #[Computed]

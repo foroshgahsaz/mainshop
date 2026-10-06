@@ -51,4 +51,31 @@ class ShopSearchSuggestTest extends TestCase
             ->assertJsonCount(1, 'items')
             ->assertJsonPath('items.0.name', 'کفش ورزشی مخصوص دویدن');
     }
+
+    public function test_suggest_limits_items_to_five_but_reports_total(): void
+    {
+        $category = Category::query()->create([
+            'name' => 'ظروف',
+            'slug' => 'dishes',
+            'is_active' => true,
+        ]);
+
+        for ($i = 1; $i <= 7; $i++) {
+            Product::query()->create([
+                'category_id' => $category->id,
+                'name' => "کاسه سرامیک شماره {$i}",
+                'slug' => "bowl-{$i}",
+                'price' => 50000 + $i,
+                'stock' => 3,
+                'is_active' => true,
+            ]);
+        }
+
+        $response = $this->getJson(route('shop.search.suggest', ['q' => 'کاسه']));
+
+        $response->assertOk()
+            ->assertJsonPath('total', 7)
+            ->assertJsonCount(5, 'items')
+            ->assertJsonStructure(['all_results_url']);
+    }
 }

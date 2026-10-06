@@ -22,22 +22,34 @@
                 </div>
 
                 <div class="hidden md:block flex-1 max-w-2xl mx-8">
-                    <div class="relative">
-                    <form action="{{ route('products.index') }}" method="GET" class="relative">
-                        <input type="text" name="search" value="{{ request('search') }}"
-                   placeholder="جستجو در {{ site_name() }}..."
-                   class="w-full bg-white border-2 border-gray-200 rounded-xl py-3 px-5 pr-12 outline-none focus:border-brand-green text-sm">
-            <svg class="w-5 h-5 absolute right-4 top-3.5 text-gray-400"
-                 fill="none"
-                 stroke="currentColor"
-                 stroke-width="2"
-                 viewBox="0 0 24 24">
-              <circle cx="11"
-                      cy="11"
-                      r="7" />
-              <path d="m20 20-3.5-3.5" />
-            </svg>
-                    </form>
+                    <div class="header-search-suggest relative"
+                         id="headerSearchSuggest"
+                         data-suggest-url="{{ route('shop.search.suggest') }}"
+                         data-min-chars="3">
+                        <form action="{{ route('products.index') }}" method="GET" class="relative" id="headerSearchForm">
+                            <input type="search"
+                                   name="search"
+                                   id="headerSearchInput"
+                                   value="{{ request('search') }}"
+                                   placeholder="جستجو در {{ site_name() }}..."
+                                   autocomplete="off"
+                                   aria-autocomplete="list"
+                                   aria-controls="headerSearchDropdown"
+                                   class="w-full bg-white border-2 border-gray-200 rounded-xl py-3 px-5 pr-12 outline-none focus:border-brand-green text-sm">
+                            <svg class="w-5 h-5 absolute right-4 top-3.5 text-gray-400 pointer-events-none"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 stroke-width="2"
+                                 viewBox="0 0 24 24"
+                                 aria-hidden="true">
+                              <circle cx="11" cy="11" r="7" />
+                              <path d="m20 20-3.5-3.5" />
+                            </svg>
+                        </form>
+                        <div id="headerSearchDropdown"
+                             class="header-search-suggest__dropdown hidden"
+                             aria-live="polite"
+                             role="listbox"></div>
                     </div>
                 </div>
 

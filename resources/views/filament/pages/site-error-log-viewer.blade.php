@@ -66,11 +66,69 @@
         </section>
 
         <section class="admin-order__section">
-            <h2 class="admin-order__section-title">۲۰ روز اخیر — دانلود</h2>
+            <h2 class="admin-order__section-title">فایل‌های لاگ روی سرور</h2>
             <p class="admin-order__hint">
-                مسیر: <code dir="ltr">{{ $logsDirectory }}</code>
-                — فقط <code dir="ltr">laravel-YYYY-MM-DD.log</code> و <code dir="ltr">laravel.log</code>
-                (لاگ پرداخت جداست).
+                مسیر: <code dir="ltr">{{ $logDiagnostics['directory'] ?? $logsDirectory }}</code>
+                — کانال: <code dir="ltr">{{ $logDiagnostics['log_channel'] ?? '—' }}</code>
+                — <code dir="ltr">LOG_STACK={{ $logDiagnostics['log_stack'] ?? '—' }}</code>
+                @if (! empty($logDiagnostics['uses_single_file']))
+                    (با <code dir="ltr">single</code> فقط <code dir="ltr">laravel.log</code> نوشته می‌شود؛ فایل روزانه ساخته نمی‌شود.)
+                @elseif (! empty($logDiagnostics['uses_daily_files']))
+                    (با <code dir="ltr">daily</code> فایل‌ها به صورت <code dir="ltr">laravel-YYYY-MM-DD.log</code> هستند.)
+                @endif
+            </p>
+
+            @if (empty($logDiagnostics['directory_writable']))
+                <p class="admin-payment-log-viewer__warn">
+                    پوشهٔ لاگ روی سرور وجود ندارد یا قابل نوشتن نیست — Laravel ممکن است اصلاً فایلی نسازد.
+                    دسترسی <code dir="ltr">storage/logs</code> را در Runflare بررسی کنید.
+                </p>
+            @endif
+
+            @if ($discoveredLogFiles === [])
+                <p class="admin-payment-log-viewer__empty">
+                    هیچ فایل <code dir="ltr">laravel*.log</code> در این مسیر پیدا نشد.
+                    اگر اپ روی کانتینر بدون دیسک پایدار است، بعد از ری‌استارت لاگ از بین می‌رود؛
+                    یا لاگ به <code dir="ltr">stderr</code> می‌رود (در آن صورت از پنل هاست لاگ کانتینر را ببینید).
+                </p>
+            @else
+                <div class="admin-payment-log-viewer__table-wrap">
+                    <table class="admin-payment-log-viewer__table">
+                        <thead>
+                            <tr>
+                                <th>نام فایل</th>
+                                <th>تاریخ / توضیح</th>
+                                <th>حجم</th>
+                                <th>دانلود</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($discoveredLogFiles as $file)
+                                <tr>
+                                    <td dir="ltr" class="admin-payment-log-viewer__filename">{{ $file['basename'] }}</td>
+                                    <td>{{ $file['label'] }}</td>
+                                    <td dir="ltr">{{ $this->formatSize($file['size_bytes']) }}</td>
+                                    <td>
+                                        @if ($file['download_url'])
+                                            <x-filament::button tag="a" href="{{ $file['download_url'] }}" size="sm">
+                                                دانلود
+                                            </x-filament::button>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </section>
+
+        <section class="admin-order__section">
+            <h2 class="admin-order__section-title">۲۰ روز اخیر — تقویم</h2>
+            <p class="admin-order__hint">
+                برای هر روز فایل <code dir="ltr">laravel-YYYY-MM-DD.log</code> جستجو می‌شود؛
+                امروز در صورت نبود فایل روزانه، <code dir="ltr">laravel.log</code> نشان داده می‌شود.
+                (لاگ پرداخت جداست.)
             </p>
 
             @if ($legacyLogEntry)

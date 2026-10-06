@@ -41,4 +41,47 @@ class ApplicationLogReaderTest extends TestCase
 
         @unlink($path);
     }
+
+    public function test_discover_includes_single_and_daily_logs(): void
+    {
+        $dir = storage_path('logs');
+        if (! is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        $single = $dir.DIRECTORY_SEPARATOR.'laravel.log';
+        $daily = $dir.DIRECTORY_SEPARATOR.'laravel-2026-01-01.log';
+        file_put_contents($single, "line\n");
+        file_put_contents($daily, "line\n");
+
+        $reader = app(ApplicationLogReader::class);
+        $found = $reader->discoverLaravelLogFiles();
+        $basenames = array_column($found, 'basename');
+
+        $this->assertContains('laravel.log', $basenames);
+        $this->assertContains('laravel-2026-01-01.log', $basenames);
+
+        @unlink($single);
+        @unlink($daily);
+    }
+
+    public function test_today_calendar_entry_falls_back_to_laravel_log(): void
+    {
+        $dir = storage_path('logs');
+        if (! is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        $single = $dir.DIRECTORY_SEPARATOR.'laravel.log';
+        file_put_contents($single, "ok\n");
+
+        $reader = app(ApplicationLogReader::class);
+        $today = $reader->recentDayEntries(1)[0];
+
+        $this->assertSame('log', $today['kind']);
+        $this->assertSame('laravel.log', $today['basename']);
+        $this->assertNotNull($today['download_url']);
+
+        @unlink($single);
+    }
 }

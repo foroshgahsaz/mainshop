@@ -70,10 +70,10 @@ class RepresentativeCatalogLookup
     }
 
     /** @return Collection<int, ProductTemplate> */
-    public function templates(int $familyId, int $brandId): Collection
+    public function templates(int $familyId, int $plantId, int $brandId): Collection
     {
         return $this->catalogCache->remember(
-            'rep:catalog:templates:'.$familyId.':'.$brandId,
+            'rep:catalog:templates:'.$familyId.':'.$plantId.':'.$brandId,
             $this->cacheTtl(),
             fn () => ProductTemplate::query()
                 ->where('product_family_id', $familyId)
@@ -81,6 +81,7 @@ class RepresentativeCatalogLookup
                 ->where('is_active', true)
                 ->whereHas('products', fn (Builder $q) => $this->baseProductQuery($q)
                     ->where('product_family_id', $familyId)
+                    ->where('product_plant_id', $plantId)
                     ->where('brand_id', $brandId))
                 ->orderBy('position')
                 ->get(['id', 'name'])

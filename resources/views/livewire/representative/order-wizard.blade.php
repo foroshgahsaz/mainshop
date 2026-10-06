@@ -1,35 +1,57 @@
+@php
+    $wizardSteps = [
+        'customer' => 'مشتری',
+        'family' => 'خانواده',
+        'plant' => 'کارخانه',
+        'brand' => 'برند',
+        'template' => 'قالب',
+        'product' => 'محصول',
+        'review' => 'جمع‌بندی',
+    ];
+    $wizardStepKeys = array_keys($wizardSteps);
+    $activeStepIndex = array_search($step, $wizardStepKeys, true);
+    $catalogTrail = $this->catalogSelectionSummary;
+@endphp
 <div class="rep-order-wizard"
      wire:loading.class="opacity-75"
      @rep-product-images-modal-closed.window="document.documentElement.classList.remove('rep-modal-open')">
-    <nav class="rep-wizard-steps" aria-label="مراحل سفارش">
-        @foreach ([
-            'customer' => 'مشتری',
-            'family' => 'خانواده',
-            'plant' => 'کارخانه',
-            'brand' => 'برند',
-            'template' => 'قالب',
-            'product' => 'محصول',
-            'review' => 'جمع‌بندی',
-        ] as $key => $label)
+    <nav class="rep-wizard-stepper" aria-label="مراحل سفارش">
+        @foreach ($wizardSteps as $key => $label)
+            @php
+                $stepIndex = array_search($key, $wizardStepKeys, true);
+                $isStepActive = $step === $key;
+                $isStepComplete = $activeStepIndex !== false && $stepIndex !== false && $stepIndex < $activeStepIndex;
+            @endphp
             <button type="button"
                     wire:click="goToStep('{{ $key }}')"
                     @disabled($key !== 'customer' && $orderId === null)
-                    class="rep-wizard-step {{ $step === $key ? 'is-active' : '' }}">
-                {{ $label }}
+                    class="rep-wizard-stepper__item {{ $isStepActive ? 'is-active' : '' }} {{ $isStepComplete ? 'is-complete' : '' }}"
+                    @if ($isStepActive) aria-current="step" @endif>
+                <span class="rep-wizard-stepper__label">{{ $label }}</span>
             </button>
         @endforeach
     </nav>
 
     @if ($step === 'customer')
         <section class="rep-wizard-panel">
-            <h2 class="rep-wizard-title">انتخاب مشتری</h2>
-            <p class="rep-wizard-hint">حداکثر ۵۰ مشتری اخیر — بدون بارگذاری تصویر برای سرعت بیشتر.</p>
-            <ul class="rep-choice-list">
+            <header class="rep-wizard-header">
+                <h2 class="rep-wizard-title">انتخاب مشتری</h2>
+                <p class="rep-wizard-hint">حداکثر ۵۰ مشتری اخیر نمایش داده می‌شود. در صورت نیاز از منوی «مشتریان» شخص جدید ثبت کنید.</p>
+            </header>
+            <ul class="rep-plan-list" role="list">
                 @forelse ($this->customers as $customer)
                     <li>
-                        <button type="button" class="rep-choice-btn" wire:click="selectCustomer({{ $customer->id }})">
-                            <span class="rep-choice-title">{{ $customer->name }}</span>
-                            <span class="rep-choice-meta">{{ $customer->phone }}</span>
+                        <button type="button"
+                                class="rep-plan-row"
+                                wire:click="selectCustomer({{ $customer->id }})">
+                            <span class="rep-plan-row__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            </span>
+                            <span class="rep-plan-row__body">
+                                <span class="rep-plan-row__title">{{ $customer->name }}</span>
+                                <span class="rep-plan-row__meta">{{ $customer->phone }}</span>
+                            </span>
+                            <span class="rep-plan-row__radio" aria-hidden="true"></span>
                         </button>
                     </li>
                 @empty
@@ -41,95 +63,138 @@
 
     @if ($step === 'family')
         <section class="rep-wizard-panel">
-            <h2 class="rep-wizard-title">خانواده محصول</h2>
-            <ul class="rep-choice-list">
+            <header class="rep-wizard-header">
+                <h2 class="rep-wizard-title">خانواده محصول</h2>
+                <p class="rep-wizard-hint">فقط خانواده‌هایی که محصول فعال و موجود دارند نمایش داده می‌شوند.</p>
+            </header>
+            <div class="rep-chip-grid" role="list">
                 @forelse ($this->families as $family)
-                    <li>
-                        <button type="button" class="rep-choice-btn" wire:click="selectFamily({{ $family->id }})">
-                            {{ $family->name }}
-                        </button>
-                    </li>
+                    <button type="button"
+                            role="listitem"
+                            class="rep-chip {{ $familyId === $family->id ? 'is-selected' : '' }}"
+                            wire:click="selectFamily({{ $family->id }})">
+                        {{ $family->name }}
+                    </button>
                 @empty
-                    <li class="rep-wizard-empty">خانواده فعالی با محصول موجود نیست.</li>
+                    <p class="rep-wizard-empty">خانواده فعالی با محصول موجود نیست.</p>
                 @endforelse
-            </ul>
+            </div>
         </section>
     @endif
 
     @if ($step === 'plant')
         <section class="rep-wizard-panel">
-            <h2 class="rep-wizard-title">کارخانه</h2>
-            <ul class="rep-choice-list">
+            <header class="rep-wizard-header">
+                <h2 class="rep-wizard-title">کارخانه</h2>
+                @if ($catalogTrail['family'])
+                    <p class="rep-wizard-hint">خانواده: <strong>{{ $catalogTrail['family'] }}</strong> — کارخانه‌های مرتبط با این خانواده.</p>
+                @endif
+            </header>
+            <div class="rep-chip-grid" role="list">
                 @forelse ($this->plants as $plant)
-                    <li>
-                        <button type="button" class="rep-choice-btn" wire:click="selectPlant({{ $plant->id }})">
-                            {{ $plant->name }}
-                        </button>
-                    </li>
+                    <button type="button"
+                            role="listitem"
+                            class="rep-chip {{ $plantId === $plant->id ? 'is-selected' : '' }}"
+                            wire:click="selectPlant({{ $plant->id }})">
+                        {{ $plant->name }}
+                    </button>
                 @empty
-                    <li class="rep-wizard-empty">کارخانه‌ای برای این خانواده پیدا نشد.</li>
+                    <p class="rep-wizard-empty">کارخانه‌ای برای این خانواده پیدا نشد.</p>
                 @endforelse
-            </ul>
+            </div>
         </section>
     @endif
 
     @if ($step === 'brand')
         <section class="rep-wizard-panel">
-            <h2 class="rep-wizard-title">برند</h2>
-            <ul class="rep-choice-list">
+            <header class="rep-wizard-header">
+                <h2 class="rep-wizard-title">برند</h2>
+                @if ($catalogTrail['family'] || $catalogTrail['plant'])
+                    <p class="rep-wizard-hint">
+                        @if ($catalogTrail['family']){{ $catalogTrail['family'] }}@endif
+                        @if ($catalogTrail['plant']) · {{ $catalogTrail['plant'] }}@endif
+                    </p>
+                @endif
+            </header>
+            <div class="rep-chip-grid" role="list">
                 @forelse ($this->brands as $brand)
-                    <li>
-                        <button type="button" class="rep-choice-btn" wire:click="selectBrand({{ $brand->id }})">
-                            {{ $brand->name }}
-                        </button>
-                    </li>
+                    <button type="button"
+                            role="listitem"
+                            class="rep-chip {{ $brandId === $brand->id ? 'is-selected' : '' }}"
+                            wire:click="selectBrand({{ $brand->id }})">
+                        {{ $brand->name }}
+                    </button>
                 @empty
-                    <li class="rep-wizard-empty">برندی برای انتخاب‌های قبلی نیست.</li>
+                    <p class="rep-wizard-empty">برندی برای انتخاب‌های قبلی نیست.</p>
                 @endforelse
-            </ul>
+            </div>
         </section>
     @endif
 
     @if ($step === 'template')
         <section class="rep-wizard-panel">
-            <h2 class="rep-wizard-title">قالب محصول</h2>
-            <ul class="rep-choice-list">
+            <header class="rep-wizard-header">
+                <h2 class="rep-wizard-title">قالب محصول</h2>
+                @if ($catalogTrail['brand'])
+                    <p class="rep-wizard-hint">برند: <strong>{{ $catalogTrail['brand'] }}</strong> — قالب‌های فعال با موجودی در کارخانه انتخاب‌شده.</p>
+                @endif
+            </header>
+            <div class="rep-chip-grid" role="list">
                 @forelse ($this->templates as $template)
-                    <li>
-                        <button type="button" class="rep-choice-btn" wire:click="selectTemplate({{ $template->id }})">
-                            {{ $template->name }}
-                        </button>
-                    </li>
+                    <button type="button"
+                            role="listitem"
+                            class="rep-chip {{ $templateId === $template->id ? 'is-selected' : '' }}"
+                            wire:click="selectTemplate({{ $template->id }})">
+                        {{ $template->name }}
+                    </button>
                 @empty
-                    <li class="rep-wizard-empty">قالبی پیدا نشد.</li>
+                    <p class="rep-wizard-empty">قالبی برای این ترکیب خانواده، کارخانه و برند نیست.</p>
                 @endforelse
-            </ul>
+            </div>
         </section>
     @endif
 
     @if ($step === 'product')
         <section class="rep-wizard-panel">
-            <h2 class="rep-wizard-title">انتخاب محصول</h2>
-            <input type="search"
-                   wire:model.live.debounce.400ms="productSearch"
-                   class="rep-wizard-search"
-                   placeholder="جستجو نام یا کد کالا…"
-                   autocomplete="off">
-            <div class="rep-wizard-qty">
-                <label>تعداد</label>
-                <input type="number" min="1" max="999" wire:model="quantity" class="rep-wizard-qty-input">
+            <header class="rep-wizard-header">
+                <h2 class="rep-wizard-title">انتخاب محصول</h2>
+                @if ($catalogTrail['family'] || $catalogTrail['plant'] || $catalogTrail['brand'] || $catalogTrail['template'])
+                    <p class="rep-wizard-hint rep-catalog-trail">
+                        {{ collect([$catalogTrail['family'], $catalogTrail['plant'], $catalogTrail['brand'], $catalogTrail['template']])->filter()->implode(' · ') }}
+                    </p>
+                @endif
+            </header>
+            <div class="rep-wizard-toolbar">
+                <label class="rep-field rep-field--grow">
+                    <span class="rep-field__label">جستجو</span>
+                    <input type="search"
+                           wire:model.live.debounce.400ms="productSearch"
+                           class="rep-field__input"
+                           placeholder="نام یا کد کالا…"
+                           autocomplete="off">
+                </label>
+                <label class="rep-field rep-field--qty">
+                    <span class="rep-field__label">تعداد افزودن</span>
+                    <input type="number" min="1" max="999" wire:model="quantity" class="rep-field__input rep-field__input--qty">
+                </label>
             </div>
-            <ul class="rep-product-list">
+            <ul class="rep-plan-list rep-plan-list--products" role="list">
                 @php $products = $this->products; @endphp
                 @if ($products)
                     @forelse ($products as $product)
-                        <li class="rep-product-row">
-                            <div>
-                                <div class="rep-choice-title">{{ $product->name }}</div>
-                                <div class="rep-choice-meta">
-                                    {{ $product->sku ?: '—' }} · {{ $this->formatMoney($product->effective_price) }}
-                                    · موجودی {{ $product->stock }}
-                                </div>
+                        <li class="rep-plan-list__item-with-actions" wire:key="rep-product-{{ $product->id }}">
+                            <div class="rep-plan-row rep-plan-row--static">
+                                <span class="rep-plan-row__icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.3 7.7 12 12l8.7-4.3"/><path d="M12 22V12"/></svg>
+                                </span>
+                                <span class="rep-plan-row__body">
+                                    <span class="rep-plan-row__title">{{ $product->name }}</span>
+                                    <span class="rep-plan-row__meta">
+                                        کد: {{ $product->sku ?: '—' }}
+                                        · {{ $this->formatMoney($product->effective_price) }}
+                                        · موجودی: {{ $product->stock }}
+                                    </span>
+                                </span>
                             </div>
                             <div class="rep-product-row-actions">
                                 <button type="button"
@@ -137,25 +202,26 @@
                                         wire:click="openProductImages({{ $product->id }})"
                                         wire:loading.attr="disabled"
                                         wire:target="openProductImages">
-                                    <span wire:loading.remove wire:target="openProductImages">مشاهده تصویر محصول</span>
-                                    <span wire:loading wire:target="openProductImages">در حال آماده‌سازی…</span>
+                                    <span wire:loading.remove wire:target="openProductImages">تصاویر</span>
+                                    <span wire:loading wire:target="openProductImages">…</span>
                                 </button>
                                 <button type="button" class="rep-btn-primary" wire:click="addProduct({{ $product->id }})">
-                                    افزودن
+                                    افزودن به سفارش
                                 </button>
                             </div>
                         </li>
                     @empty
-                        <li class="rep-wizard-empty">محصولی مطابق فیلترها نیست.</li>
+                        <li class="rep-wizard-empty">محصولی مطابق فیلترهای خانواده، کارخانه، برند و قالب نیست.</li>
                     @endforelse
-                    <div class="rep-pagination">
+                    <li class="rep-pagination">
                         @if (! $products->onFirstPage())
                             <button type="button" class="rep-btn-secondary" wire:click="previousPage('page')">صفحه قبل</button>
                         @endif
+                        <span class="rep-pagination__info">صفحه {{ $products->currentPage() }} از {{ $products->lastPage() }}</span>
                         @if ($products->hasMorePages())
                             <button type="button" class="rep-btn-secondary" wire:click="nextPage('page')">صفحه بعد</button>
                         @endif
-                    </div>
+                    </li>
                 @endif
             </ul>
         </section>
@@ -163,7 +229,10 @@
 
     @if ($step === 'review')
         <section class="rep-wizard-panel">
-            <h2 class="rep-wizard-title">جمع‌بندی پیش‌سفارش</h2>
+            <header class="rep-wizard-header">
+                <h2 class="rep-wizard-title">جمع‌بندی پیش‌سفارش</h2>
+                <p class="rep-wizard-hint">باربری و درگاه را انتخاب کنید، سپس پیش‌فاکتور را ثبت کنید.</p>
+            </header>
             @php $order = $this->draftOrder; @endphp
             @if ($order)
                 <p class="rep-wizard-hint">
@@ -173,7 +242,7 @@
                     $catalog = $this->catalogSelectionSummary;
                 @endphp
                 @if ($catalog['family'] || $catalog['plant'] || $catalog['brand'] || $catalog['template'])
-                    <dl class="rep-catalog-summary">
+                    <dl class="rep-catalog-summary rep-catalog-summary--cards">
                         @if ($catalog['family'])
                             <div><dt>خانواده</dt><dd>{{ $catalog['family'] }}</dd></div>
                         @endif

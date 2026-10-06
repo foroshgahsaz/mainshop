@@ -4,11 +4,13 @@ namespace App\Filament\Pages;
 
 use App\Filament\Support\CrudSuccessNotification;
 use App\Filament\Support\ShopIconUpload;
+use App\Services\Payment\BajetReturnUrl;
 use App\Services\Settings\SettingsService;
 use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 
 class ManageBajetPay extends Page implements HasForms
@@ -102,16 +104,17 @@ class ManageBajetPay extends Page implements HasForms
                     Forms\Components\TextInput::make('sandbox_base_url')
                         ->label('Base URL تست API')
                         ->placeholder('https://host:port')
-                        ->helperText('سرور API برای توکن و ایجاد سفارش؛ مسیرها /api/v1/jetpay/... خودکار اضافه می‌شوند.')
+                        ->helperText('فقط دامنه با https (نه IP خام) — با IP خطای SSL cURL 60 می‌گیرید. مسیرها /api/v1/jetpay/... خودکار اضافه می‌شوند.')
                         ->columnSpanFull(),
                     Forms\Components\TextInput::make('portal_sandbox_base_url')
                         ->label('آدرس پرتال پرداخت (Sandbox)')
                         ->placeholder('https://sandbox-jetpay.example.ir')
-                        ->helperText('آدرسی که مرورگر مشتری باز می‌کند. اگر API لینک داخلی یا http روی 8443 برگرداند، با این آدرس جایگزین می‌شود (مسیر /fa/ep/invoice?requestId=…).')
+                        ->helperText('فقط وقتی API هاست داخلی برمی‌گرداند؛ دامنهٔ عمومی پرتال — مسیر و id همان پاسخ API حفظ می‌شود.')
                         ->columnSpanFull(),
                     Forms\Components\TextInput::make('base_url')
                         ->label('Base URL عملیاتی API')
                         ->placeholder('https://host:port')
+                        ->helperText('دامنهٔ رسمی باجت از مستند (نه https://45.x.x.x) — با IP گواهی SSL خطا می‌دهد.')
                         ->columnSpanFull(),
                     Forms\Components\TextInput::make('portal_base_url')
                         ->label('آدرس پرتال پرداخت (عملیاتی)')
@@ -137,6 +140,19 @@ class ManageBajetPay extends Page implements HasForms
     {
         $data = $this->form->getState();
 
+        foreach (['sandbox_base_url', 'base_url'] as $field) {
+            $url = trim((string) ($data[$field] ?? ''));
+            if ($url !== '' && self::apiBaseUrlUsesIpHost($url)) {
+                Notification::make()
+                    ->danger()
+                    ->title('آدرس API نامعتبر')
+                    ->body('Base URL باید با نام دامنه (hostname) باشد، نه IP. با IP گواهی SSL خطای cURL 60 می‌دهد.')
+                    ->send();
+
+                return;
+            }
+        }
+
         $settings->setMany('bajet', [
             'enabled' => $data['enabled'] ?? false,
             'sandbox' => $data['sandbox'] ?? true,
@@ -144,7 +160,7 @@ class ManageBajetPay extends Page implements HasForms
             'password' => $data['password'] ?? '',
             'terminal_id' => $data['terminal_id'] ?? '',
             'amount_unit' => $data['amount_unit'] ?? 'toman',
-            'return_url_base' => $data['return_url_base'] ?? '',
+            'return_url_base' => BajetReturnUrl::normalizeStoredBase((string) ($data['return_url_base'] ?? '')),
             'callback_url' => $data['callback_url'] ?? '/payment/callback/bajet',
             'sandbox_base_url' => $data['sandbox_base_url'] ?? '',
             'portal_sandbox_base_url' => $data['portal_sandbox_base_url'] ?? '',
@@ -159,5 +175,12 @@ class ManageBajetPay extends Page implements HasForms
             ->title('ذخیره شد')
             ->body('تنظیمات باجت‌پی با موفقیت ذخیره شد.')
             ->send();
+    }
+
+    protected static function apiBaseUrlUsesIpHost(string $url): bool
+    {
+        $host = parse_url($url, PHP_URL_HOST);
+
+        return is_string($host) && filter_var($host, FILTER_VALIDATE_IP) !== false;
     }
 }

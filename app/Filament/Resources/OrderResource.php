@@ -45,16 +45,27 @@ class OrderResource extends Resource
     public static function table(Table $table): Table
     {
         return AdminTable::configure($table)
+            ->recordUrl(fn (Order $record): string => static::getUrl('view', ['record' => $record]))
             ->columns([
-                Tables\Columns\TextColumn::make('tracking_code')->label('کد سفارش')->searchable()->copyable(),
-                Tables\Columns\TextColumn::make('user.name')->label('کاربر')->placeholder('—'),
+                Tables\Columns\TextColumn::make('tracking_code')
+                    ->label('کد سفارش')
+                    ->searchable()
+                    ->copyable()
+                    ->weight('medium')
+                    ->color('primary'),
+                Tables\Columns\TextColumn::make('user.name')->label('کاربر')->placeholder('—')->wrap(),
                 Tables\Columns\TextColumn::make('representative.name')
                     ->label('نماینده')
                     ->placeholder('—')
-                    ->toggleable(),
-                Tables\Columns\TextColumn::make('user.phone')->label('موبایل')->placeholder('—')->toggleable(),
+                    ->toggleable()
+                    ->wrap(),
+                Tables\Columns\TextColumn::make('user.phone')
+                    ->label('موبایل')
+                    ->placeholder('—')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('final_amount')
                     ->label('مبلغ')
+                    ->alignEnd()
                     ->formatStateUsing(fn (?int $state) => ShopLabels::formatMoney($state)),
                 Tables\Columns\TextColumn::make('payment_method')
                     ->label('روش پرداخت')
@@ -64,7 +75,11 @@ class OrderResource extends Resource
                     ->label('وضعیت')
                     ->badge()
                     ->formatStateUsing(fn (?string $state) => ShopLabels::orderStatus($state)),
-                Tables\Columns\TextColumn::make('created_at')->label('تاریخ')->dateTime('Y/m/d H:i')->sortable(),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('تاریخ')
+                    ->dateTime('Y/m/d H:i')
+                    ->sortable()
+                    ->toggleable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('payment_method')
@@ -76,9 +91,15 @@ class OrderResource extends Resource
             ])
             ->defaultSort('created_at', 'desc')
             ->actions([
-                Tables\Actions\ViewAction::make()->label('جزئیات'),
+                Tables\Actions\ViewAction::make()
+                    ->label('جزئیات')
+                    ->icon('heroicon-o-eye')
+                    ->color('primary')
+                    ->button()
+                    ->outlined(),
                 OrderDeleteActions::tableDeleteAction(),
             ])
+            ->actionsColumnLabel('عملیات')
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     OrderDeleteActions::tableBulkDeleteAction(),

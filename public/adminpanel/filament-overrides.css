@@ -459,15 +459,77 @@ body.fi-body .fi-admin-shell .fi-wi-widget {
 
 .fi-admin-shell .fi-ta-cell,
 .fi-admin-shell .fi-ta-actions-cell {
-    padding: 0 !important;
+    padding: 12px 16px !important;
     color: #3f4254;
     vertical-align: middle;
+    font-size: 13px;
+    line-height: 1.45;
 }
 
 .fi-admin-shell .fi-ta-cell .fi-ta-text,
 .fi-admin-shell .fi-ta-cell .fi-ta-text-item,
 .fi-admin-shell .fi-ta-cell > div {
     padding: 0 !important;
+}
+
+.fi-admin-shell .fi-ta-row {
+    border-bottom: 1px solid #f1f1f4;
+    transition: background-color 0.12s ease;
+}
+
+.fi-admin-shell .fi-ta-row:last-child {
+    border-bottom: none;
+}
+
+.fi-admin-shell .fi-ta-actions-cell {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.fi-admin-shell .fi-ta-actions-cell .fi-ac-btn-action.fi-btn {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 12px;
+    min-height: 34px;
+    box-shadow: none;
+}
+
+.fi-admin-shell .fi-ta-actions-cell .fi-ac-btn-action.fi-btn.fi-color-primary {
+    border-color: #e4e6ef;
+    color: #7239ea;
+    background: #f8f5ff;
+}
+
+.fi-admin-shell .fi-ta-actions-cell .fi-ac-btn-action.fi-btn.fi-color-primary:hover {
+    background: #7239ea;
+    color: #fff;
+    border-color: #7239ea;
+}
+
+.fi-admin-shell .fi-ta-actions-cell .fi-icon-btn.fi-color-danger {
+    color: #f1416c;
+    border-color: #fce7ec;
+    background: #fff5f8;
+}
+
+.fi-admin-shell .fi-ta-actions-cell .fi-icon-btn.fi-color-danger:hover {
+    background: #f1416c;
+    color: #fff;
+    border-color: #f1416c;
+}
+
+.fi-admin-shell .fi-ta-header-cell-label {
+    letter-spacing: 0.01em;
+}
+
+.fi-admin-shell .fi-ta-pagination {
+    padding: 12px 20px 16px !important;
+    border-top: 1px solid #eff2f5;
+    background: #fafbfc;
 }
 
 /* دکمه ایجاد فقط در admin-top-bar — نه داخل جدول */
@@ -857,6 +919,18 @@ body.fi-body .fi-no-notification-icon {
     padding-top: 0 !important;
     padding-bottom: 24px !important;
     gap: 12px !important;
+}
+
+.fi-admin-shell .fi-resource-list-records-page .fi-ta-ctn {
+    margin: 0 24px 20px;
+    border-radius: 12px;
+    border: 1px solid #eff2f5;
+    box-shadow: 0 4px 24px rgba(24, 28, 50, 0.04);
+    overflow: hidden;
+}
+
+.fi-admin-shell .fi-resource-list-records-page .fi-ta-header-toolbar {
+    border-radius: 12px 12px 0 0;
 }
 
 .fi-admin-shell .content-area {

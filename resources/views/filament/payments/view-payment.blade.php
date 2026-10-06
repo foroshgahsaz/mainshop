@@ -49,6 +49,15 @@
                     </dl>
                 </section>
 
+                @if ($payment->gateway === 'tara')
+                    @php
+                        $taraPayload = app(\App\Services\Payment\TaraIpgPayloadPreview::class)->forPayment($payment);
+                    @endphp
+                    @if ($taraPayload !== [])
+                        @include('filament.partials.tara-ipg-payload-preview', ['payload' => $taraPayload])
+                    @endif
+                @endif
+
                 @if($payment->raw_response)
                     <section class="admin-order__section">
                         <h2 class="admin-order__section-title">پاسخ درگاه</h2>

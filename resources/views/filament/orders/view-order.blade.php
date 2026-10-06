@@ -48,6 +48,19 @@
                     @include('filament.orders.partials.payments-table', ['order' => $order])
                 @endif
 
+                @if ($order->payment_method === 'tara')
+                    @php
+                        $taraPayment = $order->payments->where('gateway', 'tara')->sortByDesc('id')->first();
+                        $taraPreview = app(\App\Services\Payment\TaraIpgPayloadPreview::class);
+                        $taraPayload = $taraPayment
+                            ? $taraPreview->forPayment($taraPayment, $order)
+                            : $taraPreview->forOrder($order);
+                    @endphp
+                    @if ($taraPayload !== [])
+                        @include('filament.partials.tara-ipg-payload-preview', ['payload' => $taraPayload])
+                    @endif
+                @endif
+
                 @include('filament.orders.partials.notes-timeline', ['order' => $order])
             </div>
 

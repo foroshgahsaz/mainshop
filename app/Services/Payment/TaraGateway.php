@@ -19,6 +19,7 @@ class TaraGateway implements PaymentGatewayInterface
         protected PaymentAuditLogger $audit,
         protected OrderActivityLogger $orderLog,
         protected SettingsService $settings,
+        protected TaraInvoiceItemBuilder $invoiceItems,
     ) {}
 
     public function initiate(Payment $payment, Order $order): string
@@ -60,12 +61,19 @@ class TaraGateway implements PaymentGatewayInterface
             'vat' => 0,
         ];
 
+        $invoiceItem = $payload['taraInvoiceItemList'][0] ?? [];
+
         $this->audit->step(
             $payment,
             PaymentAuditStep::GATEWAY_REQUEST,
             'tara_get_token',
             'درخواست توکن به تارا ارسال شد.',
-            ['amount' => $payment->amount]
+            [
+                'amount' => $payment->amount,
+                'group' => $invoiceItem['group'] ?? null,
+                'groupTitle' => $invoiceItem['groupTitle'] ?? null,
+                'taraInvoiceItemList' => $payload['taraInvoiceItemList'],
+            ]
         );
 
         $response = $this->http($config['base_url'])
@@ -236,16 +244,7 @@ class TaraGateway implements PaymentGatewayInterface
      */
     protected function invoiceItem(Order $order, Payment $payment, array $config, int $gatewayAmount): array
     {
-        return [
-            'name' => 'سفارش '.$order->tracking_code,
-            'code' => $payment->tracking_code,
-            'count' => 1,
-            'unit' => 5,
-            'fee' => $gatewayAmount,
-            'group' => (string) $config['default_group'],
-            'groupTitle' => (string) $config['default_group_title'],
-            'data' => $order->tracking_code,
-        ];
+        return $this->invoiceItems->build($order, $payment, $config, $gatewayAmount);
     }
 
     /** @param  array<string, mixed>  $config */

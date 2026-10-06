@@ -100,7 +100,7 @@ class SalesInvoiceBuilder
         return new SalesInvoiceDocument(
             title: $title,
             invoiceNumber: (string) $order->tracking_code,
-            invoiceDate: $order->updated_at?->format('Y/m/d H:i') ?? now()->format('Y/m/d H:i'),
+            invoiceDate: $order->updated_at?->shopJalali() ?? now()->shopJalali(),
             seller: $seller,
             buyer: $buyer,
             lines: $lines,
@@ -151,7 +151,7 @@ class SalesInvoiceBuilder
         return new SalesInvoiceDocument(
             title: 'فاکتور فروش',
             invoiceNumber: 'سبد-'.now()->format('YmdHis'),
-            invoiceDate: now()->format('Y/m/d H:i'),
+            invoiceDate: now()->shopJalali(),
             seller: [
                 'name' => (string) ($site['name'] ?? config('app.name')),
                 'phone' => (string) ($site['phone'] ?? ''),

@@ -27,7 +27,7 @@
                         </span>
                     </td>
                     <td>{{ $order->items_count ?? $order->items->count() }}</td>
-                    <td>{{ $order->created_at?->format('Y/m/d H:i') }}</td>
+                    <td>{{ $order->created_at?->shopJalali() }}</td>
                     <td>
                         <a href="{{ \App\Filament\Resources\OrderResource::getUrl('view', ['record' => $order]) }}"
                            class="admin-order__link">جزئیات</a>

@@ -344,7 +344,7 @@ class PaymentLogReader
         }
 
         try {
-            return Carbon::createFromFormat('Y-m-d', $dateYmd)->format('Y/m/d');
+            return Carbon::createFromFormat('Y-m-d', $dateYmd)->shopJalali('Y/m/d');
         } catch (\Throwable) {
             return $dateYmd;
         }

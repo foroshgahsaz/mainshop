@@ -51,7 +51,7 @@ class RepresentativeProformaService
 
             $this->orderLog->system(
                 $locked->fresh(),
-                'موجودی پیش‌فاکتور رزرو شد تا '.$expiresAt->format('Y/m/d H:i').'.',
+                'موجودی پیش‌فاکتور رزرو شد تا '.$expiresAt->shopJalali().'.',
                 'proforma_stock_reserved'
             );
 
@@ -124,7 +124,7 @@ class RepresentativeProformaService
 
         $order->update(['stock_reserved_until' => $newUntil]);
 
-        $message = 'مهلت رزرو موجودی تا '.$newUntil->format('Y/m/d H:i').' تمدید شد.';
+        $message = 'مهلت رزرو موجودی تا '.$newUntil->shopJalali().' تمدید شد.';
         if ($actor?->isAdmin()) {
             $this->orderLog->byUser($order->fresh(), $actor, $message, 'private');
         } else {

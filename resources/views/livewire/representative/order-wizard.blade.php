@@ -476,7 +476,7 @@
                                     @endif
                                     <span class="rep-active-proformas__amount">{{ $this->formatMoney((int) $reservedOrder->final_amount) }}</span>
                                     @if ($reservedOrder->stock_reserved_until)
-                                        <span class="rep-active-proformas__until">انقضای رزرو: {{ $reservedOrder->stock_reserved_until->format('Y/m/d H:i') }}</span>
+                                        <span class="rep-active-proformas__until">انقضای رزرو: {{ $reservedOrder->stock_reserved_until->shopJalali() }}</span>
                                     @endif
                                 </a>
                             </li>

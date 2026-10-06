@@ -8,7 +8,7 @@ use Filament\Pages\Page;
 
 class ViewSiteErrorLogs extends Page
 {
-    public const UI_VERSION = '2026-10-05-v1';
+    public const UI_VERSION = '2026-10-06-v2';
 
     protected static ?string $navigationIcon = 'heroicon-o-bug-ant';
 
@@ -49,6 +49,12 @@ class ViewSiteErrorLogs extends Page
     /** @var list<string> */
     public array $searchScannedFiles = [];
 
+    /** @var list<array<string, mixed>> */
+    public array $discoveredLogFiles = [];
+
+    /** @var array<string, mixed> */
+    public array $logDiagnostics = [];
+
     public static function canAccess(): bool
     {
         return AdminAccess::canManageShopInAdmin();
@@ -58,7 +64,18 @@ class ViewSiteErrorLogs extends Page
     {
         $this->logsDirectory = $reader->logDirectory();
         $this->recentEntries = $reader->recentDayEntries(ApplicationLogReader::RECENT_DAYS);
+        $this->discoveredLogFiles = $reader->discoverLaravelLogFiles();
+        $this->logDiagnostics = $reader->storageDiagnostics();
         $this->legacyLogEntry = $reader->legacySingleLogEntry();
+        if ($this->legacyLogEntry !== null) {
+            foreach ($this->recentEntries as $entry) {
+                if (($entry['basename'] ?? null) === 'laravel.log') {
+                    $this->legacyLogEntry = null;
+
+                    break;
+                }
+            }
+        }
 
         $preview = $reader->tailRecentErrors();
         $this->errorPreviewLines = $preview['lines'];

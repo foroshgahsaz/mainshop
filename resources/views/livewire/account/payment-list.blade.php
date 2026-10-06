@@ -16,7 +16,7 @@
                 <div>
                     <p class="font-bold text-sm text-navy">{{ number_format($payment->amount) }} تومان</p>
                     <p class="text-xs text-gray-400 mt-1">
-                        {{ $payment->created_at->format('Y/m/d H:i') }}
+                        {{ $payment->created_at->shopJalali() }}
                         @if ($payment->order)
                             — سفارش {{ $payment->order->tracking_code }}
                         @endif

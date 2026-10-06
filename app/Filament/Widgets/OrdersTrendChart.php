@@ -38,7 +38,7 @@ class OrdersTrendChart extends ChartWidget
                 ->groupBy('day')
                 ->pluck('total', 'day');
 
-            $labels = $days->map(fn (Carbon $d) => $d->format('m/d'))->values()->all();
+            $labels = $days->map(fn (Carbon $d) => $d->shopJalali('m/d'))->values()->all();
             $orderCounts = $days->map(fn (Carbon $d) => (int) ($ordersByDay[$d->toDateString()] ?? 0))->values()->all();
             $revenues = $days->map(fn (Carbon $d) => (int) (($revenueByDay[$d->toDateString()] ?? 0) / 1000))->values()->all();
 

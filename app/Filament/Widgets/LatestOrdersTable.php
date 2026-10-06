@@ -57,7 +57,7 @@ class LatestOrdersTable extends BaseWidget
                     }),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاریخ')
-                    ->since()
+                    ->shopJalaliDateTime()
                     ->sortable(),
             ])
             ->actions([

@@ -51,7 +51,7 @@ class PageResource extends Resource
                 Tables\Columns\TextColumn::make('title')->label('عنوان')->searchable(),
                 Tables\Columns\TextColumn::make('slug')->label('اسلاگ')->copyable(),
                 Tables\Columns\IconColumn::make('is_active')->label('فعال')->boolean(),
-                Tables\Columns\TextColumn::make('updated_at')->label('به‌روزرسانی')->dateTime('Y/m/d'),
+                Tables\Columns\TextColumn::make('updated_at')->label('به‌روزرسانی')->shopJalaliDate(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()->label('ویرایش')->iconButton(),

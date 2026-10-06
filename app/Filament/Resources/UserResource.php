@@ -446,7 +446,7 @@ class UserResource extends Resource
                     ->visible(fn (): bool => AdminAccess::canManageShopInAdmin() || AdminAccess::isSalesManagerOnly()),
                 Tables\Columns\TextColumn::make('last_login_at')
                     ->label('آخرین ورود')
-                    ->since()
+                    ->shopJalaliDateTime()
                     ->placeholder('هرگز'),
                 Tables\Columns\TextColumn::make('phone_verified_at')
                     ->label('احراز موبایل')
@@ -455,7 +455,7 @@ class UserResource extends Resource
                     ->color(fn ($state) => $state ? 'success' : 'gray'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاریخ عضویت')
-                    ->dateTime('Y/m/d H:i')
+                    ->shopJalaliDateTime()
                     ->sortable(),
             ])
             ->filters([

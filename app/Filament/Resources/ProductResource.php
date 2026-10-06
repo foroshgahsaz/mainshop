@@ -190,13 +190,13 @@ class ProductResource extends Resource
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاریخ ایجاد')
-                    ->dateTime('Y/m/d H:i')
+                    ->shopJalaliDateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('تاریخ ویرایش')
-                    ->dateTime('Y/m/d H:i')
+                    ->shopJalaliDateTime()
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('lastEditedBy.name')

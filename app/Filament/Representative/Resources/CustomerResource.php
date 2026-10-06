@@ -101,7 +101,7 @@ class CustomerResource extends Resource
                         ?? '—'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاریخ ثبت')
-                    ->dateTime('Y-m-d')
+                    ->shopJalaliDate()
                     ->sortable(),
             ])
             ->defaultSort('created_at', 'desc')

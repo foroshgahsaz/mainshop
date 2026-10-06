@@ -166,7 +166,7 @@
                                         <a href="{{ route('blog.show', $post) }}">
                                             <h3 class="text-sm font-bold leading-7 mb-3 hover:text-brand-gold">{{ $post->title }}</h3>
                                         </a>
-                                        <p class="text-[11px] text-gray-400">{{ optional($post->published_at)->format('Y/m/d') }}</p>
+                                        <p class="text-[11px] text-gray-400">{{ optional($post->published_at)->shopJalali('Y/m/d') }}</p>
                                     </div>
                                 </article>
                             </div>

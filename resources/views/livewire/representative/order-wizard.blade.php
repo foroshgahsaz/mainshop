@@ -32,12 +32,14 @@
         @endforeach
     </nav>
 
+    <div class="rep-wizard-stage">
     @if ($step === 'customer')
         <section class="rep-wizard-panel">
             <header class="rep-wizard-header">
                 <h2 class="rep-wizard-title">انتخاب مشتری</h2>
                 <p class="rep-wizard-hint">حداکثر ۵۰ مشتری اخیر نمایش داده می‌شود. در صورت نیاز از منوی «مشتریان» شخص جدید ثبت کنید.</p>
             </header>
+            <div class="rep-wizard-panel__body">
             <ul class="rep-plan-list" role="list">
                 @forelse ($this->customers as $customer)
                     <li>
@@ -58,6 +60,7 @@
                     <li class="rep-wizard-empty">مشتری ثبت نشده — از منوی مشتریان یک نفر اضافه کنید.</li>
                 @endforelse
             </ul>
+            </div>
         </section>
     @endif
 
@@ -67,6 +70,7 @@
                 <h2 class="rep-wizard-title">خانواده محصول</h2>
                 <p class="rep-wizard-hint">فقط خانواده‌هایی که محصول فعال و موجود دارند نمایش داده می‌شوند.</p>
             </header>
+            <div class="rep-wizard-panel__body">
             <div class="rep-chip-grid" role="list">
                 @forelse ($this->families as $family)
                     <button type="button"
@@ -79,6 +83,7 @@
                     <p class="rep-wizard-empty">خانواده فعالی با محصول موجود نیست.</p>
                 @endforelse
             </div>
+            </div>
         </section>
     @endif
 
@@ -90,6 +95,7 @@
                     <p class="rep-wizard-hint">خانواده: <strong>{{ $catalogTrail['family'] }}</strong> — کارخانه‌های مرتبط با این خانواده.</p>
                 @endif
             </header>
+            <div class="rep-wizard-panel__body">
             <div class="rep-chip-grid" role="list">
                 @forelse ($this->plants as $plant)
                     <button type="button"
@@ -101,6 +107,7 @@
                 @empty
                     <p class="rep-wizard-empty">کارخانه‌ای برای این خانواده پیدا نشد.</p>
                 @endforelse
+            </div>
             </div>
         </section>
     @endif
@@ -116,6 +123,7 @@
                     </p>
                 @endif
             </header>
+            <div class="rep-wizard-panel__body">
             <div class="rep-chip-grid" role="list">
                 @forelse ($this->brands as $brand)
                     <button type="button"
@@ -128,6 +136,7 @@
                     <p class="rep-wizard-empty">برندی برای انتخاب‌های قبلی نیست.</p>
                 @endforelse
             </div>
+            </div>
         </section>
     @endif
 
@@ -139,6 +148,7 @@
                     <p class="rep-wizard-hint">برند: <strong>{{ $catalogTrail['brand'] }}</strong> — قالب‌های فعال با موجودی در کارخانه انتخاب‌شده.</p>
                 @endif
             </header>
+            <div class="rep-wizard-panel__body">
             <div class="rep-chip-grid" role="list">
                 @forelse ($this->templates as $template)
                     <button type="button"
@@ -150,6 +160,7 @@
                 @empty
                     <p class="rep-wizard-empty">قالبی برای این ترکیب خانواده، کارخانه و برند نیست.</p>
                 @endforelse
+            </div>
             </div>
         </section>
     @endif
@@ -178,6 +189,7 @@
                     <input type="number" min="1" max="999" wire:model="quantity" class="rep-field__input rep-field__input--qty">
                 </label>
             </div>
+            <div class="rep-wizard-panel__body rep-wizard-panel__body--products">
             <ul class="rep-plan-list rep-plan-list--products" role="list">
                 @php $products = $this->products; @endphp
                 @if ($products)
@@ -213,17 +225,9 @@
                     @empty
                         <li class="rep-wizard-empty">محصولی مطابق فیلترهای خانواده، کارخانه، برند و قالب نیست.</li>
                     @endforelse
-                    <li class="rep-pagination">
-                        @if (! $products->onFirstPage())
-                            <button type="button" class="rep-btn-secondary" wire:click="previousPage('page')">صفحه قبل</button>
-                        @endif
-                        <span class="rep-pagination__info">صفحه {{ $products->currentPage() }} از {{ $products->lastPage() }}</span>
-                        @if ($products->hasMorePages())
-                            <button type="button" class="rep-btn-secondary" wire:click="nextPage('page')">صفحه بعد</button>
-                        @endif
-                    </li>
                 @endif
             </ul>
+            </div>
         </section>
     @endif
 
@@ -233,6 +237,7 @@
                 <h2 class="rep-wizard-title">جمع‌بندی پیش‌سفارش</h2>
                 <p class="rep-wizard-hint">باربری و درگاه را انتخاب کنید، سپس پیش‌فاکتور را ثبت کنید.</p>
             </header>
+            <div class="rep-wizard-panel__body rep-wizard-panel__body--review">
             @php $order = $this->draftOrder; @endphp
             @if ($order)
                 <p class="rep-wizard-hint">
@@ -394,17 +399,33 @@
                         @endif
                         @error('freight_carrier_id') <p class="rep-wizard-error">{{ $message }}</p> @enderror
                     </div>
-                    <div class="rep-fulfillment-field">
-                        <label class="rep-fulfillment-label" for="paymentGatewaySelect">درگاه پرداخت</label>
-                        <select id="paymentGatewaySelect"
-                                class="rep-fulfillment-select"
-                                wire:model="paymentGateway">
-                            @forelse ($this->paymentGateways as $gateway)
-                                <option value="{{ $gateway['name'] }}">{{ $gateway['label'] }}</option>
-                            @empty
-                                <option value="">درگاه فعالی نیست</option>
-                            @endforelse
-                        </select>
+                    <div class="rep-fulfillment-field rep-fulfillment-field--gateways">
+                        <span class="rep-fulfillment-label" id="paymentGatewayLegend">درگاه پرداخت</span>
+                        @if (count($this->paymentGateways) === 0)
+                            <p class="rep-wizard-empty">درگاه فعالی نیست</p>
+                        @else
+                            <ul class="rep-gateway-list" role="radiogroup" aria-labelledby="paymentGatewayLegend">
+                                @foreach ($this->paymentGateways as $gateway)
+                                    <li wire:key="rep-gateway-{{ $gateway['name'] }}">
+                                        <label class="rep-gateway-option {{ $paymentGateway === $gateway['name'] ? 'is-selected' : '' }}">
+                                            <input type="radio"
+                                                   class="rep-gateway-option__input"
+                                                   name="repPaymentGateway"
+                                                   value="{{ $gateway['name'] }}"
+                                                   wire:model.live="paymentGateway">
+                                            <x-checkout-option-icon :src="$gateway['icon'] ?? null" :alt="$gateway['label']" />
+                                            <span class="rep-gateway-option__body">
+                                                <span class="rep-gateway-option__title">{{ $gateway['label'] }}</span>
+                                                @if (! empty($gateway['description']))
+                                                    <span class="rep-gateway-option__meta">{{ $gateway['description'] }}</span>
+                                                @endif
+                                            </span>
+                                            <span class="rep-plan-row__radio" aria-hidden="true"></span>
+                                        </label>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @endif
                         @error('payment_gateway') <p class="rep-wizard-error">{{ $message }}</p> @enderror
                     </div>
                 </div>
@@ -464,8 +485,10 @@
                 </div>
             @endif
             @error('quantity') <p class="rep-wizard-error">{{ $message }}</p> @enderror
+            </div>
         </section>
     @endif
+    </div>
 
     @teleport('body')
         <div wire:loading.flex

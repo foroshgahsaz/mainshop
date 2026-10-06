@@ -49,7 +49,7 @@
                         <p class="product-qa-item__answer-text">{{ $item->answer }}</p>
                         @if ($item->answered_at)
                             <time class="product-qa-item__date" datetime="{{ $item->answered_at->toIso8601String() }}">
-                                {{ $item->answered_at->format('Y/m/d') }}
+                                {{ $item->answered_at->shopJalali('Y/m/d') }}
                             </time>
                         @endif
                     @else

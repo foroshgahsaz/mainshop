@@ -82,7 +82,7 @@
                     </button>
                     @if ($order->stock_reserved_until)
                         <p class="rep-wizard-hint rep-proforma-reservation">
-                            مهلت رزرو موجودی تا <strong>{{ $order->stock_reserved_until->format('Y/m/d H:i') }}</strong>
+                            مهلت رزرو موجودی تا <strong>{{ $order->stock_reserved_until->shopJalali() }}</strong>
                         </p>
                     @endif
                 @elseif (! $order->stock_reserved)

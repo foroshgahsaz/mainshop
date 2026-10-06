@@ -67,13 +67,21 @@ class BajetPayGatewayTokenRetryTest extends TestCase
                         'referUrl' => 'https://portal.test/fa/ep/invoice?requestId=ref-new',
                     ],
                 ], 200),
-            'bajet-api.test/api/v1/jetpay/token' => Http::response([
-                'success' => true,
-                'result' => [
-                    'token' => 'fresh-token',
-                    'expiresIn' => 3600,
-                ],
-            ], 200),
+            'bajet-api.test/api/v1/jetpay/token' => Http::sequence()
+                ->push([
+                    'success' => true,
+                    'result' => [
+                        'token' => 'fresh-token-1',
+                        'expiresIn' => 3600,
+                    ],
+                ], 200)
+                ->push([
+                    'success' => true,
+                    'result' => [
+                        'token' => 'fresh-token-2',
+                        'expiresIn' => 3600,
+                    ],
+                ], 200),
         ]);
 
         $user = new User(['phone' => '09121234567']);
@@ -114,6 +122,6 @@ class BajetPayGatewayTokenRetryTest extends TestCase
             $redirect
         );
 
-        Http::assertSentCount(3);
+        Http::assertSentCount(4);
     }
 }

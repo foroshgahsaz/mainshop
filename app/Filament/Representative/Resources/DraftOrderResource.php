@@ -57,7 +57,8 @@ class DraftOrderResource extends Resource
                     ->formatStateUsing(fn (int $state): string => ShopFormatter::money($state)),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('آخرین تغییر')
-                    ->since(),
+                    ->since()
+                    ->jalaliDateTimeTooltip(),
             ])
             ->defaultSort('updated_at', 'desc')
             ->actions([

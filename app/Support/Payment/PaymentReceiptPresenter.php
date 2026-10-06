@@ -21,7 +21,7 @@ class PaymentReceiptPresenter
             'payment_tracking' => $payment->tracking_code,
             'gateway_reference' => $payment->gatewayReference(),
             'amount' => (int) $payment->amount,
-            'paid_at' => $payment->paid_at?->timezone('Asia/Tehran')->format('Y/m/d H:i'),
+            'paid_at' => $payment->paid_at?->shopJalali(),
             'order_tracking' => $order?->tracking_code,
             'order_amount' => $order ? (int) $order->final_amount : null,
             'customer_name' => $order?->user?->name,

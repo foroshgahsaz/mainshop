@@ -11,9 +11,9 @@
                 <h1 class="admin-order__title">پرداخت #{{ $payment->tracking_code }}</h1>
                 <p class="admin-order__subtitle">
                     @if($payment->paid_at)
-                        پرداخت‌شده {{ $payment->paid_at->format('Y/m/d H:i') }}
+                        پرداخت‌شده {{ $payment->paid_at->shopJalali() }}
                     @else
-                        ایجاد‌شده {{ $payment->created_at?->format('Y/m/d H:i') }}
+                        ایجاد‌شده {{ $payment->created_at?->shopJalali() }}
                     @endif
                     @if($order)
                         — سفارش: <a href="{{ \App\Filament\Resources\OrderResource::getUrl('view', ['record' => $order]) }}" class="admin-order__link">#{{ $order->tracking_code }}</a>
@@ -42,9 +42,9 @@
                         @if($payment->card_number)
                             <div><dt>شماره کارت</dt><dd dir="ltr">{{ $payment->card_number }}</dd></div>
                         @endif
-                        <div><dt>تاریخ ایجاد</dt><dd>{{ $payment->created_at?->format('Y/m/d H:i') }}</dd></div>
+                        <div><dt>تاریخ ایجاد</dt><dd>{{ $payment->created_at?->shopJalali() }}</dd></div>
                         @if($payment->paid_at)
-                            <div><dt>تاریخ پرداخت</dt><dd>{{ $payment->paid_at->format('Y/m/d H:i') }}</dd></div>
+                            <div><dt>تاریخ پرداخت</dt><dd>{{ $payment->paid_at->shopJalali() }}</dd></div>
                         @endif
                     </dl>
                 </section>

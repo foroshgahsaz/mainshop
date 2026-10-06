@@ -29,7 +29,7 @@
                         <a href="{{ route('blog.show', $post) }}" class="text-sm font-bold leading-7 block hover:text-brand-gold">
                             {{ $post->title }}
                         </a>
-                        <p class="text-[11px] text-gray-400 mt-2">{{ optional($post->published_at)->format('Y/m/d') }}</p>
+                        <p class="text-[11px] text-gray-400 mt-2">{{ optional($post->published_at)->shopJalali('Y/m/d') }}</p>
                     </div>
                 </article>
             @endforeach

@@ -24,7 +24,7 @@
                 <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
                         <p class="font-bold text-sm text-navy">کد پیگیری: {{ $order->tracking_code }}</p>
-                        <p class="text-xs text-gray-400 mt-1">{{ $order->created_at->format('Y/m/d H:i') }}</p>
+                        <p class="text-xs text-gray-400 mt-1">{{ $order->created_at->shopJalali() }}</p>
                     </div>
                     <div class="flex items-center gap-4">
                         <span class="text-sm font-bold text-brand-green">{{ number_format($order->final_amount) }} تومان</span>

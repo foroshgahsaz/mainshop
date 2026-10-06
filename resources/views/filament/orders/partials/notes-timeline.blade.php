@@ -22,7 +22,7 @@
             <li class="admin-order__note admin-order__note--{{ $note->type }}" wire:key="order-note-{{ $note->id }}">
                 <div class="admin-order__note-meta">
                     <time datetime="{{ $note->created_at?->toIso8601String() }}">
-                        {{ $note->created_at?->format('Y/m/d H:i') }}
+                        {{ $note->created_at?->shopJalali() }}
                     </time>
                     <span class="admin-order__note-type">{{ \App\Support\ShopLabels::orderNoteType($note->type) }}</span>
                     @if($note->author)

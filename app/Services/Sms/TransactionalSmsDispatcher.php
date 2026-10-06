@@ -112,14 +112,14 @@ class TransactionalSmsDispatcher
 
         if ($phone) {
             $vars = array_merge($this->orderVariables($order), [
-                'reserved_until' => $order->stock_reserved_until?->format('Y/m/d H:i') ?? '—',
+                'reserved_until' => $order->stock_reserved_until?->shopJalali() ?? '—',
             ]);
             $this->queue('proforma_created', $phone, $vars);
         }
 
         $repVars = array_merge($this->orderVariables($order), [
             'representative_name' => $order->representative?->name ?? '—',
-            'reserved_until' => $order->stock_reserved_until?->format('Y/m/d H:i') ?? '—',
+            'reserved_until' => $order->stock_reserved_until?->shopJalali() ?? '—',
         ]);
         $this->dispatchStaff('staff_new_proforma', $repVars);
     }
@@ -139,7 +139,7 @@ class TransactionalSmsDispatcher
         }
 
         $this->queue('proforma_reservation_extended', $phone, array_merge($this->orderVariables($order), [
-            'reserved_until' => $order->stock_reserved_until?->format('Y/m/d H:i') ?? '—',
+            'reserved_until' => $order->stock_reserved_until?->shopJalali() ?? '—',
         ]));
     }
 
@@ -172,7 +172,7 @@ class TransactionalSmsDispatcher
             'items_count' => (string) $order->items->sum('quantity'),
             'tracking_suffix' => '',
             'remaining_amount' => number_format((int) $order->remainingAmount()),
-            'reserved_until' => $order->stock_reserved_until?->format('Y/m/d H:i') ?? '—',
+            'reserved_until' => $order->stock_reserved_until?->shopJalali() ?? '—',
             'representative_name' => $order->representative?->name ?? '—',
         ];
     }

@@ -36,9 +36,9 @@
                     </td>
                     <td>
                         @if ($payment->paid_at)
-                            {{ $payment->paid_at->format('Y/m/d H:i') }}
+                            {{ $payment->paid_at->shopJalali() }}
                         @else
-                            {{ $payment->created_at?->format('Y/m/d H:i') ?? '—' }}
+                            {{ $payment->created_at?->shopJalali() ?? '—' }}
                         @endif
                     </td>
                     <td>

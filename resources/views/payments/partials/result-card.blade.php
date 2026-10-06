@@ -96,7 +96,7 @@
         @endif
         @guest
             @if ($isRepresentative)
-                <a href="{{ route('filament.representative.auth.login') }}" class="shop-btn-outline inline-block px-6 py-3 rounded-xl">
+                <a href="{{ route('filament.representative.auth.login', ['redirect' => $returnUrl]) }}" class="shop-btn-outline inline-block px-6 py-3 rounded-xl">
                     ورود به پنل نمایندگی
                 </a>
             @else

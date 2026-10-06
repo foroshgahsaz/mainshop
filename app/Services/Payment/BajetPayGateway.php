@@ -39,7 +39,7 @@ class BajetPayGateway implements PaymentGatewayInterface
         }
 
         $gatewayAmount = AmountConverter::toGateway($payment->amount, $config['amount_unit']);
-        $returnUrl = url($config['callback_url']).'?payment='.$payment->tracking_code;
+        $returnUrl = BajetReturnUrl::forPayment($payment, $config);
 
         $payload = [
             'orderId' => $payment->tracking_code,
@@ -61,7 +61,11 @@ class BajetPayGateway implements PaymentGatewayInterface
             PaymentAuditStep::GATEWAY_REQUEST,
             'bajet_create_order',
             'درخواست ایجاد سفارش به باجت‌پی ارسال شد.',
-            ['amount' => $gatewayAmount, 'order_id' => $payment->tracking_code]
+            [
+                'amount' => $gatewayAmount,
+                'order_id' => $payment->tracking_code,
+                'return_url' => $returnUrl,
+            ]
         );
 
         $response = $this->http($config)

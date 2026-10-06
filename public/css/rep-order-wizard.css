@@ -676,7 +676,7 @@ html.rep-modal-open {
     height: 2.25rem;
     margin: 0 auto 0.75rem;
     border: 3px solid #e5e7eb;
-    border-top-color: #0d9488;
+    border-top-color: var(--rep-primary, #7367f0);
     border-radius: 50%;
     animation: rep-spin 0.75s linear infinite;
 }

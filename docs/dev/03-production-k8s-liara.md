@@ -92,8 +92,16 @@ php artisan shop:verify-storage
 
 1. در پنل Runflare **دیسک جدا** برای `/storage/logs` یا `/storage/app/database-backups` معمولاً به مسیر واقعی Laravel (`/var/www/storage/...`) وصل نیست — حجم دیسک **۰** می‌ماند.
 2. با `FILESYSTEM_PUBLIC_ROOT=/data` اپ از نسخهٔ جدید به‌صورت خودکار لاگ را در **`/data/logs`** و بک‌آپ را در **`/data/database-backups`** می‌نویسد (همان volume تصاویر).
-3. بعد از deploy: `php artisan shop:deploy-recover` (پوشه‌ها را می‌سازد).
+3. بعد از deploy (به‌عنوان **root** در پاد): `php artisan shop:deploy-recover` و `php artisan shop:fix-storage-permissions` — پوشه‌ها ساخته می‌شوند و مالک **`www-data`** می‌شود (PHP-FPM).
 4. تشخیص: `php artisan shop:verify-storage` — مسیر فعال لاگ و بک‌آپ را نشان می‌دهد.
+
+اگر بک‌آپ دستی **Permission denied** می‌دهد:
+
+```bash
+chown -R www-data:www-data /data/database-backups /data/logs
+chmod -R 775 /data/database-backups /data/logs
+php artisan shop:fix-storage-permissions
+```
 
 اختیاری در env (اگر مسیر دیگری می‌خواهید):
 

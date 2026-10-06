@@ -85,6 +85,73 @@ class Order extends Model
         return $this->representative_id !== null;
     }
 
+    public function catalogTemplateLabel(): string
+    {
+        if (array_key_exists('catalog_template_label', $this->attributes)) {
+            return (string) $this->attributes['catalog_template_label'];
+        }
+
+        $filters = $this->catalog_filters ?? [];
+
+        if (! empty($filters['template_name']) && is_string($filters['template_name'])) {
+            return $filters['template_name'];
+        }
+
+        $templateId = $filters['template_id'] ?? null;
+
+        if ($templateId === null || $templateId === '') {
+            return '—';
+        }
+
+        return ProductTemplate::query()->whereKey((int) $templateId)->value('name') ?? '—';
+    }
+
+    /** @param  iterable<int, self>  $orders */
+    public static function attachCatalogTemplateLabels(iterable $orders): void
+    {
+        $lookupIds = [];
+
+        foreach ($orders as $order) {
+            if (! $order instanceof self) {
+                continue;
+            }
+
+            $filters = $order->catalog_filters ?? [];
+
+            if (! empty($filters['template_name']) && is_string($filters['template_name'])) {
+                $order->attributes['catalog_template_label'] = $filters['template_name'];
+
+                continue;
+            }
+
+            $templateId = $filters['template_id'] ?? null;
+
+            if ($templateId === null || $templateId === '') {
+                $order->attributes['catalog_template_label'] = '—';
+
+                continue;
+            }
+
+            $lookupIds[(int) $templateId][] = $order;
+        }
+
+        if ($lookupIds === []) {
+            return;
+        }
+
+        $names = ProductTemplate::query()
+            ->whereIn('id', array_keys($lookupIds))
+            ->pluck('name', 'id');
+
+        foreach ($lookupIds as $templateId => $ordersForId) {
+            $label = (string) ($names[$templateId] ?? '—');
+
+            foreach ($ordersForId as $order) {
+                $order->attributes['catalog_template_label'] = $label;
+            }
+        }
+    }
+
     public function representative(): BelongsTo
     {
         return $this->belongsTo(User::class, 'representative_id');

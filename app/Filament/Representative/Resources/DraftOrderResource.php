@@ -35,6 +35,11 @@ class DraftOrderResource extends Resource
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('مشتری')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('catalog_template_label')
+                    ->label('نوع طرح')
+                    ->getStateUsing(fn (Order $record): string => $record->catalogTemplateLabel())
+                    ->placeholder('—')
+                    ->wrap(),
                 Tables\Columns\TextColumn::make('items_count')
                     ->label('اقلام')
                     ->counts('items'),

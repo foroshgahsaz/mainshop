@@ -35,6 +35,7 @@ return [
             'portal_sandbox_base_url' => env('BAJET_PORTAL_SANDBOX_BASE_URL', ''),
             'portal_base_url' => env('BAJET_PORTAL_BASE_URL', ''),
             'callback_url' => env('BAJET_CALLBACK_URL', '/payment/callback/bajet'),
+            'return_url_base' => env('BAJET_RETURN_URL_BASE', ''),
             'amount_unit' => env('BAJET_AMOUNT_UNIT', 'toman'),
             'default_product_type' => env('BAJET_DEFAULT_PRODUCT_TYPE', 2),
             'default_brand' => env('BAJET_DEFAULT_BRAND', 'general'),

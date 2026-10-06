@@ -44,6 +44,7 @@ class ManageBajetPay extends Page implements HasForms
             'password' => $bajet['password'],
             'terminal_id' => $bajet['terminal_id'],
             'amount_unit' => $bajet['amount_unit'],
+            'return_url_base' => $bajet['return_url_base'] ?? '',
             'callback_url' => $bajet['callback_url'],
             'sandbox_base_url' => $bajet['sandbox_base_url'],
             'portal_sandbox_base_url' => $bajet['portal_sandbox_base_url'] ?? '',
@@ -73,10 +74,16 @@ class ManageBajetPay extends Page implements HasForms
                             'rial' => 'ریال (ارسال بدون تبدیل)',
                         ])
                         ->required(),
+                    Forms\Components\TextInput::make('return_url_base')
+                        ->label('آدرس پایه سایت (برای بازگشت از جت‌پی)')
+                        ->placeholder('https://www.chinibazar.ir')
+                        ->helperText('فقط دامنه سایت با https؛ خالی = مقدار APP_URL در .env. اگر قبلاً www.test.com می‌رفتید، اینجا دامنه واقعی را بگذارید.')
+                        ->columnSpanFull(),
                     Forms\Components\TextInput::make('callback_url')
-                        ->label('آدرس بازگشت (Return URL)')
+                        ->label('مسیر callback بازگشت')
                         ->placeholder('/payment/callback/bajet')
-                        ->helperText('پس از پرداخت، کاربر به این مسیر با پارامترهای id، orderId و status برمی‌گردد'),
+                        ->helperText('مسیر روی همان دامنه؛ returnUrl نهایی = آدرس پایه + این مسیر + ?payment=… — جت‌پی پارامترهای id و status را هم اضافه می‌کند.')
+                        ->columnSpanFull(),
                     ShopIconUpload::make('icon', 'gateway-icons', 'آیکون درگاه')
                         ->columnSpanFull(),
                 ])->columns(2),
@@ -137,6 +144,7 @@ class ManageBajetPay extends Page implements HasForms
             'password' => $data['password'] ?? '',
             'terminal_id' => $data['terminal_id'] ?? '',
             'amount_unit' => $data['amount_unit'] ?? 'toman',
+            'return_url_base' => $data['return_url_base'] ?? '',
             'callback_url' => $data['callback_url'] ?? '/payment/callback/bajet',
             'sandbox_base_url' => $data['sandbox_base_url'] ?? '',
             'portal_sandbox_base_url' => $data['portal_sandbox_base_url'] ?? '',

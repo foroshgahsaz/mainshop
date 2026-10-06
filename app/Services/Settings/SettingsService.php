@@ -144,6 +144,7 @@ class SettingsService
             'terminal_id' => (string) ($this->get('bajet', 'terminal_id') ?: ($cfg['terminal_id'] ?? '')),
             'amount_unit' => (string) ($this->get('bajet', 'amount_unit') ?: ($cfg['amount_unit'] ?? 'toman')),
             'callback_url' => (string) ($this->get('bajet', 'callback_url') ?: ($cfg['callback_url'] ?? '/payment/callback/bajet')),
+            'return_url_base' => (string) ($this->get('bajet', 'return_url_base') ?: ($cfg['return_url_base'] ?? '')),
             'default_product_type' => (int) ($this->get('bajet', 'default_product_type') ?: ($cfg['default_product_type'] ?? 2)),
             'default_brand' => (string) ($this->get('bajet', 'default_brand') ?: ($cfg['default_brand'] ?? 'general')),
             'base_url' => rtrim((string) ($this->get('bajet', $sandbox ? 'sandbox_base_url' : 'base_url') ?: $apiDefault), '/'),

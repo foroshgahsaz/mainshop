@@ -16,8 +16,19 @@
             </svg>
                 </button>
           <a href="{{ route('home') }}"
-             class="flex items-center">
-            <span class="text-lg md:text-2xl font-black text-navy">{{ site_name() }}</span>
+             class="flex items-center shrink-0"
+             aria-label="{{ site_name() }}">
+            @if ($logoUrl = site_logo_url())
+              <img src="{{ $logoUrl }}"
+                   alt="{{ site_name() }}"
+                   class="header-site-logo h-9 md:h-11 w-auto max-w-[10rem] md:max-w-[12rem] object-contain object-right"
+                   width="192"
+                   height="48"
+                   decoding="async"
+                   fetchpriority="high">
+            @else
+              <span class="text-lg md:text-2xl font-black text-navy">{{ site_name() }}</span>
+            @endif
           </a>
                 </div>
 

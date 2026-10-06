@@ -20,6 +20,24 @@ class SiteNameHelperTest extends TestCase
         $this->assertSame('فروشگاه تست', site_name());
     }
 
+    public function test_site_logo_url_reads_from_settings_storage_path(): void
+    {
+        Storage::fake('public');
+        Storage::disk('public')->put('settings/logo.png', str_repeat('x', 600));
+
+        app(SettingsService::class)->set('site', 'logo', 'settings/logo.png');
+
+        $url = site_logo_url();
+
+        $this->assertNotNull($url);
+        $this->assertStringContainsString('settings/logo.png', $url);
+    }
+
+    public function test_site_logo_url_is_null_when_not_set(): void
+    {
+        $this->assertNull(site_logo_url());
+    }
+
     public function test_shop_media_picker_returns_media_picker_field(): void
     {
         $field = ShopMediaPicker::image('image', 'products', 'تصویر');

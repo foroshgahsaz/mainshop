@@ -94,7 +94,7 @@ class MediaFileResource extends Resource
                     ->getStateUsing(fn (MediaFile $record): bool => $record->existsOnDisk()),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاریخ')
-                    ->dateTime('Y/m/d H:i')
+                    ->shopJalaliDateTime()
                     ->sortable(),
             ])
             ->defaultSort('created_at', 'desc')

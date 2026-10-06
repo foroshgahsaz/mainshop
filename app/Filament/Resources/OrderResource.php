@@ -77,7 +77,7 @@ class OrderResource extends Resource
                     ->formatStateUsing(fn (?string $state) => ShopLabels::orderStatus($state)),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاریخ')
-                    ->dateTime('Y/m/d H:i')
+                    ->shopJalaliDateTime()
                     ->sortable()
                     ->toggleable(),
             ])

@@ -88,7 +88,7 @@ class HomeSliderResource extends Resource
                     ->boolean(),
                 Tables\Columns\TextColumn::make('archived_at')
                     ->label('آرشیو')
-                    ->dateTime('Y/m/d H:i')
+                    ->shopJalaliDateTime()
                     ->placeholder('—')
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('updated_at')

@@ -67,7 +67,16 @@ class PaymentResource extends Resource
                     ->label('وضعیت')
                     ->badge()
                     ->formatStateUsing(fn (?string $state) => ShopLabels::paymentStatus($state)),
-                Tables\Columns\TextColumn::make('paid_at')->label('تاریخ پرداخت')->dateTime('Y/m/d H:i'),
+                Tables\Columns\TextColumn::make('paid_at')
+                    ->label('تاریخ پرداخت')
+                    ->shopJalaliDateTime()
+                    ->sortable()
+                    ->placeholder('—'),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('تاریخ ایجاد')
+                    ->shopJalaliDateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('gateway')

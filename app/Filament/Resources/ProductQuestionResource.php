@@ -74,7 +74,7 @@ class ProductQuestionResource extends Resource
                     ->getStateUsing(fn (ProductQuestion $record): bool => filled($record->answer)),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاریخ')
-                    ->dateTime('Y/m/d H:i')
+                    ->shopJalaliDateTime()
                     ->sortable(),
             ])
             ->defaultSort('created_at', 'desc')

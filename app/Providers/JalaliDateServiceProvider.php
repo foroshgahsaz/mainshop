@@ -22,40 +22,28 @@ class JalaliDateServiceProvider extends ServiceProvider
             return ShopDate::format($this, $format ?? 'Y/m/d H:i');
         });
 
-        $formatState = function (mixed $state, string $name): ?string {
-            if (blank($state)) {
-                return null;
-            }
+        TextColumn::macro('shopJalaliDateTime', function (?string $format = 'Y/m/d H:i') {
+            /** @var TextColumn $this */
+            return $this->formatStateUsing(
+                fn ($state) => blank($state) ? null : ShopDate::format($state, $format)
+            );
+        });
 
-            $format = $name === 'published_at' ? 'Y/m/d' : 'Y/m/d H:i';
+        TextColumn::macro('shopJalaliDate', function () {
+            /** @var TextColumn $this */
+            return $this->shopJalaliDateTime('Y/m/d');
+        });
 
-            return ShopDate::format($state, $format);
-        };
+        TextEntry::macro('shopJalaliDateTime', function (?string $format = 'Y/m/d H:i') {
+            /** @var TextEntry $this */
+            return $this->formatStateUsing(
+                fn ($state) => blank($state) ? null : ShopDate::format($state, $format)
+            );
+        });
 
-        TextColumn::configureUsing(function (TextColumn $column) use ($formatState): void {
-            $name = $column->getName();
-
-            if (! self::isJalaliDateAttribute($name)) {
-                return;
-            }
-
-            $column->formatStateUsing(fn ($state) => $formatState($state, $name));
-        }, isImportant: true);
-
-        TextEntry::configureUsing(function (TextEntry $entry) use ($formatState): void {
-            $name = $entry->getName();
-
-            if (! self::isJalaliDateAttribute($name)) {
-                return;
-            }
-
-            $entry->formatStateUsing(fn ($state) => $formatState($state, $name));
-        }, isImportant: true);
-    }
-
-    protected static function isJalaliDateAttribute(string $name): bool
-    {
-        return str_ends_with($name, '_at')
-            || in_array($name, ['published_at', 'stock_reserved_until'], true);
+        TextEntry::macro('shopJalaliDate', function () {
+            /** @var TextEntry $this */
+            return $this->shopJalaliDateTime('Y/m/d');
+        });
     }
 }

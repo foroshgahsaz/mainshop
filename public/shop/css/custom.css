@@ -2781,24 +2781,24 @@ body.has-admin-bar .listing-filters {
 
   .shop-header__mobile {
     flex-direction: row;
+    direction: ltr;
+  }
+
+  .shop-header__mobile-end {
+    direction: rtl;
   }
 
   .shop-header__mobile-menu {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    margin-inline-end: 0;
     padding: 0.35rem;
-    padding-inline-end: 0.15rem;
+    padding-inline-end: 0.1rem;
     color: #4b5563;
   }
 
   .shop-header__mobile-menu:active {
     color: #1e3a5f;
-  }
-
-  .shop-header__mobile-phone {
-    margin-inline-start: auto;
   }
 }
 

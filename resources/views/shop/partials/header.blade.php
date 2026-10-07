@@ -6,36 +6,8 @@
           $siteTel = preg_replace('/\D+/', '', (string) $sitePhone);
       @endphp
 
-      {{-- موبایل (RTL): منو راست → لوگو → تماس چپ --}}
-      <div class="shop-header__mobile flex md:hidden items-center w-full gap-2 mb-0">
-        <button type="button"
-                onclick="toggleElement('mobileMenu', true)"
-                class="shop-header__mobile-menu shrink-0"
-                aria-label="منو">
-          <svg class="w-6 h-6"
-               fill="none"
-               stroke="currentColor"
-               stroke-width="2"
-               viewBox="0 0 24 24">
-            <path stroke-linecap="round"
-                  d="M4 7h16M4 12h16M4 17h16" />
-          </svg>
-        </button>
-        <a href="{{ route('home') }}"
-           class="shop-header__mobile-logo shrink-0 min-w-0"
-           aria-label="{{ site_name() }}">
-          @if ($logoUrl = site_logo_url())
-            <img src="{{ $logoUrl }}"
-                 alt="{{ site_name() }}"
-                 class="header-site-logo h-9 w-auto max-w-[9.5rem] object-contain object-center"
-                 width="192"
-                 height="48"
-                 decoding="async"
-                 fetchpriority="high">
-          @else
-            <span class="text-lg font-black text-navy truncate">{{ site_name() }}</span>
-          @endif
-        </a>
+      {{-- موبایل: تماس چپ | (لوگو + منو) راست — ترتیب فیزیکی LTR برای پایداری در RTL --}}
+      <div class="shop-header__mobile flex md:hidden items-center w-full mb-0">
         <span class="header-phone-wrap shop-header__mobile-phone shrink-0">
           <a href="{{ $siteTel !== '' ? 'tel:'.$siteTel : '#' }}"
              class="header-phone-btn"
@@ -50,6 +22,37 @@
             </svg>
           </a>
         </span>
+        <div class="shop-header__mobile-spacer flex-1 min-w-2" aria-hidden="true"></div>
+        <div class="shop-header__mobile-end flex items-center gap-2 shrink-0">
+          <a href="{{ route('home') }}"
+             class="shop-header__mobile-logo shrink-0 min-w-0"
+             aria-label="{{ site_name() }}">
+            @if ($logoUrl = site_logo_url())
+              <img src="{{ $logoUrl }}"
+                   alt="{{ site_name() }}"
+                   class="header-site-logo h-9 w-auto max-w-[9.5rem] object-contain object-center"
+                   width="192"
+                   height="48"
+                   decoding="async"
+                   fetchpriority="high">
+            @else
+              <span class="text-lg font-black text-navy truncate">{{ site_name() }}</span>
+            @endif
+          </a>
+          <button type="button"
+                  onclick="toggleElement('mobileMenu', true)"
+                  class="shop-header__mobile-menu shrink-0"
+                  aria-label="منو">
+            <svg class="w-6 h-6"
+                 fill="none"
+                 stroke="currentColor"
+                 stroke-width="2"
+                 viewBox="0 0 24 24">
+              <path stroke-linecap="round"
+                    d="M4 7h16M4 12h16M4 17h16" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       <div class="hidden md:flex items-center justify-between gap-3 mb-4">

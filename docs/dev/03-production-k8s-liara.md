@@ -100,6 +100,18 @@ php artisan shop:verify-storage
 - `SHOP_LOGS_DIRECTORY=/data/logs`
 - `DB_BACKUP_DIRECTORY=/data/database-backups`
 
+**مالک پوشه‌ها (Runflare):** PHP معمولاً با **`xfs:xfs`** اجرا می‌شود؛ `products` و آپلودها همین مالک را دارند. اگر `logs` یا `database-backups` **`root:root`** و `0755` باشند، بک‌آپ دستی و لاگ Laravel **Permission denied** می‌دهند.
+
+یک‌بار (root در پاد):
+
+```bash
+chown -R xfs:xfs /data/database-backups /data/logs
+chmod -R 775 /data/database-backups /data/logs
+php artisan shop:fix-storage-permissions
+```
+
+یا در env: `SHOP_WEB_USER=xfs` و `SHOP_WEB_GROUP=xfs` (دستور fix مالک را از `/data/products` هم حدس می‌زند).
+
 ---
 
 ## ۶. Cron و Queue

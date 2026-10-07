@@ -48,6 +48,9 @@ return [
                 ? '/data/logs'
                 : null
         ),
+        // Runflare PHP-FPM often runs as xfs — leave null to infer from /data/products owner
+        'web_user' => env('SHOP_WEB_USER'),
+        'web_group' => env('SHOP_WEB_GROUP'),
     ],
 
 ];

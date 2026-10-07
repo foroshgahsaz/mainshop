@@ -35,7 +35,67 @@ class StoragePermissionFixer
 
     public static function webUser(): string
     {
-        return 'www-data';
+        $configured = config('shop.storage.web_user');
+
+        if (is_string($configured) && $configured !== '') {
+            return $configured;
+        }
+
+        $inferred = self::inferOwnerFromReferencePath();
+
+        return $inferred['user'] ?? 'www-data';
+    }
+
+    public static function webGroup(): string
+    {
+        $configured = config('shop.storage.web_group');
+
+        if (is_string($configured) && $configured !== '') {
+            return $configured;
+        }
+
+        $inferred = self::inferOwnerFromReferencePath();
+
+        return $inferred['group'] ?? self::webUser();
+    }
+
+    /**
+     * @return array{user: string, group: string}|null
+     */
+    public static function inferOwnerFromReferencePath(): ?array
+    {
+        $candidates = array_filter([
+            Storage::disk('public')->path('products'),
+            rtrim((string) config('filesystems.disks.public.root'), '/\\'),
+            '/data/products',
+        ]);
+
+        foreach ($candidates as $path) {
+            if (! is_dir($path)) {
+                continue;
+            }
+
+            $uid = @fileowner($path);
+            $gid = @filegroup($path);
+
+            if ($uid === false || $gid === false) {
+                continue;
+            }
+
+            $user = self::posixNameForUid((int) $uid);
+            $group = self::posixNameForGid((int) $gid);
+
+            if ($user === null || $user === 'root') {
+                continue;
+            }
+
+            return [
+                'user' => $user,
+                'group' => $group ?? $user,
+            ];
+        }
+
+        return null;
     }
 
     public static function fix(): void
@@ -54,6 +114,7 @@ class StoragePermissionFixer
 
         $runningAsRoot = self::runningAsRoot();
         $webUser = self::webUser();
+        $webGroup = self::webGroup();
 
         if (! is_dir($path)) {
             @mkdir($path, 0775, true);
@@ -65,7 +126,7 @@ class StoragePermissionFixer
 
         if ($runningAsRoot) {
             @chown($path, $webUser);
-            @chgrp($path, $webUser);
+            @chgrp($path, $webGroup);
         }
 
         @chmod($path, 0775);
@@ -94,5 +155,27 @@ class StoragePermissionFixer
         }
 
         return false;
+    }
+
+    private static function posixNameForUid(int $uid): ?string
+    {
+        if (! function_exists('posix_getpwuid')) {
+            return null;
+        }
+
+        $info = posix_getpwuid($uid);
+
+        return is_array($info) ? ($info['name'] ?? null) : null;
+    }
+
+    private static function posixNameForGid(int $gid): ?string
+    {
+        if (! function_exists('posix_getgrgid')) {
+            return null;
+        }
+
+        $info = posix_getgrgid($gid);
+
+        return is_array($info) ? ($info['name'] ?? null) : null;
     }
 }

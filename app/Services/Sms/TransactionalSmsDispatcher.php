@@ -8,7 +8,6 @@ use App\Models\Payment;
 use App\Models\User;
 use App\Services\Settings\TransactionalSmsSettingsService;
 use App\Support\ShopLabels;
-use Illuminate\Support\Facades\Bus;
 
 class TransactionalSmsDispatcher
 {
@@ -192,7 +191,7 @@ class TransactionalSmsDispatcher
             return;
         }
 
-        Bus::dispatch(new SendTransactionalSmsJob($templateKey, $phone, $variables))->afterResponse();
+        SendTransactionalSmsJob::dispatchAfterResponse($templateKey, $phone, $variables);
     }
 
     protected function formatOrderItems(Order $order): string

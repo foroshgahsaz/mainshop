@@ -105,7 +105,14 @@ class PaymentController extends Controller
             ]);
 
             if ($order) {
-                $this->sms->paymentFailed($order->fresh(['user']), $payment);
+                try {
+                    $this->sms->paymentFailed($order->fresh(['user']), $payment);
+                } catch (\Throwable $smsError) {
+                    Log::error('Payment callback payment-failed sms failed after verify exception', [
+                        'payment_id' => $payment->id,
+                        'error' => $smsError->getMessage(),
+                    ]);
+                }
             }
 
             $payment = $payment->fresh();

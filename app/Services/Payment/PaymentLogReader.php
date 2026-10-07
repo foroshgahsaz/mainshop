@@ -2,6 +2,7 @@
 
 namespace App\Services\Payment;
 
+use App\Support\LogDirectoryResolver;
 use App\Support\ShopStoragePaths;
 use Carbon\Carbon;
 
@@ -28,16 +29,12 @@ class PaymentLogReader
 
     public function pathForDailyLog(string $dateYmd): ?string
     {
-        $candidate = $this->logDirectory().DIRECTORY_SEPARATOR.$this->dailyLogBasename($dateYmd);
-
-        return $this->readableFile($candidate);
+        return LogDirectoryResolver::findReadableFile($this->dailyLogBasename($dateYmd));
     }
 
     public function pathForArchive(string $dateYmd): ?string
     {
-        $candidate = $this->logDirectory().DIRECTORY_SEPARATOR.$this->archiveBasename($dateYmd);
-
-        return $this->readableFile($candidate);
+        return LogDirectoryResolver::findReadableFile($this->archiveBasename($dateYmd));
     }
 
     public function resolveLogPath(?string $dateYmd = null): ?string
@@ -49,9 +46,7 @@ class PaymentLogReader
             return $daily;
         }
 
-        $single = $this->logDirectory().'/payments.log';
-
-        return is_readable($single) ? $single : null;
+        return LogDirectoryResolver::findReadableFile('payments.log');
     }
 
     /**
@@ -130,7 +125,7 @@ class PaymentLogReader
         $cutoff = now()->subDays(self::RECENT_DAYS)->startOfDay();
         $entries = [];
 
-        foreach (glob($this->logDirectory().DIRECTORY_SEPARATOR.'payments-*.log.zip') ?: [] as $path) {
+        foreach (LogDirectoryResolver::globReadable('payments-*.log.zip') as $path) {
             $basename = basename($path);
 
             if (! preg_match('/^payments-(\d{4}-\d{2}-\d{2})\.log\.zip$/', $basename, $matches)) {
@@ -183,9 +178,9 @@ class PaymentLogReader
     public function legacySingleLogEntry(): ?array
     {
         $basename = 'payments.log';
-        $path = $this->logDirectory().DIRECTORY_SEPARATOR.$basename;
+        $path = LogDirectoryResolver::findReadableFile($basename);
 
-        if (! is_readable($path)) {
+        if ($path === null) {
             return null;
         }
 
@@ -364,30 +359,21 @@ class PaymentLogReader
             return null;
         }
 
-        $candidate = $this->logDirectory().DIRECTORY_SEPARATOR.$basename;
+        $path = LogDirectoryResolver::findReadableFile($basename);
 
-        if (! $this->readableFile($candidate)) {
+        if ($path === null || ! LogDirectoryResolver::pathIsAllowedLogFile($path)) {
             return null;
         }
 
-        $normalizedDir = $this->normalizePath($this->logDirectory());
-        $normalizedFile = $this->normalizePath($candidate);
-
-        if (! str_starts_with($normalizedFile, $normalizedDir.'/')) {
-            return null;
-        }
-
-        return $candidate;
+        return $path;
     }
 
-    protected function readableFile(string $path): ?string
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function directoryDiagnostics(): array
     {
-        return is_file($path) && is_readable($path) ? $path : null;
-    }
-
-    protected function normalizePath(string $path): string
-    {
-        return rtrim(str_replace('\\', '/', $path), '/');
+        return LogDirectoryResolver::directoryDiagnostics();
     }
 
     public function mimeTypeForBasename(string $basename): string

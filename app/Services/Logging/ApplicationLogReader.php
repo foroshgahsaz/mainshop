@@ -2,6 +2,7 @@
 
 namespace App\Services\Logging;
 
+use App\Support\LogDirectoryResolver;
 use App\Support\ShopStoragePaths;
 use Carbon\Carbon;
 
@@ -33,9 +34,7 @@ class ApplicationLogReader
 
     public function pathForDailyLog(string $dateYmd): ?string
     {
-        $candidate = $this->logDirectory().DIRECTORY_SEPARATOR.$this->dailyLogBasename($dateYmd);
-
-        return $this->readableFile($candidate);
+        return LogDirectoryResolver::findReadableFile($this->dailyLogBasename($dateYmd));
     }
 
     /**
@@ -100,9 +99,9 @@ class ApplicationLogReader
     public function legacySingleLogEntry(): ?array
     {
         $basename = 'laravel.log';
-        $path = $this->logDirectory().DIRECTORY_SEPARATOR.$basename;
+        $path = LogDirectoryResolver::findReadableFile($basename);
 
-        if (! is_readable($path)) {
+        if ($path === null) {
             return null;
         }
 
@@ -137,20 +136,13 @@ class ApplicationLogReader
             return null;
         }
 
-        $candidate = $this->logDirectory().DIRECTORY_SEPARATOR.$basename;
+        $path = LogDirectoryResolver::findReadableFile($basename);
 
-        if (! $this->readableFile($candidate)) {
+        if ($path === null || ! LogDirectoryResolver::pathIsAllowedLogFile($path)) {
             return null;
         }
 
-        $normalizedDir = $this->normalizePath($this->logDirectory());
-        $normalizedFile = $this->normalizePath($candidate);
-
-        if (! str_starts_with($normalizedFile, $normalizedDir.'/')) {
-            return null;
-        }
-
-        return $candidate;
+        return $path;
     }
 
     public function mimeTypeForBasename(string $basename): string
@@ -249,8 +241,7 @@ class ApplicationLogReader
      */
     public function discoverLaravelLogFiles(): array
     {
-        $pattern = $this->logDirectory().DIRECTORY_SEPARATOR.'laravel*.log';
-        $paths = glob($pattern) ?: [];
+        $paths = LogDirectoryResolver::globReadable('laravel*.log');
         $entries = [];
 
         foreach ($paths as $path) {
@@ -381,6 +372,7 @@ class ApplicationLogReader
             'discovered_file_count' => count($this->discoverLaravelLogFiles()),
             'uses_daily_files' => str_contains($stack, 'daily'),
             'uses_single_file' => str_contains($stack, 'single'),
+            'search_directories' => LogDirectoryResolver::directoryDiagnostics(),
         ];
     }
 
@@ -467,13 +459,4 @@ class ApplicationLogReader
         return $out;
     }
 
-    protected function readableFile(string $path): ?string
-    {
-        return is_file($path) && is_readable($path) ? $path : null;
-    }
-
-    protected function normalizePath(string $path): string
-    {
-        return rtrim(str_replace('\\', '/', $path), '/');
-    }
 }

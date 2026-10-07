@@ -8,7 +8,7 @@ use Filament\Pages\Page;
 
 class ViewSiteErrorLogs extends Page
 {
-    public const UI_VERSION = '2026-10-06-v2';
+    public const UI_VERSION = '2026-10-07-paths-v3';
 
     protected static ?string $navigationIcon = 'heroicon-o-bug-ant';
 

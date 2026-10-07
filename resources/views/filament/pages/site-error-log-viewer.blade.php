@@ -76,7 +76,38 @@
                 @elseif (! empty($logDiagnostics['uses_daily_files']))
                     (با <code dir="ltr">daily</code> فایل‌ها به صورت <code dir="ltr">laravel-YYYY-MM-DD.log</code> هستند.)
                 @endif
+                — UI: <code dir="ltr">{{ \App\Filament\Pages\ViewSiteErrorLogs::UI_VERSION }}</code>
             </p>
+
+            @if (! empty($logDiagnostics['search_directories']))
+                <div class="admin-payment-log-viewer__table-wrap">
+                    <table class="admin-payment-log-viewer__table">
+                        <thead>
+                            <tr>
+                                <th>مسیر جستجو</th>
+                                <th>وجود</th>
+                                <th>نوشتن</th>
+                                <th>تعداد فایل لاگ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($logDiagnostics['search_directories'] as $row)
+                                <tr>
+                                    <td dir="ltr">
+                                        {{ $row['path'] }}
+                                        @if ($row['is_primary'])
+                                            <span class="admin-payment-log-viewer__badge admin-payment-log-viewer__badge--ok">فعال</span>
+                                        @endif
+                                    </td>
+                                    <td>{{ $row['exists'] ? 'بله' : 'خیر' }}</td>
+                                    <td>{{ $row['writable'] ? 'بله' : 'خیر' }}</td>
+                                    <td dir="ltr">{{ $row['log_file_count'] }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
 
             @if (empty($logDiagnostics['directory_writable']))
                 <p class="admin-payment-log-viewer__warn">

@@ -60,4 +60,11 @@ class HomepageImageServiceTest extends TestCase
         $this->assertSame(380, $optimizerPreset['cover_height'] ?? null);
         $this->assertArrayNotHasKey('max_width', $optimizerPreset);
     }
+
+    public function test_hero_display_thumbnails_disabled_by_default(): void
+    {
+        $preset = app(HomepageImageService::class)->forSection('hero');
+
+        $this->assertFalse($preset['enabled'] ?? true);
+    }
 }

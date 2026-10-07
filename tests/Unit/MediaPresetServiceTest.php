@@ -17,7 +17,8 @@ class MediaPresetServiceTest extends TestCase
         $preset = $service->forDirectory('sliders');
 
         $this->assertIsArray($preset);
-        $this->assertSame(1920, $preset['max_width'] ?? null);
+        $this->assertSame(1920, $preset['cover_width'] ?? null);
+        $this->assertSame(380, $preset['cover_height'] ?? null);
         $this->assertSame('webp', $preset['format'] ?? null);
     }
 

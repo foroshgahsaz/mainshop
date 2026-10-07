@@ -2779,13 +2779,21 @@ body.has-admin-bar .listing-filters {
     margin-bottom: 0;
   }
 
+  .shop-header__mobile {
+    flex-direction: row;
+    direction: ltr;
+  }
+
+  .shop-header__mobile-end {
+    direction: rtl;
+  }
+
   .shop-header__mobile-menu {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    margin-inline-start: 0;
-    margin-inline-end: 0;
     padding: 0.35rem;
+    padding-inline-end: 0.1rem;
     color: #4b5563;
   }
 

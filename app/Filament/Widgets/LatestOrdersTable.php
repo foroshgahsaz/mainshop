@@ -10,8 +10,6 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class LatestOrdersTable extends BaseWidget
 {
-    protected static bool $isLazy = false;
-
     protected static ?string $heading = 'آخرین سفارشات';
 
     protected static ?int $sort = 4;
@@ -25,7 +23,7 @@ class LatestOrdersTable extends BaseWidget
                 Order::query()
                     ->with('user')
                     ->latest()
-                    ->limit(8)
+                    ->take(8)
             )
             ->columns([
                 Tables\Columns\TextColumn::make('tracking_code')

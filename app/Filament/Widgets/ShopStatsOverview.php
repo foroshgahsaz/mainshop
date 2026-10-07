@@ -11,8 +11,6 @@ use Illuminate\Support\Facades\Cache;
 
 class ShopStatsOverview extends BaseWidget
 {
-    protected static bool $isLazy = false;
-
     protected static ?int $sort = 1;
 
     protected int|string|array $columnSpan = 'full';

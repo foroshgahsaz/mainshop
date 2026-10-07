@@ -9,8 +9,6 @@ use Illuminate\Support\Facades\DB;
 
 class OrdersMapWidget extends Widget
 {
-    protected static bool $isLazy = false;
-
     protected static string $view = 'filament.widgets.orders-map-widget';
 
     protected static ?int $sort = 3;
@@ -24,9 +22,13 @@ class OrdersMapWidget extends Widget
      */
     public function getMapPoints(): array
     {
-        return Cache::remember('admin:dashboard:orders_map_points', 600, function (): array {
-            return $this->buildMapPoints();
-        });
+        try {
+            return Cache::remember('admin:dashboard:orders_map_points', 600, function (): array {
+                return $this->buildMapPoints();
+            });
+        } catch (\Throwable) {
+            return [];
+        }
     }
 
     /**

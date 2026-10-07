@@ -15,16 +15,13 @@
             <div class="swiper-wrapper">
                 @forelse($sliders as $i => $slider)
                     <div class="swiper-slide">
-                        @php
-                            $url = \App\Support\ShopFormatter::sectionImage('hero', $slider->image, 'shop/images/hero/slide-ai.svg');
-                        @endphp
                         @if($slider->link)
                             <a href="{{ $slider->link }}" class="hero-slide__link">
-                                <img src="{{ $url }}" alt="{{ $slider->title ?? 'بنر' }}" class="hero-slide__img" width="1920" height="380" decoding="async" @if($i === 0) fetchpriority="high" @endif loading="{{ $i === 0 ? 'eager' : 'lazy' }}" draggable="false">
+                                @include('shop.partials.hero-slide-media', ['slider' => $slider, 'isFirst' => $i === 0])
                             </a>
                         @else
                             <div class="hero-slide__link">
-                                <img src="{{ $url }}" alt="{{ $slider->title ?? 'بنر' }}" class="hero-slide__img" width="1920" height="380" decoding="async" @if($i === 0) fetchpriority="high" @endif loading="{{ $i === 0 ? 'eager' : 'lazy' }}" draggable="false">
+                                @include('shop.partials.hero-slide-media', ['slider' => $slider, 'isFirst' => $i === 0])
                             </div>
                         @endif
                     </div>

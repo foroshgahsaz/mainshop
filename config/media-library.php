@@ -13,7 +13,8 @@ use App\Models\User;
 return [
 
     'folders' => [
-        'sliders' => 'اسلایدر',
+        'sliders' => 'اسلایدر دسکتاپ',
+        'sliders/mobile' => 'اسلایدر موبایل',
         'brands' => 'برند',
         'categories' => 'دسته‌بندی',
         'posts' => 'مقاله',
@@ -28,7 +29,7 @@ return [
     ],
 
     'models' => [
-        HomeSlider::class => ['image'],
+        HomeSlider::class => ['image', 'image_mobile'],
         Brand::class => ['logo', 'og_image'],
         Category::class => ['image', 'og_image'],
         Post::class => ['image', 'og_image'],

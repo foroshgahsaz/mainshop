@@ -39,17 +39,29 @@ class HomeSliderResource extends Resource
                 Forms\Components\TextInput::make('title')
                     ->label('عنوان')
                     ->maxLength(255),
-                ShopMediaPicker::image('image', 'sliders', 'تصویر')
+                ShopMediaPicker::image('image', 'sliders', 'تصویر دسکتاپ')
                     ->required()
                     ->maxSize(4096)
+                    ->columnSpanFull()
                     ->helperText(function (): string {
                         $preset = app(HomepageImageService::class)->forSection('hero') ?? [];
                         $w = (int) ($preset['width'] ?? 1920);
                         $h = (int) ($preset['height'] ?? 380);
-
                         $templateUrl = asset('shop/images/hero/banner-template-1920x380.svg');
 
-                        return "سایز استاندارد بنر: {$w}×{$h} پیکسل (عرض×ارتفاع). متن و لوگو را در مرکز کادر نگه دارید؛ لبه‌ها در موبایل کمی برش می‌خورد. قالب نمونه: {$templateUrl}";
+                        return "دسکتاپ و تبلت (از ۷۶۸px به بالا): {$w}×{$h} پیکسل. بنر باریک — قالب: {$templateUrl}";
+                    }),
+                ShopMediaPicker::image('image_mobile', 'sliders/mobile', 'تصویر موبایل')
+                    ->maxSize(4096)
+                    ->columnSpanFull()
+                    ->helperText(function (): string {
+                        $preset = app(HomepageImageService::class)->forSection('hero_mobile') ?? [];
+                        $w = (int) ($preset['width'] ?? 750);
+                        $h = (int) ($preset['height'] ?? 500);
+
+                        $templateUrl = asset('shop/images/hero/banner-template-750x500.svg');
+
+                        return "موبایل (عرض کمتر از ۷۶۸px): {$w}×{$h} پیکسل. اگر خالی باشد، تصویر دسکتاپ استفاده می‌شود. قالب: {$templateUrl}";
                     }),
                 Forms\Components\TextInput::make('link')
                     ->label('لینک')

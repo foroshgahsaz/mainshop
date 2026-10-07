@@ -15,13 +15,23 @@ return [
     'sections' => [
 
         'hero' => [
-            'label' => 'اسلایدر صفحه اصلی',
+            'label' => 'اسلایدر — دسکتاپ',
             'mode' => 'cover',
             'width' => 1920,
             'height' => 380,
             'quality' => 90,
             'format' => 'webp',
             // Upload preset already crops to 1920×380; avoid a second cover pass (blur/artifacts).
+            'enabled' => false,
+        ],
+
+        'hero_mobile' => [
+            'label' => 'اسلایدر — موبایل',
+            'mode' => 'cover',
+            'width' => 750,
+            'height' => 500,
+            'quality' => 90,
+            'format' => 'webp',
             'enabled' => false,
         ],
 

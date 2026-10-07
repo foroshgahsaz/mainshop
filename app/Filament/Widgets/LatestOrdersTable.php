@@ -10,6 +10,8 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class LatestOrdersTable extends BaseWidget
 {
+    protected static bool $isLazy = false;
+
     protected static ?string $heading = 'آخرین سفارشات';
 
     protected static ?int $sort = 4;

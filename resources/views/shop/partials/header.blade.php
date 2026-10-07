@@ -6,8 +6,8 @@
           $siteTel = preg_replace('/\D+/', '', (string) $sitePhone);
       @endphp
 
-      {{-- موبایل: تماس چپ | (لوگو + منو) راست — ترتیب فیزیکی LTR برای پایداری در RTL --}}
-      <div class="shop-header__mobile flex md:hidden items-center w-full mb-0">
+      {{-- موبایل (چپ→راست): تماس | فاصله | لوگو + منو (منو لبه راست) --}}
+      <div class="shop-header__mobile md:hidden w-full mb-0">
         <span class="header-phone-wrap shop-header__mobile-phone shrink-0">
           <a href="{{ $siteTel !== '' ? 'tel:'.$siteTel : '#' }}"
              class="header-phone-btn"
@@ -22,8 +22,20 @@
             </svg>
           </a>
         </span>
-        <div class="shop-header__mobile-spacer flex-1 min-w-2" aria-hidden="true"></div>
-        <div class="shop-header__mobile-end flex items-center gap-2 shrink-0">
+        <div class="shop-header__mobile-end shrink-0">
+          <button type="button"
+                  onclick="toggleElement('mobileMenu', true)"
+                  class="shop-header__mobile-menu shrink-0"
+                  aria-label="منو">
+            <svg class="w-6 h-6"
+                 fill="none"
+                 stroke="currentColor"
+                 stroke-width="2"
+                 viewBox="0 0 24 24">
+              <path stroke-linecap="round"
+                    d="M4 7h16M4 12h16M4 17h16" />
+            </svg>
+          </button>
           <a href="{{ route('home') }}"
              class="shop-header__mobile-logo shrink-0 min-w-0"
              aria-label="{{ site_name() }}">
@@ -39,19 +51,6 @@
               <span class="text-lg font-black text-navy truncate">{{ site_name() }}</span>
             @endif
           </a>
-          <button type="button"
-                  onclick="toggleElement('mobileMenu', true)"
-                  class="shop-header__mobile-menu shrink-0"
-                  aria-label="منو">
-            <svg class="w-6 h-6"
-                 fill="none"
-                 stroke="currentColor"
-                 stroke-width="2"
-                 viewBox="0 0 24 24">
-              <path stroke-linecap="round"
-                    d="M4 7h16M4 12h16M4 17h16" />
-            </svg>
-          </button>
         </div>
       </div>
 

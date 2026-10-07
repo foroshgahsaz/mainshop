@@ -2780,20 +2780,38 @@ body.has-admin-bar .listing-filters {
   }
 
   .shop-header__mobile {
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    width: 100%;
+    column-gap: 0.5rem;
+    /* فیزیکی چپ/راست مستقل از dir=rtl صفحه */
     direction: ltr;
   }
 
+  .shop-header__mobile-phone {
+    grid-column: 1;
+    justify-self: start;
+  }
+
   .shop-header__mobile-end {
-    direction: rtl;
+    grid-column: 3;
+    justify-self: end;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    gap: 0.35rem;
+    max-width: calc(100% - 3.5rem);
   }
 
   .shop-header__mobile-menu {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
     padding: 0.35rem;
-    padding-inline-end: 0.1rem;
+    padding-inline-end: 0;
+    margin-inline-end: -0.15rem;
     color: #4b5563;
   }
 

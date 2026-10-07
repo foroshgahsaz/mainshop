@@ -13,6 +13,8 @@ class StoragePermissionFixer
 
         return array_values(array_unique(array_filter([
             $publicRoot,
+            ShopStoragePaths::logsDirectory(),
+            ShopStoragePaths::backupDirectory(),
             Storage::disk('livewire-tmp')->path((string) config('livewire.temporary_file_upload.directory', 'livewire-tmp')),
             Storage::disk('public')->path('products'),
             Storage::disk('public')->path('brands'),
@@ -38,28 +40,38 @@ class StoragePermissionFixer
 
     public static function fix(): void
     {
+        foreach (self::requiredPaths() as $path) {
+            self::ensureWritableDirectory($path);
+        }
+    }
+
+    public static function ensureWritableDirectory(string $path): void
+    {
+        $path = rtrim($path, '/\\');
+        if ($path === '') {
+            return;
+        }
+
         $runningAsRoot = self::runningAsRoot();
         $webUser = self::webUser();
 
-        foreach (self::requiredPaths() as $path) {
-            if (! is_dir($path)) {
-                @mkdir($path, 0775, true);
-            }
+        if (! is_dir($path)) {
+            @mkdir($path, 0775, true);
+        }
 
-            if (! is_dir($path)) {
-                continue;
-            }
+        if (! is_dir($path)) {
+            return;
+        }
 
-            if ($runningAsRoot) {
-                @chown($path, $webUser);
-                @chgrp($path, $webUser);
-            }
+        if ($runningAsRoot) {
+            @chown($path, $webUser);
+            @chgrp($path, $webUser);
+        }
 
-            @chmod($path, 0775);
+        @chmod($path, 0775);
 
-            if (! self::isDirectoryWritable($path) && $runningAsRoot) {
-                @chmod($path, 0777);
-            }
+        if (! self::isDirectoryWritable($path) && $runningAsRoot) {
+            @chmod($path, 0777);
         }
     }
 

@@ -96,7 +96,7 @@ class AppServiceProvider extends ServiceProvider
             ShopStoragePaths::ensureDirectory($directory);
         }
 
-        if ($this->app->runningInConsole() && StoragePermissionFixer::runningAsRoot()) {
+        if (StoragePermissionFixer::runningAsRoot()) {
             StoragePermissionFixer::fix();
         }
 

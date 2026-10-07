@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Support\ShopStoragePaths;
+use App\Support\StoragePermissionFixer;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Redis;
@@ -63,6 +64,8 @@ class ShopDeployRecover extends Command
         foreach (ShopStoragePaths::persistentDirectories() as $directory) {
             ShopStoragePaths::ensureDirectory($directory);
         }
+
+        StoragePermissionFixer::fix();
     }
 
     protected function useDatabaseCacheIfRedisIsDown(): void

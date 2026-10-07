@@ -39,11 +39,7 @@ class ShopStoragePaths
 
     public static function ensureDirectory(string $directory): void
     {
-        if ($directory === '' || is_dir($directory)) {
-            return;
-        }
-
-        @mkdir($directory, 0755, true);
+        StoragePermissionFixer::ensureWritableDirectory($directory);
     }
 
     /**

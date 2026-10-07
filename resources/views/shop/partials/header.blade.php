@@ -37,7 +37,7 @@
             </svg>
           </button>
           <a href="{{ route('home') }}"
-             class="shop-header__mobile-logo shrink-0 min-w-0"
+             class="shop-header__mobile-logo min-w-0"
              aria-label="{{ site_name() }}">
             @if ($logoUrl = site_logo_url())
               <img src="{{ $logoUrl }}"

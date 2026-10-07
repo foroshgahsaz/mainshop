@@ -47,7 +47,7 @@
   display: block;
   position: relative;
   width: 100%;
-  aspect-ratio: 750 / 500;
+  aspect-ratio: 750 / 400;
   overflow: hidden;
   border-radius: 1rem;
   transform: scale(0.99);
@@ -58,7 +58,7 @@
 
 @media (min-width: 768px) {
   .mainSwiper .hero-slide__link {
-    aspect-ratio: 1920 / 380;
+    aspect-ratio: 1920 / 480;
     border-radius: 15px;
   }
 }
@@ -2767,14 +2767,30 @@ body.has-admin-bar .listing-filters {
 }
 
 @media (max-width: 767px) {
-  .shop-header > .max-w-site {
+  .shop-header > .max-w-site,
+  .shop-header__inner {
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
+    padding-inline: 0.5rem;
   }
 
   .header-phone-wrap {
     margin-top: 0;
     margin-bottom: 0;
+  }
+
+  .shop-header__mobile-menu {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-inline-start: 0;
+    margin-inline-end: 0;
+    padding: 0.35rem;
+    color: #4b5563;
+  }
+
+  .shop-header__mobile-menu:active {
+    color: #1e3a5f;
   }
 }
 

@@ -18,7 +18,7 @@ class MediaPresetServiceTest extends TestCase
 
         $this->assertIsArray($preset);
         $this->assertSame(1920, $preset['cover_width'] ?? null);
-        $this->assertSame(380, $preset['cover_height'] ?? null);
+        $this->assertSame(480, $preset['cover_height'] ?? null);
         $this->assertSame('webp', $preset['format'] ?? null);
     }
 

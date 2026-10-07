@@ -46,8 +46,8 @@ class HomeSliderResource extends Resource
                     ->helperText(function (): string {
                         $preset = app(HomepageImageService::class)->forSection('hero') ?? [];
                         $w = (int) ($preset['width'] ?? 1920);
-                        $h = (int) ($preset['height'] ?? 380);
-                        $templateUrl = asset('shop/images/hero/banner-template-1920x380.svg');
+                        $h = (int) ($preset['height'] ?? 480);
+                        $templateUrl = asset('shop/images/hero/banner-template-1920x480.svg');
 
                         return "دسکتاپ و تبلت (از ۷۶۸px به بالا): {$w}×{$h} پیکسل. بنر باریک — قالب: {$templateUrl}";
                     }),
@@ -57,9 +57,9 @@ class HomeSliderResource extends Resource
                     ->helperText(function (): string {
                         $preset = app(HomepageImageService::class)->forSection('hero_mobile') ?? [];
                         $w = (int) ($preset['width'] ?? 750);
-                        $h = (int) ($preset['height'] ?? 500);
+                        $h = (int) ($preset['height'] ?? 400);
 
-                        $templateUrl = asset('shop/images/hero/banner-template-750x500.svg');
+                        $templateUrl = asset('shop/images/hero/banner-template-750x400.svg');
 
                         return "موبایل (عرض کمتر از ۷۶۸px): {$w}×{$h} پیکسل. اگر خالی باشد، تصویر دسکتاپ استفاده می‌شود. قالب: {$templateUrl}";
                     }),

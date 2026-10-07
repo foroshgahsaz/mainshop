@@ -18,10 +18,10 @@ return [
             'label' => 'اسلایدر — دسکتاپ',
             'mode' => 'cover',
             'width' => 1920,
-            'height' => 380,
+            'height' => 480,
             'quality' => 90,
             'format' => 'webp',
-            // Upload preset already crops to 1920×380; avoid a second cover pass (blur/artifacts).
+            // Upload preset already crops to 1920×480; avoid a second cover pass (blur/artifacts).
             'enabled' => false,
         ],
 
@@ -29,7 +29,7 @@ return [
             'label' => 'اسلایدر — موبایل',
             'mode' => 'cover',
             'width' => 750,
-            'height' => 500,
+            'height' => 400,
             'quality' => 90,
             'format' => 'webp',
             'enabled' => false,

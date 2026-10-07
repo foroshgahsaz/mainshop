@@ -34,9 +34,9 @@ return [
         ],
 
         'slider' => [
-            'max_width' => 1920,
-            'max_height' => 1080,
-            'quality' => 85,
+            'cover_width' => 1920,
+            'cover_height' => 380,
+            'quality' => 90,
             'format' => 'webp',
         ],
 

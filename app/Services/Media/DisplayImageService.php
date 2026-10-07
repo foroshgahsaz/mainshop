@@ -71,7 +71,9 @@ class DisplayImageService
             return null;
         }
 
-        $preset = $this->homepageImages->optimizerPreset($section);
+        $preset = $section === 'hero'
+            ? $this->heroThumbnailPreset()
+            : $this->homepageImages->optimizerPreset($section);
         $cachePath = $this->cachePath($section, $path, $preset);
 
         if (! $disk->exists($cachePath)) {
@@ -85,6 +87,19 @@ class DisplayImageService
         return response()->file($disk->path($cachePath), [
             'Cache-Control' => 'public, max-age=31536000',
         ]);
+    }
+
+    /** @return array<string, mixed> */
+    protected function heroThumbnailPreset(): array
+    {
+        $hero = $this->homepageImages->forSection('hero') ?? [];
+        $width = max(1, (int) ($hero['width'] ?? 1920));
+
+        return [
+            'max_width' => min(3840, $width * 2),
+            'quality' => min(100, max(85, (int) ($hero['quality'] ?? 90))),
+            'format' => (string) ($hero['format'] ?? 'webp'),
+        ];
     }
 
     /** @param  array<string, mixed>  $preset */

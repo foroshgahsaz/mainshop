@@ -19,9 +19,10 @@ return [
             'mode' => 'cover',
             'width' => 1920,
             'height' => 380,
-            'quality' => 85,
+            'quality' => 90,
             'format' => 'webp',
-            'enabled' => true,
+            // Upload preset already crops to 1920×380; avoid a second cover pass (blur/artifacts).
+            'enabled' => false,
         ],
 
         'categories' => [

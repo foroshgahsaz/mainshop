@@ -20,11 +20,11 @@
                         @endphp
                         @if($slider->link)
                             <a href="{{ $slider->link }}" class="hero-slide__link">
-                                <img src="{{ $url }}" alt="{{ $slider->title ?? 'بنر' }}" loading="{{ $i === 0 ? 'eager' : 'lazy' }}" draggable="false">
+                                <img src="{{ $url }}" alt="{{ $slider->title ?? 'بنر' }}" class="hero-slide__img" width="1920" height="380" decoding="async" @if($i === 0) fetchpriority="high" @endif loading="{{ $i === 0 ? 'eager' : 'lazy' }}" draggable="false">
                             </a>
                         @else
                             <div class="hero-slide__link">
-                                <img src="{{ $url }}" alt="{{ $slider->title ?? 'بنر' }}" loading="{{ $i === 0 ? 'eager' : 'lazy' }}" draggable="false">
+                                <img src="{{ $url }}" alt="{{ $slider->title ?? 'بنر' }}" class="hero-slide__img" width="1920" height="380" decoding="async" @if($i === 0) fetchpriority="high" @endif loading="{{ $i === 0 ? 'eager' : 'lazy' }}" draggable="false">
                             </div>
                         @endif
                     </div>

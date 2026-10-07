@@ -2779,18 +2779,26 @@ body.has-admin-bar .listing-filters {
     margin-bottom: 0;
   }
 
+  .shop-header__mobile {
+    flex-direction: row;
+  }
+
   .shop-header__mobile-menu {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    margin-inline-start: 0;
     margin-inline-end: 0;
     padding: 0.35rem;
+    padding-inline-end: 0.15rem;
     color: #4b5563;
   }
 
   .shop-header__mobile-menu:active {
     color: #1e3a5f;
+  }
+
+  .shop-header__mobile-phone {
+    margin-inline-start: auto;
   }
 }
 

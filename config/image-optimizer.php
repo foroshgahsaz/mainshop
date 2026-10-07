@@ -40,6 +40,13 @@ return [
             'format' => 'webp',
         ],
 
+        'slider_mobile' => [
+            'cover_width' => 750,
+            'cover_height' => 500,
+            'quality' => 90,
+            'format' => 'webp',
+        ],
+
         'category' => [
             'max_width' => 1200,
             'max_height' => 1200,
@@ -89,6 +96,7 @@ return [
         'products/variants' => 'product',
         'brands' => 'logo',
         'sliders' => 'slider',
+        'sliders/mobile' => 'slider_mobile',
         'categories' => 'category',
         'posts' => 'post',
         'seo' => 'seo',

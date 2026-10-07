@@ -71,8 +71,8 @@ class DisplayImageService
             return null;
         }
 
-        $preset = $section === 'hero'
-            ? $this->heroThumbnailPreset()
+        $preset = in_array($section, ['hero', 'hero_mobile'], true)
+            ? $this->heroThumbnailPreset($section)
             : $this->homepageImages->optimizerPreset($section);
         $cachePath = $this->cachePath($section, $path, $preset);
 
@@ -90,9 +90,9 @@ class DisplayImageService
     }
 
     /** @return array<string, mixed> */
-    protected function heroThumbnailPreset(): array
+    protected function heroThumbnailPreset(string $section = 'hero'): array
     {
-        $hero = $this->homepageImages->forSection('hero') ?? [];
+        $hero = $this->homepageImages->forSection($section) ?? [];
         $width = max(1, (int) ($hero['width'] ?? 1920));
 
         return [

@@ -108,7 +108,15 @@ class RestorePublicFiles extends Command
 
         ProductImage::query()->whereNotNull('image')->pluck('image')->each(fn ($p) => $paths->push($p));
         Category::query()->whereNotNull('image')->pluck('image')->each(fn ($p) => $paths->push($p));
-        HomeSlider::query()->whereNotNull('image')->pluck('image')->each(fn ($p) => $paths->push($p));
+        HomeSlider::query()->get(['image', 'image_mobile'])->each(function (HomeSlider $slider) use ($paths): void {
+            if ($slider->image) {
+                $paths->push($slider->image);
+            }
+
+            if ($slider->image_mobile) {
+                $paths->push($slider->image_mobile);
+            }
+        });
         Post::query()->whereNotNull('image')->pluck('image')->each(fn ($p) => $paths->push($p));
         Brand::query()->whereNotNull('logo')->pluck('logo')->each(fn ($p) => $paths->push($p));
         MediaFile::query()->pluck('path')->each(fn ($p) => $paths->push($p));

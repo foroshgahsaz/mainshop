@@ -47,7 +47,7 @@
   display: block;
   position: relative;
   width: 100%;
-  aspect-ratio: 1920 / 380;
+  aspect-ratio: 750 / 500;
   overflow: hidden;
   border-radius: 1rem;
   transform: scale(0.99);
@@ -58,12 +58,22 @@
 
 @media (min-width: 768px) {
   .mainSwiper .hero-slide__link {
+    aspect-ratio: 1920 / 380;
     border-radius: 15px;
   }
 }
 
 .mainSwiper .swiper-slide-active .hero-slide__link {
   transform: scale(1);
+}
+
+.mainSwiper .hero-slide__picture {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
 }
 
 .mainSwiper .swiper-slide img,

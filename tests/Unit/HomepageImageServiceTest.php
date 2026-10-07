@@ -67,4 +67,12 @@ class HomepageImageServiceTest extends TestCase
 
         $this->assertFalse($preset['enabled'] ?? true);
     }
+
+    public function test_hero_mobile_section_exists(): void
+    {
+        $preset = app(HomepageImageService::class)->forSection('hero_mobile');
+
+        $this->assertSame(750, $preset['width'] ?? null);
+        $this->assertSame(500, $preset['height'] ?? null);
+    }
 }

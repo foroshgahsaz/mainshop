@@ -192,7 +192,7 @@ class TransactionalSmsDispatcher
             return;
         }
 
-        Bus::dispatch((new SendTransactionalSmsJob($templateKey, $phone, $variables))->afterResponse());
+        Bus::dispatch(new SendTransactionalSmsJob($templateKey, $phone, $variables))->afterResponse();
     }
 
     protected function formatOrderItems(Order $order): string

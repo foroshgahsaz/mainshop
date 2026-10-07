@@ -8,7 +8,7 @@ use Filament\Pages\Page;
 
 class ViewPaymentLogs extends Page
 {
-    public const UI_VERSION = '2026-10-04-list-v2';
+    public const UI_VERSION = '2026-10-07-paths-v3';
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
@@ -35,6 +35,9 @@ class ViewPaymentLogs extends Page
 
     public string $logsDirectory = '';
 
+    /** @var list<array<string, mixed>> */
+    public array $directoryDiagnostics = [];
+
     public static function canAccess(): bool
     {
         return AdminAccess::canManageShopInAdmin();
@@ -43,6 +46,7 @@ class ViewPaymentLogs extends Page
     public function mount(PaymentLogReader $reader): void
     {
         $this->logsDirectory = $reader->logDirectory();
+        $this->directoryDiagnostics = $reader->directoryDiagnostics();
         $this->recentEntries = $reader->recentDayEntries(PaymentLogReader::RECENT_DAYS);
         $this->archiveEntries = $reader->archivedZipEntries();
         $this->legacyLogEntry = $reader->legacySingleLogEntry();

@@ -60,7 +60,7 @@ class StoragePermissionFixer
     }
 
     /**
-     * @return array{user: string, group: string}|null
+     * @return array{user: string, group: string, uid: int, gid: int}|null
      */
     public static function inferOwnerFromReferencePath(): ?array
     {
@@ -78,24 +78,35 @@ class StoragePermissionFixer
             $uid = @fileowner($path);
             $gid = @filegroup($path);
 
-            if ($uid === false || $gid === false) {
+            if ($uid === false || $gid === false || (int) $uid === 0) {
                 continue;
             }
 
-            $user = self::posixNameForUid((int) $uid);
-            $group = self::posixNameForGid((int) $gid);
-
-            if ($user === null || $user === 'root') {
-                continue;
-            }
+            $uid = (int) $uid;
+            $gid = (int) $gid;
+            $user = self::posixNameForUid($uid);
+            $group = self::posixNameForGid($gid);
 
             return [
-                'user' => $user,
-                'group' => $group ?? $user,
+                'user' => $user ?? (string) $uid,
+                'group' => $group ?? (string) $gid,
+                'uid' => $uid,
+                'gid' => $gid,
             ];
         }
 
         return null;
+    }
+
+    public static function webOwnerLabel(): string
+    {
+        $inferred = self::inferOwnerFromReferencePath();
+
+        if ($inferred === null) {
+            return self::webUser().':'.self::webGroup().' (configured fallback)';
+        }
+
+        return $inferred['user'].':'.$inferred['group'].' (uid '.$inferred['uid'].' gid '.$inferred['gid'].')';
     }
 
     public static function fix(): void
@@ -113,8 +124,7 @@ class StoragePermissionFixer
         }
 
         $runningAsRoot = self::runningAsRoot();
-        $webUser = self::webUser();
-        $webGroup = self::webGroup();
+        $owner = self::inferOwnerFromReferencePath();
 
         if (! is_dir($path)) {
             @mkdir($path, 0775, true);
@@ -125,8 +135,13 @@ class StoragePermissionFixer
         }
 
         if ($runningAsRoot) {
-            @chown($path, $webUser);
-            @chgrp($path, $webGroup);
+            if ($owner !== null) {
+                @chown($path, $owner['uid']);
+                @chgrp($path, $owner['gid']);
+            } else {
+                @chown($path, self::webUser());
+                @chgrp($path, self::webGroup());
+            }
         }
 
         @chmod($path, 0775);

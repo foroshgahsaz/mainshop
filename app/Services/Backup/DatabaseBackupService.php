@@ -146,7 +146,7 @@ class DatabaseBackupService
 
         if (! StoragePermissionFixer::isDirectoryWritable($dir)) {
             throw new RuntimeException(
-                'پوشهٔ بک‌آپ قابل نوشتن نیست ('.$dir.'). مالک باید مثل /data/products باشد (Runflare: xfs:xfs). روی سرور (root): chown -R xfs:xfs '.$dir.' && php artisan shop:fix-storage-permissions'
+                'پوشهٔ بک‌آپ قابل نوشتن نیست ('.$dir.'). مالک باید مثل /data/products باشد. روی سرور (root): chown -R "$(stat -c \'%u:%g\' /data/products)" '.$dir.' && php artisan shop:fix-storage-permissions'
             );
         }
     }

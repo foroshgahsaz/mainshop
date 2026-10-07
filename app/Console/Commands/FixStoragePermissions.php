@@ -15,7 +15,7 @@ class FixStoragePermissions extends Command
     {
         StoragePermissionFixer::fix();
 
-        $this->line('Target owner: '.StoragePermissionFixer::webUser().':'.StoragePermissionFixer::webGroup());
+        $this->line('Target owner (from /data/products): '.StoragePermissionFixer::webOwnerLabel());
 
         foreach (StoragePermissionFixer::requiredPaths() as $path) {
             $writable = StoragePermissionFixer::isDirectoryWritable($path) ? 'writable' : 'NOT writable';

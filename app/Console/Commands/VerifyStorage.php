@@ -38,6 +38,16 @@ class VerifyStorage extends Command
         $this->line('Persistent logs & backups (filesystem):');
         $this->line('  log files: '.$this->countPath($logsDir).' in '.$logsDir.(is_writable($logsDir) ? ' (writable)' : ' (NOT writable)'));
         $this->line('  backup files: '.$this->countPath($backupDir).' in '.$backupDir.(is_dir($backupDir) && is_writable($backupDir) ? ' (writable)' : ' (missing or NOT writable)'));
+        $this->line('  PHP reference owner (/data/products): '.$this->formatPathOwner(Storage::disk('public')->path('products')));
+        $this->line('  logs dir owner: '.$this->formatPathOwner($logsDir));
+        $this->line('  backup dir owner: '.$this->formatPathOwner($backupDir));
+
+        if ($publicRoot === '/data' && $this->isSeparateMount($logsDir, $publicRoot)) {
+            $this->newLine();
+            $this->warn('Runflare: /data/logs is a SEPARATE disk mount (not a folder on the main /data volume).');
+            $this->line('Prefer ONE disk at /data only; remove extra claims for /data/logs and /data/database-backups.');
+            $this->line('Then chown logs/backups to the same uid:gid as /data/products (see shop:fix-storage-permissions).');
+        }
 
         if ($publicRoot === '/data' && ! ShopStoragePaths::usesCustomLogsDirectory()) {
             $this->newLine();
@@ -172,5 +182,37 @@ class VerifyStorage extends Command
         }
 
         return (string) $count;
+    }
+
+    protected function formatPathOwner(string $path): string
+    {
+        if (! is_dir($path)) {
+            return 'missing';
+        }
+
+        $uid = @fileowner($path);
+        $gid = @filegroup($path);
+
+        if ($uid === false || $gid === false) {
+            return 'unknown';
+        }
+
+        return 'uid '.(int) $uid.' gid '.(int) $gid.(is_writable($path) ? ' (writable as root)' : ' (NOT writable as root)');
+    }
+
+    protected function isSeparateMount(string $child, string $parent): bool
+    {
+        if (! is_dir($child) || ! is_dir($parent)) {
+            return false;
+        }
+
+        $childStat = @stat($child);
+        $parentStat = @stat($parent);
+
+        if ($childStat === false || $parentStat === false) {
+            return false;
+        }
+
+        return ($childStat['dev'] ?? null) !== ($parentStat['dev'] ?? null);
     }
 }

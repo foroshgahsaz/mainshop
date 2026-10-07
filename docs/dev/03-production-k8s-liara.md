@@ -105,12 +105,15 @@ php artisan shop:verify-storage
 یک‌بار (root در پاد):
 
 ```bash
-chown -R xfs:xfs /data/database-backups /data/logs
+# نام کاربر xfs در shell پاد ممکن است وجود نداشته باشد — از uid/gid محصولات کپی کنید:
+chown -R "$(stat -c '%u:%g' /data/products)" /data/database-backups /data/logs
 chmod -R 775 /data/database-backups /data/logs
 php artisan shop:fix-storage-permissions
 ```
 
-یا در env: `SHOP_WEB_USER=xfs` و `SHOP_WEB_GROUP=xfs` (دستور fix مالک را از `/data/products` هم حدس می‌زند).
+**دیسک Runflare:** فقط **یک** volume روی `/data` بگذارید. دیسک جدا برای `/data/logs` و `/data/database-backups` معمولاً خالی و `root` می‌ماند — آن دو claim را حذف کنید؛ لاگ و بک‌آپ زیرپوشهٔ همان `/data` هستند.
+
+یا در env: `SHOP_WEB_USER` / `SHOP_WEB_GROUP` فقط اگر نام کاربر در `/etc/passwd` پاد وجود دارد (اغلب نیست).
 
 ---
 

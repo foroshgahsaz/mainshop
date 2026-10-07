@@ -55,6 +55,8 @@ class AdminAccess
         'filament.admin.resources.media-files.*',
         'livewire.upload-file',
         'livewire.preview-file',
+        'livewire.update',
+        'default.livewire.update',
     ];
 
     public static function user(): ?User

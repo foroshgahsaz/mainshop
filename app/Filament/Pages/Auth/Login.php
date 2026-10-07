@@ -288,6 +288,8 @@ class Login extends BaseLogin
         $response = parent::authenticate();
 
         if ($response !== null) {
+            session()->regenerate();
+
             $this->redirectAfterAdminLogin();
 
             return null;

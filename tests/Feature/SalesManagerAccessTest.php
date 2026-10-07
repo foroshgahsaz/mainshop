@@ -11,6 +11,14 @@ use Tests\TestCase;
 
 class SalesManagerAccessTest extends TestCase
 {
+    public function test_dashboard_widgets_are_not_lazy_loaded(): void
+    {
+        $this->assertFalse(\App\Filament\Widgets\ShopStatsOverview::isLazy());
+        $this->assertFalse(\App\Filament\Widgets\OrdersTrendChart::isLazy());
+        $this->assertFalse(\App\Filament\Widgets\OrdersMapWidget::isLazy());
+        $this->assertFalse(\App\Filament\Widgets\LatestOrdersTable::isLazy());
+    }
+
     public function test_sales_manager_can_access_orders_and_products_but_not_full_shop_admin(): void
     {
         $manager = User::make([

@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Cache;
 
 class OrdersTrendChart extends ChartWidget
 {
+    protected static bool $isLazy = false;
+
     protected static ?string $pollingInterval = null;
 
     protected static ?string $heading = 'روند فروش ۳۰ روز اخیر';

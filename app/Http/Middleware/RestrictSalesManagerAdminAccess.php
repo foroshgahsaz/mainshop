@@ -24,6 +24,10 @@ class RestrictSalesManagerAdminAccess
             return $next($request);
         }
 
+        if ($request->routeIs('livewire.*', 'default.livewire.*')) {
+            return $next($request);
+        }
+
         if ($routeName === 'filament.admin.resources.users.edit') {
             $recordId = $request->route('record');
 

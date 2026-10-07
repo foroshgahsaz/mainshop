@@ -46,6 +46,7 @@ use App\Services\Settings\SettingsService;
 use App\Services\Sms\SmsSenderFactory;
 use App\Support\MediaPath;
 use App\Support\ShopMedia;
+use App\Support\ShopStoragePaths;
 use App\Support\StoragePermissionFixer;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -90,6 +91,10 @@ class AppServiceProvider extends ServiceProvider
         View::share('adminTopBarCreate', null);
 
         $this->ensureRuntimeCacheAndSessionAreReachable();
+
+        foreach (ShopStoragePaths::persistentDirectories() as $directory) {
+            ShopStoragePaths::ensureDirectory($directory);
+        }
 
         if ($this->app->runningInConsole() && StoragePermissionFixer::runningAsRoot()) {
             StoragePermissionFixer::fix();

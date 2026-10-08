@@ -46,7 +46,10 @@
         $isFamilyTaxonomy = $taxonomyMode === \App\Services\Settings\HomepageSettingsService::TAXONOMY_PRODUCT_FAMILIES;
     @endphp
     @if($taxonomyItems->isNotEmpty())
-        <section class="max-w-site mx-auto px-4 featured-categories-section">
+        <section @class([
+            'max-w-site mx-auto px-4 featured-categories-section',
+            'featured-categories-section--families' => $isFamilyTaxonomy,
+        ])>
             <div class="flex items-center justify-between section-header">
                 <h2 class="section-title">دسته‌بندی محصولات</h2>
                 <a href="{{ route('products.index') }}" class="section-nav-link">مشاهده همه</a>
@@ -55,7 +58,10 @@
                 <div class="swiper-wrapper">
                     @foreach($taxonomyItems as $item)
                         <div class="swiper-slide">
-                            <a href="{{ $isFamilyTaxonomy ? route('products.index', ['product_family_id' => $item->id]) : route('categories.show', $item) }}" class="category-card">
+                            <a href="{{ $isFamilyTaxonomy ? route('products.index', ['product_family_id' => $item->id]) : route('categories.show', $item) }}" @class([
+                                'category-card',
+                                'category-card--family' => $isFamilyTaxonomy,
+                            ])>
                                 <span class="category-card__image">
                                     <img src="{{ $isFamilyTaxonomy ? \App\Support\ShopFormatter::productFamilyImage($item->image) : \App\Support\ShopFormatter::categoryImage($item->image) }}" alt="{{ $item->name }}" loading="lazy">
                                 </span>

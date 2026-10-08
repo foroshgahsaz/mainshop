@@ -8,6 +8,7 @@
     use App\Filament\Pages\ManageSmsIr;
     use App\Filament\Pages\ManageTransactionalSms;
     use App\Filament\Pages\ManageHomepageImages;
+    use App\Filament\Pages\ManageHomepageSettings;
     use App\Filament\Pages\ManageMediaPresets;
     use App\Filament\Pages\ManageBajetPay;
     use App\Filament\Pages\ManageTara;
@@ -232,6 +233,7 @@
                 'filament.admin.pages.footer-settings',
                 'filament.admin.pages.site-header-settings',
                 'filament.admin.pages.search-popup-settings',
+                'filament.admin.pages.homepage-settings',
                 'filament.admin.pages.kavenegar',
                 'filament.admin.pages.sms-ir',
                 'filament.admin.pages.transactional-sms',
@@ -242,6 +244,7 @@
                     ['label' => 'فوتر سایت', 'url' => ManageFooterSettings::getUrl(), 'icon' => 'fa-window-maximize'],
                     ['label' => 'هدر سایت', 'url' => ManageSiteHeaderSettings::getUrl(), 'icon' => 'fa-code'],
                     ['label' => 'پاپ‌آپ جستجو', 'url' => ManageSearchPopupSettings::getUrl(), 'icon' => 'fa-magnifying-glass'],
+                    ['label' => 'صفحه اصلی فروشگاه', 'url' => ManageHomepageSettings::getUrl(), 'icon' => 'fa-house'],
                     ['label' => 'مجوزها', 'url' => ManageTrustBadges::getUrl(), 'icon' => 'fa-certificate'],
                 ]],
                 ['label' => 'پیامک', 'icon' => 'fa-sms', 'items' => [

@@ -6,6 +6,7 @@ use App\Models\HomeSlider;
 use App\Models\Page;
 use App\Models\Post;
 use App\Models\Product;
+use App\Models\ProductFamily;
 use App\Models\ProductImage;
 use App\Models\ProductVariant;
 use App\Models\User;
@@ -17,6 +18,7 @@ return [
         'sliders/mobile' => 'اسلایدر موبایل',
         'brands' => 'برند',
         'categories' => 'دسته‌بندی',
+        'product-families' => 'خانواده محصول',
         'posts' => 'مقاله',
         'products' => 'محصول',
         'products/variants' => 'تنوع محصول',
@@ -32,6 +34,7 @@ return [
         HomeSlider::class => ['image', 'image_mobile'],
         Brand::class => ['logo', 'og_image'],
         Category::class => ['image', 'og_image'],
+        ProductFamily::class => ['image'],
         Post::class => ['image', 'og_image'],
         Page::class => ['og_image'],
         Product::class => ['og_image'],

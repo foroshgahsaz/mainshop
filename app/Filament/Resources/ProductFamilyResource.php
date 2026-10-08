@@ -3,7 +3,9 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProductFamilyResource\Pages;
+use App\Filament\Support\AdminImageColumn;
 use App\Filament\Support\AdminTable;
+use App\Filament\Support\ShopMediaPicker;
 use App\Models\ProductFamily;
 use App\Support\AdminAccess;
 use Filament\Forms;
@@ -52,6 +54,7 @@ class ProductFamilyResource extends Resource
                         ->required()
                         ->maxLength(255)
                         ->unique(ignoreRecord: true),
+                    ShopMediaPicker::image('image', 'product-families', 'تصویر')->columnSpanFull(),
                     Forms\Components\Toggle::make('is_active')
                         ->label('فعال')
                         ->default(true),
@@ -68,6 +71,7 @@ class ProductFamilyResource extends Resource
     {
         return AdminTable::configure($table)
             ->columns([
+                AdminImageColumn::make('image')->label('تصویر'),
                 Tables\Columns\TextColumn::make('name')->label('نام')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('slug')->label('اسلاگ'),
                 Tables\Columns\IconColumn::make('is_active')->label('فعال')->boolean(),

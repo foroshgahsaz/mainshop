@@ -125,4 +125,13 @@ class ShopFormatter
 
         return self::sectionImage('categories', $path, 'shop/images/categories/code.svg');
     }
+
+    public static function productFamilyImage(?string $path): string
+    {
+        if (! $path) {
+            return asset('shop/images/categories/code.svg');
+        }
+
+        return self::sectionImage('product_families', $path, 'shop/images/categories/code.svg');
+    }
 }

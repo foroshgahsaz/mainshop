@@ -39,22 +39,27 @@
         </div>
     </section>
 
-    {{-- CATEGORIES --}}
-    @if($categories->isNotEmpty())
+    {{-- CATEGORIES / PRODUCT FAMILIES --}}
+    @php
+        $taxonomyMode = $taxonomy_mode ?? \App\Services\Settings\HomepageSettingsService::TAXONOMY_CATEGORIES;
+        $taxonomyItems = $taxonomy_items ?? collect();
+        $isFamilyTaxonomy = $taxonomyMode === \App\Services\Settings\HomepageSettingsService::TAXONOMY_PRODUCT_FAMILIES;
+    @endphp
+    @if($taxonomyItems->isNotEmpty())
         <section class="max-w-site mx-auto px-4 featured-categories-section">
             <div class="flex items-center justify-between section-header">
-                <h2 class="section-title">دسته‌بندی‌های منتخب</h2>
+                <h2 class="section-title">{{ $isFamilyTaxonomy ? 'خانواده‌های محصول' : 'دسته‌بندی‌های منتخب' }}</h2>
                 <a href="{{ route('products.index') }}" class="section-nav-link">مشاهده همه</a>
             </div>
             <div class="swiper categorySwiper">
                 <div class="swiper-wrapper">
-                    @foreach($categories as $category)
+                    @foreach($taxonomyItems as $item)
                         <div class="swiper-slide">
-                            <a href="{{ route('categories.show', $category) }}" class="category-card">
+                            <a href="{{ $isFamilyTaxonomy ? route('products.index', ['product_family_id' => $item->id]) : route('categories.show', $item) }}" class="category-card">
                                 <span class="category-card__image">
-                                    <img src="{{ \App\Support\ShopFormatter::categoryImage($category->image) }}" alt="{{ $category->name }}" loading="lazy">
+                                    <img src="{{ $isFamilyTaxonomy ? \App\Support\ShopFormatter::productFamilyImage($item->image) : \App\Support\ShopFormatter::categoryImage($item->image) }}" alt="{{ $item->name }}" loading="lazy">
                                 </span>
-                                <span class="category-card__label">{{ $category->name }}</span>
+                                <span class="category-card__label">{{ $item->name }}</span>
                             </a>
                         </div>
                     @endforeach

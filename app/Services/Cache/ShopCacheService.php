@@ -8,7 +8,9 @@ use App\Models\HomeSlider;
 use App\Models\MenuItem;
 use App\Models\Post;
 use App\Models\Product;
+use App\Models\ProductFamily;
 use App\Models\ShippingMethod;
+use App\Services\Settings\HomepageSettingsService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -24,14 +26,20 @@ class ShopCacheService
             'shop:home:payload',
             config('shop.cache.home_ttl'),
             function () {
+                $homepage = app(HomepageSettingsService::class);
                 $productQuery = fn () => Product::active()->with(['images' => fn ($q) => $q->orderBy('position')]);
+                $taxonomyMode = $homepage->taxonomyMode();
+                $taxonomyItems = $taxonomyMode === HomepageSettingsService::TAXONOMY_PRODUCT_FAMILIES
+                    ? ProductFamily::query()->where('is_active', true)->orderBy('position')->get()
+                    : Category::query()->where('is_active', true)->orderBy('position')->get();
 
                 return [
                     'sliders' => HomeSlider::active()->orderBy('position')->get(),
-                    'categories' => Category::where('is_active', true)->orderBy('position')->get(),
+                    'taxonomy_mode' => $taxonomyMode,
+                    'taxonomy_items' => $taxonomyItems,
                     'discounted' => $productQuery()->whereNotNull('sale_price')->whereColumn('sale_price', '<', 'price')->latest()->take(8)->get(),
                     'best_sellers' => $productQuery()->orderByDesc('views')->take(8)->get(),
-                    'new' => $productQuery()->latest()->take(8)->get(),
+                    'new' => $homepage->resolveNewProducts($productQuery),
                     'posts' => Post::published()->with('author')->latest('published_at')->take(4)->get(),
                 ];
             },
@@ -396,6 +404,7 @@ class ShopCacheService
             })
             ->when($filters['category_id'] ?? null, fn ($q, $id) => $q->where('category_id', $id))
             ->when($filters['brand_id'] ?? null, fn ($q, $id) => $q->where('brand_id', $id))
+            ->when($filters['product_family_id'] ?? null, fn ($q, $id) => $q->where('product_family_id', $id))
             ->when($filters['min_price'] ?? null, fn ($q, $min) => $q->whereRaw("{$effectivePrice} >= ?", [$min]))
             ->when($filters['max_price'] ?? null, fn ($q, $max) => $q->whereRaw("{$effectivePrice} <= ?", [$max]))
             ->orderBy($filters['sort'] ?? 'created_at', $filters['direction'] ?? 'desc');

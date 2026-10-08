@@ -45,6 +45,16 @@ return [
             'enabled' => true,
         ],
 
+        'product_families' => [
+            'label' => 'خانواده‌های محصول (صفحه اصلی)',
+            'mode' => 'contain',
+            'width' => 240,
+            'height' => 240,
+            'quality' => 85,
+            'format' => 'webp',
+            'enabled' => true,
+        ],
+
         'deals' => [
             'label' => 'فروش ویژه',
             'mode' => 'contain',

@@ -105,6 +105,16 @@ class HealthCheck extends Command
         foreach ($classes as $label => $class) {
             $this->record('code', $label, class_exists($class) ? 'ok' : 'fail', class_exists($class) ? 'loaded' : 'missing — redeploy master');
         }
+
+        if (Schema::hasTable('product_families')) {
+            $hasImage = Schema::hasColumn('product_families', 'image');
+            $this->record(
+                'code',
+                'product_families.image column',
+                $hasImage ? 'ok' : 'fail',
+                $hasImage ? 'present' : 'missing — run: php artisan migrate --force'
+            );
+        }
     }
 
     protected function checkStorage(): void

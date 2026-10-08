@@ -51,8 +51,7 @@ class ManageHomepageSettings extends Page implements HasForms
                                 HomepageSettingsService::TAXONOMY_CATEGORIES => 'دسته‌بندی‌ها',
                                 HomepageSettingsService::TAXONOMY_PRODUCT_FAMILIES => 'خانواده‌های محصول',
                             ])
-                            ->required()
-                            ->native(false),
+                            ->required(),
                     ]),
                 Forms\Components\Section::make('جدیدترین محصولات')
                     ->schema([

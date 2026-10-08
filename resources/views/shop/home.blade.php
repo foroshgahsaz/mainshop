@@ -48,7 +48,7 @@
     @if($taxonomyItems->isNotEmpty())
         <section class="max-w-site mx-auto px-4 featured-categories-section">
             <div class="flex items-center justify-between section-header">
-                <h2 class="section-title">{{ $isFamilyTaxonomy ? 'خانواده‌های محصول' : 'دسته‌بندی‌های منتخب' }}</h2>
+                <h2 class="section-title">دسته‌بندی محصولات</h2>
                 <a href="{{ route('products.index') }}" class="section-nav-link">مشاهده همه</a>
             </div>
             <div class="swiper categorySwiper">

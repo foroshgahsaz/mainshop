@@ -2,6 +2,7 @@
 
 namespace App\Services\Backup;
 
+use App\Support\StoragePermissionFixer;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
@@ -81,7 +82,7 @@ class DatabaseBackupService
                 'kind' => $kind,
                 'kind_label' => $this->kindLabel($kind),
                 'size_bytes' => (int) $file->getSize(),
-                'created_at' => Carbon::createFromTimestamp($file->getMTime())->timezone($this->displayTimezone())->format('Y/m/d H:i'),
+                'created_at' => Carbon::createFromTimestamp($file->getMTime())->timezone($this->displayTimezone())->shopJalali(),
                 'download_url' => $this->downloadUrl($basename),
             ];
         })->all();
@@ -141,8 +142,12 @@ class DatabaseBackupService
     protected function ensureDirectory(): void
     {
         $dir = $this->backupDirectory();
-        if (! is_dir($dir)) {
-            File::makeDirectory($dir, 0755, true);
+        StoragePermissionFixer::ensureWritableDirectory($dir);
+
+        if (! StoragePermissionFixer::isDirectoryWritable($dir)) {
+            throw new RuntimeException(
+                'پوشهٔ بک‌آپ قابل نوشتن نیست ('.$dir.'). روی سرور (root) اجرا کنید: php artisan shop:fix-storage-permissions'
+            );
         }
     }
 

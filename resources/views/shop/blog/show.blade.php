@@ -16,7 +16,7 @@
         <h1 class="text-2xl md:text-3xl font-bold mb-4">{{ $post->title }}</h1>
         <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500">
             @if($post->published_at)
-                <span>{{ $post->published_at->format('Y/m/d') }}</span>
+                <span>{{ $post->published_at->shopJalali('Y/m/d') }}</span>
             @endif
             @if($post->author?->slug)
                 <a href="{{ route('authors.show', $post->author) }}" class="hover:text-brand-gold">

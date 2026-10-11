@@ -60,7 +60,7 @@ class PostResource extends Resource
                 Tables\Columns\TextColumn::make('title')->label('عنوان')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('author.name')->label('نویسنده')->placeholder('—'),
                 Tables\Columns\IconColumn::make('is_active')->label('فعال')->boolean(),
-                Tables\Columns\TextColumn::make('published_at')->label('انتشار')->dateTime('Y/m/d'),
+                Tables\Columns\TextColumn::make('published_at')->label('انتشار')->shopJalaliDate(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()->label('ویرایش')->iconButton(),

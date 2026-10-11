@@ -39,7 +39,7 @@ class BajetPayGateway implements PaymentGatewayInterface
         }
 
         $gatewayAmount = AmountConverter::toGateway($payment->amount, $config['amount_unit']);
-        $returnUrl = url($config['callback_url']).'?payment='.$payment->tracking_code;
+        $returnUrl = BajetReturnUrl::forPayment($payment, $config);
 
         $payload = [
             'orderId' => $payment->tracking_code,
@@ -54,26 +54,25 @@ class BajetPayGateway implements PaymentGatewayInterface
             $payload['nationalId'] = $nationalId;
         }
 
-        $token = $this->accessToken($config);
-
         $this->audit->step(
             $payment,
             PaymentAuditStep::GATEWAY_REQUEST,
             'bajet_create_order',
             'درخواست ایجاد سفارش به باجت‌پی ارسال شد.',
-            ['amount' => $gatewayAmount, 'order_id' => $payment->tracking_code]
+            [
+                'amount' => $gatewayAmount,
+                'order_id' => $payment->tracking_code,
+                'return_url' => $returnUrl,
+            ]
         );
 
-        $response = $this->http($config)
-            ->withToken($token, 'Bearer')
-            ->post('/api/v1/jetpay/order', $payload);
-
-        $data = $this->json($response);
-        $referUrl = (string) data_get($data, 'result.referUrl', '');
+        [$response, $data] = $this->postCreateOrder($config, $payload);
+        $referUrlRaw = (string) data_get($data, 'result.referUrl', '');
         $referenceId = (string) data_get($data, 'result.referenceId', '');
         $success = (bool) data_get($data, 'success', false);
+        $referUrl = BajetReferUrl::resolve($referUrlRaw, $referenceId, $config);
 
-        if ($response->failed() || ! $success || $referUrl === '' || $referenceId === '') {
+        if ($response->failed() || ! $success || $referUrlRaw === '' || $referenceId === '' || $referUrl === '') {
             $previous = $payment->status;
             $payment->update([
                 'status' => Payment::STATUS_FAILED,
@@ -105,13 +104,21 @@ class BajetPayGateway implements PaymentGatewayInterface
             PaymentAuditStep::GATEWAY_RESPONSE,
             'bajet_order_created',
             'سفارش باجت‌پی ایجاد شد.',
-            ['reference_id' => $referenceId]
+            [
+                'reference_id' => $referenceId,
+                'refer_url' => $referUrl,
+                'refer_url_raw' => $referUrlRaw,
+            ]
         );
 
         $this->paymentLog->gatewayResponse(
             $payment->fresh(),
             'کاربر به پرتال باجت‌پی (جت‌پی) هدایت می‌شود.',
-            ['referenceId' => $referenceId, 'referUrl' => $referUrl]
+            [
+                'referenceId' => $referenceId,
+                'referUrl' => $referUrl,
+                'referUrlRaw' => $referUrlRaw,
+            ]
         );
 
         return $referUrl;
@@ -176,13 +183,17 @@ class BajetPayGateway implements PaymentGatewayInterface
     }
 
     /** @param  array<string, mixed>  $config */
-    public function accessToken(array $config): string
+    public function accessToken(array $config, bool $forceRefresh = false): string
     {
-        $cacheKey = 'bajet:access_token:'.sha1($config['base_url'].'|'.$config['username'].'|'.$config['terminal_id']);
+        $cacheKey = $this->accessTokenCacheKey($config);
 
-        $cached = Cache::get($cacheKey);
-        if (is_string($cached) && $cached !== '') {
-            return $cached;
+        if (! $forceRefresh) {
+            $cached = Cache::get($cacheKey);
+            if (is_string($cached) && $cached !== '') {
+                return $cached;
+            }
+        } else {
+            Cache::forget($cacheKey);
         }
 
         $response = $this->http($config)->post('/api/v1/jetpay/token', [
@@ -200,9 +211,55 @@ class BajetPayGateway implements PaymentGatewayInterface
         }
 
         $expiresIn = (int) data_get($data, 'result.expiresIn', 3600);
-        Cache::put($cacheKey, $token, max(60, $expiresIn - 60));
+        // JetPay often invalidates tokens before the advertised expiresIn; keep cache conservative.
+        $ttl = min(max(30, $expiresIn - 120), 180);
+        Cache::put($cacheKey, $token, $ttl);
 
         return $token;
+    }
+
+    /**
+     * @param  array<string, mixed>  $config
+     * @param  array<string, mixed>  $payload
+     * @return array{0: Response, 1: array<string, mixed>}
+     */
+    protected function postCreateOrder(array $config, array $payload): array
+    {
+        $response = null;
+        $data = [];
+
+        for ($attempt = 1; $attempt <= 3; $attempt++) {
+            $response = $this->http($config)
+                ->withToken($this->accessToken($config, true), 'Bearer')
+                ->post('/api/v1/jetpay/order', $payload);
+
+            $data = $this->json($response);
+
+            if (! $this->isExpiredAccessTokenResponse($response, $data)) {
+                break;
+            }
+        }
+
+        return [$response, $data];
+    }
+
+    /** @param  array<string, mixed>  $config */
+    protected function accessTokenCacheKey(array $config): string
+    {
+        return 'bajet:access_token:'.sha1($config['base_url'].'|'.$config['username'].'|'.$config['terminal_id']);
+    }
+
+    /** @param  array<string, mixed>  $data */
+    protected function isExpiredAccessTokenResponse(Response $response, array $data): bool
+    {
+        if ($response->status() === 401) {
+            return true;
+        }
+
+        $code = (int) data_get($data, 'result.error.code', 0);
+        $en = (string) data_get($data, 'result.error.en', '');
+
+        return $code === 6660031 || strtoupper($en) === 'REQUEST_EXPIRED';
     }
 
     /** @param  array<string, mixed>  $config */

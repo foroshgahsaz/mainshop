@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Concerns;
 
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\ProductFamily;
 use App\Services\Cache\ShopCacheService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -16,10 +17,15 @@ trait ListsShopProducts
         ?Category $category = null,
         ?Brand $brand = null,
     ): View {
+        $productFamily = $request->filled('product_family_id')
+            ? ProductFamily::query()->whereKey((int) $request->product_family_id)->where('is_active', true)->first()
+            : null;
+
         $filters = [
             'search' => $request->search,
             'category_id' => $category?->id ?? $request->category_id,
             'brand_id' => $brand?->id ?? $request->brand_id,
+            'product_family_id' => $productFamily?->id,
             'min_price' => $request->min_price,
             'max_price' => $request->max_price,
             'sort' => $request->get('sort', 'created_at'),
@@ -36,6 +42,7 @@ trait ListsShopProducts
             $request->filled('search') => 'نتایج جستجو',
             $category !== null => 'محصولات '.$category->name,
             $brand !== null => 'محصولات '.$brand->name,
+            $productFamily !== null => 'محصولات '.$productFamily->name,
             default => 'لیست کالاها',
         };
 

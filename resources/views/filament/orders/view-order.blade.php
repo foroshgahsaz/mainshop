@@ -10,7 +10,7 @@
             <div class="admin-order__header-main">
                 <h1 class="admin-order__title">سفارش #{{ $order->tracking_code }}</h1>
                 <p class="admin-order__subtitle">
-                    ثبت‌شده {{ $order->created_at?->format('Y/m/d H:i') }}
+                    ثبت‌شده {{ $order->created_at?->shopJalali() }}
                     @if($order->user)
                         — مشتری: <strong>{{ $order->user->name }}</strong>
                     @endif

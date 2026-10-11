@@ -52,8 +52,19 @@
         <!-- Brand -->
         <div class="lg:col-span-4 pb-6 md:pb-0 border-b md:border-b-0 border-gray-100">
           <a href="{{ route('home') }}"
-             class="inline-flex items-center gap-2.5">
-            <span class="text-2xl font-black text-navy">{{ site_name() }}</span>
+             class="inline-flex items-center gap-2.5"
+             aria-label="{{ site_name() }}">
+            @if ($logoUrl = site_logo_url())
+              <img src="{{ $logoUrl }}"
+                   alt="{{ site_name() }}"
+                   class="h-10 w-auto max-w-[11rem] object-contain object-right"
+                   width="176"
+                   height="40"
+                   decoding="async"
+                   loading="lazy">
+            @else
+              <span class="text-2xl font-black text-navy">{{ site_name() }}</span>
+            @endif
           </a>
           @if(filled($footer['brand_description'] ?? null))
             <p class="text-sm text-gray-500 leading-7 mt-4">{{ $footer['brand_description'] }}</p>

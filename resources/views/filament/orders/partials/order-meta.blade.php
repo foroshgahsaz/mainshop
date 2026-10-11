@@ -3,13 +3,13 @@
     <dl class="admin-order__meta-list">
         <div><dt>شناسه</dt><dd>#{{ $order->id }}</dd></div>
         <div><dt>کد پیگیری</dt><dd dir="ltr">{{ $order->tracking_code }}</dd></div>
-        <div><dt>تاریخ ثبت</dt><dd>{{ $order->created_at?->format('Y/m/d H:i') }}</dd></div>
-        <div><dt>آخرین به‌روزرسانی</dt><dd>{{ $order->updated_at?->format('Y/m/d H:i') }}</dd></div>
+        <div><dt>تاریخ ثبت</dt><dd>{{ $order->created_at?->shopJalali() }}</dd></div>
+        <div><dt>آخرین به‌روزرسانی</dt><dd>{{ $order->updated_at?->shopJalali() }}</dd></div>
         @if($order->shipped_at)
-            <div><dt>تاریخ ارسال</dt><dd>{{ $order->shipped_at->format('Y/m/d H:i') }}</dd></div>
+            <div><dt>تاریخ ارسال</dt><dd>{{ $order->shipped_at->shopJalali() }}</dd></div>
         @endif
         @if($order->delivered_at)
-            <div><dt>تاریخ تحویل</dt><dd>{{ $order->delivered_at->format('Y/m/d H:i') }}</dd></div>
+            <div><dt>تاریخ تحویل</dt><dd>{{ $order->delivered_at->shopJalali() }}</dd></div>
         @endif
         @if($order->shipping_tracking_code)
             <div><dt>رهگیری پست</dt><dd dir="ltr">{{ $order->shipping_tracking_code }}</dd></div>
@@ -24,7 +24,7 @@
                 <dt>رزرو موجودی</dt>
                 <dd>
                     @if ($order->stock_reserved_until)
-                        تا {{ $order->stock_reserved_until->format('Y/m/d H:i') }}
+                        تا {{ $order->stock_reserved_until->shopJalali() }}
                         @if ($order->isReservationExpired())
                             <span class="text-red-600">(منقضی)</span>
                         @endif

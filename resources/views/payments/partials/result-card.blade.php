@@ -60,7 +60,7 @@
         @if ($payment->paid_at)
             <div>
                 <dt>زمان ثبت</dt>
-                <dd>{{ $payment->paid_at->timezone('Asia/Tehran')->format('Y/m/d H:i') }}</dd>
+                <dd>{{ $payment->paid_at->shopJalali() }}</dd>
             </div>
         @endif
         @if ($order)

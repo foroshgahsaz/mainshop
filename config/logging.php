@@ -1,5 +1,6 @@
 <?php
 
+use App\Support\ShopStoragePaths;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
@@ -60,14 +61,14 @@ return [
 
         'single' => [
             'driver' => 'single',
-            'path' => storage_path('logs/laravel.log'),
+            'path' => ShopStoragePaths::laravelLogPath(),
             'level' => env('LOG_LEVEL', 'debug'),
             'replace_placeholders' => true,
         ],
 
         'daily' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/laravel.log'),
+            'path' => ShopStoragePaths::laravelLogPath(),
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => env('LOG_DAILY_DAYS', 14),
             'replace_placeholders' => true,
@@ -124,12 +125,12 @@ return [
         ],
 
         'emergency' => [
-            'path' => storage_path('logs/laravel.log'),
+            'path' => ShopStoragePaths::laravelLogPath(),
         ],
 
         'payments' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/payments.log'),
+            'path' => ShopStoragePaths::paymentsLogPath(),
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => env('LOG_PAYMENTS_DAYS', 30),
             'replace_placeholders' => true,

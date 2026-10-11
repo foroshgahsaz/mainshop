@@ -57,7 +57,22 @@ class HomepageImageServiceTest extends TestCase
         $optimizerPreset = app(HomepageImageService::class)->optimizerPreset('hero');
 
         $this->assertSame(1920, $optimizerPreset['cover_width'] ?? null);
-        $this->assertSame(380, $optimizerPreset['cover_height'] ?? null);
+        $this->assertSame(480, $optimizerPreset['cover_height'] ?? null);
         $this->assertArrayNotHasKey('max_width', $optimizerPreset);
+    }
+
+    public function test_hero_display_thumbnails_disabled_by_default(): void
+    {
+        $preset = app(HomepageImageService::class)->forSection('hero');
+
+        $this->assertFalse($preset['enabled'] ?? true);
+    }
+
+    public function test_hero_mobile_section_exists(): void
+    {
+        $preset = app(HomepageImageService::class)->forSection('hero_mobile');
+
+        $this->assertSame(750, $preset['width'] ?? null);
+        $this->assertSame(400, $preset['height'] ?? null);
     }
 }

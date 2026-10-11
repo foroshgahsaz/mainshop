@@ -86,6 +86,20 @@ php artisan shop:verify-storage
 
 مسیر public فایل‌ها اغلب از `routes/web.php` تحت `/data` سرو می‌شود — `FILESYSTEM_PUBLIC_URL` را با دامنه تنظیم کنید.
 
+### لاگ و بک‌آپ دیتابیس (Runflare)
+
+اگر فقط دیسک **`/data`** را mount کرده‌اید و تصاویر بعد از deploy می‌مانند، اما فایل‌های **`storage/logs`** یا **`database-backups`** پاک می‌شوند:
+
+1. در پنل Runflare **دیسک جدا** برای `/storage/logs` یا `/storage/app/database-backups` معمولاً به مسیر واقعی Laravel (`/var/www/storage/...`) وصل نیست — حجم دیسک **۰** می‌ماند.
+2. با `FILESYSTEM_PUBLIC_ROOT=/data` اپ از نسخهٔ جدید به‌صورت خودکار لاگ را در **`/data/logs`** و بک‌آپ را در **`/data/database-backups`** می‌نویسد (همان volume تصاویر).
+3. بعد از deploy: `php artisan shop:deploy-recover` (پوشه‌ها را می‌سازد).
+4. تشخیص: `php artisan shop:verify-storage` — مسیر فعال لاگ و بک‌آپ را نشان می‌دهد.
+
+اختیاری در env (اگر مسیر دیگری می‌خواهید):
+
+- `SHOP_LOGS_DIRECTORY=/data/logs`
+- `DB_BACKUP_DIRECTORY=/data/database-backups`
+
 ---
 
 ## ۶. Cron و Queue

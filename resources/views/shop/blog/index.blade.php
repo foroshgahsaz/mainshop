@@ -26,7 +26,7 @@
                             <p class="text-xs text-gray-500 mb-3 line-clamp-2">{{ $post->excerpt }}</p>
                         @endif
                         <div class="flex items-center justify-between text-[11px] text-gray-400">
-                            <span>{{ optional($post->published_at)->format('Y/m/d') }}</span>
+                            <span>{{ optional($post->published_at)->shopJalali('Y/m/d') }}</span>
                             @if($post->author?->slug)
                                 <a href="{{ route('authors.show', $post->author) }}" class="hover:text-brand-gold">{{ $post->author->name }}</a>
                             @endif

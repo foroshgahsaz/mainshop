@@ -148,11 +148,14 @@ class SettingsService
             'terminal_id' => (string) ($this->get('bajet', 'terminal_id') ?: ($cfg['terminal_id'] ?? '')),
             'amount_unit' => (string) ($this->get('bajet', 'amount_unit') ?: ($cfg['amount_unit'] ?? 'toman')),
             'callback_url' => (string) ($this->get('bajet', 'callback_url') ?: ($cfg['callback_url'] ?? '/payment/callback/bajet')),
+            'return_url_base' => (string) ($this->get('bajet', 'return_url_base') ?: ($cfg['return_url_base'] ?? '')),
             'default_product_type' => (int) ($this->get('bajet', 'default_product_type') ?: ($cfg['default_product_type'] ?? 2)),
             'default_brand' => (string) ($this->get('bajet', 'default_brand') ?: ($cfg['default_brand'] ?? 'general')),
             'base_url' => rtrim((string) ($this->get('bajet', $sandbox ? 'sandbox_base_url' : 'base_url') ?: $apiDefault), '/'),
             'sandbox_base_url' => (string) ($this->get('bajet', 'sandbox_base_url') ?: ($cfg['sandbox_base_url'] ?? '')),
             'production_base_url' => (string) ($this->get('bajet', 'base_url') ?: ($cfg['base_url'] ?? '')),
+            'portal_sandbox_base_url' => (string) ($this->get('bajet', 'portal_sandbox_base_url') ?: ($cfg['portal_sandbox_base_url'] ?? '')),
+            'portal_base_url' => (string) ($this->get('bajet', 'portal_base_url') ?: ($cfg['portal_base_url'] ?? '')),
             'icon' => $this->get('bajet', 'icon') ?: null,
         ];
     }

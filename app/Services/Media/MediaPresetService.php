@@ -128,7 +128,8 @@ class MediaPresetService
         return [
             'product' => 'محصول',
             'logo' => 'لوگو / برند',
-            'slider' => 'اسلایدر',
+            'slider' => 'اسلایدر دسکتاپ',
+            'slider_mobile' => 'اسلایدر موبایل',
             'category' => 'دسته‌بندی',
             'post' => 'مقاله',
             'seo' => 'تصویر سئو (OG)',

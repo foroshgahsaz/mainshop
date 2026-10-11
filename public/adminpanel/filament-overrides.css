@@ -430,7 +430,23 @@ body.fi-body .fi-admin-shell .fi-wi-widget {
     padding-right: 0;
 }
 
-.fi-admin-shell .content-area .fi-section,
+.fi-admin-shell .content-area .fi-section {
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.04);
+    border: 1px solid #eff2f5;
+    background: #fff;
+    position: relative;
+    z-index: 0;
+    /* Select / dropdown lists must not be clipped by the card */
+    overflow: visible;
+}
+
+.fi-admin-shell .content-area .fi-section:has(.choices.is-open),
+.fi-admin-shell .content-area .fi-section:has(.fi-dropdown-open),
+.fi-admin-shell .content-area .fi-section:has([aria-expanded='true'].fi-select-input) {
+    z-index: 40;
+}
+
 .fi-admin-shell .content-area .fi-ta-ctn {
     border-radius: 12px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.04);

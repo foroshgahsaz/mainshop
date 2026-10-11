@@ -6,11 +6,13 @@ use App\Contracts\SmsSender;
 use App\Services\Settings\TransactionalSmsSettingsService;
 use App\Services\Sms\SmsTemplateRenderer;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
 
 class SendTransactionalSmsJob implements ShouldQueue
 {
+    use Dispatchable;
     use Queueable;
 
     /** @param  array<string, string>  $variables */

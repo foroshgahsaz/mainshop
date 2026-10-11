@@ -22,7 +22,7 @@
         @forelse($payment->notes as $note)
             <li class="admin-order__note admin-order__note--{{ $note->type }}" wire:key="payment-note-{{ $note->id }}">
                 <div class="admin-order__note-meta">
-                    <time>{{ $note->created_at?->format('Y/m/d H:i') }}</time>
+                    <time>{{ $note->created_at?->shopJalali() }}</time>
                     @if(is_array($note->metadata) && isset($note->metadata['progress']))
                         <span class="admin-order__badge admin-order__badge--audit">{{ $note->metadata['progress'] }}٪</span>
                     @endif

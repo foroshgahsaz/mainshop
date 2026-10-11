@@ -101,7 +101,7 @@
                             </span>
                             @if ($review->created_at)
                                 <time class="product-review-card__date" datetime="{{ $review->created_at->toIso8601String() }}">
-                                    {{ $review->created_at->format('Y/m/d') }}
+                                    {{ $review->created_at->shopJalali('Y/m/d') }}
                                 </time>
                             @endif
                         </div>

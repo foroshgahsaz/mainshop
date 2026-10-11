@@ -34,9 +34,16 @@ return [
         ],
 
         'slider' => [
-            'max_width' => 1920,
-            'max_height' => 1080,
-            'quality' => 85,
+            'cover_width' => 1920,
+            'cover_height' => 480,
+            'quality' => 90,
+            'format' => 'webp',
+        ],
+
+        'slider_mobile' => [
+            'cover_width' => 750,
+            'cover_height' => 400,
+            'quality' => 90,
             'format' => 'webp',
         ],
 
@@ -89,6 +96,7 @@ return [
         'products/variants' => 'product',
         'brands' => 'logo',
         'sliders' => 'slider',
+        'sliders/mobile' => 'slider_mobile',
         'categories' => 'category',
         'posts' => 'post',
         'seo' => 'seo',

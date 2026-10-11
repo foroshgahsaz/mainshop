@@ -10,6 +10,7 @@ class HomeSlider extends Model
     protected $fillable = [
         'title',
         'image',
+        'image_mobile',
         'link',
         'position',
         'is_active',

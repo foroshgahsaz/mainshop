@@ -23,7 +23,7 @@ class LatestOrdersTable extends BaseWidget
                 Order::query()
                     ->with('user')
                     ->latest()
-                    ->limit(8)
+                    ->take(8)
             )
             ->columns([
                 Tables\Columns\TextColumn::make('tracking_code')
@@ -57,7 +57,7 @@ class LatestOrdersTable extends BaseWidget
                     }),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاریخ')
-                    ->since()
+                    ->shopJalaliDateTime()
                     ->sortable(),
             ])
             ->actions([

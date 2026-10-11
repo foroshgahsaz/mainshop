@@ -31,7 +31,7 @@
                 <span class="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
                     {{ ShopLabels::orderStatus($order->status) }}
                 </span>
-                <span class="text-xs text-gray-400">{{ $order->created_at->format('Y/m/d H:i') }}</span>
+                <span class="text-xs text-gray-400">{{ $order->created_at->shopJalali() }}</span>
                 <span class="text-xs text-gray-500">کد: {{ $order->tracking_code }}</span>
             </div>
             @if ($order->canInitiateOnlinePayment())
@@ -108,7 +108,7 @@
             @if ($order->stock_reserved_until && $order->isProforma())
                 <p class="text-sm mt-2 {{ $order->hasActiveStockReservation() ? 'text-amber-700' : 'text-red-700' }}">
                     @if ($order->hasActiveStockReservation())
-                        مهلت پرداخت تا {{ $order->stock_reserved_until->format('Y/m/d H:i') }}
+                        مهلت پرداخت تا {{ $order->stock_reserved_until->shopJalali() }}
                     @else
                         مهلت پرداخت این پیش‌فاکتور به پایان رسیده است.
                     @endif
@@ -204,7 +204,7 @@
             <ul class="space-y-3">
                 @foreach($order->notes as $note)
                     <li class="text-sm border-r-2 border-brand-green pr-3">
-                        <time class="text-xs text-gray-400">{{ $note->created_at->format('Y/m/d H:i') }}</time>
+                        <time class="text-xs text-gray-400">{{ $note->created_at->shopJalali() }}</time>
                         <p class="mt-1 text-gray-700">{!! nl2br(e($note->message)) !!}</p>
                     </li>
                 @endforeach

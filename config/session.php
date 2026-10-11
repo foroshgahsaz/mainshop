@@ -214,4 +214,22 @@ return [
 
     'partitioned' => env('SESSION_PARTITIONED_COOKIE', false),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Session Blocking
+    |--------------------------------------------------------------------------
+    |
+    | When true, concurrent requests (e.g. several Livewire widgets on the
+    | admin dashboard) serialize session writes and avoid CSRF token races.
+    |
+    */
+
+    'block' => env('SESSION_BLOCK', false),
+
+    'block_store' => env('SESSION_BLOCK_STORE'),
+
+    'block_lock_seconds' => env('SESSION_BLOCK_LOCK_SECONDS', 10),
+
+    'block_wait_seconds' => env('SESSION_BLOCK_WAIT_SECONDS', 10),
+
 ];

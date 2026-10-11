@@ -77,7 +77,7 @@ class FreightCarrierResource extends Resource
                 Tables\Columns\TextColumn::make('province.name')->label('استان'),
                 Tables\Columns\TextColumn::make('city.name')->label('شهر'),
                 Tables\Columns\IconColumn::make('is_active')->label('فعال')->boolean(),
-                Tables\Columns\TextColumn::make('updated_at')->label('به‌روزرسانی')->since(),
+                Tables\Columns\TextColumn::make('updated_at')->label('به‌روزرسانی')->shopJalaliDateTime(),
             ])
             ->defaultSort('name')
             ->actions([

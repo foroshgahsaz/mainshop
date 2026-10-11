@@ -22,9 +22,13 @@ class OrdersMapWidget extends Widget
      */
     public function getMapPoints(): array
     {
-        return Cache::remember('admin:dashboard:orders_map_points', 600, function (): array {
-            return $this->buildMapPoints();
-        });
+        try {
+            return Cache::remember('admin:dashboard:orders_map_points', 600, function (): array {
+                return $this->buildMapPoints();
+            });
+        } catch (\Throwable) {
+            return [];
+        }
     }
 
     /**

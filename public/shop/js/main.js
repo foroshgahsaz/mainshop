@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initHeaderUserMenu();
   initShopAdminBarOffset();
   initSearchModalEvents();
+  initHeaderSearchSuggest();
 });
 
 function openLoginModal(redirectUrl) {
@@ -101,67 +102,115 @@ function initSearchModalEvents() {
     }
   });
 
-  initSearchModalLiveSuggest(modal);
+  setupLiveSearchSuggest({
+    input: modal.querySelector('#searchModalInput'),
+    liveBox: modal.querySelector('#searchModalLiveResults'),
+    defaultBox: modal.querySelector('#searchModalDefaultContent'),
+    suggestUrl: modal.dataset.suggestUrl,
+    minChars: parseInt(modal.dataset.minChars || '3', 10),
+    onNavigate: () => toggleSearchModal(false),
+  });
 }
 
-function initSearchModalLiveSuggest(modal) {
-  const input = modal.querySelector('#searchModalInput');
-  const liveBox = modal.querySelector('#searchModalLiveResults');
-  const defaultBox = modal.querySelector('#searchModalDefaultContent');
-
-  if (!input || !liveBox || !defaultBox) {
+function initHeaderSearchSuggest() {
+  const root = document.getElementById('headerSearchSuggest');
+  if (!root) {
     return;
   }
 
-  const suggestUrl = modal.dataset.suggestUrl;
-  const minChars = parseInt(modal.dataset.minChars || '3', 10);
+  const liveBox = root.querySelector('#headerSearchDropdown');
+  const input = root.querySelector('#headerSearchInput');
+
+  setupLiveSearchSuggest({
+    input,
+    liveBox,
+    suggestUrl: root.dataset.suggestUrl,
+    minChars: parseInt(root.dataset.minChars || '3', 10),
+    onNavigate: () => liveBox?.classList.add('hidden'),
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!root.contains(event.target)) {
+      liveBox?.classList.add('hidden');
+    }
+  });
+
+  input?.addEventListener('focus', () => {
+    if (liveBox?.innerHTML.trim() !== '' && input.value.trim().length >= parseInt(root.dataset.minChars || '3', 10)) {
+      liveBox.classList.remove('hidden');
+    }
+  });
+}
+
+function setupLiveSearchSuggest({ input, liveBox, defaultBox = null, suggestUrl, minChars = 3, onNavigate = null }) {
+  if (!input || !liveBox || !suggestUrl) {
+    return;
+  }
+
   let debounceTimer = null;
   let abortController = null;
 
-  const resetView = () => {
+  const hideLive = () => {
     liveBox.classList.add('hidden');
-    liveBox.innerHTML = '';
-    defaultBox.classList.remove('hidden');
   };
+
+  const showLive = () => {
+    liveBox.classList.remove('hidden');
+  };
+
+  const resetView = () => {
+    hideLive();
+    liveBox.innerHTML = '';
+    defaultBox?.classList.remove('hidden');
+  };
+
+  if (onNavigate) {
+    liveBox.addEventListener('click', (event) => {
+      if (event.target.closest('a')) {
+        onNavigate();
+      }
+    });
+  }
 
   const renderResults = (payload) => {
     const items = payload.items || [];
     const total = payload.total || 0;
     const query = payload.query || '';
     const allUrl = payload.all_results_url || `/products?search=${encodeURIComponent(query)}`;
+    const showAllLink = total > items.length;
 
     if (items.length === 0) {
       liveBox.innerHTML = `
         <p class="search-modal__live-empty">نتیجه‌ای برای «${escapeHtml(query)}» پیدا نشد.</p>
-        <a href="${escapeHtml(allUrl)}" class="search-modal__live-all" onclick="toggleSearchModal(false)">جستجو در همه محصولات</a>
+        <a href="${escapeHtml(allUrl)}" class="search-modal__live-all">جستجو در همه محصولات</a>
       `;
-      liveBox.classList.remove('hidden');
-      defaultBox.classList.add('hidden');
+      showLive();
+      defaultBox?.classList.add('hidden');
       return;
     }
 
     const rows = items.map((item) => `
-      <a href="${escapeHtml(item.url)}" class="search-modal__live-item" onclick="toggleSearchModal(false)">
+      <a href="${escapeHtml(item.url)}" class="search-modal__live-item" role="option">
         <img src="${escapeHtml(item.image)}" alt="" class="search-modal__live-thumb" loading="lazy">
         <span class="search-modal__live-name">${escapeHtml(item.name)}</span>
         <span class="search-modal__live-price">${escapeHtml(item.price)}</span>
       </a>
     `).join('');
 
+    const allLink = showAllLink
+      ? `<a href="${escapeHtml(allUrl)}" class="search-modal__live-all">مشاهده همه</a>`
+      : '';
+
     liveBox.innerHTML = `
       <p class="search-modal__live-heading">${items.length} از ${total} نتیجه</p>
       <div class="search-modal__live-list">${rows}</div>
-      <a href="${escapeHtml(allUrl)}" class="search-modal__live-all" onclick="toggleSearchModal(false)">نمایش همه نتایج</a>
+      ${allLink}
     `;
-    liveBox.classList.remove('hidden');
-    defaultBox.classList.add('hidden');
+    showLive();
+    defaultBox?.classList.add('hidden');
   };
 
   const fetchSuggestions = (query) => {
-    if (!suggestUrl) {
-      return;
-    }
-
     if (abortController) {
       abortController.abort();
     }
@@ -193,12 +242,6 @@ function initSearchModalLiveSuggest(modal) {
     }
 
     debounceTimer = setTimeout(() => fetchSuggestions(value), 280);
-  });
-
-  input.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter' && input.value.trim().length >= minChars) {
-      return;
-    }
   });
 }
 

@@ -8,7 +8,7 @@
             <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3" wire:key="order-{{ $order->id }}">
                 <div>
                     <p class="font-bold text-sm text-navy">کد پیگیری: {{ $order->tracking_code }}</p>
-                    <p class="text-xs text-gray-400 mt-1">{{ $order->created_at->format('Y/m/d H:i') }}</p>
+                    <p class="text-xs text-gray-400 mt-1">{{ $order->created_at->shopJalali() }}</p>
                     <p class="text-sm mt-2">
                         <span class="font-bold text-brand-green">{{ number_format($order->final_amount) }} تومان</span>
                         <span class="text-gray-400 mx-2">|</span>

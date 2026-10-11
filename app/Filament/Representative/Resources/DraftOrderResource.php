@@ -6,6 +6,7 @@ use App\Filament\Representative\Pages\CreateDraftOrder;
 use App\Filament\Representative\Resources\DraftOrderResource\Pages;
 use App\Models\Order;
 use App\Support\ShopFormatter;
+use App\Support\ShopLabels;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -35,6 +36,11 @@ class DraftOrderResource extends Resource
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('مشتری')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('payment_method')
+                    ->label('طرح پرداخت')
+                    ->formatStateUsing(fn (?string $state): string => ShopLabels::paymentMethod($state))
+                    ->badge()
+                    ->placeholder('—'),
                 Tables\Columns\TextColumn::make('catalog_template_label')
                     ->label('نوع طرح')
                     ->getStateUsing(fn (Order $record): string => $record->catalogTemplateLabel())
@@ -56,7 +62,8 @@ class DraftOrderResource extends Resource
                     ->formatStateUsing(fn (int $state): string => ShopFormatter::money($state)),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('آخرین تغییر')
-                    ->since(),
+                    ->shopJalaliDateTime()
+                    ->sortable(),
             ])
             ->defaultSort('updated_at', 'desc')
             ->actions([

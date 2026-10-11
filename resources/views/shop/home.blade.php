@@ -15,16 +15,13 @@
             <div class="swiper-wrapper">
                 @forelse($sliders as $i => $slider)
                     <div class="swiper-slide">
-                        @php
-                            $url = \App\Support\ShopFormatter::sectionImage('hero', $slider->image, 'shop/images/hero/slide-ai.svg');
-                        @endphp
                         @if($slider->link)
                             <a href="{{ $slider->link }}" class="hero-slide__link">
-                                <img src="{{ $url }}" alt="{{ $slider->title ?? 'بنر' }}" loading="{{ $i === 0 ? 'eager' : 'lazy' }}" draggable="false">
+                                @include('shop.partials.hero-slide-media', ['slider' => $slider, 'isFirst' => $i === 0])
                             </a>
                         @else
                             <div class="hero-slide__link">
-                                <img src="{{ $url }}" alt="{{ $slider->title ?? 'بنر' }}" loading="{{ $i === 0 ? 'eager' : 'lazy' }}" draggable="false">
+                                @include('shop.partials.hero-slide-media', ['slider' => $slider, 'isFirst' => $i === 0])
                             </div>
                         @endif
                     </div>
@@ -42,22 +39,33 @@
         </div>
     </section>
 
-    {{-- CATEGORIES --}}
-    @if($categories->isNotEmpty())
-        <section class="max-w-site mx-auto px-4 featured-categories-section">
+    {{-- CATEGORIES / PRODUCT FAMILIES --}}
+    @php
+        $taxonomyMode = $taxonomy_mode ?? \App\Services\Settings\HomepageSettingsService::TAXONOMY_CATEGORIES;
+        $taxonomyItems = $taxonomy_items ?? collect();
+        $isFamilyTaxonomy = $taxonomyMode === \App\Services\Settings\HomepageSettingsService::TAXONOMY_PRODUCT_FAMILIES;
+    @endphp
+    @if($taxonomyItems->isNotEmpty())
+        <section @class([
+            'max-w-site mx-auto px-4 featured-categories-section',
+            'featured-categories-section--families' => $isFamilyTaxonomy,
+        ])>
             <div class="flex items-center justify-between section-header">
-                <h2 class="section-title">دسته‌بندی‌های منتخب</h2>
+                <h2 class="section-title">دسته‌بندی محصولات</h2>
                 <a href="{{ route('products.index') }}" class="section-nav-link">مشاهده همه</a>
             </div>
             <div class="swiper categorySwiper">
                 <div class="swiper-wrapper">
-                    @foreach($categories as $category)
+                    @foreach($taxonomyItems as $item)
                         <div class="swiper-slide">
-                            <a href="{{ route('categories.show', $category) }}" class="category-card">
+                            <a href="{{ $isFamilyTaxonomy ? route('products.index', ['product_family_id' => $item->id]) : route('categories.show', $item) }}" @class([
+                                'category-card',
+                                'category-card--family' => $isFamilyTaxonomy,
+                            ])>
                                 <span class="category-card__image">
-                                    <img src="{{ \App\Support\ShopFormatter::categoryImage($category->image) }}" alt="{{ $category->name }}" loading="lazy">
+                                    <img src="{{ $isFamilyTaxonomy ? \App\Support\ShopFormatter::productFamilyImage($item->image) : \App\Support\ShopFormatter::categoryImage($item->image) }}" alt="{{ $item->name }}" loading="lazy">
                                 </span>
-                                <span class="category-card__label">{{ $category->name }}</span>
+                                <span class="category-card__label">{{ $item->name }}</span>
                             </a>
                         </div>
                     @endforeach
@@ -166,7 +174,7 @@
                                         <a href="{{ route('blog.show', $post) }}">
                                             <h3 class="text-sm font-bold leading-7 mb-3 hover:text-brand-gold">{{ $post->title }}</h3>
                                         </a>
-                                        <p class="text-[11px] text-gray-400">{{ optional($post->published_at)->format('Y/m/d') }}</p>
+                                        <p class="text-[11px] text-gray-400">{{ optional($post->published_at)->shopJalali('Y/m/d') }}</p>
                                     </div>
                                 </article>
                             </div>

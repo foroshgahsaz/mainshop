@@ -3,9 +3,51 @@
         <section class="admin-order__section">
             <h2 class="admin-order__section-title">۲۰ روز اخیر</h2>
             <p class="admin-order__hint">
-                مسیر لاگ: <code dir="ltr">{{ $logsDirectory }}</code>
+                مسیر فعال (تنظیمات): <code dir="ltr">{{ $logsDirectory }}</code>
                 — فایل روزانه: <code dir="ltr">payments-YYYY-MM-DD.log</code>
+                — نسخه UI: <code dir="ltr">{{ \App\Filament\Pages\ViewPaymentLogs::UI_VERSION }}</code>
             </p>
+
+            @if ($directoryDiagnostics !== [])
+                <div class="admin-payment-log-viewer__table-wrap">
+                    <table class="admin-payment-log-viewer__table">
+                        <thead>
+                            <tr>
+                                <th>مسیر جستجو</th>
+                                <th>وجود</th>
+                                <th>نوشتن</th>
+                                <th>تعداد فایل لاگ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($directoryDiagnostics as $row)
+                                <tr>
+                                    <td dir="ltr">
+                                        {{ $row['path'] }}
+                                        @if ($row['is_primary'])
+                                            <span class="admin-payment-log-viewer__badge admin-payment-log-viewer__badge--ok">فعال</span>
+                                        @endif
+                                    </td>
+                                    <td>{{ $row['exists'] ? 'بله' : 'خیر' }}</td>
+                                    <td>{{ $row['writable'] ? 'بله' : 'خیر' }}</td>
+                                    <td dir="ltr">{{ $row['log_file_count'] }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                @php
+                    $paymentLogFiles = collect($directoryDiagnostics)->sum('log_file_count');
+                @endphp
+                @if ($paymentLogFiles === 0)
+                    <p class="admin-payment-log-viewer__warn">
+                        هیچ فایل <code dir="ltr">payments*.log</code> در مسیرهای بالا نیست.
+                        روی Runflare: <code dir="ltr">FILESYSTEM_PUBLIC_ROOT=/data</code> و <code dir="ltr">SHOP_LOGS_DIRECTORY=/data/logs</code>،
+                        یک دیسک مشترک روی <code dir="ltr">/data</code> (نه mount جدا برای <code dir="ltr">/storage/logs</code>)،
+                        سپس <code dir="ltr">php artisan config:clear</code> و <code dir="ltr">php artisan shop:fix-storage-permissions</code>.
+                    </p>
+                @endif
+            @endif
 
             @if ($legacyLogEntry)
                 <p class="admin-order__hint admin-payment-log-viewer__legacy">

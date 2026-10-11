@@ -17,6 +17,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
             'payment/callback',
             'payment/callback/tara',
             'payment/callback/bajet',
+            'payment/callback/digipay',
         ]);
         $middleware->redirectGuestsTo(function ($request) {
             if ($request->expectsJson()) {

@@ -41,6 +41,11 @@ class DraftOrderResource extends Resource
                     ->formatStateUsing(fn (?string $state): string => ShopLabels::paymentMethod($state))
                     ->badge()
                     ->placeholder('—'),
+                Tables\Columns\TextColumn::make('catalog_template_label')
+                    ->label('نوع طرح')
+                    ->getStateUsing(fn (Order $record): string => $record->catalogTemplateLabel())
+                    ->placeholder('—')
+                    ->wrap(),
                 Tables\Columns\TextColumn::make('items_count')
                     ->label('اقلام')
                     ->counts('items'),

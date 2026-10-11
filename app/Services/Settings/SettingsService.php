@@ -21,6 +21,9 @@ class SettingsService
     /** @var array<string, mixed>|null */
     protected static ?array $bajetMemo = null;
 
+    /** @var array<string, mixed>|null */
+    protected static ?array $digipayMemo = null;
+
     public function get(string $group, string $key, mixed $default = null): mixed
     {
         $settings = $this->all();
@@ -40,6 +43,7 @@ class SettingsService
         static::$zarinpalMemo = null;
         static::$taraMemo = null;
         static::$bajetMemo = null;
+        static::$digipayMemo = null;
     }
 
     /** @param  array<string, mixed>  $values */
@@ -153,6 +157,40 @@ class SettingsService
             'portal_sandbox_base_url' => (string) ($this->get('bajet', 'portal_sandbox_base_url') ?: ($cfg['portal_sandbox_base_url'] ?? '')),
             'portal_base_url' => (string) ($this->get('bajet', 'portal_base_url') ?: ($cfg['portal_base_url'] ?? '')),
             'icon' => $this->get('bajet', 'icon') ?: null,
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    public function digipay(): array
+    {
+        if (static::$digipayMemo !== null) {
+            return static::$digipayMemo;
+        }
+
+        $cfg = config('payment.gateways.digipay', []);
+        $sandbox = filter_var($this->get('digipay', 'sandbox', $cfg['sandbox'] ?? true), FILTER_VALIDATE_BOOLEAN);
+
+        $apiDefault = $sandbox
+            ? ($cfg['sandbox_base_url'] ?? 'https://uat.mydigipay.info/digipay/api')
+            : ($cfg['base_url'] ?? 'https://api.mydigipay.com/digipay/api');
+
+        return static::$digipayMemo = [
+            'enabled' => filter_var($this->get('digipay', 'enabled', false), FILTER_VALIDATE_BOOLEAN),
+            'sandbox' => $sandbox,
+            'username' => (string) ($this->get('digipay', 'username') ?: ($cfg['username'] ?? '')),
+            'password' => (string) ($this->get('digipay', 'password') ?: ($cfg['password'] ?? '')),
+            'client_id' => (string) ($this->get('digipay', 'client_id') ?: ($cfg['client_id'] ?? '')),
+            'client_secret' => (string) ($this->get('digipay', 'client_secret') ?: ($cfg['client_secret'] ?? '')),
+            'amount_unit' => (string) ($this->get('digipay', 'amount_unit') ?: ($cfg['amount_unit'] ?? 'toman')),
+            'callback_url' => (string) ($this->get('digipay', 'callback_url') ?: ($cfg['callback_url'] ?? '/payment/callback/digipay')),
+            'ticket_type' => (int) ($this->get('digipay', 'ticket_type') ?: ($cfg['ticket_type'] ?? 11)),
+            'default_product_type' => (int) ($this->get('digipay', 'default_product_type') ?: ($cfg['default_product_type'] ?? 1)),
+            'access_token' => (string) ($this->get('digipay', 'access_token') ?: ''),
+            'refresh_token' => (string) ($this->get('digipay', 'refresh_token') ?: ''),
+            'base_url' => rtrim((string) ($this->get('digipay', $sandbox ? 'sandbox_base_url' : 'base_url') ?: $apiDefault), '/'),
+            'sandbox_base_url' => (string) ($this->get('digipay', 'sandbox_base_url') ?: ($cfg['sandbox_base_url'] ?? '')),
+            'production_base_url' => (string) ($this->get('digipay', 'base_url') ?: ($cfg['base_url'] ?? '')),
+            'icon' => $this->get('digipay', 'icon') ?: null,
         ];
     }
 

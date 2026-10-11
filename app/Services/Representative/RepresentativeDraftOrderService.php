@@ -6,6 +6,7 @@ use App\Models\FreightCarrier;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\ProductTemplate;
 use App\Models\User;
 use App\Services\Order\OrderInvoiceTotalsService;
 use App\Services\Payment\PaymentGatewayCatalog;
@@ -52,12 +53,21 @@ class RepresentativeDraftOrderService
     {
         $this->assertDraftOwnedBy($order, auth()->user());
 
+        $templateId = $filters['template_id'] ?? null;
+        $templateName = null;
+        if ($templateId) {
+            $templateName = ProductTemplate::query()
+                ->whereKey((int) $templateId)
+                ->value('name');
+        }
+
         $order->update([
             'catalog_filters' => [
                 'family_id' => $filters['family_id'] ?? null,
                 'plant_id' => $filters['plant_id'] ?? null,
                 'brand_id' => $filters['brand_id'] ?? null,
-                'template_id' => $filters['template_id'] ?? null,
+                'template_id' => $templateId,
+                'template_name' => $templateName,
             ],
         ]);
     }

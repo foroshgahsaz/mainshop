@@ -59,6 +59,7 @@ class PaymentGatewayCatalog
             'zarinpal' => (bool) ($this->settings->zarinpal()['enabled'] ?? false),
             'tara' => (bool) ($this->settings->tara()['enabled'] ?? false),
             'bajet' => (bool) ($this->settings->bajet()['enabled'] ?? false),
+            'digipay' => (bool) ($this->settings->digipay()['enabled'] ?? false),
             default => false,
         };
     }
@@ -120,6 +121,7 @@ class PaymentGatewayCatalog
             'zarinpal' => $this->settings->zarinpal()['icon'] ?? null,
             'tara' => $this->settings->tara()['icon'] ?? null,
             'bajet' => $this->settings->bajet()['icon'] ?? null,
+            'digipay' => $this->settings->digipay()['icon'] ?? null,
             default => null,
         };
 

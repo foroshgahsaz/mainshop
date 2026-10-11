@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\ManageBajetPay;
+use App\Filament\Pages\ManageDigiPay;
 use App\Filament\Pages\ManageTara;
 use App\Filament\Pages\ManageZarinpal;
 use App\Filament\Pages\ViewDatabaseBackups;
@@ -68,6 +69,7 @@ class AdminPanelProvider extends PanelProvider
                 ManageZarinpal::class,
                 ManageTara::class,
                 ManageBajetPay::class,
+                ManageDigiPay::class,
                 ViewPaymentLogs::class,
                 ViewSiteErrorLogs::class,
                 ViewDatabaseBackups::class,

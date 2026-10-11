@@ -95,6 +95,7 @@ Route::get('/checkout', CheckoutPage::class)->name('checkout');
 Route::match(['get', 'post'], '/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');
 Route::match(['get', 'post'], '/payment/callback/tara', [PaymentController::class, 'taraCallback'])->name('payment.callback.tara');
 Route::match(['get', 'post'], '/payment/callback/bajet', [PaymentController::class, 'bajetCallback'])->name('payment.callback.bajet');
+Route::match(['get', 'post'], '/payment/callback/digipay', [PaymentController::class, 'digipayCallback'])->name('payment.callback.digipay');
 Route::get('/payment/tara/{tracking}', [PaymentController::class, 'taraRedirect'])->name('payment.tara.redirect');
 Route::get('/payment/result/{payment:tracking_code}', [PaymentResultController::class, 'show'])
     ->middleware('signed')

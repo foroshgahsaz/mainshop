@@ -38,6 +38,11 @@ class PaymentController extends Controller
         return $this->handleCallback($request);
     }
 
+    public function digipayCallback(Request $request)
+    {
+        return $this->handleCallback($request);
+    }
+
     public function taraRedirect(string $tracking, TaraGateway $gateway, SettingsService $settings)
     {
         $model = Payment::query()
@@ -69,6 +74,9 @@ class PaymentController extends Controller
         if ($payment->gateway === 'bajet') {
             $authority = (string) ($request->input('id') ?: $payment->transaction_id);
             $status = (string) $request->input('status', '');
+        } elseif ($payment->gateway === 'digipay') {
+            $authority = (string) ($request->input('trackingCode') ?: $payment->transaction_id);
+            $status = (string) $request->input('result', '');
         } else {
             $authority = (string) ($request->input('Authority') ?: $request->input('token') ?: $payment->transaction_id);
             $status = (string) ($request->input('Status') ?: $request->input('result') ?: '');

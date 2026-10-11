@@ -1,6 +1,7 @@
 <?php
 
 use App\Services\Payment\BajetPayGateway;
+use App\Services\Payment\DigiPayGateway;
 use App\Services\Payment\TaraGateway;
 use App\Services\Payment\ZarinpalGateway;
 
@@ -36,6 +37,24 @@ return [
             'amount_unit' => env('BAJET_AMOUNT_UNIT', 'toman'),
             'default_product_type' => env('BAJET_DEFAULT_PRODUCT_TYPE', 2),
             'default_brand' => env('BAJET_DEFAULT_BRAND', 'general'),
+        ],
+
+        'digipay' => [
+            'driver' => DigiPayGateway::class,
+            'type' => 'credit',
+            'label' => 'دیجی‌پی',
+            'description' => 'پرداخت اعتباری در ۴ قسط (دیجی‌پی)',
+            'username' => env('DIGIPAY_USERNAME', ''),
+            'password' => env('DIGIPAY_PASSWORD', ''),
+            'client_id' => env('DIGIPAY_CLIENT_ID', ''),
+            'client_secret' => env('DIGIPAY_CLIENT_SECRET', ''),
+            'sandbox' => env('DIGIPAY_SANDBOX', true),
+            'base_url' => env('DIGIPAY_BASE_URL', 'https://api.mydigipay.com/digipay/api'),
+            'sandbox_base_url' => env('DIGIPAY_SANDBOX_BASE_URL', 'https://uat.mydigipay.info/digipay/api'),
+            'callback_url' => env('DIGIPAY_CALLBACK_URL', '/payment/callback/digipay'),
+            'amount_unit' => env('DIGIPAY_AMOUNT_UNIT', 'toman'),
+            'ticket_type' => env('DIGIPAY_TICKET_TYPE', 11),
+            'default_product_type' => env('DIGIPAY_DEFAULT_PRODUCT_TYPE', 1),
         ],
 
         'tara' => [

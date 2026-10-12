@@ -35,6 +35,7 @@
     use App\Filament\Resources\ProductQuestionResource;
     use App\Filament\Resources\ProductReviewResource;
     use App\Filament\Resources\ReservationRequestResource;
+    use App\Filament\Resources\SalesRegionResource;
     use App\Filament\Resources\FreightCarrierResource;
     use App\Filament\Resources\ShippingMethodResource;
     use App\Filament\Resources\UserResource;
@@ -55,12 +56,16 @@
         'users' => [
             'label' => 'کاربران',
             'icon' => 'fa-users',
-            'routes' => ['filament.admin.resources.users.*'],
+            'routes' => ['filament.admin.resources.users.*', 'filament.admin.resources.sales-regions.*'],
             'menus' => [
                 ['label' => 'کاربران', 'icon' => 'fa-users', 'items' => [
                     ['label' => 'مشتریان', 'url' => UserResource::getUrl('index'), 'icon' => 'fa-user'],
                     ['label' => 'غیر مشتری', 'url' => UserResource::getUrl('index', ['activeTab' => 'staff']), 'icon' => 'fa-user-tie'],
                     ['label' => 'افزودن کاربر', 'url' => UserResource::getUrl('create'), 'icon' => 'fa-plus'],
+                ]],
+                ['label' => 'مناطق فروش', 'icon' => 'fa-map-location-dot', 'items' => [
+                    ['label' => 'لیست مناطق', 'url' => SalesRegionResource::getUrl('index'), 'icon' => 'fa-map'],
+                    ['label' => 'افزودن منطقه', 'url' => SalesRegionResource::getUrl('create'), 'icon' => 'fa-plus'],
                 ]],
             ],
         ],
@@ -278,9 +283,9 @@
         $panels = array_intersect_key($panels, array_flip(['products', 'brands', 'orders', 'requests', 'payments', 'users', 'media']));
         $panels['users']['menus'] = [
             ['label' => 'کاربران', 'icon' => 'fa-users', 'items' => [
-                ['label' => 'نمایندگان', 'url' => UserResource::getUrl('index', ['activeTab' => 'representatives']), 'icon' => 'fa-user-tie'],
+                ['label' => 'نمایندگان من', 'url' => UserResource::getUrl('index', ['activeTab' => 'representatives']), 'icon' => 'fa-user-tie'],
                 ['label' => 'افزودن نماینده', 'url' => UserResource::getUrl('create'), 'icon' => 'fa-user-plus'],
-                ['label' => 'مشتریان نمایندگان', 'url' => UserResource::getUrl('index', ['activeTab' => 'rep_customers']), 'icon' => 'fa-user'],
+                ['label' => 'مشتریان نمایندگان من', 'url' => UserResource::getUrl('index', ['activeTab' => 'rep_customers']), 'icon' => 'fa-user'],
             ]],
         ];
         $panels['media']['menus'] = [

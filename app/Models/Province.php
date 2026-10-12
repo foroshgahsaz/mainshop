@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Province extends Model
@@ -11,6 +12,7 @@ class Province extends Model
         'name',
         'slug',
         'position',
+        'sales_region_id',
     ];
 
     protected function casts(): array
@@ -18,6 +20,11 @@ class Province extends Model
         return [
             'position' => 'integer',
         ];
+    }
+
+    public function salesRegion(): BelongsTo
+    {
+        return $this->belongsTo(SalesRegion::class);
     }
 
     public function cities(): HasMany

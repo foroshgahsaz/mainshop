@@ -34,6 +34,7 @@
     use App\Filament\Resources\ProductTemplateResource;
     use App\Filament\Resources\ProductQuestionResource;
     use App\Filament\Resources\ProductReviewResource;
+    use App\Filament\Resources\ReservationRequestResource;
     use App\Filament\Resources\FreightCarrierResource;
     use App\Filament\Resources\ShippingMethodResource;
     use App\Filament\Resources\UserResource;
@@ -46,6 +47,9 @@
     $isDashboard = request()->routeIs('filament.admin.pages.dashboard');
     $profileUrl = UserResource::getUrl('edit', ['record' => $user->id], panel: 'admin');
     $dashboardUrl = filament()->getUrl();
+    $pendingRequestsCount = $user
+        ? app(\App\Services\Representative\ProformaReservationRequestService::class)->pendingCountFor($user)
+        : 0;
 
     $panels = [
         'users' => [
@@ -124,6 +128,17 @@
             'menus' => [
                 ['label' => 'سفارش‌ها', 'icon' => 'fa-shopping-bag', 'items' => [
                     ['label' => 'لیست همه', 'url' => OrderResource::getUrl('index'), 'icon' => 'fa-list'],
+                ]],
+            ],
+        ],
+        'requests' => [
+            'label' => 'درخواست‌ها',
+            'icon' => 'fa-inbox',
+            'routes' => ['filament.admin.resources.reservation-requests.*'],
+            'menus' => [
+                ['label' => 'درخواست‌ها', 'icon' => 'fa-inbox', 'items' => [
+                    ['label' => 'در انتظار بررسی', 'url' => ReservationRequestResource::getUrl('index', ['tableFilters' => ['status' => ['value' => 'pending']]]), 'icon' => 'fa-hourglass-half', 'badge' => $pendingRequestsCount],
+                    ['label' => 'همه درخواست‌ها', 'url' => ReservationRequestResource::getUrl('index'), 'icon' => 'fa-list'],
                 ]],
             ],
         ],
@@ -260,7 +275,7 @@
     ];
 
     if ($salesManagerOnly) {
-        $panels = array_intersect_key($panels, array_flip(['products', 'brands', 'orders', 'payments', 'users', 'media']));
+        $panels = array_intersect_key($panels, array_flip(['products', 'brands', 'orders', 'requests', 'payments', 'users', 'media']));
         $panels['users']['menus'] = [
             ['label' => 'کاربران', 'icon' => 'fa-users', 'items' => [
                 ['label' => 'نمایندگان', 'url' => UserResource::getUrl('index', ['activeTab' => 'representatives']), 'icon' => 'fa-user-tie'],
@@ -299,6 +314,7 @@
         ['id' => 'brands', 'icon' => 'fa-certificate', 'tooltip' => 'برندها', 'panel' => 'brands'],
         ['id' => 'discounts', 'icon' => 'fa-percent', 'tooltip' => 'تخفیف‌ها', 'panel' => 'discounts'],
         ['id' => 'orders', 'icon' => 'fa-shopping-bag', 'tooltip' => 'سفارش‌ها', 'panel' => 'orders'],
+        ['id' => 'requests', 'icon' => 'fa-inbox', 'tooltip' => 'درخواست‌ها', 'panel' => 'requests', 'badge' => $pendingRequestsCount],
         ['id' => 'content', 'icon' => 'fa-newspaper', 'tooltip' => 'محتوا', 'panel' => 'content'],
         ['id' => 'shipping', 'icon' => 'fa-truck', 'tooltip' => 'ارسال', 'panel' => 'shipping'],
         ['id' => 'gateways', 'icon' => 'fa-plug', 'tooltip' => 'درگاه‌ها', 'panel' => 'gateways'],
@@ -311,7 +327,7 @@
         $navIcons = array_values(array_filter(
             $navIcons,
             fn (array $icon): bool => ($icon['isLink'] ?? false)
-                || in_array($icon['panel'] ?? '', ['products', 'brands', 'orders', 'payments', 'users', 'media'], true)
+                || in_array($icon['panel'] ?? '', ['products', 'brands', 'orders', 'requests', 'payments', 'users', 'media'], true)
         ));
     }
 
@@ -344,6 +360,9 @@
                  aria-label="{{ $navIcon['tooltip'] }}">
                 <i class="fas {{ $navIcon['icon'] }}"></i>
                 <span class="sidebar-icon-label">{{ $navIcon['tooltip'] }}</span>
+                @if (($navIcon['badge'] ?? 0) > 0)
+                    <span class="sidebar-icon-badge">{{ $navIcon['badge'] }}</span>
+                @endif
             </div>
         @endif
         @if ($loop->first)
@@ -388,6 +407,9 @@
                                class="submenu-item {{ $isMenuItemActive($item['url']) ? 'active' : '' }}">
                                 <i class="fas {{ $item['icon'] }} ms-2 submenu-item-icon"></i>
                                 {{ $item['label'] }}
+                                @if (($item['badge'] ?? 0) > 0)
+                                    <span class="submenu-item-badge">{{ $item['badge'] }}</span>
+                                @endif
                             </a>
                         @endforeach
                     </div>

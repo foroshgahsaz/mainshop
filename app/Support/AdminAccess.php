@@ -12,6 +12,7 @@ use App\Filament\Resources\ProductFamilyResource;
 use App\Filament\Resources\ProductPlantResource;
 use App\Filament\Resources\ProductResource;
 use App\Filament\Resources\ProductTemplateResource;
+use App\Filament\Resources\ReservationRequestResource;
 use App\Filament\Resources\UserResource;
 use App\Models\User;
 
@@ -36,6 +37,7 @@ class AdminAccess
         ProductTemplateResource::class => true,
         BrandResource::class => true,
         MediaFileResource::class => true,
+        ReservationRequestResource::class => true,
     ];
 
     /** @var list<string> */
@@ -53,6 +55,7 @@ class AdminAccess
         'filament.admin.resources.product-templates.*',
         'filament.admin.resources.brands.*',
         'filament.admin.resources.media-files.*',
+        'filament.admin.resources.reservation-requests.*',
         'livewire.upload-file',
         'livewire.preview-file',
         'livewire.update',

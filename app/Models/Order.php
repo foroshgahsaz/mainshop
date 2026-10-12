@@ -152,6 +152,16 @@ class Order extends Model
         }
     }
 
+    public function reservationRequests(): HasMany
+    {
+        return $this->hasMany(ProformaReservationRequest::class);
+    }
+
+    public function latestReservationRequest(): HasOne
+    {
+        return $this->hasOne(ProformaReservationRequest::class)->latestOfMany();
+    }
+
     public function representative(): BelongsTo
     {
         return $this->belongsTo(User::class, 'representative_id');

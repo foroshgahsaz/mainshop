@@ -41,6 +41,7 @@ use App\Services\Cache\ShopCacheService;
 use App\Services\Media\ImageOptimizer;
 use App\Services\Media\MediaRegistry;
 use App\Services\Payment\PaymentGatewayCatalog;
+use App\Services\Representative\SalesRegionService;
 use App\Services\Settings\SearchPopupSettingsService;
 use App\Services\Settings\SettingsService;
 use App\Services\Sms\SmsSenderFactory;
@@ -84,6 +85,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(PaymentGatewayCatalog::class);
         $this->app->singleton(SettingsService::class);
+        $this->app->scoped(SalesRegionService::class);
 
         $this->app->singleton(LoginResponse::class, AdminLoginResponse::class);
     }

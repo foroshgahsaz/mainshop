@@ -29,7 +29,7 @@ class CreateUser extends CreateRecord
             $data['status'] = $data['status'] ?? true;
         }
 
-        return $data;
+        return static::stripVirtualAccessFormKeys($data);
     }
 
     protected function afterCreate(): void
@@ -39,9 +39,10 @@ class CreateUser extends CreateRecord
         }
 
         $raw = $this->form->getRawState();
+        $managerId = AdminAccess::isSalesManagerOnly() ? (int) auth()->id() : (int) ($raw['rep_sales_manager_id'] ?? 0);
 
         $this->record->representativeProfile()->create([
-            'sales_manager_id' => $raw['rep_sales_manager_id'] ?? null,
+            'sales_manager_id' => $managerId ?: null,
             'province_id' => $raw['rep_province_id'] ?? null,
             'city_id' => $raw['rep_city_id'] ?? null,
             'max_active_reservations' => (int) ($raw['rep_max_active_reservations'] ?? 3),

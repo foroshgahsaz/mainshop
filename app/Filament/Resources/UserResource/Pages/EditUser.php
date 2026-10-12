@@ -96,6 +96,14 @@ class EditUser extends EditRecord
             $data['phone'] = app(OtpService::class)->normalizePhone((string) $data['phone']);
         }
 
+        if (AdminAccess::isSalesManagerOnly()) {
+            foreach (['is_admin', 'is_author', 'is_representative', 'is_sales_manager'] as $flag) {
+                $data[$flag] = (bool) $user->{$flag};
+            }
+
+            return CreateUser::stripVirtualAccessFormKeys($data);
+        }
+
         if ($this->userEditTab === UserEditTabs::TAB_ACCESS) {
             return CreateUser::applyAccessFieldsFromForm($this->form, $data);
         }
@@ -152,6 +160,8 @@ class EditUser extends EditRecord
         $this->userEditTab = UserEditTabs::resolveActive('edit');
 
         $this->getRecord()->loadMissing([
+            'representativeProfile.salesManager',
+            'representativeProfile.province.salesRegion',
             'representativeProfile.province',
             'representativeProfile.city',
         ]);

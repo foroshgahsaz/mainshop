@@ -7,14 +7,16 @@ use App\Filament\Resources\UserResource\UserEditTabs;
 use App\Filament\Support\AdminTable;
 use App\Filament\Support\ShopMediaPicker;
 use App\Models\City;
-use App\Models\Province;
+use App\Models\RepresentativeProfile;
 use App\Models\User;
 use App\Rules\IranianNationalCode;
 use App\Services\Auth\OtpService;
+use App\Services\Representative\SalesRegionService;
 use App\Support\AdminAccess;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\ViewColumn;
@@ -71,13 +73,11 @@ class UserResource extends Resource
             return true;
         }
 
-        if (! $record->isRepresentative()) {
-            return false;
-        }
-
+        $manager = auth()->user();
         $record->loadMissing('representativeProfile');
 
-        return (int) ($record->representativeProfile?->sales_manager_id) === (int) auth()->id();
+        return $manager instanceof User
+            && app(SalesRegionService::class)->managesUser($manager, $record);
     }
 
     public static function form(Form $form): Form
@@ -126,7 +126,6 @@ class UserResource extends Resource
     /** @return array<int, Forms\Components\Component> */
     protected static function createRepresentativeFormSchemaForSalesManager(): array
     {
-        $managerId = auth()->id();
 
         return [
             ...static::profileTabSchema(),
@@ -136,7 +135,6 @@ class UserResource extends Resource
             Forms\Components\Hidden::make('is_admin')->default(false),
             Forms\Components\Hidden::make('is_author')->default(false),
             Forms\Components\Hidden::make('is_sales_manager')->default(false),
-            Forms\Components\Hidden::make('rep_sales_manager_id')->default($managerId),
             Forms\Components\Section::make('پروفایل نمایندگی')
                 ->description('این نماینده به‌صورت خودکار زیرمجموعه شما (مدیر منطقه) ثبت می‌شود.')
                 ->schema(static::representativeProfileFieldsForCreate(includeSalesManager: false))
@@ -333,15 +331,19 @@ class UserResource extends Resource
                 ])
                 ->default('customer')
                 ->required()
+                ->disabled(fn (): bool => AdminAccess::isSalesManagerOnly())
                 ->live(),
             Forms\Components\Fieldset::make('نقش‌های غیر مشتری')
                 ->schema([
                     Forms\Components\Toggle::make('is_admin')
-                        ->label('مدیر — دسترسی پنل ادمین'),
+                        ->label('مدیر — دسترسی پنل ادمین')
+                        ->disabled(fn (): bool => AdminAccess::isSalesManagerOnly()),
                     Forms\Components\Toggle::make('is_author')
-                        ->label('نویسنده — انتشار در بلاگ'),
+                        ->label('نویسنده — انتشار در بلاگ')
+                        ->disabled(fn (): bool => AdminAccess::isSalesManagerOnly()),
                     Forms\Components\Toggle::make('is_representative')
                         ->label('نماینده — پنل نمایندگی')
+                        ->disabled(fn (): bool => AdminAccess::isSalesManagerOnly())
                         ->live(),
                     Forms\Components\Toggle::make('is_sales_manager')
                         ->label('مدیر فروش — سفارش‌ها، پرداخت‌ها، کاربران و مدیریت کامل محصولات')
@@ -371,11 +373,13 @@ class UserResource extends Resource
                         return 'پروفایل نمایندگی هنوز ثبت نشده — نقش نماینده را ذخیره کنید و استان/شهر را تکمیل کنید.';
                     }
 
+                    $manager = $profile->salesManager?->name ?? 'تعیین نشده';
+                    $region = $profile->province?->salesRegion?->name ?? '—';
                     $province = $profile->province?->name ?? '—';
                     $city = $profile->city?->name ?? '—';
                     $cap = $profile->max_active_reservations;
 
-                    return "استان: {$province} · شهر: {$city} · سقف رزرو همزمان: {$cap}";
+                    return "مدیر منطقه: {$manager} · منطقه: {$region} · استان: {$province} · شهر: {$city} · سقف رزرو همزمان: {$cap}";
                 })
                 ->visible(fn (?User $record): bool => (bool) $record?->isRepresentative());
         }
@@ -401,30 +405,35 @@ class UserResource extends Resource
     /** @return array<int, Forms\Components\Component> */
     protected static function representativeProfileFieldsForEdit(): array
     {
+        $salesManagerOnly = AdminAccess::isSalesManagerOnly();
+
         return [
             Forms\Components\Select::make('sales_manager_id')
                 ->label('مدیر منطقه')
-                ->relationship('salesManager', 'name', fn ($query) => $query->where('is_sales_manager', true)->orderBy('name'))
+                ->options(fn (?RepresentativeProfile $record): array => static::salesManagerOptions($record?->sales_manager_id))
                 ->searchable()
-                ->preload()
-                ->helperText('درخواست‌های رزرو مجدد این نماینده برای این مدیر ارسال می‌شود.'),
+                ->required()
+                ->live()
+                ->disabled($salesManagerOnly)
+                ->dehydrated(! $salesManagerOnly)
+                ->afterStateUpdated(fn (Set $set) => $set('province_id', null))
+                ->helperText('فقط مدیرانی که حداقل یک منطقه فروش دارند. درخواست‌های رزرو مجدد برای این مدیر ارسال می‌شود.'),
             Forms\Components\Select::make('province_id')
                 ->label('استان فعالیت')
-                ->relationship('province', 'name', fn ($query) => $query->orderBy('position'))
+                ->options(fn (Get $get, ?RepresentativeProfile $record): array => app(SalesRegionService::class)
+                    ->provinceOptionsForManager((int) ($get('sales_manager_id') ?: $record?->sales_manager_id)))
+                ->in(fn (Get $get, ?RepresentativeProfile $record): array => app(SalesRegionService::class)
+                    ->provinceIdsForManager((int) ($get('sales_manager_id') ?: $record?->sales_manager_id)))
+                ->validationMessages(['in' => 'استان فعالیت باید در یکی از مناطق همین مدیر منطقه باشد.'])
                 ->searchable()
-                ->preload()
-                ->live(),
+                ->required()
+                ->live()
+                ->afterStateUpdated(fn (Set $set) => $set('city_id', null))
+                ->helperText('فقط استان‌های مناطق همین مدیر منطقه.'),
             Forms\Components\Select::make('city_id')
                 ->label('شهر فعالیت')
-                ->relationship(
-                    'city',
-                    'name',
-                    fn ($query, Get $get) => $query
-                        ->when($get('province_id'), fn ($q, $provinceId) => $q->where('province_id', $provinceId))
-                        ->orderBy('position')
-                )
+                ->options(fn (Get $get): array => static::cityOptions($get('province_id')))
                 ->searchable()
-                ->preload()
                 ->disabled(fn (Get $get): bool => ! $get('province_id')),
             Forms\Components\TextInput::make('max_active_reservations')
                 ->label('سقف رزرو همزمان')
@@ -436,6 +445,31 @@ class UserResource extends Resource
         ];
     }
 
+    /** @return array<int, string> */
+    protected static function salesManagerOptions(?int $currentId = null): array
+    {
+        $options = app(SalesRegionService::class)->managerOptions();
+
+        if ($currentId && ! isset($options[$currentId])) {
+            $name = User::query()->whereKey($currentId)->value('name');
+            if ($name !== null) {
+                $options[$currentId] = $name.' (بدون منطقه)';
+            }
+        }
+
+        return $options;
+    }
+
+    /** @return array<int, string> */
+    protected static function cityOptions(mixed $provinceId): array
+    {
+        if (! $provinceId) {
+            return [];
+        }
+
+        return City::query()->where('province_id', $provinceId)->orderBy('position')->pluck('name', 'id')->all();
+    }
+
     /** @return array<int, Forms\Components\Component> */
     protected static function representativeProfileFieldsForCreate(bool $includeSalesManager = true): array
     {
@@ -444,26 +478,36 @@ class UserResource extends Resource
         if ($includeSalesManager) {
             $fields[] = Forms\Components\Select::make('rep_sales_manager_id')
                 ->label('مدیر منطقه')
-                ->options(fn () => User::query()->where('is_sales_manager', true)->orderBy('name')->pluck('name', 'id'))
+                ->options(fn (): array => static::salesManagerOptions())
+                ->in(fn (): array => array_keys(static::salesManagerOptions()))
                 ->searchable()
+                ->required()
+                ->live()
                 ->dehydrated(false)
-                ->helperText('درخواست‌های رزرو مجدد این نماینده برای این مدیر ارسال می‌شود.');
+                ->afterStateUpdated(fn (Set $set) => $set('rep_province_id', null))
+                ->helperText('فقط مدیرانی که حداقل یک منطقه فروش دارند (ادمین → کاربران → مناطق فروش).');
         }
 
         return [
             ...$fields,
             Forms\Components\Select::make('rep_province_id')
                 ->label('استان فعالیت')
-                ->options(fn () => Province::query()->orderBy('position')->pluck('name', 'id'))
+                ->options(fn (Get $get): array => app(SalesRegionService::class)->provinceOptionsForManager(
+                    $includeSalesManager ? (int) $get('rep_sales_manager_id') : (int) auth()->id()
+                ))
+                ->in(fn (Get $get): array => app(SalesRegionService::class)->provinceIdsForManager(
+                    $includeSalesManager ? (int) $get('rep_sales_manager_id') : (int) auth()->id()
+                ))
+                ->validationMessages(['in' => 'استان فعالیت باید در یکی از مناطق همین مدیر منطقه باشد.'])
                 ->searchable()
+                ->required()
                 ->live()
-                ->dehydrated(false),
+                ->dehydrated(false)
+                ->afterStateUpdated(fn (Set $set) => $set('rep_city_id', null))
+                ->helperText($includeSalesManager ? 'فقط استان‌های مناطق مدیر انتخاب‌شده.' : 'فقط استان‌های مناطق شما.'),
             Forms\Components\Select::make('rep_city_id')
                 ->label('شهر فعالیت')
-                ->options(fn (Get $get) => City::query()
-                    ->when($get('rep_province_id'), fn ($q, $id) => $q->where('province_id', $id))
-                    ->orderBy('position')
-                    ->pluck('name', 'id'))
+                ->options(fn (Get $get): array => static::cityOptions($get('rep_province_id')))
                 ->searchable()
                 ->disabled(fn (Get $get): bool => ! $get('rep_province_id'))
                 ->dehydrated(false),
@@ -514,7 +558,11 @@ class UserResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->with('createdByRepresentative');
+        return parent::getEloquentQuery()->with([
+            'createdByRepresentative',
+            'representativeProfile.salesManager:id,name',
+            'representativeProfile.province:id,name',
+        ]);
     }
 
     public static function table(Table $table): Table
@@ -538,6 +586,11 @@ class UserResource extends Resource
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->visible(fn (): bool => AdminAccess::canManageShopInAdmin()),
+                Tables\Columns\TextColumn::make('representativeProfile.salesManager.name')
+                    ->label('مدیر منطقه')
+                    ->description(fn (User $record): ?string => $record->representativeProfile?->province?->name)
+                    ->placeholder(fn (User $record): string => $record->isRepresentative() ? 'تعیین نشده' : '—')
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('createdByRepresentative.name')
                     ->label('نماینده ثبت‌کننده')
                     ->placeholder('—')
@@ -558,6 +611,24 @@ class UserResource extends Resource
                     ->sortable(),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('rep_sales_manager')
+                    ->label('مدیر منطقه نماینده')
+                    ->options(fn (): array => ['none' => 'بدون مدیر منطقه']
+                        + User::query()->where('is_sales_manager', true)->orderBy('name')->pluck('name', 'id')->all())
+                    ->visible(fn (): bool => AdminAccess::canManageShopInAdmin())
+                    ->query(function (Builder $query, array $data): Builder {
+                        $value = $data['value'] ?? null;
+
+                        if ($value === null || $value === '') {
+                            return $query;
+                        }
+
+                        $query->where('is_representative', true);
+
+                        return $value === 'none'
+                            ? $query->whereDoesntHave('representativeProfile', fn (Builder $q) => $q->whereNotNull('sales_manager_id'))
+                            : $query->whereHas('representativeProfile', fn (Builder $q) => $q->where('sales_manager_id', (int) $value));
+                    }),
                 Tables\Filters\SelectFilter::make('user_kind')
                     ->label('نوع کاربر')
                     ->options([

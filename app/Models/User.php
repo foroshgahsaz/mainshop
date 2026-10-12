@@ -122,6 +122,11 @@ class User extends Authenticatable implements FilamentUser
         return implode('، ', $roles) ?: '—';
     }
 
+    public function salesRegions(): HasMany
+    {
+        return $this->hasMany(SalesRegion::class, 'sales_manager_id');
+    }
+
     public function representativeProfile(): HasOne
     {
         return $this->hasOne(RepresentativeProfile::class);

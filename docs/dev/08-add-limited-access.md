@@ -83,8 +83,10 @@ public static function canViewAny(): bool
 
 **الگو:** `UserResource` + `EditUser.php`
 
-- `canEdit()` — مدیر فروش فقط **خودش** را ویرایش کند
-- فیلدهای حساس `disabled(fn () => AdminAccess::isSalesManagerOnly())`
+- `canEdit()` — مدیر فروش فقط **خودش** و نمایندگان/مشتریانِ تحت مدیریتش (`SalesRegionService::managesUser`) را ویرایش کند
+- فیلدهای حساس (نقش‌ها، `user_kind`، مدیر منطقه) `disabled(fn () => AdminAccess::isSalesManagerOnly())` و در `EditUser::mutateFormDataBeforeSave` از رکورد حفظ می‌شوند — فقط disabled در UI کافی نیست
+- دامنهٔ داده بر اساس منطقه: `SalesRegionService::scopeRepresentativesManagedBy()` در تب‌های `ListUsers`
+- Resource فقط-ادمین (مثل `SalesRegionResource`): `canViewAny()` → `AdminAccess::canManageShopInAdmin()` و **نه** در `SALES_MANAGER_RESOURCES`
 - حذف/ایجاد کاربر: `canManageShopInAdmin()` فقط برای مدیر کامل
 
 فایل‌های نمونه:

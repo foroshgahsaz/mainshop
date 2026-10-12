@@ -4,6 +4,7 @@ namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Resources\Pages\AdminListRecords;
 use App\Filament\Resources\UserResource;
+use App\Services\Representative\SalesRegionService;
 use App\Support\AdminAccess;
 use Filament\Actions;
 use Filament\Resources\Components\Tab;
@@ -33,15 +34,12 @@ class ListUsers extends AdminListRecords
     {
         if (AdminAccess::isSalesManagerOnly()) {
             return [
-                'representatives' => Tab::make('نمایندگان')
-                    ->modifyQueryUsing(fn (Builder $query) => $query
-                        ->where('is_representative', true)
-                        ->whereHas(
-                            'representativeProfile',
-                            fn (Builder $q) => $q->where('sales_manager_id', auth()->id())
-                        )),
-                'rep_customers' => Tab::make('مشتریان نمایندگان')
-                    ->modifyQueryUsing(fn (Builder $query) => $query->whereNotNull('created_by_representative_id')),
+                'representatives' => Tab::make('نمایندگان من')
+                    ->modifyQueryUsing(fn (Builder $query) => app(SalesRegionService::class)
+                        ->scopeRepresentativesManagedBy($query, (int) auth()->id())),
+                'rep_customers' => Tab::make('مشتریان نمایندگان من')
+                    ->modifyQueryUsing(fn (Builder $query) => app(SalesRegionService::class)
+                        ->scopeCustomersOfManagedRepresentatives($query, (int) auth()->id())),
             ];
         }
 

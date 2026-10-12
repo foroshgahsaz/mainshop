@@ -3,6 +3,7 @@
 namespace App\Filament\Representative\Pages;
 
 use Filament\Pages\Page;
+use Filament\Support\Enums\MaxWidth;
 
 class CreateDraftOrder extends Page
 {
@@ -17,4 +18,9 @@ class CreateDraftOrder extends Page
     protected static string $view = 'filament.representative.pages.create-draft-order';
 
     protected static string $layout = 'filament-panels::components.layout.representative';
+
+    public function getMaxContentWidth(): MaxWidth|string|null
+    {
+        return MaxWidth::Full;
+    }
 }

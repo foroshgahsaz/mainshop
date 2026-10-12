@@ -13,6 +13,13 @@ class SalesRegion extends Model
         'sales_manager_id',
     ];
 
+    protected static function booted(): void
+    {
+        static::deleting(function (SalesRegion $region): void {
+            Province::query()->where('sales_region_id', $region->id)->update(['sales_region_id' => null]);
+        });
+    }
+
     public function salesManager(): BelongsTo
     {
         return $this->belongsTo(User::class, 'sales_manager_id');

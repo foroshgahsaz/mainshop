@@ -46,6 +46,7 @@ class RepresentativePanelProvider extends PanelProvider
                 Dashboard::class,
                 CreateDraftOrder::class,
             ])
+            ->discoverWidgets(in: app_path('Filament/Representative/Widgets'), for: 'App\\Filament\\Representative\\Widgets')
             ->widgets([])
             ->renderHook(PanelsRenderHook::HEAD_END, fn () => view('filament.hooks.styles'))
             ->renderHook(PanelsRenderHook::BODY_END, fn () => view('filament.hooks.scripts'))

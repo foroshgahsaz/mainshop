@@ -60,6 +60,8 @@ git pull origin master
 
 composer install --no-dev --optimize-autoloader
 php artisan migrate --force
+php artisan shop:deploy-recover
+# اگر migration مناطق فروش (2026_10_12_150000) قبلاً با خطای MySQL 1824 قطع شده: pull آخرین master و فقط دوباره migrate — پاک‌کردن دستی جدول لازم نیست.
 php artisan db:seed --class=IranLocationsSeeder   # فقط اگر استان‌ها خالی است
 php artisan view:clear
 php artisan optimize:clear

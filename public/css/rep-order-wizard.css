@@ -126,7 +126,7 @@
     padding: 0.85rem 1rem;
     border: 1px solid #e5e7eb;
     border-radius: 0.5rem;
-    background: #fff;
+    background: #f9fafb;
     display: grid;
     gap: 0.55rem;
 }
@@ -361,29 +361,11 @@
     flex-shrink: 0;
 }
 
-.rep-proforma-view-meta {
-    margin: 0 0 1rem;
-    padding: 0.65rem 0.25rem 0.85rem;
-    background: #fff;
-    display: grid;
-    gap: 0.35rem;
-}
-
-.rep-proforma-view-meta .rep-wizard-hint {
-    margin: 0;
-}
-
 .rep-proforma-invoice {
     width: 100%;
     max-width: 100%;
     min-width: 0;
     box-sizing: border-box;
-    margin-top: 0.25rem;
-    padding-inline: 0.15rem;
-}
-
-.rep-wizard-panel--proforma-view {
-    padding-inline: 0.35rem;
 }
 
 @media (max-width: 768px) {
@@ -392,14 +374,6 @@
         border-left: none;
         border-right: none;
         border-radius: 0;
-    }
-
-    .rep-wizard-panel--proforma-view {
-        padding-inline: 0.65rem;
-    }
-
-    .rep-proforma-invoice {
-        padding-inline: 0;
     }
 
     .rep-proforma-invoice .si-document--cart-wrap {

@@ -3,7 +3,7 @@
 @endphp
 
 <x-filament-panels::layout.base :livewire="$livewire">
-    <div class="fi-admin-shell" id="fiAdminShell">
+    <div class="fi-admin-shell fi-admin-shell--representative" id="fiAdminShell">
         @include('filament.partials.representative-sidebar')
 
         <div class="sidebar-backdrop" id="sidebarBackdrop" hidden aria-hidden="true"></div>

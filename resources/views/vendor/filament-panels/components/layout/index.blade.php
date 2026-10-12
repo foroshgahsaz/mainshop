@@ -3,7 +3,10 @@
 @endphp
 
 <x-filament-panels::layout.base :livewire="$livewire">
-    <div class="fi-admin-shell" id="fiAdminShell">
+    <div @class([
+        'fi-admin-shell',
+        'fi-admin-shell--representative' => request()->routeIs('filament.representative.*'),
+    ]) id="fiAdminShell">
         @if (request()->routeIs('filament.representative.*'))
             @include('filament.partials.representative-sidebar')
         @else

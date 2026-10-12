@@ -1843,3 +1843,29 @@ body.fi-body .fi-no {
     font-size: 14px;
     opacity: 0.85;
 }
+
+/* ===== پنل نمایندگی: پس‌زمینه سفید (هدر صفحه Filament) و حاشیه یکنواخت ===== */
+body.fi-panel-representative.fi-body,
+body.fi-panel-representative .fi-panel-representative {
+    background: #fff !important;
+}
+
+.fi-admin-shell.fi-admin-shell--representative .main-content,
+.fi-admin-shell.fi-admin-shell--representative .content-area,
+.fi-admin-shell.fi-admin-shell--representative .content-area .fi-main {
+    background: #fff;
+}
+
+.fi-admin-shell.fi-admin-shell--representative .content-area {
+    padding: 20px 24px !important;
+}
+
+.fi-admin-shell.fi-admin-shell--representative .content-area .fi-page > header.fi-header:not(.fi-admin-list-header) {
+    padding: 4px 0 16px !important;
+}
+
+@media (max-width: 991px) {
+    .fi-admin-shell.fi-admin-shell--representative .content-area {
+        padding: 16px !important;
+    }
+}

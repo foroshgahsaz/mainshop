@@ -8,7 +8,7 @@ body.fi-body aside.fi-main-sidebar {
 
 body.fi-body {
     font-family: Yekan, YekanBakh, Tahoma, Arial, sans-serif !important;
-    background: #f5f8fa !important;
+    background: #fff !important;
     overflow-x: hidden;
     direction: rtl;
 }
@@ -79,7 +79,7 @@ body.fi-body .fi-field-wrp-label {
 }
 
 body.fi-body .fi-panel-admin {
-    background: #f5f8fa !important;
+    background: #fff !important;
 }
 
 /* ===== Admin shell (عرض‌ها مطابق نمونه داشبورد) ===== */
@@ -466,7 +466,7 @@ body.fi-body .fi-admin-shell .fi-wi-widget {
 }
 
 .fi-admin-shell .fi-ta-header-cell {
-    background: #f9fafb !important;
+    background: #fff !important;
     color: #5e6278 !important;
     font-weight: 600 !important;
     font-size: 12px !important;
@@ -545,7 +545,7 @@ body.fi-body .fi-admin-shell .fi-wi-widget {
 .fi-admin-shell .fi-ta-pagination {
     padding: 12px 20px 16px !important;
     border-top: 1px solid #eff2f5;
-    background: #fafbfc;
+    background: #fff;
 }
 
 /* دکمه ایجاد فقط در admin-top-bar — نه داخل جدول */
@@ -1030,7 +1030,7 @@ body.fi-body .fi-modal-slide-over-window-hiding {
 
 .fi-admin-login-wrap {
     min-height: 100vh;
-    background: #f5f8fa;
+    background: #fff;
     font-family: Yekan, YekanBakh, Tahoma, Arial, sans-serif;
 }
 
@@ -1279,7 +1279,7 @@ body.fi-body .fi-modal-slide-over-window-hiding {
     gap: 0.65rem;
     padding: 0.65rem 0.85rem;
     border-radius: 12px;
-    background: #f8fafc;
+    background: #fff;
     border: 1px solid #e5e7eb;
     font-size: 13px;
 }
@@ -1810,7 +1810,7 @@ body.fi-body .fi-no {
     margin-bottom: 1.25rem;
     padding: 0.35rem;
     border-radius: 12px;
-    background: #f3f4f6;
+    background: #fff;
     border: 1px solid #e5e7eb;
 }
 
@@ -1844,32 +1844,58 @@ body.fi-body .fi-no {
     opacity: 0.85;
 }
 
-/* ===== پنل نمایندگی: پس‌زمینه سفید (هدر صفحه Filament) و حاشیه یکنواخت ===== */
+/* ===== پنل ادمین و نمایندگی: پس‌زمینه سفید (بدون خاکستری) و حاشیه یکنواخت ===== */
+body.fi-body,
+body.fi-body .fi-layout,
+body.fi-panel-admin.fi-body,
+body.fi-panel-admin .fi-panel-admin,
 body.fi-panel-representative.fi-body,
 body.fi-panel-representative .fi-panel-representative {
     background: #fff !important;
 }
 
-.fi-admin-shell.fi-admin-shell--representative .main-content {
+.fi-admin-shell .main-content {
     background: #fff;
     border-right: 1px solid #eff2f5;
 }
 
-.fi-admin-shell.fi-admin-shell--representative .content-area,
-.fi-admin-shell.fi-admin-shell--representative .content-area .fi-main {
+.fi-admin-shell .content-area,
+.fi-admin-shell .content-area .fi-main,
+.fi-admin-shell .content-area .fi-page {
     background: #fff;
 }
 
-.fi-admin-shell.fi-admin-shell--representative .content-area {
+.fi-admin-shell .content-area {
     padding: 20px 24px !important;
 }
 
-.fi-admin-shell.fi-admin-shell--representative .content-area .fi-page > header.fi-header:not(.fi-admin-list-header) {
+.fi-admin-shell .content-area .fi-page > header.fi-header:not(.fi-admin-list-header) {
     padding: 4px 0 16px !important;
 }
 
+.fi-admin-shell .fi-ta-header,
+.fi-admin-shell .fi-ta-header-toolbar,
+.fi-admin-shell .fi-ta-table > thead > tr,
+.fi-admin-shell .fi-ta-group-header,
+.fi-admin-shell .fi-ta-summary-header-row,
+.fi-admin-shell .fi-ta-empty-state {
+    background: #fff !important;
+}
+
+/* Bootstrap's .shadow-sm (!important) replaces Filament's ring, leaving cards edgeless on white */
+.fi-admin-shell .content-area .fi-wi-stats-overview-stat.shadow-sm {
+    box-shadow: 0 0 0 1px #e4e8ee !important;
+}
+
+.fi-admin-shell .content-area .fi-wi-stats-overview-stat,
+.fi-admin-shell .content-area .fi-ta-ctn,
+.fi-admin-shell .content-area .fi-fo-tabs,
+.fi-admin-shell .content-area .fi-in-tabs {
+    --tw-ring-color: #e4e8ee !important;
+}
+
 @media (max-width: 991px) {
-    .fi-admin-shell.fi-admin-shell--representative .content-area {
+    .fi-admin-shell .content-area {
         padding: 16px !important;
     }
 }

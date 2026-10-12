@@ -49,7 +49,7 @@ class UserResource extends Resource
 
     public static function canCreate(): bool
     {
-        return AdminAccess::canManageShopInAdmin();
+        return AdminAccess::canCreateRepresentativesInAdmin();
     }
 
     public static function canDelete($record): bool
@@ -63,7 +63,21 @@ class UserResource extends Resource
             return true;
         }
 
-        return AdminAccess::isSalesManagerOnly();
+        if (! AdminAccess::isSalesManagerOnly() || ! $record instanceof User) {
+            return false;
+        }
+
+        if ((int) auth()->id() === (int) $record->getKey()) {
+            return true;
+        }
+
+        if (! $record->isRepresentative()) {
+            return false;
+        }
+
+        $record->loadMissing('representativeProfile');
+
+        return (int) ($record->representativeProfile?->sales_manager_id) === (int) auth()->id();
     }
 
     public static function form(Form $form): Form
@@ -95,12 +109,38 @@ class UserResource extends Resource
     /** @return array<int, Forms\Components\Component> */
     protected static function createFormSchema(): array
     {
+        if (AdminAccess::isSalesManagerOnly()) {
+            return static::createRepresentativeFormSchemaForSalesManager();
+        }
+
         return [
             ...static::profileTabSchema(),
             ...static::accountTabSchema(),
             Forms\Components\Section::make('نوع کاربر و دسترسی')
                 ->description('نقش‌ها و تنظیمات نمایندگی')
                 ->schema(static::accessFieldsSchema(includeRepresentativeProfile: true, forCreate: true))
+                ->columnSpanFull(),
+        ];
+    }
+
+    /** @return array<int, Forms\Components\Component> */
+    protected static function createRepresentativeFormSchemaForSalesManager(): array
+    {
+        $managerId = auth()->id();
+
+        return [
+            ...static::profileTabSchema(),
+            ...static::accountTabSchema(),
+            Forms\Components\Hidden::make('user_kind')->default('staff'),
+            Forms\Components\Hidden::make('is_representative')->default(true),
+            Forms\Components\Hidden::make('is_admin')->default(false),
+            Forms\Components\Hidden::make('is_author')->default(false),
+            Forms\Components\Hidden::make('is_sales_manager')->default(false),
+            Forms\Components\Hidden::make('rep_sales_manager_id')->default($managerId),
+            Forms\Components\Section::make('پروفایل نمایندگی')
+                ->description('این نماینده به‌صورت خودکار زیرمجموعه شما (مدیر منطقه) ثبت می‌شود.')
+                ->schema(static::representativeProfileFieldsForCreate(includeSalesManager: false))
+                ->columns(2)
                 ->columnSpanFull(),
         ];
     }
@@ -397,15 +437,21 @@ class UserResource extends Resource
     }
 
     /** @return array<int, Forms\Components\Component> */
-    protected static function representativeProfileFieldsForCreate(): array
+    protected static function representativeProfileFieldsForCreate(bool $includeSalesManager = true): array
     {
-        return [
-            Forms\Components\Select::make('rep_sales_manager_id')
+        $fields = [];
+
+        if ($includeSalesManager) {
+            $fields[] = Forms\Components\Select::make('rep_sales_manager_id')
                 ->label('مدیر منطقه')
                 ->options(fn () => User::query()->where('is_sales_manager', true)->orderBy('name')->pluck('name', 'id'))
                 ->searchable()
                 ->dehydrated(false)
-                ->helperText('درخواست‌های رزرو مجدد این نماینده برای این مدیر ارسال می‌شود.'),
+                ->helperText('درخواست‌های رزرو مجدد این نماینده برای این مدیر ارسال می‌شود.');
+        }
+
+        return [
+            ...$fields,
             Forms\Components\Select::make('rep_province_id')
                 ->label('استان فعالیت')
                 ->options(fn () => Province::query()->orderBy('position')->pluck('name', 'id'))

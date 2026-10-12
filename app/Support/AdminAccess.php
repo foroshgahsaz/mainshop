@@ -46,6 +46,7 @@ class AdminAccess
         'filament.admin.resources.orders.*',
         'filament.admin.resources.payments.*',
         'filament.admin.resources.users.index',
+        'filament.admin.resources.users.create',
         'filament.admin.resources.users.edit',
         'filament.admin.resources.products.*',
         'filament.admin.resources.categories.*',
@@ -124,6 +125,12 @@ class AdminAccess
     public static function canManageShopInAdmin(?User $user = null): bool
     {
         return static::isFullAdmin($user);
+    }
+
+    /** مدیر منطقه (مدیر فروش) می‌تواند فقط نماینده جدید بسازد — نه هر نوع کاربر. */
+    public static function canCreateRepresentativesInAdmin(?User $user = null): bool
+    {
+        return static::isFullAdmin($user) || static::isSalesManagerOnly($user);
     }
 
     public static function canManageProductsInAdmin(?User $user = null): bool

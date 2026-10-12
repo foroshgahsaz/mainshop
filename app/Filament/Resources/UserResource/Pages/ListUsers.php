@@ -34,7 +34,12 @@ class ListUsers extends AdminListRecords
         if (AdminAccess::isSalesManagerOnly()) {
             return [
                 'representatives' => Tab::make('نمایندگان')
-                    ->modifyQueryUsing(fn (Builder $query) => $query->where('is_representative', true)),
+                    ->modifyQueryUsing(fn (Builder $query) => $query
+                        ->where('is_representative', true)
+                        ->whereHas(
+                            'representativeProfile',
+                            fn (Builder $q) => $q->where('sales_manager_id', auth()->id())
+                        )),
                 'rep_customers' => Tab::make('مشتریان نمایندگان')
                     ->modifyQueryUsing(fn (Builder $query) => $query->whereNotNull('created_by_representative_id')),
             ];
@@ -60,11 +65,24 @@ class ListUsers extends AdminListRecords
 
     public static function topBarCreateLabel(): ?string
     {
-        return 'افزودن کاربر';
+        return AdminAccess::isSalesManagerOnly() ? 'افزودن نماینده' : 'افزودن کاربر';
     }
 
     public static function canShowTopBarCreate(): bool
     {
-        return AdminAccess::canManageShopInAdmin();
+        return AdminAccess::canCreateRepresentativesInAdmin();
+    }
+
+    protected function extraListHeaderActions(): array
+    {
+        if (! AdminAccess::isSalesManagerOnly()) {
+            return [];
+        }
+
+        return [
+            Actions\CreateAction::make()
+                ->label('افزودن نماینده')
+                ->icon('heroicon-o-user-plus'),
+        ];
     }
 }

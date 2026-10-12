@@ -4,15 +4,32 @@ namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Resources\Pages\CreateRecord;
 use App\Filament\Resources\UserResource;
+use App\Support\AdminAccess;
 use Filament\Forms\Form;
+use Illuminate\Contracts\Support\Htmlable;
 
 class CreateUser extends CreateRecord
 {
     protected static string $resource = UserResource::class;
 
+    public function getTitle(): string|Htmlable
+    {
+        return AdminAccess::isSalesManagerOnly() ? 'افزودن نماینده' : parent::getTitle();
+    }
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        return static::applyAccessFieldsFromForm($this->form, $data);
+        $data = static::applyAccessFieldsFromForm($this->form, $data);
+
+        if (AdminAccess::isSalesManagerOnly()) {
+            $data['is_representative'] = true;
+            $data['is_admin'] = false;
+            $data['is_author'] = false;
+            $data['is_sales_manager'] = false;
+            $data['status'] = $data['status'] ?? true;
+        }
+
+        return $data;
     }
 
     protected function afterCreate(): void

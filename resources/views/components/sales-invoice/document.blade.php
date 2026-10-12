@@ -19,11 +19,11 @@
             .si-document th, .si-document td { border: 1px solid #000; padding: 5px 6px; vertical-align: top; }
             .si-title { text-align: center; font-size: 18px; font-weight: bold; margin: 8px 0 12px; }
             .si-meta td { border: none; padding: 2px 4px; font-size: 11px; }
-            .si-party-label { background: #f3f4f6; font-weight: bold; text-align: center; }
-            .si-lines th { background: #f3f4f6; text-align: center; font-size: 10px; }
+            .si-party-label { background: #fff; font-weight: bold; text-align: center; }
+            .si-lines th { background: #fff; text-align: center; font-size: 10px; }
             .si-lines td { text-align: center; font-size: 10px; }
             .si-lines td.si-desc { text-align: right; }
-            .si-sum { font-weight: bold; background: #f9fafb; }
+            .si-sum { font-weight: bold; background: #fff; }
             .si-footer td { font-size: 10px; }
             .si-sign td { height: 48px; text-align: center; vertical-align: bottom; font-size: 10px; }
         </style>

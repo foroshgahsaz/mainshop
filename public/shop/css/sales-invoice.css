@@ -15,7 +15,7 @@
 
 .si-document .si-meta {
   width: 100%;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.65rem;
 }
 
 .si-document .si-meta td {
@@ -53,20 +53,20 @@
 .si-document .si-footer td,
 .si-document .si-sign td {
   border: 1px solid #111;
-  padding: 0.45rem 0.5rem;
-  vertical-align: top;
+  padding: 0.55rem 0.65rem;
+  vertical-align: middle;
   word-wrap: break-word;
   overflow-wrap: anywhere;
 }
 
 .si-document .si-party-label {
-  background: #f3f4f6;
+  background: #fff;
   font-weight: 800;
   text-align: center;
 }
 
 .si-document .si-lines th {
-  background: #f8fafc;
+  background: #fff;
   text-align: center;
   font-size: 0.75rem;
   font-weight: 800;
@@ -82,7 +82,7 @@
 
 .si-document .si-sum {
   font-weight: 800;
-  background: #f9fafb;
+  background: #fff;
 }
 
 .si-document .si-footer {
@@ -100,11 +100,15 @@
 .si-document--cart-wrap {
   border: 1px solid #d1d5db;
   border-radius: 0.5rem;
-  padding: 1rem;
+  padding: 1.25rem 1.5rem;
   margin-bottom: 1rem;
   max-width: 100%;
   box-sizing: border-box;
   overflow: hidden;
+}
+
+.si-document--cart-wrap > .si-document {
+  padding: 0.15rem 0.25rem;
 }
 
 /* Desktop: table lines; mobile: cards (see media query) */
@@ -187,7 +191,7 @@
 }
 
 .si-line-card--sum {
-  background: #f9fafb;
+  background: #fff;
   font-weight: 800;
 }
 
@@ -212,8 +216,12 @@
   }
 
   .si-document--cart-wrap {
-    padding: 0.75rem;
+    padding: 1rem 1.1rem;
     margin-bottom: 0.75rem;
+  }
+
+  .si-document--cart-wrap > .si-document {
+    padding: 0;
   }
 
   .si-document .si-title {

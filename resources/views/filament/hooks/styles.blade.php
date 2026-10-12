@@ -13,6 +13,9 @@
 @if (request()->routeIs('filament.admin.pages.dashboard'))
     @include('filament.hooks.dashboard-map-styles')
 @endif
+@if (request()->routeIs('filament.representative.pages.dashboard'))
+    <link rel="stylesheet" href="{{ asset('css/rep-order-wizard.css') }}?v={{ @filemtime(public_path('css/rep-order-wizard.css')) ?: 0 }}">
+@endif
 <link rel="stylesheet" href="{{ asset('vendor/sweetalert2/11/sweetalert2.min.css') }}">
 <link rel="stylesheet" href="{{ asset('adminpanel/filament-overrides.css') }}?v={{ $adminAssetV }}">
 <link rel="stylesheet" href="{{ asset('css/filament-admin-order.css') }}">

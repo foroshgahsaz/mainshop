@@ -2,6 +2,11 @@
 
 namespace App\Filament\Representative\Pages;
 
+use App\Filament\Representative\Widgets\RepresentativeCurrentOrdersTable;
+use App\Filament\Representative\Widgets\RepresentativeDashboardInsights;
+use App\Filament\Representative\Widgets\RepresentativeSalesByGatewayChart;
+use App\Filament\Representative\Widgets\RepresentativeStatsOverview;
+use Filament\Actions;
 use Filament\Pages\Dashboard as BaseDashboard;
 
 class Dashboard extends BaseDashboard
@@ -13,4 +18,24 @@ class Dashboard extends BaseDashboard
     protected static ?string $title = 'داشبورد نمایندگی';
 
     protected static ?string $navigationLabel = 'داشبورد';
+
+    public function getWidgets(): array
+    {
+        return [
+            RepresentativeStatsOverview::class,
+            RepresentativeSalesByGatewayChart::class,
+            RepresentativeDashboardInsights::class,
+            RepresentativeCurrentOrdersTable::class,
+        ];
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\Action::make('newOrder')
+                ->label('سفارش جدید')
+                ->icon('heroicon-o-plus')
+                ->url(CreateDraftOrder::getUrl()),
+        ];
+    }
 }

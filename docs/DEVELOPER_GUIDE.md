@@ -1257,5 +1257,6 @@ resources/views/layouts/shop.blade.php
 | 2026-10-01 | نسخه 1.2 — لینک به docs/README، مدیر فروش، `/admin/login` |
 | 2026-10-02 | نسخه 1.3 — dev/07 درگاه، dev/08 دسترسی، PROJECT-PHASES، سیاست doc |
 | 2026-10-02 | نسخه 1.4 — پیامک تراکنشی (dev/09)، ادمین ریسپانسیو |
+| 2026-10-12 | داشبورد پنل نماینده: `RepresentativeDashboardService` + ویجت‌های Filament در `/representative` |
 
 > اگر بخش جدیدی به پروژه اضافه شد، همین فایل را در `docs/DEVELOPER_GUIDE.md` به‌روز کنید و در صورت نیاز `docs/README.md` و `docs/dev/*`.

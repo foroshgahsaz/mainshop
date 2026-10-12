@@ -1401,3 +1401,58 @@ html.rep-modal-open {
 .rep-pagination {
     margin-top: 0.75rem;
 }
+
+.rep-dashboard-insights {
+    font-size: 0.88rem;
+    line-height: 1.65;
+    color: #374151;
+}
+
+.rep-dashboard-insights__tips {
+    margin: 0 0 1rem;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.5rem;
+}
+
+.rep-dashboard-insights__tips li {
+    padding: 0.45rem 0.65rem;
+    border-radius: 0.5rem;
+    background: #f0fdfa;
+    border: 1px solid #ccfbf1;
+}
+
+.rep-dashboard-insights__warn {
+    background: #fffbeb !important;
+    border-color: #fde68a !important;
+}
+
+.rep-dashboard-insights__subtitle {
+    margin: 1rem 0 0.5rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #115e59;
+}
+
+.rep-dashboard-insights__breakdown {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.35rem;
+}
+
+.rep-dashboard-insights__breakdown li {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.75rem;
+    padding: 0.35rem 0;
+    border-bottom: 1px dashed #e5e7eb;
+    font-size: 0.85rem;
+}
+
+.rep-dashboard-insights__breakdown li:last-child {
+    border-bottom: none;
+}

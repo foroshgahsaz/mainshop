@@ -1850,7 +1850,11 @@ body.fi-panel-representative .fi-panel-representative {
     background: #fff !important;
 }
 
-.fi-admin-shell.fi-admin-shell--representative .main-content,
+.fi-admin-shell.fi-admin-shell--representative .main-content {
+    background: #fff;
+    border-right: 1px solid #eff2f5;
+}
+
 .fi-admin-shell.fi-admin-shell--representative .content-area,
 .fi-admin-shell.fi-admin-shell--representative .content-area .fi-main {
     background: #fff;

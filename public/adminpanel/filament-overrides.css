@@ -1873,3 +1873,14 @@ body.fi-panel-representative .fi-panel-representative {
         padding: 16px !important;
     }
 }
+
+/* ===== داشبوردها (ادمین و نماینده): بدون سایه shadow-sm؛ حاشیه ring-1 / border می‌ماند ===== */
+.fi-admin-shell .fi-dashboard-page .shadow-sm {
+    --tw-shadow: 0 0 #0000 !important;
+    --tw-shadow-colored: 0 0 #0000 !important;
+}
+
+.fi-admin-shell .content-area .fi-dashboard-page .fi-section.shadow-sm,
+.fi-admin-shell .content-area .fi-dashboard-page .fi-ta-ctn.shadow-sm {
+    box-shadow: none !important;
+}

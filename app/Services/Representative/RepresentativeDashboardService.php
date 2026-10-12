@@ -7,9 +7,11 @@ use App\Models\Payment;
 use App\Models\User;
 use App\Support\ShopDate;
 use App\Support\ShopLabels;
+use DateTimeZone;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Morilog\Jalali\Jalalian;
 
 class RepresentativeDashboardService
@@ -32,18 +34,22 @@ class RepresentativeDashboardService
             ->whereIn('status', self::activeOrderStatuses());
     }
 
+    private function jalaliNow(): Jalalian
+    {
+        return Jalalian::fromCarbon(now(ShopDate::TIMEZONE));
+    }
+
     public function jalaliMonthStart(): Carbon
     {
-        $j = Jalalian::now(ShopDate::TIMEZONE);
+        $j = $this->jalaliNow();
+        $start = new Jalalian($j->getYear(), $j->getMonth(), 1, 0, 0, 0, new DateTimeZone(ShopDate::TIMEZONE));
 
-        return (new Jalalian($j->getYear(), $j->getMonth(), 1, 0, 0, 0))
-            ->toCarbon()
-            ->timezone(ShopDate::TIMEZONE);
+        return Carbon::instance($start->toCarbon());
     }
 
     public function jalaliMonthLabel(): string
     {
-        return Jalalian::now(ShopDate::TIMEZONE)->format('F Y');
+        return $this->jalaliNow()->format('F Y');
     }
 
     /**
@@ -59,6 +65,16 @@ class RepresentativeDashboardService
      * }
      */
     public function summaryMetrics(User $representative): array
+    {
+        return Cache::remember(
+            'rep:dashboard:summary:'.$representative->id,
+            60,
+            fn (): array => $this->computeSummaryMetrics($representative),
+        );
+    }
+
+    /** @return array<string, int|string> */
+    private function computeSummaryMetrics(User $representative): array
     {
         $representativeId = (int) $representative->id;
         $monthStart = $this->jalaliMonthStart();
@@ -86,6 +102,7 @@ class RepresentativeDashboardService
         $proformaUnpaid = (clone $activeOrders)
             ->where('status', Order::STATUS_PROFORMA)
             ->where('final_amount', '>', 0)
+            ->with('payments')
             ->get()
             ->filter(fn (Order $order): bool => $order->remainingAmount() > 0)
             ->count();
@@ -145,19 +162,19 @@ class RepresentativeDashboardService
         $since ??= $this->jalaliMonthStart();
         $representativeId = (int) $representative->id;
 
-        $orderIds = Payment::query()
+        $paidByOrder = Payment::query()
             ->where('status', Payment::STATUS_SUCCESS)
             ->where('paid_at', '>=', $since)
             ->whereHas('order', fn (Builder $q) => $q->where('representative_id', $representativeId))
-            ->pluck('order_id')
-            ->unique()
-            ->values();
+            ->selectRaw('order_id, SUM(amount) as total')
+            ->groupBy('order_id')
+            ->pluck('total', 'order_id');
 
-        if ($orderIds->isEmpty()) {
+        if ($paidByOrder->isEmpty()) {
             return [];
         }
 
-        $orders = Order::query()->whereIn('id', $orderIds)->get();
+        $orders = Order::query()->whereIn('id', $paidByOrder->keys())->get();
         Order::attachCatalogTemplateLabels($orders);
 
         $totals = [];
@@ -166,7 +183,7 @@ class RepresentativeDashboardService
             if ($label === '—' || $label === '') {
                 $label = 'بدون طرح';
             }
-            $totals[$label] = ($totals[$label] ?? 0) + (int) $order->final_amount;
+            $totals[$label] = ($totals[$label] ?? 0) + (int) ($paidByOrder[$order->id] ?? 0);
         }
 
         arsort($totals);

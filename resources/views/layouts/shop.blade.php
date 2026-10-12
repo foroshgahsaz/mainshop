@@ -84,5 +84,6 @@
     @endif
     @stack('scripts')
     @include('partials.livewire-scripts')
+    @include('partials.session-guard')
 </body>
 </html>

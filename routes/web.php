@@ -50,6 +50,10 @@ Route::get('/data/{path}', function (string $path) {
     return response()->file($disk->path($path));
 })->where('path', '.*')->name('filesystem.public');
 
+Route::get('/session/ping', fn () => response()->noContent()->header('Cache-Control', 'no-store'))
+    ->middleware('throttle:30,1')
+    ->name('session.ping');
+
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/shop/search/suggest', ShopSearchSuggestController::class)->name('shop.search.suggest');

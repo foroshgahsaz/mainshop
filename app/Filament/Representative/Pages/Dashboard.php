@@ -40,7 +40,7 @@ class Dashboard extends BaseDashboard
             Actions\Action::make('newOrder')
                 ->label('سفارش جدید')
                 ->icon('heroicon-o-plus')
-                ->url(CreateDraftOrder::getUrl()),
+                ->url(CreateDraftOrder::getUrl(panel: 'representative')),
         ];
     }
 }

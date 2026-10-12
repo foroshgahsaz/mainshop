@@ -229,8 +229,10 @@
     --rep-surface: #f8f8f8;
     --rep-text: #2f2b3d;
     --rep-muted: #6d6b7b;
-    max-width: 56rem;
-    margin-inline: auto;
+    width: 100%;
+    max-width: 100%;
+    margin-inline: 0;
+    box-sizing: border-box;
     font-family: inherit;
     color: var(--rep-text);
 }
@@ -247,11 +249,13 @@
     display: flex;
     flex-wrap: nowrap;
     gap: 0;
+    width: 100%;
     margin-bottom: 1.75rem;
     border-bottom: 1px solid #ebe9f1;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
+    box-sizing: border-box;
 }
 
 .rep-wizard-stepper__item {
@@ -299,6 +303,7 @@
 
 .rep-wizard-stage {
     --rep-stage-height: 520px;
+    width: 100%;
     min-height: var(--rep-stage-height);
     height: var(--rep-stage-height);
     max-height: min(var(--rep-stage-height), calc(100dvh - 11rem));
@@ -1455,4 +1460,11 @@ html.rep-modal-open {
 
 .rep-dashboard-insights__breakdown li:last-child {
     border-bottom: none;
+}
+
+/* ویزارد پیش‌سفارش: استپر و باکس مرحله سرتاسری ناحیه محتوا */
+.fi-admin-shell--representative .fi-page:has(.rep-order-wizard) .fi-page-main,
+.fi-admin-shell--representative .fi-page:has(.rep-order-wizard) .fi-page-main > div {
+    width: 100%;
+    max-width: 100%;
 }

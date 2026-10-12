@@ -74,6 +74,7 @@ class ReservationRequestResource extends Resource
                 Tables\Columns\TextColumn::make('order.tracking_code')
                     ->label('پیش‌فاکتور')
                     ->searchable()
+                    ->description(fn (ProformaReservationRequest $record): ?string => $record->order?->user?->name)
                     ->url(fn (ProformaReservationRequest $record): ?string => $record->order
                         ? OrderResource::getUrl('view', ['record' => $record->order])
                         : null),
@@ -81,9 +82,6 @@ class ReservationRequestResource extends Resource
                     ->label('نماینده')
                     ->description(fn (ProformaReservationRequest $record): ?string => $record->representative?->phone)
                     ->searchable(),
-                Tables\Columns\TextColumn::make('order.user.name')
-                    ->label('مشتری')
-                    ->placeholder('—'),
                 Tables\Columns\TextColumn::make('order.final_amount')
                     ->label('مبلغ')
                     ->formatStateUsing(fn (?int $state) => ShopLabels::formatMoney($state)),
@@ -94,6 +92,7 @@ class ReservationRequestResource extends Resource
                 Tables\Columns\TextColumn::make('status')
                     ->label('وضعیت')
                     ->badge()
+                    ->tooltip(fn (ProformaReservationRequest $record): ?string => $record->response_note)
                     ->formatStateUsing(fn (string $state): string => ProformaReservationRequest::statusLabels()[$state] ?? $state)
                     ->color(fn (string $state): string => match ($state) {
                         ProformaReservationRequest::STATUS_APPROVED => 'success',
@@ -104,7 +103,7 @@ class ReservationRequestResource extends Resource
                     ->label('پاسخ')
                     ->limit(40)
                     ->placeholder('—')
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاریخ درخواست')
                     ->shopJalaliDateTime()

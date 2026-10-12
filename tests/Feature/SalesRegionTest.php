@@ -139,9 +139,9 @@ class SalesRegionTest extends TestCase
         $m1 = $this->user('09130000002', ['is_sales_manager' => 1]);
         SalesRegion::query()->create(['name' => 'مرکز', 'sales_manager_id' => $m1->id]);
         $this->actAs($admin);
-        $this->get('/admin/sales-regions')->assertOk()->assertSee('مرکز');
+        $this->get('/admin/sales-regions')->assertOk()->assertSee('مرکز')->assertSee('افزودن منطقه');
         $this->get('/admin/sales-regions/create')->assertOk();
-        $this->get('/admin')->assertOk()->assertSee('افزودن منطقه');
+        $this->get('/admin')->assertOk()->assertSee('مناطق فروش');
     }
 
     public function test_regions_page_forbidden_for_sales_manager(): void

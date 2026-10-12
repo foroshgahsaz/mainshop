@@ -56,13 +56,20 @@
         'users' => [
             'label' => 'کاربران',
             'icon' => 'fa-users',
-            'routes' => ['filament.admin.resources.users.*', 'filament.admin.resources.sales-regions.*'],
+            'routes' => ['filament.admin.resources.users.*'],
             'menus' => [
                 ['label' => 'کاربران', 'icon' => 'fa-users', 'items' => [
                     ['label' => 'مشتریان', 'url' => UserResource::getUrl('index'), 'icon' => 'fa-user'],
                     ['label' => 'غیر مشتری', 'url' => UserResource::getUrl('index', ['activeTab' => 'staff']), 'icon' => 'fa-user-tie'],
                     ['label' => 'افزودن کاربر', 'url' => UserResource::getUrl('create'), 'icon' => 'fa-plus'],
                 ]],
+            ],
+        ],
+        'sales_regions' => [
+            'label' => 'مناطق فروش',
+            'icon' => 'fa-map-location-dot',
+            'routes' => ['filament.admin.resources.sales-regions.*'],
+            'menus' => [
                 ['label' => 'مناطق فروش', 'icon' => 'fa-map-location-dot', 'items' => [
                     ['label' => 'لیست مناطق', 'url' => SalesRegionResource::getUrl('index'), 'icon' => 'fa-map'],
                     ['label' => 'افزودن منطقه', 'url' => SalesRegionResource::getUrl('create'), 'icon' => 'fa-plus'],
@@ -315,6 +322,7 @@
     $navIcons = [
         ['id' => 'dashboard', 'icon' => 'fa-chart-pie', 'tooltip' => 'داشبورد', 'href' => $dashboardUrl, 'isLink' => true],
         ['id' => 'users', 'icon' => 'fa-users', 'tooltip' => 'کاربران', 'panel' => 'users'],
+        ['id' => 'sales_regions', 'icon' => 'fa-map-location-dot', 'tooltip' => 'مناطق فروش', 'panel' => 'sales_regions'],
         ['id' => 'products', 'icon' => 'fa-box-open', 'tooltip' => 'محصولات', 'panel' => 'products'],
         ['id' => 'payments', 'icon' => 'fa-credit-card', 'tooltip' => 'پرداخت‌ها', 'panel' => 'payments'],
         ['id' => 'brands', 'icon' => 'fa-certificate', 'tooltip' => 'برندها', 'panel' => 'brands'],

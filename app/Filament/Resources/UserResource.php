@@ -485,7 +485,7 @@ class UserResource extends Resource
                 ->live()
                 ->dehydrated(false)
                 ->afterStateUpdated(fn (Set $set) => $set('rep_province_id', null))
-                ->helperText('فقط مدیرانی که حداقل یک منطقه فروش دارند (ادمین → کاربران → مناطق فروش).');
+                ->helperText('فقط مدیرانی که حداقل یک منطقه فروش دارند (ادمین → مناطق فروش در سایدبار).');
         }
 
         return [

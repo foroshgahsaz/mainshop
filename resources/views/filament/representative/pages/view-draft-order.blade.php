@@ -20,13 +20,15 @@
         </div>
     @endif
 
-    <section class="rep-wizard-panel">
-        <p class="rep-wizard-hint">
-            مشتری: <strong>{{ $order->user?->name }}</strong> ({{ $order->user?->phone }})
-        </p>
-        <p class="rep-wizard-hint">
-            وضعیت: <strong>پیش‌فاکتور ثبت‌شده</strong> — فقط مشاهده
-        </p>
+    <section class="rep-wizard-panel rep-wizard-panel--proforma-view">
+        <div class="rep-proforma-view-meta">
+            <p class="rep-wizard-hint">
+                مشتری: <strong>{{ $order->user?->name }}</strong> ({{ $order->user?->phone }})
+            </p>
+            <p class="rep-wizard-hint">
+                وضعیت: <strong>پیش‌فاکتور ثبت‌شده</strong> — فقط مشاهده
+            </p>
+        </div>
 
         @php
             $invoicePreview = \App\Support\SalesInvoice\SalesInvoiceBuilder::fromOrder(

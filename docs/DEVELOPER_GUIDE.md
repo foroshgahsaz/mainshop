@@ -1258,5 +1258,6 @@ resources/views/layouts/shop.blade.php
 | 2026-10-02 | نسخه 1.3 — dev/07 درگاه، dev/08 دسترسی، PROJECT-PHASES، سیاست doc |
 | 2026-10-02 | نسخه 1.4 — پیامک تراکنشی (dev/09)، ادمین ریسپانسیو |
 | 2026-10-12 | داشبورد پنل نماینده: `RepresentativeDashboardService` + ویجت‌های Filament در `/representative` |
+| 2026-10-12 | رفع 500 داشبورد نماینده (تایم‌زون Jalalian) + `livewire-session-guard.js` و `/session/ping` برای حذف دیالوگ 419 در کل سایت (dev/05 §A) |
 
 > اگر بخش جدیدی به پروژه اضافه شد، همین فایل را در `docs/DEVELOPER_GUIDE.md` به‌روز کنید و در صورت نیاز `docs/README.md` و `docs/dev/*`.

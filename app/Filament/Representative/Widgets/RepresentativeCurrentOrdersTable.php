@@ -14,6 +14,8 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class RepresentativeCurrentOrdersTable extends BaseWidget
 {
+    protected static bool $isLazy = false;
+
     protected static ?string $heading = 'سفارش‌های جاری';
 
     protected static ?int $sort = 4;
@@ -78,7 +80,7 @@ class RepresentativeCurrentOrdersTable extends BaseWidget
                     ->label('مشاهده')
                     ->icon('heroicon-m-eye')
                     ->visible(fn (Order $record): bool => $record->isProforma())
-                    ->url(fn (Order $record): string => DraftOrderResource::getUrl('view', ['record' => $record])),
+                    ->url(fn (Order $record): string => DraftOrderResource::getUrl('view', ['record' => $record], panel: 'representative')),
             ])
             ->defaultPaginationPageOption(10)
             ->paginated([10, 25]);

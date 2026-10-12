@@ -10,6 +10,8 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class RepresentativeStatsOverview extends BaseWidget
 {
+    protected static bool $isLazy = false;
+
     protected static ?int $sort = 1;
 
     protected int|string|array $columnSpan = 'full';
@@ -23,7 +25,19 @@ class RepresentativeStatsOverview extends BaseWidget
             return [];
         }
 
-        $metrics = app(RepresentativeDashboardService::class)->summaryMetrics($user);
+        try {
+            $metrics = app(RepresentativeDashboardService::class)->summaryMetrics($user);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return [
+                Stat::make('داشبورد', 'خطا در بارگذاری آمار')
+                    ->description('صفحه را دوباره بارگذاری کنید')
+                    ->color('danger'),
+            ];
+        }
+
+        $ordersUrl = DraftOrderResource::getUrl('index', panel: 'representative');
 
         return [
             Stat::make('فروش ماه '.$metrics['month_label'], ShopFormatter::money($metrics['month_sales']))
@@ -38,7 +52,7 @@ class RepresentativeStatsOverview extends BaseWidget
                 ->description('پیش‌نویس تا در حال پردازش')
                 ->descriptionIcon('heroicon-m-clipboard-document-list')
                 ->color('info')
-                ->url(DraftOrderResource::getUrl('index')),
+                ->url($ordersUrl),
             Stat::make('پیش‌فاکتور در انتظار پرداخت', (string) $metrics['proforma_unpaid_count'])
                 ->description(
                     $metrics['expiring_reservations_count'] > 0
@@ -47,7 +61,7 @@ class RepresentativeStatsOverview extends BaseWidget
                 )
                 ->descriptionIcon('heroicon-m-clock')
                 ->color($metrics['proforma_unpaid_count'] > 0 ? 'warning' : 'gray')
-                ->url(DraftOrderResource::getUrl('index')),
+                ->url($ordersUrl),
         ];
     }
 

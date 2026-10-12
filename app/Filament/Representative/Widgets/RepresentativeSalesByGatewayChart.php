@@ -8,6 +8,8 @@ use Filament\Widgets\ChartWidget;
 
 class RepresentativeSalesByGatewayChart extends ChartWidget
 {
+    protected static bool $isLazy = false;
+
     protected static ?string $heading = 'فروش ماه جاری به تفکیک درگاه';
 
     protected static ?int $sort = 2;
@@ -28,7 +30,12 @@ class RepresentativeSalesByGatewayChart extends ChartWidget
             return ['datasets' => [], 'labels' => []];
         }
 
-        $byGateway = app(RepresentativeDashboardService::class)->salesByGateway($user);
+        try {
+            $byGateway = app(RepresentativeDashboardService::class)->salesByGateway($user);
+        } catch (\Throwable $e) {
+            report($e);
+            $byGateway = [];
+        }
         $labels = [];
         $amounts = [];
 

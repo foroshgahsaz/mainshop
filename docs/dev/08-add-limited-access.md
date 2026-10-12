@@ -71,6 +71,8 @@ public static function canViewAny(): bool
 
 بلوک `$salesManagerOnly` — آیتم منو را فقط وقتی نشان دهید که مدیر کامل یا مدیر فروش مجاز است (الگوی موجود برای سفارش/محصول).
 
+نمونهٔ کامل اخیر: `ReservationRequestResource` (درخواست‌ها) — در `SALES_MANAGER_RESOURCES`، الگوی route `filament.admin.resources.reservation-requests.*`، پنل `requests` در سایدبار با `badge`، و محدودسازی رکوردها با scope `ProformaReservationRequest::visibleTo($user)` در `getEloquentQuery()`.
+
 ### ۵) تست
 
 **فایل:** `tests/Feature/SalesManagerAccessTest.php` — assertion برای Resource جدید.

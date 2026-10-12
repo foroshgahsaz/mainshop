@@ -2,6 +2,7 @@
 
 namespace App\Filament\Representative\Pages;
 
+use App\Filament\Representative\Resources\CustomerResource;
 use App\Filament\Representative\Widgets\RepresentativeCurrentOrdersTable;
 use App\Filament\Representative\Widgets\RepresentativeDashboardInsights;
 use App\Filament\Representative\Widgets\RepresentativeSalesByGatewayChart;
@@ -41,6 +42,11 @@ class Dashboard extends BaseDashboard
                 ->label('سفارش جدید')
                 ->icon('heroicon-o-plus')
                 ->url(CreateDraftOrder::getUrl(panel: 'representative')),
+            Actions\Action::make('newCustomer')
+                ->label('مشتری جدید')
+                ->icon('heroicon-o-user-plus')
+                ->color('gray')
+                ->url(CustomerResource::getUrl('create', panel: 'representative')),
         ];
     }
 }

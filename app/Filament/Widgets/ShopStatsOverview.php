@@ -17,23 +17,11 @@ class ShopStatsOverview extends BaseWidget
 
     protected static ?string $pollingInterval = null;
 
+    protected static bool $isLazy = false;
+
     protected function getStats(): array
     {
-        $metrics = Cache::remember('admin:dashboard:shop_stats', 120, function (): array {
-            return [
-                'today_orders' => Order::whereDate('created_at', today())->count(),
-                'today_revenue' => (int) Payment::query()
-                    ->where('status', Payment::STATUS_SUCCESS)
-                    ->whereDate('paid_at', today())
-                    ->sum('amount'),
-                'pending_orders' => Order::where('status', Order::STATUS_PENDING)->count(),
-                'month_revenue' => (int) Payment::query()
-                    ->where('status', Payment::STATUS_SUCCESS)
-                    ->where('paid_at', '>=', now()->startOfMonth())
-                    ->sum('amount'),
-                'low_stock' => Product::where('is_active', true)->where('stock', '<=', 5)->count(),
-            ];
-        });
+        $metrics = $this->metrics();
 
         $todayOrders = $metrics['today_orders'];
         $todayRevenue = $metrics['today_revenue'];
@@ -62,6 +50,32 @@ class ShopStatsOverview extends BaseWidget
                 ->color($lowStock > 0 ? 'danger' : 'success')
                 ->url(route('filament.admin.resources.products.index')),
         ];
+    }
+
+    /** @return array{today_orders:int,today_revenue:int,pending_orders:int,month_revenue:int,low_stock:int} */
+    protected function metrics(): array
+    {
+        try {
+            return Cache::remember('admin:dashboard:shop_stats', 120, function (): array {
+                return [
+                    'today_orders' => Order::whereDate('created_at', today())->count(),
+                    'today_revenue' => (int) Payment::query()
+                        ->where('status', Payment::STATUS_SUCCESS)
+                        ->whereDate('paid_at', today())
+                        ->sum('amount'),
+                    'pending_orders' => Order::where('status', Order::STATUS_PENDING)->count(),
+                    'month_revenue' => (int) Payment::query()
+                        ->where('status', Payment::STATUS_SUCCESS)
+                        ->where('paid_at', '>=', now()->startOfMonth())
+                        ->sum('amount'),
+                    'low_stock' => Product::where('is_active', true)->where('stock', '<=', 5)->count(),
+                ];
+            });
+        } catch (\Throwable $e) {
+            report($e);
+
+            return ['today_orders' => 0, 'today_revenue' => 0, 'pending_orders' => 0, 'month_revenue' => 0, 'low_stock' => 0];
+        }
     }
 
     protected function getColumns(): int

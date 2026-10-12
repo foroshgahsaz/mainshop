@@ -362,6 +362,12 @@ class UserResource extends Resource
     protected static function representativeProfileFieldsForEdit(): array
     {
         return [
+            Forms\Components\Select::make('sales_manager_id')
+                ->label('مدیر منطقه')
+                ->relationship('salesManager', 'name', fn ($query) => $query->where('is_sales_manager', true)->orderBy('name'))
+                ->searchable()
+                ->preload()
+                ->helperText('درخواست‌های رزرو مجدد این نماینده برای این مدیر ارسال می‌شود.'),
             Forms\Components\Select::make('province_id')
                 ->label('استان فعالیت')
                 ->relationship('province', 'name', fn ($query) => $query->orderBy('position'))
@@ -394,6 +400,12 @@ class UserResource extends Resource
     protected static function representativeProfileFieldsForCreate(): array
     {
         return [
+            Forms\Components\Select::make('rep_sales_manager_id')
+                ->label('مدیر منطقه')
+                ->options(fn () => User::query()->where('is_sales_manager', true)->orderBy('name')->pluck('name', 'id'))
+                ->searchable()
+                ->dehydrated(false)
+                ->helperText('درخواست‌های رزرو مجدد این نماینده برای این مدیر ارسال می‌شود.'),
             Forms\Components\Select::make('rep_province_id')
                 ->label('استان فعالیت')
                 ->options(fn () => Province::query()->orderBy('position')->pluck('name', 'id'))

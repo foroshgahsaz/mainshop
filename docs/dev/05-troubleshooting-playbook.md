@@ -9,7 +9,7 @@
 | بعد از OTP همان login | `APP_URL`, `SESSION_SECURE`, کوکی | [03-production-k8s-liara.md](03-production-k8s-liara.md) |
 | `bash: ! event not found` | از `'...'` تک‌کوت در tinker استفاده کنید | — |
 | tinker `USER NOT FOUND` | شماره واقعی ۱۱ رقمی | لیست `is_sales_manager` |
-| دیالوگ «This page has expired» (419 لایووایر) | session منقضی/پاد ری‌استارت/کوکی | `public/js/livewire-session-guard.js` در همه پنل‌ها و فروشگاه: هر ۱۰ دقیقه `GET /session/ping` (session زنده) و روی 419 بدون دیالوگ یک‌بار reload. اگر مکرر شد: `SESSION_DRIVER=redis` مشترک بین پادها، `APP_KEY` یکسان، در صورت نیاز `SESSION_BLOCK=true` |
+| دیالوگ «This page has expired» (419 لایووایر) | session منقضی/پاد ری‌استارت/کوکی | `public/js/livewire-session-guard.js` در همه پنل‌ها و فروشگاه: هر ۱۰ دقیقه `GET /session/ping` (session زنده) و روی 419 بدون دیالوگ یک‌بار reload. اگر reload کمک نکند (تا ۳ بار در دقیقه)، به‌جای دیالوگ یک پیام کوچک «تازه‌سازی» نشان داده می‌شود. اگر مکرر شد: `SESSION_DRIVER=redis` مشترک بین پادها، `APP_KEY` یکسان، در صورت نیاز `SESSION_BLOCK=true`. در `laravel.log` دنبال «Redis unreachable; falling back to database cache/session» بگردید — یعنی بعضی درخواست‌ها session را از دیتابیس و بعضی از ردیس می‌خوانند (419 متناوب). داشبورد ادمین فقط ویجت نقشه را lazy بارگذاری می‌کند |
 | مودال 500 روی ویجت داشبورد | `storage/logs` — خطای همان ویجت | ویجت‌های داشبورد نماینده `isLazy=false` و خطا را `report()` می‌کنند تا کل صفحه نخوابد |
 
 ```bash

@@ -85,14 +85,34 @@
                             مهلت رزرو موجودی تا <strong>{{ $order->stock_reserved_until->shopJalali() }}</strong>
                         </p>
                     @endif
-                @elseif (! $order->stock_reserved)
-                    <p class="rep-wizard-error">
-                        رزرو موجودی فعال نیست. با ادمین هماهنگ کنید تا پیش‌فاکتور ویرایش یا رزرو مجدد شود.
-                    </p>
                 @elseif (! $order->hasActiveStockReservation())
+                    @php($reservationRequest = $order->latestReservationRequest()->first())
                     <p class="rep-wizard-error">
-                        مهلت رزرو تمام شده. ادمین می‌تواند پیش‌فاکتور را ویرایش کند؛ برای پرداخت، از ادمین «تمدید رزرو موجودی» بگیرید.
+                        @if (! $order->stock_reserved)
+                            رزرو موجودی فعال نیست.
+                        @else
+                            مهلت رزرو تمام شده.
+                        @endif
+                        برای پرداخت، درخواست رزرو مجدد را برای مدیر منطقه بفرستید.
                     </p>
+                    @if ($reservationRequest?->isPending())
+                        <p class="rep-wizard-hint rep-reservation-request rep-reservation-request--pending">
+                            درخواست رزرو مجدد در {{ $reservationRequest->created_at->shopJalali() }} ثبت شد و در انتظار بررسی مدیر منطقه است.
+                        </p>
+                    @else
+                        @if ($reservationRequest?->status === \App\Models\ProformaReservationRequest::STATUS_REJECTED)
+                            <p class="rep-wizard-hint rep-reservation-request rep-reservation-request--rejected">
+                                درخواست قبلی رد شد{{ $reservationRequest->response_note ? ': '.$reservationRequest->response_note : '.' }}
+                            </p>
+                        @endif
+                        <button type="button"
+                                class="rep-btn-primary rep-payment-info__pay"
+                                wire:click="requestReReservation"
+                                wire:loading.attr="disabled">
+                            <span wire:loading.remove wire:target="requestReReservation">درخواست رزرو مجدد</span>
+                            <span wire:loading wire:target="requestReReservation">در حال ثبت…</span>
+                        </button>
+                    @endif
                 @endif
             </div>
         @elseif ($order->isProforma() && $order->isPaid())

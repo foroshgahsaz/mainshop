@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Filament\Resources\OrderResource;
 use App\Filament\Resources\ProductResource;
+use App\Filament\Resources\ReservationRequestResource;
+use App\Models\ProformaReservationRequest;
 use App\Models\User;
 use App\Services\Auth\AdminLoginGuard;
 use App\Support\AdminAccess;
@@ -27,6 +29,26 @@ class SalesManagerAccessTest extends TestCase
         $this->assertTrue(AdminAccess::canAccessAdminResource(ProductResource::class));
         $this->assertTrue(AdminAccess::canManageProductsInAdmin($manager));
         $this->assertFalse(AdminAccess::canManageShopInAdmin($manager));
+        $this->assertTrue(AdminAccess::canAccessAdminResource(ReservationRequestResource::class));
+        $this->assertContains('filament.admin.resources.reservation-requests.*', AdminAccess::salesManagerAllowedRoutePatterns());
+    }
+
+    public function test_reservation_requests_are_scoped_to_own_or_unassigned_for_sales_manager(): void
+    {
+        $manager = User::make(['is_sales_manager' => true, 'is_admin' => false]);
+        $manager->id = 7;
+
+        $query = ProformaReservationRequest::query()->visibleTo($manager);
+        $sql = str_replace(['"', '`'], '', $query->toSql());
+        $this->assertStringContainsString('sales_manager_id = ?', $sql);
+        $this->assertStringContainsString('sales_manager_id is null', $sql);
+        $this->assertSame([7], $query->getBindings());
+
+        $admin = User::make(['is_admin' => true]);
+        $this->assertStringNotContainsString('sales_manager_id', ProformaReservationRequest::query()->visibleTo($admin)->toSql());
+
+        $representative = User::make(['is_representative' => true]);
+        $this->assertStringContainsString('1 = 0', ProformaReservationRequest::query()->visibleTo($representative)->toSql());
     }
 
     public function test_sales_manager_passes_admin_login_guard(): void

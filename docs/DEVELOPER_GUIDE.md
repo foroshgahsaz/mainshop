@@ -1260,5 +1260,9 @@ resources/views/layouts/shop.blade.php
 | 2026-10-12 | داشبورد پنل نماینده: `RepresentativeDashboardService` + ویجت‌های Filament در `/representative` |
 | 2026-10-12 | داشبوردها بدون سایه `shadow-sm` (override در `filament-overrides.css` روی `.fi-dashboard-page`) |
 | 2026-10-12 | رفع 500 داشبورد نماینده (تایم‌زون Jalalian) + `livewire-session-guard.js` و `/session/ping` برای حذف دیالوگ 419 در کل سایت (dev/05 §A) |
+| 2026-10-12 | داشبورد نماینده: دکمه «مشتری جدید» کنار «سفارش جدید» |
+| 2026-10-12 | درخواست رزرو مجدد پیش‌فاکتور: جدول `proforma_reservation_requests` + `representative_profiles.sales_manager_id` (مدیر منطقه)، `ProformaReservationRequestService`، Resource ادمین «درخواست‌ها» (`ReservationRequestResource`، مجاز برای مدیر فروش، badge تعداد در انتظار در سایدبار) |
+| 2026-10-12 | داشبورد ادمین/مدیر فروش: ویجت‌های آمار، نمودار و آخرین سفارش‌ها eager (فقط نقشه lazy) تا درخواست‌های موازی Livewire و 419 کم شود؛ لاگ هشدار fallback ردیس؛ guard 419 تا ۳ reload در دقیقه و بعد پیام غیرمسدودکننده به‌جای دیالوگ |
+| 2026-10-12 | پنل ادمین تماماً سفید: پس‌زمینه body/shell، هدر و pagination جدول، تب‌های کاربر، صفحه ورود (`filament-overrides.css`، `styles.css`) |
 
 > اگر بخش جدیدی به پروژه اضافه شد، همین فایل را در `docs/DEVELOPER_GUIDE.md` به‌روز کنید و در صورت نیاز `docs/README.md` و `docs/dev/*`.

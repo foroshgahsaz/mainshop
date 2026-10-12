@@ -9,6 +9,7 @@ class RepresentativeProfile extends Model
 {
     protected $fillable = [
         'user_id',
+        'sales_manager_id',
         'province_id',
         'city_id',
         'max_active_reservations',
@@ -24,6 +25,11 @@ class RepresentativeProfile extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function salesManager(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'sales_manager_id');
     }
 
     public function province(): BelongsTo

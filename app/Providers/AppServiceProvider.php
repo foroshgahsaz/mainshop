@@ -56,7 +56,9 @@ use Filament\Http\Responses\Auth\Contracts\LoginResponse;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\ViewAction;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -405,11 +407,22 @@ class AppServiceProvider extends ServiceProvider
             } elseif ($sessionDriver === 'redis') {
                 Redis::connection(config('session.connection') ?: 'default')->ping();
             }
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
             config([
                 'cache.default' => 'database',
                 'session.driver' => 'database',
             ]);
+
+            // A per-request switch splits sessions between stores and surfaces as Livewire 419s.
+            try {
+                if (Cache::store('database')->add('runtime:redis-fallback-logged', 1, 300)) {
+                    Log::warning('Redis unreachable; falling back to database cache/session.', [
+                        'error' => $e->getMessage(),
+                        'path' => request()->path(),
+                    ]);
+                }
+            } catch (\Throwable) {
+            }
         }
     }
 

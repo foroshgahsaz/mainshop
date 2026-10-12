@@ -4,6 +4,7 @@ namespace App\Filament\Representative\Resources\DraftOrderResource\Pages;
 
 use App\Filament\Representative\Resources\DraftOrderResource;
 use App\Models\Order;
+use App\Services\Representative\ProformaReservationRequestService;
 use App\Services\Representative\RepresentativeDraftOrderService;
 use App\Services\Representative\RepresentativeProformaPaymentService;
 use App\Support\ShopLabels;
@@ -11,6 +12,7 @@ use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Validation\ValidationException;
 
 class ViewDraftOrder extends ViewRecord
 {
@@ -85,6 +87,33 @@ class ViewDraftOrder extends ViewRecord
         }
 
         return $actions;
+    }
+
+    public function requestReReservation(ProformaReservationRequestService $requests): void
+    {
+        $representative = auth()->user();
+
+        if ($representative === null) {
+            return;
+        }
+
+        try {
+            $requests->request($this->getRecord()->fresh(), $representative);
+
+            Notification::make()
+                ->title('درخواست رزرو مجدد ثبت شد')
+                ->body('درخواست برای مدیر منطقه ارسال شد. پس از تأیید، امکان پرداخت فعال می‌شود.')
+                ->success()
+                ->send();
+        } catch (ValidationException $e) {
+            Notification::make()
+                ->title('ثبت درخواست ممکن نیست')
+                ->body(collect($e->errors())->flatten()->first())
+                ->danger()
+                ->send();
+        }
+
+        $this->record = $this->getRecord()->fresh();
     }
 
     public function payProformaFromPage(RepresentativeProformaPaymentService $payments): void

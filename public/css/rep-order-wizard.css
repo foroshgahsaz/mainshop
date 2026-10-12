@@ -121,6 +121,25 @@
     color: #64748b;
 }
 
+.rep-reservation-request {
+    margin-top: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.82rem;
+}
+
+.rep-reservation-request--pending {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    color: #92400e;
+}
+
+.rep-reservation-request--rejected {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+}
+
 .rep-proforma-summary {
     margin: 1.25rem 0 0;
     padding: 0.85rem 1rem;

@@ -24,6 +24,7 @@ class CreateUser extends CreateRecord
         $raw = $this->form->getRawState();
 
         $this->record->representativeProfile()->create([
+            'sales_manager_id' => $raw['rep_sales_manager_id'] ?? null,
             'province_id' => $raw['rep_province_id'] ?? null,
             'city_id' => $raw['rep_city_id'] ?? null,
             'max_active_reservations' => (int) ($raw['rep_max_active_reservations'] ?? 3),
@@ -83,6 +84,7 @@ class CreateUser extends CreateRecord
     {
         unset(
             $data['user_kind'],
+            $data['rep_sales_manager_id'],
             $data['rep_province_id'],
             $data['rep_city_id'],
             $data['rep_max_active_reservations'],

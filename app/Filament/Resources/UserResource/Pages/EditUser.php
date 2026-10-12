@@ -6,8 +6,8 @@ use App\Filament\Resources\Pages\EditRecord;
 use App\Filament\Resources\UserResource;
 use App\Filament\Resources\UserResource\UserEditTabs;
 use App\Models\User;
-use App\Support\AdminAccess;
 use App\Services\Auth\OtpService;
+use App\Support\AdminAccess;
 use Filament\Actions;
 use Illuminate\Contracts\Support\Htmlable;
 
@@ -55,7 +55,9 @@ class EditUser extends EditRecord
 
     protected function getFormActions(): array
     {
-        if (AdminAccess::isSalesManagerOnly() && auth()->id() !== $this->getRecord()->getKey()) {
+        if (AdminAccess::isSalesManagerOnly()
+            && auth()->id() !== $this->getRecord()->getKey()
+            && ! UserResource::canEdit($this->getRecord())) {
             return [];
         }
 
@@ -75,7 +77,9 @@ class EditUser extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        if (AdminAccess::isSalesManagerOnly() && auth()->id() !== $this->getRecord()->getKey()) {
+        if (AdminAccess::isSalesManagerOnly()
+            && auth()->id() !== $this->getRecord()->getKey()
+            && ! UserResource::canEdit($this->getRecord())) {
             return $data;
         }
 
@@ -132,7 +136,9 @@ class EditUser extends EditRecord
 
     public function save(bool $shouldRedirect = true, bool $shouldSendSavedNotification = true): void
     {
-        if (AdminAccess::isSalesManagerOnly() && auth()->id() !== $this->getRecord()->getKey()) {
+        if (AdminAccess::isSalesManagerOnly()
+            && auth()->id() !== $this->getRecord()->getKey()
+            && ! UserResource::canEdit($this->getRecord())) {
             return;
         }
 

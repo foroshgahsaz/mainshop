@@ -279,6 +279,7 @@
         $panels['users']['menus'] = [
             ['label' => 'کاربران', 'icon' => 'fa-users', 'items' => [
                 ['label' => 'نمایندگان', 'url' => UserResource::getUrl('index', ['activeTab' => 'representatives']), 'icon' => 'fa-user-tie'],
+                ['label' => 'افزودن نماینده', 'url' => UserResource::getUrl('create'), 'icon' => 'fa-user-plus'],
                 ['label' => 'مشتریان نمایندگان', 'url' => UserResource::getUrl('index', ['activeTab' => 'rep_customers']), 'icon' => 'fa-user'],
             ]],
         ];

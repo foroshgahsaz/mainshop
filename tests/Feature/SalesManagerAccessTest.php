@@ -5,7 +5,9 @@ namespace Tests\Feature;
 use App\Filament\Resources\OrderResource;
 use App\Filament\Resources\ProductResource;
 use App\Filament\Resources\ReservationRequestResource;
+use App\Filament\Resources\UserResource;
 use App\Models\ProformaReservationRequest;
+use App\Models\RepresentativeProfile;
 use App\Models\User;
 use App\Services\Auth\AdminLoginGuard;
 use App\Support\AdminAccess;
@@ -29,8 +31,30 @@ class SalesManagerAccessTest extends TestCase
         $this->assertTrue(AdminAccess::canAccessAdminResource(ProductResource::class));
         $this->assertTrue(AdminAccess::canManageProductsInAdmin($manager));
         $this->assertFalse(AdminAccess::canManageShopInAdmin($manager));
+        $this->assertTrue(AdminAccess::canCreateRepresentativesInAdmin($manager));
+        $this->assertTrue(UserResource::canCreate());
         $this->assertTrue(AdminAccess::canAccessAdminResource(ReservationRequestResource::class));
         $this->assertContains('filament.admin.resources.reservation-requests.*', AdminAccess::salesManagerAllowedRoutePatterns());
+        $this->assertContains('filament.admin.resources.users.create', AdminAccess::salesManagerAllowedRoutePatterns());
+    }
+
+    public function test_sales_manager_can_edit_assigned_representative_only(): void
+    {
+        $manager = User::make(['is_sales_manager' => true, 'is_admin' => false]);
+        $manager->id = 7;
+
+        $ownRep = User::make(['is_representative' => true]);
+        $ownRep->id = 10;
+        $ownRep->setRelation('representativeProfile', new RepresentativeProfile(['sales_manager_id' => 7]));
+
+        $otherRep = User::make(['is_representative' => true]);
+        $otherRep->id = 11;
+        $otherRep->setRelation('representativeProfile', new RepresentativeProfile(['sales_manager_id' => 99]));
+
+        $this->actingAs($manager);
+
+        $this->assertTrue(UserResource::canEdit($ownRep));
+        $this->assertFalse(UserResource::canEdit($otherRep));
     }
 
     public function test_reservation_requests_are_scoped_to_own_or_unassigned_for_sales_manager(): void

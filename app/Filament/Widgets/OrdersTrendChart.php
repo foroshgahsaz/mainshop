@@ -12,6 +12,8 @@ class OrdersTrendChart extends ChartWidget
 {
     protected static ?string $pollingInterval = null;
 
+    protected static bool $isLazy = false;
+
     protected static ?string $heading = 'روند فروش ۳۰ روز اخیر';
 
     protected static ?int $sort = 2;
@@ -21,6 +23,17 @@ class OrdersTrendChart extends ChartWidget
     protected static ?string $maxHeight = '280px';
 
     protected function getData(): array
+    {
+        try {
+            return $this->buildData();
+        } catch (\Throwable $e) {
+            report($e);
+
+            return ['datasets' => [], 'labels' => []];
+        }
+    }
+
+    protected function buildData(): array
     {
         return Cache::remember('admin:dashboard:orders_trend_chart', 300, function (): array {
             $days = collect(range(29, 0))->map(fn (int $i) => now()->subDays($i)->startOfDay());

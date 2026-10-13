@@ -44,10 +44,33 @@
 
                         @if ($showAddressForm)
                             <div class="checkout-address-form">
+                                @if ($needsProfileNames)
+                                    <div class="mb-4 p-3 bg-amber-50 text-amber-900 rounded-xl text-sm leading-6">
+                                        نام حساب شما هنوز تکمیل نشده. نام و نام خانوادگی را وارد کنید تا در هدر و فرم آدرس نمایش داده شود.
+                                    </div>
+                                    <div class="checkout-address-form__row">
+                                        <div>
+                                            <label class="shop-label">نام</label>
+                                            <input type="text" wire:model="profileFirstName" class="shop-input" placeholder="نام">
+                                            @error('profileFirstName') <span class="checkout-field-error">{{ $message }}</span> @enderror
+                                        </div>
+                                        <div>
+                                            <label class="shop-label">نام خانوادگی</label>
+                                            <input type="text" wire:model="profileLastName" class="shop-input" placeholder="نام خانوادگی">
+                                            @error('profileLastName') <span class="checkout-field-error">{{ $message }}</span> @enderror
+                                        </div>
+                                    </div>
+                                    <div class="mb-4">
+                                        <button type="button" wire:click="saveCheckoutProfileNames" wire:loading.attr="disabled" class="shop-btn-outline text-sm">
+                                            <span wire:loading.remove wire:target="saveCheckoutProfileNames">ثبت نام در حساب</span>
+                                            <span wire:loading wire:target="saveCheckoutProfileNames">در حال ذخیره...</span>
+                                        </button>
+                                    </div>
+                                @endif
                                 <div class="checkout-address-form__row">
                                     <div>
                                         <label class="shop-label">نام گیرنده</label>
-                                        <input type="text" wire:model="receiver_name" class="shop-input" placeholder="نام و نام خانوادگی">
+                                        <input type="text" wire:model="receiver_name" class="shop-input" placeholder="نام و نام خانوادگی" @readonly($needsProfileNames)>
                                         @error('receiver_name') <span class="checkout-field-error">{{ $message }}</span> @enderror
                                     </div>
                                     <div>

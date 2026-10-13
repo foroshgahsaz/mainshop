@@ -15,6 +15,16 @@ document.addEventListener('DOMContentLoaded', () => {
   initHeaderSearchSuggest();
 });
 
+function requestCloseLoginModal() {
+  if (typeof Livewire !== 'undefined') {
+    Livewire.dispatch('request-close-login-modal');
+
+    return;
+  }
+
+  toggleElement('loginModal', false);
+}
+
 function openLoginModal(redirectUrl) {
   const redirect = redirectUrl || window.location.href;
 
@@ -699,6 +709,7 @@ function switchTab(type) {
 }
 
 window.toggleElement = toggleElement;
+window.requestCloseLoginModal = requestCloseLoginModal;
 window.toggleAccordion = toggleAccordion;
 window.switchTab = switchTab;
 window.openLoginModal = openLoginModal;

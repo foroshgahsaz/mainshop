@@ -40,6 +40,12 @@ class CheckoutPage extends Component
 
     public string $receiver_name = '';
 
+    public string $profileFirstName = '';
+
+    public string $profileLastName = '';
+
+    public bool $needsProfileNames = false;
+
     public string $receiver_phone = '';
 
     public ?int $province_id = null;
@@ -115,7 +121,9 @@ class CheckoutPage extends Component
             $this->shippingMethodId = $shipping->id;
         }
 
-        if (UserDisplayName::isPlaceholder(auth()->user()->name)) {
+        $this->needsProfileNames = UserDisplayName::isPlaceholder(auth()->user()->name);
+
+        if ($this->needsProfileNames) {
             $checkoutUrl = route('checkout');
             $this->js('window.openLoginModal && window.openLoginModal('.json_encode($checkoutUrl).')');
         }
@@ -141,8 +149,42 @@ class CheckoutPage extends Component
         $this->city = '';
     }
 
+    public function saveCheckoutProfileNames(): void
+    {
+        if (! $this->needsProfileNames) {
+            return;
+        }
+
+        $this->validate([
+            'profileFirstName' => ['required', 'string', 'max:64'],
+            'profileLastName' => ['required', 'string', 'max:64'],
+        ], [
+            'profileFirstName.required' => 'نام را وارد کنید.',
+            'profileLastName.required' => 'نام خانوادگی را وارد کنید.',
+        ]);
+
+        $this->receiver_name = trim($this->profileFirstName.' '.$this->profileLastName);
+        $this->persistUserDisplayName($this->receiver_name);
+        $this->reset(['profileFirstName', 'profileLastName']);
+    }
+
     public function saveAddress(): void
     {
+        if ($this->needsProfileNames) {
+            $this->validate([
+                'profileFirstName' => ['required', 'string', 'max:64'],
+                'profileLastName' => ['required', 'string', 'max:64'],
+            ], [
+                'profileFirstName.required' => 'نام را وارد کنید.',
+                'profileLastName.required' => 'نام خانوادگی را وارد کنید.',
+            ]);
+
+            $this->receiver_name = trim($this->profileFirstName.' '.$this->profileLastName);
+            $this->persistUserDisplayName($this->receiver_name);
+            $this->needsProfileNames = false;
+            $this->reset(['profileFirstName', 'profileLastName']);
+        }
+
         $validated = $this->validate($this->addressRules());
 
         $province = Province::query()->findOrFail($this->province_id);
@@ -162,8 +204,6 @@ class CheckoutPage extends Component
             $user->addresses()->update(['is_default' => false]);
             $validated['is_default'] = true;
         }
-
-        $this->syncUserDisplayNameFromReceiver($user, $validated['receiver_name']);
 
         $address = $user->addresses()->create($validated);
 
@@ -380,16 +420,23 @@ class CheckoutPage extends Component
             ->get(['id', 'name']);
     }
 
-    protected function syncUserDisplayNameFromReceiver(User $user, string $receiverName): void
+    protected function persistUserDisplayName(string $fullName): void
     {
-        $receiverName = trim($receiverName);
+        $fullName = trim($fullName);
 
-        if ($receiverName === '' || ! $this->isPlaceholderUserName((string) $user->name)) {
+        if ($fullName === '' || ! auth()->check()) {
             return;
         }
 
-        $user->forceFill(['name' => $receiverName])->save();
+        $user = auth()->user();
+
+        if (! UserDisplayName::isPlaceholder($user->name)) {
+            return;
+        }
+
+        $user->forceFill(['name' => $fullName])->save();
         auth()->setUser($user->fresh());
+        $this->needsProfileNames = false;
         $this->dispatch('shop-user-profile-updated');
     }
 

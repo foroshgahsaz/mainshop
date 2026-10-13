@@ -16,14 +16,14 @@
         </div>
         <div>
             <label class="block text-sm font-bold text-gray-700 mb-2">نام</label>
-            <input type="text" wire:model="firstName"
+            <input type="text" wire:model.live="firstName"
                    autofocus
                    class="w-full border-2 border-gray-200 rounded-xl py-3 px-4 text-sm outline-none focus:border-brand-green">
             @error('firstName') <span class="text-red-600 text-xs mt-1 block">{{ $message }}</span> @enderror
         </div>
         <div>
             <label class="block text-sm font-bold text-gray-700 mb-2">نام خانوادگی</label>
-            <input type="text" wire:model="lastName"
+            <input type="text" wire:model.live="lastName"
                    class="w-full border-2 border-gray-200 rounded-xl py-3 px-4 text-sm outline-none focus:border-brand-green">
             @error('lastName') <span class="text-red-600 text-xs mt-1 block">{{ $message }}</span> @enderror
         </div>

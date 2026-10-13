@@ -17,6 +17,12 @@ class LoginModal extends Component
 
     public string $activeTab = 'otp';
 
+    #[On('request-close-login-modal')]
+    public function requestCloseFromBackdrop(): void
+    {
+        $this->closeModal();
+    }
+
     #[On('open-login-modal')]
     public function openModal(?string $redirect = null): void
     {

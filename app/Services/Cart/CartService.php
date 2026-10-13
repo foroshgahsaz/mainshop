@@ -148,9 +148,11 @@ class CartService
         return 0;
     }
 
-    public function mergeGuestCartIntoUser(User $user): void
+    public function mergeGuestCartIntoUser(User $user, ?string $guestSessionId = null): void
     {
-        $guestCart = $this->getGuestCart();
+        $guestCart = $guestSessionId !== null
+            ? $this->getGuestCartForSession($guestSessionId)
+            : $this->getGuestCart();
 
         if (empty($guestCart)) {
             return;
@@ -174,7 +176,17 @@ class CartService
             }
         });
 
-        Cache::forget($this->guestCacheKey());
+        if ($guestSessionId !== null) {
+            Cache::forget($this->guestCacheKeyForSession($guestSessionId));
+        } else {
+            Cache::forget($this->guestCacheKey());
+        }
+    }
+
+    /** @return array<string, array<string, mixed>> */
+    public function getGuestCartForSession(string $sessionId): array
+    {
+        return Cache::get($this->guestCacheKeyForSession($sessionId), []);
     }
 
     protected function getRawItems(): Collection
@@ -316,7 +328,12 @@ class CartService
 
     protected function guestCacheKey(): string
     {
-        return config('shop.cart.guest_prefix').session()->getId();
+        return $this->guestCacheKeyForSession((string) session()->getId());
+    }
+
+    protected function guestCacheKeyForSession(string $sessionId): string
+    {
+        return config('shop.cart.guest_prefix').$sessionId;
     }
 
     protected function itemKey(int $productId, ?int $variantId): string

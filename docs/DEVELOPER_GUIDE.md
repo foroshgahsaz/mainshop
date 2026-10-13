@@ -412,12 +412,16 @@ public function mount(CheckoutService $checkout, ShopCacheService $cache) { ... 
 
 ### Checkout — `app/Livewire/Checkout/CheckoutPage.php`
 
-1. انتخاب/ثبت آدرس (inline)
-2. روش ارسال
-3. کوپن
-4. درگاه پرداخت
-5. `CheckoutService::placeOrder()`
-6. redirect به درگاه
+1. انتخاب/ثبت آدرس (inline) — استان/شهر از `provinces`/`cities` (select، نه متن آزاد)، کد پستی با `IranianPostalCode`
+2. تا وقتی `addressId` انتخاب/ذخیره نشده، بخش کوپن/درگاه/ثبت سفارش غیرفعال است
+3. نام گیرنده از `users.name` (پس از تکمیل پروفایل OTP) پر می‌شود؛ اگر هنوز «کاربر XXXX» است از همان placeholder پر نمی‌شود و با ذخیره آدرس می‌توان `name` را همگام کرد
+4. روش ارسال
+5. کوپن
+6. درگاه پرداخت
+7. `CheckoutService::placeOrder()`
+8. redirect به درگاه
+
+**سبد کناری:** لینک «مشاهده سبد کامل» به `/cart` می‌رود؛ در `public/shop/js/main.js` فقط برای غیر-`<a>` با `data-close-cart` از `preventDefault` استفاده می‌شود.
 
 ### سفارش unpaid
 

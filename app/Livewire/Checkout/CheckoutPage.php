@@ -3,6 +3,10 @@
 namespace App\Livewire\Checkout;
 
 use App\Livewire\Concerns\PromptsLoginModal;
+use App\Models\City;
+use App\Models\Province;
+use App\Models\User;
+use App\Rules\IranianPostalCode;
 use App\Services\Cache\ShopCacheService;
 use App\Services\Checkout\CheckoutService;
 use App\Services\Payment\PaymentGatewayCatalog;
@@ -35,6 +39,10 @@ class CheckoutPage extends Component
     public string $receiver_name = '';
 
     public string $receiver_phone = '';
+
+    public ?int $province_id = null;
+
+    public ?int $city_id = null;
 
     public string $province = '';
 
@@ -86,9 +94,26 @@ class CheckoutPage extends Component
         $this->resetAddressFields();
     }
 
+    public function updatedProvinceId(): void
+    {
+        $this->city_id = null;
+        $this->province = '';
+        $this->city = '';
+    }
+
     public function saveAddress(): void
     {
         $validated = $this->validate($this->addressRules());
+
+        $province = Province::query()->findOrFail($this->province_id);
+        $city = City::query()
+            ->where('province_id', $province->id)
+            ->findOrFail($this->city_id);
+
+        $validated['province'] = $province->name;
+        $validated['city'] = $city->name;
+        $validated['postal_code'] = IranianPostalCode::normalize($validated['postal_code']);
+        unset($validated['province_id'], $validated['city_id']);
 
         $user = auth()->user();
         $isFirst = $user->addresses()->doesntExist();
@@ -97,6 +122,8 @@ class CheckoutPage extends Component
             $user->addresses()->update(['is_default' => false]);
             $validated['is_default'] = true;
         }
+
+        $this->syncUserDisplayNameFromReceiver($user, $validated['receiver_name']);
 
         $address = $user->addresses()->create($validated);
 
@@ -155,6 +182,9 @@ class CheckoutPage extends Component
                 'creditGateways' => $catalog->credit(),
                 'cashGateways' => $catalog->cash(),
                 'awaitingLogin' => true,
+                'provinces' => collect(),
+                'cities' => collect(),
+                'checkoutUnlocked' => false,
             ]);
         }
 
@@ -179,6 +209,9 @@ class CheckoutPage extends Component
             'creditGateways' => $catalog->credit(),
             'cashGateways' => $catalog->cash(),
             'awaitingLogin' => false,
+            'provinces' => Province::query()->orderBy('position')->get(['id', 'name']),
+            'cities' => $this->checkoutCities(),
+            'checkoutUnlocked' => $this->addressId !== null,
         ]);
     }
 
@@ -215,10 +248,14 @@ class CheckoutPage extends Component
         return [
             'receiver_name' => ['required', 'string', 'max:255'],
             'receiver_phone' => ['required', 'string', 'max:15'],
-            'province' => ['required', 'string', 'max:255'],
-            'city' => ['required', 'string', 'max:255'],
+            'province_id' => ['required', 'integer', Rule::exists('provinces', 'id')],
+            'city_id' => [
+                'required',
+                'integer',
+                Rule::exists('cities', 'id')->where('province_id', $this->province_id),
+            ],
             'address' => ['required', 'string'],
-            'postal_code' => ['required', 'string', 'max:10'],
+            'postal_code' => ['required', 'string', new IranianPostalCode],
             'is_default' => ['boolean'],
         ];
     }
@@ -235,8 +272,10 @@ class CheckoutPage extends Component
             'paymentMethod.in' => 'روش پرداخت معتبر نیست.',
             'receiver_name.required' => 'نام گیرنده را وارد کنید.',
             'receiver_phone.required' => 'موبایل گیرنده را وارد کنید.',
-            'province.required' => 'استان را وارد کنید.',
-            'city.required' => 'شهر را وارد کنید.',
+            'province_id.required' => 'استان را انتخاب کنید.',
+            'province_id.exists' => 'استان انتخاب‌شده معتبر نیست.',
+            'city_id.required' => 'شهر را انتخاب کنید.',
+            'city_id.exists' => 'شهر انتخاب‌شده معتبر نیست.',
             'address.required' => 'آدرس کامل را وارد کنید.',
             'postal_code.required' => 'کد پستی را وارد کنید.',
         ];
@@ -259,10 +298,13 @@ class CheckoutPage extends Component
 
     protected function prefillAddressFromProfile(): void
     {
-        $user = auth()->user();
+        $user = auth()->user()->fresh();
 
         if ($this->receiver_name === '') {
-            $this->receiver_name = (string) ($user->name ?? '');
+            $name = trim((string) ($user->name ?? ''));
+            if ($name !== '' && ! $this->isPlaceholderUserName($name)) {
+                $this->receiver_name = $name;
+            }
         }
 
         if ($this->receiver_phone === '') {
@@ -275,11 +317,42 @@ class CheckoutPage extends Component
         $this->reset([
             'receiver_name',
             'receiver_phone',
+            'province_id',
+            'city_id',
             'province',
             'city',
             'address',
             'postal_code',
             'is_default',
         ]);
+    }
+
+    /** @return \Illuminate\Support\Collection<int, City> */
+    protected function checkoutCities(): \Illuminate\Support\Collection
+    {
+        if ($this->province_id === null) {
+            return collect();
+        }
+
+        return City::query()
+            ->where('province_id', $this->province_id)
+            ->orderBy('position')
+            ->get(['id', 'name']);
+    }
+
+    protected function isPlaceholderUserName(string $name): bool
+    {
+        return (bool) preg_match('/^کاربر \d{4}$/u', trim($name));
+    }
+
+    protected function syncUserDisplayNameFromReceiver(\App\Models\User $user, string $receiverName): void
+    {
+        $receiverName = trim($receiverName);
+
+        if ($receiverName === '' || ! $this->isPlaceholderUserName((string) $user->name)) {
+            return;
+        }
+
+        $user->forceFill(['name' => $receiverName])->save();
     }
 }

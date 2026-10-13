@@ -59,13 +59,23 @@
                                 <div class="checkout-address-form__row">
                                     <div>
                                         <label class="shop-label">استان</label>
-                                        <input type="text" wire:model="province" class="shop-input" placeholder="استان">
-                                        @error('province') <span class="checkout-field-error">{{ $message }}</span> @enderror
+                                        <select wire:model.live="province_id" class="shop-input">
+                                            <option value="">انتخاب استان</option>
+                                            @foreach ($provinces as $provinceOption)
+                                                <option value="{{ $provinceOption->id }}">{{ $provinceOption->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('province_id') <span class="checkout-field-error">{{ $message }}</span> @enderror
                                     </div>
                                     <div>
                                         <label class="shop-label">شهر</label>
-                                        <input type="text" wire:model="city" class="shop-input" placeholder="شهر">
-                                        @error('city') <span class="checkout-field-error">{{ $message }}</span> @enderror
+                                        <select wire:model="city_id" class="shop-input" @disabled($cities->isEmpty())>
+                                            <option value="">@if ($province_id) انتخاب شهر @else ابتدا استان را انتخاب کنید @endif</option>
+                                            @foreach ($cities as $cityOption)
+                                                <option value="{{ $cityOption->id }}">{{ $cityOption->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('city_id') <span class="checkout-field-error">{{ $message }}</span> @enderror
                                     </div>
                                 </div>
                                 <div>
@@ -141,8 +151,13 @@
                     </section>
                 </div>
 
-                <div class="checkout-row checkout-row--summary">
-                    <div class="checkout-pay-stack">
+                <div class="checkout-row checkout-row--summary @if(! ($checkoutUnlocked ?? false)) checkout-row--locked @endif">
+                    @if (! ($checkoutUnlocked ?? false))
+                        <div class="checkout-locked-banner shop-card">
+                            <p class="text-sm text-gray-600">برای ادامه، ابتدا آدرس تحویل را ذخیره کنید یا یک آدرس ذخیره‌شده را انتخاب کنید.</p>
+                        </div>
+                    @endif
+                    <div class="checkout-pay-stack @if(! ($checkoutUnlocked ?? false)) checkout-pay-stack--disabled @endif" @if(! ($checkoutUnlocked ?? false)) inert @endif>
                         <section class="shop-card checkout-card">
                             <h2 class="shop-section-title">کد تخفیف</h2>
                             <label class="shop-label">کد تخفیف</label>
@@ -204,7 +219,7 @@
                         </section>
                     </div>
 
-                    <aside class="checkout-summary-col">
+                    <aside class="checkout-summary-col @if(! ($checkoutUnlocked ?? false)) checkout-summary-col--disabled @endif" @if(! ($checkoutUnlocked ?? false)) inert @endif>
                         <div class="shop-card checkout-card checkout-summary">
                             <h2 class="font-bold text-navy border-b border-gray-100 pb-3">خلاصه سفارش</h2>
                             <div class="checkout-summary__lines">
@@ -227,7 +242,7 @@
                                 <span class="font-bold text-navy">مبلغ نهایی</span>
                                 <span class="text-lg font-black text-brand-green">{{ number_format($preview['total']) }} تومان</span>
                             </div>
-                            <button type="submit" wire:loading.attr="disabled" class="shop-btn-gold checkout-summary__submit">
+                            <button type="submit" wire:loading.attr="disabled" class="shop-btn-gold checkout-summary__submit" @disabled(! ($checkoutUnlocked ?? false))>
                                 <span wire:loading.remove wire:target="placeOrder">ثبت و پرداخت سفارش</span>
                                 <span wire:loading wire:target="placeOrder">در حال پردازش...</span>
                             </button>
@@ -236,16 +251,18 @@
                     </aside>
                 </div>
 
-                <div class="shop-mobile-bar checkout-mobile-bar" aria-label="ثبت سفارش">
-                    <div class="shop-mobile-bar__info">
-                        <span class="shop-mobile-bar__label">مبلغ نهایی</span>
-                        <span class="shop-mobile-bar__price">{{ number_format($preview['total']) }} تومان</span>
+                @if ($checkoutUnlocked ?? false)
+                    <div class="shop-mobile-bar checkout-mobile-bar" aria-label="ثبت سفارش">
+                        <div class="shop-mobile-bar__info">
+                            <span class="shop-mobile-bar__label">مبلغ نهایی</span>
+                            <span class="shop-mobile-bar__price">{{ number_format($preview['total']) }} تومان</span>
+                        </div>
+                        <button type="submit" form="checkoutForm" wire:loading.attr="disabled" class="shop-mobile-bar__btn">
+                            <span wire:loading.remove wire:target="placeOrder">ثبت سفارش</span>
+                            <span wire:loading wire:target="placeOrder">...</span>
+                        </button>
                     </div>
-                    <button type="submit" form="checkoutForm" wire:loading.attr="disabled" class="shop-mobile-bar__btn">
-                        <span wire:loading.remove wire:target="placeOrder">ثبت سفارش</span>
-                        <span wire:loading wire:target="placeOrder">...</span>
-                    </button>
-                </div>
+                @endif
             </form>
         @endif
     </div>

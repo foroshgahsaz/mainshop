@@ -187,6 +187,12 @@ class CheckoutPage extends Component
 
         $validated = $this->validate($this->addressRules());
 
+        $user = auth()->user();
+
+        if (UserDisplayName::isPlaceholder($user->name) && trim($this->receiver_name) !== '') {
+            $this->persistUserDisplayName(trim($this->receiver_name));
+        }
+
         $province = Province::query()->findOrFail($this->province_id);
         $city = City::query()
             ->where('province_id', $province->id)
@@ -197,7 +203,6 @@ class CheckoutPage extends Component
         $validated['postal_code'] = IranianPostalCode::normalize($validated['postal_code']);
         unset($validated['province_id'], $validated['city_id']);
 
-        $user = auth()->user();
         $isFirst = $user->addresses()->doesntExist();
 
         if ($isFirst || $this->is_default) {
@@ -253,6 +258,10 @@ class CheckoutPage extends Component
 
     public function render(CheckoutService $checkout, ShopCacheService $cache, PaymentGatewayCatalog $catalog)
     {
+        if (auth()->check()) {
+            $this->syncProfileNameState();
+        }
+
         if (! auth()->check()) {
             return view('livewire.checkout.checkout-page', [
                 'preview' => null,
@@ -418,6 +427,24 @@ class CheckoutPage extends Component
             ->where('province_id', $this->province_id)
             ->orderBy('position')
             ->get(['id', 'name']);
+    }
+
+    protected function syncProfileNameState(): void
+    {
+        $user = auth()->user()?->fresh();
+
+        if ($user === null) {
+            $this->needsProfileNames = false;
+
+            return;
+        }
+
+        auth()->setUser($user);
+        $this->needsProfileNames = UserDisplayName::isPlaceholder($user->name);
+
+        if (! $this->needsProfileNames && $this->receiver_name === '' && trim($user->name) !== '') {
+            $this->receiver_name = trim($user->name);
+        }
     }
 
     protected function persistUserDisplayName(string $fullName): void

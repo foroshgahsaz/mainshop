@@ -11,6 +11,8 @@ class UserDisplayNameTest extends TestCase
     {
         $this->assertTrue(UserDisplayName::isPlaceholder('کاربر 1090'));
         $this->assertTrue(UserDisplayName::isPlaceholder('کاربر ۱۰۹۰'));
+        $this->assertTrue(UserDisplayName::isPlaceholder('کاربر  9341'));
+        $this->assertTrue(UserDisplayName::isPlaceholder('کاربر9341'));
         $this->assertFalse(UserDisplayName::isPlaceholder('علی رضایی'));
     }
 }

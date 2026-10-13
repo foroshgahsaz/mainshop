@@ -40,6 +40,12 @@ class CheckoutPage extends Component
 
     public string $receiver_name = '';
 
+    public string $profileFirstName = '';
+
+    public string $profileLastName = '';
+
+    public bool $needsProfileNames = false;
+
     public string $receiver_phone = '';
 
     public ?int $province_id = null;
@@ -65,6 +71,36 @@ class CheckoutPage extends Component
             return;
         }
 
+        $this->bootstrapAuthenticatedCheckout($catalog, $cache);
+    }
+
+    #[On('shop-user-logged-in')]
+    public function onShopUserLoggedIn(PaymentGatewayCatalog $catalog, ShopCacheService $cache): void
+    {
+        if (! auth()->check()) {
+            return;
+        }
+
+        $this->bootstrapAuthenticatedCheckout($catalog, $cache);
+    }
+
+    #[On('shop-user-profile-updated')]
+    public function refreshReceiverFromProfile(PaymentGatewayCatalog $catalog, ShopCacheService $cache): void
+    {
+        if (! auth()->check()) {
+            return;
+        }
+
+        auth()->setUser(auth()->user()->fresh());
+        $this->bootstrapAuthenticatedCheckout($catalog, $cache, refreshReceiverName: true);
+    }
+
+    protected function bootstrapAuthenticatedCheckout(
+        PaymentGatewayCatalog $catalog,
+        ShopCacheService $cache,
+        bool $refreshReceiverName = false,
+    ): void {
+        $this->awaitingLogin = false;
         $this->paymentMethod = $this->defaultPaymentMethod($catalog);
 
         $addresses = auth()->user()->addresses;
@@ -74,6 +110,9 @@ class CheckoutPage extends Component
             $this->addressId = $default->id;
         } else {
             $this->showAddressForm = true;
+            if ($refreshReceiverName) {
+                $this->receiver_name = '';
+            }
             $this->prefillAddressFromProfile();
         }
 
@@ -82,22 +121,12 @@ class CheckoutPage extends Component
             $this->shippingMethodId = $shipping->id;
         }
 
-        if (UserDisplayName::isPlaceholder(auth()->user()->name)) {
+        $this->needsProfileNames = UserDisplayName::isPlaceholder(auth()->user()->name);
+
+        if ($this->needsProfileNames) {
             $checkoutUrl = route('checkout');
             $this->js('window.openLoginModal && window.openLoginModal('.json_encode($checkoutUrl).')');
         }
-    }
-
-    #[On('shop-user-profile-updated')]
-    public function refreshReceiverFromProfile(): void
-    {
-        if (! auth()->check()) {
-            return;
-        }
-
-        auth()->setUser(auth()->user()->fresh());
-        $this->receiver_name = '';
-        $this->prefillAddressFromProfile();
     }
 
     public function toggleAddressForm(): void
@@ -120,9 +149,49 @@ class CheckoutPage extends Component
         $this->city = '';
     }
 
+    public function saveCheckoutProfileNames(): void
+    {
+        if (! $this->needsProfileNames) {
+            return;
+        }
+
+        $this->validate([
+            'profileFirstName' => ['required', 'string', 'max:64'],
+            'profileLastName' => ['required', 'string', 'max:64'],
+        ], [
+            'profileFirstName.required' => 'نام را وارد کنید.',
+            'profileLastName.required' => 'نام خانوادگی را وارد کنید.',
+        ]);
+
+        $this->receiver_name = trim($this->profileFirstName.' '.$this->profileLastName);
+        $this->persistUserDisplayName($this->receiver_name);
+        $this->reset(['profileFirstName', 'profileLastName']);
+    }
+
     public function saveAddress(): void
     {
+        if ($this->needsProfileNames) {
+            $this->validate([
+                'profileFirstName' => ['required', 'string', 'max:64'],
+                'profileLastName' => ['required', 'string', 'max:64'],
+            ], [
+                'profileFirstName.required' => 'نام را وارد کنید.',
+                'profileLastName.required' => 'نام خانوادگی را وارد کنید.',
+            ]);
+
+            $this->receiver_name = trim($this->profileFirstName.' '.$this->profileLastName);
+            $this->persistUserDisplayName($this->receiver_name);
+            $this->needsProfileNames = false;
+            $this->reset(['profileFirstName', 'profileLastName']);
+        }
+
         $validated = $this->validate($this->addressRules());
+
+        $user = auth()->user();
+
+        if (UserDisplayName::isPlaceholder($user->name) && trim($this->receiver_name) !== '') {
+            $this->persistUserDisplayName(trim($this->receiver_name));
+        }
 
         $province = Province::query()->findOrFail($this->province_id);
         $city = City::query()
@@ -134,15 +203,12 @@ class CheckoutPage extends Component
         $validated['postal_code'] = IranianPostalCode::normalize($validated['postal_code']);
         unset($validated['province_id'], $validated['city_id']);
 
-        $user = auth()->user();
         $isFirst = $user->addresses()->doesntExist();
 
         if ($isFirst || $this->is_default) {
             $user->addresses()->update(['is_default' => false]);
             $validated['is_default'] = true;
         }
-
-        $this->syncUserDisplayNameFromReceiver($user, $validated['receiver_name']);
 
         $address = $user->addresses()->create($validated);
 
@@ -192,6 +258,10 @@ class CheckoutPage extends Component
 
     public function render(CheckoutService $checkout, ShopCacheService $cache, PaymentGatewayCatalog $catalog)
     {
+        if (auth()->check()) {
+            $this->syncProfileNameState();
+        }
+
         if (! auth()->check()) {
             return view('livewire.checkout.checkout-page', [
                 'preview' => null,
@@ -359,16 +429,41 @@ class CheckoutPage extends Component
             ->get(['id', 'name']);
     }
 
-    protected function syncUserDisplayNameFromReceiver(User $user, string $receiverName): void
+    protected function syncProfileNameState(): void
     {
-        $receiverName = trim($receiverName);
+        $user = auth()->user()?->fresh();
 
-        if ($receiverName === '' || ! $this->isPlaceholderUserName((string) $user->name)) {
+        if ($user === null) {
+            $this->needsProfileNames = false;
+
             return;
         }
 
-        $user->forceFill(['name' => $receiverName])->save();
+        auth()->setUser($user);
+        $this->needsProfileNames = UserDisplayName::isPlaceholder($user->name);
+
+        if (! $this->needsProfileNames && $this->receiver_name === '' && trim($user->name) !== '') {
+            $this->receiver_name = trim($user->name);
+        }
+    }
+
+    protected function persistUserDisplayName(string $fullName): void
+    {
+        $fullName = trim($fullName);
+
+        if ($fullName === '' || ! auth()->check()) {
+            return;
+        }
+
+        $user = auth()->user();
+
+        if (! UserDisplayName::isPlaceholder($user->name)) {
+            return;
+        }
+
+        $user->forceFill(['name' => $fullName])->save();
         auth()->setUser($user->fresh());
+        $this->needsProfileNames = false;
         $this->dispatch('shop-user-profile-updated');
     }
 

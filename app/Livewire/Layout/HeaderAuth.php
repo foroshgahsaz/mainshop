@@ -28,6 +28,14 @@ class HeaderAuth extends Component
 
     public function render()
     {
-        return view('livewire.layout.header-auth');
+        $shopUser = auth()->user()?->fresh();
+
+        if ($shopUser !== null) {
+            Auth::setUser($shopUser);
+        }
+
+        return view('livewire.layout.header-auth', [
+            'shopUser' => $shopUser,
+        ]);
     }
 }

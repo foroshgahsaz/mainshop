@@ -31,6 +31,9 @@
 
         @if (! ($awaitingLogin ?? false) && $preview)
             <form wire:submit="placeOrder" id="checkoutForm" class="checkout-layout">
+                @if ($needsProfileNames)
+                    @include('livewire.checkout.partials.profile-name-completion')
+                @endif
                 <div class="checkout-row">
                     <section class="shop-card checkout-card">
                         <div class="checkout-card__head">

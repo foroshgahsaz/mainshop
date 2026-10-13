@@ -17,6 +17,12 @@ class LoginModal extends Component
 
     public string $activeTab = 'otp';
 
+    #[On('request-close-login-modal')]
+    public function requestCloseFromBackdrop(): void
+    {
+        $this->closeModal();
+    }
+
     #[On('open-login-modal')]
     public function openModal(?string $redirect = null): void
     {
@@ -49,6 +55,22 @@ class LoginModal extends Component
         $this->js('toggleElement("loginModal", false)');
 
         $this->redirectAfterShopLogin($user);
+    }
+
+    protected function redirectAfterShopLogin(User $user): void
+    {
+        $default = app(\App\Services\Auth\LoginRedirectService::class)->shopDefaultUrl($user);
+
+        if ($user->isRepresentative() && ! $user->isAdmin()) {
+            session()->forget('url.intended');
+
+            $this->redirect($default, navigate: false);
+
+            return;
+        }
+
+        // Full reload so checkout/account pick up the saved display name (wire:navigate keeps stale Livewire state).
+        $this->redirectIntended(default: $default, navigate: false);
     }
 
     protected function onProfileStepRequested(): void

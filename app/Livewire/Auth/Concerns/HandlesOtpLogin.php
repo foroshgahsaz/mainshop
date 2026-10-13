@@ -153,9 +153,9 @@ trait HandlesOtpLogin
             ]);
         }
 
-        $user->forceFill([
-            'name' => trim($this->firstName.' '.$this->lastName),
-        ])->save();
+        $fullName = trim($this->firstName.' '.$this->lastName);
+
+        User::query()->whereKey($user->getKey())->update(['name' => $fullName]);
 
         Auth::setUser($user->fresh());
 
@@ -238,6 +238,8 @@ trait HandlesOtpLogin
 
         Auth::login($user, remember: true);
         $cart->mergeGuestCartIntoUser($user, $guestSessionId);
+
+        $this->dispatch('shop-user-logged-in');
 
         if ($this->needsProfileCompletion($user, $createdAccount)) {
             $this->pendingNewAccount = $createdAccount;

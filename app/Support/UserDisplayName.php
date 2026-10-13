@@ -12,10 +12,26 @@ final class UserDisplayName
             return true;
         }
 
-        if (preg_match('/^کاربر \d{4}$/u', $name)) {
-            return true;
+        $name = self::normalizeDigits($name);
+        $name = preg_replace('/\s+/u', ' ', $name) ?? $name;
+
+        if (! preg_match('/^کاربر\s*(.+)$/u', $name, $matches)) {
+            return false;
         }
 
-        return (bool) preg_match('/^کاربر [۰-۹]{4}$/u', $name);
+        $suffix = preg_replace('/\s+/u', '', $matches[1]) ?? $matches[1];
+
+        return (bool) preg_match('/^\d{4}$/', $suffix);
+    }
+
+    public static function normalizeDigits(string $value): string
+    {
+        $persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+        $arabic = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+
+        $value = str_replace($persian, range(0, 9), $value);
+        $value = str_replace($arabic, range(0, 9), $value);
+
+        return $value;
     }
 }

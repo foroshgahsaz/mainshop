@@ -15,7 +15,7 @@
                 <circle cx="12" cy="7" r="4" />
             </svg>
             @if ($isDesktop)
-                <span class="max-w-[120px] truncate">{{ auth()->user()->name }}</span>
+                <span class="max-w-[120px] truncate">{{ $shopUser?->name ?? auth()->user()->name }}</span>
                 <svg class="header-user-chevron w-3.5 h-3.5 text-gray-400 shrink-0 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path d="m6 9 6 6 6-6" />
                 </svg>
@@ -24,8 +24,8 @@
 
         <div class="header-user-menu" data-header-user-menu-panel role="menu">
             <div class="px-4 py-3 border-b border-gray-100">
-                <p class="font-bold text-sm text-navy truncate">{{ auth()->user()->name }}</p>
-                <p class="text-xs text-gray-400 truncate" dir="ltr">{{ auth()->user()->phone }}</p>
+                <p class="font-bold text-sm text-navy truncate">{{ $shopUser?->name ?? auth()->user()->name }}</p>
+                <p class="text-xs text-gray-400 truncate" dir="ltr">{{ $shopUser?->phone ?? auth()->user()->phone }}</p>
             </div>
             <a href="{{ route('account.dashboard') }}" class="header-user-menu-item">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>

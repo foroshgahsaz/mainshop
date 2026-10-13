@@ -55,6 +55,57 @@ class CheckoutPageTest extends TestCase
         $this->assertSame($shipping->id, $component->get('shippingMethodId'));
     }
 
+    public function test_checkout_can_save_display_name_from_inline_profile_fields(): void
+    {
+        $user = User::factory()->create([
+            'name' => 'کاربر 1090',
+            'phone' => '09907891090',
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(CheckoutPage::class)
+            ->assertSet('needsProfileNames', true)
+            ->set('profileFirstName', 'مریم')
+            ->set('profileLastName', 'کریمی')
+            ->call('saveCheckoutProfileNames')
+            ->assertHasNoErrors()
+            ->assertSet('needsProfileNames', false)
+            ->assertSet('receiver_name', 'مریم کریمی');
+
+        $this->assertSame('مریم کریمی', $user->fresh()->name);
+    }
+
+    public function test_checkout_prefills_receiver_name_from_saved_profile(): void
+    {
+        $user = User::factory()->create([
+            'name' => 'سارا احمدی',
+            'phone' => '09123334455',
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(CheckoutPage::class)
+            ->assertSet('receiver_name', 'سارا احمدی');
+    }
+
+    public function test_checkout_updates_receiver_name_after_profile_saved_event(): void
+    {
+        $user = User::factory()->create([
+            'name' => 'کاربر 3455',
+            'phone' => '09123334455',
+        ]);
+
+        $component = Livewire::actingAs($user)
+            ->test(CheckoutPage::class)
+            ->assertSet('receiver_name', '');
+
+        $user->forceFill(['name' => 'سارا احمدی'])->save();
+        $this->actingAs($user->fresh());
+
+        $component
+            ->dispatch('shop-user-profile-updated')
+            ->assertSet('receiver_name', 'سارا احمدی');
+    }
+
     public function test_checkout_rejects_invalid_postal_code(): void
     {
         $this->seed(IranLocationsSeeder::class);

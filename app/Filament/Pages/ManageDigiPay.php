@@ -64,7 +64,8 @@ class ManageDigiPay extends Page implements HasForms
                         ->helperText('درگاه اعتباری ۴ قسط دیجی‌پی (UPG)'),
                     Forms\Components\Toggle::make('sandbox')
                         ->label('حالت Sandbox (UAT)')
-                        ->default(true),
+                        ->default(false)
+                        ->helperText('روی سرور واقعی (chinibazar) حتماً خاموش باشد؛ UAT از داخل پاد ممکن است resolve نشود.'),
                     Forms\Components\Select::make('amount_unit')
                         ->label('واحد مبلغ فروشگاه')
                         ->options([

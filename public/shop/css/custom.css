@@ -1825,6 +1825,19 @@ body.has-admin-bar .listing-filters {
   min-width: 0;
 }
 
+.checkout-locked-banner {
+  padding: 1rem 1.25rem;
+  border: 1px dashed rgba(15, 23, 42, 0.12);
+  background: #f8fafc;
+}
+
+.checkout-pay-stack--disabled,
+.checkout-summary-col--disabled {
+  opacity: 0.45;
+  pointer-events: none;
+  user-select: none;
+}
+
 .checkout-card {
   padding: 1.25rem;
 }
@@ -2021,6 +2034,10 @@ body.has-admin-bar .listing-filters {
 
   .checkout-row--summary {
     grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  }
+
+  .checkout-row--summary.checkout-row--locked {
+    grid-template-columns: 1fr;
   }
 
   .checkout-summary {

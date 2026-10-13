@@ -346,8 +346,11 @@ function initCartEvents() {
     }
 
     if (event.target.closest('[data-close-cart]')) {
-      event.preventDefault();
       toggleCartSidebar(false);
+      const closer = event.target.closest('[data-close-cart]');
+      if (closer?.tagName !== 'A') {
+        event.preventDefault();
+      }
     }
   });
 

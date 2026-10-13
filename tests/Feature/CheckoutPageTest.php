@@ -12,6 +12,7 @@ use App\Services\Cart\CartService;
 use App\Services\Payment\PaymentGatewayCatalog;
 use App\Services\Settings\SettingsService;
 use App\Support\ShopMedia;
+use Database\Seeders\IranLocationsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -22,23 +23,28 @@ class CheckoutPageTest extends TestCase
 
     public function test_customer_can_add_address_on_checkout_without_leaving_the_page(): void
     {
+        $this->seed(IranLocationsSeeder::class);
         [$user, , $shipping] = $this->prepareCart();
+        $province = \App\Models\Province::query()->where('name', 'تهران')->firstOrFail();
+        $city = \App\Models\City::query()->where('province_id', $province->id)->where('name', 'تهران')->firstOrFail();
 
         $component = Livewire::actingAs($user)
             ->test(CheckoutPage::class)
             ->assertSet('showAddressForm', true)
             ->assertSee('ذخیره آدرس')
+            ->assertSee('برای ادامه، ابتدا آدرس تحویل را ذخیره کنید')
             ->assertDontSee(route('account.addresses'), false)
             ->set('receiver_name', 'رضا محمدی')
             ->set('receiver_phone', '09121112233')
-            ->set('province', 'تهران')
-            ->set('city', 'تهران')
+            ->set('province_id', $province->id)
+            ->set('city_id', $city->id)
             ->set('address', 'خیابان ولیعصر، پلاک ۱۲')
             ->set('postal_code', '1234567890')
             ->call('saveAddress')
             ->assertHasNoErrors()
             ->assertSet('showAddressForm', false)
-            ->assertSee('رضا محمدی');
+            ->assertSee('رضا محمدی')
+            ->assertDontSee('برای ادامه، ابتدا آدرس تحویل را ذخیره کنید');
 
         $address = UserAddress::query()->where('user_id', $user->id)->first();
 
@@ -47,6 +53,25 @@ class CheckoutPageTest extends TestCase
         $this->assertTrue($address->is_default);
         $this->assertSame($address->id, $component->get('addressId'));
         $this->assertSame($shipping->id, $component->get('shippingMethodId'));
+    }
+
+    public function test_checkout_rejects_invalid_postal_code(): void
+    {
+        $this->seed(IranLocationsSeeder::class);
+        [$user] = $this->prepareCart();
+        $province = \App\Models\Province::query()->orderBy('position')->firstOrFail();
+        $city = \App\Models\City::query()->where('province_id', $province->id)->orderBy('position')->firstOrFail();
+
+        Livewire::actingAs($user)
+            ->test(CheckoutPage::class)
+            ->set('receiver_name', 'رضا محمدی')
+            ->set('receiver_phone', '09121112233')
+            ->set('province_id', $province->id)
+            ->set('city_id', $city->id)
+            ->set('address', 'خیابان تست')
+            ->set('postal_code', '123')
+            ->call('saveAddress')
+            ->assertHasErrors(['postal_code']);
     }
 
     public function test_checkout_shows_shipping_and_gateway_icons(): void

@@ -3,6 +3,7 @@
 namespace App\Livewire\Checkout;
 
 use App\Livewire\Concerns\PromptsLoginModal;
+use App\Support\UserDisplayName;
 use App\Models\City;
 use App\Models\Province;
 use App\Models\User;
@@ -13,6 +14,7 @@ use App\Services\Payment\PaymentGatewayCatalog;
 use App\Services\Payment\PaymentService;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
@@ -79,6 +81,23 @@ class CheckoutPage extends Component
         if ($shipping) {
             $this->shippingMethodId = $shipping->id;
         }
+
+        if (UserDisplayName::isPlaceholder(auth()->user()->name)) {
+            $checkoutUrl = route('checkout');
+            $this->js('window.openLoginModal && window.openLoginModal('.json_encode($checkoutUrl).')');
+        }
+    }
+
+    #[On('shop-user-profile-updated')]
+    public function refreshReceiverFromProfile(): void
+    {
+        if (! auth()->check()) {
+            return;
+        }
+
+        auth()->setUser(auth()->user()->fresh());
+        $this->receiver_name = '';
+        $this->prefillAddressFromProfile();
     }
 
     public function toggleAddressForm(): void
@@ -340,12 +359,7 @@ class CheckoutPage extends Component
             ->get(['id', 'name']);
     }
 
-    protected function isPlaceholderUserName(string $name): bool
-    {
-        return (bool) preg_match('/^کاربر \d{4}$/u', trim($name));
-    }
-
-    protected function syncUserDisplayNameFromReceiver(\App\Models\User $user, string $receiverName): void
+    protected function syncUserDisplayNameFromReceiver(User $user, string $receiverName): void
     {
         $receiverName = trim($receiverName);
 
@@ -354,5 +368,12 @@ class CheckoutPage extends Component
         }
 
         $user->forceFill(['name' => $receiverName])->save();
+        auth()->setUser($user->fresh());
+        $this->dispatch('shop-user-profile-updated');
+    }
+
+    protected function isPlaceholderUserName(string $name): bool
+    {
+        return UserDisplayName::isPlaceholder($name);
     }
 }

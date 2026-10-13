@@ -64,6 +64,20 @@ class ShopLivewireTest extends TestCase
         $this->assertFalse(Cache::has('cart:guest:pre-login-session'));
     }
 
+    public function test_logged_in_placeholder_user_opens_profile_step_in_modal(): void
+    {
+        $user = User::factory()->create([
+            'phone' => '09907891090',
+            'name' => 'کاربر 1090',
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(LoginModal::class)
+            ->dispatch('open-login-modal', redirect: route('checkout'))
+            ->assertSet('step', 'profile')
+            ->assertSet('phone', '09907891090');
+    }
+
     public function test_new_otp_user_is_prompted_for_name_and_keeps_guest_cart(): void
     {
         $category = Category::create([

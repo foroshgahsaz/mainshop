@@ -5,6 +5,8 @@ namespace App\Livewire\Auth;
 use App\Livewire\Auth\Concerns\HandlesOtpLogin;
 use App\Livewire\Auth\Concerns\HandlesPasswordLogin;
 use App\Models\User;
+use App\Support\UserDisplayName;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -19,11 +21,24 @@ class LoginModal extends Component
     public function openModal(?string $redirect = null): void
     {
         $this->rememberIntendedUrl($redirect);
-        $this->resetLoginForm();
+
+        if ($this->shouldOpenProfileStepForAuthenticatedUser()) {
+            $this->prepareProfileStepForAuthenticatedUser();
+        } else {
+            $this->resetLoginForm();
+        }
+
+        $this->js('toggleElement("loginModal", true)');
     }
 
     public function closeModal(): void
     {
+        if ($this->mustCompleteProfileBeforeClose()) {
+            $this->addError('firstName', 'لطفاً نام و نام خانوادگی را وارد کنید تا ادامه دهید.');
+
+            return;
+        }
+
         $this->resetLoginForm();
         $this->js('toggleElement("loginModal", false)');
     }
@@ -34,6 +49,11 @@ class LoginModal extends Component
         $this->js('toggleElement("loginModal", false)');
 
         $this->redirectAfterShopLogin($user);
+    }
+
+    protected function onProfileStepRequested(): void
+    {
+        $this->js('toggleElement("loginModal", true)');
     }
 
     protected function resetLoginForm(): void
@@ -47,6 +67,39 @@ class LoginModal extends Component
         $this->pendingNewAccount = false;
         $this->resetPasswordForm();
         $this->resetValidation();
+    }
+
+    protected function shouldOpenProfileStepForAuthenticatedUser(): bool
+    {
+        $user = Auth::user();
+
+        return $user !== null && UserDisplayName::isPlaceholder($user->name);
+    }
+
+    protected function prepareProfileStepForAuthenticatedUser(): void
+    {
+        $user = Auth::user();
+
+        $this->activeTab = 'otp';
+        $this->step = 'profile';
+        $this->phone = (string) ($user?->phone ?? '');
+        $this->otp = '';
+        $this->firstName = '';
+        $this->lastName = '';
+        $this->pendingNewAccount = false;
+        $this->resetPasswordForm();
+        $this->resetValidation();
+    }
+
+    protected function mustCompleteProfileBeforeClose(): bool
+    {
+        if ($this->step !== 'profile') {
+            return false;
+        }
+
+        $user = Auth::user();
+
+        return $user !== null && UserDisplayName::isPlaceholder($user->name);
     }
 
     protected function rememberIntendedUrl(?string $redirect): void

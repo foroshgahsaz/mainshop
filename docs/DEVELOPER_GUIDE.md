@@ -414,7 +414,7 @@ public function mount(CheckoutService $checkout, ShopCacheService $cache) { ... 
 
 1. انتخاب/ثبت آدرس (inline) — استان/شهر از `provinces`/`cities` (select، نه متن آزاد)، کد پستی با `IranianPostalCode`
 2. تا وقتی `addressId` انتخاب/ذخیره نشده، بخش کوپن/درگاه/ثبت سفارش غیرفعال است
-3. نام گیرنده از `users.name` (پس از تکمیل پروفایل OTP) پر می‌شود؛ اگر هنوز «کاربر XXXX» است از همان placeholder پر نمی‌شود و با ذخیره آدرس می‌توان `name` را همگام کرد
+3. نام گیرنده از `users.name` (پس از تکمیل پروفایل OTP) پر می‌شود؛ placeholder (`UserDisplayName::isPlaceholder` — «کاربر 1090» یا ارقام فارسی) در checkout دوباره مودال «تکمیل پروفایل» را باز می‌کند؛ بستن مودال در این مرحله مجاز نیست؛ پس از `saveProfile` رویداد `shop-user-profile-updated` هدر و فرم checkout را به‌روز می‌کند
 4. روش ارسال
 5. کوپن
 6. درگاه پرداخت

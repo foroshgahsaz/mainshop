@@ -3,6 +3,7 @@
 namespace App\Livewire\Auth\Concerns;
 
 use App\Models\User;
+use App\Support\UserDisplayName;
 use App\Services\Auth\LoginRedirectService;
 use App\Services\Auth\OtpService;
 use App\Services\Auth\ShopLoginGuard;
@@ -156,6 +157,8 @@ trait HandlesOtpLogin
             'name' => trim($this->firstName.' '.$this->lastName),
         ])->save();
 
+        Auth::setUser($user->fresh());
+
         if ($this->pendingNewAccount) {
             app(TransactionalSmsDispatcher::class)->accountCreated($user->fresh());
             $this->pendingNewAccount = false;
@@ -163,6 +166,7 @@ trait HandlesOtpLogin
 
         $this->firstName = '';
         $this->lastName = '';
+        $this->dispatch('shop-user-profile-updated');
         $this->finalizeShopLogin($user);
     }
 
@@ -252,7 +256,7 @@ trait HandlesOtpLogin
             return true;
         }
 
-        return (bool) preg_match('/^کاربر \d{4}$/u', trim((string) $user->name));
+        return UserDisplayName::isPlaceholder($user->name);
     }
 
     protected function onProfileStepRequested(): void {}

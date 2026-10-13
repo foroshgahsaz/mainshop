@@ -423,6 +423,8 @@ public function mount(CheckoutService $checkout, ShopCacheService $cache) { ... 
 
 **سبد کناری:** لینک «مشاهده سبد کامل» به `/cart` می‌رود؛ در `public/shop/js/main.js` فقط برای غیر-`<a>` با `data-close-cart` از `preventDefault` استفاده می‌شود.
 
+**OTP / نام:** مایگریت یا پاک‌کردن کش لازم نیست — نام در ستون `users.name` ذخیره می‌شود. بعد از `saveProfile` مودال با `redirect` بدون `wire:navigate` (full reload) و رویدادهای `shop-user-logged-in` / `shop-user-profile-updated` checkout را به‌روز می‌کنند.
+
 ### سفارش unpaid
 
 - TTL: `SHOP_UNPAID_TTL_MINUTES` (پیش‌فرض 60)

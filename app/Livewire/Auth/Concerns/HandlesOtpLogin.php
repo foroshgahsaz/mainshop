@@ -239,6 +239,8 @@ trait HandlesOtpLogin
         Auth::login($user, remember: true);
         $cart->mergeGuestCartIntoUser($user, $guestSessionId);
 
+        $this->dispatch('shop-user-logged-in');
+
         if ($this->needsProfileCompletion($user, $createdAccount)) {
             $this->pendingNewAccount = $createdAccount;
             $this->step = 'profile';

@@ -65,6 +65,36 @@ class CheckoutPage extends Component
             return;
         }
 
+        $this->bootstrapAuthenticatedCheckout($catalog, $cache);
+    }
+
+    #[On('shop-user-logged-in')]
+    public function onShopUserLoggedIn(PaymentGatewayCatalog $catalog, ShopCacheService $cache): void
+    {
+        if (! auth()->check()) {
+            return;
+        }
+
+        $this->bootstrapAuthenticatedCheckout($catalog, $cache);
+    }
+
+    #[On('shop-user-profile-updated')]
+    public function refreshReceiverFromProfile(PaymentGatewayCatalog $catalog, ShopCacheService $cache): void
+    {
+        if (! auth()->check()) {
+            return;
+        }
+
+        auth()->setUser(auth()->user()->fresh());
+        $this->bootstrapAuthenticatedCheckout($catalog, $cache, refreshReceiverName: true);
+    }
+
+    protected function bootstrapAuthenticatedCheckout(
+        PaymentGatewayCatalog $catalog,
+        ShopCacheService $cache,
+        bool $refreshReceiverName = false,
+    ): void {
+        $this->awaitingLogin = false;
         $this->paymentMethod = $this->defaultPaymentMethod($catalog);
 
         $addresses = auth()->user()->addresses;
@@ -74,6 +104,9 @@ class CheckoutPage extends Component
             $this->addressId = $default->id;
         } else {
             $this->showAddressForm = true;
+            if ($refreshReceiverName) {
+                $this->receiver_name = '';
+            }
             $this->prefillAddressFromProfile();
         }
 
@@ -86,18 +119,6 @@ class CheckoutPage extends Component
             $checkoutUrl = route('checkout');
             $this->js('window.openLoginModal && window.openLoginModal('.json_encode($checkoutUrl).')');
         }
-    }
-
-    #[On('shop-user-profile-updated')]
-    public function refreshReceiverFromProfile(): void
-    {
-        if (! auth()->check()) {
-            return;
-        }
-
-        auth()->setUser(auth()->user()->fresh());
-        $this->receiver_name = '';
-        $this->prefillAddressFromProfile();
     }
 
     public function toggleAddressForm(): void

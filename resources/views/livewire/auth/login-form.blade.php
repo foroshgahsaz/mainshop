@@ -8,7 +8,32 @@
     <div class="mb-4 p-3 bg-emerald-50 text-emerald-700 rounded-xl text-sm">{{ session('login_success') }}</div>
 @endif
 
-@if ($step === 'phone')
+@if ($step === 'profile')
+    <form wire:submit="saveProfile" class="space-y-4">
+        <div class="text-center mb-2">
+            <h3 class="text-base font-bold text-navy">تکمیل پروفایل</h3>
+            <p class="text-sm text-gray-500 mt-1">نام و نام خانوادگی خود را وارد کنید</p>
+        </div>
+        <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">نام</label>
+            <input type="text" wire:model="firstName"
+                   autofocus
+                   class="w-full border-2 border-gray-200 rounded-xl py-3 px-4 text-sm outline-none focus:border-brand-green">
+            @error('firstName') <span class="text-red-600 text-xs mt-1 block">{{ $message }}</span> @enderror
+        </div>
+        <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">نام خانوادگی</label>
+            <input type="text" wire:model="lastName"
+                   class="w-full border-2 border-gray-200 rounded-xl py-3 px-4 text-sm outline-none focus:border-brand-green">
+            @error('lastName') <span class="text-red-600 text-xs mt-1 block">{{ $message }}</span> @enderror
+        </div>
+        <button type="submit" wire:loading.attr="disabled"
+                class="w-full bg-brand-green hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition">
+            <span wire:loading.remove wire:target="saveProfile">ادامه</span>
+            <span wire:loading wire:target="saveProfile">در حال ذخیره...</span>
+        </button>
+    </form>
+@elseif ($step === 'phone')
     <form wire:submit="sendOtp" class="space-y-4">
         <div>
             <label class="block text-sm font-bold text-gray-700 mb-2">شماره موبایل</label>

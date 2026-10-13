@@ -29,6 +29,12 @@ trait HandlesOtpLogin
 
     public int $otpSentAt = 0;
 
+    public string $firstName = '';
+
+    public string $lastName = '';
+
+    public bool $pendingNewAccount = false;
+
     public function sendOtp(OtpService $otp): void
     {
         $this->phone = $otp->normalizePhone($this->phone);
@@ -116,16 +122,48 @@ trait HandlesOtpLogin
 
         $otp->markPhoneVerified($user);
 
-        if ($createdAccount) {
-            app(TransactionalSmsDispatcher::class)->accountCreated($user);
-        }
-
         $user->forceFill([
             'last_login_at' => now(),
             'login_count' => $user->login_count + 1,
         ])->save();
 
-        $this->afterSuccessfulLogin($user, $cart);
+        $this->completeShopLogin($user, $cart, $createdAccount);
+
+        if ($createdAccount && $this->step !== 'profile') {
+            app(TransactionalSmsDispatcher::class)->accountCreated($user->fresh());
+        }
+    }
+
+    public function saveProfile(CartService $cart): void
+    {
+        $this->validate([
+            'firstName' => ['required', 'string', 'max:64'],
+            'lastName' => ['required', 'string', 'max:64'],
+        ], [
+            'firstName.required' => 'نام را وارد کنید.',
+            'lastName.required' => 'نام خانوادگی را وارد کنید.',
+        ]);
+
+        $user = Auth::user();
+
+        if ($user === null) {
+            throw ValidationException::withMessages([
+                'firstName' => 'نشست ورود منقضی شده؛ دوباره وارد شوید.',
+            ]);
+        }
+
+        $user->forceFill([
+            'name' => trim($this->firstName.' '.$this->lastName),
+        ])->save();
+
+        if ($this->pendingNewAccount) {
+            app(TransactionalSmsDispatcher::class)->accountCreated($user->fresh());
+            $this->pendingNewAccount = false;
+        }
+
+        $this->firstName = '';
+        $this->lastName = '';
+        $this->finalizeShopLogin($user);
     }
 
     public function backToPhone(): void
@@ -184,15 +222,54 @@ trait HandlesOtpLogin
         $this->step = 'phone';
         $this->phone = '';
         $this->otp = '';
+        $this->firstName = '';
+        $this->lastName = '';
+        $this->pendingNewAccount = false;
         $this->resetValidation();
+    }
+
+    protected function completeShopLogin(User $user, CartService $cart, bool $createdAccount): void
+    {
+        $guestSessionId = session()->getId();
+
+        Auth::login($user, remember: true);
+        $cart->mergeGuestCartIntoUser($user, $guestSessionId);
+
+        if ($this->needsProfileCompletion($user, $createdAccount)) {
+            $this->pendingNewAccount = $createdAccount;
+            $this->step = 'profile';
+            $this->onProfileStepRequested();
+
+            return;
+        }
+
+        $this->finalizeShopLogin($user);
+    }
+
+    protected function needsProfileCompletion(User $user, bool $createdAccount): bool
+    {
+        if ($createdAccount) {
+            return true;
+        }
+
+        return (bool) preg_match('/^کاربر \d{4}$/u', trim((string) $user->name));
+    }
+
+    protected function onProfileStepRequested(): void {}
+
+    protected function finalizeShopLogin(User $user): void
+    {
+        $this->redirectAfterShopLogin($user);
     }
 
     protected function afterSuccessfulLogin(User $user, CartService $cart): void
     {
-        Auth::login($user, remember: true);
-        $cart->mergeGuestCartIntoUser($user);
+        $guestSessionId = session()->getId();
 
-        $this->redirectAfterShopLogin($user);
+        Auth::login($user, remember: true);
+        $cart->mergeGuestCartIntoUser($user, $guestSessionId);
+
+        $this->finalizeShopLogin($user);
     }
 
     protected function redirectAfterShopLogin(User $user): void

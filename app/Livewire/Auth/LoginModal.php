@@ -5,8 +5,6 @@ namespace App\Livewire\Auth;
 use App\Livewire\Auth\Concerns\HandlesOtpLogin;
 use App\Livewire\Auth\Concerns\HandlesPasswordLogin;
 use App\Models\User;
-use App\Services\Cart\CartService;
-use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -30,11 +28,8 @@ class LoginModal extends Component
         $this->js('toggleElement("loginModal", false)');
     }
 
-    protected function afterSuccessfulLogin(User $user, CartService $cart): void
+    protected function finalizeShopLogin(User $user): void
     {
-        Auth::login($user, remember: true);
-        $cart->mergeGuestCartIntoUser($user);
-
         $this->resetLoginForm();
         $this->js('toggleElement("loginModal", false)');
 
@@ -47,6 +42,9 @@ class LoginModal extends Component
         $this->step = 'phone';
         $this->phone = '';
         $this->otp = '';
+        $this->firstName = '';
+        $this->lastName = '';
+        $this->pendingNewAccount = false;
         $this->resetPasswordForm();
         $this->resetValidation();
     }

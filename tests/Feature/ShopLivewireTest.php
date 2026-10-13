@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Livewire\Auth\Login;
+use App\Livewire\Auth\LoginModal;
 use App\Livewire\Cart\CartPage;
 use App\Livewire\Product\AddToCart;
 use App\Models\Category;
@@ -24,6 +25,86 @@ class ShopLivewireTest extends TestCase
         Livewire::test(CartPage::class)
             ->assertOk()
             ->assertSee('سبد خرید شما خالی است');
+    }
+
+    public function test_merge_guest_cart_uses_session_id_before_login(): void
+    {
+        $category = Category::create([
+            'name' => 'Test',
+            'slug' => 'test-merge-cart',
+            'is_active' => true,
+        ]);
+
+        $product = Product::create([
+            'category_id' => $category->id,
+            'name' => 'Merge Product',
+            'slug' => 'merge-product',
+            'price' => 100000,
+            'stock' => 5,
+            'is_active' => true,
+        ]);
+
+        Cache::put('cart:guest:pre-login-session', [
+            $product->id.':0' => [
+                'product_id' => $product->id,
+                'product_variant_id' => null,
+                'quantity' => 2,
+                'price' => 100000,
+                'product_name' => 'Merge Product',
+                'sku' => null,
+            ],
+        ], now()->addHour());
+
+        $user = User::factory()->create(['phone' => '09125556677']);
+        $this->actingAs($user);
+
+        app(CartService::class)->mergeGuestCartIntoUser($user, 'pre-login-session');
+
+        $this->assertSame(2, app(CartService::class)->count());
+        $this->assertFalse(Cache::has('cart:guest:pre-login-session'));
+    }
+
+    public function test_new_otp_user_is_prompted_for_name_and_keeps_guest_cart(): void
+    {
+        $category = Category::create([
+            'name' => 'Test',
+            'slug' => 'test-otp-profile',
+            'is_active' => true,
+        ]);
+
+        $product = Product::create([
+            'category_id' => $category->id,
+            'name' => 'Cart Keep Product',
+            'slug' => 'cart-keep-product',
+            'price' => 50000,
+            'stock' => 10,
+            'is_active' => true,
+        ]);
+
+        $this->get(route('home'))->assertOk();
+        $guestSessionId = session()->getId();
+        app(CartService::class)->add($product->id, 1);
+
+        $phone = '09128887766';
+
+        Livewire::test(LoginModal::class)
+            ->dispatch('open-login-modal', redirect: route('cart'))
+            ->set('phone', $phone)
+            ->call('sendOtp')
+            ->set('otp', Cache::get('otp:phone:'.$phone))
+            ->call('verifyOtp')
+            ->assertSet('step', 'profile')
+            ->set('firstName', 'علی')
+            ->set('lastName', 'رضایی')
+            ->call('saveProfile')
+            ->assertRedirect(route('cart'));
+
+        $this->assertAuthenticated();
+
+        $user = User::where('phone', $phone)->firstOrFail();
+        $this->assertSame('علی رضایی', $user->fresh()->name);
+        $this->assertSame(1, app(CartService::class)->count());
+        $this->assertFalse(Cache::has('cart:guest:'.$guestSessionId));
     }
 
     public function test_guest_cart_page_renders_invoice_for_string_item_keys(): void
@@ -93,6 +174,10 @@ class ShopLivewireTest extends TestCase
             ->set('step', 'otp')
             ->set('otp', $code)
             ->call('verifyOtp')
+            ->assertSet('step', 'profile')
+            ->set('firstName', 'رضا')
+            ->set('lastName', 'محمدی')
+            ->call('saveProfile')
             ->assertRedirect(route('account.dashboard'));
 
         $user = User::where('phone', $phone)->first();

@@ -5,9 +5,12 @@ namespace App\Services\Payment;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Services\Order\OrderActivityLogger;
+use App\Services\Settings\SettingsService;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use RuntimeException;
+use Throwable;
 
 class PaymentService
 {
@@ -116,7 +119,7 @@ class PaymentService
 
         try {
             $redirectUrl = $this->gateway($payment->gateway)->initiate($payment, $order);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->audit->failure(
                 $payment->fresh(),
                 PaymentAuditStep::GATEWAY_RESPONSE,
@@ -125,7 +128,7 @@ class PaymentService
                 $e
             );
 
-            throw $e;
+            throw $this->userFacingInitiateException($payment, $e);
         }
 
         $this->audit->step(
@@ -164,7 +167,7 @@ class PaymentService
 
         try {
             $result = $this->gateway($payment->gateway)->verify($payment, $authority, $status);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->audit->failure(
                 $payment,
                 PaymentAuditStep::VERIFY_RESULT,
@@ -343,5 +346,38 @@ class PaymentService
 
             return $final;
         });
+    }
+
+    protected function userFacingInitiateException(Payment $payment, Throwable $e): RuntimeException
+    {
+        if ($e instanceof RuntimeException && ! $e instanceof ConnectionException) {
+            return $e;
+        }
+
+        $gateway = (string) $payment->gateway;
+        $detail = $e->getMessage();
+
+        if ($e instanceof ConnectionException || str_contains($detail, 'Could not resolve host')) {
+            if ($gateway === 'digipay') {
+                $sandbox = app(SettingsService::class)->digipay()['sandbox'] ?? false;
+                $hint = $sandbox
+                    ? ' سرور به آدرس UAT دیجی‌پی (uat.mydigipay.info) دسترسی ندارد. در ادمین → دیجی‌پی، «حالت Sandbox» را خاموش کنید و Base URL عملیاتی + اطلاعات production را بگذارید.'
+                    : ' اتصال به API دیجی‌پی برقرار نشد. DNS/فایروال egress پاد را بررسی کنید.';
+
+                return new RuntimeException('اتصال به درگاه دیجی‌پی ممکن نشد.'.$hint, 0, $e);
+            }
+
+            return new RuntimeException(
+                'اتصال به درگاه پرداخت برقرار نشد. چند لحظه بعد دوباره تلاش کنید یا درگاه دیگری انتخاب کنید.',
+                0,
+                $e
+            );
+        }
+
+        return new RuntimeException(
+            $detail !== '' ? $detail : 'خطا در شروع پرداخت در درگاه.',
+            0,
+            $e
+        );
     }
 }

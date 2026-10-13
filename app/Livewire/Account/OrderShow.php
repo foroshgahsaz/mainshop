@@ -77,8 +77,10 @@ class OrderShow extends Component
             $payment = $payments->createForOrder($this->order, $gateway);
             $url = $payments->initiate($payment, $this->order);
             $this->redirect($url);
-        } catch (\RuntimeException $e) {
-            session()->flash('error', $e->getMessage());
+        } catch (\Throwable $e) {
+            session()->flash('error', $e instanceof \RuntimeException
+                ? $e->getMessage()
+                : 'خطا در اتصال به درگاه پرداخت.');
         }
     }
 

@@ -19,6 +19,7 @@ class CheckoutPage extends Component
     use PromptsLoginModal;
 
     public bool $awaitingLogin = false;
+
     public ?int $addressId = null;
 
     public ?int $shippingMethodId = null;
@@ -130,8 +131,10 @@ class CheckoutPage extends Component
                 $paymentModel = $payment->createForOrder($order, $this->paymentMethod);
                 $url = $payment->initiate($paymentModel, $order);
                 $this->redirect($url);
-            } catch (\RuntimeException $e) {
-                session()->flash('error', $e->getMessage());
+            } catch (\Throwable $e) {
+                session()->flash('error', $e instanceof \RuntimeException
+                    ? $e->getMessage()
+                    : 'خطا در اتصال به درگاه پرداخت. لطفاً دوباره تلاش کنید.');
                 $this->redirect(route('account.orders.show', $order), navigate: true);
             }
 

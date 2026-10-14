@@ -4,6 +4,7 @@ namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Resources\Pages\AdminListRecords;
 use App\Filament\Resources\UserResource;
+use App\Models\User;
 use App\Services\Representative\SalesRegionService;
 use App\Support\AdminAccess;
 use Filament\Actions;
@@ -27,7 +28,7 @@ class ListUsers extends AdminListRecords
             return 'representatives';
         }
 
-        return 'customers';
+        return User::ADMIN_LIST_SEGMENT_CUSTOMER;
     }
 
     public function getTabs(): array
@@ -44,20 +45,16 @@ class ListUsers extends AdminListRecords
         }
 
         return [
-            'customers' => Tab::make('مشتریان')
-                ->modifyQueryUsing(fn (Builder $query) => $query
-                    ->where('is_admin', false)
-                    ->where('is_author', false)
-                    ->where('is_representative', false)
-                    ->where('is_sales_manager', false)),
-            'staff' => Tab::make('مدیران')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where(
-                    fn (Builder $q) => $q
-                        ->where('is_admin', true)
-                        ->orWhere('is_author', true)
-                        ->orWhere('is_representative', true)
-                        ->orWhere('is_sales_manager', true)
-                )),
+            User::ADMIN_LIST_SEGMENT_CUSTOMER => Tab::make('مشتریان')
+                ->modifyQueryUsing(fn (Builder $query) => $query->adminListSegment(User::ADMIN_LIST_SEGMENT_CUSTOMER)),
+            User::ADMIN_LIST_SEGMENT_SALES_MANAGER => Tab::make('مدیران مناطق')
+                ->modifyQueryUsing(fn (Builder $query) => $query->adminListSegment(User::ADMIN_LIST_SEGMENT_SALES_MANAGER)),
+            User::ADMIN_LIST_SEGMENT_SYSTEM_ADMIN => Tab::make('مدیران سیستم')
+                ->modifyQueryUsing(fn (Builder $query) => $query->adminListSegment(User::ADMIN_LIST_SEGMENT_SYSTEM_ADMIN)),
+            User::ADMIN_LIST_SEGMENT_REPRESENTATIVE => Tab::make('نمایندگان')
+                ->modifyQueryUsing(fn (Builder $query) => $query->adminListSegment(User::ADMIN_LIST_SEGMENT_REPRESENTATIVE)),
+            User::ADMIN_LIST_SEGMENT_AUTHOR => Tab::make('نویسندگان')
+                ->modifyQueryUsing(fn (Builder $query) => $query->adminListSegment(User::ADMIN_LIST_SEGMENT_AUTHOR)),
         ];
     }
 

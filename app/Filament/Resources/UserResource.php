@@ -576,13 +576,12 @@ class UserResource extends Resource
                     ->view('filament.tables.columns.user-cell')
                     ->searchable(['name', 'email', 'phone']),
                 UserTableColumns::phone(),
-                Tables\Columns\TextColumn::make('customer_type')
-                    ->label('نوع')
-                    ->state(fn (User $record) => $record->isCustomer()
-                        ? $record->customerTypeLabel()
-                        : $record->staffRoleLabel())
-                    ->badge(fn (User $record): bool => $record->isCustomer())
-                    ->color(fn (User $record) => $record->isCustomer() ? $record->roleColor() : null),
+                Tables\Columns\TextColumn::make('admin_list_segment')
+                    ->label('دسته')
+                    ->state(fn (User $record): string => $record->adminListSegmentLabel())
+                    ->description(fn (User $record): ?string => $record->adminListSegmentSecondaryRolesDescription())
+                    ->badge()
+                    ->color(fn (User $record): string => $record->adminListSegmentColor()),
                 Tables\Columns\TextColumn::make('national_code')
                     ->label('کد ملی')
                     ->searchable()
@@ -631,22 +630,17 @@ class UserResource extends Resource
                             ? $query->whereDoesntHave('representativeProfile', fn (Builder $q) => $q->whereNotNull('sales_manager_id'))
                             : $query->whereHas('representativeProfile', fn (Builder $q) => $q->where('sales_manager_id', (int) $value));
                     }),
-                Tables\Filters\SelectFilter::make('user_kind')
-                    ->label('نوع کاربر')
-                    ->options([
-                        'customer' => 'مشتری',
-                        'staff' => 'مدیران',
-                    ])
-                    ->query(function ($query, array $data) {
-                        return match ($data['value'] ?? null) {
-                            'customer' => $query->where('is_admin', false)->where('is_author', false)->where('is_representative', false),
-                            'staff' => $query->where(fn ($q) => $q
-                                ->where('is_admin', true)
-                                ->orWhere('is_author', true)
-                                ->orWhere('is_representative', true)
-                                ->orWhere('is_sales_manager', true)),
-                            default => $query,
-                        };
+                Tables\Filters\SelectFilter::make('admin_list_segment')
+                    ->label('دسته')
+                    ->options(User::adminListSegmentFilterOptions())
+                    ->query(function (Builder $query, array $data): Builder {
+                        $value = $data['value'] ?? null;
+
+                        if (! is_string($value) || $value === '') {
+                            return $query;
+                        }
+
+                        return $query->adminListSegment($value);
                     }),
                 Tables\Filters\TernaryFilter::make('status')->label('فعال'),
             ])

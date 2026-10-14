@@ -414,7 +414,7 @@ public function mount(CheckoutService $checkout, ShopCacheService $cache) { ... 
 
 1. انتخاب/ثبت آدرس (inline) — استان/شهر از `provinces`/`cities` (select، نه متن آزاد)، کد پستی با `IranianPostalCode`
 2. تا وقتی `addressId` انتخاب/ذخیره نشده، بخش کوپن/درگاه/ثبت سفارش غیرفعال است
-3. نام گیرنده از `users.name` (پس از تکمیل پروفایل OTP) پر می‌شود؛ placeholder (`UserDisplayName::isPlaceholder` — «کاربر 1090» یا ارقام فارسی) در checkout دوباره مودال «تکمیل پروفایل» را باز می‌کند؛ بستن مودال در این مرحله مجاز نیست؛ پس از `saveProfile` رویداد `shop-user-profile-updated` هدر و فرم checkout را به‌روز می‌کند
+3. نام گیرنده (اجباری `*`) از `users.name` پر می‌شود؛ موبایل گیرنده (اجباری `*`) با الگوی `09xxxxxxxxx`. نام فقط در مودال OTP (مرحله `profile`) گرفته می‌شود — کارت جدا در checkout وجود ندارد
 4. روش ارسال
 5. کوپن
 6. درگاه پرداخت
@@ -423,12 +423,12 @@ public function mount(CheckoutService $checkout, ShopCacheService $cache) { ... 
 
 **سبد کناری:** لینک «مشاهده سبد کامل» به `/cart` می‌رود؛ در `public/shop/js/main.js` فقط برای غیر-`<a>` با `data-close-cart` از `preventDefault` استفاده می‌شود.
 
-**OTP / نام:** مایگریت یا پاک‌کردن کش لازم نیست — نام در ستون `users.name` ذخیره می‌شود. بعد از `saveProfile` مودال با `redirect` بدون `wire:navigate` (full reload) و رویدادهای `shop-user-logged-in` / `shop-user-profile-updated` checkout را به‌روز می‌کنند.
+**OTP / نام:** مایگریت یا پاک‌کردن کش لازم نیست — نام در ستون `users.name` ذخیره می‌شود. `layouts/shop.blade.php` مودال را برای مهمان **و** کاربر لاگین با نام placeholder (`UserDisplayName::isPlaceholder` — «کاربر 1090») رندر می‌کند؛ در این حالت `LoginModal::mount` مستقیم مرحله `profile` را باز می‌کند، دکمه بستن و کلیک بیرون غیرفعال است و تا ثبت نام و نام خانوادگی در هیچ صفحه‌ای نمی‌توان ادامه داد. `profileUserId` (Locked) در صورت از دست رفتن session بین OTP و profile، کاربر را دوباره login می‌کند. بعد از `saveProfile` redirect با full reload انجام می‌شود.
 
 ### سفارش unpaid
 
 - TTL: `SHOP_UNPAID_TTL_MINUTES` (پیش‌فرض 60)
-- Scheduler: `shop:expire-pending-orders` هر 5 دقیقه
+- Scheduler: `shop:expire-pending-orders` هر 5 دقیقه — سفارش فروشگاه با `payment_method != cod` و بدون پرداخت موفق
 - موجودی رزرو شده آزاد می‌شود
 
 ---
@@ -1080,6 +1080,8 @@ $settings->site();       // نام سایت، لوگو، ...
 
 **View custom:** `resources/views/filament/orders/` — items table، notes
 
+**ستون روش پرداخت:** `ShopLabels::orderPaymentMethodLabel()` — برای سفارش‌های قدیمی با `payment_method=online` نام درگاه از آخرین رکورد `payments.gateway` (مثلاً باجت‌پی)؛ سفارش‌های جدید فروشگاه slug درگاه (`bajet`، `tara`، …) را در `orders.payment_method` ذخیره می‌کنند.
+
 ### PaymentResource
 
 | Page | URL |
@@ -1274,6 +1276,8 @@ resources/views/layouts/shop.blade.php
 | 2026-10-12 | رفع migration مناطق فروش روی MySQL (خطای 1824 `Failed to open the referenced table 'sales_regions'`): migration idempotent — `sales_regions` با InnoDB (و تبدیل اگر MyISAM ساخته شده)، ستون/ایندکس جدا، FKها فقط اگر نبودند و با try/catch؛ `SalesRegion::deleting` استان‌ها را آزاد می‌کند. اجرای دوبارهٔ `php artisan migrate --force` کافی است |
 | 2026-10-12 | منوی **مناطق فروش** جدا از کاربران: آیکون و پنل مستقل در `admin-sidebar` (لیست مناطق، افزودن منطقه) — فقط مدیر کل |
 | 2026-10-12 | پنل ادمین تماماً سفید: پس‌زمینه body/shell، هدر و pagination جدول، تب‌های کاربر، صفحه ورود (`filament-overrides.css`، `styles.css`) |
+| 2026-10-14 | نام کاربر OTP فقط در مودال اجباری (رندر برای کاربر placeholder هم)؛ حذف کارت «تکمیل نام حساب» از checkout؛ `*` روی نام/موبایل گیرنده |
 | 2026-10-14 | لیست‌های ادمین: ستون/زیرنویس **موبایل** برای کاربر (`UserTableColumns`، `/admin/users` و سفارش/پرداخت/نظرات و …) |
+| 2026-10-14 | لیست/جزئیات سفارش ادمین: برچسب روش پرداخت = نام درگاه (`orderPaymentMethodLabel`)؛ checkout slug درگاه را در `orders.payment_method` ذخیره می‌کند |
 
 > اگر بخش جدیدی به پروژه اضافه شد، همین فایل را در `docs/DEVELOPER_GUIDE.md` به‌روز کنید و در صورت نیاز `docs/README.md` و `docs/dev/*`.

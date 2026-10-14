@@ -40,7 +40,7 @@ class OrderResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->with(['user', 'representative']);
+        return parent::getEloquentQuery()->with(['user', 'representative', 'payments']);
     }
 
     public static function table(Table $table): Table
@@ -67,7 +67,7 @@ class OrderResource extends Resource
                 Tables\Columns\TextColumn::make('payment_method')
                     ->label('روش پرداخت')
                     ->badge()
-                    ->formatStateUsing(fn (?string $state) => ShopLabels::paymentMethod($state)),
+                    ->formatStateUsing(fn (Order $record): string => $record->paymentMethodLabel()),
                 Tables\Columns\TextColumn::make('status')
                     ->label('وضعیت')
                     ->badge()

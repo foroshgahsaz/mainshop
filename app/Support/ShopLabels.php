@@ -49,6 +49,28 @@ class ShopLabels
         };
     }
 
+    /** برچسب روش پرداخت سفارش (لیست ادمین): درگاه واقعی از payments اگر orders.payment_method=online باشد. */
+    public static function orderPaymentMethodLabel(Order $order): string
+    {
+        $method = (string) ($order->payment_method ?? '');
+
+        if ($method !== '' && $method !== 'online') {
+            return self::paymentMethod($method);
+        }
+
+        if ($method === 'online') {
+            $payment = $order->relationLoaded('payments')
+                ? $order->payments->sortByDesc('id')->first()
+                : $order->payments()->latest('id')->first();
+
+            if ($payment !== null && filled($payment->gateway)) {
+                return self::gateway($payment->gateway);
+            }
+        }
+
+        return self::paymentMethod($method);
+    }
+
     public static function gateway(?string $gateway): string
     {
         return match ($gateway) {

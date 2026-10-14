@@ -186,7 +186,7 @@ class CheckoutPage extends Component
                 $this->addressId,
                 $this->shippingMethodId,
                 $this->couponCode ?: null,
-                $isCod ? 'cod' : 'online',
+                $isCod ? 'cod' : $this->paymentMethod,
                 $this->note
             );
         } catch (\RuntimeException $e) {

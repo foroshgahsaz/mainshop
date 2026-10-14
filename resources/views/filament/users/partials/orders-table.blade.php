@@ -20,7 +20,7 @@
                 <tr>
                     <td dir="ltr">{{ $order->tracking_code }}</td>
                     <td>{{ ShopLabels::formatMoney($order->final_amount) }}</td>
-                    <td>{{ ShopLabels::paymentMethod($order->payment_method) }}</td>
+                    <td>{{ ShopLabels::orderPaymentMethodLabel($order) }}</td>
                     <td>
                         <span class="admin-order__badge admin-order__badge--status admin-order__badge--{{ $order->status }}">
                             {{ ShopLabels::orderStatus($order->status) }}

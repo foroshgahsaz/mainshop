@@ -2,6 +2,7 @@
 
 namespace App\Filament\Representative\Resources;
 
+use App\Filament\Support\UserTableColumns;
 use App\Filament\Representative\Pages\CreateDraftOrder;
 use App\Filament\Representative\Resources\DraftOrderResource\Pages;
 use App\Models\Order;
@@ -33,9 +34,7 @@ class DraftOrderResource extends Resource
                 Tables\Columns\TextColumn::make('tracking_code')
                     ->label('کد')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('user.name')
-                    ->label('مشتری')
-                    ->searchable(),
+                UserTableColumns::nameWithPhone(label: 'مشتری'),
                 Tables\Columns\TextColumn::make('payment_method')
                     ->label('طرح پرداخت')
                     ->formatStateUsing(fn (?string $state): string => ShopLabels::paymentMethod($state))

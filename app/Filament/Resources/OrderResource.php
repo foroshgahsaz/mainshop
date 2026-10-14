@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Support\AdminTable;
+use App\Filament\Support\UserTableColumns;
 use App\Filament\Support\OrderDeleteActions;
 use App\Models\Order;
 use App\Support\AdminAccess;
@@ -53,16 +54,12 @@ class OrderResource extends Resource
                     ->copyable()
                     ->weight('medium')
                     ->color('primary'),
-                Tables\Columns\TextColumn::make('user.name')->label('کاربر')->placeholder('—')->wrap(),
+                UserTableColumns::nameWithPhone(),
                 Tables\Columns\TextColumn::make('representative.name')
                     ->label('نماینده')
                     ->placeholder('—')
                     ->toggleable()
                     ->wrap(),
-                Tables\Columns\TextColumn::make('user.phone')
-                    ->label('موبایل')
-                    ->placeholder('—')
-                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('final_amount')
                     ->label('مبلغ')
                     ->alignEnd()

@@ -13,5 +13,10 @@
          width="40"
          height="40"
          loading="lazy">
-    <span class="fi-admin-user-cell__name">{{ $record->name }}</span>
+    <div class="fi-admin-user-cell__text">
+        <span class="fi-admin-user-cell__name">{{ $record->name }}</span>
+        @if (filled($record->phone))
+            <span class="fi-admin-user-cell__phone" dir="ltr">{{ $record->phone }}</span>
+        @endif
+    </div>
 </div>

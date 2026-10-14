@@ -74,7 +74,15 @@ class ReservationRequestResource extends Resource
                 Tables\Columns\TextColumn::make('order.tracking_code')
                     ->label('پیش‌فاکتور')
                     ->searchable()
-                    ->description(fn (ProformaReservationRequest $record): ?string => $record->order?->user?->name)
+                    ->description(function (ProformaReservationRequest $record): ?string {
+                        $user = $record->order?->user;
+
+                        if ($user === null) {
+                            return null;
+                        }
+
+                        return collect([$user->name, $user->phone])->filter()->implode(' · ');
+                    })
                     ->url(fn (ProformaReservationRequest $record): ?string => $record->order
                         ? OrderResource::getUrl('view', ['record' => $record->order])
                         : null),

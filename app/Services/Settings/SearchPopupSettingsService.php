@@ -26,7 +26,8 @@ class SearchPopupSettingsService
             return $defaults;
         }
 
-        return array_replace_recursive($defaults, $this->normalize($decoded));
+        // array_merge — نه array_replace_recursive: لیست popular_searches باید کامل جایگزین شود.
+        return array_merge($defaults, $this->normalize($decoded));
     }
 
     /** @return array<string, mixed> */

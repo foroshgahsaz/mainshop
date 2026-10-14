@@ -13,7 +13,13 @@ class AdminImageColumn
             ->disk('public')
             ->visibility('public')
             ->height($height)
+            ->width($height)
+            ->square()
             ->defaultImageUrl(asset('shop/images/products/clothing.svg'))
-            ->extraImgAttributes(['class' => 'rounded-lg object-cover']);
+            ->extraImgAttributes([
+                'class' => 'rounded-lg object-cover fi-admin-table-thumb',
+                'width' => (string) $height,
+                'height' => (string) $height,
+            ]);
     }
 }

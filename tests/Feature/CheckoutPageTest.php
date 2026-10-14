@@ -55,24 +55,34 @@ class CheckoutPageTest extends TestCase
         $this->assertSame($shipping->id, $component->get('shippingMethodId'));
     }
 
-    public function test_checkout_can_save_display_name_from_inline_profile_fields(): void
+    public function test_checkout_has_no_inline_profile_card_and_marks_receiver_fields_required(): void
     {
-        $user = User::factory()->create([
-            'name' => 'کاربر 1090',
-            'phone' => '09907891090',
-        ]);
+        [$user] = $this->prepareCart();
 
         Livewire::actingAs($user)
             ->test(CheckoutPage::class)
-            ->assertSet('needsProfileNames', true)
-            ->set('profileFirstName', 'مریم')
-            ->set('profileLastName', 'کریمی')
-            ->call('saveCheckoutProfileNames')
-            ->assertHasNoErrors()
-            ->assertSet('needsProfileNames', false)
-            ->assertSet('receiver_name', 'مریم کریمی');
+            ->assertDontSee('تکمیل نام حساب')
+            ->assertSeeHtml('wire:model="receiver_name" class="shop-input" placeholder="نام و نام خانوادگی" required')
+            ->assertSeeHtml('wire:model="receiver_phone" class="shop-input" placeholder="0912..." dir="ltr" required');
+    }
 
-        $this->assertSame('مریم کریمی', $user->fresh()->name);
+    public function test_checkout_rejects_invalid_receiver_phone(): void
+    {
+        $this->seed(IranLocationsSeeder::class);
+        [$user] = $this->prepareCart();
+        $province = \App\Models\Province::query()->orderBy('position')->firstOrFail();
+        $city = \App\Models\City::query()->where('province_id', $province->id)->orderBy('position')->firstOrFail();
+
+        Livewire::actingAs($user)
+            ->test(CheckoutPage::class)
+            ->set('receiver_name', 'رضا محمدی')
+            ->set('receiver_phone', '12345')
+            ->set('province_id', $province->id)
+            ->set('city_id', $city->id)
+            ->set('address', 'خیابان تست')
+            ->set('postal_code', '1234567890')
+            ->call('saveAddress')
+            ->assertHasErrors(['receiver_phone']);
     }
 
     public function test_checkout_prefills_receiver_name_from_saved_profile(): void

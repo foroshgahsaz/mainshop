@@ -31,9 +31,6 @@
 
         @if (! ($awaitingLogin ?? false) && $preview)
             <form wire:submit="placeOrder" id="checkoutForm" class="checkout-layout">
-                @if ($needsProfileNames)
-                    @include('livewire.checkout.partials.profile-name-completion')
-                @endif
                 <div class="checkout-row">
                     <section class="shop-card checkout-card">
                         <div class="checkout-card__head">
@@ -49,13 +46,13 @@
                             <div class="checkout-address-form">
                                 <div class="checkout-address-form__row">
                                     <div>
-                                        <label class="shop-label">نام گیرنده</label>
-                                        <input type="text" wire:model="receiver_name" class="shop-input" placeholder="نام و نام خانوادگی">
+                                        <label class="shop-label">نام گیرنده <span class="text-red-600" aria-hidden="true">*</span></label>
+                                        <input type="text" wire:model="receiver_name" class="shop-input" placeholder="نام و نام خانوادگی" required aria-required="true">
                                         @error('receiver_name') <span class="checkout-field-error">{{ $message }}</span> @enderror
                                     </div>
                                     <div>
-                                        <label class="shop-label">موبایل گیرنده</label>
-                                        <input type="text" wire:model="receiver_phone" class="shop-input" placeholder="0912..." dir="ltr">
+                                        <label class="shop-label">موبایل گیرنده <span class="text-red-600" aria-hidden="true">*</span></label>
+                                        <input type="tel" wire:model="receiver_phone" class="shop-input" placeholder="0912..." dir="ltr" required aria-required="true">
                                         @error('receiver_phone') <span class="checkout-field-error">{{ $message }}</span> @enderror
                                     </div>
                                 </div>

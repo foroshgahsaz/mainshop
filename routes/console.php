@@ -13,3 +13,6 @@ Schedule::command('payments:archive-logs')->daily();
 Schedule::command('shop:database-backup')
     ->dailyAt((string) config('backup.database.schedule_time', '18:00'))
     ->timezone((string) config('backup.database.schedule_timezone', 'Asia/Tehran'));
+Schedule::command('shop:files-backup')
+    ->dailyAt((string) config('backup.files.schedule_time', '19:00'))
+    ->timezone((string) config('backup.files.schedule_timezone', 'Asia/Tehran'));

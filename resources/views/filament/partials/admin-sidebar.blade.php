@@ -250,7 +250,7 @@
             'routes' => ['filament.admin.pages.database-backups'],
             'menus' => [
                 ['label' => 'بک‌آپ', 'icon' => 'fa-database', 'items' => [
-                    ['label' => 'دیتابیس', 'url' => ViewDatabaseBackups::getUrl(), 'icon' => 'fa-download'],
+                    ['label' => 'دیتابیس و فایل', 'url' => ViewDatabaseBackups::getUrl(), 'icon' => 'fa-download'],
                 ]],
             ],
         ],

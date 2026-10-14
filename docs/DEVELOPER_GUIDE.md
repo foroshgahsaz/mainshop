@@ -1274,6 +1274,7 @@ resources/views/layouts/shop.blade.php
 | 2026-10-12 | درخواست رزرو مجدد پیش‌فاکتور: جدول `proforma_reservation_requests` + `representative_profiles.sales_manager_id` (مدیر منطقه)، `ProformaReservationRequestService`، Resource ادمین «درخواست‌ها» (`ReservationRequestResource`، مجاز برای مدیر فروش، badge تعداد در انتظار در سایدبار) |
 | 2026-10-12 | داشبورد ادمین/مدیر فروش: ویجت‌های آمار، نمودار و آخرین سفارش‌ها eager (فقط نقشه lazy) تا درخواست‌های موازی Livewire و 419 کم شود؛ لاگ هشدار fallback ردیس؛ guard 419 تا ۳ reload در دقیقه و بعد پیام غیرمسدودکننده به‌جای دیالوگ |
 | 2026-10-12 | مدیر منطقه (مدیر فروش): ایجاد نماینده (`UserResource::canCreate`، فرم ساده، `sales_manager_id` = خودش)، دکمه «افزودن نماینده» روی داشبورد `/admin`، لیست فقط نمایندگان تحت مدیریت خودش |
+| 2026-10-14 | `/admin/sales-regions`: لیست — همهٔ استان‌های هر منطقه (badge، بدون محدودیت ۴تایی)؛ ویرایش — جدول **نمایندگان این منطقه** (`SalesRegionService::representativesForRegion`) |
 | 2026-10-12 | **مناطق فروش**: جدول `sales_regions` + `provinces.sales_region_id` (هر استان فقط یک منطقه، هر منطقه چند استان، هر مدیر چند منطقه)؛ CRUD ادمین `/admin/sales-regions` (`SalesRegionResource`، منطق `SalesRegionService`)؛ تعریف نماینده: مدیر منطقه الزامی + استان فقط از مناطق همان مدیر؛ مدیر منطقه هنگام ساخت نماینده = خودش؛ لیست «نمایندگان من» = `sales_manager_id` خودش یا استان در مناطق خودش؛ تغییر مدیر منطقه → نمایندگان آن استان‌ها منتقل می‌شوند؛ ستون/فیلتر «مدیر منطقه» در لیست کاربران؛ رفع ارتقای نقش (مدیر فروش دیگر نمی‌تواند `is_admin`/`user_kind`/نقش‌ها را تغییر دهد). تست: `tests/Feature/SalesRegionTest.php` (MariaDB) |
 | 2026-10-12 | رفع migration مناطق فروش روی MySQL (خطای 1824 `Failed to open the referenced table 'sales_regions'`): migration idempotent — `sales_regions` با InnoDB (و تبدیل اگر MyISAM ساخته شده)، ستون/ایندکس جدا، FKها فقط اگر نبودند و با try/catch؛ `SalesRegion::deleting` استان‌ها را آزاد می‌کند. اجرای دوبارهٔ `php artisan migrate --force` کافی است |
 | 2026-10-12 | منوی **مناطق فروش** جدا از کاربران: آیکون و پنل مستقل در `admin-sidebar` (لیست مناطق، افزودن منطقه) — فقط مدیر کل |
@@ -1281,6 +1282,7 @@ resources/views/layouts/shop.blade.php
 | 2026-10-14 | نام کاربر OTP فقط در مودال اجباری (رندر برای کاربر placeholder هم)؛ حذف کارت «تکمیل نام حساب» از checkout؛ `*` روی نام/موبایل گیرنده |
 | 2026-10-14 | لیست‌های ادمین: ستون/زیرنویس **موبایل** برای کاربر (`UserTableColumns`، `/admin/users` و سفارش/پرداخت/نظرات و …) |
 | 2026-10-14 | `/admin/users`: تب‌های مشتریان، مدیران مناطق، مدیران سیستم، نمایندگان، نویسندگان + ستون/فیلتر **دسته** (`adminListSegment`) |
+| 2026-10-14 | `/admin/orders`: ستون کاربر فقط نام — بدون نمایش موبایل زیر نام |
 | 2026-10-14 | لیست/جزئیات سفارش ادمین: برچسب روش پرداخت = نام درگاه (`orderPaymentMethodLabel`)؛ checkout slug درگاه را در `orders.payment_method` ذخیره می‌کند |
 | 2026-10-14 | سفارش مستقیم فروشگاه: `representative_id` = `SHOP_DIRECT_REPRESENTATIVE_ID` (پیش‌فرض ۸۱ چینی بازار)؛ backfill `shop:assign-direct-shop-representative` |
 

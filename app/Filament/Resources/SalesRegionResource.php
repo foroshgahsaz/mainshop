@@ -5,9 +5,9 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\SalesRegionResource\Pages;
 use App\Filament\Support\AdminTable;
 use App\Models\Province;
-use App\Models\RepresentativeProfile;
 use App\Models\SalesRegion;
 use App\Models\User;
+use App\Services\Representative\SalesRegionService;
 use App\Support\AdminAccess;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -67,6 +67,29 @@ class SalesRegionResource extends Resource
                         ->columnSpanFull(),
                 ])
                 ->columns(2),
+            Forms\Components\Section::make('نمایندگان این منطقه')
+                ->schema([
+                    Forms\Components\View::make('region_representatives')
+                        ->view('filament.sales-regions.region-representatives')
+                        ->dehydrated(false)
+                        ->columnSpanFull()
+                        ->viewData(function (?SalesRegion $record): array {
+                            if (! $record?->exists) {
+                                return ['representatives' => collect()];
+                            }
+
+                            $record->loadMissing('provinces');
+
+                            return [
+                                'representatives' => app(SalesRegionService::class)
+                                    ->representativesForRegion($record)
+                                    ->orderBy('name')
+                                    ->get(),
+                            ];
+                        }),
+                ])
+                ->visibleOn('edit')
+                ->columnSpanFull(),
         ]);
     }
 
@@ -80,12 +103,11 @@ class SalesRegionResource extends Resource
                 Tables\Columns\TextColumn::make('provinces.name')
                     ->label('استان‌ها')
                     ->badge()
-                    ->limitList(4)
-                    ->expandableLimitedList(),
+                    ->wrap(),
                 Tables\Columns\TextColumn::make('representatives_count')
                     ->label('نمایندگان')
-                    ->state(fn (SalesRegion $record): int => RepresentativeProfile::query()
-                        ->whereIn('province_id', $record->provinces->pluck('id'))
+                    ->state(fn (SalesRegion $record): int => app(SalesRegionService::class)
+                        ->representativesForRegion($record)
                         ->count()),
             ])
             ->actions([

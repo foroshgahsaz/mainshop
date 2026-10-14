@@ -21,6 +21,16 @@ final class UserTableColumns
             ->searchable();
     }
 
+    /** نام کاربر بدون زیرنویس موبایل (مثلاً لیست سفارش‌ها). */
+    public static function nameOnly(string $namePath = 'user.name', string $label = 'کاربر'): TextColumn
+    {
+        return TextColumn::make($namePath)
+            ->label($label)
+            ->placeholder('—')
+            ->wrap()
+            ->searchable();
+    }
+
     public static function phone(string $phonePath = 'phone', string $label = 'موبایل'): TextColumn
     {
         return TextColumn::make($phonePath)

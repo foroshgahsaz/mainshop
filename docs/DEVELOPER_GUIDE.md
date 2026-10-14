@@ -1075,7 +1075,7 @@ $settings->site();       // نام سایت، لوگو، ...
 
 | Page | URL | کار |
 |------|-----|-----|
-| List | `/admin/orders` | لیست + فیلتر |
+| List | `/admin/orders` | لیست + فیلتر — ستون کاربر فقط **نام** (`UserTableColumns::nameOnly`، بدون موبایل زیر نام) |
 | View | `/admin/orders/{id}` | جزئیات، timeline، items |
 
 **View custom:** `resources/views/filament/orders/` — items table، notes

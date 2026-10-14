@@ -148,7 +148,7 @@ class ProductResource extends Resource
                     ->label('ID')
                     ->sortable(),
 
-                AdminImageColumn::make('primary_image_path', 52, 'تصویر'),
+                AdminImageColumn::make('primary_image_path', 56, 'تصویر'),
 
                 Tables\Columns\TextColumn::make('name')
                     ->label('نام محصول')

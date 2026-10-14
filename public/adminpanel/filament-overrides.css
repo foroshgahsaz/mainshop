@@ -240,12 +240,23 @@ body.fi-body .tippy-box {
     z-index: 99999 !important;
 }
 
-/* تصاویر در جدول */
+/* تصاویر در جدول — عرض ثابت (max-width:100% باعث نوار باریک در ستون‌های فشرده می‌شد) */
 .fi-admin-shell .fi-ta-image img,
-.fi-admin-shell .fi-ta-image-column img {
+.fi-admin-shell .fi-ta-image-column img,
+.fi-admin-shell img.fi-admin-table-thumb {
     border-radius: 8px;
     object-fit: cover;
-    max-width: 100%;
+}
+
+.fi-admin-shell .fi-ta-image-column,
+.fi-admin-shell .fi-ta-image {
+    width: auto;
+    min-width: 4.5rem;
+}
+
+.fi-admin-shell img.fi-admin-table-thumb {
+    display: block;
+    flex-shrink: 0;
 }
 
 /* جدول کاربران — استایل نمونه */

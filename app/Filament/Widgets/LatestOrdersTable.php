@@ -33,7 +33,7 @@ class LatestOrdersTable extends BaseWidget
                     ->label('کد سفارش')
                     ->searchable()
                     ->copyable(),
-                UserTableColumns::nameWithPhone(label: 'مشتری'),
+                UserTableColumns::nameOnly('user.name', 'مشتری'),
                 Tables\Columns\TextColumn::make('final_amount')
                     ->label('مبلغ')
                     ->numeric()

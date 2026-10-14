@@ -1107,7 +1107,7 @@ $settings->site();       // نام سایت، لوگو، ...
 | آمار KPI | `ShopStatsOverview.php` |
 | نمودار سفارش | `OrdersTrendChart.php` |
 | نقشه | `OrdersMapWidget.php` + `IranCityCoordinates.php` |
-| آخرین سفارش‌ها | `LatestOrdersTable.php` |
+| آخرین سفارش‌ها | `LatestOrdersTable.php` — ستون مشتری فقط نام (بدون موبایل) |
 | موجودی کم | `LowStockProductsTable.php` |
 
 ---

@@ -80,9 +80,41 @@ class Order extends Model
         return $this->isDraft();
     }
 
+    public static function directShopRepresentativeId(): ?int
+    {
+        $id = (int) config('shop.checkout.direct_representative_id', 0);
+
+        return $id > 0 ? $id : null;
+    }
+
+    public function isDirectShopRepresentativeAttribution(): bool
+    {
+        $directId = self::directShopRepresentativeId();
+
+        return $directId !== null && (int) $this->representative_id === $directId;
+    }
+
     public function isRepresentativeOrder(): bool
     {
-        return $this->representative_id !== null;
+        return $this->representative_id !== null && ! $this->isDirectShopRepresentativeAttribution();
+    }
+
+    public function representativeLabel(): string
+    {
+        if ($this->representative_id !== null) {
+            if ($this->relationLoaded('representative') && $this->representative) {
+                return (string) $this->representative->name;
+            }
+
+            return (string) ($this->representative()->value('name') ?? '—');
+        }
+
+        $directId = self::directShopRepresentativeId();
+        if ($directId !== null) {
+            return (string) (User::query()->whereKey($directId)->value('name') ?? '—');
+        }
+
+        return '—';
     }
 
     public function catalogTemplateLabel(): string
@@ -299,7 +331,7 @@ class Order extends Model
 
     public function isPendingShopOnlinePayment(): bool
     {
-        if ($this->representative_id !== null) {
+        if ($this->representative_id !== null && ! $this->isDirectShopRepresentativeAttribution()) {
             return false;
         }
 

@@ -17,6 +17,14 @@ class LoginModal extends Component
 
     public string $activeTab = 'otp';
 
+    public function mount(): void
+    {
+        if ($this->shouldOpenProfileStepForAuthenticatedUser()) {
+            $this->prepareProfileStepForAuthenticatedUser();
+            $this->rememberIntendedUrl(url()->current());
+        }
+    }
+
     #[On('request-close-login-modal')]
     public function requestCloseFromBackdrop(): void
     {
@@ -87,6 +95,7 @@ class LoginModal extends Component
         $this->firstName = '';
         $this->lastName = '';
         $this->pendingNewAccount = false;
+        $this->profileUserId = null;
         $this->resetPasswordForm();
         $this->resetValidation();
     }
@@ -109,6 +118,7 @@ class LoginModal extends Component
         $this->firstName = '';
         $this->lastName = '';
         $this->pendingNewAccount = false;
+        $this->profileUserId = $user !== null ? (int) $user->getKey() : null;
         $this->resetPasswordForm();
         $this->resetValidation();
     }
@@ -153,6 +163,8 @@ class LoginModal extends Component
 
     public function render()
     {
-        return view('livewire.auth.login-modal');
+        return view('livewire.auth.login-modal', [
+            'profileRequired' => $this->mustCompleteProfileBeforeClose(),
+        ]);
     }
 }

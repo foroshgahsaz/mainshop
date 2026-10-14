@@ -78,6 +78,39 @@ class ShopLivewireTest extends TestCase
             ->assertSet('phone', '09907891090');
     }
 
+    public function test_placeholder_user_gets_mandatory_profile_modal_on_page_load(): void
+    {
+        $user = User::factory()->create([
+            'phone' => '09907891090',
+            'name' => 'کاربر 1090',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('home'))
+            ->assertOk()
+            ->assertSee('data-profile-required', false)
+            ->assertSee('تکمیل پروفایل');
+
+        Livewire::actingAs($user)
+            ->test(LoginModal::class)
+            ->assertSet('step', 'profile')
+            ->assertDontSeeHtml('aria-label="بستن"')
+            ->call('closeModal')
+            ->assertHasErrors(['firstName'])
+            ->set('firstName', 'مریم')
+            ->set('lastName', 'کریمی')
+            ->call('saveProfile')
+            ->assertHasNoErrors();
+
+        $this->assertSame('مریم کریمی', $user->fresh()->name);
+
+        $this->actingAs($user->fresh())
+            ->get(route('home'))
+            ->assertOk()
+            ->assertDontSee('data-profile-required', false)
+            ->assertSee('مریم کریمی');
+    }
+
     public function test_new_otp_user_is_prompted_for_name_and_keeps_guest_cart(): void
     {
         $category = Category::create([

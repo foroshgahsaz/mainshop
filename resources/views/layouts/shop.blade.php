@@ -71,9 +71,9 @@
     @include('shop.partials.overlays')
     @include('shop.partials.mobile-menu')
 
-    @guest
+    @if (auth()->guest() || \App\Support\UserDisplayName::isPlaceholder(auth()->user()->name))
         @include('shop.partials.login-modal-shell')
-    @endguest
+    @endif
 
     @if ($needsSwiper)
         <script src="{{ asset('shop/vendor/swiper/swiper-bundle.min.js') }}" defer></script>

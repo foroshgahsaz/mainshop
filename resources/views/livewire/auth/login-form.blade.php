@@ -12,18 +12,18 @@
     <form wire:submit="saveProfile" class="space-y-4">
         <div class="text-center mb-2">
             <h3 class="text-base font-bold text-navy">تکمیل پروفایل</h3>
-            <p class="text-sm text-gray-500 mt-1">نام و نام خانوادگی خود را وارد کنید</p>
+            <p class="text-sm text-gray-500 mt-1">برای ادامه، نام و نام خانوادگی خود را وارد کنید</p>
         </div>
         <div>
-            <label class="block text-sm font-bold text-gray-700 mb-2">نام</label>
-            <input type="text" wire:model.live="firstName"
+            <label class="block text-sm font-bold text-gray-700 mb-2">نام <span class="text-red-600" aria-hidden="true">*</span></label>
+            <input type="text" wire:model.live="firstName" required aria-required="true" autocomplete="given-name"
                    autofocus
                    class="w-full border-2 border-gray-200 rounded-xl py-3 px-4 text-sm outline-none focus:border-brand-green">
             @error('firstName') <span class="text-red-600 text-xs mt-1 block">{{ $message }}</span> @enderror
         </div>
         <div>
-            <label class="block text-sm font-bold text-gray-700 mb-2">نام خانوادگی</label>
-            <input type="text" wire:model.live="lastName"
+            <label class="block text-sm font-bold text-gray-700 mb-2">نام خانوادگی <span class="text-red-600" aria-hidden="true">*</span></label>
+            <input type="text" wire:model.live="lastName" required aria-required="true" autocomplete="family-name"
                    class="w-full border-2 border-gray-200 rounded-xl py-3 px-4 text-sm outline-none focus:border-brand-green">
             @error('lastName') <span class="text-red-600 text-xs mt-1 block">{{ $message }}</span> @enderror
         </div>

@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Locked;
 
 trait HandlesOtpLogin
 {
@@ -35,6 +36,9 @@ trait HandlesOtpLogin
     public string $lastName = '';
 
     public bool $pendingNewAccount = false;
+
+    #[Locked]
+    public ?int $profileUserId = null;
 
     public function sendOtp(OtpService $otp): void
     {
@@ -147,6 +151,14 @@ trait HandlesOtpLogin
 
         $user = Auth::user();
 
+        if ($user === null && $this->profileUserId !== null) {
+            $user = User::query()->find($this->profileUserId);
+
+            if ($user !== null) {
+                Auth::login($user, remember: true);
+            }
+        }
+
         if ($user === null) {
             throw ValidationException::withMessages([
                 'firstName' => 'نشست ورود منقضی شده؛ دوباره وارد شوید.',
@@ -166,8 +178,9 @@ trait HandlesOtpLogin
 
         $this->firstName = '';
         $this->lastName = '';
+        $this->profileUserId = null;
         $this->dispatch('shop-user-profile-updated');
-        $this->finalizeShopLogin($user);
+        $this->finalizeShopLogin($user->fresh());
     }
 
     public function backToPhone(): void
@@ -243,6 +256,7 @@ trait HandlesOtpLogin
 
         if ($this->needsProfileCompletion($user, $createdAccount)) {
             $this->pendingNewAccount = $createdAccount;
+            $this->profileUserId = (int) $user->getKey();
             $this->step = 'profile';
             $this->onProfileStepRequested();
 

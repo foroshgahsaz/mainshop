@@ -8,6 +8,7 @@ use App\Models\City;
 use App\Models\Province;
 use App\Models\User;
 use App\Rules\IranianPostalCode;
+use App\Services\Auth\OtpService;
 use App\Services\Cache\ShopCacheService;
 use App\Services\Checkout\CheckoutService;
 use App\Services\Payment\PaymentGatewayCatalog;
@@ -39,12 +40,6 @@ class CheckoutPage extends Component
     public bool $showAddressForm = false;
 
     public string $receiver_name = '';
-
-    public string $profileFirstName = '';
-
-    public string $profileLastName = '';
-
-    public bool $needsProfileNames = false;
 
     public string $receiver_phone = '';
 
@@ -120,13 +115,6 @@ class CheckoutPage extends Component
         if ($shipping) {
             $this->shippingMethodId = $shipping->id;
         }
-
-        $this->needsProfileNames = UserDisplayName::isPlaceholder(auth()->user()->name);
-
-        if ($this->needsProfileNames) {
-            $checkoutUrl = route('checkout');
-            $this->js('window.openLoginModal && window.openLoginModal('.json_encode($checkoutUrl).')');
-        }
     }
 
     public function toggleAddressForm(): void
@@ -149,41 +137,10 @@ class CheckoutPage extends Component
         $this->city = '';
     }
 
-    public function saveCheckoutProfileNames(): void
+    public function saveAddress(OtpService $otp): void
     {
-        if (! $this->needsProfileNames) {
-            return;
-        }
-
-        $this->validate([
-            'profileFirstName' => ['required', 'string', 'max:64'],
-            'profileLastName' => ['required', 'string', 'max:64'],
-        ], [
-            'profileFirstName.required' => 'نام را وارد کنید.',
-            'profileLastName.required' => 'نام خانوادگی را وارد کنید.',
-        ]);
-
-        $this->receiver_name = trim($this->profileFirstName.' '.$this->profileLastName);
-        $this->persistUserDisplayName($this->receiver_name);
-        $this->reset(['profileFirstName', 'profileLastName']);
-    }
-
-    public function saveAddress(): void
-    {
-        if ($this->needsProfileNames) {
-            $this->validate([
-                'profileFirstName' => ['required', 'string', 'max:64'],
-                'profileLastName' => ['required', 'string', 'max:64'],
-            ], [
-                'profileFirstName.required' => 'نام را وارد کنید.',
-                'profileLastName.required' => 'نام خانوادگی را وارد کنید.',
-            ]);
-
-            $this->receiver_name = trim($this->profileFirstName.' '.$this->profileLastName);
-            $this->persistUserDisplayName($this->receiver_name);
-            $this->needsProfileNames = false;
-            $this->reset(['profileFirstName', 'profileLastName']);
-        }
+        $this->receiver_name = trim($this->receiver_name);
+        $this->receiver_phone = $otp->normalizePhone($this->receiver_phone);
 
         $validated = $this->validate($this->addressRules());
 
@@ -258,10 +215,6 @@ class CheckoutPage extends Component
 
     public function render(CheckoutService $checkout, ShopCacheService $cache, PaymentGatewayCatalog $catalog)
     {
-        if (auth()->check()) {
-            $this->syncProfileNameState();
-        }
-
         if (! auth()->check()) {
             return view('livewire.checkout.checkout-page', [
                 'preview' => null,
@@ -336,7 +289,7 @@ class CheckoutPage extends Component
     {
         return [
             'receiver_name' => ['required', 'string', 'max:255'],
-            'receiver_phone' => ['required', 'string', 'max:15'],
+            'receiver_phone' => ['required', 'string', 'regex:/^09\d{9}$/'],
             'province_id' => ['required', 'integer', Rule::exists('provinces', 'id')],
             'city_id' => [
                 'required',
@@ -361,6 +314,7 @@ class CheckoutPage extends Component
             'paymentMethod.in' => 'روش پرداخت معتبر نیست.',
             'receiver_name.required' => 'نام گیرنده را وارد کنید.',
             'receiver_phone.required' => 'موبایل گیرنده را وارد کنید.',
+            'receiver_phone.regex' => 'موبایل گیرنده باید با 09 شروع شود و ۱۱ رقم باشد.',
             'province_id.required' => 'استان را انتخاب کنید.',
             'province_id.exists' => 'استان انتخاب‌شده معتبر نیست.',
             'city_id.required' => 'شهر را انتخاب کنید.',
@@ -429,24 +383,6 @@ class CheckoutPage extends Component
             ->get(['id', 'name']);
     }
 
-    protected function syncProfileNameState(): void
-    {
-        $user = auth()->user()?->fresh();
-
-        if ($user === null) {
-            $this->needsProfileNames = false;
-
-            return;
-        }
-
-        auth()->setUser($user);
-        $this->needsProfileNames = UserDisplayName::isPlaceholder($user->name);
-
-        if (! $this->needsProfileNames && $this->receiver_name === '' && trim($user->name) !== '') {
-            $this->receiver_name = trim($user->name);
-        }
-    }
-
     protected function persistUserDisplayName(string $fullName): void
     {
         $fullName = trim($fullName);
@@ -463,7 +399,6 @@ class CheckoutPage extends Component
 
         $user->forceFill(['name' => $fullName])->save();
         auth()->setUser($user->fresh());
-        $this->needsProfileNames = false;
         $this->dispatch('shop-user-profile-updated');
     }
 

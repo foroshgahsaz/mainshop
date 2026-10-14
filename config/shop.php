@@ -22,6 +22,8 @@ return [
 
     'checkout' => [
         'unpaid_ttl_minutes' => (int) env('SHOP_UNPAID_TTL_MINUTES', 60),
+        /** سفارش مستقیم فروشگاه (بدون ویزارد نماینده) — user_id مدیر/نمایندهٔ «چینی بازار» در production */
+        'direct_representative_id' => (int) env('SHOP_DIRECT_REPRESENTATIVE_ID', 81),
     ],
 
     'representative' => [

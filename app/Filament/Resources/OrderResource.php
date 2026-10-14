@@ -58,6 +58,7 @@ class OrderResource extends Resource
                 Tables\Columns\TextColumn::make('representative.name')
                     ->label('نماینده')
                     ->placeholder('—')
+                    ->formatStateUsing(fn (Order $record): string => $record->representativeLabel())
                     ->toggleable()
                     ->wrap(),
                 Tables\Columns\TextColumn::make('final_amount')

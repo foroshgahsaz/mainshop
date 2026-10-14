@@ -1082,6 +1082,8 @@ $settings->site();       // نام سایت، لوگو، ...
 
 **ستون روش پرداخت:** `ShopLabels::orderPaymentMethodLabel()` — برای سفارش‌های قدیمی با `payment_method=online` نام درگاه از آخرین رکورد `payments.gateway` (مثلاً باجت‌پی)؛ سفارش‌های جدید فروشگاه slug درگاه (`bajet`، `tara`، …) را در `orders.payment_method` ذخیره می‌کنند.
 
+**ستون نماینده (خرید مستقیم سایت):** `SHOP_DIRECT_REPRESENTATIVE_ID` (پیش‌فرض `81` — چینی بازار) در `CheckoutService::placeOrder` روی `orders.representative_id` ست می‌شود. این سفارش‌ها `isRepresentativeOrder()` نیستند (`isDirectShopRepresentativeAttribution()`). سفارش‌های قدیمی بدون نماینده: `php artisan shop:assign-direct-shop-representative` (یا `--dry-run`).
+
 ### PaymentResource
 
 | Page | URL |
@@ -1279,5 +1281,6 @@ resources/views/layouts/shop.blade.php
 | 2026-10-14 | نام کاربر OTP فقط در مودال اجباری (رندر برای کاربر placeholder هم)؛ حذف کارت «تکمیل نام حساب» از checkout؛ `*` روی نام/موبایل گیرنده |
 | 2026-10-14 | لیست‌های ادمین: ستون/زیرنویس **موبایل** برای کاربر (`UserTableColumns`، `/admin/users` و سفارش/پرداخت/نظرات و …) |
 | 2026-10-14 | لیست/جزئیات سفارش ادمین: برچسب روش پرداخت = نام درگاه (`orderPaymentMethodLabel`)؛ checkout slug درگاه را در `orders.payment_method` ذخیره می‌کند |
+| 2026-10-14 | سفارش مستقیم فروشگاه: `representative_id` = `SHOP_DIRECT_REPRESENTATIVE_ID` (پیش‌فرض ۸۱ چینی بازار)؛ backfill `shop:assign-direct-shop-representative` |
 
 > اگر بخش جدیدی به پروژه اضافه شد، همین فایل را در `docs/DEVELOPER_GUIDE.md` به‌روز کنید و در صورت نیاز `docs/README.md` و `docs/dev/*`.

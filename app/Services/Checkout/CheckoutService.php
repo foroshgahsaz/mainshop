@@ -74,6 +74,7 @@ class CheckoutService
         return DB::transaction(function () use ($user, $address, $preview, $paymentMethod, $note) {
             $order = Order::create([
                 'user_id' => $user->id,
+                'representative_id' => Order::directShopRepresentativeId(),
                 'address_id' => $address->id,
                 'coupon_id' => $preview['coupon']?->id,
                 'shipping_method_id' => $preview['shippingMethod']?->id,

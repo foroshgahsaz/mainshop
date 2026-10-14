@@ -17,8 +17,17 @@ class ExpirePendingOrders extends Command
         $minutes = (int) ($this->option('minutes') ?: config('shop.checkout.unpaid_ttl_minutes', 60));
         $cutoff = now()->subMinutes($minutes);
 
+        $directRepId = Order::directShopRepresentativeId();
+
         $pending = Order::query()
-            ->whereNull('representative_id')
+            ->when(
+                $directRepId,
+                fn ($q) => $q->where(function ($q) use ($directRepId) {
+                    $q->whereNull('representative_id')
+                        ->orWhere('representative_id', $directRepId);
+                }),
+                fn ($q) => $q->whereNull('representative_id'),
+            )
             ->where('payment_method', '!=', 'cod')
             ->where('status', Order::STATUS_PENDING)
             ->where('created_at', '<', $cutoff)

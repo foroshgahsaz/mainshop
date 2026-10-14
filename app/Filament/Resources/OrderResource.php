@@ -54,7 +54,7 @@ class OrderResource extends Resource
                     ->copyable()
                     ->weight('medium')
                     ->color('primary'),
-                UserTableColumns::nameWithPhone(),
+                UserTableColumns::nameOnly(),
                 Tables\Columns\TextColumn::make('representative.name')
                     ->label('نماینده')
                     ->placeholder('—')

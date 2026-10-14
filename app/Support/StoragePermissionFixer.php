@@ -15,6 +15,7 @@ class StoragePermissionFixer
             $publicRoot,
             ShopStoragePaths::logsDirectory(),
             ShopStoragePaths::backupDirectory(),
+            ShopStoragePaths::filesBackupDirectory(),
             Storage::disk('livewire-tmp')->path((string) config('livewire.temporary_file_upload.directory', 'livewire-tmp')),
             Storage::disk('public')->path('products'),
             Storage::disk('public')->path('brands'),

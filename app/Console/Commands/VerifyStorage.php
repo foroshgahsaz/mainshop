@@ -21,6 +21,7 @@ class VerifyStorage extends Command
         $this->info('Storage verification');
         $logsDir = ShopStoragePaths::logsDirectory();
         $backupDir = ShopStoragePaths::backupDirectory();
+        $filesBackupDir = ShopStoragePaths::filesBackupDirectory();
         $defaultLogsDir = storage_path('logs');
 
         $this->table(['Key', 'Value'], [
@@ -32,12 +33,14 @@ class VerifyStorage extends Command
             ['logs directory (active)', $logsDir],
             ['logs default (storage/logs)', $defaultLogsDir],
             ['DB backup directory', $backupDir],
+            ['files backup directory', $filesBackupDir],
         ]);
 
         $this->newLine();
         $this->line('Persistent logs & backups (filesystem):');
         $this->line('  log files: '.$this->countPath($logsDir).' in '.$logsDir.(is_writable($logsDir) ? ' (writable)' : ' (NOT writable)'));
-        $this->line('  backup files: '.$this->countPath($backupDir).' in '.$backupDir.(is_dir($backupDir) && is_writable($backupDir) ? ' (writable)' : ' (missing or NOT writable)'));
+        $this->line('  DB backup files: '.$this->countPath($backupDir).' in '.$backupDir.(is_dir($backupDir) && is_writable($backupDir) ? ' (writable)' : ' (missing or NOT writable)'));
+        $this->line('  files backup files: '.$this->countPath($filesBackupDir).' in '.$filesBackupDir.(is_dir($filesBackupDir) && is_writable($filesBackupDir) ? ' (writable)' : ' (missing or NOT writable)'));
 
         if ($publicRoot === '/data' && ! ShopStoragePaths::usesCustomLogsDirectory()) {
             $this->newLine();
@@ -45,6 +48,7 @@ class VerifyStorage extends Command
             $this->line('Set in environment (same panel as FILESYSTEM_PUBLIC_ROOT):');
             $this->line('  SHOP_LOGS_DIRECTORY=/data/logs');
             $this->line('  DB_BACKUP_DIRECTORY=/data/database-backups');
+            $this->line('  FILES_BACKUP_DIRECTORY=/data/files-backups');
             $this->line('Then remove extra disks mounted at /storage/logs — use subfolders on the /data volume instead.');
         } elseif ($logsDir !== $defaultLogsDir && str_starts_with($logsDir, '/data')) {
             $this->info('Logs are configured on the /data volume — they should survive deploys.');

@@ -30,6 +30,11 @@ class ShopStoragePaths
         return (string) config('backup.database.directory');
     }
 
+    public static function filesBackupDirectory(): string
+    {
+        return (string) config('backup.files.directory');
+    }
+
     public static function usesCustomLogsDirectory(): bool
     {
         $custom = config('shop.storage.logs_directory');
@@ -50,6 +55,7 @@ class ShopStoragePaths
         return array_values(array_unique([
             self::logsDirectory(),
             self::backupDirectory(),
+            self::filesBackupDirectory(),
         ]));
     }
 }

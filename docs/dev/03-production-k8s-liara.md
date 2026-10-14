@@ -91,7 +91,7 @@ php artisan shop:verify-storage
 اگر فقط دیسک **`/data`** را mount کرده‌اید و تصاویر بعد از deploy می‌مانند، اما فایل‌های **`storage/logs`** یا **`database-backups`** پاک می‌شوند:
 
 1. در پنل Runflare **دیسک جدا** برای `/storage/logs` یا `/storage/app/database-backups` معمولاً به مسیر واقعی Laravel (`/var/www/storage/...`) وصل نیست — حجم دیسک **۰** می‌ماند.
-2. با `FILESYSTEM_PUBLIC_ROOT=/data` اپ از نسخهٔ جدید به‌صورت خودکار لاگ را در **`/data/logs`** و بک‌آپ را در **`/data/database-backups`** می‌نویسد (همان volume تصاویر).
+2. با `FILESYSTEM_PUBLIC_ROOT=/data` اپ از نسخهٔ جدید به‌صورت خودکار لاگ را در **`/data/logs`**، بک‌آپ DB در **`/data/database-backups`** و بک‌آپ فایل‌ها در **`/data/files-backups`** می‌نویسد (همان volume تصاویر؛ پوشه‌های بک‌آپ و logs داخل آرشیو فایل‌ها نیستند).
 3. بعد از deploy: `php artisan shop:deploy-recover` (پوشه‌ها را می‌سازد).
 4. تشخیص: `php artisan shop:verify-storage` — مسیر فعال لاگ و بک‌آپ را نشان می‌دهد.
 
@@ -99,6 +99,7 @@ php artisan shop:verify-storage
 
 - `SHOP_LOGS_DIRECTORY=/data/logs`
 - `DB_BACKUP_DIRECTORY=/data/database-backups`
+- `FILES_BACKUP_DIRECTORY=/data/files-backups` — یک نسخه آخر (`FILES_BACKUP_KEEP=1`)؛ scheduler `shop:files-backup` روزانه؛ پنل `/admin/database-backups`
 
 ---
 

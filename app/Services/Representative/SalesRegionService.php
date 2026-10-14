@@ -116,6 +116,23 @@ class SalesRegionService
         );
     }
 
+    /** نمایندگانی که استان فعالیتشان در این منطقه است. */
+    public function representativesForRegion(SalesRegion $region): Builder
+    {
+        $provinceIds = $region->relationLoaded('provinces')
+            ? $region->provinces->pluck('id')->map(fn ($id) => (int) $id)->all()
+            : $region->provinces()->pluck('id')->map(fn ($id) => (int) $id)->all();
+
+        if ($provinceIds === []) {
+            return User::query()->whereRaw('1 = 0');
+        }
+
+        return User::query()
+            ->where('is_representative', true)
+            ->with(['representativeProfile.province:id,name'])
+            ->whereHas('representativeProfile', fn (Builder $q) => $q->whereIn('province_id', $provinceIds));
+    }
+
     /**
      * @param  list<int|string>  $provinceIds
      */

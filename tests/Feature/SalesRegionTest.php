@@ -133,6 +133,35 @@ class SalesRegionTest extends TestCase
 
     }
 
+    public function test_representatives_for_region_match_provinces(): void
+    {
+        $m1 = $this->user('09130000002', ['is_sales_manager' => 1]);
+        $pTehran = Province::query()->create(['name' => 'تهران', 'slug' => 'teh-'.uniqid(), 'position' => 1]);
+        $pGilan = Province::query()->create(['name' => 'گیلان', 'slug' => 'gil-'.uniqid(), 'position' => 2]);
+
+        $region = SalesRegion::query()->create(['name' => 'مرکز', 'sales_manager_id' => $m1->id]);
+        $pTehran->update(['sales_region_id' => $region->id]);
+
+        $inRegion = $this->user('09130000020', ['is_representative' => 1]);
+        RepresentativeProfile::query()->create([
+            'user_id' => $inRegion->id,
+            'sales_manager_id' => $m1->id,
+            'province_id' => $pTehran->id,
+        ]);
+
+        $outRegion = $this->user('09130000021', ['is_representative' => 1]);
+        RepresentativeProfile::query()->create([
+            'user_id' => $outRegion->id,
+            'sales_manager_id' => $m1->id,
+            'province_id' => $pGilan->id,
+        ]);
+
+        $service = app(SalesRegionService::class);
+        $ids = $service->representativesForRegion($region->fresh('provinces'))->pluck('id')->all();
+
+        $this->assertSame([$inRegion->id], $ids);
+    }
+
     public function test_regions_page_admin_only(): void
     {
         $admin = $this->user('09130000001', ['is_admin' => 1]);

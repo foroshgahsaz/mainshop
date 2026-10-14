@@ -18,7 +18,8 @@ class ExpirePendingOrders extends Command
         $cutoff = now()->subMinutes($minutes);
 
         $pending = Order::query()
-            ->where('payment_method', 'online')
+            ->whereNull('representative_id')
+            ->where('payment_method', '!=', 'cod')
             ->where('status', Order::STATUS_PENDING)
             ->where('created_at', '<', $cutoff)
             ->whereDoesntHave('payments', fn ($q) => $q->where('status', 'success'))

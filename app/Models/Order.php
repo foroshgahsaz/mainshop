@@ -297,13 +297,37 @@ class Order extends Model
             && $this->stock_reserved_until->isPast();
     }
 
+    public function isPendingShopOnlinePayment(): bool
+    {
+        if ($this->representative_id !== null) {
+            return false;
+        }
+
+        $method = (string) ($this->payment_method ?? '');
+
+        if ($method === '' || $method === 'cod') {
+            return false;
+        }
+
+        if ($method === 'online') {
+            return true;
+        }
+
+        return app(PaymentGatewayCatalog::class)->isEnabled($method);
+    }
+
+    public function paymentMethodLabel(): string
+    {
+        return \App\Support\ShopLabels::orderPaymentMethodLabel($this);
+    }
+
     public function canInitiateOnlinePayment(): bool
     {
         if ($this->remainingAmount() <= 0 || ! $this->hasActiveStockReservation()) {
             return false;
         }
 
-        if ($this->status === self::STATUS_PENDING && $this->payment_method === 'online') {
+        if ($this->status === self::STATUS_PENDING && $this->isPendingShopOnlinePayment()) {
             return true;
         }
 

@@ -110,7 +110,7 @@ class SalesInvoiceBuilder
             shippingAmount: (int) $order->shipping_amount,
             finalAmount: (int) $order->final_amount,
             feesTotal: $feesTotal,
-            paymentMethodLabel: ShopLabels::paymentMethod((string) $order->payment_method),
+            paymentMethodLabel: ShopLabels::orderPaymentMethodLabel($order),
             freightLabel: $order->freightCarrier?->displayLabel(),
             notes: $notes,
         );

@@ -21,7 +21,7 @@
                     {{ \App\Support\ShopLabels::orderStatus($order->status) }}
                 </span>
                 <span class="admin-order__badge admin-order__badge--payment">
-                    {{ \App\Support\ShopLabels::paymentMethod($order->payment_method) }}
+                    {{ \App\Support\ShopLabels::orderPaymentMethodLabel($order) }}
                 </span>
                 @if($order->isPaid())
                     <span class="admin-order__badge admin-order__badge--paid">پرداخت شده</span>

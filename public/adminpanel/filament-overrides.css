@@ -315,6 +315,20 @@ body.fi-body .tippy-box {
     min-width: 0;
 }
 
+.fi-admin-user-cell__text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.fi-admin-user-cell__phone {
+    font-size: 12px;
+    font-weight: 500;
+    color: #7e8299;
+    letter-spacing: 0.02em;
+}
+
 .fi-admin-user-cell__avatar {
     flex-shrink: 0;
     width: 40px;

@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\UserEditTabs;
 use App\Filament\Support\AdminTable;
+use App\Filament\Support\UserTableColumns;
 use App\Filament\Support\ShopMediaPicker;
 use App\Models\City;
 use App\Models\RepresentativeProfile;
@@ -574,6 +575,7 @@ class UserResource extends Resource
                     ->label('کاربر')
                     ->view('filament.tables.columns.user-cell')
                     ->searchable(['name', 'email', 'phone']),
+                UserTableColumns::phone(),
                 Tables\Columns\TextColumn::make('customer_type')
                     ->label('نوع')
                     ->state(fn (User $record) => $record->isCustomer()

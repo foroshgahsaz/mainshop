@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Filament\Resources\OrderResource;
+use App\Filament\Support\UserTableColumns;
 use App\Models\Order;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -32,9 +33,7 @@ class LatestOrdersTable extends BaseWidget
                     ->label('کد سفارش')
                     ->searchable()
                     ->copyable(),
-                Tables\Columns\TextColumn::make('user.name')
-                    ->label('مشتری')
-                    ->placeholder('—'),
+                UserTableColumns::nameWithPhone(label: 'مشتری'),
                 Tables\Columns\TextColumn::make('final_amount')
                     ->label('مبلغ')
                     ->numeric()

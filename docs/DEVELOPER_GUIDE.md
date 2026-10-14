@@ -1274,5 +1274,6 @@ resources/views/layouts/shop.blade.php
 | 2026-10-12 | رفع migration مناطق فروش روی MySQL (خطای 1824 `Failed to open the referenced table 'sales_regions'`): migration idempotent — `sales_regions` با InnoDB (و تبدیل اگر MyISAM ساخته شده)، ستون/ایندکس جدا، FKها فقط اگر نبودند و با try/catch؛ `SalesRegion::deleting` استان‌ها را آزاد می‌کند. اجرای دوبارهٔ `php artisan migrate --force` کافی است |
 | 2026-10-12 | منوی **مناطق فروش** جدا از کاربران: آیکون و پنل مستقل در `admin-sidebar` (لیست مناطق، افزودن منطقه) — فقط مدیر کل |
 | 2026-10-12 | پنل ادمین تماماً سفید: پس‌زمینه body/shell، هدر و pagination جدول، تب‌های کاربر، صفحه ورود (`filament-overrides.css`، `styles.css`) |
+| 2026-10-14 | لیست‌های ادمین: ستون/زیرنویس **موبایل** برای کاربر (`UserTableColumns`، `/admin/users` و سفارش/پرداخت/نظرات و …) |
 
 > اگر بخش جدیدی به پروژه اضافه شد، همین فایل را در `docs/DEVELOPER_GUIDE.md` به‌روز کنید و در صورت نیاز `docs/README.md` و `docs/dev/*`.

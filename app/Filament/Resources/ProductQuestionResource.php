@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProductQuestionResource\Pages;
+use App\Filament\Support\UserTableColumns;
 use App\Models\ProductQuestion;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -36,7 +37,17 @@ class ProductQuestionResource extends Resource
                 ->content(fn (ProductQuestion $record): string => $record->product?->name ?? '—'),
             Forms\Components\Placeholder::make('user_label')
                 ->label('کاربر')
-                ->content(fn (ProductQuestion $record): string => $record->user?->name ?? '—'),
+                ->content(function (ProductQuestion $record): string {
+                    $user = $record->user;
+
+                    if ($user === null) {
+                        return '—';
+                    }
+
+                    return filled($user->phone)
+                        ? $user->name.' — '.$user->phone
+                        : $user->name;
+                }),
             Forms\Components\Textarea::make('question')
                 ->label('پرسش')
                 ->rows(3)
@@ -59,8 +70,7 @@ class ProductQuestionResource extends Resource
                     ->label('محصول')
                     ->searchable()
                     ->limit(30),
-                Tables\Columns\TextColumn::make('user.name')
-                    ->label('کاربر'),
+                UserTableColumns::nameWithPhone(),
                 Tables\Columns\TextColumn::make('question')
                     ->label('پرسش')
                     ->limit(40)

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Representative\Widgets;
 
+use App\Filament\Support\UserTableColumns;
 use App\Filament\Representative\Pages\CreateDraftOrder;
 use App\Filament\Representative\Resources\DraftOrderResource;
 use App\Models\Order;
@@ -40,9 +41,7 @@ class RepresentativeCurrentOrdersTable extends BaseWidget
                 Tables\Columns\TextColumn::make('tracking_code')
                     ->label('کد')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('user.name')
-                    ->label('مشتری')
-                    ->placeholder('—'),
+                UserTableColumns::nameWithPhone(label: 'مشتری'),
                 Tables\Columns\TextColumn::make('status')
                     ->label('وضعیت')
                     ->badge()

@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PaymentResource\Pages;
 use App\Filament\Support\AdminTable;
+use App\Filament\Support\UserTableColumns;
 use App\Filament\Support\PaymentDeleteActions;
 use App\Models\Order;
 use App\Models\Payment;
@@ -56,7 +57,7 @@ class PaymentResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('tracking_code')->label('پیگیری')->searchable(),
                 Tables\Columns\TextColumn::make('order.tracking_code')->label('سفارش'),
-                Tables\Columns\TextColumn::make('user.name')->label('کاربر'),
+                UserTableColumns::nameWithPhone(),
                 Tables\Columns\TextColumn::make('amount')
                     ->label('مبلغ')
                     ->formatStateUsing(fn (?int $state) => ShopLabels::formatMoney($state)),

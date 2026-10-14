@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProductReviewResource\Pages;
+use App\Filament\Support\UserTableColumns;
 use App\Models\ProductReview;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -35,7 +36,7 @@ class ProductReviewResource extends Resource
     {
         return $table->columns([
             Tables\Columns\TextColumn::make('product.name')->label('محصول'),
-            Tables\Columns\TextColumn::make('user.name')->label('کاربر'),
+            UserTableColumns::nameWithPhone(),
             Tables\Columns\TextColumn::make('rating')->label('امتیاز'),
             Tables\Columns\TextColumn::make('comment')->label('نظر')->limit(50),
             Tables\Columns\IconColumn::make('is_approved')->label('تایید')->boolean(),

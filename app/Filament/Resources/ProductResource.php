@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProductResource\Pages;
 use App\Filament\Resources\ProductResource\RelationManagers;
+use App\Filament\Support\AdminImageColumn;
 use App\Filament\Support\AdminTable;
 use App\Filament\Support\Filters\PriceRangeFilter;
 use App\Filament\Support\ProductDeleteActions;
@@ -147,6 +148,8 @@ class ProductResource extends Resource
                     ->label('ID')
                     ->sortable(),
 
+                AdminImageColumn::make('primary_image_path', 52, 'تصویر'),
+
                 Tables\Columns\TextColumn::make('name')
                     ->label('نام محصول')
                     ->searchable()
@@ -239,6 +242,11 @@ class ProductResource extends Resource
             'productPlant:id,name',
             'productTemplate:id,name',
             'lastEditedBy:id,name',
+            'images' => fn ($query) => $query
+                ->select('id', 'product_id', 'image', 'is_primary', 'position')
+                ->orderByDesc('is_primary')
+                ->orderBy('position')
+                ->limit(1),
         ]);
     }
 

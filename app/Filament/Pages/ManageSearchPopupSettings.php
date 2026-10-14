@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Filament\Support\CrudSuccessNotification;
 use App\Filament\Support\ShopMediaPicker;
 use App\Services\Settings\SearchPopupSettingsService;
+use App\Support\AdminAccess;
 use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -32,6 +33,11 @@ class ManageSearchPopupSettings extends Page implements HasForms
     protected static string $view = 'filament.pages.manage-general-settings';
 
     public ?array $data = [];
+
+    public static function canAccess(): bool
+    {
+        return AdminAccess::canManageShopInAdmin();
+    }
 
     public function mount(SearchPopupSettingsService $searchPopup): void
     {
@@ -93,8 +99,8 @@ class ManageSearchPopupSettings extends Page implements HasForms
                             ->visible(fn (Forms\Get $get): bool => (bool) $get('banner.enabled')),
                         Forms\Components\TextInput::make('banner.link')
                             ->label('لینک بنر')
-                            ->url()
                             ->maxLength(500)
+                            ->helperText('آدرس کامل یا مسیر داخلی مثل /products')
                             ->visible(fn (Forms\Get $get): bool => (bool) $get('banner.enabled')),
                         Forms\Components\TextInput::make('banner.button_text')
                             ->label('متن دکمه')
@@ -108,7 +114,11 @@ class ManageSearchPopupSettings extends Page implements HasForms
 
     public function save(SearchPopupSettingsService $searchPopup): void
     {
-        $searchPopup->saveFromAdminForm($this->form->getState());
+        $data = $this->form->getState();
+
+        $searchPopup->saveFromAdminForm($data);
+
+        $this->form->fill($searchPopup->forAdminForm());
 
         CrudSuccessNotification::saved()
             ->title('ذخیره شد')

@@ -507,6 +507,32 @@ body.fi-body .fi-admin-shell .fi-wi-widget {
     line-height: 1.45;
 }
 
+/* لیست محصولات — ردیف‌ها و ستون‌ها فشرده‌تر (مشابه نمونهٔ UI) */
+.fi-admin-shell .fi-resource-products .fi-ta-header-cell {
+    padding: 8px 10px !important;
+}
+
+.fi-admin-shell .fi-resource-products .fi-ta-cell,
+.fi-admin-shell .fi-resource-products .fi-ta-actions-cell {
+    padding: 6px 10px !important;
+    line-height: 1.35;
+}
+
+.fi-admin-shell .fi-resource-products .fi-ta-image-column,
+.fi-admin-shell .fi-resource-products .fi-ta-image {
+    min-width: 2.75rem;
+    width: 2.75rem;
+}
+
+.fi-admin-shell .fi-resource-products img.fi-admin-table-thumb {
+    width: 44px !important;
+    height: 44px !important;
+}
+
+.fi-admin-shell .fi-resource-products .fi-ta-cell .fi-ta-text-item-label {
+    white-space: normal;
+}
+
 .fi-admin-shell .fi-ta-cell .fi-ta-text,
 .fi-admin-shell .fi-ta-cell .fi-ta-text-item,
 .fi-admin-shell .fi-ta-cell > div {

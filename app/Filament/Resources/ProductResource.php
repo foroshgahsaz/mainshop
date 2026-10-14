@@ -147,18 +147,26 @@ class ProductResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
-                    ->sortable(),
+                    ->sortable()
+                    ->width('3.5rem')
+                    ->grow(false),
 
-                AdminImageColumn::make('primary_image_path', 56, 'تصویر'),
+                AdminImageColumn::make('primary_image_path', 44, 'تصویر'),
 
                 Tables\Columns\TextColumn::make('name')
                     ->label('نام محصول')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->wrap(false)
+                    ->lineClamp(2)
+                    ->tooltip(fn (Product $record): string => $record->name),
 
                 Tables\Columns\TextColumn::make('category.name')
                     ->label('دسته‌بندی')
-                    ->sortable(),
+                    ->sortable()
+                    ->width('7rem')
+                    ->grow(false)
+                    ->wrap(false),
 
                 Tables\Columns\TextColumn::make('productFamily.name')
                     ->label('خانواده')
@@ -179,19 +187,30 @@ class ProductResource extends Resource
                     ->label('قیمت')
                     ->alignEnd()
                     ->formatStateUsing(fn (?int $state): string => ShopLabels::formatMoney($state))
-                    ->sortable(),
+                    ->sortable()
+                    ->width('9rem')
+                    ->grow(false),
 
                 Tables\Columns\TextColumn::make('stock')
                     ->label('موجودی')
-                    ->sortable(),
+                    ->sortable()
+                    ->width('4rem')
+                    ->grow(false)
+                    ->alignCenter(),
 
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('فعال')
-                    ->boolean(),
+                    ->boolean()
+                    ->width('3.5rem')
+                    ->grow(false)
+                    ->alignCenter(),
 
                 Tables\Columns\IconColumn::make('is_featured')
                     ->label('ویژه')
-                    ->boolean(),
+                    ->boolean()
+                    ->width('3.5rem')
+                    ->grow(false)
+                    ->alignCenter(),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاریخ ایجاد')
@@ -202,13 +221,18 @@ class ProductResource extends Resource
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('تاریخ ویرایش')
                     ->shopJalaliDateTime()
-                    ->sortable(),
+                    ->sortable()
+                    ->width('8.5rem')
+                    ->grow(false),
 
                 Tables\Columns\TextColumn::make('lastEditedBy.name')
                     ->label('آخرین ویرایش توسط')
                     ->placeholder('—')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->width('6.5rem')
+                    ->grow(false)
+                    ->wrap(false),
             ])
             ->defaultSort('updated_at', 'desc')
             ->filters([

@@ -1277,6 +1277,7 @@ resources/views/layouts/shop.blade.php
 | 2026-10-14 | رفع ذخیره `/admin/search-popup-settings`: `array_merge` به‌جای `array_replace_recursive` برای لیست جستجوهای پرتکرار |
 | 2026-10-14 | `/admin/products`: ستون **تصویر** (تصویر اصلی محصول در لیست) |
 | 2026-10-14 | `/admin/products`: ستون قیمت با **تومان** (`ShopLabels::formatMoney` به‌جای `money('irr')`) |
+| 2026-10-14 | `/admin/products`: جدول لیست **فشرده** — padding کمتر، عرض ستون‌ها، تصویر ۴۴px، نام دوخط (`lineClamp`) |
 | 2026-10-14 | رفع نمایش باریک تصویر در جدول‌های ادمین (`AdminImageColumn` + `width`/`square`، CSS thumb) |
 | 2026-10-14 | `/admin/database-backups`: بک‌آپ **فایل‌ها** (دستی + `shop:files-backup` روزانه) — `FilesBackupService`، نگه‌داری ۱ نسخه، منبع `FILESYSTEM_PUBLIC_ROOT` |
 | 2026-10-14 | `/admin/sales-regions`: لیست — همهٔ استان‌های هر منطقه (badge، بدون محدودیت ۴تایی)؛ ویرایش — جدول **نمایندگان این منطقه** (`SalesRegionService::representativesForRegion`) |

@@ -22,7 +22,15 @@ class ChineseServiceBrandPopupTest extends TestCase
             'position' => 0,
         ]);
 
+        $brand = Brand::query()->create([
+            'name' => 'Test',
+            'slug' => 'test',
+            'is_active' => true,
+            'position' => 0,
+        ]);
+
         ProductTemplate::query()->create([
+            'brand_id' => $brand->id,
             'product_family_id' => $family->id,
             'name' => 'مارشال',
             'slug' => 'marshal',
@@ -37,5 +45,20 @@ class ChineseServiceBrandPopupTest extends TestCase
         $this->assertCount(6, $payload['brands']);
         $this->assertSame('مارشال', $payload['brands'][1]['name']);
         $this->assertStringContainsString('product_template_id=', $payload['brands'][1]['url']);
+    }
+
+    public function test_matches_family_by_normalized_name(): void
+    {
+        $service = app(ChineseServiceBrandPopupService::class);
+
+        $family = ProductFamily::query()->create([
+            'name' => 'سرویس  چینی',
+            'slug' => 'porcelain-set',
+            'is_active' => true,
+            'position' => 0,
+        ]);
+
+        $this->assertTrue($service->matchesFamily($family));
+        $this->assertNotNull($service->payloadForFamily($family));
     }
 }

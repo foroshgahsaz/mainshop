@@ -46,6 +46,7 @@
         $isFamilyTaxonomy = $taxonomyMode === \App\Services\Settings\HomepageSettingsService::TAXONOMY_PRODUCT_FAMILIES;
         $chineseServiceBrandPopup = $chinese_service_brand_popup ?? null;
         $chineseServiceFamilyId = (int) ($chineseServiceBrandPopup['family_id'] ?? 0);
+        $chineseServicePopupMatcher = app(\App\Services\Shop\ChineseServiceBrandPopupService::class);
     @endphp
     @if($taxonomyItems->isNotEmpty())
         <section @class([
@@ -60,7 +61,7 @@
                 <div class="swiper-wrapper">
                     @foreach($taxonomyItems as $item)
                         <div class="swiper-slide">
-                            @if ($isFamilyTaxonomy && $chineseServiceFamilyId > 0 && (int) $item->id === $chineseServiceFamilyId)
+                            @if ($isFamilyTaxonomy && $chineseServiceBrandPopup && $chineseServicePopupMatcher->matchesFamily($item))
                                 <button type="button"
                                         class="category-card category-card--family category-card--popup-trigger"
                                         onclick="toggleChineseServiceBrandsModal(true)"

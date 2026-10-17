@@ -34,11 +34,21 @@ class ShopCacheService
                     ? ProductFamily::query()->where('is_active', true)->orderBy('position')->get()
                     : Category::query()->where('is_active', true)->orderBy('position')->get();
 
+                $chineseServiceBrandPopup = null;
+                if ($taxonomyMode === HomepageSettingsService::TAXONOMY_PRODUCT_FAMILIES) {
+                    $popupService = app(ChineseServiceBrandPopupService::class);
+                    $chineseFamily = $taxonomyItems
+                        ->first(fn ($item) => $item instanceof ProductFamily && $popupService->matchesFamily($item));
+                    if ($chineseFamily instanceof ProductFamily) {
+                        $chineseServiceBrandPopup = $popupService->payloadForFamily($chineseFamily);
+                    }
+                }
+
                 return [
                     'sliders' => HomeSlider::active()->orderBy('position')->get(),
                     'taxonomy_mode' => $taxonomyMode,
                     'taxonomy_items' => $taxonomyItems,
-                    'chinese_service_brand_popup' => app(ChineseServiceBrandPopupService::class)->payload(),
+                    'chinese_service_brand_popup' => $chineseServiceBrandPopup,
                     'discounted' => $productQuery()->whereNotNull('sale_price')->whereColumn('sale_price', '<', 'price')->latest()->take(8)->get(),
                     'best_sellers' => $productQuery()->orderByDesc('views')->take(8)->get(),
                     'new' => $homepage->resolveNewProducts($productQuery),

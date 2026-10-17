@@ -85,13 +85,11 @@ class ViewOrder extends ViewRecord
         ];
 
         $order = $this->record;
-        if (
-            $order->isRepresentativeOrder()
-            && ($order->isDraft() || $order->isProforma())
-        ) {
-            $actions[] = Actions\Action::make('downloadProformaPdf')
-                ->label('PDF پیش‌فاکتور')
+        if ($this->canDownloadSalesInvoicePdf()) {
+            $actions[] = Actions\Action::make('downloadSalesInvoicePdf')
+                ->label($order->isProforma() ? 'PDF پیش‌فاکتور' : 'PDF فاکتور')
                 ->icon('heroicon-o-arrow-down-tray')
+                ->color('primary')
                 ->url(fn (): string => route('representative.proforma.pdf', $order))
                 ->openUrlInNewTab();
         }
@@ -433,6 +431,15 @@ class ViewOrder extends ViewRecord
     public function getPaymentGatewayOptionsProperty(): array
     {
         return app(PaymentGatewayCatalog::class)->enabled();
+    }
+
+    protected function canDownloadSalesInvoicePdf(): bool
+    {
+        if (! AdminAccess::isFullAdmin() && ! AdminAccess::isSalesManagerOnly()) {
+            return false;
+        }
+
+        return $this->record->items->isNotEmpty();
     }
 
     protected function refreshRecord(): void

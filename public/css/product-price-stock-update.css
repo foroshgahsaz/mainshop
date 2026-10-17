@@ -1,0 +1,403 @@
+/* بروزرسانی قیمت و موجودی — /admin/product-price-stock-update */
+
+.product-price-stock-update {
+    --ppu-primary: #7239ea;
+    --ppu-border: #e4e6ef;
+    --ppu-muted: #7e8299;
+    --ppu-bg-soft: #f9fafb;
+    --ppu-bulk-bg: #fffbeb;
+    --ppu-bulk-border: #fcd34d;
+    --ppu-filter-bg: #f8f5ff;
+    --ppu-filter-border: #e9e3ff;
+    max-width: 100%;
+}
+
+.product-price-stock-update .ppu-toolbar {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+@media (min-width: 992px) {
+    .product-price-stock-update .ppu-toolbar {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+        align-items: stretch;
+    }
+}
+
+.product-price-stock-update .ppu-card {
+    background: #fff;
+    border: 1px solid var(--ppu-border);
+    border-radius: 12px;
+    padding: 1.25rem 1.35rem;
+    box-shadow: 0 1px 3px rgba(24, 28, 50, 0.04);
+}
+
+.product-price-stock-update .ppu-card--filters {
+    background: linear-gradient(180deg, var(--ppu-filter-bg) 0%, #fff 100%);
+    border-color: var(--ppu-filter-border);
+}
+
+.product-price-stock-update .ppu-card--bulk {
+    background: linear-gradient(180deg, var(--ppu-bulk-bg) 0%, #fff 55%);
+    border-color: var(--ppu-bulk-border);
+    border-width: 1px;
+}
+
+.product-price-stock-update .ppu-card__head {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    margin-bottom: 1.1rem;
+}
+
+.product-price-stock-update .ppu-card__icon {
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-size: 1rem;
+}
+
+.product-price-stock-update .ppu-card__icon--filter {
+    background: #ede9fe;
+    color: var(--ppu-primary);
+}
+
+.product-price-stock-update .ppu-card__icon--bulk {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.product-price-stock-update .ppu-card__title {
+    margin: 0 0 0.2rem;
+    font-size: 1rem;
+    font-weight: 800;
+    color: #181c32;
+}
+
+.product-price-stock-update .ppu-card__subtitle {
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--ppu-muted);
+}
+
+.product-price-stock-update .ppu-fields {
+    display: grid;
+    gap: 1rem;
+}
+
+.product-price-stock-update .ppu-fields--2 {
+    grid-template-columns: 1fr;
+}
+
+@media (min-width: 576px) {
+    .product-price-stock-update .ppu-fields--2 {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.product-price-stock-update .ppu-field {
+    margin: 0;
+}
+
+.product-price-stock-update .ppu-label {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: #3f4254;
+}
+
+.product-price-stock-update .ppu-select,
+.product-price-stock-update .ppu-input {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid var(--ppu-border);
+    border-radius: 8px;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.875rem;
+    background: #fff;
+    color: #181c32;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.product-price-stock-update .ppu-select {
+    cursor: pointer;
+    appearance: none;
+    padding-left: 2rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%237e8299' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: left 0.65rem center;
+}
+
+.product-price-stock-update .ppu-select:focus,
+.product-price-stock-update .ppu-input:focus {
+    outline: none;
+    border-color: var(--ppu-primary);
+    box-shadow: 0 0 0 3px rgba(114, 57, 234, 0.12);
+}
+
+.product-price-stock-update .ppu-bulk-hint {
+    margin: 0 0 1rem;
+    padding: 0.65rem 0.85rem;
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px dashed #fcd34d;
+    border-radius: 8px;
+    font-size: 0.8125rem;
+    line-height: 1.55;
+    color: #78350f;
+}
+
+.product-price-stock-update .ppu-bulk-hint p {
+    margin: 0;
+}
+
+.product-price-stock-update .ppu-bulk-hint p + p {
+    margin-top: 0.35rem;
+}
+
+.product-price-stock-update .ppu-bulk-form {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    align-items: end;
+}
+
+@media (min-width: 768px) {
+    .product-price-stock-update .ppu-bulk-form {
+        grid-template-columns: 1fr 1fr auto;
+    }
+}
+
+.product-price-stock-update .ppu-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+}
+
+.product-price-stock-update .ppu-input-wrap .ppu-input {
+    padding-left: 3rem;
+}
+
+.product-price-stock-update .ppu-input-suffix {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--ppu-muted);
+    pointer-events: none;
+}
+
+.product-price-stock-update .ppu-input--ltr {
+    direction: ltr;
+    text-align: left;
+}
+
+.product-price-stock-update .ppu-bulk-submit {
+    display: flex;
+    align-items: flex-end;
+}
+
+.product-price-stock-update .ppu-bulk-btn {
+    width: 100%;
+    justify-content: center;
+    min-height: 42px;
+}
+
+@media (min-width: 768px) {
+    .product-price-stock-update .ppu-bulk-btn {
+        min-width: 10rem;
+        width: auto;
+    }
+}
+
+/* جدول */
+.product-price-stock-update .ppu-card--table {
+    padding: 0;
+    overflow: hidden;
+}
+
+.product-price-stock-update .ppu-table-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 1.25rem 1.35rem 0.5rem;
+    border-bottom: 1px solid var(--ppu-border);
+    background: var(--ppu-bg-soft);
+}
+
+.product-price-stock-update .ppu-count-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.75rem;
+    border-radius: 9999px;
+    background: #ede9fe;
+    color: var(--ppu-primary);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.product-price-stock-update .ppu-table-note {
+    margin: 0;
+    padding: 0.5rem 1.35rem 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--ppu-muted);
+    background: var(--ppu-bg-soft);
+    border-bottom: 1px solid var(--ppu-border);
+}
+
+.product-price-stock-update .ppu-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.product-price-stock-update .ppu-table {
+    width: 100%;
+    min-width: 720px;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+}
+
+.product-price-stock-update .ppu-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 0.75rem 0.85rem;
+    text-align: right;
+    font-weight: 700;
+    font-size: 0.75rem;
+    color: var(--ppu-muted);
+    text-transform: none;
+    background: #fff;
+    border-bottom: 2px solid var(--ppu-border);
+    white-space: nowrap;
+}
+
+.product-price-stock-update .ppu-table tbody td {
+    padding: 0.65rem 0.85rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #f1f1f4;
+    background: #fff;
+}
+
+.product-price-stock-update .ppu-table tbody tr:hover td {
+    background: #fafafa;
+}
+
+.product-price-stock-update .ppu-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.product-price-stock-update .ppu-id {
+    display: inline-block;
+    padding: 0.15rem 0.45rem;
+    border-radius: 6px;
+    background: var(--ppu-bg-soft);
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: #5e6278;
+}
+
+.product-price-stock-update .ppu-product-name {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-weight: 600;
+    color: #181c32;
+    line-height: 1.45;
+    max-width: 280px;
+}
+
+.product-price-stock-update .ppu-cat-badge {
+    display: inline-block;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.product-price-stock-update .ppu-input--cell {
+    min-width: 6.5rem;
+    max-width: 9.5rem;
+    padding: 0.4rem 0.55rem;
+    font-weight: 600;
+}
+
+.product-price-stock-update .ppu-input--stock {
+    max-width: 5rem;
+    text-align: center;
+}
+
+.product-price-stock-update .ppu-date {
+    display: block;
+    font-size: 0.75rem;
+    color: #3f4254;
+    white-space: nowrap;
+}
+
+.product-price-stock-update .ppu-editor {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.6875rem;
+    color: var(--ppu-muted);
+}
+
+.product-price-stock-update .ppu-save-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 4.25rem;
+    padding: 0.4rem 0.85rem;
+    border: none;
+    border-radius: 8px;
+    background: var(--ppu-primary);
+    color: #fff;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.product-price-stock-update .ppu-save-btn:hover:not(:disabled) {
+    background: #5f2fd6;
+}
+
+.product-price-stock-update .ppu-save-btn:disabled {
+    opacity: 0.65;
+    cursor: wait;
+}
+
+.product-price-stock-update .ppu-empty {
+    text-align: center;
+    padding: 2.5rem 1rem !important;
+    color: var(--ppu-muted);
+}
+
+.product-price-stock-update .ppu-pagination {
+    padding: 1rem 1.35rem;
+    border-top: 1px solid var(--ppu-border);
+    background: var(--ppu-bg-soft);
+}
+
+.product-price-stock-update .ppu-col-action {
+    text-align: center;
+    width: 5.5rem;
+}

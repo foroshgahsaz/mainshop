@@ -42,6 +42,28 @@
 
 
 
+    @if ($showDigipayInstallmentPromo ?? false)
+
+        <div class="product-digipay-promo py-3 border-b border-gray-100 mb-3">
+
+            <div class="product-digipay-promo__inner">
+
+                @if ($digipayIconUrl ?? null)
+
+                    <img src="{{ $digipayIconUrl }}" alt="" width="48" height="48" class="product-digipay-promo__icon" loading="lazy" decoding="async">
+
+                @endif
+
+                <p class="product-digipay-promo__text">خرید با دیجی‌پی با ۴ قسط</p>
+
+            </div>
+
+        </div>
+
+    @endif
+
+
+
     @if ($selectedStock !== null)
 
         <p class="text-xs text-gray-500 mb-3">

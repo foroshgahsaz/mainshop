@@ -4,6 +4,8 @@ namespace App\Livewire\Product;
 
 use App\Models\Product;
 use App\Services\Cart\CartService;
+use App\Services\Payment\PaymentGatewayCatalog;
+use App\Services\Settings\SettingsService;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -104,8 +106,15 @@ class AddToCart extends Component
         }
     }
 
-    public function render()
+    public function render(SettingsService $settings, PaymentGatewayCatalog $catalog)
     {
-        return view('livewire.product.add-to-cart');
+        $digipay = $settings->digipay();
+        $showDigipayInstallmentPromo = ($digipay['enabled'] ?? false)
+            && ($digipay['show_product_installment_promo'] ?? false);
+
+        return view('livewire.product.add-to-cart', [
+            'showDigipayInstallmentPromo' => $showDigipayInstallmentPromo,
+            'digipayIconUrl' => $catalog->iconUrl('digipay'),
+        ]);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Services\Payment;
 
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Payment;
 use App\Services\Order\OrderActivityLogger;
 use App\Services\Settings\SettingsService;
@@ -217,10 +218,17 @@ class DigiPayGateway implements PaymentGatewayInterface
             return;
         }
 
-        $order->loadMissing('items');
-        $products = $order->items->map(fn ($item) => (string) $item->name)->values()->all();
+        $products = $this->deliverProductTitles($order);
 
         try {
+            $this->audit->step(
+                $payment,
+                PaymentAuditStep::GATEWAY_REQUEST,
+                'digipay_deliver_request',
+                'درخواست تحویل (deliver) دیجی‌پی ارسال شد.',
+                ['trackingCode' => $trackingCode, 'type' => $type, 'products' => $products]
+            );
+
             $this->apiRequest($config, 'purchases/deliver?type='.$type, [
                 'deliveryDate' => (int) round(microtime(true) * 1000),
                 'invoiceNumber' => (string) $order->id,
@@ -230,6 +238,33 @@ class DigiPayGateway implements PaymentGatewayInterface
         } catch (\Throwable) {
             // Deliver failure should not void a verified payment.
         }
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function deliverProductTitles(Order $order): array
+    {
+        $order->loadMissing(['items.product']);
+
+        return $order->items
+            ->map(function (OrderItem $item): string {
+                $name = trim((string) ($item->product_name ?? ''));
+                if ($name === '' && $item->product) {
+                    $name = trim((string) $item->product->name);
+                }
+
+                if ($name === '') {
+                    return '';
+                }
+
+                $qty = max(1, (int) $item->quantity);
+
+                return $qty > 1 ? $name.' ×'.$qty : $name;
+            })
+            ->filter(fn (string $title) => $title !== '')
+            ->values()
+            ->all();
     }
 
     /**

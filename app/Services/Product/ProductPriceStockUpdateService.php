@@ -19,42 +19,59 @@ class ProductPriceStockUpdateService
         return $product->fresh();
     }
 
-    /** @return array{price_updated: int, stock_updated: int} */
-    public function bulkAdjustOnQuery(Builder $query, ?float $pricePercent, ?int $stockDelta, ?int $editorUserId): array
+    public function bulkAdjustPriceOnQuery(Builder $query, float $pricePercent, ?int $editorUserId): int
     {
-        $priceUpdated = 0;
-        $stockUpdated = 0;
+        if ($pricePercent === 0.0) {
+            return 0;
+        }
 
-        DB::transaction(function () use ($query, $pricePercent, $stockDelta, $editorUserId, &$priceUpdated, &$stockUpdated): void {
+        $updated = 0;
+
+        DB::transaction(function () use ($query, $pricePercent, $editorUserId, &$updated): void {
+            $factor = 1 + ($pricePercent / 100);
+
             $query->clone()
-                ->select('id', 'price', 'stock')
+                ->select('id', 'price')
                 ->orderBy('id')
-                ->chunkById(200, function ($products) use ($pricePercent, $stockDelta, $editorUserId, &$priceUpdated, &$stockUpdated): void {
+                ->chunkById(200, function ($products) use ($factor, $editorUserId, &$updated): void {
                     foreach ($products as $product) {
                         /** @var Product $product */
-                        $updates = ['last_edited_by_user_id' => $editorUserId];
-
-                        if ($pricePercent !== null && $pricePercent !== 0.0) {
-                            $factor = 1 + ($pricePercent / 100);
-                            $updates['price'] = max(0, (int) round((int) $product->price * $factor));
-                            $priceUpdated++;
-                        }
-
-                        if ($stockDelta !== null && $stockDelta !== 0) {
-                            $updates['stock'] = max(0, (int) $product->stock + $stockDelta);
-                            $stockUpdated++;
-                        }
-
-                        if (count($updates) > 1) {
-                            Product::query()->whereKey($product->id)->update($updates);
-                        }
+                        Product::query()->whereKey($product->id)->update([
+                            'price' => max(0, (int) round((int) $product->price * $factor)),
+                            'last_edited_by_user_id' => $editorUserId,
+                        ]);
+                        $updated++;
                     }
                 });
         });
 
-        return [
-            'price_updated' => $priceUpdated,
-            'stock_updated' => $stockUpdated,
-        ];
+        return $updated;
+    }
+
+    public function bulkAdjustStockOnQuery(Builder $query, int $stockDelta, ?int $editorUserId): int
+    {
+        if ($stockDelta === 0) {
+            return 0;
+        }
+
+        $updated = 0;
+
+        DB::transaction(function () use ($query, $stockDelta, $editorUserId, &$updated): void {
+            $query->clone()
+                ->select('id', 'stock')
+                ->orderBy('id')
+                ->chunkById(200, function ($products) use ($stockDelta, $editorUserId, &$updated): void {
+                    foreach ($products as $product) {
+                        /** @var Product $product */
+                        Product::query()->whereKey($product->id)->update([
+                            'stock' => max(0, (int) $product->stock + $stockDelta),
+                            'last_edited_by_user_id' => $editorUserId,
+                        ]);
+                        $updated++;
+                    }
+                });
+        });
+
+        return $updated;
     }
 }

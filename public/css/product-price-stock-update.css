@@ -163,15 +163,48 @@
 }
 
 .product-price-stock-update .ppu-bulk-form {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
-    align-items: end;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
 }
 
-@media (min-width: 768px) {
-    .product-price-stock-update .ppu-bulk-form {
-        grid-template-columns: 1fr 1fr auto;
+.product-price-stock-update .ppu-bulk-field {
+    padding: 1rem 1.1rem;
+    border-radius: 10px;
+    border: 1px dashed #e4e6ef;
+    background: rgba(255, 255, 255, 0.65);
+}
+
+.product-price-stock-update .ppu-bulk-field--price {
+    border-color: #fcd34d;
+}
+
+.product-price-stock-update .ppu-bulk-field--stock {
+    border-color: #cbd5e1;
+}
+
+.product-price-stock-update .ppu-bulk-field-hint {
+    margin: 0 0 0.65rem;
+    font-size: 0.8125rem;
+    color: var(--ppu-muted);
+    line-height: 1.45;
+}
+
+.product-price-stock-update .ppu-bulk-field-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+@media (min-width: 640px) {
+    .product-price-stock-update .ppu-bulk-field-row {
+        flex-direction: row;
+        align-items: stretch;
+    }
+
+    .product-price-stock-update .ppu-bulk-field-row .ppu-input-wrap {
+        flex: 1;
+        min-width: 0;
     }
 }
 
@@ -201,20 +234,20 @@
     text-align: left;
 }
 
-.product-price-stock-update .ppu-bulk-submit {
-    display: flex;
-    align-items: flex-end;
-}
-
 .product-price-stock-update .ppu-bulk-btn {
     width: 100%;
     justify-content: center;
     min-height: 42px;
+    white-space: nowrap;
 }
 
-@media (min-width: 768px) {
-    .product-price-stock-update .ppu-bulk-btn {
-        min-width: 10rem;
+.product-price-stock-update .ppu-bulk-btn--inline {
+    flex-shrink: 0;
+}
+
+@media (min-width: 640px) {
+    .product-price-stock-update .ppu-bulk-btn--inline {
+        min-width: 11rem;
         width: auto;
     }
 }

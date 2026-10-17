@@ -44,52 +44,67 @@
                 </header>
 
                 <div class="ppu-bulk-hint">
-                    <p><strong>قیمت:</strong> درصد مثبت افزایش (۱۰ = +۱۰٪)، منفی کاهش.</p>
-                    <p><strong>موجودی:</strong> عدد مثبت یا منفی به موجودی هر محصول اضافه می‌شود.</p>
+                    <p>قیمت و موجودی <strong>جداگانه</strong> اعمال می‌شوند — هر بخش دکمهٔ مخصوص خودش را دارد.</p>
                 </div>
 
                 <div class="ppu-bulk-form">
-                    <div class="ppu-bulk-field">
+                    <div class="ppu-bulk-field ppu-bulk-field--price">
                         <label class="ppu-label" for="ppu-bulk-price">درصد تغییر قیمت پایه</label>
-                        <div class="ppu-input-wrap">
-                            <input
-                                id="ppu-bulk-price"
-                                type="number"
-                                step="0.01"
-                                wire:model="bulkPricePercent"
-                                class="ppu-input ppu-input--ltr"
-                                placeholder="10"
-                                autocomplete="off"
+                        <p class="ppu-bulk-field-hint">مثبت افزایش (۱۰ = +۱۰٪)، منفی کاهش.</p>
+                        <div class="ppu-bulk-field-row">
+                            <div class="ppu-input-wrap">
+                                <input
+                                    id="ppu-bulk-price"
+                                    type="number"
+                                    step="0.01"
+                                    wire:model.defer="bulkPricePercent"
+                                    class="ppu-input ppu-input--ltr"
+                                    placeholder="مثلاً 10"
+                                    autocomplete="off"
+                                >
+                                <span class="ppu-input-suffix">٪</span>
+                            </div>
+                            <x-filament::button
+                                color="warning"
+                                icon="heroicon-o-bolt"
+                                wire:click="applyBulkPricePercent"
+                                wire:loading.attr="disabled"
+                                wire:target="applyBulkPricePercent"
+                                wire:confirm="درصد قیمت روی تمام محصولات مطابق فیلتر اعمال می‌شود. موجودی تغییر نمی‌کند. ادامه می‌دهید؟"
+                                class="ppu-bulk-btn ppu-bulk-btn--inline"
                             >
-                            <span class="ppu-input-suffix">٪</span>
+                                اعمال درصد قیمت
+                            </x-filament::button>
                         </div>
                     </div>
-                    <div class="ppu-bulk-field">
+                    <div class="ppu-bulk-field ppu-bulk-field--stock">
                         <label class="ppu-label" for="ppu-bulk-stock">تغییر موجودی</label>
-                        <div class="ppu-input-wrap">
-                            <input
-                                id="ppu-bulk-stock"
-                                type="number"
-                                step="1"
-                                wire:model="bulkStockDelta"
-                                class="ppu-input ppu-input--ltr"
-                                placeholder="10"
-                                autocomplete="off"
+                        <p class="ppu-bulk-field-hint">عدد مثبت یا منفی به موجودی هر محصول اضافه می‌شود.</p>
+                        <div class="ppu-bulk-field-row">
+                            <div class="ppu-input-wrap">
+                                <input
+                                    id="ppu-bulk-stock"
+                                    type="number"
+                                    step="1"
+                                    wire:model.defer="bulkStockDelta"
+                                    class="ppu-input ppu-input--ltr"
+                                    placeholder="مثلاً -5"
+                                    autocomplete="off"
+                                >
+                                <span class="ppu-input-suffix">عدد</span>
+                            </div>
+                            <x-filament::button
+                                color="gray"
+                                icon="heroicon-o-cube"
+                                wire:click="applyBulkStockDelta"
+                                wire:loading.attr="disabled"
+                                wire:target="applyBulkStockDelta"
+                                wire:confirm="تغییر موجودی روی تمام محصولات مطابق فیلتر اعمال می‌شود. قیمت تغییر نمی‌کند. ادامه می‌دهید؟"
+                                class="ppu-bulk-btn ppu-bulk-btn--inline"
                             >
-                            <span class="ppu-input-suffix">عدد</span>
+                                اعمال موجودی
+                            </x-filament::button>
                         </div>
-                    </div>
-                    <div class="ppu-bulk-submit">
-                        <x-filament::button
-                            color="warning"
-                            icon="heroicon-o-bolt"
-                            wire:click="applyBulkAdjustments"
-                            wire:loading.attr="disabled"
-                            wire:confirm="تغییر گروهی روی تمام محصولات مطابق فیلتر اعمال می‌شود. ادامه می‌دهید؟"
-                            class="ppu-bulk-btn"
-                        >
-                            اعمال گروهی
-                        </x-filament::button>
                     </div>
                 </div>
             </section>

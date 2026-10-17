@@ -111,36 +111,23 @@ class ProductPriceStockUpdate extends Page
             ->send();
     }
 
-    public function applyBulkAdjustments(ProductPriceStockUpdateService $service): void
+    public function applyBulkPricePercent(ProductPriceStockUpdateService $service): void
     {
-        $hasPrice = trim($this->bulkPricePercent) !== '';
-        $hasStock = trim($this->bulkStockDelta) !== '';
-
-        if (! $hasPrice && ! $hasStock) {
+        if (trim($this->bulkPricePercent) === '') {
             Notification::make()
-                ->title('ورودی خالی')
-                ->body('درصد تغییر قیمت یا مقدار تغییر موجودی را وارد کنید.')
+                ->title('درصد قیمت خالی است')
+                ->body('درصد تغییر قیمت پایه را وارد کنید.')
                 ->warning()
                 ->send();
 
             return;
         }
 
-        $rules = [];
-        if ($hasPrice) {
-            $rules['bulkPricePercent'] = ['required', 'numeric', 'not_in:0', 'between:-99,1000'];
-        }
-        if ($hasStock) {
-            $rules['bulkStockDelta'] = ['required', 'integer', 'not_in:0', 'between:-999999,999999'];
-        }
-
-        $this->validate($rules, [], [
+        $this->validate([
+            'bulkPricePercent' => ['required', 'numeric', 'not_in:0', 'between:-99,1000'],
+        ], [], [
             'bulkPricePercent' => 'درصد تغییر قیمت',
-            'bulkStockDelta' => 'تغییر موجودی',
         ]);
-
-        $pricePercent = $hasPrice ? (float) $this->bulkPricePercent : null;
-        $stockDelta = $hasStock ? (int) $this->bulkStockDelta : null;
 
         $count = (clone $this->filteredQuery())->count();
 
@@ -150,26 +137,62 @@ class ProductPriceStockUpdate extends Page
             return;
         }
 
-        $result = $service->bulkAdjustOnQuery(
+        $updated = $service->bulkAdjustPriceOnQuery(
             $this->filteredQuery(),
-            $pricePercent,
-            $stockDelta,
+            (float) $this->bulkPricePercent,
             auth()->id(),
         );
 
         $this->bulkPricePercent = '';
+        $this->resetRowInputs();
+        $this->resetPage();
+
+        Notification::make()
+            ->title('درصد قیمت اعمال شد')
+            ->body(sprintf('قیمت %d محصول از %d محصول فیلترشده به‌روزرسانی شد.', $updated, $count))
+            ->success()
+            ->send();
+    }
+
+    public function applyBulkStockDelta(ProductPriceStockUpdateService $service): void
+    {
+        if (trim($this->bulkStockDelta) === '') {
+            Notification::make()
+                ->title('تغییر موجودی خالی است')
+                ->body('مقدار تغییر موجودی را وارد کنید.')
+                ->warning()
+                ->send();
+
+            return;
+        }
+
+        $this->validate([
+            'bulkStockDelta' => ['required', 'integer', 'not_in:0', 'between:-999999,999999'],
+        ], [], [
+            'bulkStockDelta' => 'تغییر موجودی',
+        ]);
+
+        $count = (clone $this->filteredQuery())->count();
+
+        if ($count === 0) {
+            Notification::make()->title('محصولی یافت نشد')->warning()->send();
+
+            return;
+        }
+
+        $updated = $service->bulkAdjustStockOnQuery(
+            $this->filteredQuery(),
+            (int) $this->bulkStockDelta,
+            auth()->id(),
+        );
+
         $this->bulkStockDelta = '';
         $this->resetRowInputs();
         $this->resetPage();
 
         Notification::make()
-            ->title('اعمال گروهی انجام شد')
-            ->body(sprintf(
-                'روی %d محصول فیلترشده — قیمت: %d، موجودی: %d',
-                $count,
-                $result['price_updated'],
-                $result['stock_updated'],
-            ))
+            ->title('تغییر موجودی اعمال شد')
+            ->body(sprintf('موجودی %d محصول از %d محصول فیلترشده به‌روزرسانی شد.', $updated, $count))
             ->success()
             ->send();
     }

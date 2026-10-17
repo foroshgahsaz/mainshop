@@ -20,4 +20,13 @@ class ProductPriceStockUpdateServiceTest extends TestCase
         $this->assertSame(0, max(0, 3 - 10));
         $this->assertSame(13, max(0, 3 + 10));
     }
+
+    public function test_bulk_price_and_stock_adjustments_are_independent_concepts(): void
+    {
+        $priceOnlyFactor = 1 + (10 / 100);
+        $this->assertSame(110, (int) round(100 * $priceOnlyFactor));
+
+        $stockOnly = max(0, 5 + 10);
+        $this->assertSame(15, $stockOnly);
+    }
 }

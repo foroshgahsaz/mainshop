@@ -52,6 +52,7 @@ class ManageDigiPay extends Page implements HasForms
             'base_url' => $digipay['production_base_url'],
             'icon' => ShopIconUpload::forForm($digipay['icon'] ?? null),
             'show_product_installment_promo' => $digipay['show_product_installment_promo'] ?? false,
+            'product_installment_promo_text' => $digipay['product_installment_promo_text'] ?? '',
         ]);
     }
 
@@ -81,8 +82,15 @@ class ManageDigiPay extends Page implements HasForms
                     ShopIconUpload::make('icon', 'gateway-icons', 'آیکون درگاه')
                         ->columnSpanFull(),
                     Forms\Components\Toggle::make('show_product_installment_promo')
-                        ->label('نمایش «خرید اقساطی» در صفحه محصول')
-                        ->helperText('بالای موجودی در باکس خرید، متن «خرید با دیجی‌پی با ۴ قسط» به‌همراه آیکون درگاه (۴۸×۴۸) نمایش داده می‌شود.')
+                        ->label('نمایش بنر اقساطی در صفحه محصول')
+                        ->helperText('بالای موجودی در باکس خرید، متن قابل تنظیم زیر به‌همراه آیکون درگاه (۴۸×۴۸) نمایش داده می‌شود.')
+                        ->live()
+                        ->columnSpanFull(),
+                    Forms\Components\TextInput::make('product_installment_promo_text')
+                        ->label('متن بنر صفحه محصول')
+                        ->placeholder('این درگاه اعتباری دیجی‌پی در ۴ قسط')
+                        ->maxLength(200)
+                        ->visible(fn (Forms\Get $get): bool => (bool) $get('show_product_installment_promo'))
                         ->columnSpanFull(),
                 ])->columns(2),
                 Forms\Components\Section::make('OAuth و API')->schema([
@@ -147,6 +155,7 @@ class ManageDigiPay extends Page implements HasForms
             'refresh_token' => '',
             'icon' => ShopIconUpload::fromState($data['icon'] ?? null),
             'show_product_installment_promo' => $data['show_product_installment_promo'] ?? false,
+            'product_installment_promo_text' => trim((string) ($data['product_installment_promo_text'] ?? '')),
         ]);
 
         CrudSuccessNotification::saved()

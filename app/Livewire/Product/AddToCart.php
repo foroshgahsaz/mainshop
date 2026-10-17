@@ -115,6 +115,7 @@ class AddToCart extends Component
         return view('livewire.product.add-to-cart', [
             'showDigipayInstallmentPromo' => $showDigipayInstallmentPromo,
             'digipayIconUrl' => $catalog->iconUrl('digipay'),
+            'digipayInstallmentPromoText' => $digipay['product_installment_promo_text'] ?? '',
         ]);
     }
 }

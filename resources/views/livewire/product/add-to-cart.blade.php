@@ -54,7 +54,7 @@
 
                 @endif
 
-                <p class="product-digipay-promo__text">خرید با دیجی‌پی با ۴ قسط</p>
+                <p class="product-digipay-promo__text">{{ $digipayInstallmentPromoText }}</p>
 
             </div>
 

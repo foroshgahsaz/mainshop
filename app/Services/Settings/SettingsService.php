@@ -195,6 +195,8 @@ class SettingsService
                 $this->get('digipay', 'show_product_installment_promo', false),
                 FILTER_VALIDATE_BOOLEAN
             ),
+            'product_installment_promo_text' => (string) ($this->get('digipay', 'product_installment_promo_text')
+                ?: 'این درگاه اعتباری دیجی‌پی در ۴ قسط'),
         ];
     }
 

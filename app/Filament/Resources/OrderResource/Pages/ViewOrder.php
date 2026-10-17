@@ -8,6 +8,8 @@ use App\Models\FreightCarrier;
 use App\Models\OrderNote;
 use App\Services\Order\OrderActivityLogger;
 use App\Services\Order\OrderService;
+use App\Models\Payment;
+use App\Services\Payment\DigiPayRefundService;
 use App\Services\Payment\PaymentGatewayCatalog;
 use App\Services\Representative\RepresentativeOrderAdminService;
 use App\Services\Representative\RepresentativeProformaService;
@@ -94,6 +96,25 @@ class ViewOrder extends ViewRecord
                 ->openUrlInNewTab();
         }
 
+        if (AdminAccess::canManageShopInAdmin() && ($digipayPayment = $this->digipayPaymentEligibleForRefund()) !== null) {
+            $actions[] = Actions\Action::make('digipayRefund')
+                ->label('لغو دیجی‌پی')
+                ->icon('heroicon-o-arrow-uturn-left')
+                ->color('danger')
+                ->requiresConfirmation()
+                ->modalHeading('لغو / عودت پرداخت دیجی‌پی')
+                ->modalDescription('درخواست عودت وجه به API دیجی‌پی (refunds) ارسال می‌شود. وضعیت پرداخت به «مسترد شده» تغییر می‌کند. در صورت نبود پرداخت موفق دیگر، سفارش می‌تواند به «در انتظار» برگردد.')
+                ->action(function (DigiPayRefundService $refunds) use ($digipayPayment): void {
+                    try {
+                        $refunds->refund($digipayPayment);
+                        $this->refreshRecord();
+                        Notification::make()->title('درخواست لغو دیجی‌پی ثبت شد')->success()->send();
+                    } catch (\RuntimeException $e) {
+                        Notification::make()->title('لغو دیجی‌پی ناموفق')->body($e->getMessage())->danger()->send();
+                    }
+                });
+        }
+
         if (AdminAccess::canManageShopInAdmin() && $order->canAdvanceToWarehouseProcessing()) {
             $actions[] = Actions\Action::make('confirmWarehouseProcessing')
                 ->label('تأیید پرداخت — پردازش انبار')
@@ -140,6 +161,19 @@ class ViewOrder extends ViewRecord
     public function getTitle(): string
     {
         return 'سفارش #'.$this->record->tracking_code;
+    }
+
+    protected function digipayPaymentEligibleForRefund(): ?Payment
+    {
+        if (! $this->record->relationLoaded('payments')) {
+            $this->record->load('payments');
+        }
+
+        return $this->record->payments
+            ->where('gateway', 'digipay')
+            ->where('status', Payment::STATUS_SUCCESS)
+            ->sortByDesc('id')
+            ->first();
     }
 
     public function addNote(OrderActivityLogger $logger): void

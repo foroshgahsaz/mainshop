@@ -48,7 +48,7 @@ class LoginModal extends Component
     public function closeModal(): void
     {
         if ($this->mustCompleteProfileBeforeClose()) {
-            $this->addError('firstName', 'لطفاً نام و نام خانوادگی را وارد کنید تا ادامه دهید.');
+            $this->addError('profileName', 'لطفاً نام و نام خانوادگی و کد ملی را وارد کنید تا ادامه دهید.');
 
             return;
         }
@@ -92,8 +92,8 @@ class LoginModal extends Component
         $this->step = 'phone';
         $this->phone = '';
         $this->otp = '';
-        $this->firstName = '';
-        $this->lastName = '';
+        $this->profileName = '';
+        $this->nationalCode = '';
         $this->pendingNewAccount = false;
         $this->profileUserId = null;
         $this->resetPasswordForm();
@@ -115,8 +115,10 @@ class LoginModal extends Component
         $this->step = 'profile';
         $this->phone = (string) ($user?->phone ?? '');
         $this->otp = '';
-        $this->firstName = '';
-        $this->lastName = '';
+        $this->profileName = UserDisplayName::isPlaceholder($user?->name ?? '')
+            ? ''
+            : trim((string) ($user?->name ?? ''));
+        $this->nationalCode = (string) ($user?->national_code ?? '');
         $this->pendingNewAccount = false;
         $this->profileUserId = $user !== null ? (int) $user->getKey() : null;
         $this->resetPasswordForm();

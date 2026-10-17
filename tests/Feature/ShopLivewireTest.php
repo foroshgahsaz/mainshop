@@ -96,13 +96,14 @@ class ShopLivewireTest extends TestCase
             ->assertSet('step', 'profile')
             ->assertDontSeeHtml('aria-label="بستن"')
             ->call('closeModal')
-            ->assertHasErrors(['firstName'])
-            ->set('firstName', 'مریم')
-            ->set('lastName', 'کریمی')
+            ->assertHasErrors(['profileName'])
+            ->set('profileName', 'مریم کریمی')
+            ->set('nationalCode', '0013542419')
             ->call('saveProfile')
             ->assertHasNoErrors();
 
         $this->assertSame('مریم کریمی', $user->fresh()->name);
+        $this->assertSame('0013542419', $user->fresh()->national_code);
 
         $this->actingAs($user->fresh())
             ->get(route('home'))
@@ -141,8 +142,8 @@ class ShopLivewireTest extends TestCase
             ->set('otp', Cache::get('otp:phone:'.$phone))
             ->call('verifyOtp')
             ->assertSet('step', 'profile')
-            ->set('firstName', 'علی')
-            ->set('lastName', 'رضایی')
+            ->set('profileName', 'علی رضایی')
+            ->set('nationalCode', '0067749828')
             ->call('saveProfile')
             ->assertRedirect(route('cart'));
 
@@ -150,6 +151,7 @@ class ShopLivewireTest extends TestCase
 
         $user = User::where('phone', $phone)->firstOrFail();
         $this->assertSame('علی رضایی', $user->fresh()->name);
+        $this->assertSame('0067749828', $user->fresh()->national_code);
         $this->assertSame(1, app(CartService::class)->count());
         $this->assertFalse(Cache::has('cart:guest:'.$guestSessionId));
     }
@@ -222,8 +224,8 @@ class ShopLivewireTest extends TestCase
             ->set('otp', $code)
             ->call('verifyOtp')
             ->assertSet('step', 'profile')
-            ->set('firstName', 'رضا')
-            ->set('lastName', 'محمدی')
+            ->set('profileName', 'رضا محمدی')
+            ->set('nationalCode', '0013542419')
             ->call('saveProfile')
             ->assertRedirect(route('account.dashboard'));
 

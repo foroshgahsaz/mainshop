@@ -12,20 +12,23 @@
     <form wire:submit="saveProfile" class="space-y-4">
         <div class="text-center mb-2">
             <h3 class="text-base font-bold text-navy">تکمیل پروفایل</h3>
-            <p class="text-sm text-gray-500 mt-1">برای ادامه، نام و نام خانوادگی خود را وارد کنید</p>
+            <p class="text-sm text-gray-500 mt-1">برای ادامه، نام کامل و کد ملی خود را وارد کنید</p>
         </div>
         <div>
-            <label class="block text-sm font-bold text-gray-700 mb-2">نام <span class="text-red-600" aria-hidden="true">*</span></label>
-            <input type="text" wire:model.live="firstName" required aria-required="true" autocomplete="given-name"
+            <label class="block text-sm font-bold text-gray-700 mb-2">نام و نام خانوادگی <span class="text-red-600" aria-hidden="true">*</span></label>
+            <input type="text" wire:model.live="profileName" required aria-required="true" autocomplete="name"
                    autofocus
+                   placeholder="مثال: علی رضایی"
                    class="w-full border-2 border-gray-200 rounded-xl py-3 px-4 text-sm outline-none focus:border-brand-green">
-            @error('firstName') <span class="text-red-600 text-xs mt-1 block">{{ $message }}</span> @enderror
+            @error('profileName') <span class="text-red-600 text-xs mt-1 block">{{ $message }}</span> @enderror
         </div>
         <div>
-            <label class="block text-sm font-bold text-gray-700 mb-2">نام خانوادگی <span class="text-red-600" aria-hidden="true">*</span></label>
-            <input type="text" wire:model.live="lastName" required aria-required="true" autocomplete="family-name"
-                   class="w-full border-2 border-gray-200 rounded-xl py-3 px-4 text-sm outline-none focus:border-brand-green">
-            @error('lastName') <span class="text-red-600 text-xs mt-1 block">{{ $message }}</span> @enderror
+            <label class="block text-sm font-bold text-gray-700 mb-2">کد ملی <span class="text-red-600" aria-hidden="true">*</span></label>
+            <input type="text" wire:model.live="nationalCode" required aria-required="true" autocomplete="off"
+                   inputmode="numeric" dir="ltr" maxlength="10"
+                   placeholder="0012345678"
+                   class="w-full border-2 border-gray-200 rounded-xl py-3 px-4 text-sm outline-none focus:border-brand-green text-left tracking-wide">
+            @error('nationalCode') <span class="text-red-600 text-xs mt-1 block">{{ $message }}</span> @enderror
         </div>
         <button type="submit" wire:loading.attr="disabled"
                 class="w-full bg-brand-green hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition">

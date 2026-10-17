@@ -83,7 +83,7 @@ class ManageDigiPay extends Page implements HasForms
                         ->columnSpanFull(),
                     Forms\Components\Toggle::make('show_product_installment_promo')
                         ->label('نمایش بنر اقساطی در صفحه محصول')
-                        ->helperText('بالای موجودی در باکس خرید، متن قابل تنظیم زیر به‌همراه آیکون درگاه (۴۸×۴۸) نمایش داده می‌شود.')
+                        ->helperText('بالای موجودی در باکس خرید، متن قابل تنظیم زیر به‌همراه آیکون درگاه (۲۸×۲۸) نمایش داده می‌شود.')
                         ->live()
                         ->columnSpanFull(),
                     Forms\Components\TextInput::make('product_installment_promo_text')

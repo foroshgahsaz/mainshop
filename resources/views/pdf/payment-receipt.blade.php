@@ -21,7 +21,7 @@
         @if ($receipt['gateway_reference'])
             <tr><th>شناسه مرجع درگاه</th><td dir="ltr">{{ $receipt['gateway_reference'] }}</td></tr>
         @endif
-        <tr><th>مبلغ پرداخت</th><td>{{ number_format($receipt['amount']) }} تومان</td></tr>
+        <tr><th>مبلغ پرداخت</th><td>{{ \App\Support\ShopLabels::formatInvoiceMoney((int) ($receipt['amount'] ?? 0)) }}</td></tr>
         @if ($receipt['paid_at'])
             <tr><th>زمان ثبت</th><td>{{ $receipt['paid_at'] }}</td></tr>
         @endif

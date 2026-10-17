@@ -1,6 +1,9 @@
 @php
     /** @var \App\Support\SalesInvoice\SalesInvoiceDocument $document */
+    use App\Support\ShopLabels;
+
     $forPdf = ($context ?? 'web') === 'pdf';
+    $siRial = static fn (int $toman): string => number_format(ShopLabels::invoiceAmountInRial($toman));
 @endphp
 
 @if (! $forPdf)
@@ -76,11 +79,11 @@
                     <th style="width: 34%;">شرح کالا</th>
                     <th style="width: 8%;">واحد</th>
                     <th style="width: 8%;">تعداد</th>
-                    <th style="width: 14%;">بهای واحد (تومان)</th>
+                    <th style="width: 14%;">بهای واحد (ریال)</th>
                     @if ($document->showsLineDiscountColumn())
-                        <th style="width: 12%;">تخفیف (تومان)</th>
+                        <th style="width: 12%;">تخفیف (ریال)</th>
                     @endif
-                    <th style="width: 14%;">مبلغ کل (تومان)</th>
+                    <th style="width: 14%;">مبلغ کل (ریال)</th>
                 </tr>
             </thead>
             <tbody>
@@ -91,11 +94,11 @@
                         <td class="si-desc">{{ $line['name'] }}</td>
                         <td>{{ $line['unit'] }}</td>
                         <td>{{ number_format($line['quantity']) }}</td>
-                        <td dir="ltr">{{ number_format($line['unit_price']) }}</td>
+                        <td dir="ltr">{{ $siRial((int) $line['unit_price']) }}</td>
                         @if ($document->showsLineDiscountColumn())
-                            <td dir="ltr">{{ number_format((int) ($line['line_discount'] ?? 0)) }}</td>
+                            <td dir="ltr">{{ $siRial((int) ($line['line_discount'] ?? 0)) }}</td>
                         @endif
-                        <td dir="ltr">{{ number_format($line['line_total']) }}</td>
+                        <td dir="ltr">{{ $siRial((int) $line['line_total']) }}</td>
                     </tr>
                 @endforeach
                 <tr class="si-sum">
@@ -105,7 +108,7 @@
                     @if ($document->showsLineDiscountColumn())
                         <td></td>
                     @endif
-                    <td dir="ltr">{{ number_format($document->itemsTotal) }}</td>
+                    <td dir="ltr">{{ $siRial($document->itemsTotal) }}</td>
                 </tr>
             </tbody>
         </table>
@@ -132,17 +135,17 @@
                         </div>
                         <div>
                             <dt>بهای واحد</dt>
-                            <dd dir="ltr">{{ number_format($line['unit_price']) }} <span class="si-line-card__unit">تومان</span></dd>
+                            <dd dir="ltr">{{ ShopLabels::formatInvoiceMoney((int) $line['unit_price']) }}</dd>
                         </div>
                         @if ($document->showsLineDiscountColumn())
                             <div>
                                 <dt>تخفیف</dt>
-                                <dd dir="ltr">{{ number_format((int) ($line['line_discount'] ?? 0)) }} <span class="si-line-card__unit">تومان</span></dd>
+                                <dd dir="ltr">{{ ShopLabels::formatInvoiceMoney((int) ($line['line_discount'] ?? 0)) }}</dd>
                             </div>
                         @endif
                         <div class="si-line-card__total">
                             <dt>مبلغ کل</dt>
-                            <dd dir="ltr">{{ number_format($line['line_total']) }} <span class="si-line-card__unit">تومان</span></dd>
+                            <dd dir="ltr">{{ ShopLabels::formatInvoiceMoney((int) $line['line_total']) }}</dd>
                         </div>
                     </dl>
                 </article>
@@ -150,7 +153,7 @@
             <div class="si-line-card si-line-card--sum">
                 <div class="si-line-card__sum-row">
                     <span>جمع اقلام</span>
-                    <strong dir="ltr">{{ number_format($document->itemsTotal) }} تومان</strong>
+                    <strong dir="ltr">{{ ShopLabels::formatInvoiceMoney($document->itemsTotal) }}</strong>
                 </div>
                 <div class="si-line-card__sum-qty">
                     تعداد کل: <strong>{{ number_format($document->quantityTotal) }}</strong>
@@ -175,17 +178,17 @@
             </td>
             <td class="si-footer__totals">
                 @if ($document->discountAmount > 0)
-                    <div><span class="si-k">جمع تخفیف‌ها:</span> {{ number_format($document->discountAmount) }} تومان</div>
+                    <div><span class="si-k">جمع تخفیف‌ها:</span> {{ ShopLabels::formatInvoiceMoney($document->discountAmount) }}</div>
                 @endif
                 @if ($document->feesTotal > 0)
-                    <div><span class="si-k">جمع هزینه‌های اضافه:</span> {{ number_format($document->feesTotal) }} تومان</div>
+                    <div><span class="si-k">جمع هزینه‌های اضافه:</span> {{ ShopLabels::formatInvoiceMoney($document->feesTotal) }}</div>
                 @endif
                 @if ($document->shippingAmount > 0)
-                    <div><span class="si-k">هزینه ارسال:</span> {{ number_format($document->shippingAmount) }} تومان</div>
+                    <div><span class="si-k">هزینه ارسال:</span> {{ ShopLabels::formatInvoiceMoney($document->shippingAmount) }}</div>
                 @endif
                 <div style="margin-top: 6px; font-weight: bold;">
                     <span class="si-k">مبلغ قابل پرداخت:</span>
-                    {{ number_format($document->payableAmount()) }} تومان
+                    {{ ShopLabels::formatInvoiceMoney($document->payableAmount()) }}
                 </div>
             </td>
         </tr>

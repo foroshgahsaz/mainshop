@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Models\Order;
 use App\Models\Payment;
+use App\Services\Payment\AmountConverter;
 
 class ShopLabels
 {
@@ -98,5 +99,21 @@ class ShopLabels
         }
 
         return number_format($amount).' تومان';
+    }
+
+    /** مبلغ ذخیره‌شده در سیستم (تومان) → عدد ریال برای نمایش روی فاکتور. */
+    public static function invoiceAmountInRial(int $shopAmount): int
+    {
+        return AmountConverter::toGateway($shopAmount, AmountConverter::UNIT_TOMAN);
+    }
+
+    /** قالب مبلغ روی فاکتور / PDF فروش (ریال، ×۱۰ نسبت به تومان داخلی). */
+    public static function formatInvoiceMoney(?int $shopAmount): string
+    {
+        if ($shopAmount === null) {
+            return '—';
+        }
+
+        return number_format(self::invoiceAmountInRial($shopAmount)).' ریال';
     }
 }

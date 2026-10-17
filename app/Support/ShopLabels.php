@@ -15,6 +15,7 @@ class ShopLabels
             Order::STATUS_PROFORMA => 'پیش‌فاکتور',
             Order::STATUS_PENDING => 'در انتظار',
             Order::STATUS_PROCESSING => 'در حال پردازش',
+            Order::STATUS_WAREHOUSE_PROCESSING => 'پردازش انبار',
             Order::STATUS_SHIPPED => 'ارسال شده',
             Order::STATUS_DELIVERED => 'تحویل شده',
             Order::STATUS_CANCELED => 'لغو شده',

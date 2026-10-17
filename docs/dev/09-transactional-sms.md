@@ -19,6 +19,7 @@
 | `order_paid` | پرداخت موفق — `PaymentController` |
 | `payment_failed` | خطا/انصراف درگاه — `PaymentController` |
 | `payment_partial_remaining` | پرداخت جزئی، مانده باقی — `PaymentController` |
+| `order_warehouse_processing` | انتقال به **پردازش انبار** (دکمه تأیید پرداخت ادمین یا تغییر وضعیت) — `OrderService` |
 | `order_shipped` / `order_delivered` / `order_canceled` | تغییر وضعیت — `OrderService` |
 | `order_expired_unpaid` | انقضای مهلت پرداخت — `OrderService::expireUnpaid` |
 | `proforma_created` | ثبت پیش‌فاکتور نماینده — `RepresentativeDraftOrderService` |

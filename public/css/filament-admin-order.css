@@ -105,6 +105,7 @@
 .admin-order__badge--pay-pending { background: #fef3c7; color: #92400e; border-color: #fcd34d; }
 .admin-order__badge--processing,
 .admin-order__badge--pay-success { background: #d1fae5; color: #065f46; border-color: #6ee7b7; }
+.admin-order__badge--warehouse_processing { background: #e0f2fe; color: #0c4a6e; border-color: #7dd3fc; }
 .admin-order__badge--shipped { background: #dbeafe; color: #1e40af; border-color: #93c5fd; }
 .admin-order__badge--delivered,
 .admin-order__badge--paid { background: #d1fae5; color: #065f46; }

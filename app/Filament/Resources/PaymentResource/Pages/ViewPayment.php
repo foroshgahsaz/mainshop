@@ -7,6 +7,7 @@ use App\Filament\Resources\OrderResource;
 use App\Filament\Resources\PaymentResource;
 use App\Filament\Support\PaymentDeleteActions;
 use App\Models\Payment;
+use App\Services\Order\OrderService;
 use App\Services\Payment\PaymentActivityLogger;
 use App\Services\Payment\BajetRefundService;
 use App\Services\Payment\TaraRefundService;
@@ -32,6 +33,30 @@ class ViewPayment extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('confirmWarehouseProcessing')
+                ->label('تأیید پرداخت — پردازش انبار')
+                ->icon('heroicon-o-building-storefront')
+                ->color('success')
+                ->requiresConfirmation()
+                ->modalHeading('انتقال سفارش به پردازش انبار')
+                ->modalDescription('وضعیت سفارش به «پردازش انبار» تغییر می‌کند و در صورت فعال بودن قالب، پیامک به مشتری ارسال می‌شود.')
+                ->visible(fn (): bool => AdminAccess::canManageShopInAdmin()
+                    && $this->record->status === Payment::STATUS_SUCCESS
+                    && $this->record->order !== null
+                    && $this->record->order->canAdvanceToWarehouseProcessing())
+                ->action(function (OrderService $orders): void {
+                    try {
+                        $order = $this->record->order;
+                        if ($order === null) {
+                            return;
+                        }
+                        $orders->advanceToWarehouseProcessing($order, auth()->user());
+                        $this->refreshRecord();
+                        Notification::make()->title('سفارش به پردازش انبار منتقل شد')->success()->send();
+                    } catch (\RuntimeException $e) {
+                        Notification::make()->title('انتقال ممکن نیست')->body($e->getMessage())->danger()->send();
+                    }
+                }),
             Actions\Action::make('taraRefund')
                 ->label('مرجوعی تارا')
                 ->icon('heroicon-o-arrow-uturn-left')

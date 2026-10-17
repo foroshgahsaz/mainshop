@@ -9,6 +9,7 @@
                     'proforma' => 'پیش‌فاکتور نماینده',
                     'pending' => 'در انتظار',
                     'processing' => 'در حال پردازش',
+                    'warehouse_processing' => 'پردازش انبار',
                     'shipped' => 'ارسال شده',
                     'delivered' => 'تحویل شده',
                     'canceled' => 'لغو شده',

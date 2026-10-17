@@ -44,6 +44,7 @@ class LatestOrdersTable extends BaseWidget
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         Order::STATUS_PENDING => 'در انتظار',
                         Order::STATUS_PROCESSING => 'در حال پردازش',
+                        Order::STATUS_WAREHOUSE_PROCESSING => 'پردازش انبار',
                         Order::STATUS_SHIPPED => 'ارسال شده',
                         Order::STATUS_DELIVERED => 'تحویل شده',
                         Order::STATUS_CANCELED => 'لغو شده',

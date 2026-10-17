@@ -156,6 +156,7 @@ class OrderResource extends Resource
             Order::STATUS_PROFORMA => ShopLabels::orderStatus(Order::STATUS_PROFORMA),
             Order::STATUS_PENDING => ShopLabels::orderStatus(Order::STATUS_PENDING),
             Order::STATUS_PROCESSING => ShopLabels::orderStatus(Order::STATUS_PROCESSING),
+            Order::STATUS_WAREHOUSE_PROCESSING => ShopLabels::orderStatus(Order::STATUS_WAREHOUSE_PROCESSING),
             Order::STATUS_SHIPPED => ShopLabels::orderStatus(Order::STATUS_SHIPPED),
             Order::STATUS_DELIVERED => ShopLabels::orderStatus(Order::STATUS_DELIVERED),
             Order::STATUS_CANCELED => ShopLabels::orderStatus(Order::STATUS_CANCELED),

@@ -94,6 +94,25 @@ class ViewOrder extends ViewRecord
                 ->openUrlInNewTab();
         }
 
+        if (AdminAccess::canManageShopInAdmin() && $order->canAdvanceToWarehouseProcessing()) {
+            $actions[] = Actions\Action::make('confirmWarehouseProcessing')
+                ->label('تأیید پرداخت — پردازش انبار')
+                ->icon('heroicon-o-building-storefront')
+                ->color('success')
+                ->requiresConfirmation()
+                ->modalHeading('انتقال به پردازش انبار')
+                ->modalDescription('وضعیت سفارش به «پردازش انبار» تغییر می‌کند و در صورت فعال بودن قالب، پیامک به مشتری ارسال می‌شود.')
+                ->action(function (OrderService $orders): void {
+                    try {
+                        $orders->advanceToWarehouseProcessing($this->record->fresh(), auth()->user());
+                        $this->refreshRecord();
+                        Notification::make()->title('سفارش به پردازش انبار منتقل شد')->success()->send();
+                    } catch (\RuntimeException $e) {
+                        Notification::make()->title('انتقال ممکن نیست')->body($e->getMessage())->danger()->send();
+                    }
+                });
+        }
+
         $actions[] = OrderDeleteActions::pageDeleteAction();
 
         if ($order->isProforma() && $order->hasActiveStockReservation()) {

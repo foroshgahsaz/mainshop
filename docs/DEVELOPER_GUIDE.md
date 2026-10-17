@@ -1292,6 +1292,7 @@ resources/views/layouts/shop.blade.php
 | 2026-10-17 | `/admin/orders/{id}`: دانلود **PDF فاکتور** برای سفارش‌های ثبت‌شده از سایت (ادمین/مدیر فروش) — `representative.proforma.pdf` + `ProformaPdfController` |
 | 2026-10-17 | `/admin/orders`: فیلتر روش پرداخت بر اساس **درگاه‌های فعال** (باجت‌پی، دیجی‌پی، …) + `cod`؛ تطبیق `payment_method` و سفارش‌های `online` با `payments.gateway` |
 | 2026-10-17 | **فاکتور** (`components/sales-invoice/document`، PDF، رسید پرداخت): نمایش مبالغ **ریال** (`ShopLabels::formatInvoiceMoney`، تومان داخلی ×۱۰) |
+| 2026-10-17 | وضعیت سفارش **پردازش انبار** (`warehouse_processing`) بعد از «در حال پردازش»؛ دکمه تأیید پرداخت در `/admin/orders/{id}` و `/admin/payments/{id}`؛ SMS `order_warehouse_processing` در `/admin/transactional-sms` |
 | 2026-10-14 | لیست/جزئیات سفارش ادمین: برچسب روش پرداخت = نام درگاه (`orderPaymentMethodLabel`)؛ checkout slug درگاه را در `orders.payment_method` ذخیره می‌کند |
 | 2026-10-14 | سفارش مستقیم فروشگاه: `representative_id` = `SHOP_DIRECT_REPRESENTATIVE_ID` (پیش‌فرض ۸۱ چینی بازار)؛ backfill `shop:assign-direct-shop-representative` |
 

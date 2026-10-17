@@ -3,6 +3,7 @@
     @if($order->user)
         <dl class="admin-order__meta-list">
             <div><dt>نام</dt><dd>{{ $order->user->name }}</dd></div>
+            <div><dt>کد ملی</dt><dd dir="ltr">{{ $order->user->national_code ?: '—' }}</dd></div>
             <div><dt>موبایل</dt><dd dir="ltr">{{ $order->user->phone }}</dd></div>
             @if($order->user->email)
                 <div><dt>ایمیل</dt><dd dir="ltr">{{ $order->user->email }}</dd></div>

@@ -20,6 +20,11 @@ return [
         'guest_ttl' => 60 * 24 * 7,
     ],
 
+    'user_credentials' => [
+        /** ایمیل خودکار: {کد_ملی}@domain */
+        'email_domain' => env('SHOP_USER_EMAIL_DOMAIN', 'chinibazar.ir'),
+    ],
+
     'checkout' => [
         'unpaid_ttl_minutes' => (int) env('SHOP_UNPAID_TTL_MINUTES', 60),
         /** سفارش مستقیم فروشگاه (بدون ویزارد نماینده) — user_id مدیر/نمایندهٔ «چینی بازار» در production */

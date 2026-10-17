@@ -51,6 +51,7 @@ class ManageDigiPay extends Page implements HasForms
             'sandbox_base_url' => $digipay['sandbox_base_url'],
             'base_url' => $digipay['production_base_url'],
             'icon' => ShopIconUpload::forForm($digipay['icon'] ?? null),
+            'show_product_installment_promo' => $digipay['show_product_installment_promo'] ?? false,
         ]);
     }
 
@@ -78,6 +79,10 @@ class ManageDigiPay extends Page implements HasForms
                         ->placeholder('/payment/callback/digipay')
                         ->helperText('دیجی‌پی با POST به این آدرس برمی‌گردد؛ شناسه payment در query است.'),
                     ShopIconUpload::make('icon', 'gateway-icons', 'آیکون درگاه')
+                        ->columnSpanFull(),
+                    Forms\Components\Toggle::make('show_product_installment_promo')
+                        ->label('نمایش «خرید اقساطی» در صفحه محصول')
+                        ->helperText('بالای موجودی در باکس خرید، متن «خرید با دیجی‌پی با ۴ قسط» به‌همراه آیکون درگاه (۴۸×۴۸) نمایش داده می‌شود.')
                         ->columnSpanFull(),
                 ])->columns(2),
                 Forms\Components\Section::make('OAuth و API')->schema([
@@ -141,6 +146,7 @@ class ManageDigiPay extends Page implements HasForms
             'access_token' => '',
             'refresh_token' => '',
             'icon' => ShopIconUpload::fromState($data['icon'] ?? null),
+            'show_product_installment_promo' => $data['show_product_installment_promo'] ?? false,
         ]);
 
         CrudSuccessNotification::saved()

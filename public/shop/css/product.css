@@ -520,6 +520,28 @@
   font-size: 12px;
 }
 
+.product-digipay-promo__inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.product-digipay-promo__icon {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.product-digipay-promo__text {
+  margin: 0;
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  line-height: 1.4;
+}
+
 .product-buy-box__price {
   font-size: 1.35rem;
   font-weight: 900;

@@ -191,6 +191,10 @@ class SettingsService
             'sandbox_base_url' => (string) ($this->get('digipay', 'sandbox_base_url') ?: ($cfg['sandbox_base_url'] ?? '')),
             'production_base_url' => (string) ($this->get('digipay', 'base_url') ?: ($cfg['base_url'] ?? '')),
             'icon' => $this->get('digipay', 'icon') ?: null,
+            'show_product_installment_promo' => filter_var(
+                $this->get('digipay', 'show_product_installment_promo', false),
+                FILTER_VALIDATE_BOOLEAN
+            ),
         ];
     }
 

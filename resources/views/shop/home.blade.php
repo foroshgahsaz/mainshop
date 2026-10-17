@@ -44,6 +44,8 @@
         $taxonomyMode = $taxonomy_mode ?? \App\Services\Settings\HomepageSettingsService::TAXONOMY_CATEGORIES;
         $taxonomyItems = $taxonomy_items ?? collect();
         $isFamilyTaxonomy = $taxonomyMode === \App\Services\Settings\HomepageSettingsService::TAXONOMY_PRODUCT_FAMILIES;
+        $chineseServiceBrandPopup = $chinese_service_brand_popup ?? null;
+        $chineseServiceFamilyId = (int) ($chineseServiceBrandPopup['family_id'] ?? 0);
     @endphp
     @if($taxonomyItems->isNotEmpty())
         <section @class([
@@ -58,20 +60,35 @@
                 <div class="swiper-wrapper">
                     @foreach($taxonomyItems as $item)
                         <div class="swiper-slide">
-                            <a href="{{ $isFamilyTaxonomy ? route('products.index', ['product_family_id' => $item->id]) : route('categories.show', $item) }}" @class([
-                                'category-card',
-                                'category-card--family' => $isFamilyTaxonomy,
-                            ])>
-                                <span class="category-card__image">
-                                    <img src="{{ $isFamilyTaxonomy ? \App\Support\ShopFormatter::productFamilyImage($item->image) : \App\Support\ShopFormatter::categoryImage($item->image) }}" alt="{{ $item->name }}" loading="lazy">
-                                </span>
-                                <span class="category-card__label">{{ $item->name }}</span>
-                            </a>
+                            @if ($isFamilyTaxonomy && $chineseServiceFamilyId > 0 && (int) $item->id === $chineseServiceFamilyId)
+                                <button type="button"
+                                        class="category-card category-card--family category-card--popup-trigger"
+                                        onclick="toggleChineseServiceBrandsModal(true)"
+                                        aria-haspopup="dialog">
+                                    <span class="category-card__image">
+                                        <img src="{{ \App\Support\ShopFormatter::productFamilyImage($item->image) }}" alt="{{ $item->name }}" loading="lazy">
+                                    </span>
+                                    <span class="category-card__label">{{ $item->name }}</span>
+                                </button>
+                            @else
+                                <a href="{{ $isFamilyTaxonomy ? route('products.index', ['product_family_id' => $item->id]) : route('categories.show', $item) }}" @class([
+                                    'category-card',
+                                    'category-card--family' => $isFamilyTaxonomy,
+                                ])>
+                                    <span class="category-card__image">
+                                        <img src="{{ $isFamilyTaxonomy ? \App\Support\ShopFormatter::productFamilyImage($item->image) : \App\Support\ShopFormatter::categoryImage($item->image) }}" alt="{{ $item->name }}" loading="lazy">
+                                    </span>
+                                    <span class="category-card__label">{{ $item->name }}</span>
+                                </a>
+                            @endif
                         </div>
                     @endforeach
                 </div>
             </div>
         </section>
+        @if ($chineseServiceBrandPopup)
+            @include('shop.partials.chinese-service-brands-modal', ['popup' => $chineseServiceBrandPopup])
+        @endif
     @endif
 
     {{-- SPECIAL SALE --}}

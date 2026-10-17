@@ -2331,6 +2331,136 @@ body.has-admin-bar .listing-filters {
   z-index: 120;
 }
 
+/* ===== Chinese service brands popup (homepage) ===== */
+.category-card--popup-trigger {
+  width: 100%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-align: inherit;
+  padding: 0;
+}
+
+.chinese-brands-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 56;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.chinese-brands-modal.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.chinese-brands-modal__panel {
+  background: #fff;
+  width: 100%;
+  max-width: 420px;
+  border-radius: 1rem;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.18);
+  padding: 1.25rem 1.25rem 1rem;
+  transform: translateY(8px);
+  transition: transform 0.25s ease;
+}
+
+.chinese-brands-modal.is-open .chinese-brands-modal__panel {
+  transform: translateY(0);
+}
+
+.chinese-brands-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.35rem;
+}
+
+.chinese-brands-modal__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #181c32;
+}
+
+.chinese-brands-modal__close {
+  border: none;
+  background: #f3f4f6;
+  border-radius: 999px;
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  cursor: pointer;
+}
+
+.chinese-brands-modal__close:hover {
+  background: #e5e7eb;
+}
+
+.chinese-brands-modal__hint {
+  margin: 0 0 0.85rem;
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.chinese-brands-modal__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.chinese-brands-modal__item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  color: #374151;
+  font-weight: 700;
+  font-size: 0.9rem;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.chinese-brands-modal__item:hover {
+  border-color: #3bb371;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.chinese-brands-modal__index {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 999px;
+  background: #ecfdf5;
+  color: #059669;
+  font-size: 0.75rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.chinese-brands-modal__name {
+  flex: 1;
+}
+
 /* ===== Search modal (global — all pages) ===== */
 .search-modal {
   position: fixed;

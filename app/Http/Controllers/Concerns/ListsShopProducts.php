@@ -26,6 +26,9 @@ trait ListsShopProducts
             'category_id' => $category?->id ?? $request->category_id,
             'brand_id' => $brand?->id ?? $request->brand_id,
             'product_family_id' => $productFamily?->id,
+            'product_template_id' => $request->filled('product_template_id')
+                ? (int) $request->product_template_id
+                : null,
             'min_price' => $request->min_price,
             'max_price' => $request->max_price,
             'sort' => $request->get('sort', 'created_at'),

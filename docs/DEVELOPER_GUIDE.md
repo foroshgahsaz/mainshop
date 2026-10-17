@@ -1294,7 +1294,7 @@ resources/views/layouts/shop.blade.php
 | 2026-10-14 | `/admin/orders`: ستون کاربر فقط نام — بدون نمایش موبایل زیر نام |
 | 2026-10-17 | دیجی‌پی `purchases/deliver`: فیلد `products` = عناوین فارسی `order_items.product_name` (×تعداد) |
 | 2026-10-17 | `/admin/orders/{id}` و جزئیات پرداخت: **لغو دیجی‌پی** — عودت API (`refunds?type=`) via `DigiPayRefundService` |
-| 2026-10-17 | `/admin/orders/{id}`: دانلود **PDF فاکتور** برای سفارش‌های ثبت‌شده از سایت (ادمین/مدیر فروش) — `representative.proforma.pdf` + `ProformaPdfController` |
+| 2026-10-17 | `/admin/orders/{id}`: دو PDF فاکتور — **مشتری** (`representative.proforma.pdf`) و **مالی** (`?financial=1`، سطر **ارزش افزوده** ۱۰٪ از مبلغ قابل پرداخت، `shop.invoice.vat_percent`)؛ `ProformaPdfController` — نسخه مالی فقط ادمین/مدیر فروش |
 | 2026-10-17 | `/admin/orders`: فیلتر روش پرداخت بر اساس **درگاه‌های فعال** (باجت‌پی، دیجی‌پی، …) + `cod`؛ تطبیق `payment_method` و سفارش‌های `online` با `payments.gateway` |
 | 2026-10-17 | **فاکتور** (`components/sales-invoice/document`، PDF، رسید پرداخت): نمایش مبالغ **ریال** (`ShopLabels::formatInvoiceMoney`، تومان داخلی ×۱۰) |
 | 2026-10-17 | وضعیت سفارش **پردازش انبار** (`warehouse_processing`) بعد از «در حال پردازش»؛ migration `2026_10_17_120000_add_warehouse_processing_status_to_orders` (ENUM MySQL)؛ دکمه تأیید پرداخت؛ SMS `order_warehouse_processing` |

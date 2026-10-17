@@ -14,8 +14,12 @@ class SalesInvoiceBuilder
     /**
      * @param  array<string, mixed>  $site
      */
-    public static function fromOrder(Order $order, string $title, array $site): SalesInvoiceDocument
-    {
+    public static function fromOrder(
+        Order $order,
+        string $title,
+        array $site,
+        bool $financialBreakdown = false,
+    ): SalesInvoiceDocument {
         $order->loadMissing([
             'items',
             'invoiceLines',
@@ -114,6 +118,7 @@ class SalesInvoiceBuilder
             paymentMethodLabel: ShopLabels::orderPaymentMethodLabel($order),
             freightLabel: $order->freightCarrier?->displayLabel(),
             notes: $notes,
+            showVatBreakdown: $financialBreakdown,
         );
     }
 

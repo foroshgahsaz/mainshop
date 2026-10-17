@@ -9,13 +9,16 @@ use App\Services\Pdf\PersianPdfGenerator;
 use App\Services\Settings\SettingsService;
 use App\Support\AdminAccess;
 use App\Support\SalesInvoice\SalesInvoiceBuilder;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class ProformaPdfController extends Controller
 {
-    public function __invoke(Order $order, PersianPdfGenerator $pdf): Response
+    public function __invoke(Order $order, Request $request, PersianPdfGenerator $pdf): Response
     {
-        $this->authorizeOrder($order);
+        $financial = $request->boolean('financial');
+
+        $this->authorizeOrder($order, $financial);
 
         $order->load([
             'items',
@@ -29,21 +32,32 @@ class ProformaPdfController extends Controller
 
         $site = app(SettingsService::class)->site();
         $title = $order->isProforma() ? 'پیش‌فاکتور' : 'فاکتور فروش';
+        if ($financial) {
+            $title .= ' — نسخه مالی';
+        }
 
-        $document = SalesInvoiceBuilder::fromOrder($order, $title, $site);
+        $document = SalesInvoiceBuilder::fromOrder($order, $title, $site, financialBreakdown: $financial);
 
-        $filename = ($order->isProforma() ? 'proforma-' : 'invoice-').$order->tracking_code.'.pdf';
+        $filename = ($order->isProforma() ? 'proforma-' : 'invoice-').$order->tracking_code;
+        if ($financial) {
+            $filename .= '-financial';
+        }
+        $filename .= '.pdf';
 
         return $pdf->download('pdf.sales-invoice', [
             'document' => $document,
         ], $filename);
     }
 
-    private function authorizeOrder(Order $order): void
+    private function authorizeOrder(Order $order, bool $financial): void
     {
         $user = auth()->user();
 
         if (! $user instanceof User) {
+            abort(403);
+        }
+
+        if ($financial && ! $this->userCanDownloadFromAdminPanel($user)) {
             abort(403);
         }
 

@@ -31,6 +31,11 @@ return [
         'direct_representative_id' => (int) env('SHOP_DIRECT_REPRESENTATIVE_ID', 81),
     ],
 
+    /** فاکتور PDF مالی: سهم ارزش افزوده از مبلغ قابل پرداخت (درصد، فقط نسخه مالی) */
+    'invoice' => [
+        'vat_percent' => (int) env('SHOP_INVOICE_VAT_PERCENT', 10),
+    ],
+
     'representative' => [
         'catalog_cache_seconds' => (int) env('REP_CATALOG_CACHE_SECONDS', 300),
         'products_per_page' => (int) env('REP_PRODUCTS_PER_PAGE', 60),

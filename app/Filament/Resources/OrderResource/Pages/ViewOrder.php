@@ -89,10 +89,16 @@ class ViewOrder extends ViewRecord
         $order = $this->record;
         if ($this->canDownloadSalesInvoicePdf()) {
             $actions[] = Actions\Action::make('downloadSalesInvoicePdf')
-                ->label($order->isProforma() ? 'PDF پیش‌فاکتور' : 'PDF فاکتور')
+                ->label($order->isProforma() ? 'PDF پیش‌فاکتور (مشتری)' : 'PDF فاکتور (مشتری)')
                 ->icon('heroicon-o-arrow-down-tray')
                 ->color('primary')
                 ->url(fn (): string => route('representative.proforma.pdf', $order))
+                ->openUrlInNewTab();
+            $actions[] = Actions\Action::make('downloadFinancialSalesInvoicePdf')
+                ->label($order->isProforma() ? 'PDF پیش‌فاکتور (مالی)' : 'PDF فاکتور (مالی)')
+                ->icon('heroicon-o-document-chart-bar')
+                ->color('gray')
+                ->url(fn (): string => route('representative.proforma.pdf', ['order' => $order, 'financial' => 1]))
                 ->openUrlInNewTab();
         }
 

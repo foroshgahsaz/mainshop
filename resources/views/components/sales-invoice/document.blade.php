@@ -189,6 +189,9 @@
                 @if ($document->shippingAmount > 0)
                     <div><span class="si-k">هزینه ارسال:</span> {{ ShopLabels::formatInvoiceMoney($document->shippingAmount) }}</div>
                 @endif
+                @if ($document->showVatBreakdown && $document->vatAmount() > 0)
+                    <div><span class="si-k">ارزش افزوده ({{ $document->vatPercent() }}٪):</span> {{ ShopLabels::formatInvoiceMoney($document->vatAmount()) }}</div>
+                @endif
                 <div style="margin-top: 6px; font-weight: bold;">
                     <span class="si-k">مبلغ قابل پرداخت:</span>
                     {{ ShopLabels::formatInvoiceMoney($document->payableAmount()) }}

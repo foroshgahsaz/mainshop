@@ -25,7 +25,28 @@ final class SalesInvoiceDocument
         public ?string $paymentMethodLabel = null,
         public ?string $freightLabel = null,
         public ?string $notes = null,
+        public bool $showVatBreakdown = false,
     ) {}
+
+    public function vatPercent(): int
+    {
+        return max(0, (int) config('shop.invoice.vat_percent', 10));
+    }
+
+    /** سهم ارزش افزوده از مبلغ نهایی (قیمت مشتری شامل مالیات است؛ این فقط برای PDF مالی). */
+    public function vatAmount(): int
+    {
+        if (! $this->showVatBreakdown) {
+            return 0;
+        }
+
+        $percent = $this->vatPercent();
+        if ($percent <= 0) {
+            return 0;
+        }
+
+        return (int) round($this->payableAmount() * $percent / 100);
+    }
 
     public function showsLineDiscountColumn(): bool
     {

@@ -1076,7 +1076,7 @@ $settings->site();       // نام سایت، لوگو، ...
 | Page | URL | کار |
 |------|-----|-----|
 | List | `/admin/orders` | لیست + فیلتر — ستون کاربر فقط **نام** (`UserTableColumns::nameOnly`، بدون موبایل زیر نام) |
-| View | `/admin/orders/{id}` | جزئیات، timeline، items |
+| View | `/admin/orders/{id}` | جزئیات، timeline، items؛ دکمه **PDF فاکتور** (همان قالب `pdf/sales-invoice` نماینده) برای سفارش‌های سایت و پیش‌فاکتور |
 
 **View custom:** `resources/views/filament/orders/` — items table، notes
 
@@ -1289,6 +1289,7 @@ resources/views/layouts/shop.blade.php
 | 2026-10-14 | لیست‌های ادمین: ستون/زیرنویس **موبایل** برای کاربر (`UserTableColumns`، `/admin/users` و سفارش/پرداخت/نظرات و …) |
 | 2026-10-14 | `/admin/users`: تب‌های مشتریان، مدیران مناطق، مدیران سیستم، نمایندگان، نویسندگان + ستون/فیلتر **دسته** (`adminListSegment`) |
 | 2026-10-14 | `/admin/orders`: ستون کاربر فقط نام — بدون نمایش موبایل زیر نام |
+| 2026-10-17 | `/admin/orders/{id}`: دانلود **PDF فاکتور** برای سفارش‌های ثبت‌شده از سایت (ادمین/مدیر فروش) — `representative.proforma.pdf` + `ProformaPdfController` |
 | 2026-10-14 | لیست/جزئیات سفارش ادمین: برچسب روش پرداخت = نام درگاه (`orderPaymentMethodLabel`)؛ checkout slug درگاه را در `orders.payment_method` ذخیره می‌کند |
 | 2026-10-14 | سفارش مستقیم فروشگاه: `representative_id` = `SHOP_DIRECT_REPRESENTATIVE_ID` (پیش‌فرض ۸۱ چینی بازار)؛ backfill `shop:assign-direct-shop-representative` |
 

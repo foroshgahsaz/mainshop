@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Representative;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\User;
 use App\Services\Pdf\PersianPdfGenerator;
 use App\Services\Settings\SettingsService;
+use App\Support\AdminAccess;
 use App\Support\SalesInvoice\SalesInvoiceBuilder;
 use Illuminate\Http\Response;
 
@@ -39,6 +41,20 @@ class ProformaPdfController extends Controller
 
     private function authorizeOrder(Order $order): void
     {
+        $user = auth()->user();
+
+        if (! $user instanceof User) {
+            abort(403);
+        }
+
+        if ($this->userCanDownloadFromAdminPanel($user)) {
+            if ($order->items()->exists()) {
+                return;
+            }
+
+            abort(404);
+        }
+
         if (! $order->isRepresentativeOrder()) {
             abort(404);
         }
@@ -54,20 +70,15 @@ class ProformaPdfController extends Controller
             abort(404);
         }
 
-        $user = auth()->user();
-
-        if ($user === null) {
-            abort(403);
-        }
-
-        if ($user->is_admin) {
-            return;
-        }
-
         if ($user->is_representative && (int) $order->representative_id === (int) $user->id) {
             return;
         }
 
         abort(403);
+    }
+
+    private function userCanDownloadFromAdminPanel(User $user): bool
+    {
+        return AdminAccess::isFullAdmin($user) || AdminAccess::isSalesManagerOnly($user);
     }
 }

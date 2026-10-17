@@ -92,7 +92,6 @@ class RepresentativeCustomerService
                 'name' => $data['name'],
                 'phone' => $phone,
                 'national_code' => $nationalCode,
-                'password' => Hash::make(Str::random(32)),
                 'status' => true,
                 'is_admin' => false,
                 'is_author' => false,

@@ -77,6 +77,7 @@ class SalesInvoiceBuilder
         $buyer = [
             'name' => $order->user?->name,
             'code' => $order->user?->id ? str_pad((string) $order->user->id, 5, '0', STR_PAD_LEFT) : null,
+            'national_code' => $order->user?->national_code,
             'phone' => $order->user?->phone,
             'mobile' => $order->user?->phone,
             'economic_id' => null,
@@ -163,6 +164,7 @@ class SalesInvoiceBuilder
             buyer: [
                 'name' => auth()->user()?->name ?? 'مهمان',
                 'code' => auth()->id() ? str_pad((string) auth()->id(), 5, '0', STR_PAD_LEFT) : null,
+                'national_code' => auth()->user()?->national_code,
                 'phone' => auth()->user()?->phone,
                 'mobile' => auth()->user()?->phone,
                 'economic_id' => null,

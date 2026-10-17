@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use App\Support\UserNationalCodeCredentials;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -43,6 +44,15 @@ class User extends Authenticatable implements FilamentUser
         'password',
         'remember_token',
     ];
+
+    protected static function booted(): void
+    {
+        static::saving(function (User $user): void {
+            if (UserNationalCodeCredentials::shouldApplyOnSave($user)) {
+                UserNationalCodeCredentials::applyIfNationalCodePresent($user);
+            }
+        });
+    }
 
     protected function casts(): array
     {

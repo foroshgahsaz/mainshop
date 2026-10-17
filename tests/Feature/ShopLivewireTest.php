@@ -104,6 +104,7 @@ class ShopLivewireTest extends TestCase
 
         $this->assertSame('مریم کریمی', $user->fresh()->name);
         $this->assertSame('0013542419', $user->fresh()->national_code);
+        $this->assertSame('0013542419@chinibazar.ir', $user->fresh()->email);
 
         $this->actingAs($user->fresh())
             ->get(route('home'))

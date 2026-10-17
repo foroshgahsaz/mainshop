@@ -177,10 +177,11 @@ trait HandlesOtpLogin
 
         $fullName = trim(preg_replace('/\s+/u', ' ', $this->profileName) ?? '');
 
-        User::query()->whereKey($user->getKey())->update([
+        $user->fill([
             'name' => $fullName,
             'national_code' => $normalizedNationalCode,
         ]);
+        $user->save();
 
         Auth::setUser($user->fresh());
 

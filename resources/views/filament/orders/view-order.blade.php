@@ -13,6 +13,9 @@
                     ثبت‌شده {{ $order->created_at?->shopJalali() }}
                     @if($order->user)
                         — مشتری: <strong>{{ $order->user->name }}</strong>
+                        @if($order->user->national_code)
+                            — کد ملی: <strong dir="ltr">{{ $order->user->national_code }}</strong>
+                        @endif
                     @endif
                 </p>
             </div>

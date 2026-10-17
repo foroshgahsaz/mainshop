@@ -61,12 +61,15 @@
         <tr>
             <td colspan="2"><span class="si-k">نام:</span> {{ $document->buyer['name'] ?? '—' }}</td>
             <td colspan="2"><span class="si-k">کد مشتری:</span> {{ $document->buyer['code'] ?? '—' }}</td>
-            <td colspan="2"><span class="si-k">تلفن:</span> {{ $document->buyer['phone'] ?? '—' }}</td>
+            <td colspan="2"><span class="si-k">کد ملی:</span> {{ $document->buyer['national_code'] ?? '—' }}</td>
         </tr>
         <tr>
+            <td colspan="2"><span class="si-k">تلفن:</span> {{ $document->buyer['phone'] ?? '—' }}</td>
             <td colspan="2"><span class="si-k">موبایل:</span> {{ $document->buyer['mobile'] ?? '—' }}</td>
             <td colspan="2"><span class="si-k">کد پستی:</span> {{ $document->buyer['postal_code'] ?? '—' }}</td>
-            <td colspan="2"><span class="si-k">نشانی:</span> {{ $document->buyer['address'] ?? '—' }}</td>
+        </tr>
+        <tr>
+            <td colspan="6"><span class="si-k">نشانی:</span> {{ $document->buyer['address'] ?? '—' }}</td>
         </tr>
     </table>
 

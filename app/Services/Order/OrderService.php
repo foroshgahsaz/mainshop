@@ -164,12 +164,25 @@ class OrderService
         };
 
         match ($status) {
+            Order::STATUS_WAREHOUSE_PROCESSING => $this->sms->orderWarehouseProcessing($order),
             Order::STATUS_SHIPPED => $this->sms->orderShipped($order),
             Order::STATUS_DELIVERED => $this->sms->orderDelivered($order),
             default => null,
         };
 
         return $order;
+    }
+
+    /** پس از تأیید پرداخت توسط ادمین — انتقال به پردازش انبار + پیامک. */
+    public function advanceToWarehouseProcessing(Order $order, ?User $actor = null): Order
+    {
+        $order = $order->fresh(['user', 'payments']);
+
+        if (! $order->canAdvanceToWarehouseProcessing()) {
+            throw new \RuntimeException('انتقال به پردازش انبار برای این سفارش مجاز نیست.');
+        }
+
+        return $this->updateStatus($order, Order::STATUS_WAREHOUSE_PROCESSING, $actor);
     }
 
     public function updateTracking(Order $order, ?string $trackingCode, ?User $actor = null): Order

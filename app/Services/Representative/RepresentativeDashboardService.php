@@ -24,6 +24,7 @@ class RepresentativeDashboardService
             Order::STATUS_PROFORMA,
             Order::STATUS_PENDING,
             Order::STATUS_PROCESSING,
+            Order::STATUS_WAREHOUSE_PROCESSING,
         ];
     }
 

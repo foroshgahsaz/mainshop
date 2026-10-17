@@ -100,7 +100,7 @@ class BajetRefundService
         $order = $payment->order;
         if ($order instanceof Order && ! $order->payments()->where('status', Payment::STATUS_SUCCESS)->exists()) {
             $orderPrevious = $order->status;
-            if (in_array($order->status, [Order::STATUS_PROCESSING, Order::STATUS_PROFORMA], true)) {
+            if (in_array($order->status, [Order::STATUS_PROCESSING, Order::STATUS_WAREHOUSE_PROCESSING, Order::STATUS_PROFORMA], true)) {
                 $order->update(['status' => Order::STATUS_PENDING]);
                 $this->orderLog->statusChanged($order->fresh(), $orderPrevious, Order::STATUS_PENDING, 'پس از استرداد باجت‌پی');
             }

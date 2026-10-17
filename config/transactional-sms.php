@@ -40,6 +40,12 @@ return [
             'body' => '{site_name}: بخشی از سفارش {order_code} پرداخت شد. مبلغ باقی‌مانده: {remaining_amount} تومان. از حساب کاربری پرداخت کنید.',
         ],
 
+        'order_warehouse_processing' => [
+            'label' => 'پردازش انبار (پس از تأیید پرداخت)',
+            'enabled' => true,
+            'body' => '{site_name}: سفارش {order_code} به مرحله پردازش انبار منتقل شد. به‌زودی آماده ارسال می‌شود.',
+        ],
+
         'order_shipped' => [
             'label' => 'ارسال سفارش',
             'enabled' => true,

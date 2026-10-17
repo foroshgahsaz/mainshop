@@ -50,6 +50,7 @@ class RepresentativeCurrentOrdersTable extends BaseWidget
                         Order::STATUS_PROFORMA => 'پیش‌فاکتور',
                         Order::STATUS_PENDING => 'در انتظار',
                         Order::STATUS_PROCESSING => 'در حال پردازش',
+                        Order::STATUS_WAREHOUSE_PROCESSING => 'پردازش انبار',
                         default => $state,
                     }),
                 Tables\Columns\TextColumn::make('payment_method')

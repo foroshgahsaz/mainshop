@@ -16,6 +16,7 @@ class RepresentativeDashboardServiceTest extends TestCase
         $this->assertContains(Order::STATUS_PROFORMA, $statuses);
         $this->assertContains(Order::STATUS_PENDING, $statuses);
         $this->assertContains(Order::STATUS_PROCESSING, $statuses);
+        $this->assertContains(Order::STATUS_WAREHOUSE_PROCESSING, $statuses);
     }
 
     public function test_service_is_instantiable(): void

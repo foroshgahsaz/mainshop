@@ -80,6 +80,11 @@ class TransactionalSmsDispatcher
         ]));
     }
 
+    public function orderWarehouseProcessing(Order $order): void
+    {
+        $this->statusSms($order, 'order_warehouse_processing');
+    }
+
     public function orderShipped(Order $order): void
     {
         $this->statusSms($order, 'order_shipped', [

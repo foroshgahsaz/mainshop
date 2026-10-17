@@ -19,6 +19,8 @@ class Order extends Model
 
     public const STATUS_PROCESSING = 'processing';
 
+    public const STATUS_WAREHOUSE_PROCESSING = 'warehouse_processing';
+
     public const STATUS_SHIPPED = 'shipped';
 
     public const STATUS_DELIVERED = 'delivered';
@@ -296,7 +298,23 @@ class Order extends Model
 
     public function canBeCanceledByAdmin(): bool
     {
-        return in_array($this->status, [self::STATUS_PENDING, self::STATUS_PROCESSING], true);
+        return in_array($this->status, [
+            self::STATUS_PENDING,
+            self::STATUS_PROCESSING,
+            self::STATUS_WAREHOUSE_PROCESSING,
+        ], true);
+    }
+
+    public function canAdvanceToWarehouseProcessing(): bool
+    {
+        if (! $this->isPaid()) {
+            return false;
+        }
+
+        return in_array($this->status, [
+            self::STATUS_PENDING,
+            self::STATUS_PROCESSING,
+        ], true);
     }
 
     public function stockWasDeducted(): bool

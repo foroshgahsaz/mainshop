@@ -115,6 +115,7 @@ class ManageTransactionalSms extends Page implements HasForms
             'order_placed', 'order_canceled', 'order_expired_unpaid' => '{site_name}، {name}، {phone}، {order_code}، {amount}، {payment_method}، {items}، {items_count}',
             'order_paid' => '{site_name}، {order_code}، {paid_amount}، {gateway}، {payment_tracking}، {items}',
             'payment_failed', 'payment_partial_remaining' => '{site_name}، {order_code}، {amount}، {remaining_amount}',
+            'order_warehouse_processing' => '{site_name}، {order_code}، {amount}، {name}',
             'order_shipped' => '{site_name}، {order_code}، {tracking_suffix} (مثلاً « رهگیری: 123»)',
             'order_delivered' => '{site_name}، {order_code}',
             'proforma_created', 'proforma_reservation_expired', 'proforma_reservation_extended' => '{site_name}، {order_code}، {amount}، {reserved_until}',

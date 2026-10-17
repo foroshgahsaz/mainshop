@@ -94,7 +94,7 @@ class TaraRefundService
         );
 
         $order = $payment->order()->first();
-        if ($order && $order->status === Order::STATUS_PROCESSING) {
+        if ($order && in_array($order->status, [Order::STATUS_PROCESSING, Order::STATUS_WAREHOUSE_PROCESSING], true)) {
             $order->unsetRelation('payments');
             if ($order->remainingAmount() > 0) {
                 $orderPrevious = $order->status;

@@ -38,6 +38,11 @@ class OrderSmsNotifier
         $this->transactional->paymentPartialRemaining($order, $remainingAmount);
     }
 
+    public function orderWarehouseProcessing(Order $order): void
+    {
+        $this->transactional->orderWarehouseProcessing($order);
+    }
+
     public function orderShipped(Order $order): void
     {
         $this->transactional->orderShipped($order);

@@ -1,119 +1,176 @@
 <x-filament-panels::page>
-    <div class="product-price-stock-update" dir="rtl">
-        <section class="admin-order__section product-price-stock-update__filters">
-            <h2 class="admin-order__section-title">فیلترها</h2>
-            <div class="product-price-stock-update__filter-grid">
-                <div class="admin-order__field">
-                    <label class="admin-order__label">دسته‌بندی</label>
-                    <select wire:model.live="filterCategoryId" class="admin-order__select admin-order__select--full">
-                        <option value="">همه دسته‌ها</option>
-                        @foreach($this->categoryOptions as $id => $name)
-                            <option value="{{ $id }}">{{ $name }}</option>
-                        @endforeach
-                    </select>
+    <div class="admin-order product-price-stock-update" dir="rtl">
+        <div class="ppu-toolbar">
+            <section class="ppu-card ppu-card--filters" aria-labelledby="ppu-filters-title">
+                <header class="ppu-card__head">
+                    <span class="ppu-card__icon ppu-card__icon--filter" aria-hidden="true">
+                        <i class="fa-solid fa-filter"></i>
+                    </span>
+                    <div>
+                        <h2 id="ppu-filters-title" class="ppu-card__title">فیلتر لیست</h2>
+                        <p class="ppu-card__subtitle">محدود کردن محصولات قبل از ویرایش یا اعمال گروهی</p>
+                    </div>
+                </header>
+                <div class="ppu-fields ppu-fields--2">
+                    <div class="ppu-field">
+                        <label class="ppu-label" for="ppu-filter-category">دسته‌بندی</label>
+                        <select id="ppu-filter-category" wire:model.live="filterCategoryId" class="ppu-select">
+                            <option value="">همه دسته‌ها</option>
+                            @foreach($this->categoryOptions as $id => $name)
+                                <option value="{{ $id }}">{{ $name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="ppu-field">
+                        <label class="ppu-label" for="ppu-filter-stock">موجودی</label>
+                        <select id="ppu-filter-stock" wire:model.live="filterStock" class="ppu-select">
+                            <option value="all">همه</option>
+                            <option value="in_stock">موجود</option>
+                            <option value="out_of_stock">ناموجود</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="admin-order__field">
-                    <label class="admin-order__label">موجودی</label>
-                    <select wire:model.live="filterStock" class="admin-order__select admin-order__select--full">
-                        <option value="all">همه</option>
-                        <option value="in_stock">موجود</option>
-                        <option value="out_of_stock">ناموجود</option>
-                    </select>
-                </div>
-            </div>
-        </section>
+            </section>
 
-        <section class="admin-order__section product-price-stock-update__bulk">
-            <h2 class="admin-order__section-title">تغییر گروهی (روی همهٔ محصولات فیلترشده)</h2>
-            <p class="admin-order__hint">
-                درصد مثبت = افزایش قیمت پایه (مثلاً ۱۰ یعنی +۱۰٪). درصد منفی = کاهش. تغییر موجودی به همه اضافه یا کم می‌شود (مثلاً ۱۰ یعنی +۱۰ عدد).
-            </p>
-            <div class="product-price-stock-update__bulk-grid">
-                <div class="admin-order__field">
-                    <label class="admin-order__label">درصد تغییر قیمت</label>
-                    <input type="number" step="0.01" wire:model="bulkPricePercent" class="admin-order__input" dir="ltr" placeholder="مثلاً 10 یا -5">
-                </div>
-                <div class="admin-order__field">
-                    <label class="admin-order__label">تغییر موجودی (عدد)</label>
-                    <input type="number" step="1" wire:model="bulkStockDelta" class="admin-order__input" dir="ltr" placeholder="مثلاً 10 یا -2">
-                </div>
-                <div class="product-price-stock-update__bulk-action">
-                    <x-filament::button
-                        color="warning"
-                        icon="heroicon-o-adjustments-horizontal"
-                        wire:click="applyBulkAdjustments"
-                        wire:loading.attr="disabled"
-                        wire:confirm="تغییر گروهی روی تمام محصولات مطابق فیلتر اعمال می‌شود. ادامه می‌دهید؟"
-                    >
-                        اعمال گروهی
-                    </x-filament::button>
-                </div>
-            </div>
-        </section>
+            <section class="ppu-card ppu-card--bulk" aria-labelledby="ppu-bulk-title">
+                <header class="ppu-card__head">
+                    <span class="ppu-card__icon ppu-card__icon--bulk" aria-hidden="true">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </span>
+                    <div>
+                        <h2 id="ppu-bulk-title" class="ppu-card__title">تغییر گروهی قیمت و موجودی</h2>
+                        <p class="ppu-card__subtitle">روی <strong>همهٔ {{ number_format($this->products->total()) }} محصول</strong> مطابق فیلتر بالا</p>
+                    </div>
+                </header>
 
-        <section class="admin-order__section">
-            <h2 class="admin-order__section-title">لیست محصولات</h2>
-            <p class="admin-order__hint">
-                {{ number_format($this->products->total()) }} محصول — قیمت‌ها به <strong>تومان</strong> (فیلد قیمت پایه).
-            </p>
+                <div class="ppu-bulk-hint">
+                    <p><strong>قیمت:</strong> درصد مثبت افزایش (۱۰ = +۱۰٪)، منفی کاهش.</p>
+                    <p><strong>موجودی:</strong> عدد مثبت یا منفی به موجودی هر محصول اضافه می‌شود.</p>
+                </div>
 
-            <div class="admin-payment-log-viewer__table-wrap">
-                <table class="admin-payment-log-viewer__table product-price-stock-update__table">
+                <div class="ppu-bulk-form">
+                    <div class="ppu-bulk-field">
+                        <label class="ppu-label" for="ppu-bulk-price">درصد تغییر قیمت پایه</label>
+                        <div class="ppu-input-wrap">
+                            <input
+                                id="ppu-bulk-price"
+                                type="number"
+                                step="0.01"
+                                wire:model="bulkPricePercent"
+                                class="ppu-input ppu-input--ltr"
+                                placeholder="10"
+                                autocomplete="off"
+                            >
+                            <span class="ppu-input-suffix">٪</span>
+                        </div>
+                    </div>
+                    <div class="ppu-bulk-field">
+                        <label class="ppu-label" for="ppu-bulk-stock">تغییر موجودی</label>
+                        <div class="ppu-input-wrap">
+                            <input
+                                id="ppu-bulk-stock"
+                                type="number"
+                                step="1"
+                                wire:model="bulkStockDelta"
+                                class="ppu-input ppu-input--ltr"
+                                placeholder="10"
+                                autocomplete="off"
+                            >
+                            <span class="ppu-input-suffix">عدد</span>
+                        </div>
+                    </div>
+                    <div class="ppu-bulk-submit">
+                        <x-filament::button
+                            color="warning"
+                            icon="heroicon-o-bolt"
+                            wire:click="applyBulkAdjustments"
+                            wire:loading.attr="disabled"
+                            wire:confirm="تغییر گروهی روی تمام محصولات مطابق فیلتر اعمال می‌شود. ادامه می‌دهید؟"
+                            class="ppu-bulk-btn"
+                        >
+                            اعمال گروهی
+                        </x-filament::button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <section class="ppu-card ppu-card--table" aria-labelledby="ppu-table-title">
+            <header class="ppu-table-head">
+                <div>
+                    <h2 id="ppu-table-title" class="ppu-card__title">لیست محصولات</h2>
+                    <p class="ppu-card__subtitle">ویرایش سطری — پس از تغییر، «ذخیره» همان ردیف را بزنید</p>
+                </div>
+                <span class="ppu-count-badge">{{ number_format($this->products->total()) }} محصول</span>
+            </header>
+
+            <p class="ppu-table-note">قیمت‌ها به <strong>تومان</strong> (فیلد قیمت پایه)</p>
+
+            <div class="ppu-table-wrap">
+                <table class="ppu-table">
                     <thead>
                         <tr>
-                            <th>شناسه</th>
-                            <th>نام</th>
-                            <th>دسته</th>
-                            <th>قیمت (تومان)</th>
-                            <th>موجودی</th>
-                            <th>آخرین ویرایش</th>
-                            <th></th>
+                            <th class="ppu-col-id">شناسه</th>
+                            <th class="ppu-col-name">نام محصول</th>
+                            <th class="ppu-col-cat">دسته</th>
+                            <th class="ppu-col-price">قیمت (تومان)</th>
+                            <th class="ppu-col-stock">موجودی</th>
+                            <th class="ppu-col-date">آخرین ویرایش</th>
+                            <th class="ppu-col-action"></th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($this->products as $product)
                             <tr wire:key="product-row-{{ $product->id }}">
-                                <td dir="ltr">{{ $product->id }}</td>
-                                <td>{{ $product->name }}</td>
-                                <td>{{ $product->category?->name ?? '—' }}</td>
-                                <td>
+                                <td class="ppu-col-id" dir="ltr"><span class="ppu-id">{{ $product->id }}</span></td>
+                                <td class="ppu-col-name">
+                                    <span class="ppu-product-name" title="{{ $product->name }}">{{ $product->name }}</span>
+                                </td>
+                                <td class="ppu-col-cat">
+                                    <span class="ppu-cat-badge">{{ $product->category?->name ?? '—' }}</span>
+                                </td>
+                                <td class="ppu-col-price">
                                     <input
                                         type="number"
                                         min="0"
-                                        class="admin-order__input product-price-stock-update__num"
+                                        class="ppu-input ppu-input--cell ppu-input--ltr"
                                         dir="ltr"
                                         wire:model="rowPrices.{{ $product->id }}"
+                                        aria-label="قیمت محصول {{ $product->id }}"
                                     >
                                 </td>
-                                <td>
+                                <td class="ppu-col-stock">
                                     <input
                                         type="number"
                                         min="0"
-                                        class="admin-order__input product-price-stock-update__num"
+                                        class="ppu-input ppu-input--cell ppu-input--stock ppu-input--ltr"
                                         dir="ltr"
                                         wire:model="rowStocks.{{ $product->id }}"
+                                        aria-label="موجودی محصول {{ $product->id }}"
                                     >
                                 </td>
-                                <td class="product-price-stock-update__meta">
-                                    <div>{{ $product->updated_at?->shopJalali('Y/m/d H:i') ?? '—' }}</div>
+                                <td class="ppu-col-date">
+                                    <time class="ppu-date">{{ $product->updated_at?->shopJalali('Y/m/d H:i') ?? '—' }}</time>
                                     @if($product->lastEditedBy)
-                                        <div class="product-price-stock-update__editor">{{ $product->lastEditedBy->name }}</div>
+                                        <span class="ppu-editor">{{ $product->lastEditedBy->name }}</span>
                                     @endif
                                 </td>
-                                <td>
-                                    <x-filament::button
-                                        size="sm"
+                                <td class="ppu-col-action">
+                                    <button
+                                        type="button"
+                                        class="ppu-save-btn"
                                         wire:click="saveProduct({{ $product->id }})"
                                         wire:loading.attr="disabled"
                                         wire:target="saveProduct({{ $product->id }})"
                                     >
-                                        ذخیره
-                                    </x-filament::button>
+                                        <span wire:loading.remove wire:target="saveProduct({{ $product->id }})">ذخیره</span>
+                                        <span wire:loading wire:target="saveProduct({{ $product->id }})">…</span>
+                                    </button>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center text-gray-500 py-6">محصولی با این فیلتر یافت نشد.</td>
+                                <td colspan="7" class="ppu-empty">محصولی با این فیلتر یافت نشد.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -121,7 +178,7 @@
             </div>
 
             @if($this->products->hasPages())
-                <div class="product-price-stock-update__pagination mt-4">
+                <div class="ppu-pagination">
                     {{ $this->products->links() }}
                 </div>
             @endif
@@ -130,36 +187,7 @@
 
     @once
         @push('styles')
-            <style>
-                .product-price-stock-update__filter-grid,
-                .product-price-stock-update__bulk-grid {
-                    display: grid;
-                    gap: 1rem;
-                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                    align-items: end;
-                }
-                .product-price-stock-update__bulk-action {
-                    display: flex;
-                    align-items: flex-end;
-                    padding-bottom: 2px;
-                }
-                .product-price-stock-update__num {
-                    min-width: 7rem;
-                    max-width: 10rem;
-                }
-                .product-price-stock-update__meta {
-                    font-size: 0.8rem;
-                    white-space: nowrap;
-                }
-                .product-price-stock-update__editor {
-                    color: #7e8299;
-                    font-size: 0.75rem;
-                }
-                .product-price-stock-update__table input.admin-order__input {
-                    padding: 0.35rem 0.5rem;
-                    font-size: 0.875rem;
-                }
-            </style>
+            <link rel="stylesheet" href="{{ asset('css/product-price-stock-update.css') }}?v={{ @filemtime(public_path('css/product-price-stock-update.css')) ?: 0 }}">
         @endpush
     @endonce
 </x-filament-panels::page>

@@ -113,6 +113,18 @@
                     @endif
                     <td dir="ltr">{{ $siRial($document->itemsTotal) }}</td>
                 </tr>
+                @if ($document->showVatBreakdown && $document->vatAmount() > 0)
+                    @php($vatToman = $document->vatAmount())
+                    <tr class="si-sum">
+                        <td colspan="4">ارزش افزوده</td>
+                        <td>{{ number_format(1) }}</td>
+                        <td dir="ltr">{{ $siRial($vatToman) }}</td>
+                        @if ($document->showsLineDiscountColumn())
+                            <td></td>
+                        @endif
+                        <td dir="ltr">{{ $siRial($vatToman) }}</td>
+                    </tr>
+                @endif
             </tbody>
         </table>
 
@@ -162,6 +174,18 @@
                     تعداد کل: <strong>{{ number_format($document->quantityTotal) }}</strong>
                 </div>
             </div>
+            @if ($document->showVatBreakdown && $document->vatAmount() > 0)
+                <div class="si-line-card si-line-card--sum">
+                    <div class="si-line-card__sum-row">
+                        <span>ارزش افزوده</span>
+                        <strong dir="ltr">{{ ShopLabels::formatInvoiceMoney($document->vatAmount()) }}</strong>
+                    </div>
+                    <div class="si-line-card__sum-qty">
+                        تعداد: <strong>۱</strong>
+                        — بهای واحد: <strong dir="ltr">{{ ShopLabels::formatInvoiceMoney($document->vatAmount()) }}</strong>
+                    </div>
+                </div>
+            @endif
         </div>
         @endif
     </div>
@@ -188,9 +212,6 @@
                 @endif
                 @if ($document->shippingAmount > 0)
                     <div><span class="si-k">هزینه ارسال:</span> {{ ShopLabels::formatInvoiceMoney($document->shippingAmount) }}</div>
-                @endif
-                @if ($document->showVatBreakdown && $document->vatAmount() > 0)
-                    <div><span class="si-k">ارزش افزوده ({{ $document->vatPercent() }}٪):</span> {{ ShopLabels::formatInvoiceMoney($document->vatAmount()) }}</div>
                 @endif
                 <div style="margin-top: 6px; font-weight: bold;">
                     <span class="si-k">مبلغ قابل پرداخت:</span>

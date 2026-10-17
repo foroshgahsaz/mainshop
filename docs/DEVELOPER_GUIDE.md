@@ -1290,6 +1290,7 @@ resources/views/layouts/shop.blade.php
 | 2026-10-14 | لیست‌های ادمین: ستون/زیرنویس **موبایل** برای کاربر (`UserTableColumns`، `/admin/users` و سفارش/پرداخت/نظرات و …) |
 | 2026-10-14 | `/admin/users`: تب‌های مشتریان، مدیران مناطق، مدیران سیستم، نمایندگان، نویسندگان + ستون/فیلتر **دسته** (`adminListSegment`) |
 | 2026-10-14 | `/admin/orders`: ستون کاربر فقط نام — بدون نمایش موبایل زیر نام |
+| 2026-10-17 | `/admin/orders/{id}` و جزئیات پرداخت: **لغو دیجی‌پی** — عودت API (`refunds?type=`) via `DigiPayRefundService` |
 | 2026-10-17 | `/admin/orders/{id}`: دانلود **PDF فاکتور** برای سفارش‌های ثبت‌شده از سایت (ادمین/مدیر فروش) — `representative.proforma.pdf` + `ProformaPdfController` |
 | 2026-10-17 | `/admin/orders`: فیلتر روش پرداخت بر اساس **درگاه‌های فعال** (باجت‌پی، دیجی‌پی، …) + `cod`؛ تطبیق `payment_method` و سفارش‌های `online` با `payments.gateway` |
 | 2026-10-17 | **فاکتور** (`components/sales-invoice/document`، PDF، رسید پرداخت): نمایش مبالغ **ریال** (`ShopLabels::formatInvoiceMoney`، تومان داخلی ×۱۰) |

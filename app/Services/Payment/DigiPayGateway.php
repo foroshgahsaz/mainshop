@@ -430,6 +430,41 @@ class DigiPayGateway implements PaymentGatewayInterface
         return preg_match('/^09\d{9}$/', $digits) ? $digits : '';
     }
 
+    /**
+     * عودت خرید — مستند UPG بخش ۱۰ (`refunds?type=`).
+     *
+     * @return array<string, mixed>
+     */
+    public function submitRefund(string $ticketType, string $refundProviderId, int $amountRial, string $saleTrackingCode): array
+    {
+        $config = $this->settings->digipay();
+        $this->assertCredentials($config);
+
+        return $this->apiRequest($config, 'refunds?type='.rawurlencode($ticketType), [
+            'providerId' => $refundProviderId,
+            'amount' => $amountRial,
+            'saleTrackingCode' => $saleTrackingCode,
+        ], true);
+    }
+
+    /**
+     * پیگیری عودت — مستند UPG بخش ۱۱.
+     *
+     * @return array<string, mixed>
+     */
+    public function inquireRefund(string $inquiryId, string $ticketType): array
+    {
+        $config = $this->settings->digipay();
+        $this->assertCredentials($config);
+
+        return $this->apiRequest(
+            $config,
+            'refunds/'.rawurlencode($inquiryId).'?type='.rawurlencode($ticketType),
+            [],
+            true
+        );
+    }
+
     /** @param  array<string, mixed>  $data */
     protected function failInitiate(Payment $payment, Order $order, array $data, string $message): void
     {

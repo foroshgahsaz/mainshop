@@ -10,6 +10,7 @@ use App\Models\Payment;
 use App\Services\Order\OrderService;
 use App\Services\Payment\PaymentActivityLogger;
 use App\Services\Payment\BajetRefundService;
+use App\Services\Payment\DigiPayRefundService;
 use App\Services\Payment\TaraRefundService;
 use App\Support\AdminAccess;
 use Filament\Actions;
@@ -93,6 +94,26 @@ class ViewPayment extends ViewRecord
                         Notification::make()->title('استرداد باجت‌پی انجام شد')->success()->send();
                     } catch (\RuntimeException $e) {
                         Notification::make()->title('استرداد ناموفق')->body($e->getMessage())->danger()->send();
+                    }
+                }),
+            Actions\Action::make('digipayRefund')
+                ->label('لغو دیجی‌پی')
+                ->icon('heroicon-o-arrow-uturn-left')
+                ->color('danger')
+                ->requiresConfirmation()
+                ->modalHeading('لغو / عودت پرداخت دیجی‌پی')
+                ->modalDescription('درخواست عودت به API دیجی‌پی ارسال می‌شود (refunds).')
+                ->visible(fn () => AdminAccess::canManageShopInAdmin()
+                    && $this->record->gateway === 'digipay'
+                    && $this->record->status === Payment::STATUS_SUCCESS
+                    && ! isset((is_array($this->record->raw_response) ? $this->record->raw_response : [])['digipay_refund']))
+                ->action(function (DigiPayRefundService $refunds): void {
+                    try {
+                        $this->record = $refunds->refund($this->record);
+                        $this->refreshRecord();
+                        Notification::make()->title('لغو دیجی‌پی ثبت شد')->success()->send();
+                    } catch (\RuntimeException $e) {
+                        Notification::make()->title('لغو دیجی‌پی ناموفق')->body($e->getMessage())->danger()->send();
                     }
                 }),
             Actions\Action::make('paymentFileLog')

@@ -50,7 +50,7 @@
 
                 @if ($digipayIconUrl ?? null)
 
-                    <img src="{{ $digipayIconUrl }}" alt="" width="48" height="48" class="product-digipay-promo__icon" loading="lazy" decoding="async">
+                    <img src="{{ $digipayIconUrl }}" alt="" width="28" height="28" class="product-digipay-promo__icon" loading="lazy" decoding="async">
 
                 @endif
 

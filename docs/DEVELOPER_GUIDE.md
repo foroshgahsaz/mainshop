@@ -1285,7 +1285,7 @@ resources/views/layouts/shop.blade.php
 | 2026-10-12 | رفع migration مناطق فروش روی MySQL (خطای 1824 `Failed to open the referenced table 'sales_regions'`): migration idempotent — `sales_regions` با InnoDB (و تبدیل اگر MyISAM ساخته شده)، ستون/ایندکس جدا، FKها فقط اگر نبودند و با try/catch؛ `SalesRegion::deleting` استان‌ها را آزاد می‌کند. اجرای دوبارهٔ `php artisan migrate --force` کافی است |
 | 2026-10-12 | منوی **مناطق فروش** جدا از کاربران: آیکون و پنل مستقل در `admin-sidebar` (لیست مناطق، افزودن منطقه) — فقط مدیر کل |
 | 2026-10-12 | پنل ادمین تماماً سفید: پس‌زمینه body/shell، هدر و pagination جدول، تب‌های کاربر، صفحه ورود (`filament-overrides.css`، `styles.css`) |
-| 2026-10-17 | صفحه محصول — باکس خرید: بنر اقساط دیجی‌پی (آیکون ۴۸×۴۸، متن پیش‌فرض «این درگاه اعتباری دیجی‌پی در ۴ قسط»)؛ ادمین → دیجی‌پی → `show_product_installment_promo` + `product_installment_promo_text` |
+| 2026-10-17 | صفحه محصول — باکس خرید: بنر اقساط دیجی‌پی (آیکون ۲۸×۲۸، متن پیش‌فرض «این درگاه اعتباری دیجی‌پی در ۴ قسط»)؛ ادمین → دیجی‌پی → `show_product_installment_promo` + `product_installment_promo_text` |
 | 2026-10-17 | فاکتور و جزئیات سفارش: **کد ملی** خریدار؛ با ثبت `national_code` → ایمیل `{کد}@chinibazar.ir` و رمز `/*{کد}/*` (`UserNationalCodeCredentials`) |
 | 2026-10-17 | مودال OTP فروشگاه: پس از کد — **یک فیلد نام کامل** + **کد ملی** در `users.name` / `users.national_code` (`HandlesOtpLogin::saveProfile`) |
 | 2026-10-14 | نام کاربر OTP فقط در مودال اجباری (رندر برای کاربر placeholder هم)؛ حذف کارت «تکمیل نام حساب» از checkout؛ `*` روی نام/موبایل گیرنده |

@@ -49,6 +49,7 @@ class AdminAccess
         'filament.admin.resources.users.create',
         'filament.admin.resources.users.edit',
         'filament.admin.resources.products.*',
+        'filament.admin.pages.product-price-stock-update',
         'filament.admin.resources.categories.*',
         'filament.admin.resources.attributes.*',
         'filament.admin.resources.product-families.*',

@@ -287,6 +287,36 @@ function toggleSearchModal(show) {
 
 window.toggleSearchModal = toggleSearchModal;
 
+function toggleChineseServiceBrandsModal(show) {
+  const modal = document.getElementById('chineseServiceBrandsModal');
+  if (!modal) return;
+
+  if (show) {
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  } else {
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+}
+
+window.toggleChineseServiceBrandsModal = toggleChineseServiceBrandsModal;
+
+document.addEventListener('keydown', (event) => {
+  if (event.key !== 'Escape') return;
+  toggleChineseServiceBrandsModal(false);
+});
+
+document.addEventListener('click', (event) => {
+  const modal = document.getElementById('chineseServiceBrandsModal');
+  if (!modal?.classList.contains('is-open')) return;
+  if (event.target === modal) {
+    toggleChineseServiceBrandsModal(false);
+  }
+});
+
 function initHeaderUserMenu() {
   const closeAll = () => {
     document.querySelectorAll('.header-user-dropdown.open').forEach((dropdown) => {

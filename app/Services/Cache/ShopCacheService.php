@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\ProductFamily;
 use App\Models\ShippingMethod;
 use App\Services\Settings\HomepageSettingsService;
+use App\Services\Shop\ChineseServiceBrandPopupService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -37,6 +38,7 @@ class ShopCacheService
                     'sliders' => HomeSlider::active()->orderBy('position')->get(),
                     'taxonomy_mode' => $taxonomyMode,
                     'taxonomy_items' => $taxonomyItems,
+                    'chinese_service_brand_popup' => app(ChineseServiceBrandPopupService::class)->payload(),
                     'discounted' => $productQuery()->whereNotNull('sale_price')->whereColumn('sale_price', '<', 'price')->latest()->take(8)->get(),
                     'best_sellers' => $productQuery()->orderByDesc('views')->take(8)->get(),
                     'new' => $homepage->resolveNewProducts($productQuery),
@@ -405,6 +407,7 @@ class ShopCacheService
             ->when($filters['category_id'] ?? null, fn ($q, $id) => $q->where('category_id', $id))
             ->when($filters['brand_id'] ?? null, fn ($q, $id) => $q->where('brand_id', $id))
             ->when($filters['product_family_id'] ?? null, fn ($q, $id) => $q->where('product_family_id', $id))
+            ->when($filters['product_template_id'] ?? null, fn ($q, $id) => $q->where('product_template_id', $id))
             ->when($filters['min_price'] ?? null, fn ($q, $min) => $q->whereRaw("{$effectivePrice} >= ?", [$min]))
             ->when($filters['max_price'] ?? null, fn ($q, $max) => $q->whereRaw("{$effectivePrice} <= ?", [$max]))
             ->orderBy($filters['sort'] ?? 'created_at', $filters['direction'] ?? 'desc');

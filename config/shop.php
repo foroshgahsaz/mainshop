@@ -36,6 +36,22 @@ return [
         'vat_percent' => (int) env('SHOP_INVOICE_VAT_PERCENT', 10),
     ],
 
+    'homepage' => [
+        /** پاپ‌آپ زیربرندها با کلیک روی خانواده «سرویس چینی» در اسلایدر دسته‌بندی */
+        'chinese_service_popup' => [
+            'family_slug' => 'chinese-service',
+            'family_names' => ['سرویس چینی'],
+            'brand_labels' => [
+                'والاس',
+                'مارشال',
+                'فالکن',
+                'لورین',
+                'ادزک',
+                'هرمیتاژ',
+            ],
+        ],
+    ],
+
     'representative' => [
         'catalog_cache_seconds' => (int) env('REP_CATALOG_CACHE_SECONDS', 300),
         'products_per_page' => (int) env('REP_PRODUCTS_PER_PAGE', 60),

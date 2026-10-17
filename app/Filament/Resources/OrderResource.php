@@ -7,6 +7,7 @@ use App\Filament\Support\AdminTable;
 use App\Filament\Support\UserTableColumns;
 use App\Filament\Support\OrderDeleteActions;
 use App\Models\Order;
+use App\Services\Payment\PaymentGatewayCatalog;
 use App\Support\AdminAccess;
 use App\Support\ShopLabels;
 use Filament\Resources\Resource;
@@ -80,9 +81,13 @@ class OrderResource extends Resource
                     ->toggleable(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('payment_method')
+                Tables\Filters\SelectFilter::make('payment_gateway')
                     ->label('روش پرداخت')
-                    ->options(static::paymentMethodFilterOptions()),
+                    ->options(fn (): array => static::paymentGatewayFilterOptions())
+                    ->query(fn (Builder $query, array $data): Builder => static::applyPaymentGatewayFilter(
+                        $query,
+                        $data['value'] ?? null,
+                    )),
                 Tables\Filters\SelectFilter::make('status')
                     ->label('وضعیت')
                     ->options(static::statusFilterOptions()),
@@ -106,12 +111,41 @@ class OrderResource extends Resource
     }
 
     /** @return array<string, string> */
-    protected static function paymentMethodFilterOptions(): array
+    protected static function paymentGatewayFilterOptions(): array
     {
-        return [
-            'online' => ShopLabels::paymentMethod('online'),
-            'cod' => ShopLabels::paymentMethod('cod'),
-        ];
+        $options = [];
+
+        foreach (app(PaymentGatewayCatalog::class)->enabled() as $gateway) {
+            $name = (string) ($gateway['name'] ?? '');
+            if ($name === '') {
+                continue;
+            }
+
+            $options[$name] = (string) ($gateway['label'] ?? ShopLabels::gateway($name));
+        }
+
+        $options['cod'] = ShopLabels::paymentMethod('cod');
+
+        return $options;
+    }
+
+    protected static function applyPaymentGatewayFilter(Builder $query, mixed $gateway): Builder
+    {
+        if (! is_string($gateway) || $gateway === '') {
+            return $query;
+        }
+
+        if ($gateway === 'cod') {
+            return $query->where('payment_method', 'cod');
+        }
+
+        return $query->where(function (Builder $inner) use ($gateway): void {
+            $inner->where('payment_method', $gateway)
+                ->orWhere(function (Builder $online) use ($gateway): void {
+                    $online->where('payment_method', 'online')
+                        ->whereHas('payments', fn (Builder $payments): Builder => $payments->where('gateway', $gateway));
+                });
+        });
     }
 
     /** @return array<string, string> */

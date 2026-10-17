@@ -3,6 +3,7 @@
 namespace App\Livewire\Auth\Concerns;
 
 use App\Models\User;
+use App\Rules\IranianNationalCode;
 use App\Support\UserDisplayName;
 use App\Services\Auth\LoginRedirectService;
 use App\Services\Auth\OtpService;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
 
@@ -31,9 +33,9 @@ trait HandlesOtpLogin
 
     public int $otpSentAt = 0;
 
-    public string $firstName = '';
+    public string $profileName = '';
 
-    public string $lastName = '';
+    public string $nationalCode = '';
 
     public bool $pendingNewAccount = false;
 
@@ -141,14 +143,6 @@ trait HandlesOtpLogin
 
     public function saveProfile(CartService $cart): void
     {
-        $this->validate([
-            'firstName' => ['required', 'string', 'max:64'],
-            'lastName' => ['required', 'string', 'max:64'],
-        ], [
-            'firstName.required' => 'نام را وارد کنید.',
-            'lastName.required' => 'نام خانوادگی را وارد کنید.',
-        ]);
-
         $user = Auth::user();
 
         if ($user === null && $this->profileUserId !== null) {
@@ -161,13 +155,32 @@ trait HandlesOtpLogin
 
         if ($user === null) {
             throw ValidationException::withMessages([
-                'firstName' => 'نشست ورود منقضی شده؛ دوباره وارد شوید.',
+                'profileName' => 'نشست ورود منقضی شده؛ دوباره وارد شوید.',
             ]);
         }
 
-        $fullName = trim($this->firstName.' '.$this->lastName);
+        $normalizedNationalCode = IranianNationalCode::normalize($this->nationalCode);
 
-        User::query()->whereKey($user->getKey())->update(['name' => $fullName]);
+        $this->validate([
+            'profileName' => ['required', 'string', 'min:3', 'max:128'],
+            'nationalCode' => [
+                'required',
+                new IranianNationalCode,
+                Rule::unique('users', 'national_code')->ignore($user->getKey()),
+            ],
+        ], [
+            'profileName.required' => 'نام و نام خانوادگی را وارد کنید.',
+            'profileName.min' => 'نام و نام خانوادگی را کامل وارد کنید.',
+            'nationalCode.required' => 'کد ملی را وارد کنید.',
+            'nationalCode.unique' => 'این کد ملی قبلاً ثبت شده است.',
+        ]);
+
+        $fullName = trim(preg_replace('/\s+/u', ' ', $this->profileName) ?? '');
+
+        User::query()->whereKey($user->getKey())->update([
+            'name' => $fullName,
+            'national_code' => $normalizedNationalCode,
+        ]);
 
         Auth::setUser($user->fresh());
 
@@ -176,8 +189,8 @@ trait HandlesOtpLogin
             $this->pendingNewAccount = false;
         }
 
-        $this->firstName = '';
-        $this->lastName = '';
+        $this->profileName = '';
+        $this->nationalCode = '';
         $this->profileUserId = null;
         $this->dispatch('shop-user-profile-updated');
         $this->finalizeShopLogin($user->fresh());
@@ -239,8 +252,8 @@ trait HandlesOtpLogin
         $this->step = 'phone';
         $this->phone = '';
         $this->otp = '';
-        $this->firstName = '';
-        $this->lastName = '';
+        $this->profileName = '';
+        $this->nationalCode = '';
         $this->pendingNewAccount = false;
         $this->resetValidation();
     }

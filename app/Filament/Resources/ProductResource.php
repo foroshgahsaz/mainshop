@@ -148,6 +148,8 @@ class ProductResource extends Resource
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
                     ->sortable()
+                    ->badge()
+                    ->color('gray')
                     ->width('3.5rem')
                     ->grow(false),
 
@@ -159,11 +161,14 @@ class ProductResource extends Resource
                     ->sortable()
                     ->wrap(false)
                     ->lineClamp(2)
+                    ->extraCellAttributes(['class' => 'fi-admin-product-name'])
                     ->tooltip(fn (Product $record): string => $record->name),
 
                 Tables\Columns\TextColumn::make('category.name')
                     ->label('دسته‌بندی')
                     ->sortable()
+                    ->badge()
+                    ->color('gray')
                     ->width('7rem')
                     ->grow(false)
                     ->wrap(false),
@@ -189,14 +194,16 @@ class ProductResource extends Resource
                     ->formatStateUsing(fn (?int $state): string => ShopLabels::formatMoney($state))
                     ->sortable()
                     ->width('9rem')
-                    ->grow(false),
+                    ->grow(false)
+                    ->extraCellAttributes(['class' => 'fi-admin-product-price']),
 
                 Tables\Columns\TextColumn::make('stock')
                     ->label('موجودی')
                     ->sortable()
                     ->width('4rem')
                     ->grow(false)
-                    ->alignCenter(),
+                    ->alignCenter()
+                    ->extraCellAttributes(['class' => 'fi-admin-product-stock']),
 
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('فعال')

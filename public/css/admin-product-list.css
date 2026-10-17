@@ -1,0 +1,140 @@
+/* لیست محصولات ادمین — /admin/products — هماهنگ با بروزرسانی قیمت */
+
+.fi-admin-shell .fi-resource-products {
+    --apl-primary: #7239ea;
+    --apl-border: #e4e6ef;
+    --apl-muted: #7e8299;
+    --apl-bg-soft: #f9fafb;
+    --apl-filter-bg: #f8f5ff;
+    --apl-filter-border: #e9e3ff;
+}
+
+.fi-admin-shell .fi-resource-products .fi-admin-list-header {
+    background: linear-gradient(180deg, var(--apl-filter-bg) 0%, #fff 100%);
+    border-bottom-color: var(--apl-filter-border);
+}
+
+.fi-admin-shell .fi-resource-products .fi-admin-list-header__icon {
+    background: #ede9fe;
+}
+
+.fi-admin-shell .fi-resource-products.fi-resource-list-records-page .fi-ta-ctn {
+    margin: 0 24px 20px;
+    border: 1px solid var(--apl-border) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 1px 3px rgba(24, 28, 50, 0.04), 0 4px 24px rgba(24, 28, 50, 0.04) !important;
+    overflow: hidden;
+}
+
+.fi-admin-shell .fi-resource-products .fi-ta-header-toolbar {
+    padding: 1rem 1.25rem !important;
+    background: linear-gradient(180deg, var(--apl-bg-soft) 0%, #fff 100%) !important;
+    border-bottom: 1px solid var(--apl-border) !important;
+}
+
+.fi-admin-shell .fi-resource-products .fi-ta-search-field input {
+    border: 1px solid var(--apl-border) !important;
+    background: #fff !important;
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+
+.fi-admin-shell .fi-resource-products .fi-ta-search-field input:focus {
+    border-color: var(--apl-primary) !important;
+    box-shadow: 0 0 0 3px rgba(114, 57, 234, 0.12) !important;
+}
+
+.fi-admin-shell .fi-resource-products .fi-ta-filters-indicator,
+.fi-admin-shell .fi-resource-products .fi-ta-header-toolbar .fi-btn.fi-color-gray {
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.8125rem;
+}
+
+.fi-admin-shell .fi-resource-products .fi-ta-header-cell {
+    background: #fff !important;
+    color: var(--apl-muted) !important;
+    font-weight: 700 !important;
+    font-size: 0.75rem !important;
+    padding: 0.75rem 0.85rem !important;
+    border-bottom: 2px solid var(--apl-border) !important;
+}
+
+.fi-admin-shell .fi-resource-products .fi-ta-cell,
+.fi-admin-shell .fi-resource-products .fi-ta-actions-cell {
+    padding: 0.65rem 0.85rem !important;
+    font-size: 0.8125rem;
+    border-bottom: 1px solid #f1f1f4;
+}
+
+.fi-admin-shell .fi-resource-products .fi-ta-row:hover .fi-ta-cell,
+.fi-admin-shell .fi-resource-products .fi-ta-row:hover .fi-ta-actions-cell {
+    background: #fafafa !important;
+}
+
+.fi-admin-shell .fi-resource-products .fi-ta-row:last-child .fi-ta-cell,
+.fi-admin-shell .fi-resource-products .fi-ta-row:last-child .fi-ta-actions-cell {
+    border-bottom: none;
+}
+
+.fi-admin-shell .fi-resource-products img.fi-admin-table-thumb {
+    border-radius: 8px;
+    border: 1px solid var(--apl-border);
+    object-fit: cover;
+    box-shadow: 0 1px 2px rgba(24, 28, 50, 0.06);
+}
+
+.fi-admin-shell .fi-resource-products .fi-admin-product-name .fi-ta-text-item-label {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-weight: 600;
+    color: #181c32;
+    line-height: 1.45;
+    max-width: 320px;
+}
+
+.fi-admin-shell .fi-resource-products .fi-admin-product-price .fi-ta-text-item-label {
+    font-weight: 700;
+    color: #181c32;
+    white-space: nowrap;
+}
+
+.fi-admin-shell .fi-resource-products .fi-admin-product-stock .fi-ta-text-item-label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2rem;
+    padding: 0.15rem 0.45rem;
+    border-radius: 6px;
+    background: var(--apl-bg-soft);
+    font-weight: 700;
+    font-size: 0.75rem;
+    color: #5e6278;
+}
+
+.fi-admin-shell .fi-resource-products .fi-ta-cell .fi-badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+}
+
+.fi-admin-shell .fi-resource-products .fi-ta-cell .fi-badge.fi-color-gray {
+    background: var(--apl-bg-soft);
+    color: #5e6278;
+    --tw-ring-color: transparent;
+}
+
+.fi-admin-shell .fi-resource-products .fi-ta-pagination {
+    padding: 1rem 1.25rem !important;
+    background: var(--apl-bg-soft) !important;
+    border-top: 1px solid var(--apl-border) !important;
+}
+
+@media (max-width: 991px) {
+    .fi-admin-shell .fi-resource-products.fi-resource-list-records-page .fi-ta-ctn {
+        margin: 0 14px 16px;
+    }
+}

@@ -1065,7 +1065,7 @@ $settings->site();       // نام سایت، لوگو، ...
 
 ### Rich content
 
-`RichContentEditor` + `public/shop/css/rich-content.css` — HTML محصول/بلاگ
+`RichContentEditor` + `public/shop/css/rich-content.css` — HTML محصول/بلاگ/صفحات؛ دکمه **«بارگذاری و درج ویدئو»** (فایل MP4/WebM یا URL) → `<figure class="rich-content-video">` — `shop.rich_content.video_max_size_kb`
 
 ---
 

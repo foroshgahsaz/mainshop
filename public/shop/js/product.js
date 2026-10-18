@@ -389,19 +389,21 @@ function initProductLightbox() {
 function initProductZoom() {
   const zoomRoot = document.querySelector('.product-zoom');
   const stage = document.querySelector('.product-zoom__stage');
+  const lens = document.querySelector('.product-zoom__lens');
+  const lensImg = document.querySelector('.product-zoom__lens-img');
   const mainImage = document.getElementById('productMainImage');
 
-  if (!zoomRoot || !stage || !mainImage) {
+  if (!zoomRoot || !stage || !lens || !lensImg || !mainImage) {
     return;
   }
 
-  /** دو برابر سطح قبلی (۲.۲ → ۴.۴) — زوم داخل همان قاب تصویر */
   const zoomLevel = 4.4;
+
+  const zoomSrc = () => mainImage.dataset.zoom || mainImage.src;
 
   const resetZoom = () => {
     zoomRoot.classList.remove('is-active');
-    mainImage.style.transform = '';
-    mainImage.style.transformOrigin = '';
+    lens.setAttribute('aria-hidden', 'true');
   };
 
   const updateZoom = (event) => {
@@ -413,20 +415,35 @@ function initProductZoom() {
     }
 
     const rect = stage.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+    let x = event.clientX - rect.left;
+    let y = event.clientY - rect.top;
 
     if (x < 0 || y < 0 || x > rect.width || y > rect.height) {
       resetZoom();
       return;
     }
 
-    const originX = (x / rect.width) * 100;
-    const originY = (y / rect.height) * 100;
+    const lensW = lens.offsetWidth;
+    const lensH = lens.offsetHeight;
+    x = Math.max(lensW / 2, Math.min(rect.width - lensW / 2, x));
+    y = Math.max(lensH / 2, Math.min(rect.height - lensH / 2, y));
+
+    lens.style.left = `${x - lensW / 2}px`;
+    lens.style.top = `${y - lensH / 2}px`;
+
+    const zoomW = rect.width * zoomLevel;
+    const zoomH = rect.height * zoomLevel;
+    const src = zoomSrc();
+    if (lensImg.getAttribute('src') !== src) {
+      lensImg.src = src;
+    }
+    lensImg.style.width = `${zoomW}px`;
+    lensImg.style.height = `${zoomH}px`;
+    lensImg.style.left = `${-(x * zoomLevel - lensW / 2)}px`;
+    lensImg.style.top = `${-(y * zoomLevel - lensH / 2)}px`;
 
     zoomRoot.classList.add('is-active');
-    mainImage.style.transformOrigin = `${originX}% ${originY}%`;
-    mainImage.style.transform = `scale(${zoomLevel})`;
+    lens.setAttribute('aria-hidden', 'false');
   };
 
   stage.addEventListener('mousemove', updateZoom);

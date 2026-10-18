@@ -389,55 +389,48 @@ function initProductLightbox() {
 function initProductZoom() {
   const zoomRoot = document.querySelector('.product-zoom');
   const stage = document.querySelector('.product-zoom__stage');
-  const lens = document.querySelector('.product-zoom__lens');
-  const result = document.querySelector('.product-zoom__result');
   const mainImage = document.getElementById('productMainImage');
 
-  if (!zoomRoot || !stage || !lens || !result || !mainImage) return;
+  if (!zoomRoot || !stage || !mainImage) {
+    return;
+  }
 
-  const zoomLevel = 2.2;
+  /** دو برابر سطح قبلی (۲.۲ → ۴.۴) — زوم داخل همان قاب تصویر */
+  const zoomLevel = 4.4;
+
+  const resetZoom = () => {
+    zoomRoot.classList.remove('is-active');
+    mainImage.style.transform = '';
+    mainImage.style.transformOrigin = '';
+  };
 
   const updateZoom = (event) => {
-    if (window.innerWidth < 1024) return;
-    if (document.getElementById('productZoomModal')?.classList.contains('is-open')) return;
-
-    const rect = stage.getBoundingClientRect();
-    let x = event.clientX - rect.left;
-    let y = event.clientY - rect.top;
-
-    if (x < 0 || y < 0 || x > rect.width || y > rect.height) {
-      zoomRoot.classList.remove('is-active');
+    if (window.innerWidth < 1024) {
+      return;
+    }
+    if (document.getElementById('productZoomModal')?.classList.contains('is-open')) {
       return;
     }
 
-    const lensW = lens.offsetWidth;
-    const lensH = lens.offsetHeight;
-    x = Math.max(lensW / 2, Math.min(rect.width - lensW / 2, x));
-    y = Math.max(lensH / 2, Math.min(rect.height - lensH / 2, y));
+    const rect = stage.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
 
-    lens.style.left = `${x - lensW / 2}px`;
-    lens.style.top = `${y - lensH / 2}px`;
+    if (x < 0 || y < 0 || x > rect.width || y > rect.height) {
+      resetZoom();
+      return;
+    }
+
+    const originX = (x / rect.width) * 100;
+    const originY = (y / rect.height) * 100;
 
     zoomRoot.classList.add('is-active');
-
-    const resultW = result.offsetWidth || rect.width;
-    const resultH = result.offsetHeight || rect.height;
-    const bgW = rect.width * zoomLevel;
-    const bgH = rect.height * zoomLevel;
-    const bgX = (x / rect.width) * bgW - resultW / 2;
-    const bgY = (y / rect.height) * bgH - resultH / 2;
-
-    result.style.backgroundImage = `url('${mainImage.dataset.zoom || mainImage.src}')`;
-    result.style.backgroundSize = `${bgW}px ${bgH}px`;
-    result.style.backgroundPosition = `-${bgX}px -${bgY}px`;
-    result.setAttribute('aria-hidden', 'false');
+    mainImage.style.transformOrigin = `${originX}% ${originY}%`;
+    mainImage.style.transform = `scale(${zoomLevel})`;
   };
 
   stage.addEventListener('mousemove', updateZoom);
-  stage.addEventListener('mouseleave', () => {
-    zoomRoot.classList.remove('is-active');
-    result.setAttribute('aria-hidden', 'true');
-  });
+  stage.addEventListener('mouseleave', resetZoom);
 }
 
 function initProductOptions() {

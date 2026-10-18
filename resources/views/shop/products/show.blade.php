@@ -83,9 +83,10 @@
                         <div class="product-zoom">
                             <div class="product-zoom__stage" data-open-lightbox role="button" tabindex="0" aria-label="بزرگنمایی و مشاهده گالری">
                                 <img id="productMainImage" src="{{ $mainImage }}" data-zoom="{{ $mainZoomImage }}" data-initial-src="{{ $mainImage }}" alt="{{ $product->name }}">
-                                <div class="product-zoom__lens"></div>
+                                <div class="product-zoom__lens" aria-hidden="true">
+                                    <img class="product-zoom__lens-img" alt="" draggable="false">
+                                </div>
                             </div>
-                            <div class="product-zoom__result" aria-hidden="true"></div>
                         </div>
                     </div>
                     @if($images->isNotEmpty())

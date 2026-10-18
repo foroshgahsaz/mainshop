@@ -44,9 +44,7 @@
         $taxonomyMode = $taxonomy_mode ?? \App\Services\Settings\HomepageSettingsService::TAXONOMY_CATEGORIES;
         $taxonomyItems = $taxonomy_items ?? collect();
         $isFamilyTaxonomy = $taxonomyMode === \App\Services\Settings\HomepageSettingsService::TAXONOMY_PRODUCT_FAMILIES;
-        $chineseServiceBrandPopup = $chinese_service_brand_popup ?? null;
-        $chineseServiceFamilyId = (int) ($chineseServiceBrandPopup['family_id'] ?? 0);
-        $chineseServicePopupMatcher = app(\App\Services\Shop\ChineseServiceBrandPopupService::class);
+        $familyHomepagePopups = $family_homepage_popups ?? [];
     @endphp
     @if($taxonomyItems->isNotEmpty())
         <section @class([
@@ -60,11 +58,12 @@
             <div class="swiper categorySwiper">
                 <div class="swiper-wrapper">
                     @foreach($taxonomyItems as $item)
+                        @php($familyPopup = $isFamilyTaxonomy ? ($familyHomepagePopups[$item->id] ?? null) : null)
                         <div class="swiper-slide">
-                            @if ($isFamilyTaxonomy && $chineseServiceBrandPopup && $chineseServicePopupMatcher->matchesFamily($item))
+                            @if ($familyPopup)
                                 <button type="button"
                                         class="category-card category-card--family category-card--popup-trigger"
-                                        onclick="toggleChineseServiceBrandsModal(true)"
+                                        onclick="openFamilyHomepagePopup(@js($familyPopup['family_name']), @js($familyPopup['items']))"
                                         aria-haspopup="dialog">
                                     <span class="category-card__image">
                                         <img src="{{ \App\Support\ShopFormatter::productFamilyImage($item->image) }}" alt="{{ $item->name }}" loading="lazy">
@@ -87,8 +86,8 @@
                 </div>
             </div>
         </section>
-        @if ($chineseServiceBrandPopup)
-            @include('shop.partials.chinese-service-brands-modal', ['popup' => $chineseServiceBrandPopup])
+        @if ($isFamilyTaxonomy && $familyHomepagePopups !== [])
+            @include('shop.partials.family-homepage-popup-modal')
         @endif
     @endif
 

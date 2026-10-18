@@ -36,6 +36,11 @@ return [
         'vat_percent' => (int) env('SHOP_INVOICE_VAT_PERCENT', 10),
     ],
 
+    'rich_content' => [
+        /** حداکثر حجم آپلود ویدئو در ادیتور (KB) */
+        'video_max_size_kb' => (int) env('SHOP_RICH_CONTENT_VIDEO_MAX_KB', 102400),
+    ],
+
     'representative' => [
         'catalog_cache_seconds' => (int) env('REP_CATALOG_CACHE_SECONDS', 300),
         'products_per_page' => (int) env('REP_PRODUCTS_PER_PAGE', 60),

@@ -246,7 +246,7 @@ components/shop/
 | `public/shop/css/tailwind.css` | Tailwind اصلی (production) |
 | `public/shop/css/custom.css` | override و layout (checkout، sidebar) |
 | `public/shop/js/main.js` | JS فروشگاه |
-| `public/shop/css/product.css` + `public/shop/js/product.js` | صفحه محصول: گالری، **زوم با هاور** (دسکتاپ)، لایت‌باکس با دکمه زوم و تصویر وسط‌چین |
+| `public/shop/css/product.css` + `public/shop/js/product.js` | صفحه محصول: گالری، **زوم درون تصویر** با هاور (دسکتاپ)، لایت‌باکس با دکمه زوم و تصویر وسط‌چین |
 | `resources/css/app.css` | Vite — کم‌استفاده |
 
 > **نکته:** layoutهای جدید را ترجیحاً در `custom.css` بنویسید؛ `tailwind.css` prebuilt است و ممکن است utilityهای `lg:` کامل نباشند.
@@ -1295,6 +1295,7 @@ resources/views/layouts/shop.blade.php
 | 2026-10-14 | `/admin/orders`: ستون کاربر فقط نام — بدون نمایش موبایل زیر نام |
 | 2026-10-17 | دیجی‌پی `purchases/deliver`: فیلد `products` = عناوین فارسی `order_items.product_name` (×تعداد) |
 | 2026-10-17 | `/admin/orders/{id}` و جزئیات پرداخت: **لغو دیجی‌پی** — عودت API (`refunds?type=`) via `DigiPayRefundService` |
+| 2026-10-18 | صفحه محصول: زوم **داخل همان قاب تصویر** (دسکتاپ، scale≈۴.۴× با مبدأ موس)؛ لایت‌باکس: دکمه بزرگنمایی + pan — `product.js` |
 | 2026-10-18 | `RichContentEditor`: دکمه **بارگذاری و درج ویدئو**؛ فروشگاه: `RichContentPresenter` — ویدئوها **بالای** متن در `x-shop.rich-content` |
 | 2026-10-18 | صفحه اصلی — پاپ‌آپ **هر خانواده محصول**: ادمین → خانواده محصول → «نمایش با پاپ‌آپ» + repeater **نام/URL** (`product_family_homepage_popup_items`); `shop:diagnose-family-homepage-popups` |
 | 2026-10-17 | `/admin/orders/{id}`: دو PDF فاکتور — **مشتری** و **مالی** (`?financial=1`)؛ نسخه مالی: ردیف جدول **ارزش افزوده** (تعداد ۱، بهای واحد = مبلغ کل = ۱۰٪ مبلغ قابل پرداخت) بعد از «جمع اقلام» — `shop.invoice.vat_percent` |

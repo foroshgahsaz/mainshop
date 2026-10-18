@@ -1294,6 +1294,7 @@ resources/views/layouts/shop.blade.php
 | 2026-10-14 | `/admin/orders`: ستون کاربر فقط نام — بدون نمایش موبایل زیر نام |
 | 2026-10-17 | دیجی‌پی `purchases/deliver`: فیلد `products` = عناوین فارسی `order_items.product_name` (×تعداد) |
 | 2026-10-17 | `/admin/orders/{id}` و جزئیات پرداخت: **لغو دیجی‌پی** — عودت API (`refunds?type=`) via `DigiPayRefundService` |
+| 2026-10-18 | `RichContentEditor`: دکمه **بارگذاری و درج ویدئو**؛ فروشگاه: `RichContentPresenter` — ویدئوها **بالای** متن در `x-shop.rich-content` |
 | 2026-10-18 | صفحه اصلی — پاپ‌آپ **هر خانواده محصول**: ادمین → خانواده محصول → «نمایش با پاپ‌آپ» + repeater **نام/URL** (`product_family_homepage_popup_items`); `shop:diagnose-family-homepage-popups` |
 | 2026-10-17 | `/admin/orders/{id}`: دو PDF فاکتور — **مشتری** و **مالی** (`?financial=1`)؛ نسخه مالی: ردیف جدول **ارزش افزوده** (تعداد ۱، بهای واحد = مبلغ کل = ۱۰٪ مبلغ قابل پرداخت) بعد از «جمع اقلام» — `shop.invoice.vat_percent` |
 | 2026-10-17 | `/admin/orders`: فیلتر روش پرداخت بر اساس **درگاه‌های فعال** (باجت‌پی، دیجی‌پی، …) + `cod`؛ تطبیق `payment_method` و سفارش‌های `online` با `payments.gateway` |

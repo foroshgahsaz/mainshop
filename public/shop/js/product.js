@@ -218,10 +218,13 @@ function initProductLightbox() {
     },
     on: {
       slideChange(swiper) {
-        if (!modal.classList.contains('is-open')) return;
+        if (!modal.classList.contains('is-open')) {
+          return;
+        }
         setMainGalleryImage(swiper.activeIndex);
       },
     },
+    allowTouchMove: true,
   });
 
   const openLightbox = (index = productGalleryIndex) => {
@@ -233,10 +236,100 @@ function initProductLightbox() {
   };
 
   const closeLightbox = () => {
+    resetLightboxZoom();
     modal.classList.remove('is-open');
     modal.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
   };
+
+  const lightboxStage = modal.querySelector('[data-lightbox-stage]');
+  const lightboxZoomBtn = modal.querySelector('[data-lightbox-zoom]');
+  const LIGHTBOX_ZOOM_SCALE = 2.5;
+  let lightboxZoomed = false;
+  let lightboxPan = { x: 0, y: 0 };
+  let lightboxPanStart = null;
+
+  const getActiveLightboxImage = () => {
+    const slide = lightboxSwiper?.slides?.[lightboxSwiper.activeIndex];
+    return slide?.querySelector('img') ?? null;
+  };
+
+  const applyLightboxZoomTransform = () => {
+    const img = getActiveLightboxImage();
+    if (!img) {
+      return;
+    }
+
+    if (!lightboxZoomed) {
+      img.style.transform = '';
+      lightboxStage?.classList.remove('is-zoomed', 'is-panning');
+      return;
+    }
+
+    img.style.transform = `translate(${lightboxPan.x}px, ${lightboxPan.y}px) scale(${LIGHTBOX_ZOOM_SCALE})`;
+    lightboxStage?.classList.add('is-zoomed');
+  };
+
+  const resetLightboxZoom = () => {
+    lightboxZoomed = false;
+    lightboxPan = { x: 0, y: 0 };
+    lightboxPanStart = null;
+    lightboxZoomBtn?.classList.remove('is-active');
+    lightboxZoomBtn?.setAttribute('aria-pressed', 'false');
+    applyLightboxZoomTransform();
+    lightboxSwiper?.enable();
+  };
+
+  const setLightboxZoom = (enabled) => {
+    lightboxZoomed = enabled;
+    lightboxPan = { x: 0, y: 0 };
+    lightboxZoomBtn?.classList.toggle('is-active', enabled);
+    lightboxZoomBtn?.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+    applyLightboxZoomTransform();
+    if (enabled) {
+      lightboxSwiper?.disable();
+    } else {
+      lightboxSwiper?.enable();
+    }
+  };
+
+  lightboxZoomBtn?.addEventListener('click', (event) => {
+    event.stopPropagation();
+    setLightboxZoom(!lightboxZoomed);
+  });
+
+  lightboxStage?.addEventListener('mousedown', (event) => {
+    if (!lightboxZoomed || event.button !== 0) {
+      return;
+    }
+    event.preventDefault();
+    lightboxPanStart = {
+      originX: event.clientX - lightboxPan.x,
+      originY: event.clientY - lightboxPan.y,
+    };
+    lightboxStage.classList.add('is-panning');
+  });
+
+  document.addEventListener('mousemove', (event) => {
+    if (!lightboxPanStart) {
+      return;
+    }
+    lightboxPan.x = event.clientX - lightboxPanStart.originX;
+    lightboxPan.y = event.clientY - lightboxPanStart.originY;
+    applyLightboxZoomTransform();
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!lightboxPanStart) {
+      return;
+    }
+    lightboxPanStart = null;
+    lightboxStage?.classList.remove('is-panning');
+  });
+
+  lightboxSwiper.on('slideChange', () => {
+    resetLightboxZoom();
+  });
 
   let draggedRecently = false;
   let dragStart = 0;
@@ -325,19 +418,26 @@ function initProductZoom() {
     lens.style.left = `${x - lensW / 2}px`;
     lens.style.top = `${y - lensH / 2}px`;
 
+    zoomRoot.classList.add('is-active');
+
+    const resultW = result.offsetWidth || rect.width;
+    const resultH = result.offsetHeight || rect.height;
     const bgW = rect.width * zoomLevel;
     const bgH = rect.height * zoomLevel;
-    const bgX = (x / rect.width) * bgW - result.offsetWidth / 2;
-    const bgY = (y / rect.height) * bgH - result.offsetHeight / 2;
+    const bgX = (x / rect.width) * bgW - resultW / 2;
+    const bgY = (y / rect.height) * bgH - resultH / 2;
 
     result.style.backgroundImage = `url('${mainImage.dataset.zoom || mainImage.src}')`;
     result.style.backgroundSize = `${bgW}px ${bgH}px`;
     result.style.backgroundPosition = `-${bgX}px -${bgY}px`;
-    zoomRoot.classList.add('is-active');
+    result.setAttribute('aria-hidden', 'false');
   };
 
   stage.addEventListener('mousemove', updateZoom);
-  stage.addEventListener('mouseleave', () => zoomRoot.classList.remove('is-active'));
+  stage.addEventListener('mouseleave', () => {
+    zoomRoot.classList.remove('is-active');
+    result.setAttribute('aria-hidden', 'true');
+  });
 }
 
 function initProductOptions() {

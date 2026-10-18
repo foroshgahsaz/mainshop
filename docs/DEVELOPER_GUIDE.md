@@ -246,6 +246,7 @@ components/shop/
 | `public/shop/css/tailwind.css` | Tailwind اصلی (production) |
 | `public/shop/css/custom.css` | override و layout (checkout، sidebar) |
 | `public/shop/js/main.js` | JS فروشگاه |
+| `public/shop/css/product.css` + `public/shop/js/product.js` | صفحه محصول: گالری، **زوم با هاور** (دسکتاپ)، لایت‌باکس با دکمه زوم و تصویر وسط‌چین |
 | `resources/css/app.css` | Vite — کم‌استفاده |
 
 > **نکته:** layoutهای جدید را ترجیحاً در `custom.css` بنویسید؛ `tailwind.css` prebuilt است و ممکن است utilityهای `lg:` کامل نباشند.

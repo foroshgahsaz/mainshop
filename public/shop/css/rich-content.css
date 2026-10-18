@@ -52,6 +52,14 @@
   margin: 1.25rem 0;
 }
 
+.rich-content-videos {
+  margin-bottom: 0.5rem;
+}
+
+.rich-content-videos .rich-content-video {
+  margin-top: 0;
+}
+
 .rich-content-video {
   margin: 1.25rem 0;
 }

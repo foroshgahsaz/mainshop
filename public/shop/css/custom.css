@@ -2331,7 +2331,7 @@ body.has-admin-bar .listing-filters {
   z-index: 120;
 }
 
-/* ===== Chinese service brands popup (homepage) ===== */
+/* ===== Product family homepage popup ===== */
 .category-card--popup-trigger {
   width: 100%;
   border: none;
@@ -2342,6 +2342,7 @@ body.has-admin-bar .listing-filters {
   padding: 0;
 }
 
+.family-homepage-popup,
 .chinese-brands-modal {
   position: fixed;
   inset: 0;
@@ -2357,11 +2358,13 @@ body.has-admin-bar .listing-filters {
   transition: opacity 0.25s ease;
 }
 
+.family-homepage-popup.is-open,
 .chinese-brands-modal.is-open {
   opacity: 1;
   pointer-events: auto;
 }
 
+.family-homepage-popup__panel,
 .chinese-brands-modal__panel {
   background: #fff;
   width: 100%;
@@ -2373,10 +2376,12 @@ body.has-admin-bar .listing-filters {
   transition: transform 0.25s ease;
 }
 
+.family-homepage-popup.is-open .family-homepage-popup__panel,
 .chinese-brands-modal.is-open .chinese-brands-modal__panel {
   transform: translateY(0);
 }
 
+.family-homepage-popup__header,
 .chinese-brands-modal__header {
   display: flex;
   align-items: center;
@@ -2385,6 +2390,7 @@ body.has-admin-bar .listing-filters {
   margin-bottom: 0.35rem;
 }
 
+.family-homepage-popup__title,
 .chinese-brands-modal__title {
   margin: 0;
   font-size: 1.05rem;
@@ -2392,6 +2398,7 @@ body.has-admin-bar .listing-filters {
   color: #181c32;
 }
 
+.family-homepage-popup__close,
 .chinese-brands-modal__close {
   border: none;
   background: #f3f4f6;
@@ -2405,16 +2412,19 @@ body.has-admin-bar .listing-filters {
   cursor: pointer;
 }
 
+.family-homepage-popup__close:hover,
 .chinese-brands-modal__close:hover {
   background: #e5e7eb;
 }
 
+.family-homepage-popup__hint,
 .chinese-brands-modal__hint {
   margin: 0 0 0.85rem;
   font-size: 0.8rem;
   color: #9ca3af;
 }
 
+.family-homepage-popup__list,
 .chinese-brands-modal__list {
   list-style: none;
   margin: 0;
@@ -2424,6 +2434,7 @@ body.has-admin-bar .listing-filters {
   gap: 0.5rem;
 }
 
+.family-homepage-popup__item,
 .chinese-brands-modal__item {
   display: flex;
   align-items: center;
@@ -2437,12 +2448,14 @@ body.has-admin-bar .listing-filters {
   transition: border-color 0.15s, background 0.15s;
 }
 
+.family-homepage-popup__item:hover,
 .chinese-brands-modal__item:hover {
   border-color: #3bb371;
   background: #f0fdf4;
   color: #166534;
 }
 
+.family-homepage-popup__index,
 .chinese-brands-modal__index {
   width: 1.75rem;
   height: 1.75rem;
@@ -2457,6 +2470,7 @@ body.has-admin-bar .listing-filters {
   flex-shrink: 0;
 }
 
+.family-homepage-popup__name,
 .chinese-brands-modal__name {
   flex: 1;
 }

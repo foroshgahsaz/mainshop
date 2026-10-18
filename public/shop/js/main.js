@@ -287,8 +287,8 @@ function toggleSearchModal(show) {
 
 window.toggleSearchModal = toggleSearchModal;
 
-function toggleChineseServiceBrandsModal(show) {
-  const modal = document.getElementById('chineseServiceBrandsModal');
+function toggleFamilyHomepagePopup(show) {
+  const modal = document.getElementById('familyHomepagePopupModal');
   if (!modal) return;
 
   if (show) {
@@ -302,18 +302,39 @@ function toggleChineseServiceBrandsModal(show) {
   }
 }
 
-window.toggleChineseServiceBrandsModal = toggleChineseServiceBrandsModal;
+function openFamilyHomepagePopup(title, items) {
+  const modal = document.getElementById('familyHomepagePopupModal');
+  if (!modal || !Array.isArray(items) || items.length === 0) return;
+
+  const titleEl = modal.querySelector('[data-family-popup-title]');
+  const listEl = modal.querySelector('[data-family-popup-list]');
+  if (titleEl) titleEl.textContent = title || '';
+  if (listEl) {
+    listEl.innerHTML = items
+      .map((item, index) => {
+        const label = escapeHtml(item.label || '');
+        const url = escapeHtml(item.url || '#');
+        return `<li><a href="${url}" class="family-homepage-popup__item" onclick="toggleFamilyHomepagePopup(false)"><span class="family-homepage-popup__index">${index + 1}</span><span class="family-homepage-popup__name">${label}</span></a></li>`;
+      })
+      .join('');
+  }
+
+  toggleFamilyHomepagePopup(true);
+}
+
+window.toggleFamilyHomepagePopup = toggleFamilyHomepagePopup;
+window.openFamilyHomepagePopup = openFamilyHomepagePopup;
 
 document.addEventListener('keydown', (event) => {
   if (event.key !== 'Escape') return;
-  toggleChineseServiceBrandsModal(false);
+  toggleFamilyHomepagePopup(false);
 });
 
 document.addEventListener('click', (event) => {
-  const modal = document.getElementById('chineseServiceBrandsModal');
+  const modal = document.getElementById('familyHomepagePopupModal');
   if (!modal?.classList.contains('is-open')) return;
   if (event.target === modal) {
-    toggleChineseServiceBrandsModal(false);
+    toggleFamilyHomepagePopup(false);
   }
 });
 

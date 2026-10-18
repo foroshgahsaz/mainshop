@@ -64,6 +64,43 @@ class ProductFamilyResource extends Resource
                         ->default(0)
                         ->minValue(0),
                 ])->columns(2),
+            Forms\Components\Section::make('پاپ‌آپ صفحه اصلی')
+                ->description('وقتی در صفحه اصلی «خانواده‌های محصول» نمایش داده می‌شود، با کلیک روی این خانواده به‌جای رفتن مستقیم به لیست، پاپ‌آپ باز می‌شود.')
+                ->schema([
+                    Forms\Components\Toggle::make('homepage_popup_enabled')
+                        ->label('نمایش با پاپ‌آپ در صفحه اصلی')
+                        ->live(),
+                    Forms\Components\Repeater::make('homepagePopupItems')
+                        ->relationship()
+                        ->label('لینک‌های پاپ‌آپ')
+                        ->schema([
+                            Forms\Components\TextInput::make('label')
+                                ->label('نام')
+                                ->required()
+                                ->maxLength(255),
+                            Forms\Components\TextInput::make('url')
+                                ->label('آدرس (URL)')
+                                ->required()
+                                ->maxLength(2048)
+                                ->placeholder('https://www.chinibazar.ir/products?...')
+                                ->columnSpanFull(),
+                            Forms\Components\TextInput::make('position')
+                                ->label('ترتیب')
+                                ->numeric()
+                                ->default(0)
+                                ->minValue(0),
+                            Forms\Components\Toggle::make('is_active')
+                                ->label('فعال')
+                                ->default(true),
+                        ])
+                        ->columns(2)
+                        ->defaultItems(0)
+                        ->reorderable()
+                        ->orderColumn('position')
+                        ->collapsible()
+                        ->visible(fn (Forms\Get $get): bool => (bool) $get('homepage_popup_enabled'))
+                        ->columnSpanFull(),
+                ]),
         ]);
     }
 
@@ -75,6 +112,7 @@ class ProductFamilyResource extends Resource
                 Tables\Columns\TextColumn::make('name')->label('نام')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('slug')->label('اسلاگ'),
                 Tables\Columns\IconColumn::make('is_active')->label('فعال')->boolean(),
+                Tables\Columns\IconColumn::make('homepage_popup_enabled')->label('پاپ‌آپ')->boolean(),
                 Tables\Columns\TextColumn::make('position')->label('ترتیب')->sortable(),
                 Tables\Columns\TextColumn::make('products_count')->counts('products')->label('محصولات'),
             ])

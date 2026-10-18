@@ -11,7 +11,7 @@ use App\Models\Product;
 use App\Models\ProductFamily;
 use App\Models\ShippingMethod;
 use App\Services\Settings\HomepageSettingsService;
-use App\Services\Shop\ChineseServiceBrandPopupService;
+use App\Services\Shop\ProductFamilyHomepagePopupService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -31,24 +31,22 @@ class ShopCacheService
                 $productQuery = fn () => Product::active()->with(['images' => fn ($q) => $q->orderBy('position')]);
                 $taxonomyMode = $homepage->taxonomyMode();
                 $taxonomyItems = $taxonomyMode === HomepageSettingsService::TAXONOMY_PRODUCT_FAMILIES
-                    ? ProductFamily::query()->where('is_active', true)->orderBy('position')->get()
+                    ? ProductFamily::query()
+                        ->where('is_active', true)
+                        ->with(['homepagePopupItems' => fn ($q) => $q->where('is_active', true)->orderBy('position')->orderBy('id')])
+                        ->orderBy('position')
+                        ->get()
                     : Category::query()->where('is_active', true)->orderBy('position')->get();
 
-                $chineseServiceBrandPopup = null;
-                if ($taxonomyMode === HomepageSettingsService::TAXONOMY_PRODUCT_FAMILIES) {
-                    $popupService = app(ChineseServiceBrandPopupService::class);
-                    $chineseFamily = $taxonomyItems
-                        ->first(fn ($item) => $item instanceof ProductFamily && $popupService->matchesFamily($item));
-                    if ($chineseFamily instanceof ProductFamily) {
-                        $chineseServiceBrandPopup = $popupService->payloadForFamily($chineseFamily);
-                    }
-                }
+                $familyHomepagePopups = $taxonomyMode === HomepageSettingsService::TAXONOMY_PRODUCT_FAMILIES
+                    ? app(ProductFamilyHomepagePopupService::class)->payloadsByFamilyId($taxonomyItems)
+                    : [];
 
                 return [
                     'sliders' => HomeSlider::active()->orderBy('position')->get(),
                     'taxonomy_mode' => $taxonomyMode,
                     'taxonomy_items' => $taxonomyItems,
-                    'chinese_service_brand_popup' => $chineseServiceBrandPopup,
+                    'family_homepage_popups' => $familyHomepagePopups,
                     'discounted' => $productQuery()->whereNotNull('sale_price')->whereColumn('sale_price', '<', 'price')->latest()->take(8)->get(),
                     'best_sellers' => $productQuery()->orderByDesc('views')->take(8)->get(),
                     'new' => $homepage->resolveNewProducts($productQuery),

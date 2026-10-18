@@ -13,14 +13,21 @@ class ProductFamily extends Model
         'image',
         'is_active',
         'position',
+        'homepage_popup_enabled',
     ];
 
     protected function casts(): array
     {
         return [
             'is_active' => 'boolean',
+            'homepage_popup_enabled' => 'boolean',
             'position' => 'integer',
         ];
+    }
+
+    public function homepagePopupItems(): HasMany
+    {
+        return $this->hasMany(ProductFamilyHomepagePopupItem::class)->orderBy('position')->orderBy('id');
     }
 
     public function products(): HasMany

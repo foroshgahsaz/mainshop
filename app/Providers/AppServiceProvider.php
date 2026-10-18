@@ -18,6 +18,7 @@ use App\Models\Payment;
 use App\Models\Post;
 use App\Models\Product;
 use App\Models\ProductFamily;
+use App\Models\ProductFamilyHomepagePopupItem;
 use App\Models\ProductImage;
 use App\Models\ProductPlant;
 use App\Models\ProductTemplate;
@@ -144,6 +145,7 @@ class AppServiceProvider extends ServiceProvider
         Product::observe(ProductObserver::class);
         $representativeCatalogObserver = app(RepresentativeCatalogObserver::class);
         ProductFamily::observe($representativeCatalogObserver);
+        ProductFamilyHomepagePopupItem::observe($representativeCatalogObserver);
         ProductPlant::observe($representativeCatalogObserver);
         ProductTemplate::observe($representativeCatalogObserver);
         ProductImage::observe(ProductImageObserver::class);

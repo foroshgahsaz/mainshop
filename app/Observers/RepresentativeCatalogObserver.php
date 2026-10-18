@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\ProductFamily;
+use App\Models\ProductFamilyHomepagePopupItem;
 use App\Services\Cache\ShopCacheService;
 use App\Services\Representative\RepresentativeCatalogCache;
 
@@ -17,7 +18,7 @@ class RepresentativeCatalogObserver
     {
         $this->catalogCache->flush();
 
-        if ($model instanceof ProductFamily) {
+        if ($model instanceof ProductFamily || $model instanceof ProductFamilyHomepagePopupItem) {
             $this->shopCache->forgetHome();
         }
     }
@@ -26,7 +27,7 @@ class RepresentativeCatalogObserver
     {
         $this->catalogCache->flush();
 
-        if ($model instanceof ProductFamily) {
+        if ($model instanceof ProductFamily || $model instanceof ProductFamilyHomepagePopupItem) {
             $this->shopCache->forgetHome();
         }
     }

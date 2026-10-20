@@ -77,5 +77,7 @@ class FooterSettingsTest extends TestCase
         $response->assertSee('دسترسی سریع', false);
         $response->assertSee('021-9100-1234', false);
         $response->assertSee('ارسال سریع', false);
+        $response->assertDontSee('کالاهای دیجیتال، لوازم خانگی، پوشاک', false);
+        $response->assertDontSee('اعتماد شما سرمایه ماست', false);
     }
 }

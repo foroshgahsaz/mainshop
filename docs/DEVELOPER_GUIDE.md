@@ -1295,6 +1295,7 @@ resources/views/layouts/shop.blade.php
 | 2026-10-14 | `/admin/orders`: ستون کاربر فقط نام — بدون نمایش موبایل زیر نام |
 | 2026-10-17 | دیجی‌پی `purchases/deliver`: فیلد `products` = عناوین فارسی `order_items.product_name` (×تعداد) |
 | 2026-10-17 | `/admin/orders/{id}` و جزئیات پرداخت: **لغو دیجی‌پی** — عودت API (`refunds?type=`) via `DigiPayRefundService` |
+| 2026-10-20 | فوتر: حذف متن دمو (پاراگراف‌های «دیجیتال/پوشاک» و توضیح برند پیش‌فرض) — `FooterSettingsService` + migration پاک‌سازی تنظیم ذخیره‌شده |
 | 2026-10-18 | صفحه محصول: **ذره‌بین روی تصویر** (لنز سبز + پیش‌نمایش ۴.۴× داخل لنز، بدون پنل کنار)؛ لایت‌باکس: دکمه بزرگنمایی + pan — `product.js` |
 | 2026-10-18 | `RichContentEditor`: دکمه **بارگذاری و درج ویدئو**؛ فروشگاه: `RichContentPresenter` — ویدئوها **بالای** متن در `x-shop.rich-content` |
 | 2026-10-18 | صفحه اصلی — پاپ‌آپ **هر خانواده محصول**: ادمین → خانواده محصول → «نمایش با پاپ‌آپ» + repeater **نام/URL** (`product_family_homepage_popup_items`); `shop:diagnose-family-homepage-popups` |

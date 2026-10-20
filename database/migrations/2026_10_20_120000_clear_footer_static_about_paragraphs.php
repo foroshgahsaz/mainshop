@@ -36,7 +36,7 @@ return new class extends Migration
         $row->value = json_encode($decoded, JSON_UNESCAPED_UNICODE);
         $row->save();
 
-        Cache::forget(FooterSettingsService::CACHE_KEY);
+        Cache::forget('shop:footer:settings:all');
         Cache::forget('shop:settings:all');
     }
 

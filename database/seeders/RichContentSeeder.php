@@ -13,7 +13,9 @@ class RichContentSeeder extends Seeder
     {
         $asset = fn (string $path): string => asset($path);
 
-        Page::updateOrCreate(['slug' => 'about'], [
+        if (! Page::query()->where('slug', 'about')->exists()) {
+            Page::query()->create([
+            'slug' => 'about',
             'title' => 'درباره ما',
             'meta_title' => 'درباره چینی بازار | فروشگاه اینترنتی',
             'meta_description' => 'آشنایی با تیم، ارزش‌ها و خدمات فروشگاه اینترنتی چینی بازار',
@@ -54,9 +56,12 @@ class RichContentSeeder extends Seeder
     <strong>می‌دانید؟</strong> تیم چینی بازار متشکل از متخصصان فناوری، لجستیک و تجربه مشتری است که هر روز برای بهبود خدمات تلاش می‌کنند.
 </div>
 HTML,
-        ]);
+            ]);
+        }
 
-        Page::updateOrCreate(['slug' => 'contact'], [
+        if (! Page::query()->where('slug', 'contact')->exists()) {
+            Page::query()->create([
+            'slug' => 'contact',
             'title' => 'تماس با ما',
             'meta_title' => 'تماس با ما | چینی بازار',
             'meta_description' => 'راه‌های ارتباط با پشتیبانی، فروش و واحد فنی فروشگاه چینی بازار',
@@ -72,8 +77,8 @@ HTML,
     <tbody>
         <tr><td>پشتیبانی سفارش</td><td>۰۲۱-۹۱۰۰۰۰۰۰</td><td>شنبه تا پنج‌شنبه ۹–۱۸</td></tr>
         <tr><td>واتساپ</td><td>۰۹۱۲-۰۰۰۰۰۰۰</td><td>۹–۲۱</td></tr>
-        <tr><td>ایمیل</td><td>support@chapino.ir</td><td>۲۴ ساعته (پاسخ در ۲۴h)</td></tr>
-        <tr><td>همکاری تجاری</td><td>biz@chapino.ir</td><td>شنبه تا چهارشنبه</td></tr>
+        <tr><td>ایمیل</td><td>—</td><td>۲۴ ساعته (پاسخ در ۲۴h)</td></tr>
+        <tr><td>همکاری تجاری</td><td>—</td><td>شنبه تا چهارشنبه</td></tr>
     </tbody>
 </table>
 
@@ -96,7 +101,8 @@ HTML,
     <li>مرجوعی کالا تا ۷ روز پس از تحویل امکان‌پذیر است.</li>
 </ol>
 HTML,
-        ]);
+            ]);
+        }
 
         $author = User::query()->where('is_author', true)->first()
             ?? User::query()->where('is_admin', true)->first();

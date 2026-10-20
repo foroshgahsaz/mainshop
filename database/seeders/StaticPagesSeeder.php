@@ -48,7 +48,10 @@ class StaticPagesSeeder extends Seeder
         ];
 
         foreach ($pages as $data) {
-            Page::updateOrCreate(['slug' => $data['slug']], $data);
+            Page::query()->firstOrCreate(
+                ['slug' => $data['slug']],
+                $data
+            );
         }
     }
 }

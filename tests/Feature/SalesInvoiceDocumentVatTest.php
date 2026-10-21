@@ -26,7 +26,9 @@ class SalesInvoiceDocumentVatTest extends TestCase
             showVatBreakdown: true,
         );
 
-        $this->assertSame(100_000, $doc->vatAmount());
+        $this->assertSame(90909, $doc->vatAmount());
+        $this->assertSame(909_091, $doc->payableAmountExcludingVat());
+        $this->assertSame(909_091, $doc->priceExcludingVat(1_000_000));
         $this->assertSame(1_000_000, $doc->payableAmount());
     }
 

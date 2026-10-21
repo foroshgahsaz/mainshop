@@ -1299,7 +1299,8 @@ resources/views/layouts/shop.blade.php
 | 2026-10-18 | صفحه محصول: **ذره‌بین روی تصویر** (لنز سبز + پیش‌نمایش ۴.۴× داخل لنز، بدون پنل کنار)؛ لایت‌باکس: دکمه بزرگنمایی + pan — `product.js` |
 | 2026-10-18 | `RichContentEditor`: دکمه **بارگذاری و درج ویدئو**؛ فروشگاه: `RichContentPresenter` — ویدئوها **بالای** متن در `x-shop.rich-content` |
 | 2026-10-18 | صفحه اصلی — پاپ‌آپ **هر خانواده محصول**: ادمین → خانواده محصول → «نمایش با پاپ‌آپ» + repeater **نام/URL** (`product_family_homepage_popup_items`); `shop:diagnose-family-homepage-popups` |
-| 2026-10-17 | `/admin/orders/{id}`: دو PDF فاکتور — **مشتری** و **مالی** (`?financial=1`)؛ نسخه مالی: ردیف جدول **ارزش افزوده** (تعداد ۱، بهای واحد = مبلغ کل = ۱۰٪ مبلغ قابل پرداخت) بعد از «جمع اقلام» — `shop.invoice.vat_percent` |
+| 2026-10-21 | فاکتور مالی نماینده/ادمین: قیمت بدون مالیات = قیمت با مالیات ÷ (۱ + `vat_percent`/۱۰۰)؛ ردیف ارزش افزوده = تفاوت — `SalesInvoiceDocument` |
+| 2026-10-17 | `/admin/orders/{id}`: دو PDF فاکتور — **مشتری** و **مالی** (`?financial=1`)؛ نسخه مالی: ردیف جدول **ارزش افزوده** بعد از «جمع اقلام» — `shop.invoice.vat_percent` |
 | 2026-10-17 | `/admin/orders`: فیلتر روش پرداخت بر اساس **درگاه‌های فعال** (باجت‌پی، دیجی‌پی، …) + `cod`؛ تطبیق `payment_method` و سفارش‌های `online` با `payments.gateway` |
 | 2026-10-17 | **فاکتور** (`components/sales-invoice/document`، PDF، رسید پرداخت): نمایش مبالغ **ریال** (`ShopLabels::formatInvoiceMoney`، تومان داخلی ×۱۰) |
 | 2026-10-17 | وضعیت سفارش **پردازش انبار** (`warehouse_processing`) بعد از «در حال پردازش»؛ migration `2026_10_17_120000_add_warehouse_processing_status_to_orders` (ENUM MySQL)؛ دکمه تأیید پرداخت؛ SMS `order_warehouse_processing` |

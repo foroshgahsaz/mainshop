@@ -1299,7 +1299,7 @@ resources/views/layouts/shop.blade.php
 | 2026-10-18 | صفحه محصول: **ذره‌بین روی تصویر** (لنز سبز + پیش‌نمایش ۴.۴× داخل لنز، بدون پنل کنار)؛ لایت‌باکس: دکمه بزرگنمایی + pan — `product.js` |
 | 2026-10-18 | `RichContentEditor`: دکمه **بارگذاری و درج ویدئو**؛ فروشگاه: `RichContentPresenter` — ویدئوها **بالای** متن در `x-shop.rich-content` |
 | 2026-10-18 | صفحه اصلی — پاپ‌آپ **هر خانواده محصول**: ادمین → خانواده محصول → «نمایش با پاپ‌آپ» + repeater **نام/URL** (`product_family_homepage_popup_items`); `shop:diagnose-family-homepage-popups` |
-| 2026-10-21 | پیش‌فاکتور/فاکتور **نماینده**: قیمت کالا بدون مالیات، سپس ردیف ارزش افزوده، سپس **جمع کل**؛ `SalesInvoiceBuilder` برای سفارش نماینده `showVatBreakdown` |
+| 2026-10-21 | پیش‌فاکتور نماینده: قیمت ردیف بدون مالیات، ردیف ارزش افزوده، **جمع کل** (بدون ردیف جمع اقلام بدون مالیات) — `document.blade.php` |
 | 2026-10-17 | `/admin/orders/{id}`: دو PDF فاکتور — **مشتری** و **مالی** (`?financial=1`)؛ نسخه مالی: ردیف جدول **ارزش افزوده** بعد از «جمع اقلام» — `shop.invoice.vat_percent` |
 | 2026-10-17 | `/admin/orders`: فیلتر روش پرداخت بر اساس **درگاه‌های فعال** (باجت‌پی، دیجی‌پی، …) + `cod`؛ تطبیق `payment_method` و سفارش‌های `online` با `payments.gateway` |
 | 2026-10-17 | **فاکتور** (`components/sales-invoice/document`، PDF، رسید پرداخت): نمایش مبالغ **ریال** (`ShopLabels::formatInvoiceMoney`، تومان داخلی ×۱۰) |

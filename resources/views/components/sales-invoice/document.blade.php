@@ -106,15 +106,6 @@
                     </tr>
                 @endforeach
                 @if ($document->showVatBreakdown && $document->productLinesGrossTotal() > 0)
-                    <tr class="si-sum">
-                        <td colspan="4">جمع اقلام (بدون مالیات)</td>
-                        <td>{{ number_format($document->quantityTotal) }}</td>
-                        <td></td>
-                        @if ($document->showsLineDiscountColumn())
-                            <td></td>
-                        @endif
-                        <td dir="ltr">{{ $siRial($document->productLinesNetTotal()) }}</td>
-                    </tr>
                     @if ($document->productLinesVatAmount() > 0)
                         @php($vatToman = $document->productLinesVatAmount())
                         <tr class="si-sum">
@@ -189,15 +180,6 @@
                 </article>
             @endforeach
             @if ($document->showVatBreakdown && $document->productLinesGrossTotal() > 0)
-                <div class="si-line-card si-line-card--sum">
-                    <div class="si-line-card__sum-row">
-                        <span>جمع اقلام (بدون مالیات)</span>
-                        <strong dir="ltr">{{ ShopLabels::formatInvoiceMoney($document->productLinesNetTotal()) }}</strong>
-                    </div>
-                    <div class="si-line-card__sum-qty">
-                        تعداد کل: <strong>{{ number_format($document->quantityTotal) }}</strong>
-                    </div>
-                </div>
                 @if ($document->productLinesVatAmount() > 0)
                     <div class="si-line-card si-line-card--sum">
                         <div class="si-line-card__sum-row">

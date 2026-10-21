@@ -33,19 +33,71 @@ final class SalesInvoiceDocument
         return max(0, (int) config('shop.invoice.vat_percent', 10));
     }
 
-    /** سهم ارزش افزوده از مبلغ نهایی (قیمت مشتری شامل مالیات است؛ این فقط برای PDF مالی). */
+    /** ضریب قیمت با مالیات (مثلاً ۱.۱ برای ۱۰٪). */
+    public function grossPriceMultiplier(): float
+    {
+        $percent = $this->vatPercent();
+
+        return 1 + ($percent / 100);
+    }
+
+    /**
+     * قیمت اصلی بدون مالیات = قیمت با مالیات ÷ (۱ + درصد/۱۰۰).
+     * مبالغ فروشگاه به‌صورت شامل ارزش افزوده ذخیره می‌شوند.
+     */
+    public function priceExcludingVat(int $amountWithVat): int
+    {
+        if ($this->vatPercent() <= 0) {
+            return $amountWithVat;
+        }
+
+        return (int) round($amountWithVat / $this->grossPriceMultiplier());
+    }
+
+    /** مبلغ قابل پرداخت بدون سهم ارزش افزوده (فقط نمایش/PDF مالی). */
+    public function payableAmountExcludingVat(): int
+    {
+        if (! $this->showVatBreakdown) {
+            return $this->payableAmount();
+        }
+
+        return $this->priceExcludingVat($this->payableAmount());
+    }
+
+    /** سهم ارزش افزوده داخل مبلغ نهایی (قیمت با مالیات − قیمت بدون مالیات). */
     public function vatAmount(): int
     {
         if (! $this->showVatBreakdown) {
             return 0;
         }
 
-        $percent = $this->vatPercent();
-        if ($percent <= 0) {
+        if ($this->vatPercent() <= 0) {
             return 0;
         }
 
-        return (int) round($this->payableAmount() * $percent / 100);
+        $gross = $this->payableAmount();
+
+        return max(0, $gross - $this->priceExcludingVat($gross));
+    }
+
+    /** جمع اقلام برای PDF مالی (بدون سهم مالیات). */
+    public function itemsTotalExcludingVat(): int
+    {
+        if (! $this->showVatBreakdown) {
+            return $this->itemsTotal;
+        }
+
+        return $this->priceExcludingVat($this->itemsTotal);
+    }
+
+    /** بهای واحد/ردیف برای PDF مالی. */
+    public function lineAmountForDisplay(int $amountWithVat): int
+    {
+        if (! $this->showVatBreakdown) {
+            return $amountWithVat;
+        }
+
+        return $this->priceExcludingVat($amountWithVat);
     }
 
     public function showsLineDiscountColumn(): bool

@@ -97,11 +97,11 @@
                         <td class="si-desc">{{ $line['name'] }}</td>
                         <td>{{ $line['unit'] }}</td>
                         <td>{{ number_format($line['quantity']) }}</td>
-                        <td dir="ltr">{{ $siRial((int) $line['unit_price']) }}</td>
+                        <td dir="ltr">{{ $siRial($document->lineAmountForDisplay((int) $line['unit_price'])) }}</td>
                         @if ($document->showsLineDiscountColumn())
-                            <td dir="ltr">{{ $siRial((int) ($line['line_discount'] ?? 0)) }}</td>
+                            <td dir="ltr">{{ $siRial($document->lineAmountForDisplay((int) ($line['line_discount'] ?? 0))) }}</td>
                         @endif
-                        <td dir="ltr">{{ $siRial((int) $line['line_total']) }}</td>
+                        <td dir="ltr">{{ $siRial($document->lineAmountForDisplay((int) $line['line_total'])) }}</td>
                     </tr>
                 @endforeach
                 <tr class="si-sum">
@@ -111,7 +111,7 @@
                     @if ($document->showsLineDiscountColumn())
                         <td></td>
                     @endif
-                    <td dir="ltr">{{ $siRial($document->itemsTotal) }}</td>
+                    <td dir="ltr">{{ $siRial($document->itemsTotalExcludingVat()) }}</td>
                 </tr>
                 @if ($document->showVatBreakdown && $document->vatAmount() > 0)
                     @php($vatToman = $document->vatAmount())
@@ -150,17 +150,17 @@
                         </div>
                         <div>
                             <dt>بهای واحد</dt>
-                            <dd dir="ltr">{{ ShopLabels::formatInvoiceMoney((int) $line['unit_price']) }}</dd>
+                            <dd dir="ltr">{{ ShopLabels::formatInvoiceMoney($document->lineAmountForDisplay((int) $line['unit_price'])) }}</dd>
                         </div>
                         @if ($document->showsLineDiscountColumn())
                             <div>
                                 <dt>تخفیف</dt>
-                                <dd dir="ltr">{{ ShopLabels::formatInvoiceMoney((int) ($line['line_discount'] ?? 0)) }}</dd>
+                                <dd dir="ltr">{{ ShopLabels::formatInvoiceMoney($document->lineAmountForDisplay((int) ($line['line_discount'] ?? 0))) }}</dd>
                             </div>
                         @endif
                         <div class="si-line-card__total">
                             <dt>مبلغ کل</dt>
-                            <dd dir="ltr">{{ ShopLabels::formatInvoiceMoney((int) $line['line_total']) }}</dd>
+                            <dd dir="ltr">{{ ShopLabels::formatInvoiceMoney($document->lineAmountForDisplay((int) $line['line_total'])) }}</dd>
                         </div>
                     </dl>
                 </article>
@@ -168,7 +168,7 @@
             <div class="si-line-card si-line-card--sum">
                 <div class="si-line-card__sum-row">
                     <span>جمع اقلام</span>
-                    <strong dir="ltr">{{ ShopLabels::formatInvoiceMoney($document->itemsTotal) }}</strong>
+                    <strong dir="ltr">{{ ShopLabels::formatInvoiceMoney($document->itemsTotalExcludingVat()) }}</strong>
                 </div>
                 <div class="si-line-card__sum-qty">
                     تعداد کل: <strong>{{ number_format($document->quantityTotal) }}</strong>

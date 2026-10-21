@@ -32,6 +32,41 @@ class SalesInvoiceDocumentVatTest extends TestCase
         $this->assertSame(1_000_000, $doc->payableAmount());
     }
 
+    public function test_product_lines_vat_breakdown_for_representative_style_invoice(): void
+    {
+        config(['shop.invoice.vat_percent' => 10]);
+
+        $doc = new SalesInvoiceDocument(
+            title: 'پیش‌فاکتور',
+            invoiceNumber: '1',
+            invoiceDate: '1404/01/01',
+            seller: [],
+            buyer: [],
+            lines: [
+                [
+                    'row' => 1,
+                    'sku' => 'A1',
+                    'name' => 'کالا',
+                    'unit' => 'عدد',
+                    'quantity' => 2,
+                    'unit_price' => 550_000,
+                    'line_total' => 1_100_000,
+                ],
+            ],
+            quantityTotal: 2,
+            itemsTotal: 1_100_000,
+            discountAmount: 0,
+            shippingAmount: 0,
+            finalAmount: 1_100_000,
+            showVatBreakdown: true,
+        );
+
+        $this->assertSame(1_000_000, $doc->productLinesNetTotal());
+        $this->assertSame(100_000, $doc->productLinesVatAmount());
+        $this->assertSame(1_100_000, $doc->productLinesGrossTotal());
+        $this->assertSame(500_000, $doc->lineAmountForDisplay(550_000));
+    }
+
     public function test_customer_document_hides_vat(): void
     {
         $doc = new SalesInvoiceDocument(

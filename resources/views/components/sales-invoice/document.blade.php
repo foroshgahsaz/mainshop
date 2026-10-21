@@ -91,38 +91,60 @@
             </thead>
             <tbody>
                 @foreach ($document->lines as $line)
+                    @php($isAdjustment = ! $document->isProductLine($line))
                     <tr>
                         <td>{{ $line['row'] }}</td>
                         <td dir="ltr">{{ $line['sku'] ?: '—' }}</td>
                         <td class="si-desc">{{ $line['name'] }}</td>
                         <td>{{ $line['unit'] }}</td>
                         <td>{{ number_format($line['quantity']) }}</td>
-                        <td dir="ltr">{{ $siRial($document->lineAmountForDisplay((int) $line['unit_price'])) }}</td>
+                        <td dir="ltr">{{ $siRial($document->lineAmountForDisplay((int) $line['unit_price'], $isAdjustment)) }}</td>
                         @if ($document->showsLineDiscountColumn())
-                            <td dir="ltr">{{ $siRial($document->lineAmountForDisplay((int) ($line['line_discount'] ?? 0))) }}</td>
+                            <td dir="ltr">{{ $siRial($document->lineAmountForDisplay((int) ($line['line_discount'] ?? 0), $isAdjustment)) }}</td>
                         @endif
-                        <td dir="ltr">{{ $siRial($document->lineAmountForDisplay((int) $line['line_total'])) }}</td>
+                        <td dir="ltr">{{ $siRial($document->lineAmountForDisplay((int) $line['line_total'], $isAdjustment)) }}</td>
                     </tr>
                 @endforeach
-                <tr class="si-sum">
-                    <td colspan="4">جمع اقلام</td>
-                    <td>{{ number_format($document->quantityTotal) }}</td>
-                    <td></td>
-                    @if ($document->showsLineDiscountColumn())
-                        <td></td>
-                    @endif
-                    <td dir="ltr">{{ $siRial($document->itemsTotalExcludingVat()) }}</td>
-                </tr>
-                @if ($document->showVatBreakdown && $document->vatAmount() > 0)
-                    @php($vatToman = $document->vatAmount())
+                @if ($document->showVatBreakdown && $document->productLinesGrossTotal() > 0)
                     <tr class="si-sum">
-                        <td colspan="4">ارزش افزوده</td>
-                        <td>{{ number_format(1) }}</td>
-                        <td dir="ltr">{{ $siRial($vatToman) }}</td>
+                        <td colspan="4">جمع اقلام (بدون مالیات)</td>
+                        <td>{{ number_format($document->quantityTotal) }}</td>
+                        <td></td>
                         @if ($document->showsLineDiscountColumn())
                             <td></td>
                         @endif
-                        <td dir="ltr">{{ $siRial($vatToman) }}</td>
+                        <td dir="ltr">{{ $siRial($document->productLinesNetTotal()) }}</td>
+                    </tr>
+                    @if ($document->productLinesVatAmount() > 0)
+                        @php($vatToman = $document->productLinesVatAmount())
+                        <tr class="si-sum">
+                            <td colspan="4">ارزش افزوده ({{ $document->vatPercent() }}٪)</td>
+                            <td>{{ number_format(1) }}</td>
+                            <td dir="ltr">{{ $siRial($vatToman) }}</td>
+                            @if ($document->showsLineDiscountColumn())
+                                <td></td>
+                            @endif
+                            <td dir="ltr">{{ $siRial($vatToman) }}</td>
+                        </tr>
+                    @endif
+                    <tr class="si-sum">
+                        <td colspan="4">جمع کل</td>
+                        <td></td>
+                        <td></td>
+                        @if ($document->showsLineDiscountColumn())
+                            <td></td>
+                        @endif
+                        <td dir="ltr">{{ $siRial($document->productLinesGrossTotal()) }}</td>
+                    </tr>
+                @else
+                    <tr class="si-sum">
+                        <td colspan="4">جمع اقلام</td>
+                        <td>{{ number_format($document->quantityTotal) }}</td>
+                        <td></td>
+                        @if ($document->showsLineDiscountColumn())
+                            <td></td>
+                        @endif
+                        <td dir="ltr">{{ $siRial($document->itemsTotal) }}</td>
                     </tr>
                 @endif
             </tbody>
@@ -131,6 +153,7 @@
         @if (! $forPdf)
         <div class="si-lines--cards" aria-label="اقلام فاکتور">
             @foreach ($document->lines as $line)
+                @php($isAdjustment = ! $document->isProductLine($line))
                 <article class="si-line-card">
                     <header class="si-line-card__head">
                         <span class="si-line-card__row">ردیف {{ $line['row'] }}</span>
@@ -149,40 +172,54 @@
                             <dd>{{ number_format($line['quantity']) }}</dd>
                         </div>
                         <div>
-                            <dt>بهای واحد</dt>
-                            <dd dir="ltr">{{ ShopLabels::formatInvoiceMoney($document->lineAmountForDisplay((int) $line['unit_price'])) }}</dd>
+                            <dt>بهای واحد@if($document->showVatBreakdown && ! $isAdjustment) (بدون مالیات)@endif</dt>
+                            <dd dir="ltr">{{ ShopLabels::formatInvoiceMoney($document->lineAmountForDisplay((int) $line['unit_price'], $isAdjustment)) }}</dd>
                         </div>
                         @if ($document->showsLineDiscountColumn())
                             <div>
                                 <dt>تخفیف</dt>
-                                <dd dir="ltr">{{ ShopLabels::formatInvoiceMoney($document->lineAmountForDisplay((int) ($line['line_discount'] ?? 0))) }}</dd>
+                                <dd dir="ltr">{{ ShopLabels::formatInvoiceMoney($document->lineAmountForDisplay((int) ($line['line_discount'] ?? 0), $isAdjustment)) }}</dd>
                             </div>
                         @endif
                         <div class="si-line-card__total">
-                            <dt>مبلغ کل</dt>
-                            <dd dir="ltr">{{ ShopLabels::formatInvoiceMoney($document->lineAmountForDisplay((int) $line['line_total'])) }}</dd>
+                            <dt>مبلغ کل@if($document->showVatBreakdown && ! $isAdjustment) (بدون مالیات)@endif</dt>
+                            <dd dir="ltr">{{ ShopLabels::formatInvoiceMoney($document->lineAmountForDisplay((int) $line['line_total'], $isAdjustment)) }}</dd>
                         </div>
                     </dl>
                 </article>
             @endforeach
-            <div class="si-line-card si-line-card--sum">
-                <div class="si-line-card__sum-row">
-                    <span>جمع اقلام</span>
-                    <strong dir="ltr">{{ ShopLabels::formatInvoiceMoney($document->itemsTotalExcludingVat()) }}</strong>
-                </div>
-                <div class="si-line-card__sum-qty">
-                    تعداد کل: <strong>{{ number_format($document->quantityTotal) }}</strong>
-                </div>
-            </div>
-            @if ($document->showVatBreakdown && $document->vatAmount() > 0)
+            @if ($document->showVatBreakdown && $document->productLinesGrossTotal() > 0)
                 <div class="si-line-card si-line-card--sum">
                     <div class="si-line-card__sum-row">
-                        <span>ارزش افزوده</span>
-                        <strong dir="ltr">{{ ShopLabels::formatInvoiceMoney($document->vatAmount()) }}</strong>
+                        <span>جمع اقلام (بدون مالیات)</span>
+                        <strong dir="ltr">{{ ShopLabels::formatInvoiceMoney($document->productLinesNetTotal()) }}</strong>
                     </div>
                     <div class="si-line-card__sum-qty">
-                        تعداد: <strong>۱</strong>
-                        — بهای واحد: <strong dir="ltr">{{ ShopLabels::formatInvoiceMoney($document->vatAmount()) }}</strong>
+                        تعداد کل: <strong>{{ number_format($document->quantityTotal) }}</strong>
+                    </div>
+                </div>
+                @if ($document->productLinesVatAmount() > 0)
+                    <div class="si-line-card si-line-card--sum">
+                        <div class="si-line-card__sum-row">
+                            <span>ارزش افزوده ({{ $document->vatPercent() }}٪)</span>
+                            <strong dir="ltr">{{ ShopLabels::formatInvoiceMoney($document->productLinesVatAmount()) }}</strong>
+                        </div>
+                    </div>
+                @endif
+                <div class="si-line-card si-line-card--sum">
+                    <div class="si-line-card__sum-row">
+                        <span>جمع کل</span>
+                        <strong dir="ltr">{{ ShopLabels::formatInvoiceMoney($document->productLinesGrossTotal()) }}</strong>
+                    </div>
+                </div>
+            @else
+                <div class="si-line-card si-line-card--sum">
+                    <div class="si-line-card__sum-row">
+                        <span>جمع اقلام</span>
+                        <strong dir="ltr">{{ ShopLabels::formatInvoiceMoney($document->itemsTotal) }}</strong>
+                    </div>
+                    <div class="si-line-card__sum-qty">
+                        تعداد کل: <strong>{{ number_format($document->quantityTotal) }}</strong>
                     </div>
                 </div>
             @endif

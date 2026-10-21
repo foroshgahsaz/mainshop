@@ -118,7 +118,7 @@ class SalesInvoiceBuilder
             paymentMethodLabel: ShopLabels::orderPaymentMethodLabel($order),
             freightLabel: $order->freightCarrier?->displayLabel(),
             notes: $notes,
-            showVatBreakdown: $financialBreakdown,
+            showVatBreakdown: $financialBreakdown || $order->isRepresentativeOrder(),
         );
     }
 

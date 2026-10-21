@@ -80,20 +80,52 @@ final class SalesInvoiceDocument
         return max(0, $gross - $this->priceExcludingVat($gross));
     }
 
-    /** جمع اقلام برای PDF مالی (بدون سهم مالیات). */
-    public function itemsTotalExcludingVat(): int
+    /** @param  array<string, mixed>  $line */
+    public function isProductLine(array $line): bool
     {
-        if (! $this->showVatBreakdown) {
-            return $this->itemsTotal;
-        }
-
-        return $this->priceExcludingVat($this->itemsTotal);
+        return ! (bool) ($line['is_adjustment'] ?? false);
     }
 
-    /** بهای واحد/ردیف برای PDF مالی. */
-    public function lineAmountForDisplay(int $amountWithVat): int
+    /** جمع مبلغ ردیف کالا (شامل مالیات). */
+    public function productLinesGrossTotal(): int
+    {
+        $sum = 0;
+        foreach ($this->lines as $line) {
+            if (! $this->isProductLine($line)) {
+                continue;
+            }
+            $sum += (int) $line['line_total'];
+        }
+
+        return $sum;
+    }
+
+    /** جمع اقلام کالا بدون مالیات. */
+    public function productLinesNetTotal(): int
     {
         if (! $this->showVatBreakdown) {
+            return $this->productLinesGrossTotal();
+        }
+
+        return $this->priceExcludingVat($this->productLinesGrossTotal());
+    }
+
+    /** سهم ارزش افزوده داخل جمع کالاها. */
+    public function productLinesVatAmount(): int
+    {
+        if (! $this->showVatBreakdown) {
+            return 0;
+        }
+
+        $gross = $this->productLinesGrossTotal();
+
+        return max(0, $gross - $this->priceExcludingVat($gross));
+    }
+
+    /** بهای واحد/ردیف برای PDF مالی (فقط ردیف کالا). */
+    public function lineAmountForDisplay(int $amountWithVat, bool $isAdjustmentLine = false): int
+    {
+        if (! $this->showVatBreakdown || $isAdjustmentLine) {
             return $amountWithVat;
         }
 

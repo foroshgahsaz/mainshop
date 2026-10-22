@@ -87,6 +87,10 @@ class CheckoutService
 
         $preview = $this->preview($user, $couponCode, $shippingMethodId, $paymentMethod);
 
+        if ($couponCode && ($preview['couponError'] ?? null)) {
+            throw new RuntimeException($preview['couponError']);
+        }
+
         return DB::transaction(function () use ($user, $address, $preview, $paymentMethod, $note) {
             $order = Order::create([
                 'user_id' => $user->id,

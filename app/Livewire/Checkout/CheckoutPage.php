@@ -137,6 +137,16 @@ class CheckoutPage extends Component
         $this->city = '';
     }
 
+    public function updatedCouponCode(): void
+    {
+        $this->alertCouponValidationIfNeeded();
+    }
+
+    public function updatedPaymentMethod(): void
+    {
+        $this->alertCouponValidationIfNeeded();
+    }
+
     public function saveAddress(OtpService $otp): void
     {
         $this->receiver_name = trim($this->receiver_name);
@@ -218,7 +228,8 @@ class CheckoutPage extends Component
         if (! auth()->check()) {
             return view('livewire.checkout.checkout-page', [
                 'preview' => null,
-                'error' => null,
+                'fatalError' => null,
+                'couponError' => null,
                 'addresses' => collect(),
                 'shippingMethods' => $cache->shippingMethods(),
                 'creditGateways' => $catalog->credit(),
@@ -231,21 +242,23 @@ class CheckoutPage extends Component
         }
 
         $preview = null;
-        $error = null;
+        $fatalError = null;
 
         try {
             $preview = $checkout->preview(
                 auth()->user(),
                 $this->couponCode ?: null,
-                $this->shippingMethodId
+                $this->shippingMethodId,
+                $this->couponPaymentMethod(),
             );
         } catch (\RuntimeException $e) {
-            $error = $e->getMessage();
+            $fatalError = $e->getMessage();
         }
 
         return view('livewire.checkout.checkout-page', [
             'preview' => $preview,
-            'error' => $error,
+            'fatalError' => $fatalError,
+            'couponError' => $preview['couponError'] ?? null,
             'addresses' => auth()->user()->addresses()->latest()->get(),
             'shippingMethods' => $cache->shippingMethods(),
             'creditGateways' => $catalog->credit(),
@@ -405,5 +418,36 @@ class CheckoutPage extends Component
     protected function isPlaceholderUserName(string $name): bool
     {
         return UserDisplayName::isPlaceholder($name);
+    }
+
+    protected function couponPaymentMethod(): string
+    {
+        return $this->paymentMethod === 'cod' ? 'cod' : $this->paymentMethod;
+    }
+
+    protected function alertCouponValidationIfNeeded(): void
+    {
+        if (trim($this->couponCode) === '') {
+            return;
+        }
+
+        if (! auth()->check()) {
+            return;
+        }
+
+        try {
+            $preview = app(CheckoutService::class)->preview(
+                auth()->user(),
+                $this->couponCode,
+                $this->shippingMethodId,
+                $this->couponPaymentMethod(),
+            );
+        } catch (\RuntimeException) {
+            return;
+        }
+
+        if (! empty($preview['couponError'])) {
+            $this->dispatch('checkout-coupon-alert', message: $preview['couponError']);
+        }
     }
 }

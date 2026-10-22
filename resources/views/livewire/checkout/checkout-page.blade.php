@@ -22,8 +22,8 @@
                     });
                 </script>
             @endpush
-        @elseif ($error)
-            <div class="mb-4 p-3 bg-red-50 text-red-700 rounded-xl text-sm">{{ $error }}</div>
+        @elseif ($fatalError ?? null)
+            <div class="mb-4 p-3 bg-red-50 text-red-700 rounded-xl text-sm">{{ $fatalError }}</div>
         @endif
         @if (session('error'))
             <div class="mb-4 p-3 bg-red-50 text-red-700 rounded-xl text-sm">{{ session('error') }}</div>
@@ -161,7 +161,10 @@
                         <section class="shop-card checkout-card">
                             <h2 class="shop-section-title">کد تخفیف</h2>
                             <label class="shop-label">کد تخفیف</label>
-                            <input type="text" wire:model.live="couponCode" placeholder="کد تخفیف را وارد کنید" class="shop-input">
+                            <input type="text" wire:model.live.debounce.400ms="couponCode" placeholder="کد تخفیف را وارد کنید" class="shop-input @if($couponError ?? null) shop-input--error @endif">
+                            @if ($couponError ?? null)
+                                <p class="checkout-field-error mt-2" role="alert">{{ $couponError }}</p>
+                            @endif
                             <div class="checkout-note">
                                 <label class="shop-label">یادداشت (اختیاری)</label>
                                 <textarea wire:model="note" class="shop-input" rows="2" placeholder="توضیحات سفارش..."></textarea>
@@ -266,4 +269,37 @@
             </form>
         @endif
     </div>
+
+    <div id="checkoutCouponAlertModal"
+         class="checkout-coupon-alert"
+         role="alertdialog"
+         aria-modal="true"
+         aria-labelledby="checkoutCouponAlertTitle"
+         aria-hidden="true">
+        <div class="checkout-coupon-alert__panel shop-card">
+            <h3 id="checkoutCouponAlertTitle" class="font-bold text-navy text-sm mb-2">کد تخفیف قابل اعمال نیست</h3>
+            <p class="text-sm text-gray-600 mb-4" data-checkout-coupon-alert-message></p>
+            <button type="button" class="shop-btn-primary w-full" onclick="toggleCheckoutCouponAlert(false)">متوجه شدم</button>
+        </div>
+    </div>
+
+    @push('scripts')
+        <script>
+            function toggleCheckoutCouponAlert(show, message) {
+                const modal = document.getElementById('checkoutCouponAlertModal');
+                if (!modal) return;
+                const textEl = modal.querySelector('[data-checkout-coupon-alert-message]');
+                if (message && textEl) textEl.textContent = message;
+                modal.classList.toggle('checkout-coupon-alert--open', !!show);
+                modal.setAttribute('aria-hidden', show ? 'false' : 'true');
+                document.documentElement.classList.toggle('checkout-coupon-alert-open', !!show);
+            }
+
+            document.addEventListener('livewire:init', () => {
+                Livewire.on('checkout-coupon-alert', ({ message }) => {
+                    toggleCheckoutCouponAlert(true, message || '');
+                });
+            });
+        </script>
+    @endpush
 </div>

@@ -53,7 +53,7 @@ trait HandlesOtpLogin
         ]);
 
         app(ShopLoginGuard::class)->assertAllowed(
-            User::query()->where('phone', $this->phone)->first(),
+            User::findByLoginPhone($this->phone),
             'phone'
         );
 
@@ -112,7 +112,7 @@ trait HandlesOtpLogin
 
         RateLimiter::clear($key);
 
-        $user = User::query()->where('phone', $this->phone)->first();
+        $user = User::findByLoginPhone($this->phone);
         $createdAccount = false;
 
         if (! $user) {
@@ -159,7 +159,30 @@ trait HandlesOtpLogin
             ]);
         }
 
+        $user->refresh();
+
+        if (UserDisplayName::isShopProfileComplete($user)) {
+            $this->finalizeShopLogin($user);
+
+            return;
+        }
+
         $normalizedNationalCode = IranianNationalCode::normalize($this->nationalCode);
+
+        $existingByNationalCode = User::query()
+            ->where('national_code', $normalizedNationalCode)
+            ->first();
+
+        if ($existingByNationalCode !== null
+            && (int) $existingByNationalCode->getKey() !== (int) $user->getKey()
+            && app(OtpService::class)->normalizePhone((string) $existingByNationalCode->phone)
+                === app(OtpService::class)->normalizePhone($this->phone)) {
+            Auth::login($existingByNationalCode, remember: true);
+            $cart->mergeGuestCartIntoUser($existingByNationalCode, session()->getId());
+            $this->finalizeShopLogin($existingByNationalCode->fresh());
+
+            return;
+        }
 
         $this->validate([
             'profileName' => ['required', 'string', 'min:3', 'max:128'],
@@ -282,11 +305,7 @@ trait HandlesOtpLogin
 
     protected function needsProfileCompletion(User $user, bool $createdAccount): bool
     {
-        if ($createdAccount) {
-            return true;
-        }
-
-        return UserDisplayName::isPlaceholder($user->name);
+        return ! UserDisplayName::isShopProfileComplete($user);
     }
 
     protected function onProfileStepRequested(): void {}

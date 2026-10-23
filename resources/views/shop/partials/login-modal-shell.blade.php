@@ -1,5 +1,5 @@
 @php
-    $profileRequired = auth()->check() && \App\Support\UserDisplayName::isPlaceholder(auth()->user()->name);
+    $profileRequired = auth()->check() && ! \App\Support\UserDisplayName::isShopProfileComplete(auth()->user());
 @endphp
 <!-- LOGIN MODAL -->
 <div id="loginModal"

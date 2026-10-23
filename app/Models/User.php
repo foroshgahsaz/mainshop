@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use App\Services\Auth\OtpService;
 use App\Support\UserNationalCodeCredentials;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -103,6 +104,49 @@ class User extends Authenticatable implements FilamentUser
             && ! $this->is_author
             && ! $this->is_representative
             && ! $this->is_sales_manager;
+    }
+
+    public static function findByLoginPhone(string $phone): ?self
+    {
+        $normalized = app(OtpService::class)->normalizePhone($phone);
+
+        if ($normalized === '') {
+            return null;
+        }
+
+        $direct = static::query()->where('phone', $normalized)->first();
+
+        if ($direct !== null) {
+            return $direct;
+        }
+
+        $otp = app(OtpService::class);
+
+        foreach (self::alternateLoginPhoneForms($normalized) as $alternative) {
+            $match = static::query()->where('phone', $alternative)->first();
+
+            if ($match !== null && $otp->normalizePhone((string) $match->phone) === $normalized) {
+                return $match;
+            }
+        }
+
+        return null;
+    }
+
+    /** @return list<string> */
+    protected static function alternateLoginPhoneForms(string $normalized): array
+    {
+        if (! preg_match('/^09\d{9}$/', $normalized)) {
+            return [];
+        }
+
+        $core = substr($normalized, 1);
+
+        return [
+            '+98'.$core,
+            '98'.$core,
+            '0098'.$core,
+        ];
     }
 
     public function customerTypeLabel(): string

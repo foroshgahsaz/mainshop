@@ -29,10 +29,10 @@ class CouponAnalyticsPage extends Page
         return AdminAccess::canManageShopInAdmin();
     }
 
-    public function mount(int|string $record, CouponAnalyticsService $analytics): void
+    public function mount(int|string $record): void
     {
         $this->coupon = Coupon::query()->findOrFail($record);
-        $this->summary = $analytics->summary($this->coupon);
+        $this->summary = app(CouponAnalyticsService::class)->summary($this->coupon);
     }
 
     public function getTitle(): string

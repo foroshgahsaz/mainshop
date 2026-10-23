@@ -28,8 +28,12 @@ class CheckoutService
         protected OrderSmsNotifier $sms,
     ) {}
 
-    public function preview(User $user, ?string $couponCode = null, ?int $shippingMethodId = null): array
-    {
+    public function preview(
+        User $user,
+        ?string $couponCode = null,
+        ?int $shippingMethodId = null,
+        ?string $paymentMethod = null,
+    ): array {
         $items = $this->cartService->getItems();
 
         if ($items->isEmpty()) {
@@ -37,15 +41,27 @@ class CheckoutService
         }
 
         $subtotal = $this->cartService->subtotal();
-        $coupon = $couponCode ? $this->couponService->findValid($couponCode, $user, $subtotal) : null;
-        $discount = $coupon ? $coupon->calculateDiscount($subtotal) : 0;
+        $coupon = null;
+        $couponError = null;
+        $discount = 0;
+
+        if ($couponCode) {
+            $validation = $this->couponService->validate($couponCode, $user, $subtotal, $paymentMethod);
+            if (! $validation['valid']) {
+                $couponError = $validation['message'];
+            } else {
+                $coupon = $validation['coupon'];
+                $discount = $coupon->calculateDiscount($subtotal);
+            }
+        }
+
         $shippingMethod = $shippingMethodId
             ? ShippingMethod::where('is_active', true)->findOrFail($shippingMethodId)
             : null;
         $shipping = $shippingMethod ? $shippingMethod->calculateCost($subtotal - $discount) : 0;
         $total = max(0, $subtotal - $discount + $shipping);
 
-        return compact('items', 'subtotal', 'coupon', 'discount', 'shippingMethod', 'shipping', 'total');
+        return compact('items', 'subtotal', 'coupon', 'couponError', 'discount', 'shippingMethod', 'shipping', 'total');
     }
 
     public function placeOrder(
@@ -69,7 +85,11 @@ class CheckoutService
             throw new RuntimeException('آدرس انتخاب‌شده معتبر نیست.');
         }
 
-        $preview = $this->preview($user, $couponCode, $shippingMethodId);
+        $preview = $this->preview($user, $couponCode, $shippingMethodId, $paymentMethod);
+
+        if ($couponCode && ($preview['couponError'] ?? null)) {
+            throw new RuntimeException($preview['couponError']);
+        }
 
         return DB::transaction(function () use ($user, $address, $preview, $paymentMethod, $note) {
             $order = Order::create([

@@ -1907,6 +1907,40 @@ body.has-admin-bar .listing-filters {
   color: #dc2626;
 }
 
+.shop-input--error {
+  border-color: #dc2626;
+}
+
+.checkout-coupon-alert {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.45);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.checkout-coupon-alert--open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.checkout-coupon-alert__panel {
+  width: min(100%, 22rem);
+  padding: 1.25rem;
+}
+
+html.checkout-coupon-alert-open {
+  overflow: hidden;
+}
+
 .checkout-option__icon {
   width: 2.5rem;
   height: 2.5rem;

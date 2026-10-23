@@ -23,6 +23,8 @@ class Coupon extends Model
         'starts_at',
         'expires_at',
         'is_active',
+        'stackable_with_other_coupons',
+        'allowed_payment_gateways',
         'description',
     ];
 
@@ -37,7 +39,21 @@ class Coupon extends Model
             'starts_at' => 'datetime',
             'expires_at' => 'datetime',
             'is_active' => 'boolean',
+            'stackable_with_other_coupons' => 'boolean',
+            'allowed_payment_gateways' => 'array',
         ];
+    }
+
+    /** @return list<string> */
+    public function allowedPaymentGateways(): array
+    {
+        $gateways = $this->allowed_payment_gateways;
+
+        if (! is_array($gateways) || $gateways === []) {
+            return [];
+        }
+
+        return array_values(array_filter($gateways, fn ($name) => is_string($name) && $name !== ''));
     }
 
     public function usages(): HasMany

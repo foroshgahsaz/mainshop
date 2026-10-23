@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\CouponResource\Pages;
 use App\Models\Coupon;
+use App\Services\Payment\PaymentGatewayCatalog;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -37,8 +38,30 @@ class CouponResource extends Resource
             Forms\Components\DateTimePicker::make('starts_at')->label('شروع'),
             Forms\Components\DateTimePicker::make('expires_at')->label('پایان'),
             Forms\Components\Toggle::make('is_active')->label('فعال')->default(true),
+            Forms\Components\Toggle::make('stackable_with_other_coupons')
+                ->label('قابل ترکیب با کدهای تخفیف دیگر')
+                ->helperText('اگر غیرفعال باشد، در آینده هنگام اعمال چند کد هم‌زمان این کد با سایر کدها ترکیب نمی‌شود.')
+                ->default(false),
+            Forms\Components\CheckboxList::make('allowed_payment_gateways')
+                ->label('درگاه‌های مجاز')
+                ->options(fn () => self::paymentGatewayOptions())
+                ->helperText('خالی = همه درگاه‌های فعال و پرداخت در محل. در غیر این صورت فقط درگاه‌های انتخاب‌شده.')
+                ->columns(2),
             Forms\Components\TextInput::make('description')->label('توضیح'),
         ]);
+    }
+
+    /** @return array<string, string> */
+    protected static function paymentGatewayOptions(): array
+    {
+        $catalog = app(PaymentGatewayCatalog::class);
+        $options = ['cod' => 'پرداخت در محل'];
+
+        foreach ($catalog->enabled() as $gateway) {
+            $options[$gateway['name']] = (string) $gateway['label'];
+        }
+
+        return $options;
     }
 
     public static function table(Table $table): Table
@@ -49,6 +72,10 @@ class CouponResource extends Resource
             Tables\Columns\TextColumn::make('value')->label('مقدار'),
             Tables\Columns\IconColumn::make('is_active')->label('فعال')->boolean(),
         ])->actions([
+            Tables\Actions\Action::make('analytics')
+                ->label('آنالیز')
+                ->icon('heroicon-o-chart-bar')
+                ->url(fn (Coupon $record): string => static::getUrl('analytics', ['record' => $record])),
             Tables\Actions\EditAction::make(),
             Tables\Actions\DeleteAction::make(),
         ]);
@@ -60,6 +87,7 @@ class CouponResource extends Resource
             'index' => Pages\ListCoupons::route('/'),
             'create' => Pages\CreateCoupon::route('/create'),
             'edit' => Pages\EditCoupon::route('/{record}/edit'),
+            'analytics' => Pages\CouponAnalytics::route('/{record}/analytics'),
         ];
     }
 }

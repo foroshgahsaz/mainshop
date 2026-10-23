@@ -723,6 +723,24 @@
     white-space: nowrap;
 }
 
+.admin-payment-log-viewer__row--clickable {
+    cursor: pointer;
+}
+
+.admin-payment-log-viewer__row--clickable:hover td {
+    background: #f9fafb;
+}
+
+.admin-payment-log-viewer__file-link {
+    color: #7239ea;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.admin-payment-log-viewer__file-link:hover {
+    text-decoration: underline;
+}
+
 .admin-payment-log-viewer__filename {
     font-size: 11px;
     color: #6b7280;

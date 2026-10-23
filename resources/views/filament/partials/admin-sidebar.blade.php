@@ -105,12 +105,10 @@
         'payments' => [
             'label' => 'پرداخت‌ها',
             'icon' => 'fa-credit-card',
-            'routes' => ['filament.admin.resources.payments.*', 'filament.admin.pages.payment-logs', 'filament.admin.pages.site-error-logs'],
+            'routes' => ['filament.admin.resources.payments.*'],
             'menus' => [
                 ['label' => 'پرداخت‌ها', 'icon' => 'fa-credit-card', 'items' => [
                     ['label' => 'لیست همه', 'url' => PaymentResource::getUrl('index'), 'icon' => 'fa-list'],
-                    ['label' => 'لاگ فایل پرداخت', 'url' => ViewPaymentLogs::getUrl(), 'icon' => 'fa-file-lines'],
-                    ['label' => 'لاگ خطای سایت', 'url' => ViewSiteErrorLogs::getUrl(), 'icon' => 'fa-bug'],
                 ]],
             ],
         ],
@@ -250,10 +248,18 @@
         'backup' => [
             'label' => 'بک‌آپ',
             'icon' => 'fa-database',
-            'routes' => ['filament.admin.pages.database-backups'],
+            'routes' => [
+                'filament.admin.pages.database-backups',
+                'filament.admin.pages.payment-logs',
+                'filament.admin.pages.site-error-logs',
+            ],
             'menus' => [
                 ['label' => 'بک‌آپ', 'icon' => 'fa-database', 'items' => [
                     ['label' => 'دیتابیس و فایل', 'url' => ViewDatabaseBackups::getUrl(), 'icon' => 'fa-download'],
+                ]],
+                ['label' => 'لاگ', 'icon' => 'fa-file-lines', 'items' => [
+                    ['label' => 'لاگ پرداخت', 'url' => ViewPaymentLogs::getUrl(), 'icon' => 'fa-credit-card'],
+                    ['label' => 'لاگ سیستم', 'url' => ViewSiteErrorLogs::getUrl(), 'icon' => 'fa-bug'],
                 ]],
             ],
         ],

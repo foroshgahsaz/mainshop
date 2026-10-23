@@ -30,7 +30,7 @@
         @endif
 
         @if (! ($awaitingLogin ?? false) && $preview)
-            <form wire:submit="placeOrder" id="checkoutForm" class="checkout-layout">
+            <form wire:submit="placeOrder" id="checkoutForm" class="checkout-layout" wire:init="syncCouponAlertOnLoad">
                 <div class="checkout-row">
                     <section class="shop-card checkout-card">
                         <div class="checkout-card__head">
@@ -161,9 +161,9 @@
                         <section class="shop-card checkout-card">
                             <h2 class="shop-section-title">کد تخفیف</h2>
                             <label class="shop-label">کد تخفیف</label>
-                            <input type="text" wire:model.live.debounce.400ms="couponCode" placeholder="کد تخفیف را وارد کنید" class="shop-input @if($couponError ?? null) shop-input--error @endif">
+                            <input type="text" wire:model.live.debounce.400ms="couponCode" placeholder="کد تخفیف را وارد کنید" class="shop-input @if($couponError ?? null) shop-input--error @endif" aria-invalid="@if($couponError ?? null) true @else false @endif">
                             @if ($couponError ?? null)
-                                <p class="checkout-field-error mt-2" role="alert">{{ $couponError }}</p>
+                                <p class="sr-only" role="alert">{{ $couponError }}</p>
                             @endif
                             <div class="checkout-note">
                                 <label class="shop-label">یادداشت (اختیاری)</label>
@@ -278,7 +278,7 @@
          aria-hidden="true">
         <div class="checkout-coupon-alert__panel shop-card">
             <h3 id="checkoutCouponAlertTitle" class="font-bold text-navy text-sm mb-2">کد تخفیف قابل اعمال نیست</h3>
-            <p class="text-sm text-gray-600 mb-4" data-checkout-coupon-alert-message></p>
+            <p class="checkout-coupon-alert__message mb-4" data-checkout-coupon-alert-message></p>
             <button type="button" class="shop-btn-primary w-full" onclick="toggleCheckoutCouponAlert(false)">متوجه شدم</button>
         </div>
     </div>

@@ -137,6 +137,11 @@ class CheckoutPage extends Component
         $this->city = '';
     }
 
+    public function syncCouponAlertOnLoad(): void
+    {
+        $this->alertCouponValidationIfNeeded();
+    }
+
     public function updatedCouponCode(): void
     {
         $this->alertCouponValidationIfNeeded();

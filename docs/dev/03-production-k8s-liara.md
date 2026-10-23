@@ -98,8 +98,11 @@ php artisan shop:verify-storage
 اختیاری در env (اگر مسیر دیگری می‌خواهید):
 
 - `SHOP_LOGS_DIRECTORY=/data/logs`
+- `LOG_STACK=daily` (با `FILESYSTEM_PUBLIC_ROOT=/data` یا `SHOP_LOGS_DIRECTORY`، پیش‌فرض config خودکار `daily` است — فایل‌های `laravel-YYYY-MM-DD.log`)
 - `DB_BACKUP_DIRECTORY=/data/database-backups`
 - `FILES_BACKUP_DIRECTORY=/data/files-backups` — یک نسخه آخر (`FILES_BACKUP_KEEP=1`)؛ scheduler `shop:files-backup` روزانه؛ پنل `/admin/database-backups`
+
+**ادمین:** منوی بک‌آپ → زیرمنوی **لاگ** → «لاگ پرداخت» / «لاگ سیستم»؛ کلیک روی نام فایل یا ردیف = دانلود.
 
 ---
 

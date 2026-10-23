@@ -49,15 +49,16 @@ class CouponResource extends Resource
                 ->label('قابل ترکیب با کدهای تخفیف دیگر')
                 ->helperText('اگر غیرفعال باشد، در آینده هنگام اعمال چند کد هم‌زمان این کد با سایر کدها ترکیب نمی‌شود.')
                 ->default(false),
-            Forms\Components\ToggleButtons::make('allowed_payment_gateways')
+            Forms\Components\Select::make('allowed_payment_gateways')
                 ->label('درگاه‌های مجاز')
                 ->multiple()
-                ->inline(false)
-                ->columns(2)
+                ->searchable()
                 ->options(fn () => self::paymentGatewayOptions())
-                ->helperText('هیچ‌کدام انتخاب نشود = همه درگاه‌های فعال و پرداخت در محل. برای محدود کردن، یک یا چند دکمه را بزنید.')
+                ->helperText('خالی بگذارید = همه درگاه‌های فعال و پرداخت در محل.')
+                ->placeholder('یک گزینه را انتخاب کنید')
+                ->columnSpanFull()
                 ->dehydrateStateUsing(fn (?array $state): ?array => filled($state) ? array_values($state) : null)
-                ->afterStateHydrated(function (Forms\Components\ToggleButtons $component, $state): void {
+                ->afterStateHydrated(function (Forms\Components\Select $component, $state): void {
                     $component->state(is_array($state) ? $state : []);
                 }),
             Forms\Components\TextInput::make('description')->label('توضیح'),

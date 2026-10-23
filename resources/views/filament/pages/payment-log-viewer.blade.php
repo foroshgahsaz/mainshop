@@ -72,10 +72,15 @@
                     </thead>
                     <tbody>
                         @foreach ($recentEntries as $entry)
-                            <tr>
+                            @php $downloadUrl = $entry['download_url'] ?? null; @endphp
+                            <tr @class(['admin-payment-log-viewer__row--clickable' => $downloadUrl]) @if($downloadUrl) onclick="window.location.href='{{ $downloadUrl }}'" @endif>
                                 <td>{{ $entry['label'] }}</td>
                                 <td dir="ltr" class="admin-payment-log-viewer__filename">
-                                    {{ $entry['basename'] ?? '—' }}
+                                    @if ($downloadUrl)
+                                        <a href="{{ $downloadUrl }}" class="admin-payment-log-viewer__file-link" onclick="event.stopPropagation()">{{ $entry['basename'] ?? '—' }}</a>
+                                    @else
+                                        {{ $entry['basename'] ?? '—' }}
+                                    @endif
                                 </td>
                                 <td>
                                     @if ($entry['kind'] === 'log')
@@ -88,8 +93,8 @@
                                 </td>
                                 <td dir="ltr">{{ $this->formatSize($entry['size_bytes']) }}</td>
                                 <td>
-                                    @if ($entry['download_url'])
-                                        <x-filament::button tag="a" href="{{ $entry['download_url'] }}" size="sm">
+                                    @if ($downloadUrl)
+                                        <x-filament::button tag="a" href="{{ $downloadUrl }}" size="sm" class="admin-payment-log-viewer__download-btn">
                                             دانلود
                                         </x-filament::button>
                                     @else
@@ -118,12 +123,15 @@
                         </thead>
                         <tbody>
                             @foreach ($archiveEntries as $entry)
-                                <tr>
+                                @php $downloadUrl = $entry['download_url'] ?? null; @endphp
+                                <tr @class(['admin-payment-log-viewer__row--clickable' => $downloadUrl]) @if($downloadUrl) onclick="window.location.href='{{ $downloadUrl }}'" @endif>
                                     <td>{{ $entry['label'] }}</td>
-                                    <td dir="ltr">{{ $entry['basename'] }}</td>
+                                    <td dir="ltr">
+                                        <a href="{{ $downloadUrl }}" class="admin-payment-log-viewer__file-link" onclick="event.stopPropagation()">{{ $entry['basename'] }}</a>
+                                    </td>
                                     <td dir="ltr">{{ $this->formatSize($entry['size_bytes']) }}</td>
                                     <td>
-                                        <x-filament::button tag="a" href="{{ $entry['download_url'] }}" size="sm" color="gray">
+                                        <x-filament::button tag="a" href="{{ $downloadUrl }}" size="sm" color="gray" class="admin-payment-log-viewer__download-btn">
                                             دانلود ZIP
                                         </x-filament::button>
                                     </td>

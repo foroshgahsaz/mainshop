@@ -71,7 +71,7 @@
     @include('shop.partials.overlays')
     @include('shop.partials.mobile-menu')
 
-    @if (auth()->guest() || \App\Support\UserDisplayName::isPlaceholder(auth()->user()->name))
+    @if (auth()->guest() || (auth()->check() && ! \App\Support\UserDisplayName::isShopProfileComplete(auth()->user())))
         @include('shop.partials.login-modal-shell')
     @endif
 

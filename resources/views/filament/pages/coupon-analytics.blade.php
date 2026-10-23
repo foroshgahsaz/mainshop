@@ -37,7 +37,7 @@
             <div><dt class="text-gray-500">نوع</dt><dd>{{ $coupon->type === 'percent' ? 'درصدی' : 'مبلغ ثابت' }} — {{ $coupon->value }}</dd></div>
             <div><dt class="text-gray-500">حداقل سفارش</dt><dd>{{ $coupon->minimum_order_amount ? ShopLabels::formatMoney($coupon->minimum_order_amount) : '—' }}</dd></div>
             <div><dt class="text-gray-500">فعال</dt><dd>{{ $coupon->is_active ? 'بله' : 'خیر' }}</dd></div>
-            <div><dt class="text-gray-500">ترکیب با کدهای دیگر</dt><dd>{{ $coupon->stackable_with_other_coupons ? 'مجاز' : 'غیرمجاز' }}</dd></div>
+            <div><dt class="text-gray-500">ترکیب با کدهای دیگر</dt><dd>{{ ($coupon->stackable_with_other_coupons ?? false) ? 'مجاز' : 'غیرمجاز' }}</dd></div>
         </dl>
     </x-filament::section>
 
@@ -63,7 +63,7 @@
                         @foreach ($usages as $usage)
                             @php $order = $usage->order; @endphp
                             <tr class="border-b border-gray-100">
-                                <td class="py-2 pe-3 whitespace-nowrap">{{ optional($usage->used_at)->shopJalaliDateTime() }}</td>
+                                <td class="py-2 pe-3 whitespace-nowrap">{{ optional($usage->used_at)->shopJalali('Y/m/d H:i') }}</td>
                                 <td class="py-2 pe-3">{{ $usage->user?->name ?? '—' }}</td>
                                 <td class="py-2 pe-3" dir="ltr">{{ $usage->user?->phone ?? '—' }}</td>
                                 <td class="py-2 pe-3">

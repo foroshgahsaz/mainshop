@@ -59,6 +59,23 @@ body.fi-body .fi-field-wrp-label {
     cursor: pointer;
 }
 
+.fi-admin-shell .fi-fo-toggle-buttons {
+    gap: 0.5rem;
+}
+
+.fi-admin-shell .fi-fo-toggle-buttons button,
+.fi-admin-shell .fi-btn-toggle {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    min-height: 2.5rem;
+}
+
+.fi-admin-shell .fi-fo-toggle-buttons .fi-btn-toggle[aria-pressed='true'] {
+    background: #7239ea !important;
+    border-color: #7239ea !important;
+    color: #fff !important;
+}
+
 .fi-admin-shell .sidebar-menu a.submenu-item {
     display: flex;
     align-items: center;

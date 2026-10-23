@@ -12,7 +12,7 @@ class CouponAnalyticsService
     public function summary(Coupon $coupon): array
     {
         $usageCount = $coupon->usages()->count();
-        $uniqueUsers = (int) $coupon->usages()->distinct('user_id')->count('user_id');
+        $uniqueUsers = (int) $coupon->usages()->distinct()->count('user_id');
 
         $ordersQuery = Order::query()->where('coupon_id', $coupon->id);
 

@@ -104,7 +104,7 @@ class LoginModal extends Component
     {
         $user = Auth::user();
 
-        return $user !== null && UserDisplayName::isPlaceholder($user->name);
+        return $user !== null && ! UserDisplayName::isShopProfileComplete($user);
     }
 
     protected function prepareProfileStepForAuthenticatedUser(): void
@@ -133,7 +133,7 @@ class LoginModal extends Component
 
         $user = Auth::user();
 
-        return $user !== null && UserDisplayName::isPlaceholder($user->name);
+        return $user !== null && ! UserDisplayName::isShopProfileComplete($user);
     }
 
     protected function rememberIntendedUrl(?string $redirect): void

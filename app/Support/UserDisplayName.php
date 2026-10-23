@@ -2,8 +2,20 @@
 
 namespace App\Support;
 
+use App\Rules\IranianNationalCode;
+
 final class UserDisplayName
 {
+    public static function isShopProfileComplete(object $user): bool
+    {
+        if (self::isPlaceholder((string) ($user->name ?? ''))) {
+            return false;
+        }
+
+        $code = IranianNationalCode::normalize((string) ($user->national_code ?? ''));
+
+        return $code !== '';
+    }
     public static function isPlaceholder(?string $name): bool
     {
         $name = trim((string) $name);

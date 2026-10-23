@@ -247,6 +247,41 @@ class ShopLivewireTest extends TestCase
             ->assertSee('مبلغ قابل پرداخت');
     }
 
+    public function test_returning_user_with_complete_profile_skips_profile_step(): void
+    {
+        $phone = '09124445566';
+
+        User::factory()->create([
+            'phone' => $phone,
+            'name' => 'سارا احمدی',
+            'national_code' => '0013542419',
+        ]);
+
+        Livewire::test(LoginModal::class)
+            ->dispatch('open-login-modal', redirect: route('home'))
+            ->set('phone', $phone)
+            ->call('sendOtp')
+            ->set('otp', Cache::get('otp:phone:'.$phone))
+            ->call('verifyOtp')
+            ->assertRedirect(route('home'));
+
+        $this->assertAuthenticated();
+    }
+
+    public function test_find_by_login_phone_matches_legacy_international_format(): void
+    {
+        $user = User::factory()->create([
+            'phone' => '+989124445566',
+            'name' => 'رضا محمدی',
+            'national_code' => '0067749828',
+        ]);
+
+        $found = User::findByLoginPhone('09124445566');
+
+        $this->assertNotNull($found);
+        $this->assertSame($user->getKey(), $found->getKey());
+    }
+
     public function test_otp_service_sends_via_log_driver(): void
     {
         $otp = app(OtpService::class);

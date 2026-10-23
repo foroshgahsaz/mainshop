@@ -1911,6 +1911,14 @@ body.has-admin-bar .listing-filters {
   border-color: #dc2626;
 }
 
+.checkout-coupon-alert__panel .checkout-coupon-alert__message {
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: #374151;
+  max-height: min(60vh, 16rem);
+  overflow-y: auto;
+}
+
 .checkout-coupon-alert {
   position: fixed;
   inset: 0;

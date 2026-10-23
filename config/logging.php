@@ -6,6 +6,16 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
 use Monolog\Processor\PsrLogMessageProcessor;
 
+$configuredLogStack = env('LOG_STACK');
+$defaultLogStack = is_string($configuredLogStack) && trim($configuredLogStack) !== ''
+    ? trim($configuredLogStack)
+    : (
+        (is_string(env('SHOP_LOGS_DIRECTORY')) && env('SHOP_LOGS_DIRECTORY') !== '')
+        || rtrim((string) env('FILESYSTEM_PUBLIC_ROOT', ''), '/\\') === '/data'
+            ? 'daily'
+            : 'single'
+    );
+
 return [
 
     /*
@@ -55,7 +65,7 @@ return [
 
         'stack' => [
             'driver' => 'stack',
-            'channels' => explode(',', (string) env('LOG_STACK', 'single')),
+            'channels' => explode(',', $defaultLogStack),
             'ignore_exceptions' => false,
         ],
 

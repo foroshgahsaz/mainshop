@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\Auth\Login;
+use App\Filament\Pages\CouponAnalyticsPage;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\ManageBajetPay;
 use App\Filament\Pages\ManageDigiPay;
@@ -73,6 +74,7 @@ class AdminPanelProvider extends PanelProvider
                 ViewPaymentLogs::class,
                 ViewSiteErrorLogs::class,
                 ViewDatabaseBackups::class,
+                CouponAnalyticsPage::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([])

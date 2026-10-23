@@ -35,6 +35,30 @@ body.fi-body .fi-field-wrp-label {
     font-family: Yekan, YekanBakh, Tahoma, Arial, sans-serif !important;
 }
 
+/* Filament checkbox / multi-select — Bootstrap RTL sometimes hides native controls */
+.fi-admin-shell .fi-checkbox-input {
+    width: 1.125rem !important;
+    height: 1.125rem !important;
+    flex-shrink: 0;
+    cursor: pointer;
+    opacity: 1 !important;
+    position: relative !important;
+    accent-color: #7239ea;
+}
+
+.fi-admin-shell .fi-fo-checkbox-list-option-label,
+.fi-admin-shell .fi-fo-checkbox-list .fi-fo-field-wrp-label span {
+    cursor: pointer;
+}
+
+.fi-admin-shell .fi-fo-checkbox-list-option {
+    pointer-events: auto !important;
+}
+
+.fi-admin-shell .fi-select-input {
+    cursor: pointer;
+}
+
 .fi-admin-shell .sidebar-menu a.submenu-item {
     display: flex;
     align-items: center;

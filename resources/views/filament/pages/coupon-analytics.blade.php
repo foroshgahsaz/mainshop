@@ -3,8 +3,7 @@
     use App\Services\Checkout\CouponAnalyticsService;
     use App\Support\ShopLabels;
 
-    /** @var \App\Models\Coupon $record */
-    $usages = app(CouponAnalyticsService::class)->recentUsages($record);
+    $usages = app(CouponAnalyticsService::class)->recentUsages($coupon);
 @endphp
 
 <x-filament-panels::page>
@@ -35,10 +34,10 @@
     <x-filament::section class="mt-6">
         <x-slot name="heading">جزئیات کد</x-slot>
         <dl class="grid gap-3 text-sm md:grid-cols-2">
-            <div><dt class="text-gray-500">نوع</dt><dd>{{ $record->type === 'percent' ? 'درصدی' : 'مبلغ ثابت' }} — {{ $record->value }}</dd></div>
-            <div><dt class="text-gray-500">حداقل سفارش</dt><dd>{{ $record->minimum_order_amount ? ShopLabels::formatMoney($record->minimum_order_amount) : '—' }}</dd></div>
-            <div><dt class="text-gray-500">فعال</dt><dd>{{ $record->is_active ? 'بله' : 'خیر' }}</dd></div>
-            <div><dt class="text-gray-500">ترکیب با کدهای دیگر</dt><dd>{{ $record->stackable_with_other_coupons ? 'مجاز' : 'غیرمجاز' }}</dd></div>
+            <div><dt class="text-gray-500">نوع</dt><dd>{{ $coupon->type === 'percent' ? 'درصدی' : 'مبلغ ثابت' }} — {{ $coupon->value }}</dd></div>
+            <div><dt class="text-gray-500">حداقل سفارش</dt><dd>{{ $coupon->minimum_order_amount ? ShopLabels::formatMoney($coupon->minimum_order_amount) : '—' }}</dd></div>
+            <div><dt class="text-gray-500">فعال</dt><dd>{{ $coupon->is_active ? 'بله' : 'خیر' }}</dd></div>
+            <div><dt class="text-gray-500">ترکیب با کدهای دیگر</dt><dd>{{ $coupon->stackable_with_other_coupons ? 'مجاز' : 'غیرمجاز' }}</dd></div>
         </dl>
     </x-filament::section>
 

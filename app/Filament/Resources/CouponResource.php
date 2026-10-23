@@ -2,9 +2,11 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Pages\CouponAnalyticsPage;
 use App\Filament\Resources\CouponResource\Pages;
 use App\Models\Coupon;
 use App\Services\Payment\PaymentGatewayCatalog;
+use App\Support\AdminAccess;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -25,6 +27,11 @@ class CouponResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
+    public static function canAccess(): bool
+    {
+        return AdminAccess::canManageShopInAdmin();
+    }
+
     public static function form(Form $form): Form
     {
         return $form->schema([
@@ -42,11 +49,14 @@ class CouponResource extends Resource
                 ->label('قابل ترکیب با کدهای تخفیف دیگر')
                 ->helperText('اگر غیرفعال باشد، در آینده هنگام اعمال چند کد هم‌زمان این کد با سایر کدها ترکیب نمی‌شود.')
                 ->default(false),
-            Forms\Components\CheckboxList::make('allowed_payment_gateways')
+            Forms\Components\Select::make('allowed_payment_gateways')
                 ->label('درگاه‌های مجاز')
+                ->multiple()
+                ->native(false)
+                ->searchable()
                 ->options(fn () => self::paymentGatewayOptions())
-                ->helperText('خالی = همه درگاه‌های فعال و پرداخت در محل. در غیر این صورت فقط درگاه‌های انتخاب‌شده.')
-                ->columns(2),
+                ->helperText('خالی بگذارید = همه درگاه‌های فعال و پرداخت در محل. در غیر این صورت فقط درگاه‌های انتخاب‌شده.')
+                ->placeholder('همه درگاه‌ها'),
             Forms\Components\TextInput::make('description')->label('توضیح'),
         ]);
     }
@@ -75,7 +85,7 @@ class CouponResource extends Resource
             Tables\Actions\Action::make('analytics')
                 ->label('آنالیز')
                 ->icon('heroicon-o-chart-bar')
-                ->url(fn (Coupon $record): string => static::getUrl('analytics', ['record' => $record])),
+                ->url(fn (Coupon $record): string => CouponAnalyticsPage::getUrl(['record' => $record->getKey()])),
             Tables\Actions\EditAction::make(),
             Tables\Actions\DeleteAction::make(),
         ]);
@@ -87,7 +97,6 @@ class CouponResource extends Resource
             'index' => Pages\ListCoupons::route('/'),
             'create' => Pages\CreateCoupon::route('/create'),
             'edit' => Pages\EditCoupon::route('/{record}/edit'),
-            'analytics' => Pages\CouponAnalytics::route('/{record}/analytics'),
         ];
     }
 }

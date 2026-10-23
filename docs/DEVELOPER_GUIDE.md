@@ -1309,7 +1309,9 @@ resources/views/layouts/shop.blade.php
 | 2026-10-17 | `/admin/products` — UI لیست محصولات هماهنگ با صفحه بروزرسانی قیمت (`public/css/admin-product-list.css`، badge برای ID/دسته) |
 | 2026-10-14 | لیست/جزئیات سفارش ادمین: برچسب روش پرداخت = نام درگاه (`orderPaymentMethodLabel`)؛ checkout slug درگاه را در `orders.payment_method` ذخیره می‌کند |
 | 2026-10-14 | سفارش مستقیم فروشگاه: `representative_id` = `SHOP_DIRECT_REPRESENTATIVE_ID` (پیش‌فرض ۸۱ چینی بازار)؛ backfill `shop:assign-direct-shop-representative` |
+| 2026-10-23 | OTP فروشگاه: کاربر با نام+کد ملی کامل دوباره مودال پروفایل نمی‌بیند؛ جستجوی موبایل `User::findByLoginPhone` — `UserDisplayName::isShopProfileComplete` |
+| 2026-10-23 | رفع 500 آنالیز کد تخفیف: `CouponAnalyticsPage::mount($record)` بدون پارامتر DI دوم (Livewire + route named arg) |
 | 2026-10-23 | ادمین: لاگ پرداخت/سیستم زیر منوی بک‌آپ؛ دانلود با کلیک روی فایل؛ `LOG_STACK` پیش‌فرض `daily` روی `/data`؛ checkout: پیام کد تخفیف فقط مودال؛ درگاه کد تخفیف = Select چندتایی (مثل استان منطقه) |
-| 2026-10-23 | checkout کد تخفیف: پیام دقیق (کف سبد، درگاه، …) + مودال؛ ادمین: آنالیز `/admin/coupons/{id}/analytics` (`CouponAnalyticsPage`)، npm `follow-redirects` ≥1.16.1 |
+| 2026-10-23 | checkout کد تخفیف: پیام دقیق (کف سبد، درگاه، …) + مودال؛ ادمین: آنالیز `/admin/coupons/{id}/analytics` (`CouponAnalyticsPage`)، درگاه‌های مجاز (Select چندتایی)، npm `follow-redirects` ≥1.16.1؛ پس از deploy: `migrate --force` + `optimize:clear` |
 
 > اگر بخش جدیدی به پروژه اضافه شد، همین فایل را در `docs/DEVELOPER_GUIDE.md` به‌روز کنید و در صورت نیاز `docs/README.md` و `docs/dev/*`.

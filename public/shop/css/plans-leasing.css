@@ -388,10 +388,15 @@
 }
 
 .plan-leasing .stat strong {
-  font-size: 25px;
+  font-size: clamp(15px, 2.1vw, 22px);
   color: var(--purple);
   display: block;
   font-weight: 900;
+  line-height: 1.55;
+}
+
+.plan-leasing .stats--titles-only .stat {
+  padding: 0.35rem 0.5rem;
 }
 
 .plan-leasing .stat span {

@@ -1,16 +1,30 @@
 @extends('layouts.shop')
 
-@section('title', 'خرید اقساطی با دیجی‌پی | چینی بازار')
+@section('title', 'خرید اقساطی دیجی‌پی از چینی بازار | پرداخت اعتباری')
+
+@php
+    $seoTitle = 'خرید اقساطی دیجی‌پی از چینی بازار | پرداخت اعتباری تا '.$creditCapMillions.' میلیون';
+    $seoDescription = 'راهنمای خرید لوازم خانگی از چینی بازار با درگاه دیجی‌پی؛ سقف اعتبار '.$creditCapMillions.' میلیون تومان، مراحل checkout، پردازش انبار و ارسال. محاسبه تقریبی قسط.';
+    $seoKeywords = 'خرید اقساطی دیجی‌پی, دیجی‌پی چینی بازار, پرداخت اعتباری, خرید اعتباری لوازم خانگی, checkout دیجی‌پی';
+    $canonicalUrl = route('plans.digipay-leasing');
+@endphp
 
 @section('meta')
     <x-seo-meta :seo="\App\Support\SeoPresenter::for(null, [
-        'title' => 'طرح خرید اقساطی دیجی‌پی در چینی بازار',
-        'description' => 'خرید لوازم خانگی از چینی بازار با پرداخت اعتباری دیجی‌پی؛ سقف اعتبار تا '.$creditCapMillions.' میلیون تومان.',
+        'title' => $seoTitle,
+        'description' => $seoDescription,
+        'url' => $canonicalUrl,
+        'image' => $seoImage ?? null,
+        'type' => 'website',
     ])" />
 @endsection
 
+@push('meta')
+    <meta name="keywords" content="{{ $seoKeywords }}">
+@endpush
+
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('shop/css/plans-leasing.css') }}?v=2026-10-25-hub">
+    <link rel="stylesheet" href="{{ asset('shop/css/plans-leasing.css') }}?v=2026-10-25-fix">
 @endpush
 
 @section('body_class', 'plan-leasing-page')
@@ -27,7 +41,7 @@
         <div class="wrap hero-grid">
             <div class="hero-copy">
                 <span class="eyebrow"><i></i> پرداخت، باهوش</span>
-                <h1>خرید از چینی بازار،<br><span>ساده‌تر از همیشه</span></h1>
+                <h1>خرید از چینی بازار<br><span>ساده‌تر از همیشه با دیجی‌پی</span></h1>
                 <p>
                     لوازم خانگی را از فروشگاه چینی بازار انتخاب کنید و در checkout درگاه دیجی‌پی را بزنید.
                     سقف اعتبار این طرح تا {{ str_replace(range(0, 9), $faDigits, number_format($creditCapMillions)) }} میلیون تومان است؛
@@ -71,17 +85,6 @@
                         <div class="quick"><i>▣</i>قبض</div>
                         <div class="quick"><i>◈</i>بیمه</div>
                         <div class="quick"><i>◉</i>اعتبار</div>
-                    </div>
-                    <div class="phone-title">تراکنش‌های اخیر</div>
-                    <div class="transaction">
-                        <i>↗</i>
-                        <div>خرید چینی بازار<small style="display:block;color:#9a93a5">امروز، ۱۰:۲۴</small></div>
-                        <span class="amount">− ۱۸۵,۰۰۰</span>
-                    </div>
-                    <div class="transaction">
-                        <i style="background:#f0eaff">▣</i>
-                        <div>تأیید اعتبار<small style="display:block;color:#9a93a5">دیروز، ۱۸:۱۰</small></div>
-                        <span class="amount">+ {{ str_replace(range(0, 9), $faDigits, number_format(min(50000000, $creditCapTomans))) }}</span>
                     </div>
                 </div>
                 <div class="float-card fc2">
@@ -148,33 +151,51 @@
                     <h2>خرید با دیجی‌پی در چینی بازار چطور است؟</h2>
                     <p>مسیر خرید از فروشگاه چینی بازار با درگاه دیجی‌پی</p>
                 </div>
-                <div class="flow-path">
-                    <div class="flow-step" data-step="1">
-                        <span class="flow-step-num">۱</span>
-                        <div class="flow-icon">🛍️</div>
-                        <h3>انتخاب کالا</h3>
-                        <p>محصولات را از چینی بازار انتخاب و به سبد خرید اضافه کنید.</p>
+                <div class="flow-rows">
+                    <div class="flow-row">
+                        <div class="flow-step" data-step="1">
+                            <span class="flow-step-num">۱</span>
+                            <div class="flow-icon">🛍️</div>
+                            <h3>انتخاب کالا</h3>
+                            <p>محصولات را از چینی بازار انتخاب و به سبد خرید اضافه کنید.</p>
+                        </div>
+                        <div class="flow-connector flow-connector--h" aria-hidden="true"></div>
+                        <div class="flow-step" data-step="2">
+                            <span class="flow-step-num">۲</span>
+                            <div class="flow-icon">📱</div>
+                            <h3>وارد کردن اطلاعات</h3>
+                            <p>نام، کد ملی، تماس، آدرس و کد پستی را در checkout وارد کنید.</p>
+                        </div>
+                        <div class="flow-connector flow-connector--h" aria-hidden="true"></div>
+                        <div class="flow-step" data-step="3">
+                            <span class="flow-step-num">۳</span>
+                            <div class="flow-icon">💳</div>
+                            <h3>ورود به درگاه دیجی‌پی</h3>
+                            <p>دیجی‌پی را انتخاب کنید و با کد اپ، پرداخت را نهایی کنید.</p>
+                        </div>
                     </div>
-                    <div class="flow-connector flow-connector--h" aria-hidden="true"></div>
-                    <div class="flow-step" data-step="2">
-                        <span class="flow-step-num">۲</span>
-                        <div class="flow-icon">📱</div>
-                        <h3>وارد کردن اطلاعات</h3>
-                        <p>نام، کد ملی، تماس، آدرس و کد پستی را در checkout وارد کنید.</p>
-                    </div>
-                    <div class="flow-connector flow-connector--h" aria-hidden="true"></div>
-                    <div class="flow-step" data-step="3">
-                        <span class="flow-step-num">۳</span>
-                        <div class="flow-icon">💳</div>
-                        <h3>ورود به درگاه دیجی‌پی</h3>
-                        <p>دیجی‌پی را انتخاب کنید و با کد اپ، پرداخت را نهایی کنید.</p>
-                    </div>
-                    <div class="flow-connector flow-connector--v" aria-hidden="true"></div>
-                    <div class="flow-step flow-step--final" data-step="4">
-                        <span class="flow-step-num">۴</span>
-                        <div class="flow-icon flow-icon--accent">🚚</div>
-                        <h3>ثبت نهایی</h3>
-                        <p>سفارش در چینی بازار ثبت و وارد فرآیند ارسال می‌شود.</p>
+                    <div class="flow-row-vert" aria-hidden="true"></div>
+                    <div class="flow-row">
+                        <div class="flow-step" data-step="4">
+                            <span class="flow-step-num">۴</span>
+                            <div class="flow-icon flow-icon--accent">✅</div>
+                            <h3>ثبت نهایی</h3>
+                            <p>پس از پرداخت موفق، سفارش در چینی بازار ثبت می‌شود.</p>
+                        </div>
+                        <div class="flow-connector flow-connector--h" aria-hidden="true"></div>
+                        <div class="flow-step" data-step="5">
+                            <span class="flow-step-num">۵</span>
+                            <div class="flow-icon">📦</div>
+                            <h3>پردازش انبار</h3>
+                            <p>سفارش در انبار چینی بازار آماده‌سازی و بسته‌بندی می‌شود.</p>
+                        </div>
+                        <div class="flow-connector flow-connector--h" aria-hidden="true"></div>
+                        <div class="flow-step" data-step="6">
+                            <span class="flow-step-num">۶</span>
+                            <div class="flow-icon flow-icon--accent">🚚</div>
+                            <h3>ارسال رایگان</h3>
+                            <p>ارسال رایگان برای خریدهای واجد شرایط طبق قوانین فروشگاه.</p>
+                        </div>
                     </div>
                 </div>
                 <div class="flow-note" role="note">
@@ -262,6 +283,37 @@
 @endsection
 
 @push('scripts')
+<script type="application/ld+json">
+{!! json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'WebPage',
+    'name' => $seoTitle,
+    'description' => $seoDescription,
+    'url' => $canonicalUrl,
+    'inLanguage' => 'fa-IR',
+    'isPartOf' => [
+        '@type' => 'WebSite',
+        'name' => $siteName,
+        'url' => url('/'),
+    ],
+    'about' => [
+        '@type' => 'Service',
+        'name' => 'خرید اقساطی با دیجی‌پی',
+        'provider' => ['@type' => 'Organization', 'name' => $siteName],
+        'areaServed' => 'IR',
+    ],
+], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+</script>
+<script type="application/ld+json">
+{!! json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'FAQPage',
+    'mainEntity' => [
+        ['@type' => 'Question', 'name' => 'آیا همه محصولات چینی بازار با دیجی‌پی قابل پرداخت هستند؟', 'acceptedAnswer' => ['@type' => 'Answer', 'text' => 'در checkout فقط درگاه‌های فعال نمایش داده می‌شوند. اگر دیجی‌پی برای سبد شما فعال باشد، می‌توانید آن را انتخاب کنید.']],
+        ['@type' => 'Question', 'name' => 'سقف اعتبار ۲۰۰ میلیون تومان یعنی چه؟', 'acceptedAnswer' => ['@type' => 'Answer', 'text' => 'در این صفحه برای معرفی طرح، سقف ۲۰۰ میلیون تومان در نظر گرفته شده است. اعتبار واقعی در اپ دیجی‌پی مشخص می‌شود.']],
+    ],
+], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+</script>
 <script>
 (function () {
     const faNum = (n) => Math.round(n).toLocaleString('fa-IR');

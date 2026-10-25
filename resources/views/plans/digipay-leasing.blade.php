@@ -24,7 +24,7 @@
 @endpush
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('shop/css/plans-leasing.css') }}?v=2026-10-25-fix">
+    <link rel="stylesheet" href="{{ asset('shop/css/plans-leasing.css') }}?v=2026-10-25-shadow">
 @endpush
 
 @section('body_class', 'plan-leasing-page')
@@ -40,7 +40,7 @@
     <section class="hero">
         <div class="wrap hero-grid">
             <div class="hero-copy">
-                <span class="eyebrow"><i></i> پرداخت، باهوش</span>
+                <span class="eyebrow"><i></i> پرداخت با هوش</span>
                 <h1>خرید از چینی بازار<br><span>ساده‌تر از همیشه با دیجی‌پی</span></h1>
                 <p>
                     لوازم خانگی را از فروشگاه چینی بازار انتخاب کنید و در checkout درگاه دیجی‌پی را بزنید.
@@ -58,6 +58,7 @@
             </div>
 
             <div class="visual" aria-label="نمای اپ دیجی‌پی">
+                <div class="visual-ground" aria-hidden="true"></div>
                 <div class="halo"></div>
                 <div class="float-card fc1">
                     <span class="float-icon">✦</span>
@@ -101,7 +102,7 @@
             <div class="stat"><strong>یک‌جا</strong><span>انتخاب تا پرداخت</span></div>
             <div class="stat"><strong>آنلاین</strong><span>checkout چینی بازار</span></div>
             <div class="stat"><strong>اقساطی</strong><span>تا {{ str_replace(range(0, 9), $faDigits, (string) $creditCapMillions) }} میلیون</span></div>
-            <div class="stat"><strong>هوشمند</strong><span>تأیید در اپ دیجی‌پی</span></div>
+            <div class="stat"><strong>به توان تو</strong><span>پرداخت با هوش</span></div>
         </div>
     </div>
 

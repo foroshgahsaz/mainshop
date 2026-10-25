@@ -98,11 +98,11 @@
     </section>
 
     <div class="wrap">
-        <div class="stats">
-            <div class="stat"><strong>یک‌جا</strong><span>انتخاب تا پرداخت</span></div>
-            <div class="stat"><strong>آنلاین</strong><span>checkout چینی بازار</span></div>
-            <div class="stat"><strong>اقساطی</strong><span>تا {{ str_replace(range(0, 9), $faDigits, (string) $creditCapMillions) }} میلیون</span></div>
-            <div class="stat"><strong>به توان تو</strong><span>پرداخت با هوش</span></div>
+        <div class="stats stats--titles-only">
+            <div class="stat"><strong>ثبت‌نام آنلاین</strong></div>
+            <div class="stat"><strong>بدون ضامن</strong></div>
+            <div class="stat"><strong>اقساط بلندمدت</strong></div>
+            <div class="stat"><strong>خرید از چینی بازار</strong></div>
         </div>
     </div>
 

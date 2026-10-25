@@ -41,7 +41,7 @@
         <div class="wrap hero-grid">
             <div class="hero-copy">
                 <span class="eyebrow"><i></i> پرداخت، باهوش</span>
-                <h1>خرید از چینی بازار،<br><span>ساده‌تر از همیشه</span></h1>
+                <h1>خرید از چینی بازار<br><span>ساده‌تر از همیشه با دیجی‌پی</span></h1>
                 <p>
                     لوازم خانگی را از فروشگاه چینی بازار انتخاب کنید و در checkout درگاه دیجی‌پی را بزنید.
                     سقف اعتبار این طرح تا {{ str_replace(range(0, 9), $faDigits, number_format($creditCapMillions)) }} میلیون تومان است؛

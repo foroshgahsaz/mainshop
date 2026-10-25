@@ -619,10 +619,10 @@
   }
 
   .plan-leasing .flow-rows .flow-step:last-of-type { border-right-color: transparent; }
-  .plan-leasing .flow-step-num { position: static !important; transform: none !important; margin-right: -1.85rem; grid-column: 1; grid-row: 1; }
-  .plan-leasing .flow-icon { grid-column: 2; grid-row: 1; margin: 0 0 0.5rem !important; width: 3.5rem !important; height: 3.5rem !important; justify-self: start; }
-  .plan-leasing .flow-step h3 { grid-column: 2; text-align: right; font-size: 15px; }
-  .plan-leasing .flow-step p { grid-column: 2; text-align: right; max-width: none; margin-inline: 0; }
+  .plan-leasing .flow-rows .flow-step-num { position: static !important; transform: none !important; margin-right: -1.85rem; grid-column: 1; grid-row: 1; }
+  .plan-leasing .flow-rows .flow-icon { grid-column: 2; grid-row: 1; margin: 0 0 0.5rem !important; width: 3.5rem !important; height: 3.5rem !important; justify-self: start; }
+  .plan-leasing .flow-rows .flow-step h3 { grid-column: 2; text-align: right; font-size: 15px; }
+  .plan-leasing .flow-rows .flow-step p { grid-column: 2; text-align: right; max-width: none; margin-inline: 0; }
   .plan-leasing .flow-row {
     display: block;
   }

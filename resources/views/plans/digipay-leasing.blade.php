@@ -5,12 +5,12 @@
 @section('meta')
     <x-seo-meta :seo="\App\Support\SeoPresenter::for(null, [
         'title' => 'طرح خرید اقساطی دیجی‌پی در چینی بازار',
-        'description' => 'خرید لوازم خانگی از چینی بازار با پرداخت اعتباری دیجی‌پی؛ سقف اعتبار تا '.$creditCapMillions.' میلیون تومان. راهنمای مراحل خرید و محاسبه تقریبی قسط.',
+        'description' => 'خرید لوازم خانگی از چینی بازار با پرداخت اعتباری دیجی‌پی؛ سقف اعتبار تا '.$creditCapMillions.' میلیون تومان.',
     ])" />
 @endsection
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('shop/css/plans-leasing.css') }}?v=2026-10-25-2">
+    <link rel="stylesheet" href="{{ asset('shop/css/plans-leasing.css') }}?v=2026-10-25-hub">
 @endpush
 
 @section('body_class', 'plan-leasing-page')
@@ -19,273 +19,242 @@
 @php
     $creditCapMillions = (int) $creditCapMillions;
     $creditCapTomans = $creditCapMillions * 1_000_000;
+    $faDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+    $creditFaDisplay = str_replace(range(0, 9), $faDigits, number_format($creditCapTomans));
 @endphp
 <div class="plan-leasing">
-    {{-- Hero (Digipay hub style) --}}
-    <section class="plan-leasing__hero">
-        <div class="container mx-auto px-4">
-            <div class="plan-leasing__hero-grid">
-                <div class="plan-leasing__hero-copy">
-                    <span class="plan-leasing__eyebrow">پرداخت، باهوش</span>
-                    <h1 class="plan-leasing__title">
-                        خرید از چینی بازار،
-                        <span class="plan-leasing__title-accent">ساده‌تر از همیشه</span>
-                    </h1>
-                    <p class="plan-leasing__lead">
-                        لوازم خانگی را از چینی بازار انتخاب کنید و در checkout درگاه دیجی‌پی را بزنید.
-                        سقف اعتبار معرفی‌شده در این صفحه
-                        <strong>{{ number_format($creditCapMillions) }} میلیون تومان</strong> است؛
-                        مبلغ و اقساط نهایی در اپ دیجی‌پی تأیید می‌شود.
-                    </p>
-                    <div class="plan-leasing__actions">
-                        <a href="{{ route('products.index') }}" class="plan-leasing__btn-primary">
-                            شروع خرید از چینی بازار
-                            <span class="plan-leasing__btn-arrow" aria-hidden="true">←</span>
-                        </a>
-                        <a href="#plan-digipay-credit" class="plan-leasing__btn-outline">آشنایی با اعتبار خرید</a>
-                    </div>
-                    <p class="plan-leasing__hero-trust">
-                        <span class="plan-leasing__hero-trust-icons" aria-hidden="true">✦ ✓ ★</span>
-                        خرید اعتباری از فروشگاه چینی بازار — پرداخت و اقساط در دیجی‌پی
-                    </p>
+    <section class="hero">
+        <div class="wrap hero-grid">
+            <div class="hero-copy">
+                <span class="eyebrow"><i></i> پرداخت، باهوش</span>
+                <h1>خرید از چینی بازار،<br><span>ساده‌تر از همیشه</span></h1>
+                <p>
+                    لوازم خانگی را از فروشگاه چینی بازار انتخاب کنید و در checkout درگاه دیجی‌پی را بزنید.
+                    سقف اعتبار این طرح تا {{ str_replace(range(0, 9), $faDigits, number_format($creditCapMillions)) }} میلیون تومان است؛
+                    مبلغ و اقساط نهایی در اپ دیجی‌پی تأیید می‌شود.
+                </p>
+                <div class="hero-actions">
+                    <a class="btn" href="{{ route('products.index') }}">شروع خرید از چینی بازار <span>←</span></a>
+                    <a class="btn secondary" href="#credit">آشنایی با اعتبار خرید</a>
                 </div>
-
-                <div class="plan-leasing__hero-visual" aria-hidden="true">
-                    <div class="plan-leasing__float plan-leasing__float--1">
-                        <span class="plan-leasing__float-icon">+</span>
-                        خرید اعتباری
-                    </div>
-                    <div class="plan-leasing__float plan-leasing__float--2">
-                        <span class="plan-leasing__float-icon plan-leasing__float-icon--ok">✓</span>
-                        پرداخت آسان
-                    </div>
-                    <div class="plan-leasing__phone-shell">
-                        <div class="plan-leasing__phone-notch"></div>
-                        <div class="plan-leasing__phone-screen">
-                            <div class="plan-leasing__phone-top">
-                                <span class="plan-leasing__phone-brand">DigiPay</span>
-                            </div>
-                            <div class="plan-leasing__phone-credit">
-                                <span class="plan-leasing__phone-credit-label">اعتبار قابل استفاده</span>
-                                <span class="plan-leasing__phone-credit-amount">{{ number_format($creditCapMillions) }}</span>
-                                <span class="plan-leasing__phone-credit-unit">میلیون تومان</span>
-                            </div>
-                            <div class="plan-leasing__phone-icons">
-                                <span></span><span></span><span></span><span></span>
-                            </div>
-                        </div>
-                    </div>
+                <div class="trustline">
+                    <div class="avatars"><span>✓</span><span>↗</span><span>★</span></div>
+                    <span>انتخاب کالا در چینی بازار، پرداخت و اقساط در دیجی‌پی</span>
                 </div>
             </div>
 
-            <div class="plan-leasing__hero-stats">
-                <div class="plan-leasing__hero-stat">
-                    <strong>یکجا</strong>
-                    <span>انتخاب کالا تا پرداخت</span>
+            <div class="visual" aria-label="نمای اپ دیجی‌پی">
+                <div class="halo"></div>
+                <div class="float-card fc1">
+                    <span class="float-icon">✦</span>
+                    <strong>خرید اعتباری</strong>
+                    امروز انتخاب کن، طبق شرایط پرداخت کن
                 </div>
-                <div class="plan-leasing__hero-stat">
-                    <strong>آنلاین</strong>
-                    <span>checkout چینی بازار</span>
+                <div class="phone">
+                    <div class="notch"></div>
+                    <div class="phone-top"><span>۹:۴۱</span><span>●●● ▰</span></div>
+                    <div class="phone-top" style="margin-top:16px">
+                        <span>سلام، خوش اومدی 👋</span>
+                        <span class="mini-logo">دیجی‌پی</span>
+                    </div>
+                    <div class="balance">
+                        <small>اعتبار قابل استفاده</small>
+                        <strong>{{ $creditFaDisplay }}</strong>
+                        <div class="balance-foot">
+                            <span>تومان</span>
+                            <span>سقف طرح چینی بازار</span>
+                        </div>
+                    </div>
+                    <div class="phone-title">خدمات پرکاربرد</div>
+                    <div class="quick-grid">
+                        <div class="quick"><i>⇄</i>کارت‌به‌کارت</div>
+                        <div class="quick"><i>▣</i>قبض</div>
+                        <div class="quick"><i>◈</i>بیمه</div>
+                        <div class="quick"><i>◉</i>اعتبار</div>
+                    </div>
+                    <div class="phone-title">تراکنش‌های اخیر</div>
+                    <div class="transaction">
+                        <i>↗</i>
+                        <div>خرید چینی بازار<small style="display:block;color:#9a93a5">امروز، ۱۰:۲۴</small></div>
+                        <span class="amount">− ۱۸۵,۰۰۰</span>
+                    </div>
+                    <div class="transaction">
+                        <i style="background:#f0eaff">▣</i>
+                        <div>تأیید اعتبار<small style="display:block;color:#9a93a5">دیروز، ۱۸:۱۰</small></div>
+                        <span class="amount">+ {{ str_replace(range(0, 9), $faDigits, number_format(min(50000000, $creditCapTomans))) }}</span>
+                    </div>
                 </div>
-                <div class="plan-leasing__hero-stat">
-                    <strong>اقساطی</strong>
-                    <span>تا سقف {{ number_format($creditCapMillions) }}M</span>
-                </div>
-                <div class="plan-leasing__hero-stat">
-                    <strong>هوشمند</strong>
-                    <span>تأیید در اپ دیجی‌پی</span>
+                <div class="float-card fc2">
+                    <span class="float-icon">✓</span>
+                    <strong>پرداخت آسان</strong>
+                    checkout سریع در چینی بازار
                 </div>
             </div>
         </div>
     </section>
 
-    {{-- Credit section (reference image 2) --}}
-    <section class="plan-leasing__section" id="plan-digipay-credit">
-        <div class="container mx-auto px-4">
-            <div class="plan-leasing__split">
-                <div class="plan-leasing__split-visual" aria-hidden="true">
-                    <div class="plan-leasing__card-scene">
-                        <div class="plan-leasing__card-tag plan-leasing__card-tag--1">خرید راحت‌تر</div>
-                        <div class="plan-leasing__card-tag plan-leasing__card-tag--2">مدیریت بهتر پرداخت‌ها</div>
-                        <div class="plan-leasing__credit-card">
-                            <div class="plan-leasing__credit-card-top">
-                                <span>دیجی‌پی</span>
-                                <span class="plan-leasing__credit-chip"></span>
-                            </div>
-                            <div class="plan-leasing__credit-card-num">•••• •••• •••• ۱۴۰۴</div>
-                            <div class="plan-leasing__credit-card-bottom">
-                                <span>SMART PAY</span>
-                                <span>اعتبار خرید</span>
-                            </div>
-                        </div>
-                    </div>
+    <div class="wrap">
+        <div class="stats">
+            <div class="stat"><strong>یک‌جا</strong><span>انتخاب تا پرداخت</span></div>
+            <div class="stat"><strong>آنلاین</strong><span>checkout چینی بازار</span></div>
+            <div class="stat"><strong>اقساطی</strong><span>تا {{ str_replace(range(0, 9), $faDigits, (string) $creditCapMillions) }} میلیون</span></div>
+            <div class="stat"><strong>هوشمند</strong><span>تأیید در اپ دیجی‌پی</span></div>
+        </div>
+    </div>
+
+    <section class="plan-section" id="credit">
+        <div class="wrap split">
+            <div class="feature-copy">
+                <span class="eyebrow">وام و اعتبار</span>
+                <h2>برای خریدهای مهم،<br>گزینه‌های بیشتری داشته باشید</h2>
+                <p>
+                    در چینی بازار کالا را انتخاب کنید و با دیجی‌پی تا سقف
+                    {{ str_replace(range(0, 9), $faDigits, (string) $creditCapMillions) }} میلیون تومان (در این طرح معرفی)
+                    اعتباری پرداخت کنید. نوع اعتبار، تعداد اقساط و شرایط نهایی در اپ دیجی‌پی اعلام می‌شود.
+                </p>
+                <ul class="checks">
+                    <li>
+                        <span class="check">✓</span>
+                        <span><b>انتخاب متناسب با نیاز</b><br>محصول را در چینی بازار ببینید؛ قبل از پرداخت، شرایط اقساط در دیجی‌پی نمایش داده می‌شود.</span>
+                    </li>
+                    <li>
+                        <span class="check">✓</span>
+                        <span><b>مدیریت شفاف‌تر پرداخت‌ها</b><br>مبلغ هر قسط را در پرونده اعتباری دیجی‌پی ببینید — عدد صفحه فقط تقریبی است.</span>
+                    </li>
+                    <li>
+                        <span class="check">✓</span>
+                        <span><b>خرید از فروشگاه چینی بازار</b><br>همان سبد و قیمت فروشگاه؛ فقط در checkout درگاه دیجی‌پی را انتخاب می‌کنید.</span>
+                    </li>
+                </ul>
+                <a class="btn" href="https://www.mydigipay.com/hub/" target="_blank" rel="noopener noreferrer">بررسی شرایط در سایت رسمی ↗</a>
+            </div>
+            <div class="feature-art">
+                <div class="mini-bubble bubble-a">✨ خرید راحت‌تر</div>
+                <div class="credit-card">
+                    <div class="cc-brand">دیجی‌پی</div>
+                    <div class="cc-chip"></div>
+                    <div class="cc-number">•••• &nbsp; •••• &nbsp; •••• &nbsp; ۱۴۰۴</div>
+                    <div class="cc-foot"><span>اعتبار خرید</span><span>SMART PAY</span></div>
                 </div>
-                <div class="plan-leasing__split-copy">
-                    <span class="plan-leasing__eyebrow plan-leasing__eyebrow--soft">وام و اعتبار</span>
-                    <h2 class="plan-leasing__split-title">برای خریدهای مهم، گزینه‌های بیشتری داشته باشید</h2>
-                    <p class="plan-leasing__split-lead">
-                        با دیجی‌پی می‌توانید سبد خرید چینی بازار را تا سقف
-                        {{ number_format($creditCapMillions) }} میلیون تومان (در این طرح معرفی) اعتباری پرداخت کنید
-                        و اقساط را در اپ مدیریت کنید.
-                    </p>
-                    <ul class="plan-leasing__checklist">
-                        <li>
-                            <span class="plan-leasing__check" aria-hidden="true">✓</span>
-                            <div>
-                                <strong>انتخاب متناسب با نیاز</strong>
-                                <p>کالا را در چینی بازار انتخاب کنید؛ قبل از نهایی کردن، شرایط اقساط در دیجی‌پی نمایش داده می‌شود.</p>
-                            </div>
-                        </li>
-                        <li>
-                            <span class="plan-leasing__check" aria-hidden="true">✓</span>
-                            <div>
-                                <strong>مدیریت شفاف‌تر پرداخت‌ها</strong>
-                                <p>مبلغ هر قسط و زمان بازپرداخت را در پرونده اعتباری دیجی‌پی ببینید — عدد این صفحه فقط تقریبی است.</p>
-                            </div>
-                        </li>
-                        <li>
-                            <span class="plan-leasing__check" aria-hidden="true">✓</span>
-                            <div>
-                                <strong>خرید از فروشگاه چینی بازار</strong>
-                                <p>همان سبد و همان قیمت فروشگاه؛ فقط روش پرداخت در checkout «دیجی‌پی» انتخاب می‌شود.</p>
-                            </div>
-                        </li>
-                    </ul>
-                    <a href="https://www.mydigipay.com/hub/" class="plan-leasing__btn-primary plan-leasing__btn-primary--compact" target="_blank" rel="noopener noreferrer">
-                        بررسی شرایط در سایت رسمی دیجی‌پی
-                        <span class="plan-leasing__btn-arrow" aria-hidden="true">↗</span>
-                    </a>
-                </div>
+                <div class="mini-bubble bubble-b">✓ مدیریت بهتر پرداخت‌ها</div>
             </div>
         </div>
     </section>
 
-    {{-- Purchase flow RTL + connectors --}}
-    <section class="plan-leasing__section plan-leasing__section--muted" id="plan-digipay-flow">
-        <div class="container mx-auto px-4">
-            <div class="plan-leasing__flow-card">
-                <div class="plan-leasing__flow-head">
+    <section class="plan-section" id="plan-digipay-flow" style="padding-top:0">
+        <div class="wrap">
+            <div class="flow-card">
+                <div class="flow-head">
                     <h2>خرید با دیجی‌پی در چینی بازار چطور است؟</h2>
                     <p>مسیر خرید از فروشگاه چینی بازار با درگاه دیجی‌پی</p>
                 </div>
-
-                <div class="plan-leasing__flow-path">
-                    <div class="plan-leasing__flow-step" data-step="1">
-                        <span class="plan-leasing__flow-step-num">۱</span>
-                        <div class="plan-leasing__flow-icon">🛍️</div>
+                <div class="flow-path">
+                    <div class="flow-step" data-step="1">
+                        <span class="flow-step-num">۱</span>
+                        <div class="flow-icon">🛍️</div>
                         <h3>انتخاب کالا</h3>
-                        <p>محصولات مورد نظرتان را از میان کالاهای چینی بازار انتخاب و به سبد خرید اضافه کنید.</p>
+                        <p>محصولات را از چینی بازار انتخاب و به سبد خرید اضافه کنید.</p>
                     </div>
-                    <div class="plan-leasing__flow-connector plan-leasing__flow-connector--h" aria-hidden="true"></div>
-                    <div class="plan-leasing__flow-step" data-step="2">
-                        <span class="plan-leasing__flow-step-num">۲</span>
-                        <div class="plan-leasing__flow-icon">📱</div>
+                    <div class="flow-connector flow-connector--h" aria-hidden="true"></div>
+                    <div class="flow-step" data-step="2">
+                        <span class="flow-step-num">۲</span>
+                        <div class="flow-icon">📱</div>
                         <h3>وارد کردن اطلاعات</h3>
-                        <p>نام، کد ملی، شماره تماس، آدرس و کد پستی را در checkout وارد کنید.</p>
+                        <p>نام، کد ملی، تماس، آدرس و کد پستی را در checkout وارد کنید.</p>
                     </div>
-                    <div class="plan-leasing__flow-connector plan-leasing__flow-connector--h" aria-hidden="true"></div>
-                    <div class="plan-leasing__flow-step" data-step="3">
-                        <span class="plan-leasing__flow-step-num">۳</span>
-                        <div class="plan-leasing__flow-icon">💳</div>
+                    <div class="flow-connector flow-connector--h" aria-hidden="true"></div>
+                    <div class="flow-step" data-step="3">
+                        <span class="flow-step-num">۳</span>
+                        <div class="flow-icon">💳</div>
                         <h3>ورود به درگاه دیجی‌پی</h3>
-                        <p>درگاه دیجی‌پی را انتخاب کنید، کد احراز هویت را در اپ بزنید و خرید را نهایی کنید.</p>
+                        <p>دیجی‌پی را انتخاب کنید و با کد اپ، پرداخت را نهایی کنید.</p>
                     </div>
-                    <div class="plan-leasing__flow-connector plan-leasing__flow-connector--v" aria-hidden="true"></div>
-                    <div class="plan-leasing__flow-step plan-leasing__flow-step--final" data-step="4">
-                        <span class="plan-leasing__flow-step-num">۴</span>
-                        <div class="plan-leasing__flow-icon plan-leasing__flow-icon--accent">🚚</div>
+                    <div class="flow-connector flow-connector--v" aria-hidden="true"></div>
+                    <div class="flow-step flow-step--final" data-step="4">
+                        <span class="flow-step-num">۴</span>
+                        <div class="flow-icon flow-icon--accent">🚚</div>
                         <h3>ثبت نهایی</h3>
-                        <p>پس از نهایی شدن پرداخت، سفارش در چینی بازار ثبت می‌شود و وارد فرآیند ارسال می‌گردد.</p>
+                        <p>سفارش در چینی بازار ثبت و وارد فرآیند ارسال می‌شود.</p>
                     </div>
                 </div>
-
-                <div class="plan-leasing__flow-note" role="note">
+                <div class="flow-note" role="note">
                     <span aria-hidden="true">🛡️</span>
-                    <span>عدد نهایی اعتبار و قسط را سرویس دیجی‌پی در پرونده شما اعلام می‌کند؛ محاسبه زیر فقط برای آشنایی اولیه است.</span>
+                    <span>عدد نهایی اعتبار و قسط را سرویس دیجی‌پی در پرونده شما اعلام می‌کند.</span>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="plan-leasing__section" id="plan-digipay-calculator">
-        <div class="container mx-auto px-4">
-            <div class="plan-leasing__calc">
-                <div class="plan-leasing__calc-panel">
-                    <h2>قسط ماهانه را به‌صورت تقریبی ببینید</h2>
-                    <p>
-                        مبلغ خرید را تا سقف {{ number_format($creditCapMillions) }} میلیون تومان انتخاب کنید و تعداد ماه را مشخص کنید.
-                        نرخ و شرایط واقعی هنگام پرداخت در دیجی‌پی نمایش داده می‌شود.
-                    </p>
+    <section class="plan-section" id="plan-digipay-calculator">
+        <div class="wrap">
+            <div class="calc">
+                <div>
+                    <span class="eyebrow">ابزار نمایشی</span>
+                    <h2>قسط ماهانه را<br>به‌صورت تقریبی ببینید</h2>
+                    <p>مبلغ تا سقف {{ str_replace(range(0, 9), $faDigits, (string) $creditCapMillions) }} میلیون تومان و تعداد اقساط را تغییر دهید. این محاسبه جایگزین تأیید دیجی‌پی نیست.</p>
                 </div>
-                <div class="plan-leasing__calc-box"
-                     id="digipayPlanCalc"
-                     data-cap="{{ $creditCapTomans }}">
-                    <div class="plan-leasing__calc-label">
-                        <span>مبلغ خرید (تومان)</span>
-                        <span class="plan-leasing__calc-value" data-calc-amount-label>—</span>
+                <div class="calc-box" id="digipayPlanCalc" data-cap="{{ $creditCapTomans }}">
+                    <label for="planAmount">مبلغ خرید (تومان)</label>
+                    <input id="planAmount" type="range" data-calc-amount min="5000000" max="{{ $creditCapTomans }}" step="500000" value="{{ min(50000000, $creditCapTomans) }}">
+                    <div class="calc-range-labels">
+                        <span>۵ میلیون</span>
+                        <strong data-calc-amount-label>—</strong>
+                        <span>{{ str_replace(range(0, 9), $faDigits, (string) $creditCapMillions) }} میلیون</span>
                     </div>
-                    <input type="range"
-                           class="plan-leasing__calc-range"
-                           data-calc-amount
-                           min="5000000"
-                           max="{{ $creditCapTomans }}"
-                           step="500000"
-                           value="{{ min(50000000, $creditCapTomans) }}"
-                           aria-label="مبلغ خرید">
-
-                    <div class="plan-leasing__calc-label">
-                        <span>تعداد اقساط (ماه)</span>
-                    </div>
-                    <div class="plan-leasing__calc-months" data-calc-months role="group" aria-label="تعداد اقساط">
+                    <label style="margin-top:18px">تعداد اقساط (ماه)</label>
+                    <div class="calc-months" data-calc-months>
                         @foreach ([2, 3, 4, 6, 12] as $month)
-                            <button type="button"
-                                    class="plan-leasing__calc-month @if($month === 6) is-active @endif"
-                                    data-month="{{ $month }}">{{ $month }} ماه</button>
+                            <button type="button" class="calc-month @if($month === 6) is-active @endif" data-month="{{ $month }}">{{ str_replace(range(0, 9), $faDigits, (string) $month) }} ماه</button>
                         @endforeach
                     </div>
-
-                    <div class="plan-leasing__calc-result">
-                        <div class="plan-leasing__calc-result-label">قسط ماهانه تقریبی</div>
-                        <div class="plan-leasing__calc-result-amount" data-calc-installment>—</div>
+                    <div class="calc-result">
+                        <div>
+                            <small>قسط ماهانه تقریبی</small>
+                            <strong data-calc-installment>—</strong>
+                        </div>
+                        <span style="font-size:25px">🧮</span>
                     </div>
-                    <p class="plan-leasing__calc-disclaimer">
-                        سقف اعتبار این صفحه: {{ number_format($creditCapMillions) }} میلیون تومان.
-                        این ابزار جایگزین تأیید دیجی‌پی نیست.
-                    </p>
+                    <p class="calc-note">شرایط نهایی را در دیجی‌پی یا هنگام checkout بررسی کنید.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="plan-leasing__section plan-leasing__section--muted">
-        <div class="container mx-auto px-4">
-            <h2 class="plan-leasing__section-title">سوالات متداول</h2>
-            <p class="plan-leasing__section-lead">پاسخ کوتاه به رایج‌ترین سوالات درباره خرید با دیجی‌پی از چینی بازار</p>
-            <div class="plan-leasing__faq">
-                @foreach ([
-                    ['q' => 'آیا همه محصولات چینی بازار با دیجی‌پی قابل پرداخت هستند؟', 'a' => 'در checkout فقط درگاه‌های فعال نمایش داده می‌شوند. اگر دیجی‌پی برای سبد شما فعال باشد، می‌توانید آن را انتخاب کنید.'],
-                    ['q' => 'سقف اعتبار ۲۰۰ میلیون تومان یعنی چه؟', 'a' => 'در این صفحه برای محاسبه و معرفی، سقف ۲۰۰ میلیون تومان در نظر گرفته شده است. اعتبار واقعی شما در اپ دیجی‌پی و هنگام پرداخت مشخص می‌شود.'],
-                    ['q' => 'بعد از پرداخت موفق چه می‌شود؟', 'a' => 'سفارش در پنل کاربری چینی بازار ثبت می‌شود و مثل سایر سفارش‌های پرداخت‌شده وارد مرحله آماده‌سازی و ارسال می‌گردد.'],
-                    ['q' => 'اگر پرداخت نیمه‌کاره بماند چه کنم؟', 'a' => 'از بخش سفارش‌ها در حساب کاربری می‌توانید وضعیت را ببینید یا دوباره برای پرداخت اقدام کنید (مطابق قوانین زمانی سفارش در سایت).'],
-                ] as $item)
-                    <div class="plan-leasing__faq-item">
-                        <button type="button" class="plan-leasing__faq-q" aria-expanded="false">
-                            <span>{{ $item['q'] }}</span>
-                            <span class="plan-leasing__faq-chevron" aria-hidden="true">▼</span>
-                        </button>
-                        <div class="plan-leasing__faq-a">{{ $item['a'] }}</div>
-                    </div>
-                @endforeach
+    <section class="plan-section" style="padding-top:0">
+        <div class="wrap">
+            <div class="section-head">
+                <span class="eyebrow">پاسخ پرسش‌ها</span>
+                <h2>سوالات متداول</h2>
+            </div>
+            <div class="faq">
+                <details>
+                    <summary>آیا همه محصولات چینی بازار با دیجی‌پی قابل پرداخت هستند؟</summary>
+                    <p>در checkout فقط درگاه‌های فعال نمایش داده می‌شوند. اگر دیجی‌پی برای سبد شما فعال باشد، می‌توانید آن را انتخاب کنید.</p>
+                </details>
+                <details>
+                    <summary>سقف {{ str_replace(range(0, 9), $faDigits, (string) $creditCapMillions) }} میلیون تومان یعنی چه؟</summary>
+                    <p>در این صفحه برای معرفی طرح، سقف {{ str_replace(range(0, 9), $faDigits, (string) $creditCapMillions) }} میلیون تومان در نظر گرفته شده است. اعتبار واقعی در اپ دیجی‌پی مشخص می‌شود.</p>
+                </details>
+                <details>
+                    <summary>بعد از پرداخت موفق چه می‌شود؟</summary>
+                    <p>سفارش در حساب کاربری چینی بازار ثبت و مثل سایر سفارش‌های پرداخت‌شده ارسال می‌شود.</p>
+                </details>
+                <details>
+                    <summary>آیا مبلغ قسط در ابزار این صفحه دقیق است؟</summary>
+                    <p>خیر. فقط تقسیم ساده مبلغ است و کارمزد یا شرایط طرح را لحاظ نمی‌کند.</p>
+                </details>
             </div>
         </div>
     </section>
 
-    <section class="plan-leasing__section">
-        <div class="container mx-auto px-4">
-            <div class="plan-leasing__cta-band">
-                <h2>همین حالا خرید را شروع کنید</h2>
-                <p>محصول را انتخاب کنید، در checkout دیجی‌پی را بزنید و اقساط را در اپ تأیید کنید.</p>
-                <a href="{{ route('home') }}" class="plan-leasing__btn-primary plan-leasing__btn-primary--on-dark">رفتن به فروشگاه</a>
+    <section class="plan-section">
+        <div class="wrap">
+            <div class="download-box">
+                <div>
+                    <h2>همین حالا از چینی بازار خرید کنید</h2>
+                    <p>محصول را انتخاب کنید و در checkout دیجی‌پی را بزنید.</p>
+                </div>
+                <a class="btn" href="{{ route('home') }}">رفتن به فروشگاه ←</a>
             </div>
         </div>
     </section>
@@ -295,38 +264,30 @@
 @push('scripts')
 <script>
 (function () {
+    const faNum = (n) => Math.round(n).toLocaleString('fa-IR');
     const root = document.getElementById('digipayPlanCalc');
     if (root) {
-        const amountInput = root.querySelector('[data-calc-amount]');
+        const amount = root.querySelector('[data-calc-amount]');
         const amountLabel = root.querySelector('[data-calc-amount-label]');
         const installmentEl = root.querySelector('[data-calc-installment]');
         const monthButtons = root.querySelectorAll('[data-calc-months] [data-month]');
         let months = 6;
-        const formatTomans = (n) => new Intl.NumberFormat('fa-IR').format(Math.round(n)) + ' تومان';
-        function recalc() {
-            const amount = Number(amountInput.value);
-            amountLabel.textContent = formatTomans(amount);
-            installmentEl.textContent = formatTomans(months > 0 ? amount / months : 0);
+        function updateCalc() {
+            const a = Number(amount.value);
+            amountLabel.textContent = faNum(a) + ' تومان';
+            installmentEl.textContent = faNum(months > 0 ? a / months : 0) + ' تومان';
         }
-        amountInput.addEventListener('input', recalc);
+        amount.addEventListener('input', updateCalc);
         monthButtons.forEach((btn) => {
             btn.addEventListener('click', () => {
                 monthButtons.forEach((b) => b.classList.remove('is-active'));
                 btn.classList.add('is-active');
                 months = Number(btn.dataset.month);
-                recalc();
+                updateCalc();
             });
         });
-        recalc();
+        updateCalc();
     }
-
-    document.querySelectorAll('.plan-leasing__faq-q').forEach((btn) => {
-        btn.addEventListener('click', () => {
-            const item = btn.closest('.plan-leasing__faq-item');
-            const open = item.classList.toggle('is-open');
-            btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-        });
-    });
 })();
 </script>
 @endpush

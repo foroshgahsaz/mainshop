@@ -40,7 +40,7 @@
     <section class="hero">
         <div class="wrap hero-grid">
             <div class="hero-copy">
-                <span class="eyebrow"><i></i> پرداخت با هوش</span>
+                <span class="eyebrow"><i></i> به توان تو</span>
                 <h1>خرید از چینی بازار<br><span>ساده‌تر از همیشه با دیجی‌پی</span></h1>
                 <p>
                     لوازم خانگی را از فروشگاه چینی بازار انتخاب کنید و در checkout درگاه دیجی‌پی را بزنید.

@@ -43,9 +43,10 @@
 }
 
 .plan-leasing .hero {
-  padding: 68px 0 58px;
+  padding: 68px 0 72px;
   position: relative;
-  overflow: hidden;
+  overflow-x: clip;
+  overflow-y: visible;
 }
 
 .plan-leasing .hero-grid {
@@ -169,11 +170,24 @@
 
 .plan-leasing .visual {
   position: relative;
-  min-height: 400px;
+  min-height: 430px;
   max-width: 100%;
   display: grid;
   place-items: center;
-  overflow: hidden;
+  overflow: visible;
+  padding-bottom: 28px;
+}
+
+.plan-leasing .visual-ground {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(220px, 72vw);
+  height: 28px;
+  background: radial-gradient(ellipse at center, #30204440 0%, #30204400 72%);
+  pointer-events: none;
+  z-index: 1;
 }
 
 .plan-leasing .halo {
@@ -191,12 +205,13 @@
   width: min(242px, 78vw);
   height: auto;
   min-height: 340px;
-  max-height: 390px;
   border: 8px solid #25202f;
   border-radius: 35px;
   background: #fff;
-  box-shadow: 0 28px 65px #30204430;
-  padding: 18px 15px 14px;
+  box-shadow:
+    0 22px 50px #30204435,
+    0 8px 18px #30204418;
+  padding: 18px 15px 16px;
   transform: rotate(-4deg);
   z-index: 2;
   color: #211b2c;
@@ -351,7 +366,9 @@
 }
 
 .plan-leasing .stats {
-  margin: 12px auto 76px;
+  margin: -20px auto 76px;
+  position: relative;
+  z-index: 4;
   background: #fff;
   border: 1px solid var(--line);
   border-radius: 24px;
@@ -957,7 +974,14 @@
   }
 
   .plan-leasing .fc2 {
-    display: none;
+    left: 0;
+    bottom: 8px;
+    max-width: calc(100% - 8px);
+  }
+
+  .plan-leasing .visual-ground {
+    width: min(180px, 70vw);
+    bottom: 4px;
   }
 
   .plan-leasing .stats {

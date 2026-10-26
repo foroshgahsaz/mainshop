@@ -47,7 +47,11 @@ class ParsianGateway implements PaymentGatewayInterface
             PaymentAuditStep::GATEWAY_REQUEST,
             'parsian_sale_request',
             'درخواست Token به درگاه پارسیان ارسال شد.',
-            ['amount' => $amount, 'order_id' => $orderId]
+            [
+                'amount' => $amount,
+                'order_id' => $orderId,
+                'callback_url' => $callbackUrl,
+            ]
         );
 
         try {

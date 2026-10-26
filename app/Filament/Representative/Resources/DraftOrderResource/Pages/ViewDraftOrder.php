@@ -75,7 +75,7 @@ class ViewDraftOrder extends ViewRecord
                     try {
                         $url = app(RepresentativeProformaPaymentService::class)
                             ->initiateGatewayPayment($order->fresh(), $representative);
-                        $this->redirect($url);
+                        $this->redirect($url, navigate: false);
                     } catch (\Throwable $e) {
                         Notification::make()
                             ->title('خطا در اتصال به درگاه')

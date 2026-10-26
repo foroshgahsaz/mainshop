@@ -16,6 +16,12 @@ class ParsianCallbackUrlTest extends TestCase
             'callback_url' => 'payment/callback/parsian/?payment=ignored',
         ]);
 
-        $this->assertSame('https://www.example.ir/payment/callback/parsian', $url);
+        $this->assertSame('https://www.example.ir/payment/callback/parsian/', $url);
+
+        $urlNoSlash = ParsianCallbackUrl::absolute([
+            'callback_url' => '/payment/callback/parsian',
+        ]);
+
+        $this->assertSame('https://www.example.ir/payment/callback/parsian', $urlNoSlash);
     }
 }

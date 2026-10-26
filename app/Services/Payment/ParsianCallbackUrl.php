@@ -52,9 +52,7 @@ final class ParsianCallbackUrl
             $callback = '/'.$callback;
         }
 
-        $callback = rtrim($callback, '/');
-
-        if ($callback === '') {
+        if ($callback === '/') {
             $callback = '/payment/callback/parsian';
         }
 

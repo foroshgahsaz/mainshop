@@ -214,7 +214,7 @@ class CheckoutPage extends Component
             try {
                 $paymentModel = $payment->createForOrder($order, $this->paymentMethod);
                 $url = $payment->initiate($paymentModel, $order);
-                $this->redirect($url);
+                $this->redirect($url, navigate: false);
             } catch (\Throwable $e) {
                 session()->flash('error', $e instanceof \RuntimeException
                     ? $e->getMessage()

@@ -76,7 +76,7 @@ class OrderShow extends Component
         try {
             $payment = $payments->createForOrder($this->order, $gateway);
             $url = $payments->initiate($payment, $this->order);
-            $this->redirect($url);
+            $this->redirect($url, navigate: false);
         } catch (\Throwable $e) {
             session()->flash('error', $e instanceof \RuntimeException
                 ? $e->getMessage()

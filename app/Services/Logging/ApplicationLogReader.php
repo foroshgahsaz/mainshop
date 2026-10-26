@@ -14,6 +14,11 @@ class ApplicationLogReader
 {
     public const RECENT_DAYS = 20;
 
+    public function listDays(): int
+    {
+        return max(1, min(60, (int) config('logs.laravel.list_days', self::RECENT_DAYS)));
+    }
+
     private const MAX_SEARCH_LINES = 200;
 
     private const MAX_SEARCH_FILES = 3;
@@ -47,9 +52,9 @@ class ApplicationLogReader
      *     download_url: ?string
      * }>
      */
-    public function recentDayEntries(int $days = self::RECENT_DAYS): array
+    public function recentDayEntries(?int $days = null): array
     {
-        $days = max(1, min(60, $days));
+        $days = max(1, min(60, $days ?? $this->listDays()));
         $entries = [];
 
         for ($i = 0; $i < $days; $i++) {

@@ -6,6 +6,11 @@ class ShopStoragePaths
 {
     public static function logsDirectory(): string
     {
+        $fromLogsConfig = config('logs.directory');
+        if (is_string($fromLogsConfig) && $fromLogsConfig !== '') {
+            return rtrim($fromLogsConfig, '/\\');
+        }
+
         $custom = config('shop.storage.logs_directory');
 
         if (is_string($custom) && $custom !== '') {

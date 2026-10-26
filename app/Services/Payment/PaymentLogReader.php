@@ -8,9 +8,32 @@ use Carbon\Carbon;
 
 class PaymentLogReader
 {
-    public const RECENT_DAYS = 20;
+    /** @deprecated Use listDays() — kept for tests referencing the constant. */
+    public const RECENT_DAYS = 30;
 
     private const MAX_MATCH_LINES = 800;
+
+    public function listDays(): int
+    {
+        return max(1, min(90, (int) config('logs.payments.list_days', self::RECENT_DAYS)));
+    }
+
+    public function archiveAfterDays(): int
+    {
+        return max(1, min(365, (int) config('logs.payments.archive_after_days', 30)));
+    }
+
+    public function persistenceSummary(): string
+    {
+        $dir = $this->logDirectory();
+        $list = $this->listDays();
+        $archive = $this->archiveAfterDays();
+        $mono = (int) config('logs.payments.monolog_days', 45);
+
+        return "مسیر پایدار (مثل بک‌آپ DB): {$dir} — نمایش {$list} روز در پنل — "
+            ."فایل‌های قدیمی‌تر از {$archive} روز zip می‌شوند (حذف نمی‌شوند) — "
+            ."Monolog تا {$mono} روز نگه می‌دارد — scheduler: payments:archive-logs روزانه";
+    }
 
     public function logDirectory(): string
     {
@@ -59,9 +82,9 @@ class PaymentLogReader
      *     download_url: ?string
      * }>
      */
-    public function recentDayEntries(int $days = self::RECENT_DAYS): array
+    public function recentDayEntries(?int $days = null): array
     {
-        $days = max(1, min(60, $days));
+        $days = max(1, min(90, $days ?? $this->listDays()));
         $entries = [];
 
         for ($i = 0; $i < $days; $i++) {
@@ -122,7 +145,7 @@ class PaymentLogReader
      */
     public function archivedZipEntries(): array
     {
-        $cutoff = now()->subDays(self::RECENT_DAYS)->startOfDay();
+        $cutoff = now()->subDays($this->listDays())->startOfDay();
         $entries = [];
 
         foreach (LogDirectoryResolver::globReadable('payments-*.log.zip') as $path) {

@@ -1,11 +1,12 @@
 <x-filament-panels::page>
     <div class="admin-payment-log-viewer" data-admin-payment-log data-ui-version="{{ \App\Filament\Pages\ViewPaymentLogs::UI_VERSION }}">
         <section class="admin-order__section">
-            <h2 class="admin-order__section-title">۲۰ روز اخیر</h2>
+            <h2 class="admin-order__section-title">لاگ پرداخت (روزانه)</h2>
             <p class="admin-order__hint">
-                مسیر فعال (تنظیمات): <code dir="ltr">{{ $logsDirectory }}</code>
+                مسیر ذخیره: <code dir="ltr">{{ $logsDirectory }}</code>
                 — فایل روزانه: <code dir="ltr">payments-YYYY-MM-DD.log</code>
-                — نسخه UI: <code dir="ltr">{{ \App\Filament\Pages\ViewPaymentLogs::UI_VERSION }}</code>
+                <br>
+                {{ $persistenceSummary }}
             </p>
 
             @if ($directoryDiagnostics !== [])

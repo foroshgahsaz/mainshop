@@ -35,6 +35,8 @@ class ViewPaymentLogs extends Page
 
     public string $logsDirectory = '';
 
+    public string $persistenceSummary = '';
+
     /** @var list<array<string, mixed>> */
     public array $directoryDiagnostics = [];
 
@@ -46,8 +48,9 @@ class ViewPaymentLogs extends Page
     public function mount(PaymentLogReader $reader): void
     {
         $this->logsDirectory = $reader->logDirectory();
+        $this->persistenceSummary = $reader->persistenceSummary();
         $this->directoryDiagnostics = $reader->directoryDiagnostics();
-        $this->recentEntries = $reader->recentDayEntries(PaymentLogReader::RECENT_DAYS);
+        $this->recentEntries = $reader->recentDayEntries();
         $this->archiveEntries = $reader->archivedZipEntries();
         $this->legacyLogEntry = $reader->legacySingleLogEntry();
     }

@@ -12,6 +12,25 @@ class ShopStoragePaths
             return rtrim($custom, '/\\');
         }
 
+        return self::logsDirectoryFromEnvironment();
+    }
+
+    /**
+     * Used when config/logging.php loads before shop.php (alphabetical order).
+     * Also used during config:cache so channel paths match SHOP_LOGS_DIRECTORY / /data.
+     */
+    public static function logsDirectoryFromEnvironment(): string
+    {
+        $envCustom = env('SHOP_LOGS_DIRECTORY');
+        if (is_string($envCustom) && trim($envCustom) !== '') {
+            return rtrim(trim($envCustom), '/\\');
+        }
+
+        $root = rtrim((string) env('FILESYSTEM_PUBLIC_ROOT', ''), '/\\');
+        if ($root === '/data') {
+            return '/data/logs';
+        }
+
         return storage_path('logs');
     }
 

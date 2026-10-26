@@ -54,6 +54,27 @@ class VerifyStorage extends Command
             $this->info('Logs are configured on the /data volume — they should survive deploys.');
         }
 
+        $dailyLogPath = (string) (config('logging.channels.daily.path') ?? '');
+        $paymentsLogPath = (string) (config('logging.channels.payments.path') ?? '');
+        $expectedLaravel = ShopStoragePaths::laravelLogPath();
+        $expectedPayments = ShopStoragePaths::paymentsLogPath();
+
+        if ($dailyLogPath !== '' && $dailyLogPath !== $expectedLaravel) {
+            $this->newLine();
+            $this->error('Logging path mismatch: Laravel writes to a different folder than shop.storage.');
+            $this->line('  logging.channels.daily.path: '.$dailyLogPath);
+            $this->line('  expected (shop): '.$expectedLaravel);
+            $this->line('  Fix: deploy latest code, then: php artisan config:clear && php artisan config:cache');
+        }
+
+        if ($paymentsLogPath !== '' && $paymentsLogPath !== $expectedPayments) {
+            $this->newLine();
+            $this->error('Payment log path mismatch.');
+            $this->line('  logging.channels.payments.path: '.$paymentsLogPath);
+            $this->line('  expected: '.$expectedPayments);
+            $this->line('  Fix: php artisan config:clear && php artisan config:cache');
+        }
+
         if (is_dir('/storage/logs') && $logsDir !== '/storage/logs' && $defaultLogsDir !== '/storage/logs') {
             $this->newLine();
             $this->warn('A disk may be mounted at /storage/logs, but Laravel writes to '.$logsDir.'.');

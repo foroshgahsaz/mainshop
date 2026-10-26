@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Filament\Support\CrudSuccessNotification;
 use App\Filament\Support\ShopIconUpload;
+use App\Services\Payment\ParsianCallbackUrl;
 use App\Services\Settings\SettingsService;
 use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -69,7 +70,7 @@ class ManageParsian extends Page implements HasForms
                     Forms\Components\TextInput::make('callback_url')
                         ->label('آدرس Callback')
                         ->placeholder('/payment/callback/parsian')
-                        ->helperText('مسیر بازگشت POST از درگاه پس از پرداخت'),
+                        ->helperText('فقط مسیر (مثلاً /payment/callback/parsian) — باید دقیقاً مثل آدرس ثبت‌شده در پنل پارسیان باشد؛ بدون ?payment= و بدون / انتهایی'),
                     ShopIconUpload::make('icon', 'gateway-icons', 'آیکون درگاه')
                         ->columnSpanFull(),
                 ])->columns(2),
@@ -81,10 +82,14 @@ class ManageParsian extends Page implements HasForms
     {
         $data = $this->form->getState();
 
+        $callbackPath = ParsianCallbackUrl::path([
+            'callback_url' => $data['callback_url'] ?? '/payment/callback/parsian',
+        ]);
+
         $settings->setMany('parsian', [
             'enabled' => $data['enabled'] ?? false,
             'login_account' => $data['login_account'] ?? '',
-            'callback_url' => $data['callback_url'] ?? '/payment/callback/parsian',
+            'callback_url' => $callbackPath,
             'amount_unit' => $data['amount_unit'] ?? 'toman',
             'icon' => ShopIconUpload::fromState($data['icon'] ?? null),
         ]);

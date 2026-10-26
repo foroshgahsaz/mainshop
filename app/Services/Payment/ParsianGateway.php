@@ -33,7 +33,8 @@ class ParsianGateway implements PaymentGatewayInterface
             throw new RuntimeException('تنظیمات درگاه پرداخت ناقص است.');
         }
 
-        $callbackUrl = url($config['callback_url']).'?payment='.$payment->tracking_code;
+        // Must match Parsian merchant profile exactly (no ?payment= on CallBackUrl).
+        $callbackUrl = ParsianCallbackUrl::absolute($config);
         $amount = AmountConverter::toGateway(
             $payment->amount,
             $config['amount_unit'] ?? AmountConverter::UNIT_TOMAN
@@ -46,7 +47,11 @@ class ParsianGateway implements PaymentGatewayInterface
             PaymentAuditStep::GATEWAY_REQUEST,
             'parsian_sale_request',
             'درخواست Token به درگاه پارسیان ارسال شد.',
-            ['amount' => $amount, 'order_id' => $orderId]
+            [
+                'amount' => $amount,
+                'order_id' => $orderId,
+                'callback_url' => $callbackUrl,
+            ]
         );
 
         try {
@@ -66,7 +71,7 @@ class ParsianGateway implements PaymentGatewayInterface
 
         $saleResult = $result->SalePaymentRequestResult ?? null;
         $status = (string) ($saleResult->Status ?? '');
-        $token = (string) ($saleResult->Token ?? '');
+        $token = PecToken::normalize($saleResult->Token ?? null);
 
         if ($status !== '0' || $token === '') {
             $message = (string) ($saleResult->Message ?? 'پاسخ نامعتبر از درگاه پارسیان.');
@@ -102,7 +107,7 @@ class ParsianGateway implements PaymentGatewayInterface
             ['token' => $token]
         );
 
-        return PecIpgClient::PAYMENT_PAGE.'?Token='.urlencode($token);
+        return PecIpgClient::PAYMENT_PAGE.'?Token='.$token;
     }
 
     public function verify(Payment $payment, string $authority, string $status): GatewayVerificationResult

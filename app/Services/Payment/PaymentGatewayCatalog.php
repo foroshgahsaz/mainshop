@@ -60,6 +60,7 @@ class PaymentGatewayCatalog
             'tara' => (bool) ($this->settings->tara()['enabled'] ?? false),
             'bajet' => (bool) ($this->settings->bajet()['enabled'] ?? false),
             'digipay' => (bool) ($this->settings->digipay()['enabled'] ?? false),
+            'parsian' => (bool) ($this->settings->parsian()['enabled'] ?? false),
             default => false,
         };
     }
@@ -122,6 +123,7 @@ class PaymentGatewayCatalog
             'tara' => $this->settings->tara()['icon'] ?? null,
             'bajet' => $this->settings->bajet()['icon'] ?? null,
             'digipay' => $this->settings->digipay()['icon'] ?? null,
+            'parsian' => $this->settings->parsian()['icon'] ?? null,
             default => null,
         };
 

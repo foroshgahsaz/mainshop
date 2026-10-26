@@ -7,6 +7,7 @@ use App\Filament\Pages\CouponAnalyticsPage;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\ManageBajetPay;
 use App\Filament\Pages\ManageDigiPay;
+use App\Filament\Pages\ManageParsian;
 use App\Filament\Pages\ManageTara;
 use App\Filament\Pages\ManageZarinpal;
 use App\Filament\Pages\ViewDatabaseBackups;
@@ -71,6 +72,7 @@ class AdminPanelProvider extends PanelProvider
                 ManageTara::class,
                 ManageBajetPay::class,
                 ManageDigiPay::class,
+                ManageParsian::class,
                 ViewPaymentLogs::class,
                 ViewSiteErrorLogs::class,
                 ViewDatabaseBackups::class,

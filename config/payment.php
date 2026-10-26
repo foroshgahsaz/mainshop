@@ -2,6 +2,7 @@
 
 use App\Services\Payment\BajetPayGateway;
 use App\Services\Payment\DigiPayGateway;
+use App\Services\Payment\ParsianGateway;
 use App\Services\Payment\TaraGateway;
 use App\Services\Payment\ZarinpalGateway;
 
@@ -10,6 +11,16 @@ return [
     'default' => env('PAYMENT_GATEWAY', 'zarinpal'),
 
     'gateways' => [
+
+        'parsian' => [
+            'driver' => ParsianGateway::class,
+            'type' => 'cash',
+            'label' => 'پارسیان',
+            'description' => 'پرداخت نقدی آنلاین (تجارت الکترونیک پارسیان)',
+            'login_account' => env('PARSIAN_LOGIN_ACCOUNT', ''),
+            'callback_url' => env('PARSIAN_CALLBACK_URL', '/payment/callback/parsian'),
+            'amount_unit' => env('PARSIAN_AMOUNT_UNIT', 'toman'),
+        ],
 
         'zarinpal' => [
             'driver' => ZarinpalGateway::class,

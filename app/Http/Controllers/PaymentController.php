@@ -43,6 +43,11 @@ class PaymentController extends Controller
         return $this->handleCallback($request);
     }
 
+    public function parsianCallback(Request $request)
+    {
+        return $this->handleCallback($request);
+    }
+
     public function taraRedirect(string $tracking, TaraGateway $gateway, SettingsService $settings)
     {
         $model = Payment::query()
@@ -77,6 +82,16 @@ class PaymentController extends Controller
         } elseif ($payment->gateway === 'digipay') {
             $authority = (string) ($request->input('trackingCode') ?: $payment->transaction_id);
             $status = (string) $request->input('result', '');
+        } elseif ($payment->gateway === 'parsian') {
+            $authority = (string) ($request->input('Token') ?: $request->input('token') ?: $payment->transaction_id);
+            $status = (string) $request->input('status', '');
+            $payment->update([
+                'raw_response' => array_merge(
+                    is_array($payment->raw_response) ? $payment->raw_response : [],
+                    ['callback' => $request->except(['payment'])]
+                ),
+            ]);
+            $payment = $payment->fresh();
         } else {
             $authority = (string) ($request->input('Authority') ?: $request->input('token') ?: $payment->transaction_id);
             $status = (string) ($request->input('Status') ?: $request->input('result') ?: '');
@@ -199,7 +214,13 @@ class PaymentController extends Controller
             }
         }
 
-        $orderId = (string) $request->input('orderId', '');
+        $orderId = (string) ($request->input('OrderId') ?: $request->input('orderId', ''));
+        if ($orderId !== '' && ctype_digit($orderId)) {
+            $byPecOrderId = Payment::query()->whereKey((int) $orderId)->where('gateway', 'parsian')->first();
+            if ($byPecOrderId) {
+                return $byPecOrderId;
+            }
+        }
         if ($orderId !== '') {
             $byOrderId = Payment::query()->where('tracking_code', $orderId)->first();
             if ($byOrderId) {
@@ -207,7 +228,7 @@ class PaymentController extends Controller
             }
         }
 
-        $token = (string) $request->input('token', '');
+        $token = (string) ($request->input('Token') ?: $request->input('token', ''));
         if ($token !== '') {
             $byToken = Payment::query()->where('transaction_id', $token)->first();
             if ($byToken) {

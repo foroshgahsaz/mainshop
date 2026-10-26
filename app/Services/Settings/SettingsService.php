@@ -24,6 +24,9 @@ class SettingsService
     /** @var array<string, mixed>|null */
     protected static ?array $digipayMemo = null;
 
+    /** @var array<string, mixed>|null */
+    protected static ?array $parsianMemo = null;
+
     public function get(string $group, string $key, mixed $default = null): mixed
     {
         $settings = $this->all();
@@ -44,6 +47,7 @@ class SettingsService
         static::$taraMemo = null;
         static::$bajetMemo = null;
         static::$digipayMemo = null;
+        static::$parsianMemo = null;
     }
 
     /** @param  array<string, mixed>  $values */
@@ -197,6 +201,24 @@ class SettingsService
             ),
             'product_installment_promo_text' => (string) ($this->get('digipay', 'product_installment_promo_text')
                 ?: 'این درگاه اعتباری دیجی‌پی در ۴ قسط'),
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    public function parsian(): array
+    {
+        if (static::$parsianMemo !== null) {
+            return static::$parsianMemo;
+        }
+
+        $cfg = config('payment.gateways.parsian', []);
+
+        return static::$parsianMemo = [
+            'enabled' => filter_var($this->get('parsian', 'enabled', false), FILTER_VALIDATE_BOOLEAN),
+            'login_account' => (string) ($this->get('parsian', 'login_account') ?: ($cfg['login_account'] ?? '')),
+            'amount_unit' => (string) ($this->get('parsian', 'amount_unit') ?: ($cfg['amount_unit'] ?? 'toman')),
+            'callback_url' => (string) ($this->get('parsian', 'callback_url') ?: ($cfg['callback_url'] ?? '/payment/callback/parsian')),
+            'icon' => $this->get('parsian', 'icon') ?: null,
         ];
     }
 

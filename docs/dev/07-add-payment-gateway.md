@@ -4,7 +4,7 @@
 
 ## قبل از شروع
 
-- الگوهای موجود: `ZarinpalGateway` (نقدی ساده)، `TaraGateway` (اعتباری + redirect میانی).
+- الگوهای موجود: `ZarinpalGateway` (نقدی REST)، `ParsianGateway` (نقدی SOAP / PEC)، `TaraGateway` (اعتباری + redirect میانی).
 - قرارداد: `app/Services/Payment/PaymentGatewayInterface.php`
   - `initiate(Payment, Order): string` — URL یا مسیر redirect
   - `verify(Payment, authority, status): GatewayVerificationResult`

@@ -79,6 +79,8 @@ class ShopLabels
             'zarinpal' => 'زرین‌پال',
             'tara' => 'تارا',
             'bajet' => 'باجت‌پی',
+            'digipay' => 'دیجی‌پی',
+            'parsian' => 'پارسیان',
             default => $gateway ?? '—',
         };
     }

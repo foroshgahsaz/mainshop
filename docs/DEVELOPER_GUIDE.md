@@ -1314,7 +1314,8 @@ resources/views/layouts/shop.blade.php
 | 2026-10-23 | OTP فروشگاه: کاربر با نام+کد ملی کامل دوباره مودال پروفایل نمی‌بیند؛ جستجوی موبایل `User::findByLoginPhone` — `UserDisplayName::isShopProfileComplete` |
 | 2026-10-23 | رفع 500 آنالیز کد تخفیف: `CouponAnalyticsPage::mount($record)` بدون پارامتر DI دوم (Livewire + route named arg) |
 | 2026-10-23 | ادمین: لاگ پرداخت/سیستم زیر منوی بک‌آپ؛ دانلود با کلیک روی فایل؛ `LOG_STACK` پیش‌فرض `daily` روی `/data`؛ checkout: پیام کد تخفیف فقط مودال؛ درگاه کد تخفیف = Select چندتایی (مثل استان منطقه) |
-| 2026-10-26 | رفع لاگ روی `/data/logs`: `config/logging.php` قبل از `shop.php` لود می‌شد — مسیر کانال‌ها با `ShopStoragePaths::logsDirectoryFromEnvironment()` و هشدار `shop:verify-storage` |
+| 2026-10-26 | `config/logs.php` (الگوی `backup.php`): مسیر `/data/logs`، نگه‌داری ۳۰+ روز لاگ پرداخت، zip آرشیو، پنل `/admin/payment-logs` |
+| 2026-10-26 | رفع لاگ روی `/data/logs`: `config/logging.php` قبل از `shop.php` لود می‌شد — مسیر کانال‌ها با `config/logs.php` + `ShopStoragePaths` و هشدار `shop:verify-storage` |
 | 2026-10-26 | درگاه **پارسیان (PEC)**: `ParsianGateway` + `PecIpgClient`؛ `CallBackUrl` بدون query (تطابق پنل پارسیان)، شناسایی پرداخت با `OrderId`؛ تنظیمات `/admin/parsian` |
 | 2026-10-25 | صفحه استاتیک `/plans/digipay-leasing/` — معرفی خرید اقساطی دیجی‌پی در چینی بازار (`DigipayLeasingController`، `plans-leasing.css`، سقف اعتبار ۲۰۰M) |
 | 2026-10-23 | checkout کد تخفیف: پیام دقیق (کف سبد، درگاه، …) + مودال؛ ادمین: آنالیز `/admin/coupons/{id}/analytics` (`CouponAnalyticsPage`)، درگاه‌های مجاز (Select چندتایی)، npm `follow-redirects` ≥1.16.1؛ پس از deploy: `migrate --force` + `optimize:clear` |

@@ -91,7 +91,7 @@ php artisan shop:verify-storage
 اگر فقط دیسک **`/data`** را mount کرده‌اید و تصاویر بعد از deploy می‌مانند، اما فایل‌های **`storage/logs`** یا **`database-backups`** پاک می‌شوند:
 
 1. در پنل Runflare **دیسک جدا** برای `/storage/logs` یا `/storage/app/database-backups` معمولاً به مسیر واقعی Laravel (`/var/www/storage/...`) وصل نیست — حجم دیسک **۰** می‌ماند.
-2. با `FILESYSTEM_PUBLIC_ROOT=/data` اپ از نسخهٔ جدید به‌صورت خودکار لاگ را در **`/data/logs`**، بک‌آپ DB در **`/data/database-backups`** و بک‌آپ فایل‌ها در **`/data/files-backups`** می‌نویسد (همان volume تصاویر؛ پوشه‌های بک‌آپ و logs داخل آرشیو فایل‌ها نیستند).
+2. با `FILESYSTEM_PUBLIC_ROOT=/data` اپ از نسخهٔ جدید به‌صورت خودکار لاگ را در **`/data/logs`**، بک‌آپ DB در **`/data/database-backups`** و بک‌آپ فایل‌ها در **`/data/files-backups`** می‌نویسد (همان volume تصاویر؛ پوشه‌های بک‌آپ و logs داخل آرشیو فایل‌ها نیستند). مسیر و نگه‌داری لاگ مثل بک‌آپ در **`config/logs.php`** (نه فقط `shop.php`) تا `config/logging.php` همان دیسک را ببیند.
 3. بعد از deploy: `php artisan shop:deploy-recover` (پوشه‌ها را می‌سازد).
 4. تشخیص: `php artisan shop:verify-storage` — مسیر فعال لاگ و بک‌آپ را نشان می‌دهد.
 
@@ -99,6 +99,9 @@ php artisan shop:verify-storage
 
 - `SHOP_LOGS_DIRECTORY=/data/logs`
 - `LOG_STACK=daily` (با `FILESYSTEM_PUBLIC_ROOT=/data` یا `SHOP_LOGS_DIRECTORY`، پیش‌فرض config خودکار `daily` است — فایل‌های `laravel-YYYY-MM-DD.log`)
+- `PAYMENT_LOG_LIST_DAYS=30` — تعداد روز در پنل `/admin/payment-logs`
+- `PAYMENT_LOG_ARCHIVE_AFTER_DAYS=30` — بعد از آن فایل plain به `.zip` می‌رود (حذف نمی‌شود)
+- `LOG_PAYMENTS_DAYS=45` — نگه‌داری Monolog برای `payments-*.log`
 - `DB_BACKUP_DIRECTORY=/data/database-backups`
 - `FILES_BACKUP_DIRECTORY=/data/files-backups` — یک نسخه آخر (`FILES_BACKUP_KEEP=1`)؛ scheduler `shop:files-backup` روزانه؛ پنل `/admin/database-backups`
 

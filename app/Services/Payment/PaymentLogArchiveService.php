@@ -18,7 +18,7 @@ class PaymentLogArchiveService
 
     public function keepDays(): int
     {
-        return PaymentLogReader::RECENT_DAYS;
+        return app(PaymentLogReader::class)->archiveAfterDays();
     }
 
     /**

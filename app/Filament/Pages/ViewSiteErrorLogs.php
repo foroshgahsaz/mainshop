@@ -63,7 +63,7 @@ class ViewSiteErrorLogs extends Page
     public function mount(ApplicationLogReader $reader): void
     {
         $this->logsDirectory = $reader->logDirectory();
-        $this->recentEntries = $reader->recentDayEntries(ApplicationLogReader::RECENT_DAYS);
+        $this->recentEntries = $reader->recentDayEntries();
         $this->discoveredLogFiles = $reader->discoverLaravelLogFiles();
         $this->logDiagnostics = $reader->storageDiagnostics();
         $this->legacyLogEntry = $reader->legacySingleLogEntry();

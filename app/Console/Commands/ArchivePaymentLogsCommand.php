@@ -9,7 +9,7 @@ class ArchivePaymentLogsCommand extends Command
 {
     protected $signature = 'payments:archive-logs';
 
-    protected $description = 'Zip payment log files older than the 20-day retention window';
+    protected $description = 'Zip payment log files older than the configured retention window (config/logs.php)';
 
     public function handle(PaymentLogArchiveService $archive): int
     {

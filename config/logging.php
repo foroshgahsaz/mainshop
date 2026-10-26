@@ -6,6 +6,10 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
 use Monolog\Processor\PsrLogMessageProcessor;
 
+$logsDirectory = rtrim((string) (config('logs.directory') ?: ShopStoragePaths::logsDirectoryFromEnvironment()), '/\\');
+$laravelLogPath = $logsDirectory.DIRECTORY_SEPARATOR.'laravel.log';
+$paymentsLogPath = $logsDirectory.DIRECTORY_SEPARATOR.'payments.log';
+
 $configuredLogStack = env('LOG_STACK');
 $defaultLogStack = is_string($configuredLogStack) && trim($configuredLogStack) !== ''
     ? trim($configuredLogStack)
@@ -71,16 +75,16 @@ return [
 
         'single' => [
             'driver' => 'single',
-            'path' => ShopStoragePaths::laravelLogPath(),
+            'path' => $laravelLogPath,
             'level' => env('LOG_LEVEL', 'debug'),
             'replace_placeholders' => true,
         ],
 
         'daily' => [
             'driver' => 'daily',
-            'path' => ShopStoragePaths::laravelLogPath(),
+            'path' => $laravelLogPath,
             'level' => env('LOG_LEVEL', 'debug'),
-            'days' => env('LOG_DAILY_DAYS', 14),
+            'days' => (int) config('logs.laravel.monolog_days', env('LOG_DAILY_DAYS', 14)),
             'replace_placeholders' => true,
         ],
 
@@ -135,14 +139,14 @@ return [
         ],
 
         'emergency' => [
-            'path' => ShopStoragePaths::laravelLogPath(),
+            'path' => $laravelLogPath,
         ],
 
         'payments' => [
             'driver' => 'daily',
-            'path' => ShopStoragePaths::paymentsLogPath(),
+            'path' => $paymentsLogPath,
             'level' => env('LOG_LEVEL', 'debug'),
-            'days' => env('LOG_PAYMENTS_DAYS', 30),
+            'days' => (int) config('logs.payments.monolog_days', env('LOG_PAYMENTS_DAYS', 45)),
             'replace_placeholders' => true,
         ],
 

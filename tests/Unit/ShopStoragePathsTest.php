@@ -21,4 +21,18 @@ class ShopStoragePathsTest extends TestCase
         $this->assertSame('/data/logs', ShopStoragePaths::logsDirectory());
         $this->assertSame('/data/logs/laravel.log', ShopStoragePaths::laravelLogPath());
     }
+
+    public function test_logs_directory_from_environment_when_shop_config_not_loaded_yet(): void
+    {
+        config(['shop.storage.logs_directory' => null]);
+
+        $this->app->loadEnvironmentFrom('.env.testing');
+
+        putenv('FILESYSTEM_PUBLIC_ROOT=/data');
+        putenv('SHOP_LOGS_DIRECTORY=');
+
+        $this->assertSame('/data/logs', ShopStoragePaths::logsDirectoryFromEnvironment());
+
+        putenv('FILESYSTEM_PUBLIC_ROOT');
+    }
 }

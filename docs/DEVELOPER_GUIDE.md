@@ -1317,6 +1317,7 @@ resources/views/layouts/shop.blade.php
 | 2026-10-26 | `config/logs.php` (الگوی `backup.php`): مسیر `/data/logs`، نگه‌داری ۳۰+ روز لاگ پرداخت، zip آرشیو، پنل `/admin/payment-logs` |
 | 2026-10-26 | رفع لاگ روی `/data/logs`: `config/logging.php` قبل از `shop.php` لود می‌شد — مسیر کانال‌ها با `config/logs.php` + `ShopStoragePaths` و هشدار `shop:verify-storage` |
 | 2026-10-26 | درگاه **پارسیان (PEC)**: `ParsianGateway` + `PecIpgClient`؛ `CallBackUrl` بدون query (تطابق پنل پارسیان)، شناسایی پرداخت با `OrderId`؛ تنظیمات `/admin/parsian` |
+| 2026-10-27 | ویزارد نماینده: تب‌های کارخانه/قالب فقط وقتی برای خانواده/برند انتخاب‌شده در کاتالوگ وجود دارد (`RepresentativeCatalogLookup` + `OrderWizard`) |
 | 2026-10-27 | بازگشت پارسیان: مسیر alias **`/payment/callback/pec`** (همان handler که `/payment/callback/parsian`)؛ پس از verify ریدایرکت به صفحه امضاشده **`payment.result`**؛ رفع TypeError ویجت `OrdersTrendChart` (Carbon) |
 | 2026-10-25 | صفحه استاتیک `/plans/digipay-leasing/` — معرفی خرید اقساطی دیجی‌پی در چینی بازار (`DigipayLeasingController`، `plans-leasing.css`، سقف اعتبار ۲۰۰M) |
 | 2026-10-23 | checkout کد تخفیف: پیام دقیق (کف سبد، درگاه، …) + مودال؛ ادمین: آنالیز `/admin/coupons/{id}/analytics` (`CouponAnalyticsPage`)، درگاه‌های مجاز (Select چندتایی)، npm `follow-redirects` ≥1.16.1؛ پس از deploy: `migrate --force` + `optimize:clear` |

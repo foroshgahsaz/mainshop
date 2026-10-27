@@ -98,6 +98,7 @@ class OrderWizard extends Component
         $this->templateId = $filters['template_id'] ?? null;
         $hasItems = $order->items()->exists();
         $this->step = $hasItems ? 'review' : 'family';
+        $this->normalizeStepForCatalog();
 
         if ($hasItems) {
             $this->refreshDraftLineItems();
@@ -133,7 +134,8 @@ class OrderWizard extends Component
         $this->brandId = null;
         $this->templateId = null;
         $this->persistFilters();
-        $this->step = 'plant';
+        $lookup = app(RepresentativeCatalogLookup::class);
+        $this->step = $lookup->familyHasPlants($familyId) ? 'plant' : 'brand';
     }
 
     public function selectPlant(int $plantId): void
@@ -150,7 +152,10 @@ class OrderWizard extends Component
         $this->brandId = $brandId;
         $this->templateId = null;
         $this->persistFilters();
-        $this->step = 'template';
+        $lookup = app(RepresentativeCatalogLookup::class);
+        $this->step = $lookup->brandHasTemplates((int) $this->familyId, $this->plantId, $brandId)
+            ? 'template'
+            : 'product';
     }
 
     public function selectTemplate(int $templateId): void
@@ -186,12 +191,18 @@ class OrderWizard extends Component
             ->with(['images' => fn ($q) => $q->orderBy('position')])
             ->whereKey($productId);
 
-        if ($this->familyId && $this->plantId && $this->brandId && $this->templateId) {
-            $query
-                ->where('product_family_id', $this->familyId)
-                ->where('product_plant_id', $this->plantId)
-                ->where('brand_id', $this->brandId)
-                ->where('product_template_id', $this->templateId);
+        if ($this->familyId && $this->brandId) {
+            $query->where('product_family_id', $this->familyId)->where('brand_id', $this->brandId);
+            if ($this->plantId !== null) {
+                $query->where('product_plant_id', $this->plantId);
+            } else {
+                $query->whereNull('product_plant_id');
+            }
+            if ($this->templateId !== null) {
+                $query->where('product_template_id', $this->templateId);
+            } else {
+                $query->whereNull('product_template_id');
+            }
         }
 
         $product = $query->first();
@@ -277,9 +288,7 @@ class OrderWizard extends Component
 
     public function goToStep(string $step): void
     {
-        $allowed = ['customer', 'family', 'plant', 'brand', 'template', 'product', 'review'];
-
-        if (! in_array($step, $allowed, true)) {
+        if (! array_key_exists($step, $this->visibleWizardSteps)) {
             return;
         }
 
@@ -423,39 +432,83 @@ class OrderWizard extends Component
     }
 
     #[Computed]
+    public function visibleWizardSteps(): array
+    {
+        $steps = [
+            'customer' => 'مشتری',
+            'family' => 'خانواده',
+        ];
+
+        if ($this->familyId !== null && $this->catalogLookup()->familyHasPlants($this->familyId)) {
+            $steps['plant'] = 'کارخانه';
+        }
+
+        $steps['brand'] = 'برند';
+
+        if (
+            $this->familyId !== null
+            && $this->brandId !== null
+            && $this->catalogLookup()->brandHasTemplates($this->familyId, $this->plantId, $this->brandId)
+        ) {
+            $steps['template'] = 'قالب';
+        }
+
+        $steps['product'] = 'محصول';
+        $steps['review'] = 'جمع‌بندی';
+
+        return $steps;
+    }
+
+    #[Computed]
     public function brands(): Collection
     {
-        if ($this->step !== 'brand' || ! $this->familyId || ! $this->plantId) {
+        if ($this->step !== 'brand' || ! $this->familyId) {
             return collect();
         }
 
-        return app(RepresentativeCatalogLookup::class)->brands($this->familyId, $this->plantId);
+        $lookup = $this->catalogLookup();
+
+        if ($lookup->familyHasPlants($this->familyId) && $this->plantId === null) {
+            return collect();
+        }
+
+        return $lookup->brands($this->familyId, $this->plantId);
     }
 
     #[Computed]
     public function templates(): Collection
     {
-        if ($this->step !== 'template' || ! $this->familyId || ! $this->plantId || ! $this->brandId) {
+        if ($this->step !== 'template' || ! $this->familyId || ! $this->brandId) {
             return collect();
         }
 
-        return app(RepresentativeCatalogLookup::class)->templates($this->familyId, $this->plantId, $this->brandId);
+        $lookup = $this->catalogLookup();
+
+        if ($lookup->familyHasPlants($this->familyId) && $this->plantId === null) {
+            return collect();
+        }
+
+        return $lookup->templates($this->familyId, $this->plantId, $this->brandId);
     }
 
     #[Computed]
     public function products(): ?LengthAwarePaginator
     {
-        if (
-            $this->step !== 'product'
-            || ! $this->familyId
-            || ! $this->plantId
-            || ! $this->brandId
-            || ! $this->templateId
-        ) {
+        if ($this->step !== 'product' || ! $this->familyId || ! $this->brandId) {
             return null;
         }
 
-        return app(RepresentativeCatalogLookup::class)->products(
+        $lookup = $this->catalogLookup();
+
+        if ($lookup->familyHasPlants($this->familyId) && $this->plantId === null) {
+            return null;
+        }
+
+        if ($lookup->brandHasTemplates($this->familyId, $this->plantId, $this->brandId) && $this->templateId === null) {
+            return null;
+        }
+
+        return $lookup->products(
             $this->familyId,
             $this->plantId,
             $this->brandId,
@@ -512,6 +565,31 @@ class OrderWizard extends Component
     public function render()
     {
         return view('livewire.representative.order-wizard');
+    }
+
+    private function catalogLookup(): RepresentativeCatalogLookup
+    {
+        return app(RepresentativeCatalogLookup::class);
+    }
+
+    private function normalizeStepForCatalog(): void
+    {
+        if ($this->step === 'plant' && $this->familyId !== null && ! $this->catalogLookup()->familyHasPlants($this->familyId)) {
+            $this->step = 'brand';
+        }
+
+        if (
+            $this->step === 'template'
+            && $this->familyId !== null
+            && $this->brandId !== null
+            && ! $this->catalogLookup()->brandHasTemplates($this->familyId, $this->plantId, $this->brandId)
+        ) {
+            $this->step = 'product';
+        }
+
+        if (! array_key_exists($this->step, $this->visibleWizardSteps)) {
+            $this->step = 'family';
+        }
     }
 
     private function persistFilters(): void

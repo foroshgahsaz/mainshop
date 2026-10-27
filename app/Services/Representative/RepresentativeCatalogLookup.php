@@ -46,16 +46,27 @@ class RepresentativeCatalogLookup
         );
     }
 
-    /** @return Collection<int, Brand> */
-    public function brands(int $familyId, int $plantId): Collection
+    public function familyHasPlants(int $familyId): bool
     {
+        return $this->plants($familyId)->isNotEmpty();
+    }
+
+    /** @return Collection<int, Brand> */
+    public function brands(int $familyId, ?int $plantId): Collection
+    {
+        $plantKey = $plantId ?? 'none';
+
         return $this->catalogCache->remember(
-            'rep:catalog:brands:'.$familyId.':'.$plantId,
+            'rep:catalog:brands:'.$familyId.':'.$plantKey,
             $this->cacheTtl(),
             function () use ($familyId, $plantId): Collection {
                 $brandIds = Product::query()
                     ->where('product_family_id', $familyId)
-                    ->where('product_plant_id', $plantId)
+                    ->when(
+                        $plantId !== null,
+                        fn (Builder $q) => $q->where('product_plant_id', $plantId),
+                        fn (Builder $q) => $q->whereNull('product_plant_id'),
+                    )
                     ->tap(fn (Builder $q) => $this->baseProductQuery($q))
                     ->whereNotNull('brand_id')
                     ->distinct()
@@ -70,10 +81,12 @@ class RepresentativeCatalogLookup
     }
 
     /** @return Collection<int, ProductTemplate> */
-    public function templates(int $familyId, int $plantId, int $brandId): Collection
+    public function templates(int $familyId, ?int $plantId, int $brandId): Collection
     {
+        $plantKey = $plantId ?? 'none';
+
         return $this->catalogCache->remember(
-            'rep:catalog:templates:'.$familyId.':'.$plantId.':'.$brandId,
+            'rep:catalog:templates:'.$familyId.':'.$plantKey.':'.$brandId,
             $this->cacheTtl(),
             fn () => ProductTemplate::query()
                 ->where('product_family_id', $familyId)
@@ -81,18 +94,27 @@ class RepresentativeCatalogLookup
                 ->where('is_active', true)
                 ->whereHas('products', fn (Builder $q) => $this->baseProductQuery($q)
                     ->where('product_family_id', $familyId)
-                    ->where('product_plant_id', $plantId)
+                    ->when(
+                        $plantId !== null,
+                        fn (Builder $inner) => $inner->where('product_plant_id', $plantId),
+                        fn (Builder $inner) => $inner->whereNull('product_plant_id'),
+                    )
                     ->where('brand_id', $brandId))
                 ->orderBy('position')
                 ->get(['id', 'name'])
         );
     }
 
+    public function brandHasTemplates(int $familyId, ?int $plantId, int $brandId): bool
+    {
+        return $this->templates($familyId, $plantId, $brandId)->isNotEmpty();
+    }
+
     public function products(
         int $familyId,
-        int $plantId,
+        ?int $plantId,
         int $brandId,
-        int $templateId,
+        ?int $templateId,
         string $search = '',
         int $page = 1,
     ): LengthAwarePaginator {
@@ -100,9 +122,17 @@ class RepresentativeCatalogLookup
 
         return Product::query()
             ->where('product_family_id', $familyId)
-            ->where('product_plant_id', $plantId)
+            ->when(
+                $plantId !== null,
+                fn (Builder $q) => $q->where('product_plant_id', $plantId),
+                fn (Builder $q) => $q->whereNull('product_plant_id'),
+            )
             ->where('brand_id', $brandId)
-            ->where('product_template_id', $templateId)
+            ->when(
+                $templateId !== null,
+                fn (Builder $q) => $q->where('product_template_id', $templateId),
+                fn (Builder $q) => $q->whereNull('product_template_id'),
+            )
             ->tap(fn (Builder $q) => $this->baseProductQuery($q))
             ->when($search !== '', function (Builder $query) use ($search): void {
                 $query->where(function (Builder $inner) use ($search): void {

@@ -217,7 +217,7 @@ class SettingsService
             'enabled' => filter_var($this->get('parsian', 'enabled', false), FILTER_VALIDATE_BOOLEAN),
             'login_account' => (string) ($this->get('parsian', 'login_account') ?: ($cfg['login_account'] ?? '')),
             'amount_unit' => (string) ($this->get('parsian', 'amount_unit') ?: ($cfg['amount_unit'] ?? 'toman')),
-            'callback_url' => (string) ($this->get('parsian', 'callback_url') ?: ($cfg['callback_url'] ?? '/payment/callback/parsian')),
+            'callback_url' => (string) ($this->get('parsian', 'callback_url') ?: ($cfg['callback_url'] ?? '/payment/callback/pec')),
             'icon' => $this->get('parsian', 'icon') ?: null,
         ];
     }

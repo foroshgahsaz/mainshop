@@ -25,7 +25,7 @@ final class ParsianCallbackUrl
      */
     public static function path(array $config): string
     {
-        $callback = trim((string) ($config['callback_url'] ?? '/payment/callback/parsian'));
+        $callback = trim((string) ($config['callback_url'] ?? '/payment/callback/pec'));
 
         if (str_contains($callback, '?')) {
             $callback = strstr($callback, '?', true) ?: $callback;
@@ -39,13 +39,13 @@ final class ParsianCallbackUrl
         }
 
         if ($callback === '' || $callback === '/') {
-            $callback = '/payment/callback/parsian';
+            $callback = '/payment/callback/pec';
         }
 
         if (! str_starts_with($callback, '/')) {
             if (preg_match('#^[\w.-]+\.[a-z]{2,}#i', $callback)) {
                 throw new RuntimeException(
-                    'در تنظیمات پارسیان، Callback باید مسیر باشد (مثل /payment/callback/parsian)؛ دامنه از APP_URL خوانده می‌شود.'
+                    'در تنظیمات پارسیان، Callback باید مسیر باشد (مثل /payment/callback/pec)؛ دامنه از APP_URL خوانده می‌شود.'
                 );
             }
 
@@ -53,7 +53,7 @@ final class ParsianCallbackUrl
         }
 
         if ($callback === '/') {
-            $callback = '/payment/callback/parsian';
+            $callback = '/payment/callback/pec';
         }
 
         return $callback;

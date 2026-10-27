@@ -56,6 +56,35 @@ class ParsianPaymentCallbackTest extends TestCase
         $this->assertSame(Payment::STATUS_CANCELED, $payment->fresh()->status);
     }
 
+    public function test_parsian_callback_pec_path_resolves_payment_by_order_id_without_query(): void
+    {
+        [$customer, $product, $address, $shipping] = $this->prepareCheckout();
+
+        $order = $this->placeOnlineOrder($customer, $product, $address, $shipping);
+        $token = 'pec-token-xyz';
+
+        $payment = Payment::query()->create([
+            'order_id' => $order->id,
+            'user_id' => $customer->id,
+            'amount' => $order->final_amount,
+            'gateway' => 'parsian',
+            'status' => Payment::STATUS_PENDING,
+            'tracking_code' => 'PARSIANPEC2',
+            'transaction_id' => $token,
+        ]);
+
+        $response = $this->post('/payment/callback/pec', [
+            'Token' => $token,
+            'status' => '1',
+            'OrderId' => (string) $payment->id,
+            'RRN' => '0',
+            'Amount' => '100000',
+        ]);
+
+        $response->assertRedirect();
+        $this->assertSame(Payment::STATUS_CANCELED, $payment->fresh()->status);
+    }
+
     /**
      * @return array{0: User, 1: Product, 2: UserAddress, 3: ShippingMethod}
      */

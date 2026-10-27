@@ -18,7 +18,7 @@ return [
             'label' => 'پارسیان',
             'description' => 'پرداخت نقدی آنلاین (تجارت الکترونیک پارسیان)',
             'login_account' => env('PARSIAN_LOGIN_ACCOUNT', ''),
-            'callback_url' => env('PARSIAN_CALLBACK_URL', '/payment/callback/parsian'),
+            'callback_url' => env('PARSIAN_CALLBACK_URL', '/payment/callback/pec'),
             'amount_unit' => env('PARSIAN_AMOUNT_UNIT', 'toman'),
         ],
 

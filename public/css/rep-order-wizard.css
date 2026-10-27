@@ -6,6 +6,232 @@
     background: #f0fdfa;
 }
 
+.rep-payment-info--split {
+    padding: 1rem 1.15rem 1.15rem;
+}
+
+.rep-split-plan {
+    margin-top: 0.75rem;
+    display: grid;
+    gap: 0.65rem;
+}
+
+.rep-split-plan--inline {
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    background: #fff;
+    border: 1px dashed #5eead4;
+}
+
+.rep-split-plan__hint {
+    margin: 0;
+}
+
+.rep-split-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: 0.65rem;
+    margin: 0.85rem 0;
+}
+
+.rep-split-summary--panel {
+    margin-top: 1rem;
+}
+
+.rep-split-summary__item {
+    padding: 0.65rem 0.75rem;
+    border-radius: 0.55rem;
+    background: #fff;
+    border: 1px solid #ccfbf1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    font-size: 0.82rem;
+}
+
+.rep-split-summary__item--credit {
+    border-color: #c4b5fd;
+    background: #faf5ff;
+}
+
+.rep-split-summary__item--cash {
+    border-color: #6ee7b7;
+    background: #ecfdf5;
+}
+
+.rep-split-summary__item--total {
+    border-color: #fcd34d;
+    background: #fffbeb;
+}
+
+.rep-split-summary__label {
+    color: #64748b;
+    font-weight: 600;
+    font-size: 0.72rem;
+}
+
+.rep-split-summary__planned,
+.rep-split-summary__item > strong {
+    font-size: 0.95rem;
+    color: #0f172a;
+}
+
+.rep-split-summary__paid,
+.rep-split-summary__remain {
+    font-size: 0.75rem;
+    color: #475569;
+}
+
+.rep-cash-pay-box {
+    margin: 1rem 0;
+    padding: 0.85rem;
+    border-radius: 0.65rem;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+}
+
+.rep-cash-pay-box__title {
+    margin: 0 0 0.35rem;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #334155;
+}
+
+.rep-cash-pay-box__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    align-items: flex-end;
+    margin-top: 0.5rem;
+}
+
+.rep-payments-ledger {
+    margin-top: 1.25rem;
+    padding: 1rem 1.1rem;
+    border-radius: 0.75rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+.rep-payments-ledger__header {
+    margin-bottom: 0.85rem;
+}
+
+.rep-payments-ledger__title {
+    margin: 0 0 0.65rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.rep-payments-ledger__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.65rem;
+}
+
+.rep-payment-row {
+    padding: 0.75rem 0.85rem;
+    border-radius: 0.65rem;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
+}
+
+.rep-payment-row.is-success {
+    border-color: #6ee7b7;
+    background: linear-gradient(135deg, #fff 0%, #ecfdf5 100%);
+}
+
+.rep-payment-row.is-failed {
+    border-color: #fca5a5;
+    background: linear-gradient(135deg, #fff 0%, #fef2f2 100%);
+}
+
+.rep-payment-row.is-canceled {
+    border-color: #d1d5db;
+    opacity: 0.92;
+}
+
+.rep-payment-row.is-pending {
+    border-color: #fde68a;
+    background: linear-gradient(135deg, #fff 0%, #fffbeb 100%);
+}
+
+.rep-payment-row__status {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.35rem;
+    margin-bottom: 0.45rem;
+    font-size: 0.72rem;
+    color: #64748b;
+}
+
+.rep-payment-row__badge {
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    background: #e2e8f0;
+    color: #334155;
+}
+
+.rep-payment-row.is-success .rep-payment-row__badge {
+    background: #059669;
+    color: #fff;
+}
+
+.rep-payment-row.is-failed .rep-payment-row__badge {
+    background: #dc2626;
+    color: #fff;
+}
+
+.rep-payment-row__main {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.rep-payment-row__gateway {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.rep-payment-row__amount {
+    font-weight: 800;
+    font-size: 1.05rem;
+    color: #0f766e;
+}
+
+.rep-payment-row__meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+    gap: 0.35rem 0.75rem;
+    margin: 0;
+    font-size: 0.72rem;
+}
+
+.rep-payment-row__meta dt {
+    margin: 0;
+    color: #94a3b8;
+    font-weight: 600;
+}
+
+.rep-payment-row__meta dd {
+    margin: 0.1rem 0 0;
+    color: #475569;
+    word-break: break-word;
+}
+
 .rep-payment-info__title {
     margin: 0 0 0.5rem;
     font-size: 0.95rem;

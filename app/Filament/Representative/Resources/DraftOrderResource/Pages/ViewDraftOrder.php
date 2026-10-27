@@ -16,6 +16,10 @@ use Illuminate\Validation\ValidationException;
 
 class ViewDraftOrder extends ViewRecord
 {
+    public string $cashPayAmount = '';
+
+    public ?int $plannedCreditEdit = null;
+
     protected static string $resource = DraftOrderResource::class;
 
     protected static string $layout = 'filament-panels::components.layout.representative';
@@ -33,6 +37,10 @@ class ViewDraftOrder extends ViewRecord
         }
 
         app(RepresentativeDraftOrderService::class)->assertRepCanView($order, auth()->user());
+
+        $this->plannedCreditEdit = $order->proforma_planned_credit_amount !== null
+            ? (int) $order->proforma_planned_credit_amount
+            : null;
     }
 
     public function getTitle(): string|Htmlable
@@ -126,7 +134,7 @@ class ViewDraftOrder extends ViewRecord
         }
 
         try {
-            $url = $payments->initiateGatewayPayment($order->fresh(), $representative);
+            $url = $payments->initiateGatewayPayment($order->fresh(['payments']), $representative);
             $this->redirect($url, navigate: false);
         } catch (\Throwable $e) {
             Notification::make()
@@ -135,5 +143,105 @@ class ViewDraftOrder extends ViewRecord
                 ->danger()
                 ->send();
         }
+    }
+
+    public function payCashPortion(RepresentativeProformaPaymentService $payments): void
+    {
+        $representative = auth()->user();
+
+        if ($representative === null) {
+            return;
+        }
+
+        $order = $this->getRecord()->fresh(['payments']);
+        $amount = (int) preg_replace('/\D/', '', $this->cashPayAmount);
+
+        if ($amount <= 0) {
+            Notification::make()->title('مبلغ نقدی را وارد کنید')->danger()->send();
+
+            return;
+        }
+
+        try {
+            $url = $payments->initiateCashPayment($order, $representative, $amount);
+            $this->redirect($url, navigate: false);
+        } catch (\Throwable $e) {
+            Notification::make()
+                ->title('خطا در اتصال به درگاه نقدی')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+        }
+    }
+
+    public function payCreditPortion(RepresentativeProformaPaymentService $payments): void
+    {
+        $representative = auth()->user();
+
+        if ($representative === null) {
+            return;
+        }
+
+        $order = $this->getRecord()->fresh(['payments']);
+        $split = app(\App\Services\Representative\RepresentativeProformaSplitPayment::class);
+        $amount = $split->remainingCreditAmount($order);
+
+        if ($amount <= 0) {
+            Notification::make()->title('سهم اعتباری تسویه شده است')->warning()->send();
+
+            return;
+        }
+
+        try {
+            $url = $payments->initiateCreditPayment($order, $representative, $amount);
+            $this->redirect($url, navigate: false);
+        } catch (\Throwable $e) {
+            Notification::make()
+                ->title('خطا در اتصال به درگاه اعتباری')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+        }
+    }
+
+    public function saveSplitPaymentPlan(RepresentativeDraftOrderService $drafts): void
+    {
+        $order = $this->getRecord()->fresh(['payments']);
+
+        if ($order->payments()->where('status', \App\Models\Payment::STATUS_SUCCESS)->exists()) {
+            Notification::make()
+                ->title('تغییر طرح پرداخت ممکن نیست')
+                ->body('پس از اولین پرداخت موفق، طرح اعتبار/نقد قابل ویرایش نیست.')
+                ->warning()
+                ->send();
+
+            return;
+        }
+
+        $credit = $this->plannedCreditEdit;
+        $final = (int) $order->final_amount;
+
+        try {
+            if ($credit !== null && $credit > 0 && $credit < $final) {
+                app(\App\Services\Representative\RepresentativeProformaSplitPayment::class)
+                    ->assertPlanAmounts($final, $credit);
+                $order->update([
+                    'proforma_planned_credit_amount' => $credit,
+                    'proforma_cash_gateway' => $order->proforma_cash_gateway
+                        ?: app(\App\Services\Representative\RepresentativeProformaSplitPayment::class)->cashGateway($order),
+                ]);
+            } else {
+                $order->update([
+                    'proforma_planned_credit_amount' => null,
+                    'proforma_cash_gateway' => null,
+                ]);
+            }
+
+            Notification::make()->title('طرح پرداخت ذخیره شد')->success()->send();
+        } catch (\Throwable $e) {
+            Notification::make()->title('خطا')->body($e->getMessage())->danger()->send();
+        }
+
+        $this->record = $order->fresh(['payments', 'user', 'freightCarrier']);
     }
 }

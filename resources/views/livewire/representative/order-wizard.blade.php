@@ -443,6 +443,31 @@
                             </ul>
                         @endif
                         @error('payment_gateway') <p class="rep-wizard-error">{{ $message }}</p> @enderror
+                        @if ($this->selectedPaymentGatewayType === \App\Services\Payment\PaymentGatewayCatalog::TYPE_CREDIT && $order)
+                            <div class="rep-split-plan">
+                                <label class="rep-field rep-field--grow">
+                                    <span class="rep-field__label">مبلغ اعتباری (تومان)</span>
+                                    <input type="number"
+                                           min="0"
+                                           max="{{ (int) $order->final_amount }}"
+                                           step="1000"
+                                           wire:model="plannedCreditAmount"
+                                           class="rep-field__input"
+                                           placeholder="مثلاً {{ number_format((int) $order->final_amount) }} = کل اعتبار">
+                                </label>
+                                <p class="rep-wizard-hint rep-split-plan__hint">
+                                    اگر کمتر از مبلغ نهایی بگذارید، مابقی به‌صورت <strong>نقدی</strong> (چند پرداخت مجاز) از درگاه نقدی پرداخت می‌شود.
+                                </p>
+                                <label class="rep-field">
+                                    <span class="rep-field__label">درگاه نقدی (برای مابقی)</span>
+                                    <select wire:model="cashGateway" class="rep-field__input">
+                                        @foreach ($this->cashGateways as $cashGw)
+                                            <option value="{{ $cashGw['name'] }}">{{ $cashGw['label'] }}</option>
+                                        @endforeach
+                                    </select>
+                                </label>
+                            </div>
+                        @endif
                     </div>
                 </div>
                 <div class="rep-order-totals">

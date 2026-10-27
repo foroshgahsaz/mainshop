@@ -60,6 +60,11 @@ class OrderWizard extends Component
 
     public string $paymentGateway = '';
 
+    /** مبلغ اعتباری (تومان) — فقط وقتی درگاه اعتباری و کمتر از کل فاکتور باشد */
+    public ?int $plannedCreditAmount = null;
+
+    public string $cashGateway = '';
+
     public bool $showProductImagesModal = false;
 
     public string $productImagesModalTitle = '';
@@ -719,6 +724,40 @@ class OrderWizard extends Component
 
         $this->freightCarrierId = $order->freight_carrier_id;
         $this->paymentGateway = (string) ($order->payment_method ?: app(PaymentGatewayCatalog::class)->enabledNames()[0] ?? 'zarinpal');
+        $this->plannedCreditAmount = $order->proforma_planned_credit_amount !== null
+            ? (int) $order->proforma_planned_credit_amount
+            : null;
+        $this->cashGateway = (string) ($order->proforma_cash_gateway ?: $this->defaultCashGateway());
+    }
+
+    #[Computed]
+    public function cashGateways(): array
+    {
+        return app(PaymentGatewayCatalog::class)->cash();
+    }
+
+    public function defaultCashGateway(): string
+    {
+        $cash = $this->cashGateways;
+
+        foreach ($cash as $gateway) {
+            if (($gateway['name'] ?? '') === 'parsian') {
+                return 'parsian';
+            }
+        }
+
+        return (string) ($cash[0]['name'] ?? 'parsian');
+    }
+
+    #[Computed]
+    public function selectedPaymentGatewayType(): string
+    {
+        if ($this->paymentGateway === '') {
+            return PaymentGatewayCatalog::TYPE_CASH;
+        }
+
+        return app(PaymentGatewayCatalog::class)->definition($this->paymentGateway)['type']
+            ?? PaymentGatewayCatalog::TYPE_CASH;
     }
 
     private function persistFulfillment(): bool
@@ -744,11 +783,18 @@ class OrderWizard extends Component
             return false;
         }
 
+        $creditAmount = $this->plannedCreditAmount;
+        if ($this->selectedPaymentGatewayType !== PaymentGatewayCatalog::TYPE_CREDIT) {
+            $creditAmount = null;
+        }
+
         try {
             app(RepresentativeDraftOrderService::class)->syncFulfillment(
                 $order,
                 (int) $this->freightCarrierId,
                 $this->paymentGateway,
+                $creditAmount,
+                $this->cashGateway !== '' ? $this->cashGateway : $this->defaultCashGateway(),
             );
         } catch (ValidationException $exception) {
             foreach ($exception->errors() as $field => $messages) {
@@ -756,7 +802,7 @@ class OrderWizard extends Component
             }
 
             return false;
-        } catch (\RuntimeException $exception) {
+        } catch (\RuntimeException|\InvalidArgumentException $exception) {
             $this->addError('payment_gateway', $exception->getMessage());
 
             return false;

@@ -199,8 +199,13 @@ class RepresentativeDraftOrderService
         }
     }
 
-    public function syncFulfillment(Order $order, int $freightCarrierId, string $paymentGateway): void
-    {
+    public function syncFulfillment(
+        Order $order,
+        int $freightCarrierId,
+        string $paymentGateway,
+        ?int $plannedCreditAmount = null,
+        ?string $cashGateway = null,
+    ): void {
         $this->assertDraftOwnedBy($order, auth()->user());
 
         $carrier = FreightCarrier::query()
@@ -214,7 +219,8 @@ class RepresentativeDraftOrderService
             ]);
         }
 
-        app(PaymentGatewayCatalog::class)->assertEnabled($paymentGateway);
+        $catalog = app(PaymentGatewayCatalog::class);
+        $catalog->assertEnabled($paymentGateway);
 
         $order->update([
             'freight_carrier_id' => $carrier->id,
@@ -224,6 +230,37 @@ class RepresentativeDraftOrderService
         ]);
 
         $this->recalculateTotals($order);
+        $order = $order->fresh();
+        $finalAmount = (int) $order->final_amount;
+
+        $payload = [
+            'proforma_planned_credit_amount' => null,
+            'proforma_cash_gateway' => null,
+        ];
+
+        $gatewayType = $catalog->definition($paymentGateway)['type'] ?? PaymentGatewayCatalog::TYPE_CASH;
+
+        if (
+            $gatewayType === PaymentGatewayCatalog::TYPE_CREDIT
+            && $plannedCreditAmount !== null
+            && $plannedCreditAmount > 0
+            && $plannedCreditAmount < $finalAmount
+        ) {
+            app(RepresentativeProformaSplitPayment::class)->assertPlanAmounts($finalAmount, $plannedCreditAmount);
+
+            $cashName = (string) ($cashGateway ?? '');
+            if ($cashName === '' || ! $catalog->isEnabled($cashName)) {
+                $cashName = collect($catalog->cash())->pluck('name')->first() ?? 'parsian';
+            }
+            $catalog->assertEnabled($cashName);
+
+            $payload = [
+                'proforma_planned_credit_amount' => $plannedCreditAmount,
+                'proforma_cash_gateway' => $cashName,
+            ];
+        }
+
+        $order->update($payload);
     }
 
     public function submitProforma(Order $order): Order
@@ -249,6 +286,17 @@ class RepresentativeDraftOrderService
         }
 
         $this->recalculateTotals($order);
+        $order = $order->fresh();
+
+        $split = app(RepresentativeProformaSplitPayment::class);
+        if ($split->usesSplitPlan($order)) {
+            $planned = $split->plannedCreditAmount($order) + $split->plannedCashAmount($order);
+            if ($planned !== (int) $order->final_amount) {
+                throw ValidationException::withMessages([
+                    'payment_gateway' => 'مجموع سهم اعتبار و نقد باید با مبلغ نهایی پیش‌فاکتور برابر باشد.',
+                ]);
+            }
+        }
 
         $representative = auth()->user();
 

@@ -211,10 +211,32 @@ class OrderWizard extends Component
             return;
         }
 
+        $this->productImagesModalTitle = $product->name;
+        $this->productImagesModalItems = $this->mapProductImageItems($product);
+        $this->showProductImagesModal = true;
+    }
+
+    public function productListImageUrl(Product $product): ?string
+    {
+        $path = $product->images->first()?->image;
+
+        if (! is_string($path) || $path === '') {
+            return null;
+        }
+
         $displayImages = app(DisplayImageService::class);
 
-        $this->productImagesModalTitle = $product->name;
-        $this->productImagesModalItems = $product->images
+        return $displayImages->url('rep_product_card', $path) ?? ShopMedia::url($path);
+    }
+
+    /**
+     * @return list<array{thumb: string, full: string}>
+     */
+    private function mapProductImageItems(Product $product): array
+    {
+        $displayImages = app(DisplayImageService::class);
+
+        return $product->images
             ->map(function ($image) use ($displayImages) {
                 $path = (string) $image->image;
                 $full = ShopMedia::url($path);
@@ -223,16 +245,16 @@ class OrderWizard extends Component
                     return null;
                 }
 
+                $thumb = $displayImages->url('rep_gallery', $path) ?? $full;
+
                 return [
-                    'thumb' => $displayImages->url('rep_gallery', $path) ?? $full,
+                    'thumb' => $thumb,
                     'full' => $full,
                 ];
             })
             ->filter()
             ->values()
             ->all();
-
-        $this->showProductImagesModal = true;
     }
 
     public function closeProductImagesModal(): void

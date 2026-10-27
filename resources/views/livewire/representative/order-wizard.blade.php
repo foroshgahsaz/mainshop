@@ -182,31 +182,50 @@
                 </label>
             </div>
             <div class="rep-wizard-panel__body rep-wizard-panel__body--products">
-            <ul class="rep-plan-list rep-plan-list--products" role="list">
-                @php $products = $this->products; @endphp
-                @if ($products)
+            @php $products = $this->products; @endphp
+            @if ($products)
+                <ul class="rep-product-picker" role="list">
                     @forelse ($products as $product)
-                        <li class="rep-plan-list__item-with-actions" wire:key="rep-product-{{ $product->id }}">
-                            <div class="rep-plan-row rep-plan-row--static">
-                                <span class="rep-plan-row__icon" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.3 7.7 12 12l8.7-4.3"/><path d="M12 22V12"/></svg>
-                                </span>
-                                <span class="rep-plan-row__body">
-                                    <span class="rep-plan-row__title">{{ $product->name }}</span>
-                                    <span class="rep-plan-row__meta">
-                                        کد: {{ $product->sku ?: '—' }}
-                                        · {{ $this->formatMoney($product->effective_price) }}
-                                        · موجودی: {{ $product->stock }}
+                        @php $thumbUrl = $this->productListImageUrl($product); @endphp
+                        <li class="rep-product-card" wire:key="rep-product-{{ $product->id }}">
+                            <button type="button"
+                                    class="rep-product-card__media"
+                                    wire:click="openProductImages({{ $product->id }})"
+                                    wire:loading.attr="disabled"
+                                    wire:target="openProductImages"
+                                    aria-label="مشاهده تصاویر {{ $product->name }}">
+                                @if ($thumbUrl)
+                                    <img src="{{ $thumbUrl }}"
+                                         alt=""
+                                         loading="lazy"
+                                         decoding="async"
+                                         width="400"
+                                         height="300">
+                                @else
+                                    <span class="rep-product-card__media-placeholder" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                                        <span>بدون تصویر</span>
                                     </span>
-                                </span>
+                                @endif
+                                @if ($product->images->count() > 1)
+                                    <span class="rep-product-card__media-badge">{{ $product->images->count() }} تصویر</span>
+                                @endif
+                            </button>
+                            <div class="rep-product-card__body">
+                                <h3 class="rep-product-card__title">{{ $product->name }}</h3>
+                                <dl class="rep-product-card__meta">
+                                    <div><dt>کد</dt><dd>{{ $product->sku ?: '—' }}</dd></div>
+                                    <div><dt>قیمت</dt><dd>{{ $this->formatMoney($product->effective_price) }}</dd></div>
+                                    <div><dt>موجودی</dt><dd>{{ $product->stock }}</dd></div>
+                                </dl>
                             </div>
-                            <div class="rep-product-row-actions">
+                            <div class="rep-product-card__foot">
                                 <button type="button"
-                                        class="rep-btn-secondary"
+                                        class="rep-btn-secondary rep-btn-secondary--compact"
                                         wire:click="openProductImages({{ $product->id }})"
                                         wire:loading.attr="disabled"
                                         wire:target="openProductImages">
-                                    <span wire:loading.remove wire:target="openProductImages">تصاویر</span>
+                                    <span wire:loading.remove wire:target="openProductImages">گالری</span>
                                     <span wire:loading wire:target="openProductImages">…</span>
                                 </button>
                                 <button type="button" class="rep-btn-primary" wire:click="addProduct({{ $product->id }})">
@@ -215,10 +234,15 @@
                             </div>
                         </li>
                     @empty
-                        <li class="rep-wizard-empty">محصولی مطابق فیلترهای خانواده، کارخانه، برند و قالب نیست.</li>
+                        <li class="rep-wizard-empty rep-wizard-empty--full">محصولی مطابق فیلترهای انتخاب‌شده نیست.</li>
                     @endforelse
+                </ul>
+                @if ($products->hasPages())
+                    <nav class="rep-product-picker__pagination" aria-label="صفحه‌بندی محصولات">
+                        {{ $products->links(data: ['scrollTo' => false]) }}
+                    </nav>
                 @endif
-            </ul>
+            @endif
             </div>
         </section>
     @endif
@@ -519,18 +543,19 @@
                                         class="rep-product-gallery__item rep-product-gallery__trigger"
                                         x-data="{ loaded: false, failed: false }"
                                         x-on:click="fullImageUrl = @js($image['full'])">
-                                    <div class="rep-product-gallery__skeleton" x-show="!loaded && !failed" x-cloak></div>
+                                    <div class="rep-product-gallery__skeleton"
+                                         x-bind:class="{ 'is-hidden': loaded || failed }"
+                                         aria-hidden="true"></div>
                                     <img src="{{ $image['thumb'] }}"
                                          alt="{{ $productImagesModalTitle }}"
-                                         loading="{{ $index === 0 ? 'eager' : 'lazy' }}"
-                                         @if ($index === 0) fetchpriority="high" @endif
+                                         loading="eager"
                                          decoding="async"
                                          width="160"
                                          height="160"
-                                         x-show="loaded && !failed"
+                                         class="rep-product-gallery__img"
+                                         x-bind:class="{ 'is-loaded': loaded && !failed, 'is-failed': failed }"
                                          x-on:load="loaded = true"
-                                         x-on:error="failed = true; loaded = true"
-                                         x-cloak>
+                                         x-on:error="failed = true; loaded = true">
                                     <span class="rep-product-gallery__error" x-show="failed" x-cloak>بارگذاری نشد</span>
                                 </button>
                             @empty

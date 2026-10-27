@@ -145,6 +145,16 @@ return [
             'enabled' => true,
         ],
 
+        'rep_product_card' => [
+            'label' => 'کارت محصول ویزارد نماینده',
+            'mode' => 'contain',
+            'width' => 400,
+            'height' => 300,
+            'quality' => 82,
+            'format' => 'webp',
+            'enabled' => true,
+        ],
+
     ],
 
 ];

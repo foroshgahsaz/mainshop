@@ -69,8 +69,8 @@ class ManageParsian extends Page implements HasForms
                         ->required(),
                     Forms\Components\TextInput::make('callback_url')
                         ->label('آدرس Callback')
-                        ->placeholder('/payment/callback/parsian')
-                        ->helperText('فقط مسیر (مثلاً /payment/callback/parsian) — باید دقیقاً مثل آدرس ثبت‌شده در پنل پارسیان باشد؛ بدون ?payment= و بدون / انتهایی'),
+                        ->placeholder('/payment/callback/pec')
+                        ->helperText('فقط مسیر — باید عین پنل پارسیان باشد (رایج: /payment/callback/pec یا /payment/callback/parsian). بدون ?payment='),
                     ShopIconUpload::make('icon', 'gateway-icons', 'آیکون درگاه')
                         ->columnSpanFull(),
                 ])->columns(2),
@@ -83,7 +83,7 @@ class ManageParsian extends Page implements HasForms
         $data = $this->form->getState();
 
         $callbackPath = ParsianCallbackUrl::path([
-            'callback_url' => $data['callback_url'] ?? '/payment/callback/parsian',
+            'callback_url' => $data['callback_url'] ?? '/payment/callback/pec',
         ]);
 
         $settings->setMany('parsian', [

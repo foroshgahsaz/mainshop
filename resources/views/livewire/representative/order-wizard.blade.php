@@ -1,13 +1,5 @@
 @php
-    $wizardSteps = [
-        'customer' => 'مشتری',
-        'family' => 'خانواده',
-        'plant' => 'کارخانه',
-        'brand' => 'برند',
-        'template' => 'قالب',
-        'product' => 'محصول',
-        'review' => 'جمع‌بندی',
-    ];
+    $wizardSteps = $this->visibleWizardSteps;
     $wizardStepKeys = array_keys($wizardSteps);
     $activeStepIndex = array_search($step, $wizardStepKeys, true);
     $catalogTrail = $this->catalogSelectionSummary;
@@ -145,7 +137,7 @@
             <header class="rep-wizard-header">
                 <h2 class="rep-wizard-title">قالب محصول</h2>
                 @if ($catalogTrail['brand'])
-                    <p class="rep-wizard-hint">برند: <strong>{{ $catalogTrail['brand'] }}</strong> — قالب‌های فعال با موجودی در کارخانه انتخاب‌شده.</p>
+                    <p class="rep-wizard-hint">برند: <strong>{{ $catalogTrail['brand'] }}</strong> — قالب‌های فعال با موجودی برای این برند.</p>
                 @endif
             </header>
             <div class="rep-wizard-panel__body">

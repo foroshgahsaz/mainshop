@@ -337,6 +337,7 @@ class ShopCacheService
 
     public function forgetHome(): void
     {
+        $this->forgetHomeCache();
         $this->flushTag('home');
     }
 

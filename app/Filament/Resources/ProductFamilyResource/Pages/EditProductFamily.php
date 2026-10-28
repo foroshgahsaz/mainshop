@@ -3,8 +3,9 @@
 namespace App\Filament\Resources\ProductFamilyResource\Pages;
 
 use App\Filament\Resources\ProductFamilyResource;
-use Filament\Actions;
 use App\Filament\Resources\Pages\EditRecord;
+use App\Services\Cache\ShopCacheService;
+use Filament\Actions;
 
 class EditProductFamily extends EditRecord
 {
@@ -15,5 +16,10 @@ class EditProductFamily extends EditRecord
         return [
             Actions\DeleteAction::make()->label('حذف'),
         ];
+    }
+
+    protected function afterSave(): void
+    {
+        app(ShopCacheService::class)->forgetHome();
     }
 }

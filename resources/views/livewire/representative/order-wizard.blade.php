@@ -11,7 +11,7 @@
     ])
      wire:loading.class="opacity-75"
      @rep-product-images-modal-closed.window="document.documentElement.classList.remove('rep-modal-open')">
-    <nav class="rep-wizard-stepper" aria-label="مراحل سفارش" data-rep-tour="rep-wizard-stepper">
+    <nav class="rep-wizard-stepper" aria-label="مراحل سفارش">
         @foreach ($wizardSteps as $key => $label)
             @php
                 $stepIndex = array_search($key, $wizardStepKeys, true);
@@ -34,7 +34,7 @@
         'rep-wizard-stage--review' => $step === 'review',
     ])>
     @if ($step === 'customer')
-        <section class="rep-wizard-panel" data-rep-tour="rep-wizard-customer">
+        <section class="rep-wizard-panel">
             <header class="rep-wizard-header">
                 <h2 class="rep-wizard-title">انتخاب مشتری</h2>
                 <p class="rep-wizard-hint">حداکثر ۵۰ مشتری اخیر نمایش داده می‌شود. در صورت نیاز از منوی «مشتریان» شخص جدید ثبت کنید.</p>
@@ -65,7 +65,7 @@
     @endif
 
     @if ($step === 'family')
-        <section class="rep-wizard-panel" data-rep-tour="rep-wizard-family">
+        <section class="rep-wizard-panel">
             <header class="rep-wizard-header">
                 <h2 class="rep-wizard-title">خانواده محصول</h2>
                 <p class="rep-wizard-hint">فقط خانواده‌هایی که محصول فعال و موجود دارند نمایش داده می‌شوند.</p>
@@ -88,7 +88,7 @@
     @endif
 
     @if ($step === 'plant')
-        <section class="rep-wizard-panel" data-rep-tour="rep-wizard-plant">
+        <section class="rep-wizard-panel">
             <header class="rep-wizard-header">
                 <h2 class="rep-wizard-title">کارخانه</h2>
                 @if ($catalogTrail['family'])
@@ -113,7 +113,7 @@
     @endif
 
     @if ($step === 'brand')
-        <section class="rep-wizard-panel" data-rep-tour="rep-wizard-brand">
+        <section class="rep-wizard-panel">
             <header class="rep-wizard-header">
                 <h2 class="rep-wizard-title">برند</h2>
                 @if ($catalogTrail['family'] || $catalogTrail['plant'])
@@ -141,7 +141,7 @@
     @endif
 
     @if ($step === 'template')
-        <section class="rep-wizard-panel" data-rep-tour="rep-wizard-template">
+        <section class="rep-wizard-panel">
             <header class="rep-wizard-header">
                 <h2 class="rep-wizard-title">قالب محصول</h2>
                 @if ($catalogTrail['brand'])
@@ -166,7 +166,7 @@
     @endif
 
     @if ($step === 'product')
-        <section class="rep-wizard-panel" data-rep-tour="rep-wizard-product">
+        <section class="rep-wizard-panel">
             <header class="rep-wizard-header">
                 <h2 class="rep-wizard-title">انتخاب محصول</h2>
                 @if ($catalogTrail['family'] || $catalogTrail['plant'] || $catalogTrail['brand'] || $catalogTrail['template'])
@@ -286,7 +286,7 @@
                         @endif
                     </dl>
                 @endif
-                <ul class="rep-product-list" data-rep-tour="rep-wizard-review-items">
+                <ul class="rep-product-list">
                     @forelse ($order->items as $item)
                         @php
                             $lineQty = (int) ($lineQuantities[$item->id] ?? $item->quantity);
@@ -332,7 +332,7 @@
                     @endforelse
                 </ul>
                 <div class="rep-fulfillment-grid">
-                    <div class="rep-fulfillment-field" data-rep-tour="rep-wizard-freight">
+                    <div class="rep-fulfillment-field">
                         <label class="rep-fulfillment-label" for="freightCarrierSelectTrigger">باربری</label>
                         @if ($this->freightCarriers->isEmpty())
                             <button type="button"
@@ -423,7 +423,7 @@
                         @endif
                         @error('freight_carrier_id') <p class="rep-wizard-error">{{ $message }}</p> @enderror
                     </div>
-                    <div class="rep-fulfillment-field rep-fulfillment-field--gateways" data-rep-tour="rep-wizard-gateways">
+                    <div class="rep-fulfillment-field rep-fulfillment-field--gateways">
                         <span class="rep-fulfillment-label" id="paymentGatewayLegend">درگاه پرداخت</span>
                         @if (count($this->paymentGateways) === 0)
                             <p class="rep-wizard-empty">درگاه فعالی نیست</p>
@@ -452,7 +452,7 @@
                         @endif
                         @error('payment_gateway') <p class="rep-wizard-error">{{ $message }}</p> @enderror
                         @if ($this->selectedPaymentGatewayType === \App\Services\Payment\PaymentGatewayCatalog::TYPE_CREDIT && $order)
-                            <div class="rep-split-plan-card" role="region" aria-label="طرح پرداخت اعتبار و نقد" data-rep-tour="rep-wizard-split-pay">
+                            <div class="rep-split-plan-card" role="region" aria-label="طرح پرداخت اعتبار و نقد">
                                 <div class="rep-split-plan-card__glow" aria-hidden="true"></div>
                                 <div class="rep-split-plan-card__ribbon" aria-hidden="true">اعتبار + نقد</div>
                                 <div class="rep-split-plan-card__head">
@@ -548,7 +548,7 @@
                         @endif
                     </div>
                 </div>
-                <div class="rep-coupon-box" role="region" aria-label="کد تخفیف" data-rep-tour="rep-wizard-coupon">
+                <div class="rep-coupon-box" role="region" aria-label="کد تخفیف">
                     <span class="rep-coupon-box__label">کد تخفیف</span>
                     <p class="rep-wizard-hint rep-coupon-box__hint">
                         همان قوانین فروشگاه (حداقل سبد، درگاه مجاز، سقف استفاده برای مشتری) اعمال می‌شود.
@@ -587,7 +587,7 @@
                         </p>
                     @endif
                 </div>
-                <div class="rep-order-totals-card" data-rep-tour="rep-wizard-totals">
+                <div class="rep-order-totals-card">
                     <div class="rep-order-totals-card__rows">
                         <div class="rep-order-totals-card__row">
                             <span>جمع اقلام</span>
@@ -615,7 +615,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="rep-review-cta" role="region" aria-label="اقدامات پیش‌فاکتور" data-rep-tour="rep-wizard-cta">
+                <div class="rep-review-cta" role="region" aria-label="اقدامات پیش‌فاکتور">
                     <p class="rep-review-cta__hint">
                         پس از تغییر تعداد، باربری یا درگاه، اول <strong>بروزرسانی</strong> را بزنید؛ سپس پیش‌فاکتور را ثبت کنید.
                     </p>

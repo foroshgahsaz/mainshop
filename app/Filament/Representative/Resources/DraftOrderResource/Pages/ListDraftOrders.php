@@ -23,8 +23,7 @@ class ListDraftOrders extends ListRecords
             Actions\Action::make('create')
                 ->label('سفارش جدید')
                 ->url(CreateDraftOrder::getUrl())
-                ->icon('heroicon-o-plus')
-                ->extraAttributes(['data-rep-tour' => 'rep-drafts-create']),
+                ->icon('heroicon-o-plus'),
         ];
     }
 

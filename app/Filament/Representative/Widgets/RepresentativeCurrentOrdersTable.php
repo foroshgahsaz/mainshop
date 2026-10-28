@@ -23,11 +23,6 @@ class RepresentativeCurrentOrdersTable extends BaseWidget
 
     protected int|string|array $columnSpan = 'full';
 
-    public function getExtraBodyAttributes(): array
-    {
-        return ['data-rep-tour' => 'rep-widget-current-orders'];
-    }
-
     protected static ?string $pollingInterval = null;
 
     public function table(Table $table): Table

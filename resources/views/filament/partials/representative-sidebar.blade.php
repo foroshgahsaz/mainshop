@@ -76,7 +76,6 @@
             <a href="{{ $navIcon['href'] }}"
                class="sidebar-icon-item sidebar-icon-link {{ $activePanel === 'dashboard' ? 'active' : '' }}"
                data-tooltip="{{ $navIcon['tooltip'] }}"
-               @if ($navIcon['id'] === 'dashboard') data-rep-tour="rep-nav-dashboard" @endif
                aria-label="{{ $navIcon['tooltip'] }}">
                 <i class="fas {{ $navIcon['icon'] }}"></i>
                 <span class="sidebar-icon-label">{{ $navIcon['tooltip'] }}</span>
@@ -85,8 +84,6 @@
             <div class="sidebar-icon-item {{ $activePanel === $navIcon['id'] ? 'active' : '' }}"
                  data-panel="{{ $navIcon['panel'] }}"
                  data-tooltip="{{ $navIcon['tooltip'] }}"
-                 @if ($navIcon['id'] === 'customers') data-rep-tour="rep-nav-customers" @endif
-                 @if ($navIcon['id'] === 'orders') data-rep-tour="rep-nav-orders" @endif
                  role="button"
                  tabindex="0"
                  aria-label="{{ $navIcon['tooltip'] }}">
@@ -108,13 +105,8 @@
 
 <div class="sidebar-primary" id="sidebarPrimary">
     <div class="sidebar-header">
-        <div class="sidebar-header__row">
-            <div>
-                <p class="sidebar-title">پنل نمایندگی</p>
-                <p class="mb-0 fw-bold text-dark" id="sidebarPanelTitle">{{ $activePanelLabel }}</p>
-            </div>
-            @include('filament.partials.representative-tour-help')
-        </div>
+        <p class="sidebar-title">پنل نمایندگی</p>
+        <p class="mb-0 fw-bold text-dark" id="sidebarPanelTitle">{{ $activePanelLabel }}</p>
     </div>
 
     <div class="sidebar-menu" id="sidebarMenu">
@@ -138,11 +130,7 @@
                     <div class="submenu {{ $hasActiveChild ? 'expanded' : '' }}" id="{{ $submenuId }}">
                         @foreach ($menu['items'] as $item)
                             <a href="{{ $item['url'] }}"
-                               class="submenu-item {{ $isMenuItemActive($item['url']) ? 'active' : '' }}"
-                               @if ($item['label'] === 'سفارش جدید') data-rep-tour="rep-sidebar-new-order" @endif
-                               @if ($item['label'] === 'افزودن مشتری') data-rep-tour="rep-sidebar-new-customer" @endif
-                               @if ($item['label'] === 'پیش‌سفارش‌ها') data-rep-tour="rep-sidebar-draft-list" @endif
-                               @if ($item['label'] === 'لیست مشتریان') data-rep-tour="rep-sidebar-customer-list" @endif>
+                               class="submenu-item {{ $isMenuItemActive($item['url']) ? 'active' : '' }}">
                                 <i class="fas {{ $item['icon'] }} ms-2 submenu-item-icon"></i>
                                 {{ $item['label'] }}
                             </a>

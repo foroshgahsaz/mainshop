@@ -30,7 +30,6 @@ class DraftOrderResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->extraAttributes(['data-rep-tour' => 'rep-drafts-table'])
             ->columns([
                 Tables\Columns\TextColumn::make('tracking_code')
                     ->label('کد')

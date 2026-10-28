@@ -3,6 +3,7 @@
 namespace App\Services\Shop;
 
 use App\Models\ProductFamily;
+use App\Models\ProductFamilyHomepagePopupItem;
 
 class ProductFamilyHomepagePopupService
 {
@@ -14,25 +15,27 @@ class ProductFamilyHomepagePopupService
      */
     public function activeLinkItemsForFamily(ProductFamily $family): array
     {
-        $family->loadMissing([
-            'homepagePopupItems' => fn ($q) => $q->where('is_active', true)->orderBy('position')->orderBy('id'),
-        ]);
+        return ProductFamilyHomepagePopupItem::query()
+            ->where('product_family_id', $family->id)
+            ->where('is_active', true)
+            ->orderBy('position')
+            ->orderBy('id')
+            ->get()
+            ->map(function (ProductFamilyHomepagePopupItem $row): ?array {
+                $label = trim((string) $row->label);
+                $url = trim((string) $row->url);
+                if ($label === '' || $url === '') {
+                    return null;
+                }
 
-        $items = [];
-        foreach ($family->homepagePopupItems as $row) {
-            $label = trim((string) $row->label);
-            $url = trim((string) $row->url);
-            if ($label === '' || $url === '') {
-                continue;
-            }
-
-            $items[] = [
-                'label' => $label,
-                'url' => $url,
-            ];
-        }
-
-        return $items;
+                return [
+                    'label' => $label,
+                    'url' => $url,
+                ];
+            })
+            ->filter()
+            ->values()
+            ->all();
     }
 
     public function payloadForFamily(ProductFamily $family): ?array

@@ -66,24 +66,35 @@ class ManageHomepageSettings extends Page implements HasForms
                                         ->value('id') ?? 0);
                                 }
 
-                                if ($id <= 0) {
+                                $candidates = ProductFamily::query()
+                                    ->where('is_active', true)
+                                    ->where(function ($query) {
+                                        $query->where('slug', 'chinese-service')
+                                            ->orWhere('name', 'سرویس چینی');
+                                    })
+                                    ->orderBy('position')
+                                    ->get();
+
+                                if ($candidates->isEmpty()) {
                                     return 'ابتدا خانواده «سرویس چینی» را در **فروشگاه → خانواده محصول** بسازید (slug: chinese-service).';
                                 }
 
-                                $family = ProductFamily::query()->find($id);
-                                $editUrl = ProductFamilyResource::getUrl('edit', ['record' => $id]);
-                                $activeCount = $family?->homepagePopupItems()
-                                    ->where('is_active', true)
-                                    ->count() ?? 0;
+                                $lines = [];
+                                foreach ($candidates as $family) {
+                                    $activeCount = $family->homepagePopupItems()->where('is_active', true)->count();
+                                    $editUrl = ProductFamilyResource::getUrl('edit', ['record' => $family->id]);
+                                    $lines[] = '<li><a href="'.e($editUrl).'" target="_blank" rel="noopener" class="font-bold text-primary-600 underline">'
+                                        .e($family->name).' (#'.$family->id.', slug: '.e($family->slug).')</a>'
+                                        .' — <span class="text-gray-500">'.$activeCount.' لینک فعال</span></li>';
+                                }
+
+                                $selected = $id > 0 ? ProductFamily::query()->find($id) : null;
 
                                 return new HtmlString(
                                     '<p class="text-sm leading-6 text-gray-600 dark:text-gray-400">'
-                                    .'لینک‌ها در <strong>فروشگاه → خانواده محصول → ویرایش «'.e($family?->name ?? '').'»</strong> '
-                                    .'→ بخش <strong>«لینک‌های کنار اسلایدر»</strong> (نام + URL).</p>'
-                                    .'<p class="mt-2"><a href="'.e($editUrl).'" target="_blank" rel="noopener" '
-                                    .'class="inline-flex items-center gap-1 font-bold text-primary-600 underline">'
-                                    .'باز کردن ویرایش لینک‌ها</a>'
-                                    .' <span class="text-sm text-gray-500">('.$activeCount.' لینک فعال)</span></p>'
+                                    .'لینک‌ها در ویرایش خانواده → «لینک‌های کنار اسلایدر». '
+                                    .($selected ? 'انتخاب فعلی: <strong>#'.e((string) $selected->id).'</strong>.' : 'انتخاب فعلی: <strong>خودکار (chinese-service)</strong>.')
+                                    .'</p><ul class="mt-2 list-disc pr-5 text-sm space-y-1">'.implode('', $lines).'</ul>'
                                 );
                             })
                             ->columnSpanFull(),

@@ -40,18 +40,64 @@ class HomepageHeroHubService
 
     protected function resolveSidebarFamily(): ?ProductFamily
     {
-        $id = $this->homepageSettings->heroSidebarFamilyId();
-        if ($id !== null) {
+        $configuredId = $this->homepageSettings->heroSidebarFamilyId();
+
+        $candidateIds = collect();
+        if ($configuredId !== null) {
+            $candidateIds->push($configuredId);
+        }
+
+        ProductFamily::query()
+            ->where('is_active', true)
+            ->where(function ($query) {
+                $query->where('slug', 'chinese-service')
+                    ->orWhere('name', 'سرویس چینی');
+            })
+            ->pluck('id')
+            ->each(fn (int $id) => $candidateIds->push($id));
+
+        $candidateIds = $candidateIds->unique()->filter()->values();
+
+        $bestFamily = null;
+        $bestLinkCount = 0;
+
+        foreach ($candidateIds as $familyId) {
+            $family = ProductFamily::query()
+                ->where('is_active', true)
+                ->whereKey($familyId)
+                ->first();
+
+            if ($family === null) {
+                continue;
+            }
+
+            $linkCount = count($this->popupService->activeLinkItemsForFamily($family));
+            if ($linkCount > $bestLinkCount) {
+                $bestLinkCount = $linkCount;
+                $bestFamily = $family;
+            }
+        }
+
+        if ($bestFamily !== null && $bestLinkCount > 0) {
+            return $bestFamily;
+        }
+
+        if ($configuredId !== null) {
             return ProductFamily::query()
                 ->where('is_active', true)
-                ->whereKey($id)
+                ->whereKey($configuredId)
                 ->first();
         }
 
         return ProductFamily::query()
             ->where('is_active', true)
             ->where('slug', 'chinese-service')
-            ->first();
+            ->first()
+            ?? ProductFamily::query()
+                ->where('is_active', true)
+                ->where('name', 'سرویس چینی')
+                ->orderBy('position')
+                ->first();
     }
 
     /**

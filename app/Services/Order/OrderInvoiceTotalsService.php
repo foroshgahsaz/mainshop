@@ -4,6 +4,7 @@ namespace App\Services\Order;
 
 use App\Models\Order;
 use App\Models\OrderInvoiceLine;
+use App\Services\Representative\RepresentativeDraftCouponService;
 use App\Support\Order\OrderItemLinePricing;
 
 class OrderInvoiceTotalsService
@@ -44,10 +45,15 @@ class OrderInvoiceTotalsService
 
         $shipping = (int) $order->shipping_amount;
 
+        $couponDiscount = 0;
+        if ($order->coupon_id !== null && $order->isRepresentativeOrder()) {
+            $couponDiscount = app(RepresentativeDraftCouponService::class)->couponDiscountAmount($order);
+        }
+
         $order->update([
             'total_amount' => $itemsGross,
-            'discount_amount' => $itemDiscountTotal + $orderDiscount,
-            'final_amount' => max(0, $itemsNet - $orderDiscount + $feesTotal + $shipping),
+            'discount_amount' => $itemDiscountTotal + $orderDiscount + $couponDiscount,
+            'final_amount' => max(0, $itemsNet - $orderDiscount - $couponDiscount + $feesTotal + $shipping),
         ]);
 
         return $order->fresh(['items', 'invoiceLines']);

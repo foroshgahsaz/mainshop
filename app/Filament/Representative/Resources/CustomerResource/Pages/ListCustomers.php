@@ -15,9 +15,7 @@ class ListCustomers extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()
-                ->label('افزودن مشتری')
-                ->extraAttributes(['data-rep-tour' => 'rep-customers-create']),
+            Actions\CreateAction::make()->label('افزودن مشتری'),
         ];
     }
 }

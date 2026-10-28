@@ -21,11 +21,6 @@ class RepresentativeDashboardInsights extends Widget
 
     protected static ?string $pollingInterval = null;
 
-    public function getExtraBodyAttributes(): array
-    {
-        return ['data-rep-tour' => 'rep-widget-insights'];
-    }
-
     /** @return array<string, mixed> */
     protected function getViewData(): array
     {

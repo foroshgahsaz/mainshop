@@ -49,9 +49,7 @@ class RepresentativePanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Representative/Widgets'), for: 'App\\Filament\\Representative\\Widgets')
             ->widgets([])
             ->renderHook(PanelsRenderHook::HEAD_END, fn () => view('filament.hooks.styles'))
-            ->renderHook(PanelsRenderHook::HEAD_END, fn () => view('filament.hooks.representative-tours'))
             ->renderHook(PanelsRenderHook::BODY_END, fn () => view('filament.hooks.scripts'))
-            ->renderHook(PanelsRenderHook::BODY_END, fn () => view('filament.hooks.representative-tours-scripts'))
             ->middleware([
                 SetPersianLocale::class,
                 EncryptCookies::class,

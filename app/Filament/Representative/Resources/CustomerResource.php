@@ -90,7 +90,6 @@ class CustomerResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->extraAttributes(['data-rep-tour' => 'rep-customers-table'])
             ->columns([
                 Tables\Columns\TextColumn::make('name')->label('نام')->searchable(),
                 Tables\Columns\TextColumn::make('phone')->label('موبایل')->searchable(),

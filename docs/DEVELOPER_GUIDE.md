@@ -1316,13 +1316,12 @@ resources/views/layouts/shop.blade.php
 | 2026-10-23 | رفع 500 آنالیز کد تخفیف: `CouponAnalyticsPage::mount($record)` بدون پارامتر DI دوم (Livewire + route named arg) |
 | 2026-10-23 | ادمین: لاگ پرداخت/سیستم زیر منوی بک‌آپ؛ دانلود با کلیک روی فایل؛ `LOG_STACK` پیش‌فرض `daily` روی `/data`؛ checkout: پیام کد تخفیف فقط مودال؛ درگاه کد تخفیف = Select چندتایی (مثل استان منطقه) |
 | 2026-10-26 | `config/logs.php` (الگوی `backup.php`): مسیر `/data/logs`، نگه‌داری ۳۰+ روز لاگ پرداخت، zip آرشیو، پنل `/admin/payment-logs` |
-| 2026-10-28 | پنل نماینده: راهنمای Intro.js (۶ تور، دکمه سایدبار؛ assets در `public/rep-panel/` نه `public/representative/` — تداخل 403 با `/representative`) |
-| 2026-10-28 | ویزارد نماینده: اعمال **کد تخفیف** (`RepresentativeDraftCouponService`، همان `CouponService`) در جمع‌بندی؛ ثبت usage هنگام ثبت پیش‌فاکتور |
 | 2026-10-28 | پنل `/admin/payment-logs`: تایم‌لاین گرافیکی با جستجوی کد رهگیری یا `payment_id`؛ دکمه «پاسخ درگاه» برای نمایش خام `context.gateway_raw`؛ ثبت خام callback، verify و پاسخ initiate/response درگاه‌ها در `PaymentAuditLogger` |
 | 2026-10-28 | migration پشتیبان ستون‌های `proforma_*` روی `orders`؛ `OrderProformaSplitColumns`؛ پیام خطای واضح اگر migrate اجرا نشده؛ اصلاح select درگاه نقدی ویزارد نماینده |
 | 2026-10-28 | ویزارد نماینده — کارت محصول: `primary_image_path` (نه اولین position)؛ ارتفاع مرحله محصول برای نمایش کامل کارت |
 | 2026-10-28 | پیش‌فاکتور PDF: بلوک «پرداخت‌های موفق» (جمع نقد/اعتبار) بالای مهر امضا؛ پرداخت نقدی با مانده پیش‌فرض؛ ledger فشرده |
 | 2026-10-28 | ویزارد نماینده — جمع‌بندی: مبلغ اعتبار/نقد به **ریال** با جداکننده (`RialAmountInput`)، دکمه «ثبت + پرداخت نقدی»، ledger زیر فاکتور (سبز/قرمز)، درگاه‌ها compact flex، گرید محصول کوتاه‌تر |
+| 2026-10-28 | حذف راهنمای Intro.js پنل نماینده (PR #294–#296 برگشت) — بدون `public/rep-panel` و بدون تداخل `/representative` |
 | 2026-10-28 | ویزارد نماینده — جمع‌بندی: کارت پرداخت ترکیبی، درگاه‌های نقدی با آیکون (flex)، CTA برجسته ثبت پیش‌فاکتور |
 | 2026-10-28 | ویزارد review ارتفاع تا پایین viewport؛ کارت پرداخت ترکیبی گرافیکی؛ CMS `/pages/*`: عنوان بدون چاپینو؛ نوار ادمین «ویرایش این صفحه» |
 | 2026-10-26 | رفع لاگ روی `/data/logs`: `config/logging.php` قبل از `shop.php` لود می‌شد — مسیر کانال‌ها با `config/logs.php` + `ShopStoragePaths` و هشدار `shop:verify-storage` |

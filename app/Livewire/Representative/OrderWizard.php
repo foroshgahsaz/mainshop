@@ -15,7 +15,9 @@ use App\Services\Media\DisplayImageService;
 use App\Services\Payment\PaymentGatewayCatalog;
 use App\Services\Representative\RepresentativeCatalogLookup;
 use App\Services\Representative\RepresentativeDraftOrderService;
+use App\Services\Representative\RepresentativeProformaPaymentService;
 use App\Services\Representative\RepresentativeProformaService;
+use App\Support\RialAmountInput;
 use App\Support\ShopFormatter;
 use App\Support\ShopMedia;
 use Filament\Notifications\Notification;
@@ -62,6 +64,12 @@ class OrderWizard extends Component
 
     /** مبلغ اعتباری (تومان) — فقط وقتی درگاه اعتباری و کمتر از کل فاکتور باشد */
     public ?int $plannedCreditAmount = null;
+
+    /** نمایش ورودی اعتبار به ریال با جداکننده */
+    public string $plannedCreditRial = '';
+
+    /** مبلغ پرداخت نقدی اول (ریال) — پس از ثبت پیش‌فاکتور به درگاه می‌رود */
+    public string $cashPayRial = '';
 
     public string $cashGateway = '';
 
@@ -334,6 +342,8 @@ class OrderWizard extends Component
 
     public function finishDraft(): void
     {
+        $this->syncPlannedCreditFromRialInput();
+
         if (! $this->persistLineQuantities() || ! $this->persistFulfillment()) {
             return;
         }
@@ -382,6 +392,89 @@ class OrderWizard extends Component
             DraftOrderResource::getUrl('view', ['record' => $order->id], panel: 'representative'),
             navigate: false,
         );
+    }
+
+    public function finishDraftAndPayCash(): void
+    {
+        $this->syncPlannedCreditFromRialInput();
+
+        if (! $this->persistLineQuantities() || ! $this->persistFulfillment()) {
+            return;
+        }
+
+        $order = $this->findOwnedDraft();
+
+        if ($order === null || ! $order->items()->exists()) {
+            $this->addError('order', 'حداقل یک محصول به پیش‌سفارش اضافه کنید.');
+
+            return;
+        }
+
+        try {
+            $order = app(RepresentativeDraftOrderService::class)->submitProforma($order);
+        } catch (ValidationException $e) {
+            foreach ($e->errors() as $field => $messages) {
+                foreach ($messages as $message) {
+                    $this->addError($field, $message);
+                }
+            }
+
+            return;
+        } catch (RuntimeException $e) {
+            $this->addError('order', $e->getMessage());
+
+            return;
+        } catch (Throwable $e) {
+            Log::error('representative_finish_draft_pay_cash_failed', [
+                'order_id' => $order->id,
+                'representative_id' => auth()->id(),
+                'error' => $e->getMessage(),
+            ]);
+
+            $this->addError('order', 'ثبت پیش‌فاکتور ناموفق بود.');
+
+            return;
+        }
+
+        $representative = auth()->user();
+
+        if ($representative === null) {
+            return;
+        }
+
+        $amountTomans = RialAmountInput::tomanFromInput($this->cashPayRial);
+
+        if ($amountTomans === null || $amountTomans <= 0) {
+            Notification::make()
+                ->title('پیش‌فاکتور ثبت شد')
+                ->body('مبلغ نقدی را وارد کنید یا از صفحه پیش‌فاکتور پرداخت کنید.')
+                ->success()
+                ->send();
+
+            $this->redirect(
+                DraftOrderResource::getUrl('view', ['record' => $order->id], panel: 'representative'),
+                navigate: false,
+            );
+
+            return;
+        }
+
+        try {
+            $url = app(RepresentativeProformaPaymentService::class)
+                ->initiateCashPayment($order->fresh(['payments']), $representative, $amountTomans);
+            $this->redirect($url, navigate: false);
+        } catch (Throwable $e) {
+            Notification::make()
+                ->title('پیش‌فاکتور ثبت شد؛ اتصال به درگاه نقدی ناموفق بود')
+                ->body($e->getMessage())
+                ->warning()
+                ->send();
+
+            $this->redirect(
+                DraftOrderResource::getUrl('view', ['record' => $order->id], panel: 'representative'),
+                navigate: false,
+            );
+        }
     }
 
     #[Computed]
@@ -727,7 +820,30 @@ class OrderWizard extends Component
         $this->plannedCreditAmount = $order->proforma_planned_credit_amount !== null
             ? (int) $order->proforma_planned_credit_amount
             : null;
+        $this->plannedCreditRial = RialAmountInput::formatRialFromToman($this->plannedCreditAmount);
         $this->cashGateway = (string) ($order->proforma_cash_gateway ?: $this->defaultCashGateway());
+    }
+
+    public function updatedPlannedCreditRial(string $value): void
+    {
+        $this->plannedCreditRial = RialAmountInput::sanitizeFormattedInput($value);
+        $this->plannedCreditAmount = RialAmountInput::tomanFromInput($this->plannedCreditRial);
+    }
+
+    public function updatedCashPayRial(string $value): void
+    {
+        $this->cashPayRial = RialAmountInput::sanitizeFormattedInput($value);
+    }
+
+    private function syncPlannedCreditFromRialInput(): void
+    {
+        if ($this->plannedCreditRial === '') {
+            $this->plannedCreditAmount = null;
+
+            return;
+        }
+
+        $this->plannedCreditAmount = RialAmountInput::tomanFromInput($this->plannedCreditRial);
     }
 
     #[Computed]

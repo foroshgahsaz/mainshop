@@ -12,7 +12,7 @@
     $usesSplit = $split->usesSplitPlan($order);
 @endphp
 
-<section class="rep-payments-ledger" aria-label="سوابق پرداخت پیش‌فاکتور">
+<section class="rep-payments-ledger" aria-label="سوابق پرداخت پیش‌فاکتور" data-rep-tour="rep-proforma-ledger">
     <header class="rep-payments-ledger__header">
         <h3 class="rep-payments-ledger__title">سوابق پرداخت</h3>
         @if ($usesSplit)

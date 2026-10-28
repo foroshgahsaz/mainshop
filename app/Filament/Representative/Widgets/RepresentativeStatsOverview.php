@@ -18,6 +18,11 @@ class RepresentativeStatsOverview extends BaseWidget
 
     protected static ?string $pollingInterval = null;
 
+    public function getExtraBodyAttributes(): array
+    {
+        return ['data-rep-tour' => 'rep-widget-stats'];
+    }
+
     protected function getStats(): array
     {
         $user = auth()->user();

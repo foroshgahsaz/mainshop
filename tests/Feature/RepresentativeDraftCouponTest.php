@@ -42,7 +42,6 @@ class RepresentativeDraftCouponTest extends TestCase
 
         $carrier = FreightCarrier::query()->create([
             'name' => 'Test Carrier',
-            'phone' => '02100000000',
             'is_active' => true,
         ]);
 

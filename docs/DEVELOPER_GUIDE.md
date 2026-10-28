@@ -1316,6 +1316,8 @@ resources/views/layouts/shop.blade.php
 | 2026-10-23 | رفع 500 آنالیز کد تخفیف: `CouponAnalyticsPage::mount($record)` بدون پارامتر DI دوم (Livewire + route named arg) |
 | 2026-10-23 | ادمین: لاگ پرداخت/سیستم زیر منوی بک‌آپ؛ دانلود با کلیک روی فایل؛ `LOG_STACK` پیش‌فرض `daily` روی `/data`؛ checkout: پیام کد تخفیف فقط مودال؛ درگاه کد تخفیف = Select چندتایی (مثل استان منطقه) |
 | 2026-10-26 | `config/logs.php` (الگوی `backup.php`): مسیر `/data/logs`، نگه‌داری ۳۰+ روز لاگ پرداخت، zip آرشیو، پنل `/admin/payment-logs` |
+| 2026-10-28 | پنل نماینده: راهنمای Intro.js (۶ تور متنی، FAB «راهنما»، docs/representative/ONBOARDING-TOUR-FA.md) |
+| 2026-10-28 | ویزارد نماینده: اعمال **کد تخفیف** (`RepresentativeDraftCouponService`، همان `CouponService`) در جمع‌بندی؛ ثبت usage هنگام ثبت پیش‌فاکتور |
 | 2026-10-28 | پنل `/admin/payment-logs`: تایم‌لاین گرافیکی با جستجوی کد رهگیری یا `payment_id`؛ دکمه «پاسخ درگاه» برای نمایش خام `context.gateway_raw`؛ ثبت خام callback، verify و پاسخ initiate/response درگاه‌ها در `PaymentAuditLogger` |
 | 2026-10-28 | migration پشتیبان ستون‌های `proforma_*` روی `orders`؛ `OrderProformaSplitColumns`؛ پیام خطای واضح اگر migrate اجرا نشده؛ اصلاح select درگاه نقدی ویزارد نماینده |
 | 2026-10-28 | ویزارد نماینده — کارت محصول: `primary_image_path` (نه اولین position)؛ ارتفاع مرحله محصول برای نمایش کامل کارت |

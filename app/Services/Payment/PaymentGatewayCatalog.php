@@ -2,6 +2,7 @@
 
 namespace App\Services\Payment;
 
+use App\Filament\Support\GatewayHomepagePlanFields;
 use App\Services\Settings\SettingsService;
 use App\Support\ShopMedia;
 use RuntimeException;
@@ -108,6 +109,60 @@ class PaymentGatewayCatalog
     public function credit(): array
     {
         return $this->enabled(self::TYPE_CREDIT);
+    }
+
+    /**
+     * کارت‌های طرح درگاه برای صفحه اصلی (فقط درگاه فعال + تیک نمایش + URL طرح).
+     *
+     * @return list<array{name: string, label: string, intro: string, plan_url: string, icon: ?string}>
+     */
+    public function homepagePlanCards(): array
+    {
+        $cards = [];
+
+        foreach (array_keys(config('payment.gateways', [])) as $name) {
+            if (! $this->isEnabled($name)) {
+                continue;
+            }
+
+            $settings = match ($name) {
+                'zarinpal' => $this->settings->zarinpal(),
+                'tara' => $this->settings->tara(),
+                'bajet' => $this->settings->bajet(),
+                'digipay' => $this->settings->digipay(),
+                'parsian' => $this->settings->parsian(),
+                default => [],
+            };
+
+            if (! (bool) ($settings['show_on_homepage'] ?? false)) {
+                continue;
+            }
+
+            $planUrl = trim((string) ($settings['homepage_plan_url'] ?? ''));
+            if ($planUrl === '') {
+                continue;
+            }
+
+            if (! str_starts_with($planUrl, 'http://') && ! str_starts_with($planUrl, 'https://')) {
+                $planUrl = url($planUrl);
+            }
+
+            $config = config("payment.gateways.{$name}", []);
+            $intro = trim((string) ($settings['homepage_intro'] ?? ''));
+            if ($intro === '') {
+                $intro = GatewayHomepagePlanFields::DEFAULT_INTRO;
+            }
+
+            $cards[] = [
+                'name' => $name,
+                'label' => (string) ($config['label'] ?? $name),
+                'intro' => $intro,
+                'plan_url' => $planUrl,
+                'icon' => $this->iconUrl($name),
+            ];
+        }
+
+        return $cards;
     }
 
     /** @return list<string> */

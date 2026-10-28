@@ -40,7 +40,7 @@ class ProductFamilyHomepagePopupTest extends TestCase
         $this->assertSame('https://example.test/wallace', $payload['items'][0]['url']);
     }
 
-    public function test_home_payload_includes_family_popups_map(): void
+    public function test_home_payload_includes_hero_hub_sidebar_links(): void
     {
         $family = ProductFamily::query()->create([
             'name' => 'تست',
@@ -60,13 +60,15 @@ class ProductFamilyHomepagePopupTest extends TestCase
 
         app(SettingsService::class)->set('homepage', 'data', json_encode([
             'taxonomy_mode' => HomepageSettingsService::TAXONOMY_PRODUCT_FAMILIES,
+            'hero_sidebar_family_id' => $family->id,
+            'hero_quick_family_ids' => [],
             'new_products_enabled' => true,
             'new_product_ids' => [],
         ], JSON_UNESCAPED_UNICODE));
         app(ShopCacheService::class)->forgetHome();
 
-        $map = app(ShopCacheService::class)->homePayload()['family_homepage_popups'] ?? [];
+        $heroHub = app(ShopCacheService::class)->homePayload()['hero_hub'] ?? [];
 
-        $this->assertArrayHasKey($family->id, $map);
+        $this->assertSame('لینک', $heroHub['sidebar_links'][0]['label'] ?? null);
     }
 }

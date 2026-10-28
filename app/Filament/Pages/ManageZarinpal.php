@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Filament\Support\CrudSuccessNotification;
+use App\Filament\Support\GatewayHomepagePlanFields;
 use App\Filament\Support\ShopIconUpload;
 use App\Services\Settings\SettingsService;
 use Filament\Forms;
@@ -44,6 +45,7 @@ class ManageZarinpal extends Page implements HasForms
             'callback_url' => $zarinpal['callback_url'],
             'amount_unit' => $zarinpal['amount_unit'],
             'icon' => ShopIconUpload::forForm($zarinpal['icon'] ?? null),
+            ...GatewayHomepagePlanFields::mountState($zarinpal),
         ]);
     }
 
@@ -75,6 +77,7 @@ class ManageZarinpal extends Page implements HasForms
                     ShopIconUpload::make('icon', 'gateway-icons', 'آیکون درگاه')
                         ->columnSpanFull(),
                 ])->columns(2),
+                GatewayHomepagePlanFields::section(),
             ])
             ->statePath('data');
     }
@@ -90,6 +93,7 @@ class ManageZarinpal extends Page implements HasForms
             'callback_url' => $data['callback_url'] ?? '/payment/callback',
             'amount_unit' => $data['amount_unit'] ?? 'toman',
             'icon' => ShopIconUpload::fromState($data['icon'] ?? null),
+            ...GatewayHomepagePlanFields::saveState($data),
         ]);
 
         CrudSuccessNotification::saved()

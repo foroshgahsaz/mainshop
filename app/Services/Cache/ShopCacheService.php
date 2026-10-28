@@ -8,10 +8,10 @@ use App\Models\HomeSlider;
 use App\Models\MenuItem;
 use App\Models\Post;
 use App\Models\Product;
-use App\Models\ProductFamily;
 use App\Models\ShippingMethod;
+use App\Services\Payment\PaymentGatewayCatalog;
 use App\Services\Settings\HomepageSettingsService;
-use App\Services\Shop\ProductFamilyHomepagePopupService;
+use App\Services\Shop\HomepageHeroHubService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -29,24 +29,11 @@ class ShopCacheService
             function () {
                 $homepage = app(HomepageSettingsService::class);
                 $productQuery = fn () => Product::active()->with(['images' => fn ($q) => $q->orderBy('position')]);
-                $taxonomyMode = $homepage->taxonomyMode();
-                $taxonomyItems = $taxonomyMode === HomepageSettingsService::TAXONOMY_PRODUCT_FAMILIES
-                    ? ProductFamily::query()
-                        ->where('is_active', true)
-                        ->with(['homepagePopupItems' => fn ($q) => $q->where('is_active', true)->orderBy('position')->orderBy('id')])
-                        ->orderBy('position')
-                        ->get()
-                    : Category::query()->where('is_active', true)->orderBy('position')->get();
-
-                $familyHomepagePopups = $taxonomyMode === HomepageSettingsService::TAXONOMY_PRODUCT_FAMILIES
-                    ? app(ProductFamilyHomepagePopupService::class)->payloadsByFamilyId($taxonomyItems)
-                    : [];
 
                 return [
                     'sliders' => HomeSlider::active()->orderBy('position')->get(),
-                    'taxonomy_mode' => $taxonomyMode,
-                    'taxonomy_items' => $taxonomyItems,
-                    'family_homepage_popups' => $familyHomepagePopups,
+                    'hero_hub' => app(HomepageHeroHubService::class)->payload(),
+                    'homepage_gateway_plans' => app(PaymentGatewayCatalog::class)->homepagePlanCards(),
                     'discounted' => $productQuery()->whereNotNull('sale_price')->whereColumn('sale_price', '<', 'price')->latest()->take(8)->get(),
                     'best_sellers' => $productQuery()->orderByDesc('views')->take(8)->get(),
                     'new' => $homepage->resolveNewProducts($productQuery),

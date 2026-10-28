@@ -43,6 +43,8 @@ class HomepageSettingsService
 
         return [
             'taxonomy_mode' => $data['taxonomy_mode'],
+            'hero_sidebar_family_id' => $data['hero_sidebar_family_id'],
+            'hero_quick_family_ids' => $data['hero_quick_family_ids'],
             'new_products_enabled' => $data['new_products_enabled'],
             'new_product_ids' => $this->formatIdsForAdmin($data['new_product_ids']),
         ];
@@ -53,6 +55,8 @@ class HomepageSettingsService
     {
         $normalized = $this->normalize([
             'taxonomy_mode' => $data['taxonomy_mode'] ?? self::TAXONOMY_CATEGORIES,
+            'hero_sidebar_family_id' => $data['hero_sidebar_family_id'] ?? null,
+            'hero_quick_family_ids' => $data['hero_quick_family_ids'] ?? [],
             'new_products_enabled' => $data['new_products_enabled'] ?? true,
             'new_product_ids' => $data['new_product_ids'] ?? '',
         ]);
@@ -71,6 +75,31 @@ class HomepageSettingsService
         return in_array($mode, [self::TAXONOMY_CATEGORIES, self::TAXONOMY_PRODUCT_FAMILIES], true)
             ? $mode
             : self::TAXONOMY_CATEGORIES;
+    }
+
+    public function heroSidebarFamilyId(): ?int
+    {
+        $id = (int) ($this->all()['hero_sidebar_family_id'] ?? 0);
+
+        return $id > 0 ? $id : null;
+    }
+
+    /** @return list<int> */
+    public function heroQuickFamilyIds(): array
+    {
+        $raw = $this->all()['hero_quick_family_ids'] ?? [];
+
+        if (! is_array($raw)) {
+            return [];
+        }
+
+        return collect($raw)
+            ->map(fn ($id) => (int) $id)
+            ->filter(fn (int $id) => $id > 0)
+            ->unique()
+            ->take(3)
+            ->values()
+            ->all();
     }
 
     public function newProductsEnabled(): bool
@@ -115,6 +144,8 @@ class HomepageSettingsService
     {
         return [
             'taxonomy_mode' => self::TAXONOMY_CATEGORIES,
+            'hero_sidebar_family_id' => null,
+            'hero_quick_family_ids' => [],
             'new_products_enabled' => true,
             'new_product_ids' => [],
         ];
@@ -125,13 +156,33 @@ class HomepageSettingsService
     {
         $mode = (string) ($data['taxonomy_mode'] ?? self::TAXONOMY_CATEGORIES);
 
+        $quickIds = $data['hero_quick_family_ids'] ?? [];
+        if (! is_array($quickIds)) {
+            $quickIds = [];
+        }
+
         return [
             'taxonomy_mode' => in_array($mode, [self::TAXONOMY_CATEGORIES, self::TAXONOMY_PRODUCT_FAMILIES], true)
                 ? $mode
                 : self::TAXONOMY_CATEGORIES,
+            'hero_sidebar_family_id' => $this->normalizeOptionalFamilyId($data['hero_sidebar_family_id'] ?? null),
+            'hero_quick_family_ids' => collect($quickIds)
+                ->map(fn ($id) => (int) $id)
+                ->filter(fn (int $id) => $id > 0)
+                ->unique()
+                ->take(3)
+                ->values()
+                ->all(),
             'new_products_enabled' => (bool) ($data['new_products_enabled'] ?? true),
             'new_product_ids' => $this->parseProductIds($data['new_product_ids'] ?? []),
         ];
+    }
+
+    protected function normalizeOptionalFamilyId(mixed $raw): ?int
+    {
+        $id = (int) $raw;
+
+        return $id > 0 ? $id : null;
     }
 
     /** @return list<int> */

@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Filament\Support\CrudSuccessNotification;
+use App\Filament\Support\GatewayHomepagePlanFields;
 use App\Filament\Support\ShopIconUpload;
 use App\Services\Settings\SettingsService;
 use Filament\Forms;
@@ -55,6 +56,7 @@ class ManageTara extends Page implements HasForms
             'sandbox_refund_base_url' => $tara['sandbox_refund_base_url'],
             'refund_base_url' => $tara['production_refund_base_url'],
             'icon' => ShopIconUpload::forForm($tara['icon'] ?? null),
+            ...GatewayHomepagePlanFields::mountState($tara),
         ]);
     }
 
@@ -130,6 +132,7 @@ class ManageTara extends Page implements HasForms
                         ->placeholder('https://club.tara-club.ir/club')
                         ->columnSpanFull(),
                 ])->columns(2),
+                GatewayHomepagePlanFields::section(),
             ])
             ->statePath('data');
     }
@@ -156,6 +159,7 @@ class ManageTara extends Page implements HasForms
             'sandbox_refund_base_url' => $data['sandbox_refund_base_url'] ?? '',
             'refund_base_url' => $data['refund_base_url'] ?? '',
             'icon' => ShopIconUpload::fromState($data['icon'] ?? null),
+            ...GatewayHomepagePlanFields::saveState($data),
         ]);
 
         CrudSuccessNotification::saved()

@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Filament\Support\CrudSuccessNotification;
+use App\Models\ProductFamily;
 use App\Services\Cache\ShopCacheService;
 use App\Services\Settings\HomepageSettingsService;
 use Filament\Forms;
@@ -42,17 +43,31 @@ class ManageHomepageSettings extends Page implements HasForms
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('نوار دسته‌بندی / خانواده محصول')
-                    ->description('بخش اسلایدر دایره‌ای زیر بنر صفحه اصلی.')
+                Forms\Components\Section::make('باکس بالای صفحه (اسلایدر + سایدبار)')
+                    ->description('لیست سمت راست اسلایدر = لینک‌های پاپ‌آپ خانواده انتخاب‌شده (مثل سرویس چینی). سه خانواده پایین = میانبر دایره‌ای.')
                     ->schema([
+                        Forms\Components\Select::make('hero_sidebar_family_id')
+                            ->label('خانواده لیست کنار اسلایدر')
+                            ->options(fn () => ProductFamily::query()->where('is_active', true)->orderBy('position')->pluck('name', 'id'))
+                            ->searchable()
+                            ->nullable()
+                            ->helperText('خالی = خانواده با slug «chinese-service». لینک‌ها از «پاپ‌آپ صفحه اصلی» همان خانواده.'),
+                        Forms\Components\Select::make('hero_quick_family_ids')
+                            ->label('سه خانواده زیر لیست (پارس اپال، …)')
+                            ->options(fn () => ProductFamily::query()->where('is_active', true)->orderBy('position')->pluck('name', 'id'))
+                            ->multiple()
+                            ->maxItems(3)
+                            ->searchable()
+                            ->helperText('حداکثر ۳ مورد. خالی = تلاش برای slugهای pars-opal، kitchenware، crystal-service.'),
                         Forms\Components\Select::make('taxonomy_mode')
-                            ->label('نمایش در صفحه اصلی')
+                            ->label('حالت taxonomy (legacy)')
                             ->options([
                                 HomepageSettingsService::TAXONOMY_CATEGORIES => 'دسته‌بندی‌ها',
                                 HomepageSettingsService::TAXONOMY_PRODUCT_FAMILIES => 'خانواده‌های محصول',
                             ])
+                            ->helperText('دیگر در صفحه اصلی نمایش داده نمی‌شود؛ فقط برای سازگاری تنظیمات.')
                             ->required(),
-                    ]),
+                    ])->columns(1),
                 Forms\Components\Section::make('جدیدترین محصولات')
                     ->schema([
                         Forms\Components\Toggle::make('new_products_enabled')

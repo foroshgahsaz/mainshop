@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Filament\Support\CrudSuccessNotification;
+use App\Filament\Support\GatewayHomepagePlanFields;
 use App\Filament\Support\ShopIconUpload;
 use App\Services\Settings\SettingsService;
 use Filament\Forms;
@@ -53,6 +54,7 @@ class ManageDigiPay extends Page implements HasForms
             'icon' => ShopIconUpload::forForm($digipay['icon'] ?? null),
             'show_product_installment_promo' => $digipay['show_product_installment_promo'] ?? false,
             'product_installment_promo_text' => $digipay['product_installment_promo_text'] ?? '',
+            ...GatewayHomepagePlanFields::mountState($digipay),
         ]);
     }
 
@@ -119,6 +121,7 @@ class ManageDigiPay extends Page implements HasForms
                         ->placeholder('https://api.mydigipay.com/digipay/api')
                         ->columnSpanFull(),
                 ])->columns(2),
+                GatewayHomepagePlanFields::section(),
                 Forms\Components\Section::make('تیکت و سبد')->schema([
                     Forms\Components\TextInput::make('ticket_type')
                         ->label('نوع تیکت (type)')
@@ -156,6 +159,7 @@ class ManageDigiPay extends Page implements HasForms
             'icon' => ShopIconUpload::fromState($data['icon'] ?? null),
             'show_product_installment_promo' => $data['show_product_installment_promo'] ?? false,
             'product_installment_promo_text' => trim((string) ($data['product_installment_promo_text'] ?? '')),
+            ...GatewayHomepagePlanFields::saveState($data),
         ]);
 
         CrudSuccessNotification::saved()

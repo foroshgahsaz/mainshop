@@ -2,7 +2,9 @@
 
 namespace App\Services\Settings;
 
+use App\Filament\Support\GatewayHomepagePlanFields;
 use App\Models\Setting;
+use App\Services\Cache\ShopCacheService;
 use Illuminate\Support\Facades\Cache;
 
 class SettingsService
@@ -48,6 +50,10 @@ class SettingsService
         static::$bajetMemo = null;
         static::$digipayMemo = null;
         static::$parsianMemo = null;
+
+        if (in_array($group, ['zarinpal', 'tara', 'bajet', 'digipay', 'parsian', 'homepage'], true)) {
+            app(ShopCacheService::class)->forgetHome();
+        }
     }
 
     /** @param  array<string, mixed>  $values */
@@ -87,6 +93,7 @@ class SettingsService
             'amount_unit' => $this->get('zarinpal', 'amount_unit') ?: config('payment.gateways.zarinpal.amount_unit', 'toman'),
             'enabled' => filter_var($this->get('zarinpal', 'enabled', true), FILTER_VALIDATE_BOOLEAN),
             'icon' => $this->get('zarinpal', 'icon') ?: null,
+            ...$this->gatewayHomepagePlanFields('zarinpal'),
         ];
     }
 
@@ -127,6 +134,7 @@ class SettingsService
             'sandbox_refund_base_url' => (string) ($this->get('tara', 'sandbox_refund_base_url') ?: ($cfg['sandbox_refund_base_url'] ?? '')),
             'production_refund_base_url' => (string) ($this->get('tara', 'refund_base_url') ?: ($cfg['refund_base_url'] ?? '')),
             'icon' => $this->get('tara', 'icon') ?: null,
+            ...$this->gatewayHomepagePlanFields('tara'),
         ];
     }
 
@@ -161,6 +169,7 @@ class SettingsService
             'portal_sandbox_base_url' => (string) ($this->get('bajet', 'portal_sandbox_base_url') ?: ($cfg['portal_sandbox_base_url'] ?? '')),
             'portal_base_url' => (string) ($this->get('bajet', 'portal_base_url') ?: ($cfg['portal_base_url'] ?? '')),
             'icon' => $this->get('bajet', 'icon') ?: null,
+            ...$this->gatewayHomepagePlanFields('bajet'),
         ];
     }
 
@@ -201,6 +210,7 @@ class SettingsService
             ),
             'product_installment_promo_text' => (string) ($this->get('digipay', 'product_installment_promo_text')
                 ?: 'این درگاه اعتباری دیجی‌پی در ۴ قسط'),
+            ...$this->gatewayHomepagePlanFields('digipay'),
         ];
     }
 
@@ -219,6 +229,17 @@ class SettingsService
             'amount_unit' => (string) ($this->get('parsian', 'amount_unit') ?: ($cfg['amount_unit'] ?? 'toman')),
             'callback_url' => (string) ($this->get('parsian', 'callback_url') ?: ($cfg['callback_url'] ?? '/payment/callback/pec')),
             'icon' => $this->get('parsian', 'icon') ?: null,
+            ...$this->gatewayHomepagePlanFields('parsian'),
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    protected function gatewayHomepagePlanFields(string $group): array
+    {
+        return [
+            'show_on_homepage' => filter_var($this->get($group, 'show_on_homepage', false), FILTER_VALIDATE_BOOLEAN),
+            'homepage_intro' => (string) ($this->get($group, 'homepage_intro') ?: GatewayHomepagePlanFields::DEFAULT_INTRO),
+            'homepage_plan_url' => (string) ($this->get($group, 'homepage_plan_url') ?: ''),
         ];
     }
 

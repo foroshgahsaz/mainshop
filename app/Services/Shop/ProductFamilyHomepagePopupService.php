@@ -9,12 +9,11 @@ class ProductFamilyHomepagePopupService
     /**
      * @return array{family_id: int, family_name: string, items: list<array{label: string, url: string}>}|null
      */
-    public function payloadForFamily(ProductFamily $family): ?array
+    /**
+     * @return list<array{label: string, url: string}>
+     */
+    public function activeLinkItemsForFamily(ProductFamily $family): array
     {
-        if (! $family->homepage_popup_enabled) {
-            return null;
-        }
-
         $family->loadMissing([
             'homepagePopupItems' => fn ($q) => $q->where('is_active', true)->orderBy('position')->orderBy('id'),
         ]);
@@ -32,6 +31,17 @@ class ProductFamilyHomepagePopupService
                 'url' => $url,
             ];
         }
+
+        return $items;
+    }
+
+    public function payloadForFamily(ProductFamily $family): ?array
+    {
+        if (! $family->homepage_popup_enabled) {
+            return null;
+        }
+
+        $items = $this->activeLinkItemsForFamily($family);
 
         if ($items === []) {
             return null;

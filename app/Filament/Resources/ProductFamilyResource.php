@@ -64,25 +64,22 @@ class ProductFamilyResource extends Resource
                         ->default(0)
                         ->minValue(0),
                 ])->columns(2),
-            Forms\Components\Section::make('پاپ‌آپ صفحه اصلی')
-                ->description('وقتی در صفحه اصلی «خانواده‌های محصول» نمایش داده می‌شود، با کلیک روی این خانواده به‌جای رفتن مستقیم به لیست، پاپ‌آپ باز می‌شود.')
+            Forms\Components\Section::make('لینک‌های کنار اسلایدر (صفحه اصلی)')
+                ->description('برای خانواده «سرویس چینی»: همین لینک‌ها در باکس بالای صفحه اصلی (سمت راست اسلایدر) نمایش داده می‌شوند — همان موارد قبلی پاپ‌آپ.')
                 ->schema([
-                    Forms\Components\Toggle::make('homepage_popup_enabled')
-                        ->label('نمایش با پاپ‌آپ در صفحه اصلی')
-                        ->live(),
                     Forms\Components\Repeater::make('homepagePopupItems')
                         ->relationship()
-                        ->label('لینک‌های پاپ‌آپ')
+                        ->label('لینک‌ها (نام + URL)')
                         ->schema([
                             Forms\Components\TextInput::make('label')
-                                ->label('نام')
+                                ->label('نام (مثلاً والاس)')
                                 ->required()
                                 ->maxLength(255),
                             Forms\Components\TextInput::make('url')
                                 ->label('آدرس (URL)')
                                 ->required()
                                 ->maxLength(2048)
-                                ->placeholder('https://www.chinibazar.ir/products?...')
+                                ->placeholder('https://www.chinibazar.ir/products?brand_id=...')
                                 ->columnSpanFull(),
                             Forms\Components\TextInput::make('position')
                                 ->label('ترتیب')
@@ -98,8 +95,12 @@ class ProductFamilyResource extends Resource
                         ->reorderable()
                         ->orderColumn('position')
                         ->collapsible()
-                        ->visible(fn (Forms\Get $get): bool => (bool) $get('homepage_popup_enabled'))
+                        ->addActionLabel('افزودن لینک')
                         ->columnSpanFull(),
+                    Forms\Components\Toggle::make('homepage_popup_enabled')
+                        ->label('پاپ‌آپ قدیمی (اختیاری)')
+                        ->helperText('فقط اگر دوباره نوار دسته‌بندی دایره‌ای با پاپ‌آپ فعال شود.')
+                        ->default(false),
                 ]),
         ]);
     }

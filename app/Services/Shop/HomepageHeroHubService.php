@@ -28,10 +28,7 @@ class HomepageHeroHubService
 
         if ($sidebarFamily !== null) {
             $sidebarTitle = (string) $sidebarFamily->name;
-            $popup = $this->popupService->payloadForFamily($sidebarFamily);
-            if ($popup !== null) {
-                $sidebarLinks = $popup['items'];
-            }
+            $sidebarLinks = $this->popupService->activeLinkItemsForFamily($sidebarFamily);
         }
 
         return [

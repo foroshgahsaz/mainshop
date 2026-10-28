@@ -140,7 +140,7 @@ class RepresentativeCatalogLookup
                         ->orWhere('sku', 'like', '%'.$search.'%');
                 });
             })
-            ->with(['images' => fn ($q) => $q->orderBy('position')])
+            ->with(['images' => fn ($q) => $q->orderByDesc('is_primary')->orderBy('position')])
             ->orderBy('name')
             ->paginate($perPage, ['id', 'name', 'sku', 'price', 'sale_price', 'stock'], 'page', $page);
     }

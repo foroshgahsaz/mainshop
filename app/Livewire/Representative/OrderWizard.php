@@ -193,7 +193,7 @@ class OrderWizard extends Component
     public function openProductImages(int $productId): void
     {
         $query = Product::query()
-            ->with(['images' => fn ($q) => $q->orderBy('position')])
+            ->with(['images' => fn ($q) => $q->orderByDesc('is_primary')->orderBy('position')])
             ->whereKey($productId);
 
         if ($this->familyId && $this->brandId) {
@@ -223,7 +223,7 @@ class OrderWizard extends Component
 
     public function productListImageUrl(Product $product): ?string
     {
-        $path = $product->images->first()?->image;
+        $path = $product->primary_image_path;
 
         if (! is_string($path) || $path === '') {
             return null;

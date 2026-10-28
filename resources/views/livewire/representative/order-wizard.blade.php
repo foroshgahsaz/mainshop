@@ -24,7 +24,7 @@
         @endforeach
     </nav>
 
-    <div class="rep-wizard-stage">
+    <div @class(['rep-wizard-stage', 'rep-wizard-stage--products' => $step === 'product'])>
     @if ($step === 'customer')
         <section class="rep-wizard-panel">
             <header class="rep-wizard-header">
@@ -444,7 +444,13 @@
                         @endif
                         @error('payment_gateway') <p class="rep-wizard-error">{{ $message }}</p> @enderror
                         @if ($this->selectedPaymentGatewayType === \App\Services\Payment\PaymentGatewayCatalog::TYPE_CREDIT && $order)
-                            <div class="rep-split-plan">
+                            <div class="rep-split-plan-card" role="region" aria-label="طرح پرداخت اعتبار و نقد">
+                                <div class="rep-split-plan-card__head">
+                                    <span class="rep-split-plan-card__badge">پرداخت ترکیبی</span>
+                                    <p class="rep-split-plan-card__lead">
+                                        بخشی <strong>اعتباری</strong> (باجت/…) و مابقی <strong>نقدی</strong> — چند پرداخت نقدی مجاز است.
+                                    </p>
+                                </div>
                                 <label class="rep-field rep-field--grow">
                                     <span class="rep-field__label">مبلغ اعتباری (تومان)</span>
                                     <input type="number"
@@ -452,53 +458,94 @@
                                            max="{{ (int) $order->final_amount }}"
                                            step="1000"
                                            wire:model="plannedCreditAmount"
-                                           class="rep-field__input"
+                                           class="rep-field__input rep-split-plan-card__amount"
                                            placeholder="مثلاً {{ number_format((int) $order->final_amount) }} = کل اعتبار">
                                 </label>
-                                <p class="rep-wizard-hint rep-split-plan__hint">
-                                    اگر کمتر از مبلغ نهایی بگذارید، مابقی به‌صورت <strong>نقدی</strong> (چند پرداخت مجاز) از درگاه نقدی پرداخت می‌شود.
-                                </p>
-                                <label class="rep-field">
-                                    <span class="rep-field__label">درگاه نقدی (برای مابقی)</span>
-                                    <select wire:model="cashGateway" class="rep-field__input rep-fulfillment-select">
-                                        @foreach ($this->cashGateways as $cashGw)
-                                            <option value="{{ $cashGw['name'] }}">{{ $cashGw['label'] }}</option>
-                                        @endforeach
-                                    </select>
-                                </label>
+                                @if (count($this->cashGateways) === 0)
+                                    <p class="rep-wizard-empty">درگاه نقدی فعالی برای مابقی مبلغ نیست.</p>
+                                @else
+                                    <div class="rep-cash-gateway-section">
+                                        <span class="rep-cash-gateway-section__title" id="repCashGatewayLegend">
+                                            درگاه نقدی (برای مابقی مبلغ)
+                                        </span>
+                                        <p class="rep-cash-gateway-section__hint">روی آیکون درگاه کلیک کنید:</p>
+                                        <ul class="rep-cash-gateway-grid" role="radiogroup" aria-labelledby="repCashGatewayLegend">
+                                            @foreach ($this->cashGateways as $cashGw)
+                                                <li wire:key="rep-cash-gw-{{ $cashGw['name'] }}">
+                                                    <label @class([
+                                                        'rep-cash-gateway-tile',
+                                                        'is-selected' => $cashGateway === $cashGw['name'],
+                                                    ])>
+                                                        <input type="radio"
+                                                               class="rep-gateway-option__input"
+                                                               name="repCashGateway"
+                                                               value="{{ $cashGw['name'] }}"
+                                                               wire:model.live="cashGateway">
+                                                        <span class="rep-cash-gateway-tile__icon-wrap">
+                                                            <x-checkout-option-icon :src="$cashGw['icon'] ?? null" :alt="$cashGw['label']" />
+                                                        </span>
+                                                        <span class="rep-cash-gateway-tile__label">{{ $cashGw['label'] }}</span>
+                                                    </label>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endif
                             </div>
                         @endif
                     </div>
                 </div>
-                <div class="rep-order-totals">
-                    <div>جمع اقلام: {{ $this->formatMoney((int) $order->total_amount) }}</div>
-                    @if ($order->freightCarrier)
-                        <div>باربری: {{ $order->freightCarrier->displayLabel() }}</div>
-                    @endif
-                    <div>درگاه: {{ \App\Support\ShopLabels::paymentMethod($order->payment_method) }}</div>
-                    <div class="rep-order-final">مبلغ نهایی: {{ $this->formatMoney((int) $order->final_amount) }}</div>
+                <div class="rep-order-totals-card">
+                    <div class="rep-order-totals-card__rows">
+                        <div class="rep-order-totals-card__row">
+                            <span>جمع اقلام</span>
+                            <strong>{{ $this->formatMoney((int) $order->total_amount) }}</strong>
+                        </div>
+                        @if ($order->freightCarrier)
+                            <div class="rep-order-totals-card__row">
+                                <span>باربری</span>
+                                <strong>{{ $order->freightCarrier->displayLabel() }}</strong>
+                            </div>
+                        @endif
+                        <div class="rep-order-totals-card__row">
+                            <span>درگاه</span>
+                            <strong>{{ \App\Support\ShopLabels::paymentMethod($order->payment_method) }}</strong>
+                        </div>
+                        <div class="rep-order-totals-card__row rep-order-totals-card__row--final">
+                            <span>مبلغ نهایی</span>
+                            <strong>{{ $this->formatMoney((int) $order->final_amount) }}</strong>
+                        </div>
+                    </div>
                 </div>
-                <p class="rep-wizard-hint rep-review-hint">
-                    پس از تغییر تعداد یا باربری/درگاه، <strong>بروزرسانی</strong> را بزنید؛ سپس ثبت پیش‌فاکتور.
-                </p>
-                <div class="rep-wizard-actions rep-review-actions">
-                    <button type="button" class="rep-btn-secondary" wire:click="goToStep('product')">افزودن محصول دیگر</button>
+                <div class="rep-review-cta" role="region" aria-label="اقدامات پیش‌فاکتور">
+                    <p class="rep-review-cta__hint">
+                        پس از تغییر تعداد، باربری یا درگاه، اول <strong>بروزرسانی</strong> را بزنید؛ سپس پیش‌فاکتور را ثبت کنید.
+                    </p>
                     <button type="button"
-                            class="rep-btn-update"
-                            wire:click="refreshReviewTotals"
-                            wire:loading.attr="disabled"
-                            wire:target="refreshReviewTotals,finishDraft">
-                        <span wire:loading.remove wire:target="refreshReviewTotals">بروزرسانی</span>
-                        <span wire:loading wire:target="refreshReviewTotals">در حال محاسبه…</span>
+                            class="rep-review-cta__add-product"
+                            wire:click="goToStep('product')">
+                        <span class="rep-review-cta__add-icon" aria-hidden="true">+</span>
+                        <span>افزودن محصول دیگر</span>
                     </button>
-                    <button type="button"
-                            class="rep-btn-primary"
-                            wire:click="finishDraft"
-                            wire:loading.attr="disabled"
-                            wire:target="finishDraft,refreshReviewTotals">
-                        <span wire:loading.remove wire:target="finishDraft">ثبت پیش‌فاکتور (بدون ویرایش بعدی)</span>
-                        <span wire:loading wire:target="finishDraft">در حال ثبت…</span>
-                    </button>
+                    <div class="rep-review-cta__actions">
+                        <button type="button"
+                                class="rep-review-cta__update"
+                                wire:click="refreshReviewTotals"
+                                wire:loading.attr="disabled"
+                                wire:target="refreshReviewTotals,finishDraft">
+                            <span wire:loading.remove wire:target="refreshReviewTotals">بروزرسانی مبالغ</span>
+                            <span wire:loading wire:target="refreshReviewTotals">در حال محاسبه…</span>
+                        </button>
+                        <button type="button"
+                                class="rep-review-cta__submit"
+                                wire:click="finishDraft"
+                                wire:loading.attr="disabled"
+                                wire:target="finishDraft,refreshReviewTotals">
+                            <span wire:loading.remove wire:target="finishDraft">ثبت پیش‌فاکتور</span>
+                            <span wire:loading wire:target="finishDraft">در حال ثبت…</span>
+                            <span class="rep-review-cta__submit-note" wire:loading.remove wire:target="finishDraft">بدون ویرایش بعدی</span>
+                        </button>
+                    </div>
                 </div>
             @endif
             @error('order') <p class="rep-wizard-error">{{ $message }}</p> @enderror

@@ -41,6 +41,8 @@ class Order extends Model
         'shipping_amount',
         'discount_amount',
         'payment_method',
+        'proforma_planned_credit_amount',
+        'proforma_cash_gateway',
         'status',
         'stock_reserved',
         'stock_reserved_until',
@@ -64,6 +66,7 @@ class Order extends Model
             'stock_reserved' => 'boolean',
             'stock_reserved_until' => 'datetime',
             'catalog_filters' => 'array',
+            'proforma_planned_credit_amount' => 'integer',
         ];
     }
 
@@ -283,7 +286,8 @@ class Order extends Model
 
     public function isPaid(): bool
     {
-        return $this->paidAmount() >= (int) $this->final_amount;
+        return app(\App\Services\Representative\RepresentativeProformaSplitPayment::class)
+            ->isSettlementComplete($this);
     }
 
     public function canBeCanceled(): bool
@@ -403,7 +407,31 @@ class Order extends Model
             return false;
         }
 
-        if ($this->remainingAmount() <= 0 || ! $this->hasActiveStockReservation()) {
+        if (! $this->hasActiveStockReservation()) {
+            return false;
+        }
+
+        $split = app(\App\Services\Representative\RepresentativeProformaSplitPayment::class);
+
+        if ($split->isSettlementComplete($this)) {
+            return false;
+        }
+
+        if ($split->usesSplitPlan($this)) {
+            $catalog = app(PaymentGatewayCatalog::class);
+
+            if ($split->remainingCreditAmount($this) > 0 && ! $catalog->isEnabled((string) $this->payment_method)) {
+                return false;
+            }
+
+            if ($split->remainingCashAmount($this) > 0 && ! $catalog->isEnabled($split->cashGateway($this))) {
+                return false;
+            }
+
+            return true;
+        }
+
+        if ($this->remainingAmount() <= 0) {
             return false;
         }
 

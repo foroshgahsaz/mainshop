@@ -50,41 +50,124 @@
             </a>
         </div>
 
-        @if ($order->isProforma() && $order->remainingAmount() > 0)
-            <div class="rep-payment-info">
+        @php
+            $splitPay = app(\App\Services\Representative\RepresentativeProformaSplitPayment::class);
+            $catalog = app(\App\Services\Payment\PaymentGatewayCatalog::class);
+            $usesSplit = $splitPay->usesSplitPlan($order);
+            $canPay = $order->canRepresentativePayProforma();
+            $cashGwDef = $catalog->definition($splitPay->cashGateway($order));
+        @endphp
+
+        @if ($order->isProforma() && ! $order->isPaid())
+            <div class="rep-payment-info rep-payment-info--split">
                 <h3 class="rep-payment-info__title">پرداخت پیش‌فاکتور</h3>
                 <p class="rep-wizard-hint rep-payment-info__lead">
-                    پرداخت از <strong>پنل نماینده</strong> انجام می‌شود؛ در درگاه مشخص می‌شود این پرداخت
-                    برای کدام <strong>مشتری</strong> و توسط کدام <strong>نماینده</strong> است.
+                    پرداخت از <strong>پنل نماینده</strong> برای مشتری <strong>{{ $order->user?->name }}</strong> ثبت می‌شود.
+                    @if ($usesSplit)
+                        تا وقتی <strong>مجموع اعتبار و نقد</strong> با مبلغ فاکتور برابر نشود، پیش‌فاکتور بسته نمی‌شود.
+                    @endif
                 </p>
 
-                <div class="rep-proforma-pay-row">
-                    <div class="rep-proforma-gateway">
-                        <span class="rep-proforma-gateway__label">درگاه پرداخت</span>
-                        <span class="rep-proforma-gateway__value">
-                            <x-checkout-option-icon :src="$gatewayIcon" :alt="$gatewayLabel" />
-                            <strong>{{ $gatewayLabel }}</strong>
-                        </span>
-                    </div>
-                    <div class="rep-proforma-amount">
-                        <span class="rep-proforma-gateway__label">مبلغ قابل پرداخت</span>
-                        <strong class="rep-proforma-amount__value">{{ \App\Support\ShopFormatter::money($order->remainingAmount()) }}</strong>
-                    </div>
-                </div>
-
-                @if ($order->canRepresentativePayProforma())
-                    <button type="button"
-                            class="rep-btn-primary rep-payment-info__pay"
-                            wire:click="payProformaFromPage"
-                            wire:loading.attr="disabled">
-                        <span wire:loading.remove wire:target="payProformaFromPage">پرداخت و رفتن به درگاه</span>
-                        <span wire:loading wire:target="payProformaFromPage">در حال اتصال…</span>
-                    </button>
-                    @if ($order->stock_reserved_until)
-                        <p class="rep-wizard-hint rep-proforma-reservation">
-                            مهلت رزرو موجودی تا <strong>{{ $order->stock_reserved_until->shopJalali() }}</strong>
-                        </p>
+                @if (! $order->payments()->where('status', \App\Models\Payment::STATUS_SUCCESS)->exists())
+                    @php $gwType = $catalog->definition((string) $order->payment_method)['type'] ?? 'cash'; @endphp
+                    @if ($gwType === \App\Services\Payment\PaymentGatewayCatalog::TYPE_CREDIT)
+                        <div class="rep-split-plan rep-split-plan--inline">
+                            <label class="rep-field rep-field--grow">
+                                <span class="rep-field__label">سهم اعتباری (تومان)</span>
+                                <input type="number"
+                                       min="0"
+                                       max="{{ (int) $order->final_amount }}"
+                                       step="1000"
+                                       wire:model="plannedCreditEdit"
+                                       class="rep-field__input">
+                            </label>
+                            <button type="button" class="rep-btn-secondary" wire:click="saveSplitPaymentPlan">ذخیره طرح</button>
+                            <p class="rep-wizard-hint">مابقی = نقدی (پرداخت چندمرحله‌ای از درگاه {{ $cashGwDef['label'] ?? 'نقدی' }})</p>
+                        </div>
                     @endif
+                @endif
+
+                @if ($usesSplit)
+                    <div class="rep-split-summary rep-split-summary--panel">
+                        <div class="rep-split-summary__item rep-split-summary__item--credit">
+                            <span class="rep-split-summary__label">اعتبار · {{ $gatewayLabel }}</span>
+                            <strong>{{ \App\Support\ShopFormatter::money($splitPay->plannedCreditAmount($order)) }}</strong>
+                            <span class="rep-split-summary__paid">پرداخت‌شده {{ \App\Support\ShopFormatter::money($splitPay->paidCreditAmount($order)) }}</span>
+                        </div>
+                        <div class="rep-split-summary__item rep-split-summary__item--cash">
+                            <span class="rep-split-summary__label">نقدی · {{ $cashGwDef['label'] ?? '—' }}</span>
+                            <strong>{{ \App\Support\ShopFormatter::money($splitPay->plannedCashAmount($order)) }}</strong>
+                            <span class="rep-split-summary__paid">پرداخت‌شده {{ \App\Support\ShopFormatter::money($splitPay->paidCashAmount($order)) }}</span>
+                        </div>
+                        <div class="rep-split-summary__item rep-split-summary__item--total">
+                            <span class="rep-split-summary__label">مانده کل سفارش</span>
+                            <strong>{{ \App\Support\ShopFormatter::money($order->remainingAmount()) }}</strong>
+                        </div>
+                    </div>
+
+                    @if ($canPay && $splitPay->remainingCashAmount($order) > 0)
+                        <div class="rep-cash-pay-box">
+                            <h4 class="rep-cash-pay-box__title">پرداخت نقدی (چندمرحله‌ای)</h4>
+                            <p class="rep-wizard-hint">مانده نقد: <strong>{{ \App\Support\ShopFormatter::money($splitPay->remainingCashAmount($order)) }}</strong></p>
+                            <div class="rep-cash-pay-box__row">
+                                <label class="rep-field rep-field--grow">
+                                    <span class="rep-field__label">مبلغ این پرداخت (تومان)</span>
+                                    <input type="text"
+                                           inputmode="numeric"
+                                           wire:model="cashPayAmount"
+                                           class="rep-field__input"
+                                           placeholder="مثلاً ۵٬۰۰۰٬۰۰۰">
+                                </label>
+                                <button type="button"
+                                        class="rep-btn-primary"
+                                        wire:click="payCashPortion"
+                                        wire:loading.attr="disabled">
+                                    <span wire:loading.remove wire:target="payCashPortion">پرداخت نقدی</span>
+                                    <span wire:loading wire:target="payCashPortion">…</span>
+                                </button>
+                            </div>
+                        </div>
+                    @endif
+
+                    @if ($canPay && $splitPay->remainingCreditAmount($order) > 0)
+                        <button type="button"
+                                class="rep-btn-primary rep-payment-info__pay"
+                                wire:click="payCreditPortion"
+                                wire:loading.attr="disabled">
+                            <span wire:loading.remove wire:target="payCreditPortion">پرداخت اعتبار ({{ \App\Support\ShopFormatter::money($splitPay->remainingCreditAmount($order)) }})</span>
+                            <span wire:loading wire:target="payCreditPortion">در حال اتصال…</span>
+                        </button>
+                    @endif
+                @else
+                    <div class="rep-proforma-pay-row">
+                        <div class="rep-proforma-gateway">
+                            <span class="rep-proforma-gateway__label">درگاه پرداخت</span>
+                            <span class="rep-proforma-gateway__value">
+                                <x-checkout-option-icon :src="$gatewayIcon" :alt="$gatewayLabel" />
+                                <strong>{{ $gatewayLabel }}</strong>
+                            </span>
+                        </div>
+                        <div class="rep-proforma-amount">
+                            <span class="rep-proforma-gateway__label">مانده قابل پرداخت</span>
+                            <strong class="rep-proforma-amount__value">{{ \App\Support\ShopFormatter::money($order->remainingAmount()) }}</strong>
+                        </div>
+                    </div>
+
+                    @if ($canPay)
+                        <button type="button"
+                                class="rep-btn-primary rep-payment-info__pay"
+                                wire:click="payProformaFromPage"
+                                wire:loading.attr="disabled">
+                            <span wire:loading.remove wire:target="payProformaFromPage">پرداخت و رفتن به درگاه</span>
+                            <span wire:loading wire:target="payProformaFromPage">در حال اتصال…</span>
+                        </button>
+                    @endif
+                @endif
+
+                @if ($canPay && $order->stock_reserved_until)
+                    <p class="rep-wizard-hint rep-proforma-reservation">
+                        مهلت رزرو موجودی تا <strong>{{ $order->stock_reserved_until->shopJalali() }}</strong>
+                    </p>
                 @elseif (! $order->hasActiveStockReservation())
                     @php($reservationRequest = $order->latestReservationRequest()->first())
                     <p class="rep-wizard-error">
@@ -115,8 +198,11 @@
                     @endif
                 @endif
             </div>
+
+            <x-rep-proforma-payments-ledger :order="$order" :split="$splitPay" :catalog="$catalog" />
         @elseif ($order->isProforma() && $order->isPaid())
             <p class="rep-wizard-hint rep-payment-info__paid">این پیش‌فاکتور تسویه شده است.</p>
+            <x-rep-proforma-payments-ledger :order="$order" :split="$splitPay" :catalog="$catalog" />
         @endif
 
         <dl class="rep-proforma-summary">

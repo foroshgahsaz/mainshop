@@ -27,8 +27,12 @@ class PaymentService
         return $this->gateways->driver($name);
     }
 
-    public function createForOrder(Order $order, ?string $gateway = null, ?int $paidByRepresentativeId = null): Payment
-    {
+    public function createForOrder(
+        Order $order,
+        ?string $gateway = null,
+        ?int $paidByRepresentativeId = null,
+        ?int $amount = null,
+    ): Payment {
         $remaining = $order->remainingAmount();
 
         if ($remaining <= 0) {
@@ -38,11 +42,23 @@ class PaymentService
         $gatewayName = $gateway ?: config('payment.default');
         $this->catalog->assertEnabled($gatewayName);
 
+        $payAmount = $amount ?? $remaining;
+
+        if ($payAmount <= 0) {
+            throw new RuntimeException('مبلغ پرداخت باید بیشتر از صفر باشد.');
+        }
+
+        if ($payAmount > $remaining) {
+            throw new RuntimeException('مبلغ پرداخت از مانده سفارش بیشتر است.');
+        }
+
+        $this->assertSplitPaymentAmount($order, $gatewayName, $payAmount);
+
         $payment = Payment::create([
             'order_id' => $order->id,
             'user_id' => $order->user_id,
             'paid_by_representative_id' => $paidByRepresentativeId,
-            'amount' => $remaining,
+            'amount' => $payAmount,
             'gateway' => $gatewayName,
             'status' => Payment::STATUS_PENDING,
             'tracking_code' => strtoupper(Str::random(12)),
@@ -53,7 +69,7 @@ class PaymentService
             PaymentAuditStep::RECORD_CREATED,
             'payment_created',
             'رکورد پرداخت در سیستم ایجاد شد.',
-            ['amount' => $remaining, 'gateway' => $gatewayName]
+            ['amount' => $payAmount, 'gateway' => $gatewayName]
         );
 
         $this->paymentLog->created($payment);
@@ -303,12 +319,13 @@ class PaymentService
 
             $locked = $locked->fresh();
             $orderPrevious = $order->status;
-            $paidInFull = ($alreadyPaid + $captured) >= (int) $order->final_amount;
-            $partialNote = $paidInFull
+            $split = app(\App\Services\Representative\RepresentativeProformaSplitPayment::class);
+            $settlementComplete = $split->isSettlementComplete($order->fresh(['payments']));
+            $partialNote = $settlementComplete
                 ? 'پرداخت آنلاین موفق؛ سفارش تسویه شد'
                 : 'پرداخت جزئی ثبت شد. مانده: '.number_format((int) $order->final_amount - $alreadyPaid - $captured).' تومان';
 
-            if ($paidInFull && in_array($order->status, [Order::STATUS_PENDING, Order::STATUS_PROFORMA], true)) {
+            if ($settlementComplete && in_array($order->status, [Order::STATUS_PENDING, Order::STATUS_PROFORMA], true)) {
                 $order->update([
                     'status' => Order::STATUS_PROCESSING,
                     'stock_reserved_until' => null,
@@ -319,7 +336,7 @@ class PaymentService
             $this->paymentLog->statusChanged($locked, $previous, Payment::STATUS_SUCCESS, 'پرداخت تأیید شد.'.$card);
             $this->orderLog->paymentLinked($order->fresh(), $locked->tracking_code, Payment::STATUS_SUCCESS, $partialNote);
 
-            if ($paidInFull && $orderPrevious !== Order::STATUS_PROCESSING) {
+            if ($settlementComplete && $orderPrevious !== Order::STATUS_PROCESSING) {
                 $this->orderLog->statusChanged($order->fresh(), $orderPrevious, Order::STATUS_PROCESSING);
             }
 
@@ -346,6 +363,33 @@ class PaymentService
 
             return $final;
         });
+    }
+
+    protected function assertSplitPaymentAmount(Order $order, string $gatewayName, int $payAmount): void
+    {
+        $split = app(\App\Services\Representative\RepresentativeProformaSplitPayment::class);
+
+        if (! $split->usesSplitPlan($order)) {
+            return;
+        }
+
+        $type = $this->catalog->definition($gatewayName)['type'] ?? PaymentGatewayCatalog::TYPE_CASH;
+
+        if ($type === PaymentGatewayCatalog::TYPE_CREDIT) {
+            $max = $split->remainingCreditAmount($order);
+
+            if ($payAmount > $max) {
+                throw new RuntimeException('مبلغ پرداخت اعتباری از سهم اعتبار باقی‌مانده ('.number_format($max).' تومان) بیشتر است.');
+            }
+
+            return;
+        }
+
+        $max = $split->remainingCashAmount($order);
+
+        if ($payAmount > $max) {
+            throw new RuntimeException('مبلغ پرداخت نقدی از سهم نقد باقی‌مانده ('.number_format($max).' تومان) بیشتر است.');
+        }
     }
 
     protected function userFacingInitiateException(Payment $payment, Throwable $e): RuntimeException

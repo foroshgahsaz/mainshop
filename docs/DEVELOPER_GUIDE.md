@@ -1317,6 +1317,7 @@ resources/views/layouts/shop.blade.php
 | 2026-10-26 | `config/logs.php` (الگوی `backup.php`): مسیر `/data/logs`، نگه‌داری ۳۰+ روز لاگ پرداخت، zip آرشیو، پنل `/admin/payment-logs` |
 | 2026-10-26 | رفع لاگ روی `/data/logs`: `config/logging.php` قبل از `shop.php` لود می‌شد — مسیر کانال‌ها با `config/logs.php` + `ShopStoragePaths` و هشدار `shop:verify-storage` |
 | 2026-10-26 | درگاه **پارسیان (PEC)**: `ParsianGateway` + `PecIpgClient`؛ `CallBackUrl` بدون query (تطابق پنل پارسیان)، شناسایی پرداخت با `OrderId`؛ تنظیمات `/admin/parsian` |
+| 2026-10-27 | پیش‌فاکتور نماینده: طرح اعتبار+نقد (`RepresentativeProformaSplitPayment`)، پرداخت نقد چندمرحله‌ای، ledger پرداخت‌ها |
 | 2026-10-27 | ویزارد نماینده — انتخاب محصول: کارت با تصویر اصلی (`rep_product_card`)، گرید؛ رفع گالری (بارگذاری همه تصاویر، بدون lazy+p hidden) |
 | 2026-10-27 | ویزارد نماینده: تب‌های کارخانه/قالب فقط وقتی برای خانواده/برند انتخاب‌شده در کاتالوگ وجود دارد (`RepresentativeCatalogLookup` + `OrderWizard`) |
 | 2026-10-27 | بازگشت پارسیان: مسیر alias **`/payment/callback/pec`** (همان handler که `/payment/callback/parsian`)؛ پس از verify ریدایرکت به صفحه امضاشده **`payment.result`**؛ رفع TypeError ویجت `OrdersTrendChart` (Carbon) |

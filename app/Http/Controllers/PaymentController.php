@@ -108,7 +108,8 @@ class PaymentController extends Controller
                 'query' => $request->query(),
                 'authority' => $authority,
                 'status' => $status,
-            ]
+            ],
+            $request->all()
         );
 
         try {

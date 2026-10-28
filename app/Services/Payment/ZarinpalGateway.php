@@ -72,7 +72,8 @@ class ZarinpalGateway implements PaymentGatewayInterface
                 'zarinpal_request_failed',
                 'پاسخ نامعتبر از زرین‌پال (request).',
                 null,
-                ['http_status' => $response->status()]
+                ['http_status' => $response->status()],
+                $response->json()
             );
 
             $this->paymentLog->statusChanged($payment->fresh(), $previous, Payment::STATUS_FAILED, 'خطا در اتصال به درگاه');
@@ -91,7 +92,8 @@ class ZarinpalGateway implements PaymentGatewayInterface
             PaymentAuditStep::GATEWAY_RESPONSE,
             'zarinpal_authority_received',
             'Authority از زرین‌پال دریافت شد.',
-            ['authority' => $data['authority']]
+            ['authority' => $data['authority']],
+            $response->json()
         );
 
         $this->paymentLog->gatewayResponse(

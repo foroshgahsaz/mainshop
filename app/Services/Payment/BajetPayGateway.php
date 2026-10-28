@@ -85,7 +85,8 @@ class BajetPayGateway implements PaymentGatewayInterface
                 'bajet_order_failed',
                 'ایجاد سفارش باجت‌پی ناموفق بود.',
                 null,
-                ['http_status' => $response->status()]
+                ['http_status' => $response->status()],
+                $data
             );
 
             $this->paymentLog->statusChanged($payment->fresh(), $previous, Payment::STATUS_FAILED, $this->errorMessage($data, 'خطا در اتصال به باجت‌پی'));
@@ -108,7 +109,8 @@ class BajetPayGateway implements PaymentGatewayInterface
                 'reference_id' => $referenceId,
                 'refer_url' => $referUrl,
                 'refer_url_raw' => $referUrlRaw,
-            ]
+            ],
+            $data
         );
 
         $this->paymentLog->gatewayResponse(

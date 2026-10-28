@@ -1,5 +1,117 @@
 <x-filament-panels::page>
     <div class="admin-payment-log-viewer" data-admin-payment-log data-ui-version="{{ \App\Filament\Pages\ViewPaymentLogs::UI_VERSION }}">
+        <section class="admin-order__section admin-payment-log-timeline">
+            <h2 class="admin-order__section-title">مسیر پرداخت (از فایل لاگ)</h2>
+            <p class="admin-order__hint">
+                کد رهگیری پرداخت (مثل <code dir="ltr">PAY-…</code>) یا شناسه عددی پرداخت را وارد کنید.
+                در هر مرحله‌ای که پاسخ درگاه ثبت شده باشد، دکمه <strong>پاسخ درگاه</strong> خام همان پاسخ را نشان می‌دهد.
+            </p>
+            <form method="get" class="admin-payment-log-viewer__form" action="{{ \App\Filament\Pages\ViewPaymentLogs::getUrl() }}">
+                <div class="admin-payment-log-viewer__fields">
+                    <label class="admin-payment-log-viewer__field">
+                        <span>جستجو</span>
+                        <input
+                            type="search"
+                            name="tracking"
+                            value="{{ $searchQuery }}"
+                            class="admin-payment-log-viewer__input"
+                            placeholder="کد رهگیری یا payment_id"
+                            dir="ltr"
+                            autocomplete="off"
+                        />
+                    </label>
+                    <div class="admin-payment-log-viewer__actions">
+                        <x-filament::button type="submit" size="sm">نمایش تایم‌لاین</x-filament::button>
+                        @if ($searchQuery !== '')
+                            <x-filament::button tag="a" href="{{ \App\Filament\Pages\ViewPaymentLogs::getUrl() }}" size="sm" color="gray">
+                                پاک کردن
+                            </x-filament::button>
+                        @endif
+                    </div>
+                </div>
+            </form>
+
+            @if ($searchQuery !== '')
+                @if ($searchTruncated)
+                    <p class="admin-payment-log-viewer__warn">نتیجه به {{ count($timelineEvents) }} رویداد محدود شد؛ برای جزئیات کامل فایل لاگ را دانلود کنید.</p>
+                @endif
+                @if ($searchScannedFiles !== [])
+                    <p class="admin-order__hint admin-payment-log-timeline__meta">
+                        @if ($searchReferenceKind === 'payment_id')
+                            جستجو با شناسه پرداخت <code dir="ltr">{{ $searchQuery }}</code>
+                        @else
+                            جستجو با کد رهگیری <code dir="ltr">{{ $searchQuery }}</code>
+                        @endif
+                        — {{ count($searchScannedFiles) }} فایل اسکن شد
+                        @if ($searchPrimaryFile)
+                            (اولین: <code dir="ltr">{{ basename($searchPrimaryFile) }}</code>)
+                        @endif
+                    </p>
+                @endif
+
+                @if ($timelineEvents === [])
+                    <p class="admin-payment-log-viewer__empty">رویدادی در لاگ پیدا نشد (۱۴ روز اخیر).</p>
+                @else
+                    <ol class="admin-payment-log-timeline__list">
+                        @foreach ($timelineEvents as $index => $event)
+                            @php
+                                $tone = $this->timelineTone($event);
+                                $payload = $event['gateway_payload'] ?? '';
+                                $showButton = ($event['show_gateway_button'] ?? false) && $payload !== '';
+                            @endphp
+                            <li
+                                class="admin-payment-log-timeline__item admin-payment-log-timeline__item--{{ $tone }}"
+                                wire:key="payment-log-event-{{ $index }}-{{ $event['code'] ?? '' }}"
+                            >
+                                <div class="admin-payment-log-timeline__rail">
+                                    <span class="admin-payment-log-timeline__dot" aria-hidden="true"></span>
+                                </div>
+                                <div class="admin-payment-log-timeline__card">
+                                    <div class="admin-payment-log-timeline__head">
+                                        <span class="admin-payment-log-timeline__progress">{{ (int) ($event['progress'] ?? 0) }}٪</span>
+                                        <code dir="ltr" class="admin-payment-log-timeline__code">{{ $event['code'] ?? '—' }}</code>
+                                        <time dir="ltr" class="admin-payment-log-timeline__time">{{ $event['timestamp'] ?? '' }}</time>
+                                    </div>
+                                    <p class="admin-payment-log-timeline__message">{{ $event['message'] ?? '' }}</p>
+                                    <div class="admin-payment-log-timeline__meta-row">
+                                        @if (! empty($event['gateway']))
+                                            <span>درگاه: <code dir="ltr">{{ $event['gateway'] }}</code></span>
+                                        @endif
+                                        @if (! empty($event['status']))
+                                            <span>وضعیت: <code dir="ltr">{{ $event['status'] }}</code></span>
+                                        @endif
+                                        @if (! empty($event['tracking_code']))
+                                            <span>رهگیری: <code dir="ltr">{{ $event['tracking_code'] }}</code></span>
+                                        @endif
+                                    </div>
+                                    @if ($showButton)
+                                        <div class="admin-payment-log-timeline__gateway" x-data="{ open: false }">
+                                            <button
+                                                type="button"
+                                                class="admin-payment-log-timeline__gateway-btn"
+                                                @click="open = !open"
+                                                :aria-expanded="open.toString()"
+                                            >
+                                                پاسخ درگاه
+                                            </button>
+                                            <pre
+                                                class="admin-payment-log-timeline__gateway-pre"
+                                                x-show="open"
+                                                x-cloak
+                                                dir="ltr"
+                                            >{{ $payload }}</pre>
+                                        </div>
+                                    @elseif ($event['show_gateway_button'] ?? false)
+                                        <p class="admin-payment-log-timeline__gateway-empty">پاسخ خام درگاه در این مرحله در لاگ ذخیره نشده (لاگ‌های قدیمی‌تر).</p>
+                                    @endif
+                                </div>
+                            </li>
+                        @endforeach
+                    </ol>
+                @endif
+            @endif
+        </section>
+
         <section class="admin-order__section">
             <h2 class="admin-order__section-title">لاگ پرداخت (روزانه)</h2>
             <p class="admin-order__hint">

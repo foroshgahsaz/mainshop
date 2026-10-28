@@ -97,7 +97,8 @@ class TaraGateway implements PaymentGatewayInterface
                 'tara_token_failed',
                 'دریافت توکن تارا ناموفق بود.',
                 null,
-                ['result' => $result]
+                ['result' => $result],
+                $data
             );
 
             $this->paymentLog->statusChanged($payment->fresh(), $previous, Payment::STATUS_FAILED, 'خطا در دریافت توکن تارا');
@@ -116,7 +117,8 @@ class TaraGateway implements PaymentGatewayInterface
             PaymentAuditStep::GATEWAY_RESPONSE,
             'tara_token_received',
             'توکن تارا دریافت شد.',
-            ['token_prefix' => mb_substr($token, 0, 8)]
+            ['token_prefix' => mb_substr($token, 0, 8)],
+            $data
         );
 
         $this->paymentLog->gatewayResponse(

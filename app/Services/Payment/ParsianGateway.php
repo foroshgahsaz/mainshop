@@ -78,6 +78,7 @@ class ParsianGateway implements PaymentGatewayInterface
             $this->markInitiateFailed($payment, $order, [
                 'status' => $status,
                 'message' => $message,
+                'sale' => $this->objectToArray($saleResult),
             ]);
 
             throw new RuntimeException($message !== '' ? $message : 'خطا در اتصال به درگاه پرداخت.');
@@ -98,7 +99,8 @@ class ParsianGateway implements PaymentGatewayInterface
             PaymentAuditStep::GATEWAY_RESPONSE,
             'parsian_token_received',
             'Token از درگاه پارسیان دریافت شد.',
-            ['token' => $token]
+            ['token' => $token],
+            $this->objectToArray($saleResult)
         );
 
         $this->paymentLog->gatewayResponse(
@@ -193,6 +195,7 @@ class ParsianGateway implements PaymentGatewayInterface
             'parsian_request_failed',
             'پاسخ نامعتبر از درگاه پارسیان (SalePaymentRequest).',
             null,
+            is_array($raw) ? $raw : ['error' => (string) $raw],
             is_array($raw) ? $raw : ['error' => (string) $raw]
         );
 

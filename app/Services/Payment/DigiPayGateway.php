@@ -102,7 +102,8 @@ class DigiPayGateway implements PaymentGatewayInterface
             PaymentAuditStep::GATEWAY_RESPONSE,
             'digipay_ticket_created',
             'تیکت دیجی‌پی ایجاد شد؛ کاربر به درگاه هدایت می‌شود.',
-            ['redirect_host' => parse_url($redirectUrl, PHP_URL_HOST)]
+            ['redirect_host' => parse_url($redirectUrl, PHP_URL_HOST)],
+            $data
         );
 
         $this->paymentLog->gatewayResponse(
@@ -515,7 +516,8 @@ class DigiPayGateway implements PaymentGatewayInterface
             'digipay_ticket_failed',
             $message,
             null,
-            ['http' => $data]
+            ['http' => $data],
+            $data
         );
 
         $this->paymentLog->statusChanged($payment->fresh(), $previous, Payment::STATUS_FAILED, $message);

@@ -548,12 +548,57 @@
                         @endif
                     </div>
                 </div>
+                <div class="rep-coupon-box" role="region" aria-label="کد تخفیف">
+                    <span class="rep-coupon-box__label">کد تخفیف</span>
+                    <p class="rep-wizard-hint rep-coupon-box__hint">
+                        همان قوانین فروشگاه (حداقل سبد، درگاه مجاز، سقف استفاده برای مشتری) اعمال می‌شود.
+                    </p>
+                    <div class="rep-coupon-box__row">
+                        <input type="text"
+                               wire:model="couponCode"
+                               class="rep-field__input rep-coupon-box__input @error('coupon_code') rep-field__input--error @enderror"
+                               placeholder="کد را وارد کنید"
+                               autocomplete="off"
+                               @disabled($order->coupon_id !== null)>
+                        @if ($order->coupon_id !== null)
+                            <button type="button"
+                                    class="rep-btn-secondary"
+                                    wire:click="removeCoupon"
+                                    wire:loading.attr="disabled">
+                                حذف
+                            </button>
+                        @else
+                            <button type="button"
+                                    class="rep-btn-primary rep-coupon-box__apply"
+                                    wire:click="applyCoupon"
+                                    wire:loading.attr="disabled">
+                                <span wire:loading.remove wire:target="applyCoupon">اعمال</span>
+                                <span wire:loading wire:target="applyCoupon">…</span>
+                            </button>
+                        @endif
+                    </div>
+                    @error('coupon_code') <p class="rep-wizard-error">{{ $message }}</p> @enderror
+                    @if ($order->coupon)
+                        <p class="rep-coupon-box__applied">
+                            کد <strong>{{ $order->coupon->code }}</strong> اعمال شد
+                            @if ($this->appliedCouponDiscount > 0)
+                                — تخفیف {{ $this->formatMoney($this->appliedCouponDiscount) }}
+                            @endif
+                        </p>
+                    @endif
+                </div>
                 <div class="rep-order-totals-card">
                     <div class="rep-order-totals-card__rows">
                         <div class="rep-order-totals-card__row">
                             <span>جمع اقلام</span>
                             <strong>{{ $this->formatMoney((int) $order->total_amount) }}</strong>
                         </div>
+                        @if ($this->appliedCouponDiscount > 0)
+                            <div class="rep-order-totals-card__row rep-order-totals-card__row--discount">
+                                <span>تخفیف کد</span>
+                                <strong>−{{ $this->formatMoney($this->appliedCouponDiscount) }}</strong>
+                            </div>
+                        @endif
                         @if ($order->freightCarrier)
                             <div class="rep-order-totals-card__row">
                                 <span>باربری</span>

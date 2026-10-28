@@ -987,6 +987,7 @@ Product
 | `app/Services/Checkout/CouponService.php` | validate، apply، record usage |
 | `app/Filament/Resources/CouponResource.php` | admin CRUD |
 | `CheckoutPage` | فیلد coupon + preview |
+| ویزارد نماینده (جمع‌بندی) | `RepresentativeDraftCouponService` + `CouponService` — همان قوانین کوپن برای مشتری نماینده |
 
 **انواع:** درصد / مبلغ ثابت — متد `Coupon::calculateDiscount()`
 

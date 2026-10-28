@@ -243,6 +243,54 @@
     line-height: 1.3;
 }
 
+.rep-coupon-box {
+    margin-top: 1rem;
+    padding: 0.85rem 1rem;
+    border-radius: 0.75rem;
+    border: 1px dashed #cfcce6;
+    background: #faf9ff;
+}
+
+.rep-coupon-box__label {
+    display: block;
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: #3d3759;
+    margin-bottom: 0.25rem;
+}
+
+.rep-coupon-box__hint {
+    margin: 0 0 0.55rem;
+    font-size: 0.78rem;
+}
+
+.rep-coupon-box__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.rep-coupon-box__input {
+    flex: 1 1 10rem;
+    min-width: 0;
+}
+
+.rep-coupon-box__apply {
+    flex-shrink: 0;
+}
+
+.rep-coupon-box__applied {
+    margin: 0.55rem 0 0;
+    font-size: 0.82rem;
+    color: #0f766e;
+    font-weight: 600;
+}
+
+.rep-order-totals-card__row--discount strong {
+    color: #dc2626;
+}
+
 .rep-order-totals-card {
     margin-top: 1.15rem;
     padding: 0.85rem 1rem;

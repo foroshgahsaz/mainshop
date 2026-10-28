@@ -230,7 +230,15 @@ class RepresentativeDraftOrderService
         ]);
 
         $this->recalculateTotals($order);
-        $order = $order->fresh();
+        $order = $order->fresh(['coupon', 'user', 'items']);
+
+        $couponMessage = app(RepresentativeDraftCouponService::class)->assertStillValid($order);
+        if ($couponMessage !== null) {
+            throw ValidationException::withMessages([
+                'coupon_code' => $couponMessage,
+            ]);
+        }
+
         $finalAmount = (int) $order->final_amount;
 
         $gatewayType = $catalog->definition($paymentGateway)['type'] ?? PaymentGatewayCatalog::TYPE_CASH;
@@ -292,7 +300,14 @@ class RepresentativeDraftOrderService
         }
 
         $this->recalculateTotals($order);
-        $order = $order->fresh();
+        $order = $order->fresh(['coupon', 'user', 'items']);
+
+        $couponMessage = app(RepresentativeDraftCouponService::class)->assertStillValid($order);
+        if ($couponMessage !== null) {
+            throw ValidationException::withMessages([
+                'coupon_code' => $couponMessage,
+            ]);
+        }
 
         $split = app(RepresentativeProformaSplitPayment::class);
         if ($split->usesSplitPlan($order)) {
@@ -320,7 +335,9 @@ class RepresentativeDraftOrderService
             'status' => Order::STATUS_PROFORMA,
         ]);
 
-        $order = $order->fresh(['items', 'user', 'shippingMethod', 'freightCarrier', 'representative']);
+        $order = $order->fresh(['items', 'user', 'shippingMethod', 'freightCarrier', 'representative', 'coupon']);
+
+        app(RepresentativeDraftCouponService::class)->recordUsageIfNeeded($order);
 
         try {
             app(OrderSmsNotifier::class)->proformaCreated($order);

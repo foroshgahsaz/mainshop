@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Services\Media\DisplayImageService;
 use App\Services\Payment\PaymentGatewayCatalog;
 use App\Services\Representative\RepresentativeCatalogLookup;
+use App\Services\Representative\RepresentativeDraftCouponService;
 use App\Services\Representative\RepresentativeDraftOrderService;
 use App\Services\Representative\RepresentativeProformaPaymentService;
 use App\Services\Representative\RepresentativeProformaService;
@@ -72,6 +73,8 @@ class OrderWizard extends Component
     public string $cashPayRial = '';
 
     public string $cashGateway = '';
+
+    public string $couponCode = '';
 
     public bool $showProductImagesModal = false;
 
@@ -317,6 +320,58 @@ class OrderWizard extends Component
 
         Notification::make()
             ->title('محاسبات به‌روزرسانی شد')
+            ->success()
+            ->send();
+    }
+
+    public function applyCoupon(): void
+    {
+        $order = $this->findOwnedDraft();
+
+        if ($order === null) {
+            return;
+        }
+
+        $this->resetErrorBag('coupon_code');
+
+        try {
+            app(RepresentativeDraftCouponService::class)->apply(
+                $order,
+                $this->couponCode,
+                $this->paymentGateway !== '' ? $this->paymentGateway : null,
+            );
+        } catch (ValidationException $exception) {
+            foreach ($exception->errors() as $field => $messages) {
+                $this->addError($field, $messages[0] ?? 'کد تخفیف معتبر نیست.');
+            }
+
+            return;
+        }
+
+        unset($this->draftOrder);
+        $this->syncFulfillmentFromOrder();
+
+        Notification::make()
+            ->title('کد تخفیف اعمال شد')
+            ->success()
+            ->send();
+    }
+
+    public function removeCoupon(): void
+    {
+        $order = $this->findOwnedDraft();
+
+        if ($order === null) {
+            return;
+        }
+
+        app(RepresentativeDraftCouponService::class)->remove($order);
+        $this->couponCode = '';
+        $this->resetErrorBag('coupon_code');
+        unset($this->draftOrder);
+
+        Notification::make()
+            ->title('کد تخفیف حذف شد')
             ->success()
             ->send();
     }
@@ -670,7 +725,7 @@ class OrderWizard extends Component
         }
 
         return Order::query()
-            ->with(['items', 'user:id,name,phone', 'freightCarrier.province', 'freightCarrier.city'])
+            ->with(['items', 'coupon', 'user:id,name,phone', 'freightCarrier.province', 'freightCarrier.city'])
             ->whereKey($this->orderId)
             ->where('representative_id', auth()->id())
             ->where('status', Order::STATUS_DRAFT)
@@ -822,6 +877,19 @@ class OrderWizard extends Component
             : null;
         $this->plannedCreditRial = RialAmountInput::formatRialFromToman($this->plannedCreditAmount);
         $this->cashGateway = (string) ($order->proforma_cash_gateway ?: $this->defaultCashGateway());
+        $this->couponCode = (string) ($order->coupon?->code ?? '');
+    }
+
+    #[Computed]
+    public function appliedCouponDiscount(): int
+    {
+        $order = $this->draftOrder;
+
+        if ($order === null) {
+            return 0;
+        }
+
+        return app(RepresentativeDraftCouponService::class)->couponDiscountAmount($order);
     }
 
     public function updatedPlannedCreditRial(string $value): void
@@ -922,6 +990,22 @@ class OrderWizard extends Component
             $this->addError('payment_gateway', $exception->getMessage());
 
             return false;
+        }
+
+        if ($this->couponCode !== '' && $order->coupon_id === null) {
+            try {
+                app(RepresentativeDraftCouponService::class)->apply(
+                    $order->fresh(),
+                    $this->couponCode,
+                    $this->paymentGateway,
+                );
+            } catch (ValidationException $exception) {
+                foreach ($exception->errors() as $field => $messages) {
+                    $this->addError($field, $messages[0] ?? 'کد تخفیف معتبر نیست.');
+                }
+
+                return false;
+            }
         }
 
         unset($this->draftOrder);

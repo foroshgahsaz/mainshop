@@ -29,6 +29,8 @@
             .si-sum { font-weight: bold; background: #f9fafb; }
             .si-footer td { font-size: 10px; }
             .si-sign td { height: 48px; text-align: center; vertical-align: bottom; font-size: 10px; }
+            .si-paid-summary td { font-size: 10px; padding: 6px 8px; }
+            .si-paid-summary .si-k { font-weight: bold; }
         </style>
     @endif
 
@@ -239,6 +241,28 @@
             </td>
         </tr>
     </table>
+
+    @if ($document->showsSuccessfulPaymentsBlock())
+        <table class="si-paid-summary" style="margin-top: 10px; width: 100%;">
+            <tr>
+                <td colspan="3" class="si-party-label">پرداخت‌های موفق ثبت‌شده</td>
+            </tr>
+            <tr>
+                @if ($document->paidCashSuccessTomans > 0)
+                    <td style="width: 50%;">
+                        <span class="si-k">جمع نقدی موفق:</span>
+                        {{ ShopLabels::formatInvoiceMoney($document->paidCashSuccessTomans) }}
+                    </td>
+                @endif
+                @if ($document->paidCreditSuccessTomans > 0)
+                    <td @if ($document->paidCashSuccessTomans <= 0) colspan="3" @endif style="width: 50%;">
+                        <span class="si-k">جمع اعتباری موفق:</span>
+                        {{ ShopLabels::formatInvoiceMoney($document->paidCreditSuccessTomans) }}
+                    </td>
+                @endif
+            </tr>
+        </table>
+    @endif
 
     <table class="si-sign" style="margin-top: 10px;">
         <tr>

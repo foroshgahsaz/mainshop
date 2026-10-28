@@ -112,7 +112,10 @@
                     @if ($canPay && $splitPay->remainingCashAmount($order) > 0)
                         <div class="rep-cash-pay-box">
                             <h4 class="rep-cash-pay-box__title">پرداخت نقدی (چندمرحله‌ای)</h4>
-                            <p class="rep-wizard-hint">مانده نقد: <strong>{{ \App\Support\ShopFormatter::money($splitPay->remainingCashAmount($order)) }}</strong></p>
+                            <p class="rep-wizard-hint">
+                                مانده نقد: <strong>{{ \App\Support\ShopFormatter::money($splitPay->remainingCashAmount($order)) }}</strong>
+                                — اگر فیلد خالی باشد، کل مانده نقدی پرداخت می‌شود.
+                            </p>
                             <div class="rep-cash-pay-box__row">
                                 <label class="rep-field rep-field--grow">
                                     <span class="rep-field__label">مبلغ این پرداخت (ریال)</span>

@@ -5,6 +5,7 @@ namespace App\Support\SalesInvoice;
 use App\Models\Order;
 use App\Models\OrderInvoiceLine;
 use App\Services\Order\OrderInvoiceTotalsService;
+use App\Services\Representative\RepresentativeProformaSplitPayment;
 use App\Support\Order\OrderItemLinePricing;
 use App\Support\ShopLabels;
 use Illuminate\Support\Collection;
@@ -102,6 +103,15 @@ class SalesInvoiceBuilder
             ? 'نماینده: '.$order->representative->name.' — کد: '.$order->tracking_code
             : null;
 
+        $paidCashSuccess = 0;
+        $paidCreditSuccess = 0;
+        if ($order->isProforma() && $order->isRepresentativeOrder()) {
+            $order->loadMissing('payments');
+            $split = app(RepresentativeProformaSplitPayment::class);
+            $paidCashSuccess = $split->paidCashAmount($order);
+            $paidCreditSuccess = $split->paidCreditAmount($order);
+        }
+
         return new SalesInvoiceDocument(
             title: $title,
             invoiceNumber: (string) $order->tracking_code,
@@ -119,6 +129,8 @@ class SalesInvoiceBuilder
             freightLabel: $order->freightCarrier?->displayLabel(),
             notes: $notes,
             showVatBreakdown: $financialBreakdown || $order->isRepresentativeOrder(),
+            paidCashSuccessTomans: $paidCashSuccess,
+            paidCreditSuccessTomans: $paidCreditSuccess,
         );
     }
 

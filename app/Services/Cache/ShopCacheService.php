@@ -8,7 +8,6 @@ use App\Models\HomeSlider;
 use App\Models\MenuItem;
 use App\Models\Post;
 use App\Models\Product;
-use App\Models\ProductFamily;
 use App\Models\ShippingMethod;
 use App\Services\Payment\PaymentGatewayCatalog;
 use App\Services\Settings\HomepageSettingsService;

@@ -24,7 +24,7 @@
         @endforeach
     </nav>
 
-    <div class="rep-wizard-stage">
+    <div @class(['rep-wizard-stage', 'rep-wizard-stage--products' => $step === 'product'])>
     @if ($step === 'customer')
         <section class="rep-wizard-panel">
             <header class="rep-wizard-header">

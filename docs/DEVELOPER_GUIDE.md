@@ -1317,6 +1317,7 @@ resources/views/layouts/shop.blade.php
 | 2026-10-26 | `config/logs.php` (الگوی `backup.php`): مسیر `/data/logs`، نگه‌داری ۳۰+ روز لاگ پرداخت، zip آرشیو، پنل `/admin/payment-logs` |
 | 2026-10-28 | پنل `/admin/payment-logs`: تایم‌لاین گرافیکی با جستجوی کد رهگیری یا `payment_id`؛ دکمه «پاسخ درگاه» برای نمایش خام `context.gateway_raw`؛ ثبت خام callback، verify و پاسخ initiate/response درگاه‌ها در `PaymentAuditLogger` |
 | 2026-10-28 | migration پشتیبان ستون‌های `proforma_*` روی `orders`؛ `OrderProformaSplitColumns`؛ پیام خطای واضح اگر migrate اجرا نشده؛ اصلاح select درگاه نقدی ویزارد نماینده |
+| 2026-10-28 | ویزارد نماینده — کارت محصول: `primary_image_path` (نه اولین position)؛ ارتفاع مرحله محصول برای نمایش کامل کارت |
 | 2026-10-26 | رفع لاگ روی `/data/logs`: `config/logging.php` قبل از `shop.php` لود می‌شد — مسیر کانال‌ها با `config/logs.php` + `ShopStoragePaths` و هشدار `shop:verify-storage` |
 | 2026-10-26 | درگاه **پارسیان (PEC)**: `ParsianGateway` + `PecIpgClient`؛ `CallBackUrl` بدون query (تطابق پنل پارسیان)، شناسایی پرداخت با `OrderId`؛ تنظیمات `/admin/parsian` |
 | 2026-10-27 | پیش‌فاکتور نماینده: طرح اعتبار+نقد (`RepresentativeProformaSplitPayment`)، پرداخت نقد چندمرحله‌ای، ledger پرداخت‌ها |

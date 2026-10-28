@@ -5,6 +5,8 @@
         $gatewayDef = app(\App\Services\Payment\PaymentGatewayCatalog::class)->definition((string) $order->payment_method);
         $gatewayLabel = $gatewayDef['label'] ?? \App\Support\ShopLabels::paymentMethod($order->payment_method);
         $gatewayIcon = $gatewayDef['icon'] ?? null;
+        $splitPay = app(\App\Services\Representative\RepresentativeProformaSplitPayment::class);
+        $catalog = app(\App\Services\Payment\PaymentGatewayCatalog::class);
     @endphp
 
     <link rel="stylesheet" href="{{ asset('css/rep-order-wizard.css') }}?v={{ filemtime(public_path('css/rep-order-wizard.css')) }}">
@@ -41,6 +43,10 @@
             </div>
         </div>
 
+        @if ($order->isProforma())
+            <x-rep-proforma-payments-ledger :order="$order" :split="$splitPay" :catalog="$catalog" />
+        @endif
+
         <div class="rep-wizard-actions" style="margin-top: 0.75rem;">
             <a href="{{ route('representative.proforma.pdf', $order) }}"
                class="rep-btn-secondary"
@@ -51,8 +57,6 @@
         </div>
 
         @php
-            $splitPay = app(\App\Services\Representative\RepresentativeProformaSplitPayment::class);
-            $catalog = app(\App\Services\Payment\PaymentGatewayCatalog::class);
             $usesSplit = $splitPay->usesSplitPlan($order);
             $canPay = $order->canRepresentativePayProforma();
             $cashGwDef = $catalog->definition($splitPay->cashGateway($order));
@@ -73,13 +77,13 @@
                     @if ($gwType === \App\Services\Payment\PaymentGatewayCatalog::TYPE_CREDIT)
                         <div class="rep-split-plan rep-split-plan--inline">
                             <label class="rep-field rep-field--grow">
-                                <span class="rep-field__label">سهم اعتباری (تومان)</span>
-                                <input type="number"
-                                       min="0"
-                                       max="{{ (int) $order->final_amount }}"
-                                       step="1000"
-                                       wire:model="plannedCreditEdit"
-                                       class="rep-field__input">
+                                <span class="rep-field__label">سهم اعتباری (ریال)</span>
+                                <input type="text"
+                                       inputmode="numeric"
+                                       wire:model.live="plannedCreditEditRial"
+                                       class="rep-field__input rep-field__input--rial-lg"
+                                       dir="ltr"
+                                       autocomplete="off">
                             </label>
                             <button type="button" class="rep-btn-secondary" wire:click="saveSplitPaymentPlan">ذخیره طرح</button>
                             <p class="rep-wizard-hint">مابقی = نقدی (پرداخت چندمرحله‌ای از درگاه {{ $cashGwDef['label'] ?? 'نقدی' }})</p>
@@ -111,12 +115,14 @@
                             <p class="rep-wizard-hint">مانده نقد: <strong>{{ \App\Support\ShopFormatter::money($splitPay->remainingCashAmount($order)) }}</strong></p>
                             <div class="rep-cash-pay-box__row">
                                 <label class="rep-field rep-field--grow">
-                                    <span class="rep-field__label">مبلغ این پرداخت (تومان)</span>
+                                    <span class="rep-field__label">مبلغ این پرداخت (ریال)</span>
                                     <input type="text"
                                            inputmode="numeric"
-                                           wire:model="cashPayAmount"
-                                           class="rep-field__input"
-                                           placeholder="مثلاً ۵٬۰۰۰٬۰۰۰">
+                                           wire:model.live="cashPayAmount"
+                                           class="rep-field__input rep-field__input--rial-lg"
+                                           placeholder="مثلاً {{ number_format($splitPay->remainingCashAmount($order) * 10) }}"
+                                           dir="ltr"
+                                           autocomplete="off">
                                 </label>
                                 <button type="button"
                                         class="rep-btn-primary"
@@ -199,10 +205,8 @@
                 @endif
             </div>
 
-            <x-rep-proforma-payments-ledger :order="$order" :split="$splitPay" :catalog="$catalog" />
         @elseif ($order->isProforma() && $order->isPaid())
             <p class="rep-wizard-hint rep-payment-info__paid">این پیش‌فاکتور تسویه شده است.</p>
-            <x-rep-proforma-payments-ledger :order="$order" :split="$splitPay" :catalog="$catalog" />
         @endif
 
         <dl class="rep-proforma-summary">

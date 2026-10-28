@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Services\Representative\ProformaReservationRequestService;
 use App\Services\Representative\RepresentativeDraftOrderService;
 use App\Services\Representative\RepresentativeProformaPaymentService;
+use App\Support\RialAmountInput;
 use App\Support\ShopLabels;
 use Filament\Actions;
 use Filament\Notifications\Notification;
@@ -17,6 +18,8 @@ use Illuminate\Validation\ValidationException;
 class ViewDraftOrder extends ViewRecord
 {
     public string $cashPayAmount = '';
+
+    public string $plannedCreditEditRial = '';
 
     public ?int $plannedCreditEdit = null;
 
@@ -41,6 +44,18 @@ class ViewDraftOrder extends ViewRecord
         $this->plannedCreditEdit = $order->proforma_planned_credit_amount !== null
             ? (int) $order->proforma_planned_credit_amount
             : null;
+        $this->plannedCreditEditRial = RialAmountInput::formatRialFromToman($this->plannedCreditEdit);
+    }
+
+    public function updatedPlannedCreditEditRial(string $value): void
+    {
+        $this->plannedCreditEditRial = RialAmountInput::sanitizeFormattedInput($value);
+        $this->plannedCreditEdit = RialAmountInput::tomanFromInput($this->plannedCreditEditRial);
+    }
+
+    public function updatedCashPayAmount(string $value): void
+    {
+        $this->cashPayAmount = RialAmountInput::sanitizeFormattedInput($value);
     }
 
     public function getTitle(): string|Htmlable
@@ -154,7 +169,7 @@ class ViewDraftOrder extends ViewRecord
         }
 
         $order = $this->getRecord()->fresh(['payments']);
-        $amount = (int) preg_replace('/\D/', '', $this->cashPayAmount);
+        $amount = RialAmountInput::tomanFromInput($this->cashPayAmount) ?? 0;
 
         if ($amount <= 0) {
             Notification::make()->title('مبلغ نقدی را وارد کنید')->danger()->send();
@@ -218,6 +233,7 @@ class ViewDraftOrder extends ViewRecord
             return;
         }
 
+        $this->plannedCreditEdit = RialAmountInput::tomanFromInput($this->plannedCreditEditRial);
         $credit = $this->plannedCreditEdit;
         $final = (int) $order->final_amount;
 

@@ -24,11 +24,13 @@ class RepresentativeProformaPaymentService
         $this->assertCanPay($order, $representative);
 
         if ($this->split->usesSplitPlan($order)) {
+            if ($this->split->remainingCashAmount($order) > 0) {
+                return $this->initiateCashPayment($order, $representative, $this->split->remainingCashAmount($order));
+            }
+
             if ($this->split->remainingCreditAmount($order) > 0) {
                 return $this->initiateCreditPayment($order, $representative, $this->split->remainingCreditAmount($order));
             }
-
-            return $this->initiateCashPayment($order, $representative, $this->split->remainingCashAmount($order));
         }
 
         $gateway = (string) $order->payment_method;

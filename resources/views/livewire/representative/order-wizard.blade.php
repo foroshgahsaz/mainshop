@@ -4,7 +4,11 @@
     $activeStepIndex = array_search($step, $wizardStepKeys, true);
     $catalogTrail = $this->catalogSelectionSummary;
 @endphp
-<div @class(['rep-order-wizard', 'rep-order-wizard--review' => $step === 'review'])
+<div @class([
+        'rep-order-wizard',
+        'rep-order-wizard--review' => $step === 'review',
+        'rep-order-wizard--product' => $step === 'product',
+    ])
      wire:loading.class="opacity-75"
      @rep-product-images-modal-closed.window="document.documentElement.classList.remove('rep-modal-open')">
     <nav class="rep-wizard-stepper" aria-label="مراحل سفارش">
@@ -424,7 +428,7 @@
                         @if (count($this->paymentGateways) === 0)
                             <p class="rep-wizard-empty">درگاه فعالی نیست</p>
                         @else
-                            <ul class="rep-gateway-list" role="radiogroup" aria-labelledby="paymentGatewayLegend">
+                            <ul class="rep-gateway-list rep-gateway-list--compact" role="radiogroup" aria-labelledby="paymentGatewayLegend">
                                 @foreach ($this->paymentGateways as $gateway)
                                     <li wire:key="rep-gateway-{{ $gateway['name'] }}">
                                         <label class="rep-gateway-option {{ $paymentGateway === $gateway['name'] ? 'is-selected' : '' }}">
@@ -469,15 +473,47 @@
                                     </p>
                                 </div>
                                 <label class="rep-field rep-field--grow">
-                                    <span class="rep-field__label">مبلغ اعتباری (تومان)</span>
-                                    <input type="number"
-                                           min="0"
-                                           max="{{ (int) $order->final_amount }}"
-                                           step="1000"
-                                           wire:model="plannedCreditAmount"
-                                           class="rep-field__input rep-split-plan-card__amount"
-                                           placeholder="مثلاً {{ number_format((int) $order->final_amount) }} = کل اعتبار">
+                                    <span class="rep-field__label">مبلغ اعتباری (ریال)</span>
+                                    <input type="text"
+                                           inputmode="numeric"
+                                           wire:model.live="plannedCreditRial"
+                                           class="rep-field__input rep-split-plan-card__amount rep-field__input--rial-lg"
+                                           placeholder="مثلاً {{ number_format((int) $order->final_amount * 10) }}"
+                                           dir="ltr"
+                                           autocomplete="off">
                                 </label>
+                                @php
+                                    $plannedCreditTomans = (int) ($plannedCreditAmount ?? 0);
+                                    $cashRemainTomans = max(0, (int) $order->final_amount - $plannedCreditTomans);
+                                @endphp
+                                @if ($cashRemainTomans > 0 && $plannedCreditTomans > 0 && $plannedCreditTomans < (int) $order->final_amount)
+                                    <div class="rep-split-cash-pay">
+                                        <p class="rep-wizard-hint">
+                                            مابقی نقدی: <strong>{{ $this->formatMoney($cashRemainTomans) }}</strong>
+                                            — می‌توانید پس از ثبت، نقدی بزنید یا همین‌جا ثبت + پرداخت نقدی کنید.
+                                        </p>
+                                        <div class="rep-split-cash-pay__row">
+                                            <label class="rep-field rep-field--grow">
+                                                <span class="rep-field__label">مبلغ پرداخت نقدی (ریال)</span>
+                                                <input type="text"
+                                                       inputmode="numeric"
+                                                       wire:model.live="cashPayRial"
+                                                       class="rep-field__input rep-field__input--rial-lg"
+                                                       placeholder="{{ number_format($cashRemainTomans * 10) }}"
+                                                       dir="ltr"
+                                                       autocomplete="off">
+                                            </label>
+                                            <button type="button"
+                                                    class="rep-btn-primary rep-split-cash-pay__btn"
+                                                    wire:click="finishDraftAndPayCash"
+                                                    wire:loading.attr="disabled"
+                                                    wire:target="finishDraftAndPayCash">
+                                                <span wire:loading.remove wire:target="finishDraftAndPayCash">ثبت پیش‌فاکتور و پرداخت نقدی</span>
+                                                <span wire:loading wire:target="finishDraftAndPayCash">در حال اتصال…</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                @endif
                                 @if (count($this->cashGateways) === 0)
                                     <p class="rep-wizard-empty">درگاه نقدی فعالی برای مابقی مبلغ نیست.</p>
                                 @else

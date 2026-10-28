@@ -20,6 +20,6 @@ class CmsPageTitleTest extends TestCase
 
     public function test_clean_meta_title_strips_suffix_and_chapino(): void
     {
-        $this->assertSame('شرایط بازگشت', CmsPageTitle::cleanMetaTitle('شرایط بازگشت | چاپینo'));
+        $this->assertSame('شرایط بازگشت', CmsPageTitle::cleanMetaTitle('شرایط بازگشت | چاپینو'));
     }
 }

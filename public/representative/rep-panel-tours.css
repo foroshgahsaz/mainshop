@@ -1,3 +1,46 @@
+.fi-admin-shell--representative .sidebar-header__row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.65rem;
+}
+
+.rep-tour-sidebar {
+    position: relative;
+    flex-shrink: 0;
+    z-index: 850;
+}
+
+.rep-sidebar-tour-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.65rem;
+    border: 1px solid #99f6e4;
+    border-radius: 0.5rem;
+    background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.78rem;
+    line-height: 1.2;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 4px 14px rgba(13, 148, 136, 0.28);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.rep-sidebar-tour-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(13, 148, 136, 0.38);
+}
+
+.rep-tour-sidebar .rep-tour-menu {
+    position: absolute;
+    top: calc(100% + 0.35rem);
+    left: 0;
+    z-index: 9000;
+}
+
 .rep-tour-fab {
     position: fixed;
     bottom: 1.25rem;

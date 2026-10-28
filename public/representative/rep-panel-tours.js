@@ -422,10 +422,79 @@
             return;
         }
         menu.classList.toggle('is-open');
+        const helpBtn = document.getElementById('repTourHelpBtn');
+        if (helpBtn) {
+            helpBtn.setAttribute('aria-expanded', menu.classList.contains('is-open') ? 'true' : 'false');
+        }
         refreshMenuDoneStates();
     }
 
-    function buildFab() {
+    let outsideClickBound = false;
+
+    function bindOutsideClickClose(wrap) {
+        if (outsideClickBound || !wrap) {
+            return;
+        }
+        outsideClickBound = true;
+        document.addEventListener('click', (e) => {
+            if (!wrap.contains(/** @type {Node} */ (e.target))) {
+                closeMenu();
+            }
+        });
+    }
+
+    function bindResetButton(resetEl) {
+        if (!resetEl || resetEl.dataset.repTourBound) {
+            return;
+        }
+        resetEl.dataset.repTourBound = '1';
+        resetEl.addEventListener('click', () => {
+            if (confirm('پیشرفت راهنما پاک شود و تور خوش‌آمد دوباره پیشنهاد شود؟')) {
+                localStorage.removeItem(storageKey());
+                refreshMenuDoneStates();
+                closeMenu();
+            }
+        });
+    }
+
+    function bindMenuItems(root) {
+        (root || document).querySelectorAll('[data-rep-tour-menu-item]').forEach((btn) => {
+            if (btn.dataset.repTourBound) {
+                return;
+            }
+            btn.dataset.repTourBound = '1';
+            const id = btn.getAttribute('data-rep-tour-menu-item');
+            btn.addEventListener('click', () => {
+                if (id) {
+                    startTour(id);
+                }
+            });
+        });
+    }
+
+    function wireStaticTourUi() {
+        const wrap = document.getElementById('repTourFab');
+        if (!wrap) {
+            return false;
+        }
+
+        const helpBtn = document.getElementById('repTourHelpBtn');
+        if (helpBtn && !helpBtn.dataset.repTourBound) {
+            helpBtn.dataset.repTourBound = '1';
+            helpBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleMenu();
+            });
+        }
+
+        bindMenuItems(wrap);
+        bindResetButton(document.getElementById('repTourResetProgress'));
+        bindOutsideClickClose(wrap);
+
+        return true;
+    }
+
+    function buildFloatingFab() {
         if (document.getElementById('repTourFab')) {
             return;
         }
@@ -447,7 +516,6 @@
             btn.className = 'rep-tour-menu__item';
             btn.setAttribute('data-rep-tour-menu-item', id);
             btn.textContent = meta.label;
-            btn.addEventListener('click', () => startTour(id));
             li.appendChild(btn);
             list.appendChild(li);
         });
@@ -455,13 +523,8 @@
         const reset = document.createElement('button');
         reset.type = 'button';
         reset.className = 'rep-tour-menu__reset';
+        reset.id = 'repTourResetProgress';
         reset.textContent = 'پاک کردن پیشرفت راهنما (همه تورها)';
-        reset.addEventListener('click', () => {
-            if (confirm('پیشرفت راهنما پاک شود و تور خوش‌آمد دوباره پیشنهاد شود؟')) {
-                localStorage.removeItem(storageKey());
-                refreshMenuDoneStates();
-            }
-        });
         menu.appendChild(reset);
 
         const fab = document.createElement('button');
@@ -479,12 +542,18 @@
         wrap.appendChild(fab);
         document.body.appendChild(wrap);
 
-        document.addEventListener('click', (e) => {
-            if (!wrap.contains(/** @type {Node} */ (e.target))) {
-                closeMenu();
-            }
-        });
+        bindMenuItems(wrap);
+        bindResetButton(reset);
+        bindOutsideClickClose(wrap);
     }
+
+    function ensureTourUi() {
+        if (!wireStaticTourUi()) {
+            buildFloatingFab();
+        }
+    }
+
+    let welcomeBootstrapped = false;
 
     function maybeAutoStart() {
         const params = new URLSearchParams(window.location.search);
@@ -512,9 +581,12 @@
         start: startTour,
         init(config) {
             boot = { ...boot, ...config };
-            buildFab();
+            ensureTourUi();
             refreshMenuDoneStates();
-            maybeAutoStart();
+            if (!welcomeBootstrapped) {
+                welcomeBootstrapped = true;
+                maybeAutoStart();
+            }
         },
     };
 })();

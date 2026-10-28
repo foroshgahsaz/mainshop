@@ -108,8 +108,13 @@
 
 <div class="sidebar-primary" id="sidebarPrimary">
     <div class="sidebar-header">
-        <p class="sidebar-title">پنل نمایندگی</p>
-        <p class="mb-0 fw-bold text-dark" id="sidebarPanelTitle">{{ $activePanelLabel }}</p>
+        <div class="sidebar-header__row">
+            <div>
+                <p class="sidebar-title">پنل نمایندگی</p>
+                <p class="mb-0 fw-bold text-dark" id="sidebarPanelTitle">{{ $activePanelLabel }}</p>
+            </div>
+            @include('filament.partials.representative-tour-help')
+        </div>
     </div>
 
     <div class="sidebar-menu" id="sidebarMenu">

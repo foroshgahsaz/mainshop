@@ -4,10 +4,9 @@
     use App\Filament\Representative\Resources\CustomerResource;
     use App\Filament\Representative\Resources\DraftOrderResource;
 
-    $panel = filament()->getCurrentPanel();
-    $isRepPanel = $panel?->getId() === 'representative';
+    $isRepApp = request()->routeIs('filament.representative.*') && ! request()->routeIs('filament.representative.auth.*');
 @endphp
-@if ($isRepPanel && auth()->check())
+@if ($isRepApp && auth()->check())
     @php
         $tourAssetV = @filemtime(public_path('representative/rep-panel-tours.js')) ?: 1;
         $routes = [
@@ -17,19 +16,36 @@
             'draftOrders' => DraftOrderResource::getUrl('index', panel: 'representative'),
             'sampleProforma' => null,
         ];
+        $bootConfig = [
+            'userId' => auth()->id(),
+            'basePath' => '/representative',
+            'routes' => $routes,
+        ];
     @endphp
-    <script src="https://cdn.jsdelivr.net/npm/intro.js@7.2.0/intro.min.js" crossorigin="anonymous"></script>
+    <script src="{{ asset('representative/intro.min.js') }}?v=7.2.0"></script>
     <script src="{{ asset('representative/rep-panel-tours.js') }}?v={{ $tourAssetV }}"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            if (typeof window.RepPanelTours === 'undefined') {
-                return;
+        (function () {
+            var config = @json($bootConfig);
+
+            function bootRepTours() {
+                if (typeof window.RepPanelTours === 'undefined') {
+                    return;
+                }
+                window.RepPanelTours.init(config);
             }
-            window.RepPanelTours.init({
-                userId: @json(auth()->id()),
-                basePath: @json('/'.trim($panel->getPath(), '/')),
-                routes: @json($routes),
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', bootRepTours);
+            } else {
+                bootRepTours();
+            }
+
+            document.addEventListener('livewire:navigated', function () {
+                if (typeof window.RepPanelTours !== 'undefined') {
+                    window.RepPanelTours.init(config);
+                }
             });
-        });
+        })();
     </script>
 @endif

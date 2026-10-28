@@ -8,7 +8,7 @@
 @endphp
 @if ($isRepApp && auth()->check())
     @php
-        $tourAssetV = @filemtime(public_path('representative/rep-panel-tours.js')) ?: 1;
+        $tourAssetV = @filemtime(public_path('rep-panel/rep-panel-tours.js')) ?: 1;
         $routes = [
             'dashboard' => Dashboard::getUrl(panel: 'representative'),
             'customers' => CustomerResource::getUrl('index', panel: 'representative'),
@@ -22,8 +22,8 @@
             'routes' => $routes,
         ];
     @endphp
-    <script src="{{ asset('representative/intro.min.js') }}?v=7.2.0"></script>
-    <script src="{{ asset('representative/rep-panel-tours.js') }}?v={{ $tourAssetV }}"></script>
+    <script src="{{ asset('rep-panel/intro.min.js') }}?v=7.2.0"></script>
+    <script src="{{ asset('rep-panel/rep-panel-tours.js') }}?v={{ $tourAssetV }}"></script>
     <script>
         (function () {
             var config = @json($bootConfig);

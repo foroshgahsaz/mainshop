@@ -50,7 +50,12 @@
                         @endforeach
                     </ul>
                 @else
-                    <p class="home-hero-hub__empty-hint">لینک‌های خانواده «{{ $heroHub['sidebar_title'] }}» را در ادمین → خانواده محصول تنظیم کنید.</p>
+                    <p class="home-hero-hub__empty-hint">
+                        لینک‌های «{{ $heroHub['sidebar_title'] }}» هنوز ثبت نشده.
+                        ادمین → <strong>تنظیمات → صفحه اصلی فروشگاه</strong> (لینک ویرایش) یا
+                        <strong>فروشگاه → خانواده محصول → ویرایش {{ $heroHub['sidebar_title'] }}</strong>
+                        → «لینک‌های کنار اسلایدر».
+                    </p>
                 @endif
 
                 @if ($quickFamilies !== [])

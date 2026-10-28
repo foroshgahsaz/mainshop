@@ -40,13 +40,37 @@ class ProductFamilyHomepagePopupTest extends TestCase
         $this->assertSame('https://example.test/wallace', $payload['items'][0]['url']);
     }
 
+    public function test_hero_sidebar_links_work_without_popup_toggle(): void
+    {
+        $family = ProductFamily::query()->create([
+            'name' => 'تست',
+            'slug' => 'test-family',
+            'is_active' => true,
+            'homepage_popup_enabled' => false,
+            'position' => 0,
+        ]);
+
+        ProductFamilyHomepagePopupItem::query()->create([
+            'product_family_id' => $family->id,
+            'label' => 'برند',
+            'url' => 'https://example.test/brand',
+            'position' => 0,
+            'is_active' => true,
+        ]);
+
+        $items = app(ProductFamilyHomepagePopupService::class)->activeLinkItemsForFamily($family);
+
+        $this->assertCount(1, $items);
+        $this->assertSame('برند', $items[0]['label']);
+    }
+
     public function test_home_payload_includes_hero_hub_sidebar_links(): void
     {
         $family = ProductFamily::query()->create([
             'name' => 'تست',
             'slug' => 'test-family',
             'is_active' => true,
-            'homepage_popup_enabled' => true,
+            'homepage_popup_enabled' => false,
             'position' => 0,
         ]);
 

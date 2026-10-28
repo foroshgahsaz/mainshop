@@ -2,11 +2,14 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Resources\ProductFamilyResource;
 use App\Filament\Support\CrudSuccessNotification;
 use App\Models\ProductFamily;
 use App\Services\Cache\ShopCacheService;
 use App\Services\Settings\HomepageSettingsService;
 use Filament\Forms;
+use Filament\Forms\Get;
+use Illuminate\Support\HtmlString;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
@@ -51,7 +54,39 @@ class ManageHomepageSettings extends Page implements HasForms
                             ->options(fn () => ProductFamily::query()->where('is_active', true)->orderBy('position')->pluck('name', 'id'))
                             ->searchable()
                             ->nullable()
-                            ->helperText('خالی = خانواده با slug «chinese-service». لینک‌ها از «پاپ‌آپ صفحه اصلی» همان خانواده.'),
+                            ->live()
+                            ->helperText('خالی = خانواده با slug «chinese-service».'),
+                        Forms\Components\Placeholder::make('hero_sidebar_links_help')
+                            ->label('مدیریت لینک‌ها (والاس، مارشال، …)')
+                            ->content(function (Get $get): HtmlString|string {
+                                $id = (int) $get('hero_sidebar_family_id');
+                                if ($id <= 0) {
+                                    $id = (int) (ProductFamily::query()
+                                        ->where('slug', 'chinese-service')
+                                        ->value('id') ?? 0);
+                                }
+
+                                if ($id <= 0) {
+                                    return 'ابتدا خانواده «سرویس چینی» را در **فروشگاه → خانواده محصول** بسازید (slug: chinese-service).';
+                                }
+
+                                $family = ProductFamily::query()->find($id);
+                                $editUrl = ProductFamilyResource::getUrl('edit', ['record' => $id]);
+                                $activeCount = $family?->homepagePopupItems()
+                                    ->where('is_active', true)
+                                    ->count() ?? 0;
+
+                                return new HtmlString(
+                                    '<p class="text-sm leading-6 text-gray-600 dark:text-gray-400">'
+                                    .'لینک‌ها در <strong>فروشگاه → خانواده محصول → ویرایش «'.e($family?->name ?? '').'»</strong> '
+                                    .'→ بخش <strong>«لینک‌های کنار اسلایدر»</strong> (نام + URL).</p>'
+                                    .'<p class="mt-2"><a href="'.e($editUrl).'" target="_blank" rel="noopener" '
+                                    .'class="inline-flex items-center gap-1 font-bold text-primary-600 underline">'
+                                    .'باز کردن ویرایش لینک‌ها</a>'
+                                    .' <span class="text-sm text-gray-500">('.$activeCount.' لینک فعال)</span></p>'
+                                );
+                            })
+                            ->columnSpanFull(),
                         Forms\Components\Select::make('hero_quick_family_ids')
                             ->label('سه خانواده زیر لیست (پارس اپال، …)')
                             ->options(fn () => ProductFamily::query()->where('is_active', true)->orderBy('position')->pluck('name', 'id'))

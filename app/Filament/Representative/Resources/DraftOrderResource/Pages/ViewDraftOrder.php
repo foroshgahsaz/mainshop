@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Services\Representative\ProformaReservationRequestService;
 use App\Services\Representative\RepresentativeDraftOrderService;
 use App\Services\Representative\RepresentativeProformaPaymentService;
+use App\Services\Representative\RepresentativeProformaSplitPayment;
 use App\Support\RialAmountInput;
 use App\Support\ShopLabels;
 use Filament\Actions;
@@ -45,6 +46,14 @@ class ViewDraftOrder extends ViewRecord
             ? (int) $order->proforma_planned_credit_amount
             : null;
         $this->plannedCreditEditRial = RialAmountInput::formatRialFromToman($this->plannedCreditEdit);
+
+        $split = app(RepresentativeProformaSplitPayment::class);
+        if ($order->canRepresentativePayProforma() && $split->usesSplitPlan($order)) {
+            $remainCash = $split->remainingCashAmount($order);
+            if ($remainCash > 0) {
+                $this->cashPayAmount = RialAmountInput::formatRialFromToman($remainCash);
+            }
+        }
     }
 
     public function updatedPlannedCreditEditRial(string $value): void
@@ -169,12 +178,24 @@ class ViewDraftOrder extends ViewRecord
         }
 
         $order = $this->getRecord()->fresh(['payments']);
+        $split = app(RepresentativeProformaSplitPayment::class);
         $amount = RialAmountInput::tomanFromInput($this->cashPayAmount) ?? 0;
 
         if ($amount <= 0) {
-            Notification::make()->title('مبلغ نقدی را وارد کنید')->danger()->send();
+            $amount = $split->remainingCashAmount($order);
+        }
+
+        if ($amount <= 0) {
+            Notification::make()->title('مانده نقدی برای پرداخت وجود ندارد')->warning()->send();
 
             return;
+        }
+
+        $remaining = $split->usesSplitPlan($order)
+            ? $split->remainingCashAmount($order)
+            : $order->remainingAmount();
+        if ($amount > $remaining) {
+            $amount = $remaining;
         }
 
         try {

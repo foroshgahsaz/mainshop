@@ -26,7 +26,14 @@ final class SalesInvoiceDocument
         public ?string $freightLabel = null,
         public ?string $notes = null,
         public bool $showVatBreakdown = false,
+        public int $paidCashSuccessTomans = 0,
+        public int $paidCreditSuccessTomans = 0,
     ) {}
+
+    public function showsSuccessfulPaymentsBlock(): bool
+    {
+        return $this->paidCashSuccessTomans > 0 || $this->paidCreditSuccessTomans > 0;
+    }
 
     public function vatPercent(): int
     {

@@ -52,19 +52,21 @@
                         default => 'is-pending',
                     };
                 @endphp
-                <li class="rep-payment-row {{ $statusClass }}" wire:key="rep-pay-{{ $payment->id }}">
+                <li class="rep-payment-row rep-payment-row--stacked {{ $statusClass }}" wire:key="rep-pay-{{ $payment->id }}">
                     <div class="rep-payment-row__status">
                         <span class="rep-payment-row__badge">{{ \App\Support\ShopLabels::paymentStatus($status) }}</span>
                         <time datetime="{{ $payment->created_at?->toIso8601String() }}">{{ $payment->created_at?->shopJalali() }}</time>
                     </div>
-                    <div class="rep-payment-row__main">
-                        <span class="rep-payment-row__gateway">
+                    <div class="rep-payment-row__stack">
+                        <span class="rep-payment-row__icon" aria-hidden="true">
                             <x-checkout-option-icon :src="$gw['icon'] ?? null" :alt="$gw['label']" />
-                            {{ $gw['label'] ?? $payment->gateway }}
                         </span>
-                        <span class="rep-payment-row__amount">{{ \App\Support\ShopFormatter::money((int) $payment->amount) }}</span>
-                    </div>
-                    <dl class="rep-payment-row__meta">
+                        <div class="rep-payment-row__stack-body">
+                            <div class="rep-payment-row__headline">
+                                <span class="rep-payment-row__gateway">{{ $gw['label'] ?? $payment->gateway }}</span>
+                                <span class="rep-payment-row__amount">{{ \App\Support\ShopFormatter::money((int) $payment->amount) }}</span>
+                            </div>
+                            <dl class="rep-payment-row__meta">
                         <div><dt>کد پیگیری</dt><dd>{{ $payment->tracking_code }}</dd></div>
                         @if ($payment->transaction_id)
                             <div><dt>مرجع درگاه</dt><dd dir="ltr">{{ $payment->transaction_id }}</dd></div>
@@ -78,7 +80,9 @@
                         @if ($payment->paidByRepresentative)
                             <div><dt>پرداخت توسط</dt><dd>نماینده {{ $payment->paidByRepresentative->name }}</dd></div>
                         @endif
-                    </dl>
+                            </dl>
+                        </div>
+                    </div>
                 </li>
             @endforeach
         </ul>

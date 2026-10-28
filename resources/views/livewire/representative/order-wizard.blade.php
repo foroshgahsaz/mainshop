@@ -4,7 +4,7 @@
     $activeStepIndex = array_search($step, $wizardStepKeys, true);
     $catalogTrail = $this->catalogSelectionSummary;
 @endphp
-<div class="rep-order-wizard"
+<div @class(['rep-order-wizard', 'rep-order-wizard--review' => $step === 'review'])
      wire:loading.class="opacity-75"
      @rep-product-images-modal-closed.window="document.documentElement.classList.remove('rep-modal-open')">
     <nav class="rep-wizard-stepper" aria-label="مراحل سفارش">
@@ -24,7 +24,11 @@
         @endforeach
     </nav>
 
-    <div @class(['rep-wizard-stage', 'rep-wizard-stage--products' => $step === 'product'])>
+    <div @class([
+        'rep-wizard-stage',
+        'rep-wizard-stage--products' => $step === 'product',
+        'rep-wizard-stage--review' => $step === 'review',
+    ])>
     @if ($step === 'customer')
         <section class="rep-wizard-panel">
             <header class="rep-wizard-header">
@@ -445,8 +449,21 @@
                         @error('payment_gateway') <p class="rep-wizard-error">{{ $message }}</p> @enderror
                         @if ($this->selectedPaymentGatewayType === \App\Services\Payment\PaymentGatewayCatalog::TYPE_CREDIT && $order)
                             <div class="rep-split-plan-card" role="region" aria-label="طرح پرداخت اعتبار و نقد">
+                                <div class="rep-split-plan-card__glow" aria-hidden="true"></div>
+                                <div class="rep-split-plan-card__ribbon" aria-hidden="true">اعتبار + نقد</div>
                                 <div class="rep-split-plan-card__head">
-                                    <span class="rep-split-plan-card__badge">پرداخت ترکیبی</span>
+                                    <div class="rep-split-plan-card__head-main">
+                                        <span class="rep-split-plan-card__icon" aria-hidden="true">
+                                            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <circle cx="24" cy="24" r="22" stroke="currentColor" stroke-width="2" opacity="0.35"/>
+                                                <path d="M16 28h16M16 22h10M16 16h16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                                            </svg>
+                                        </span>
+                                        <div>
+                                            <span class="rep-split-plan-card__badge">پرداخت ترکیبی</span>
+                                            <h3 class="rep-split-plan-card__title">تقسیم مبلغ بین اعتبار و درگاه نقدی</h3>
+                                        </div>
+                                    </div>
                                     <p class="rep-split-plan-card__lead">
                                         بخشی <strong>اعتباری</strong> (باجت/…) و مابقی <strong>نقدی</strong> — چند پرداخت نقدی مجاز است.
                                     </p>

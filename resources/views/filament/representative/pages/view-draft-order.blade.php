@@ -37,7 +37,7 @@
                 app(\App\Services\Settings\SettingsService::class)->site(),
             );
         @endphp
-        <div class="rep-proforma-invoice">
+        <div class="rep-proforma-invoice" data-rep-tour="rep-proforma-invoice">
             <div class="si-document--cart-wrap">
                 @include('components.sales-invoice.document', ['document' => $invoicePreview, 'context' => 'web'])
             </div>
@@ -47,7 +47,7 @@
             <x-rep-proforma-payments-ledger :order="$order" :split="$splitPay" :catalog="$catalog" />
         @endif
 
-        <div class="rep-wizard-actions" style="margin-top: 0.75rem;">
+        <div class="rep-wizard-actions" style="margin-top: 0.75rem;" data-rep-tour="rep-proforma-pdf">
             <a href="{{ route('representative.proforma.pdf', $order) }}"
                class="rep-btn-secondary"
                target="_blank"
@@ -63,7 +63,7 @@
         @endphp
 
         @if ($order->isProforma() && ! $order->isPaid())
-            <div class="rep-payment-info rep-payment-info--split">
+            <div class="rep-payment-info rep-payment-info--split" data-rep-tour="rep-proforma-pay-box">
                 <h3 class="rep-payment-info__title">پرداخت پیش‌فاکتور</h3>
                 <p class="rep-wizard-hint rep-payment-info__lead">
                     پرداخت از <strong>پنل نماینده</strong> برای مشتری <strong>{{ $order->user?->name }}</strong> ثبت می‌شود.
@@ -173,6 +173,7 @@
                     @endif
                 @endif
 
+                <div data-rep-tour="rep-proforma-reservation">
                 @if ($canPay && $order->stock_reserved_until)
                     <p class="rep-wizard-hint rep-proforma-reservation">
                         مهلت رزرو موجودی تا <strong>{{ $order->stock_reserved_until->shopJalali() }}</strong>
@@ -206,6 +207,7 @@
                         </button>
                     @endif
                 @endif
+                </div>
             </div>
 
         @elseif ($order->isProforma() && $order->isPaid())

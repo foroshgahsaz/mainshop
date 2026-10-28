@@ -41,11 +41,13 @@ class Dashboard extends BaseDashboard
             Actions\Action::make('newOrder')
                 ->label('سفارش جدید')
                 ->icon('heroicon-o-plus')
+                ->extraAttributes(['data-rep-tour' => 'rep-header-new-order'])
                 ->url(CreateDraftOrder::getUrl(panel: 'representative')),
             Actions\Action::make('newCustomer')
                 ->label('مشتری جدید')
                 ->icon('heroicon-o-user-plus')
                 ->color('gray')
+                ->extraAttributes(['data-rep-tour' => 'rep-header-new-customer'])
                 ->url(CustomerResource::getUrl('create', panel: 'representative')),
         ];
     }

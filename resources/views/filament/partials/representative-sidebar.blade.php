@@ -76,6 +76,7 @@
             <a href="{{ $navIcon['href'] }}"
                class="sidebar-icon-item sidebar-icon-link {{ $activePanel === 'dashboard' ? 'active' : '' }}"
                data-tooltip="{{ $navIcon['tooltip'] }}"
+               @if ($navIcon['id'] === 'dashboard') data-rep-tour="rep-nav-dashboard" @endif
                aria-label="{{ $navIcon['tooltip'] }}">
                 <i class="fas {{ $navIcon['icon'] }}"></i>
                 <span class="sidebar-icon-label">{{ $navIcon['tooltip'] }}</span>
@@ -84,6 +85,8 @@
             <div class="sidebar-icon-item {{ $activePanel === $navIcon['id'] ? 'active' : '' }}"
                  data-panel="{{ $navIcon['panel'] }}"
                  data-tooltip="{{ $navIcon['tooltip'] }}"
+                 @if ($navIcon['id'] === 'customers') data-rep-tour="rep-nav-customers" @endif
+                 @if ($navIcon['id'] === 'orders') data-rep-tour="rep-nav-orders" @endif
                  role="button"
                  tabindex="0"
                  aria-label="{{ $navIcon['tooltip'] }}">
@@ -130,7 +133,11 @@
                     <div class="submenu {{ $hasActiveChild ? 'expanded' : '' }}" id="{{ $submenuId }}">
                         @foreach ($menu['items'] as $item)
                             <a href="{{ $item['url'] }}"
-                               class="submenu-item {{ $isMenuItemActive($item['url']) ? 'active' : '' }}">
+                               class="submenu-item {{ $isMenuItemActive($item['url']) ? 'active' : '' }}"
+                               @if ($item['label'] === 'سفارش جدید') data-rep-tour="rep-sidebar-new-order" @endif
+                               @if ($item['label'] === 'افزودن مشتری') data-rep-tour="rep-sidebar-new-customer" @endif
+                               @if ($item['label'] === 'پیش‌سفارش‌ها') data-rep-tour="rep-sidebar-draft-list" @endif
+                               @if ($item['label'] === 'لیست مشتریان') data-rep-tour="rep-sidebar-customer-list" @endif>
                                 <i class="fas {{ $item['icon'] }} ms-2 submenu-item-icon"></i>
                                 {{ $item['label'] }}
                             </a>

@@ -23,6 +23,11 @@ class RepresentativeSalesByGatewayChart extends ChartWidget
 
     protected static ?string $pollingInterval = null;
 
+    public function getExtraBodyAttributes(): array
+    {
+        return ['data-rep-tour' => 'rep-widget-gateway-chart'];
+    }
+
     protected function getData(): array
     {
         $user = auth()->user();

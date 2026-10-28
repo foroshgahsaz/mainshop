@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Services\Settings\HomepageSettingsService;
 use App\Support\ShopStoragePaths;
 use App\Support\StoragePermissionFixer;
 use Illuminate\Console\Command;
@@ -29,6 +30,10 @@ class ShopDeployRecover extends Command
         $this->components->info('Running migrations…');
         Artisan::call('migrate', ['--force' => true]);
         $this->line(trim(Artisan::output()));
+
+        if (app(HomepageSettingsService::class)->materializeHeroSidebarLinksIfEmpty()) {
+            $this->components->info('Homepage hero sidebar links imported from product family settings.');
+        }
 
         if (! \App\Support\OrderProformaSplitColumns::available()) {
             $this->components->error(\App\Support\OrderProformaSplitColumns::migrationHint());

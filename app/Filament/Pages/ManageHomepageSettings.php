@@ -47,8 +47,34 @@ class ManageHomepageSettings extends Page implements HasForms
         return $form
             ->schema([
                 Forms\Components\Section::make('باکس بالای صفحه (اسلایدر + سایدبار)')
-                    ->description('لیست سمت راست اسلایدر = لینک‌های پاپ‌آپ خانواده انتخاب‌شده (مثل سرویس چینی). سه خانواده پایین = میانبر دایره‌ای.')
+                    ->description('لینkهای کنار اسلایدر را اینجا مستقیم وارد کنید (منبع اصلی نمایش در سایت). با ذخیره، در صورت خالی بودن از خانوade محصول هم پر می‌شود.')
                     ->schema([
+                        Forms\Components\TextInput::make('hero_sidebar_title')
+                            ->label('عنوان لیست کنار اسلایدر')
+                            ->default('سرویس چینی')
+                            ->maxLength(120),
+                        Forms\Components\Repeater::make('hero_sidebar_links')
+                            ->label('لینk‌های کنار اسلایدر (نام + URL)')
+                            ->schema([
+                                Forms\Components\TextInput::make('label')
+                                    ->label('نام')
+                                    ->required()
+                                    ->maxLength(255),
+                                Forms\Components\TextInput::make('url')
+                                    ->label('آدرس (URL)')
+                                    ->required()
+                                    ->maxLength(2048)
+                                    ->columnSpanFull(),
+                                Forms\Components\Toggle::make('is_active')
+                                    ->label('فعال')
+                                    ->default(true),
+                            ])
+                            ->columns(2)
+                            ->defaultItems(0)
+                            ->reorderable()
+                            ->collapsible()
+                            ->addActionLabel('افزودن لینk')
+                            ->columnSpanFull(),
                         Forms\Components\Select::make('hero_sidebar_family_id')
                             ->label('خانواده لیست کنار اسلایدر')
                             ->options(fn () => ProductFamily::query()->where('is_active', true)->orderBy('position')->pluck('name', 'id'))

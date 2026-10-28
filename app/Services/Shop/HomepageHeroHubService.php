@@ -22,13 +22,16 @@ class HomepageHeroHubService
      */
     public function payload(): array
     {
-        $sidebarFamily = $this->resolveSidebarFamily();
-        $sidebarLinks = [];
-        $sidebarTitle = 'سرویس چینی';
+        $sidebarLinks = $this->homepageSettings->heroSidebarLinks();
+        $sidebarTitle = $this->homepageSettings->heroSidebarTitle();
 
-        if ($sidebarFamily !== null) {
-            $sidebarTitle = (string) $sidebarFamily->name;
-            $sidebarLinks = $this->popupService->activeLinkItemsForFamily($sidebarFamily);
+        if ($sidebarLinks === []) {
+            $sidebarFamily = $this->resolveSidebarFamily();
+
+            if ($sidebarFamily !== null) {
+                $sidebarTitle = (string) $sidebarFamily->name;
+                $sidebarLinks = $this->popupService->activeLinkItemsForFamily($sidebarFamily);
+            }
         }
 
         return [

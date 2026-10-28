@@ -1,9 +1,12 @@
 @extends('layouts.shop')
 
-@section('title', $page->meta_title ?: $page->title)
+@section('title', \App\Support\CmsPageTitle::forPage($page))
 
 @section('meta')
-    <x-seo-meta :seo="\App\Support\SeoPresenter::for($page, ['type' => 'article'])" />
+    <x-seo-meta :seo="\App\Support\SeoPresenter::for($page, [
+        'type' => 'article',
+        'title' => \App\Support\CmsPageTitle::forPage($page),
+    ])" />
 @endsection
 
 @section('content')

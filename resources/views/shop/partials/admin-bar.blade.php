@@ -1,14 +1,17 @@
 @php
     use App\Filament\Resources\CategoryResource;
+    use App\Filament\Resources\PageResource;
     use App\Filament\Resources\PostResource;
     use App\Filament\Resources\ProductResource;
     use App\Filament\Resources\UserResource;
+    use App\Models\Page;
     use App\Models\Post;
     use App\Models\Product;
 
     $adminUser = auth()->user();
     $currentProduct = request()->route('product');
     $currentPost = request()->route('post');
+    $currentPage = request()->route('page');
 
     $createLinks = [
         ['label' => 'محصول', 'url' => ProductResource::getUrl('create'), 'icon' => 'fa-box-open'],
@@ -38,6 +41,13 @@
                 <a href="{{ PostResource::getUrl('edit', ['record' => $currentPost]) }}" class="store-admin-bar-link">
                     <i class="fas fa-edit"></i>
                     <span>ویرایش این مقاله</span>
+                </a>
+            @endif
+
+            @if ($currentPage instanceof Page)
+                <a href="{{ PageResource::getUrl('edit', ['record' => $currentPage]) }}" class="store-admin-bar-link">
+                    <i class="fas fa-edit"></i>
+                    <span>ویرایش این صفحه</span>
                 </a>
             @endif
 

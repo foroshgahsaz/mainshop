@@ -260,15 +260,40 @@ class PaymentLogReader
      */
     public function searchByTrackingCode(string $trackingCode, ?string $dateYmd = null, int $daySpan = 7): array
     {
-        $needle = strtoupper(trim($trackingCode));
+        return $this->searchByReference($trackingCode, $dateYmd, $daySpan);
+    }
 
-        if ($needle === '') {
+    /**
+     * @return array{
+     *     lines: list<string>,
+     *     truncated: bool,
+     *     scanned_files: list<string>,
+     *     primary_file: ?string,
+     *     reference: string,
+     *     reference_kind: 'tracking'|'payment_id'|''
+     * }
+     */
+    public function searchByReference(string $reference, ?string $dateYmd = null, int $daySpan = 7): array
+    {
+        $reference = trim($reference);
+
+        if ($reference === '') {
             return [
                 'lines' => [],
                 'truncated' => false,
                 'scanned_files' => [],
                 'primary_file' => null,
+                'reference' => '',
+                'reference_kind' => '',
             ];
+        }
+
+        if (ctype_digit($reference)) {
+            $needle = '"payment_id":'.(int) $reference;
+            $kind = 'payment_id';
+        } else {
+            $needle = strtoupper($reference);
+            $kind = 'tracking';
         }
 
         $files = $this->filesToScan($dateYmd, max(1, min(30, $daySpan)));
@@ -291,6 +316,8 @@ class PaymentLogReader
             'truncated' => $truncated,
             'scanned_files' => $files,
             'primary_file' => $files[0] ?? null,
+            'reference' => $reference,
+            'reference_kind' => $kind,
         ];
     }
 

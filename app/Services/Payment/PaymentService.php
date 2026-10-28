@@ -204,7 +204,8 @@ class PaymentService
                 'successful' => $result->successful,
                 'canceled' => $result->canceled,
                 'message' => $result->message,
-            ]
+            ],
+            $result->raw
         );
 
         return DB::transaction(function () use ($payment, $result) {

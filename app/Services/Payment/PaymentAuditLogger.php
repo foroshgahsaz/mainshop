@@ -15,9 +15,10 @@ class PaymentAuditLogger
     /**
      * @param  array<string, mixed>  $context
      */
-    public function step(Payment $payment, int $progress, string $code, string $message, array $context = []): void
+    public function step(Payment $payment, int $progress, string $code, string $message, array $context = [], mixed $gatewayRaw = null): void
     {
         $progress = max(0, min(100, $progress));
+        $context = $this->attachGatewayRaw($context, $gatewayRaw);
         $context = $this->sanitizeContext($context);
 
         $payload = [
@@ -48,7 +49,7 @@ class PaymentAuditLogger
     /**
      * @param  array<string, mixed>  $context
      */
-    public function failure(Payment $payment, int $progress, string $code, string $message, ?Throwable $exception = null, array $context = []): void
+    public function failure(Payment $payment, int $progress, string $code, string $message, ?Throwable $exception = null, array $context = [], mixed $gatewayRaw = null): void
     {
         $progress = max(0, min(100, $progress));
 
@@ -57,7 +58,7 @@ class PaymentAuditLogger
             $context['error'] = $exception->getMessage();
         }
 
-        $this->step($payment, $progress, $code, $message, $context);
+        $this->step($payment, $progress, $code, $message, $context, $gatewayRaw);
 
         if ($exception !== null) {
             Log::channel('payments')->error("[{$progress}%] {$code} failed: {$message}", [
@@ -74,16 +75,78 @@ class PaymentAuditLogger
      */
     private function sanitizeContext(array $context): array
     {
+        $raw = $context['gateway_raw'] ?? null;
+        unset($context['gateway_raw']);
+
         $json = json_encode($context, JSON_UNESCAPED_UNICODE);
 
         if ($json === false) {
-            return ['_note' => 'context could not be encoded'];
+            $context = ['_note' => 'context could not be encoded'];
+        } elseif (strlen($json) > 8000) {
+            $context = ['_truncated' => true, 'preview' => mb_substr($json, 0, 4000)];
         }
 
-        if (strlen($json) > 8000) {
-            return ['_truncated' => true, 'preview' => mb_substr($json, 0, 4000)];
+        if ($raw !== null) {
+            $context['gateway_raw'] = $this->sanitizeGatewayRaw($raw);
         }
 
         return $context;
+    }
+
+    /**
+     * @param  array<string, mixed>  $context
+     * @return array<string, mixed>
+     */
+    private function attachGatewayRaw(array $context, mixed $gatewayRaw): array
+    {
+        if ($gatewayRaw !== null) {
+            $context['gateway_raw'] = $this->normalizeGatewayRaw($gatewayRaw);
+        }
+
+        return $context;
+    }
+
+    private function normalizeGatewayRaw(mixed $raw): mixed
+    {
+        if (is_scalar($raw) || $raw === null) {
+            return $raw;
+        }
+
+        if (is_array($raw)) {
+            return $raw;
+        }
+
+        if (is_object($raw)) {
+            $encoded = json_encode($raw, JSON_UNESCAPED_UNICODE);
+
+            if ($encoded !== false) {
+                $decoded = json_decode($encoded, true);
+
+                return is_array($decoded) ? $decoded : ['_value' => $encoded];
+            }
+
+            return ['_object' => $raw::class];
+        }
+
+        return ['_type' => gettype($raw)];
+    }
+
+    private function sanitizeGatewayRaw(mixed $raw): mixed
+    {
+        $normalized = $this->normalizeGatewayRaw($raw);
+        $json = json_encode($normalized, JSON_UNESCAPED_UNICODE);
+
+        if ($json === false) {
+            return ['_note' => 'gateway_raw could not be encoded'];
+        }
+
+        if (strlen($json) > 32000) {
+            return [
+                '_truncated' => true,
+                'preview' => mb_substr($json, 0, 16000),
+            ];
+        }
+
+        return $normalized;
     }
 }

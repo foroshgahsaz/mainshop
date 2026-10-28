@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Filament\Support\CrudSuccessNotification;
+use App\Filament\Support\GatewayHomepagePlanFields;
 use App\Filament\Support\ShopIconUpload;
 use App\Services\Payment\ParsianCallbackUrl;
 use App\Services\Settings\SettingsService;
@@ -44,6 +45,7 @@ class ManageParsian extends Page implements HasForms
             'callback_url' => $parsian['callback_url'],
             'amount_unit' => $parsian['amount_unit'],
             'icon' => ShopIconUpload::forForm($parsian['icon'] ?? null),
+            ...GatewayHomepagePlanFields::mountState($parsian),
         ]);
     }
 
@@ -74,6 +76,7 @@ class ManageParsian extends Page implements HasForms
                     ShopIconUpload::make('icon', 'gateway-icons', 'آیکون درگاه')
                         ->columnSpanFull(),
                 ])->columns(2),
+                GatewayHomepagePlanFields::section(),
             ])
             ->statePath('data');
     }
@@ -92,6 +95,7 @@ class ManageParsian extends Page implements HasForms
             'callback_url' => $callbackPath,
             'amount_unit' => $data['amount_unit'] ?? 'toman',
             'icon' => ShopIconUpload::fromState($data['icon'] ?? null),
+            ...GatewayHomepagePlanFields::saveState($data),
         ]);
 
         CrudSuccessNotification::saved()

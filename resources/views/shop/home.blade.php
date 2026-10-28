@@ -9,87 +9,11 @@
         </div>
     @endif
 
-    {{-- HERO --}}
-    <section class="main-slider-outer mt-2 md:mt-4">
-        <div class="swiper mainSwiper relative" aria-label="اسلایدر بنر">
-            <div class="swiper-wrapper">
-                @forelse($sliders as $i => $slider)
-                    <div class="swiper-slide">
-                        @if($slider->link)
-                            <a href="{{ $slider->link }}" class="hero-slide__link">
-                                @include('shop.partials.hero-slide-media', ['slider' => $slider, 'isFirst' => $i === 0])
-                            </a>
-                        @else
-                            <div class="hero-slide__link">
-                                @include('shop.partials.hero-slide-media', ['slider' => $slider, 'isFirst' => $i === 0])
-                            </div>
-                        @endif
-                    </div>
-                @empty
-                    @foreach(['slide-ai.svg', 'slide-discount.svg', 'slide-python.svg'] as $i => $hero)
-                        <div class="swiper-slide">
-                            <a href="{{ route('products.index') }}" class="hero-slide__link">
-                                <img src="{{ asset('shop/images/hero/'.$hero) }}" alt="بنر" loading="{{ $i === 0 ? 'eager' : 'lazy' }}" draggable="false">
-                            </a>
-                        </div>
-                    @endforeach
-                @endforelse
-            </div>
-            <div class="swiper-pagination"></div>
-        </div>
-    </section>
-
-    {{-- CATEGORIES / PRODUCT FAMILIES --}}
-    @php
-        $taxonomyMode = $taxonomy_mode ?? \App\Services\Settings\HomepageSettingsService::TAXONOMY_CATEGORIES;
-        $taxonomyItems = $taxonomy_items ?? collect();
-        $isFamilyTaxonomy = $taxonomyMode === \App\Services\Settings\HomepageSettingsService::TAXONOMY_PRODUCT_FAMILIES;
-        $familyHomepagePopups = $family_homepage_popups ?? [];
-    @endphp
-    @if($taxonomyItems->isNotEmpty())
-        <section @class([
-            'max-w-site mx-auto px-4 featured-categories-section',
-            'featured-categories-section--families' => $isFamilyTaxonomy,
-        ])>
-            <div class="flex items-center justify-between section-header">
-                <h2 class="section-title">دسته‌بندی محصولات</h2>
-                <a href="{{ route('products.index') }}" class="section-nav-link">مشاهده همه</a>
-            </div>
-            <div class="swiper categorySwiper">
-                <div class="swiper-wrapper">
-                    @foreach($taxonomyItems as $item)
-                        @php($familyPopup = $isFamilyTaxonomy ? ($familyHomepagePopups[$item->id] ?? null) : null)
-                        <div class="swiper-slide">
-                            @if ($familyPopup)
-                                <button type="button"
-                                        class="category-card category-card--family category-card--popup-trigger"
-                                        onclick="openFamilyHomepagePopup(@js($familyPopup['family_name']), @js($familyPopup['items']))"
-                                        aria-haspopup="dialog">
-                                    <span class="category-card__image">
-                                        <img src="{{ \App\Support\ShopFormatter::productFamilyImage($item->image) }}" alt="{{ $item->name }}" loading="lazy">
-                                    </span>
-                                    <span class="category-card__label">{{ $item->name }}</span>
-                                </button>
-                            @else
-                                <a href="{{ $isFamilyTaxonomy ? route('products.index', ['product_family_id' => $item->id]) : route('categories.show', $item) }}" @class([
-                                    'category-card',
-                                    'category-card--family' => $isFamilyTaxonomy,
-                                ])>
-                                    <span class="category-card__image">
-                                        <img src="{{ $isFamilyTaxonomy ? \App\Support\ShopFormatter::productFamilyImage($item->image) : \App\Support\ShopFormatter::categoryImage($item->image) }}" alt="{{ $item->name }}" loading="lazy">
-                                    </span>
-                                    <span class="category-card__label">{{ $item->name }}</span>
-                                </a>
-                            @endif
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        </section>
-        @if ($isFamilyTaxonomy && $familyHomepagePopups !== [])
-            @include('shop.partials.family-homepage-popup-modal')
-        @endif
-    @endif
+    @include('shop.partials.home-hero-hub', [
+        'sliders' => $sliders,
+        'hero_hub' => $hero_hub ?? [],
+        'homepage_gateway_plans' => $homepage_gateway_plans ?? [],
+    ])
 
     {{-- SPECIAL SALE --}}
     @if($discounted->isNotEmpty())

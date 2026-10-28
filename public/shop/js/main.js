@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initMegaMenu();
   initBrandsNavDropdowns();
   initMainSwiper();
+  initHomeHeroSwiper();
   initProductSwipers();
   initBlogSwiper();
   initProgTabs();
@@ -450,6 +451,22 @@ function toggleCartSidebar(show) {
 }
 
 window.toggleCartSidebar = toggleCartSidebar;
+
+function initHomeHeroSwiper() {
+  const root = document.querySelector('.homeHeroSwiper');
+  if (!root || typeof Swiper === 'undefined') return null;
+
+  return new Swiper(root, {
+    slidesPerView: 1,
+    spaceBetween: 0,
+    loop: true,
+    grabCursor: true,
+    pagination: {
+      el: root.querySelector('.swiper-pagination'),
+      clickable: true,
+    },
+  });
+}
 
 function initMainSwiper() {
   const root = document.querySelector('.mainSwiper');

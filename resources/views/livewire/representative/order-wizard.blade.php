@@ -460,7 +460,7 @@
                                 </p>
                                 <label class="rep-field">
                                     <span class="rep-field__label">درگاه نقدی (برای مابقی)</span>
-                                    <select wire:model="cashGateway" class="rep-field__input">
+                                    <select wire:model="cashGateway" class="rep-field__input rep-fulfillment-select">
                                         @foreach ($this->cashGateways as $cashGw)
                                             <option value="{{ $cashGw['name'] }}">{{ $cashGw['label'] }}</option>
                                         @endforeach

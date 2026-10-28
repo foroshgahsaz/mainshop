@@ -100,6 +100,7 @@ php artisan shop:verify-storage
 - `SHOP_LOGS_DIRECTORY=/data/logs`
 - `LOG_STACK=daily` (با `FILESYSTEM_PUBLIC_ROOT=/data` یا `SHOP_LOGS_DIRECTORY`، پیش‌فرض config خودکار `daily` است — فایل‌های `laravel-YYYY-MM-DD.log`)
 - `PAYMENT_LOG_LIST_DAYS=30` — تعداد روز در پنل `/admin/payment-logs`
+- پس از deploy ویژگی‌های نماینده (پرداخت ترکیبی پیش‌فاکتور): حتماً `php artisan migrate --force && php artisan shop:deploy-recover` — ستون‌های `proforma_planned_credit_amount` و `proforma_cash_gateway` روی `orders`
 - `PAYMENT_LOG_ARCHIVE_AFTER_DAYS=30` — بعد از آن فایل plain به `.zip` می‌رود (حذف نمی‌شود)
 - `LOG_PAYMENTS_DAYS=45` — نگه‌داری Monolog برای `payments-*.log`
 - `DB_BACKUP_DIRECTORY=/data/database-backups`

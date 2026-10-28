@@ -1605,7 +1605,8 @@ html.rep-modal-open {
     text-align: center;
 }
 
-.rep-order-wizard select.rep-fulfillment-select {
+.rep-order-wizard select.rep-fulfillment-select,
+.rep-order-wizard select.rep-field__input.rep-fulfillment-select {
     width: 100%;
     border: 1px solid #d1d5db;
     border-radius: 0.5rem;

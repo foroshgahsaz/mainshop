@@ -233,19 +233,18 @@ class RepresentativeDraftOrderService
         $order = $order->fresh();
         $finalAmount = (int) $order->final_amount;
 
-        $payload = [
-            'proforma_planned_credit_amount' => null,
-            'proforma_cash_gateway' => null,
-        ];
-
         $gatewayType = $catalog->definition($paymentGateway)['type'] ?? PaymentGatewayCatalog::TYPE_CASH;
 
-        if (
-            $gatewayType === PaymentGatewayCatalog::TYPE_CREDIT
+        $needsSplitColumns = $gatewayType === PaymentGatewayCatalog::TYPE_CREDIT
             && $plannedCreditAmount !== null
             && $plannedCreditAmount > 0
-            && $plannedCreditAmount < $finalAmount
-        ) {
+            && $plannedCreditAmount < $finalAmount;
+
+        $proformaPayload = null;
+
+        if ($needsSplitColumns) {
+            \App\Support\OrderProformaSplitColumns::ensureAvailable();
+
             app(RepresentativeProformaSplitPayment::class)->assertPlanAmounts($finalAmount, $plannedCreditAmount);
 
             $cashName = (string) ($cashGateway ?? '');
@@ -254,13 +253,20 @@ class RepresentativeDraftOrderService
             }
             $catalog->assertEnabled($cashName);
 
-            $payload = [
+            $proformaPayload = [
                 'proforma_planned_credit_amount' => $plannedCreditAmount,
                 'proforma_cash_gateway' => $cashName,
             ];
+        } elseif (\App\Support\OrderProformaSplitColumns::available()) {
+            $proformaPayload = [
+                'proforma_planned_credit_amount' => null,
+                'proforma_cash_gateway' => null,
+            ];
         }
 
-        $order->update($payload);
+        if ($proformaPayload !== null) {
+            $order->update($proformaPayload);
+        }
     }
 
     public function submitProforma(Order $order): Order

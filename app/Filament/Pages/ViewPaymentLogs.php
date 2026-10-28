@@ -13,11 +13,11 @@ class ViewPaymentLogs extends Page
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
-    protected static ?string $navigationLabel = 'لاگ فایل پرداخت';
+    protected static ?string $navigationLabel = 'لاگ پرداخت (تایم‌لاین)';
 
     protected static ?string $slug = 'payment-logs';
 
-    protected static ?string $title = 'فایل‌های لاگ پرداخت';
+    protected static ?string $title = 'لاگ پرداخت — تایم‌لاین و فایل';
 
     protected static ?string $navigationGroup = 'فروشگاه';
 

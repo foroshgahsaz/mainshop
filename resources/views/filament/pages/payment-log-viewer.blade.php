@@ -1,5 +1,11 @@
 <x-filament-panels::page>
     <div class="admin-payment-log-viewer" data-admin-payment-log data-ui-version="{{ \App\Filament\Pages\ViewPaymentLogs::UI_VERSION }}">
+        <p class="admin-payment-log-viewer__warn admin-payment-log-timeline__deploy-hint">
+            نسخه UI: <code dir="ltr">{{ \App\Filament\Pages\ViewPaymentLogs::UI_VERSION }}</code>
+            — اگر بخش «مسیر پرداخت» یا جستجو را نمی‌بینید، روی سرور
+            <code dir="ltr">php artisan shop:deploy-recover</code>
+            (یا حداقل <code dir="ltr">php artisan optimize:clear</code>) اجرا کنید.
+        </p>
         <section class="admin-order__section admin-payment-log-timeline">
             <h2 class="admin-order__section-title">مسیر پرداخت (از فایل لاگ)</h2>
             <p class="admin-order__hint">

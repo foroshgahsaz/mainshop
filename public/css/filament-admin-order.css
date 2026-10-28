@@ -929,3 +929,7 @@
 .admin-payment-log-timeline__meta {
     margin-top: 0.5rem;
 }
+
+.admin-payment-log-timeline__deploy-hint {
+    margin-bottom: 0.75rem;
+}

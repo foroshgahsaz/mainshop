@@ -30,6 +30,10 @@ class ShopDeployRecover extends Command
         Artisan::call('migrate', ['--force' => true]);
         $this->line(trim(Artisan::output()));
 
+        if (! \App\Support\OrderProformaSplitColumns::available()) {
+            $this->components->error(\App\Support\OrderProformaSplitColumns::migrationHint());
+        }
+
         if (array_key_exists('payments:archive-logs', Artisan::all())) {
             Artisan::call('payments:archive-logs');
             $this->line(trim(Artisan::output()));

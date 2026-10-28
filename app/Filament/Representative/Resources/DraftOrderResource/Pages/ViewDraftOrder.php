@@ -222,6 +222,8 @@ class ViewDraftOrder extends ViewRecord
         $final = (int) $order->final_amount;
 
         try {
+            \App\Support\OrderProformaSplitColumns::ensureAvailable();
+
             if ($credit !== null && $credit > 0 && $credit < $final) {
                 app(\App\Services\Representative\RepresentativeProformaSplitPayment::class)
                     ->assertPlanAmounts($final, $credit);

@@ -15,6 +15,7 @@
 | ۳ | [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md) | **راهنمای اصلی** — معماری، فروشگاه، Filament، پرداخت، cache، media |
 | ۴ | [dev/03-production-k8s-liara.md](dev/03-production-k8s-liara.md) | استقرار، پاد K8s، env بدون فایل `.env`، Redis، `/data` |
 | ۵ | [representative/PHASE-PLAN-FA.md](representative/PHASE-PLAN-FA.md) | پنل نماینده و پیش‌فاکتور (فازها) |
+| ۵.۱ | [representative/ONBOARDING-TOUR-FA.md](representative/ONBOARDING-TOUR-FA.md) | راهنمای Intro.js پنل نماینده |
 | ۶ | [dev/04-code-map.md](dev/04-code-map.md) | نقشهٔ فایل‌ها و کلاس‌ها (جستجوی سریع) |
 | ۷ | [dev/05-troubleshooting-playbook.md](dev/05-troubleshooting-playbook.md) | سناریوهای رایج + دستورات copy-paste |
 | ۸ | [dev/06-feature-recipes.md](dev/06-feature-recipes.md) | الگوی افزودن فیچر (سبد، ادمین، سرویس) |

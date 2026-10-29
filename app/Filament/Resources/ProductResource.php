@@ -13,6 +13,7 @@ use App\Filament\Support\SeoFormSchema;
 use App\Models\Product;
 use App\Support\AdminAccess;
 use App\Support\ShopLabels;
+use App\Support\SlugFromTitle;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -76,9 +77,9 @@ class ProductResource extends Resource
                             ->label('نام محصول')
                             ->required()
                             ->maxLength(255)
-                            ->live(onBlur: true)
+                            ->live(debounce: 400)
                             ->afterStateUpdated(
-                                fn ($state, callable $set) => $set('slug', Str::slug($state))
+                                fn ($state, callable $set) => $set('slug', SlugFromTitle::fromProductName($state))
                             ),
 
                         Forms\Components\TextInput::make('slug')

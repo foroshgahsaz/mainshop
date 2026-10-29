@@ -4,7 +4,6 @@ namespace App\Services\Shop;
 
 use App\Models\ProductFamily;
 use App\Services\Settings\HomepageSettingsService;
-use Illuminate\Support\Collection;
 
 class HomepageHeroHubService
 {

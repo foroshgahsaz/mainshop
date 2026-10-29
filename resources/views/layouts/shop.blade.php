@@ -28,7 +28,7 @@
     @if ($needsSwiper)
         <link rel="stylesheet" href="{{ asset('shop/vendor/swiper/swiper-bundle.min.css') }}">
     @endif
-    <link rel="stylesheet" href="{{ asset('shop/css/custom.css') }}?v={{ filemtime(public_path('shop/css/custom.css')) ?: 1 }}">
+    <link rel="stylesheet" href="{{ asset('shop/css/custom.css') }}?v={{ config('shop.assets.css_version', 1) }}-{{ filemtime(public_path('shop/css/custom.css')) ?: 1 }}">
     <link rel="stylesheet" href="{{ asset('shop/css/rich-content.css') }}">
     @if ($needsListingAssets)
         <link rel="stylesheet" href="{{ asset('shop/css/listing.css') }}">

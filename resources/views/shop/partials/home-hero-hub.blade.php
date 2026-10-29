@@ -5,7 +5,8 @@
     $quickFamilies = $heroHub['quick_families'] ?? [];
 @endphp
 
-<section class="home-hero-hub max-w-site mx-auto px-4 mt-2 md:mt-4" aria-label="بنر و دسترسی سریع">
+<section class="home-hero-hub" aria-label="بنر و دسترسی سریع">
+    <div class="home-hero-hub__inner max-w-site mx-auto px-4 mt-2 md:mt-4">
     <div class="home-hero-hub__frame">
     <div class="home-hero-hub__panel">
         <div class="home-hero-hub__grid">
@@ -114,6 +115,7 @@
                 @endforeach
             </div>
         @endif
+    </div>
     </div>
     </div>
 </section>

@@ -3712,16 +3712,30 @@ html.checkout-coupon-alert-open {
 }
 
 /* ===== Homepage hero hub (compact slider + sidebar + gateway plans) ===== */
+.home-hero-hub__frame {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 0.65rem;
+  box-shadow: 0 8px 32px rgba(15, 23, 42, 0.06);
+}
+
+@media (min-width: 768px) {
+  .home-hero-hub__frame {
+    padding: 0.85rem;
+    border-radius: 1.25rem;
+  }
+}
+
 .home-hero-hub__panel {
   background: #edf0f2;
-  border-radius: 1rem;
+  border-radius: 0.85rem;
   padding: 0.75rem;
 }
 
 @media (min-width: 768px) {
   .home-hero-hub__panel {
     padding: 1rem 1rem 1.1rem;
-    border-radius: 1.25rem;
+    border-radius: 1rem;
   }
 }
 
@@ -3735,7 +3749,7 @@ html.checkout-coupon-alert-open {
   .home-hero-hub__grid {
     grid-template-columns: minmax(0, 1fr) 220px;
     gap: 1rem;
-    align-items: stretch;
+    align-items: start;
   }
 }
 
@@ -3773,6 +3787,12 @@ html.checkout-coupon-alert-open {
 .homeHeroSwiper {
   border-radius: 0.85rem;
   overflow: hidden;
+  height: auto !important;
+}
+
+.homeHeroSwiper .swiper-wrapper,
+.homeHeroSwiper .swiper-slide {
+  height: auto !important;
 }
 
 .home-hero-hub__slide-link {
@@ -3842,8 +3862,8 @@ html.checkout-coupon-alert-open {
 .home-hero-hub__brand-link-main {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 0.45rem;
+  justify-content: flex-start;
+  gap: 0.4rem;
   flex: 1;
   min-width: 0;
 }
@@ -3853,11 +3873,20 @@ html.checkout-coupon-alert-open {
 }
 
 .home-hero-hub__brand-icon {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   object-fit: contain;
   flex-shrink: 0;
   opacity: 0.92;
+}
+
+.home-hero-hub__brand-icon-fallback {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 0.35rem;
+  background: linear-gradient(145deg, #f1f5f9, #e2e8f0);
+  opacity: 0.85;
 }
 
 .home-hero-hub__brand-link i {
@@ -3892,10 +3921,10 @@ html.checkout-coupon-alert-open {
 .home-hero-hub__quick-family-image {
   width: 100%;
   aspect-ratio: 1;
-  border-radius: 999px;
+  border-radius: 0.65rem;
   overflow: hidden;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
+  background: #dff6f9;
+  border: 1px solid #bae6fd;
 }
 
 .home-hero-hub__quick-family-image img {
@@ -3970,17 +3999,18 @@ html.checkout-coupon-alert-open {
 }
 
 .home-gateway-plan-card__logo {
-  width: 88px;
-  min-width: 88px;
+  width: 108px;
+  min-width: 108px;
   display: flex;
   align-items: center;
   justify-content: center;
   align-self: center;
+  flex-shrink: 0;
 }
 
 .home-gateway-plan-card__logo img {
-  max-width: 88px;
-  max-height: 88px;
+  max-width: 108px;
+  max-height: 108px;
   width: 100%;
   height: auto;
   object-fit: contain;

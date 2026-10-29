@@ -6,6 +6,7 @@
 @endphp
 
 <section class="home-hero-hub max-w-site mx-auto px-4 mt-2 md:mt-4" aria-label="بنر و دسترسی سریع">
+    <div class="home-hero-hub__frame">
     <div class="home-hero-hub__panel">
         <div class="home-hero-hub__grid">
             <div class="home-hero-hub__slider">
@@ -44,17 +45,19 @@
                             <li>
                                 <a href="{{ $link['url'] }}" class="home-hero-hub__brand-link">
                                     <span class="home-hero-hub__brand-link-main">
-                                        <span class="home-hero-hub__brand-label">{{ $link['label'] }}</span>
                                         @if (! empty($link['image']))
                                             <img
                                                 src="{{ $link['image'] }}"
                                                 alt=""
                                                 class="home-hero-hub__brand-icon"
-                                                width="32"
-                                                height="32"
+                                                width="36"
+                                                height="36"
                                                 loading="lazy"
                                             >
+                                        @else
+                                            <span class="home-hero-hub__brand-icon-fallback" aria-hidden="true"></span>
                                         @endif
+                                        <span class="home-hero-hub__brand-label">{{ $link['label'] }}</span>
                                     </span>
                                     <i class="fas fa-chevron-left" aria-hidden="true"></i>
                                 </a>
@@ -89,6 +92,13 @@
             <div class="home-hero-hub__gateways" aria-label="طرح‌های خرید اعتباری">
                 @foreach ($gatewayPlans as $plan)
                     <article class="home-gateway-plan-card">
+                        <div class="home-gateway-plan-card__logo">
+                            @if ($plan['icon'])
+                                <img src="{{ $plan['icon'] }}" alt="{{ $plan['label'] }}" loading="lazy">
+                            @else
+                                <span class="home-gateway-plan-card__logo-fallback">{{ mb_substr($plan['label'], 0, 1) }}</span>
+                            @endif
+                        </div>
                         <div class="home-gateway-plan-card__body">
                             <div class="home-gateway-plan-card__title-wrap">
                                 <span class="home-gateway-plan-card__title-accent" aria-hidden="true"></span>
@@ -100,16 +110,10 @@
                                 <i class="fas fa-arrow-left-long" aria-hidden="true"></i>
                             </a>
                         </div>
-                        <div class="home-gateway-plan-card__logo">
-                            @if ($plan['icon'])
-                                <img src="{{ $plan['icon'] }}" alt="{{ $plan['label'] }}" loading="lazy">
-                            @else
-                                <span class="home-gateway-plan-card__logo-fallback">{{ mb_substr($plan['label'], 0, 1) }}</span>
-                            @endif
-                        </div>
                     </article>
                 @endforeach
             </div>
         @endif
+    </div>
     </div>
 </section>

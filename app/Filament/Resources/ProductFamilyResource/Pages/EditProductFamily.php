@@ -23,20 +23,28 @@ class EditProductFamily extends EditRecord
     protected function afterSave(): void
     {
         $record = $this->getRecord()->fresh();
-        $links = app(ProductFamilyHomepagePopupService::class)->activeLinkItemsForFamily($record);
+        $popup = app(ProductFamilyHomepagePopupService::class);
+        $links = $popup->storedLinkItemsForFamily($record);
 
-        if ($links !== []) {
-            $isSidebarFamily = $record->slug === 'chinese-service'
-                || $record->name === 'سرویس چینی'
-                || app(HomepageSettingsService::class)->heroSidebarFamilyId() === (int) $record->id;
+        $isSidebarFamily = $record->slug === 'chinese-service'
+            || $record->name === 'سرویس چینی'
+            || (bool) $record->show_on_homepage_sidebar
+            || app(HomepageSettingsService::class)->heroSidebarFamilyId() === (int) $record->id;
 
-            if ($isSidebarFamily) {
-                app(HomepageSettingsService::class)->syncHeroSidebarFromFamily(
-                    (int) $record->id,
-                    (string) $record->name,
-                    $links
-                );
+        if ($isSidebarFamily) {
+            if ($links === []) {
+                $links = [[
+                    'label' => (string) $record->name,
+                    'url' => route('products.index', ['product_family_id' => $record->id]),
+                    'image' => trim((string) ($record->image ?? '')) ?: null,
+                ]];
             }
+
+            app(HomepageSettingsService::class)->syncHeroSidebarFromFamily(
+                (int) $record->id,
+                (string) $record->name,
+                $links
+            );
         }
 
         app(ShopCacheService::class)->forgetHome();

@@ -3712,16 +3712,15 @@ html.checkout-coupon-alert-open {
 }
 
 /* ===== Homepage hero hub (compact slider + sidebar + gateway plans) ===== */
-.home-hero-hub__shell {
-  background: #fff;
+.home-hero-hub__panel {
+  background: #edf0f2;
   border-radius: 1rem;
   padding: 0.75rem;
-  box-shadow: 0 8px 32px rgba(15, 23, 42, 0.06);
 }
 
 @media (min-width: 768px) {
-  .home-hero-hub__shell {
-    padding: 1rem;
+  .home-hero-hub__panel {
+    padding: 1rem 1rem 1.1rem;
     border-radius: 1.25rem;
   }
 }
@@ -3780,16 +3779,16 @@ html.checkout-coupon-alert-open {
   display: block;
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 64 / 27;
   overflow: hidden;
   border-radius: 0.85rem;
-  background: #f3f4f6;
+  background: #e2e8f0;
 }
 
 @media (min-width: 992px) {
   .home-hero-hub__slide-link {
-    aspect-ratio: 750 / 380;
-    min-height: 100%;
+    aspect-ratio: 750 / 285;
+    min-height: 0;
   }
 }
 
@@ -3824,24 +3823,47 @@ html.checkout-coupon-alert-open {
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  padding: 0.45rem 0.55rem;
+  padding: 0.5rem 0.65rem;
   border-radius: 0.55rem;
-  background: #f8fafc;
+  background: #fff;
   color: #334155;
   font-size: 0.82rem;
   font-weight: 700;
   text-decoration: none;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
 }
 
 .home-hero-hub__brand-link:hover {
-  background: #fff7ed;
   color: #c2410c;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+}
+
+.home-hero-hub__brand-link-main {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.45rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.home-hero-hub__brand-label {
+  line-height: 1.35;
+}
+
+.home-hero-hub__brand-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  flex-shrink: 0;
+  opacity: 0.92;
 }
 
 .home-hero-hub__brand-link i {
   font-size: 0.65rem;
-  opacity: 0.55;
+  opacity: 0.45;
+  flex-shrink: 0;
 }
 
 .home-hero-hub__empty-hint {
@@ -3891,12 +3913,18 @@ html.checkout-coupon-alert-open {
 
 .home-hero-hub__gateways {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(1, minmax(0, 1fr));
   gap: 0.65rem;
   margin-top: 0.85rem;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 640px) {
+  .home-hero-hub__gateways {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 992px) {
   .home-hero-hub__gateways {
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 0.75rem;
@@ -3905,69 +3933,101 @@ html.checkout-coupon-alert-open {
 
 .home-gateway-plan-card {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 0.85rem 0.65rem 0.75rem;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 0.65rem;
+  padding: 0.85rem 0.9rem;
   background: #fff;
-  border: 1px solid #e2e8f0;
+  border: none;
   border-radius: 0.85rem;
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+  min-height: 118px;
+}
+
+.home-gateway-plan-card__body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+}
+
+.home-gateway-plan-card__title-wrap {
+  width: 100%;
+  margin-bottom: 0.35rem;
+}
+
+.home-gateway-plan-card__title-accent {
+  display: block;
+  width: 28px;
+  height: 3px;
+  border-radius: 999px;
+  background: #2563eb;
+  margin-bottom: 0.35rem;
 }
 
 .home-gateway-plan-card__logo {
-  width: 72px;
-  height: 72px;
+  width: 88px;
+  min-width: 88px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 0.5rem;
+  align-self: center;
 }
 
 .home-gateway-plan-card__logo img {
-  max-width: 100%;
-  max-height: 100%;
+  max-width: 88px;
+  max-height: 88px;
+  width: 100%;
+  height: auto;
   object-fit: contain;
 }
 
 .home-gateway-plan-card__logo-fallback {
-  width: 56px;
-  height: 56px;
+  width: 72px;
+  height: 72px;
   border-radius: 999px;
   background: #f1f5f9;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 800;
+  font-size: 1.25rem;
   color: #64748b;
 }
 
 .home-gateway-plan-card__title {
-  margin: 0 0 0.25rem;
-  font-size: 0.82rem;
+  margin: 0;
+  padding-bottom: 0.25rem;
+  border-bottom: 2px solid #0f172a;
+  font-size: 0.88rem;
   font-weight: 800;
   color: #0f172a;
+  line-height: 1.35;
 }
 
 .home-gateway-plan-card__intro {
-  margin: 0 0 0.55rem;
-  font-size: 0.72rem;
+  margin: 0.45rem 0 0.55rem;
+  font-size: 0.74rem;
   line-height: 1.55;
   color: #64748b;
-  min-height: 2.2em;
 }
 
 .home-gateway-plan-card__cta {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.35rem 0.65rem;
+  padding: 0.38rem 0.75rem;
   border-radius: 999px;
-  background: #f1f5f9;
+  background: #edf0f2;
   color: #475569;
   font-size: 0.72rem;
   font-weight: 700;
   text-decoration: none;
+  margin-top: auto;
 }
 
 .home-gateway-plan-card__cta:hover {

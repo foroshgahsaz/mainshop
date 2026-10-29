@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Filament\Resources\ProductFamilyResource;
 use App\Filament\Support\CrudSuccessNotification;
+use App\Filament\Support\ShopMediaPicker;
 use App\Models\ProductFamily;
 use App\Services\Cache\ShopCacheService;
 use App\Services\Settings\HomepageSettingsService;
@@ -64,6 +65,8 @@ class ManageHomepageSettings extends Page implements HasForms
                                     ->label('آدرس (URL)')
                                     ->required()
                                     ->maxLength(2048)
+                                    ->columnSpanFull(),
+                                ShopMediaPicker::image('image', 'product-family-sidebar-icons', 'آیکون')
                                     ->columnSpanFull(),
                                 Forms\Components\Toggle::make('is_active')
                                     ->label('فعال')

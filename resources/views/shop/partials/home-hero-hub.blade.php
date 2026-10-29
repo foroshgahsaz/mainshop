@@ -6,7 +6,7 @@
 @endphp
 
 <section class="home-hero-hub max-w-site mx-auto px-4 mt-2 md:mt-4" aria-label="بنر و دسترسی سریع">
-    <div class="home-hero-hub__shell">
+    <div class="home-hero-hub__panel">
         <div class="home-hero-hub__grid">
             <div class="home-hero-hub__slider">
                 <div class="swiper homeHeroSwiper relative" aria-label="اسلایدر بنر">
@@ -43,7 +43,19 @@
                         @foreach ($sidebarLinks as $link)
                             <li>
                                 <a href="{{ $link['url'] }}" class="home-hero-hub__brand-link">
-                                    <span>{{ $link['label'] }}</span>
+                                    <span class="home-hero-hub__brand-link-main">
+                                        <span class="home-hero-hub__brand-label">{{ $link['label'] }}</span>
+                                        @if (! empty($link['image']))
+                                            <img
+                                                src="{{ $link['image'] }}"
+                                                alt=""
+                                                class="home-hero-hub__brand-icon"
+                                                width="32"
+                                                height="32"
+                                                loading="lazy"
+                                            >
+                                        @endif
+                                    </span>
                                     <i class="fas fa-chevron-left" aria-hidden="true"></i>
                                 </a>
                             </li>
@@ -72,29 +84,32 @@
                 @endif
             </aside>
         </div>
-    </div>
 
-    @if ($gatewayPlans !== [])
-        <div class="home-hero-hub__gateways" aria-label="طرح‌های خرید اعتباری">
-            @foreach ($gatewayPlans as $plan)
-                <article class="home-gateway-plan-card">
-                    <div class="home-gateway-plan-card__logo">
-                        @if ($plan['icon'])
-                            <img src="{{ $plan['icon'] }}" alt="{{ $plan['label'] }}" loading="lazy">
-                        @else
-                            <span class="home-gateway-plan-card__logo-fallback">{{ mb_substr($plan['label'], 0, 1) }}</span>
-                        @endif
-                    </div>
-                    <div class="home-gateway-plan-card__body">
-                        <h3 class="home-gateway-plan-card__title">{{ $plan['label'] }}</h3>
-                        <p class="home-gateway-plan-card__intro">{{ $plan['intro'] }}</p>
-                        <a href="{{ $plan['plan_url'] }}" class="home-gateway-plan-card__cta">
-                            <span>مشاهده طرح</span>
-                            <i class="fas fa-arrow-left-long" aria-hidden="true"></i>
-                        </a>
-                    </div>
-                </article>
-            @endforeach
-        </div>
-    @endif
+        @if ($gatewayPlans !== [])
+            <div class="home-hero-hub__gateways" aria-label="طرح‌های خرید اعتباری">
+                @foreach ($gatewayPlans as $plan)
+                    <article class="home-gateway-plan-card">
+                        <div class="home-gateway-plan-card__body">
+                            <div class="home-gateway-plan-card__title-wrap">
+                                <span class="home-gateway-plan-card__title-accent" aria-hidden="true"></span>
+                                <h3 class="home-gateway-plan-card__title">{{ $plan['label'] }}</h3>
+                            </div>
+                            <p class="home-gateway-plan-card__intro">{{ $plan['intro'] }}</p>
+                            <a href="{{ $plan['plan_url'] }}" class="home-gateway-plan-card__cta">
+                                <span>مشاهده طرح</span>
+                                <i class="fas fa-arrow-left-long" aria-hidden="true"></i>
+                            </a>
+                        </div>
+                        <div class="home-gateway-plan-card__logo">
+                            @if ($plan['icon'])
+                                <img src="{{ $plan['icon'] }}" alt="{{ $plan['label'] }}" loading="lazy">
+                            @else
+                                <span class="home-gateway-plan-card__logo-fallback">{{ mb_substr($plan['label'], 0, 1) }}</span>
+                            @endif
+                        </div>
+                    </article>
+                @endforeach
+            </div>
+        @endif
+    </div>
 </section>

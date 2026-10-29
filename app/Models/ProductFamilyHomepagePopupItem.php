@@ -11,6 +11,7 @@ class ProductFamilyHomepagePopupItem extends Model
         'product_family_id',
         'label',
         'url',
+        'image',
         'position',
         'is_active',
     ];

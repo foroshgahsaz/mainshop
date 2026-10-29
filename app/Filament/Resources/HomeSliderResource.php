@@ -49,7 +49,7 @@ class HomeSliderResource extends Resource
                         $h = (int) ($preset['height'] ?? 480);
                         $templateUrl = asset('shop/images/hero/banner-template-1920x480.svg');
 
-                        return "دسکتاپ و تبلت (از ۷۶۸px به بالا): {$w}×{$h} پیکسل. بنر باریک — قالب: {$templateUrl}";
+                        return "دسکتاپ و تبلت (از ۷۶۸px به بالا): {$w}×{$h} پیکسل. در باکس صفحه اصلی نسبت نمایش ≈750×285 (۲۵٪ کوتاه‌تر از 380) — قالب: {$templateUrl}";
                     }),
                 ShopMediaPicker::image('image_mobile', 'sliders/mobile', 'تصویر موبایل')
                     ->maxSize(4096)

@@ -5,6 +5,7 @@ namespace App\Services\Settings;
 use App\Models\Product;
 use App\Models\ProductFamily;
 use App\Services\Shop\ProductFamilyHomepagePopupService;
+use App\Support\ShopMedia;
 use Illuminate\Support\Collection;
 
 class HomepageSettingsService
@@ -99,10 +100,34 @@ class HomepageSettingsService
         return $title !== '' ? $title : 'سرویس چینی';
     }
 
-    /** @return list<array{label: string, url: string}> */
+    /** @return list<array{label: string, url: string, image: ?string}> */
     public function heroSidebarLinks(): array
     {
-        return $this->all()['hero_sidebar_links'];
+        return array_map(
+            fn (array $link): array => $this->presentHeroSidebarLink($link),
+            $this->all()['hero_sidebar_links']
+        );
+    }
+
+    /** @param  array{label: string, url: string, image?: ?string}  $link
+     * @return array{label: string, url: string, image: ?string}
+     */
+    protected function presentHeroSidebarLink(array $link): array
+    {
+        $path = trim((string) ($link['image'] ?? ''));
+
+        $imageUrl = null;
+        if ($path !== '') {
+            $imageUrl = str_starts_with($path, 'http://') || str_starts_with($path, 'https://')
+                ? $path
+                : ShopMedia::url($path);
+        }
+
+        return [
+            'label' => (string) $link['label'],
+            'url' => (string) $link['url'],
+            'image' => $imageUrl,
+        ];
     }
 
     /** Persist sidebar links from the product family when JSON has none (post-deploy backfill). */
@@ -278,10 +303,16 @@ class HomepageSettingsService
                 continue;
             }
 
-            $links[] = [
+            $image = trim((string) ($row['image'] ?? ''));
+
+            $entry = [
                 'label' => $label,
                 'url' => $url,
             ];
+            if ($image !== '') {
+                $entry['image'] = $image;
+            }
+            $links[] = $entry;
         }
 
         return $links;
@@ -316,9 +347,11 @@ class HomepageSettingsService
             return $normalized;
         }
 
-        $links = app(ProductFamilyHomepagePopupService::class)->activeLinkItemsForFamily($family);
+        $popup = app(ProductFamilyHomepagePopupService::class);
+        $links = $popup->storedLinkItemsForFamily($family);
         if ($links === []) {
-            return $normalized;
+            $links = [$popup->familyAsSidebarLink($family)];
+            $links[0]['image'] = trim((string) ($family->image ?? '')) ?: null;
         }
 
         $normalized['hero_sidebar_family_id'] = (int) $family->id;

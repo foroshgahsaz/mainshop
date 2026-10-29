@@ -81,7 +81,7 @@ class MediaPicker extends Field
 
     public function getMediaCenterAction(): Action
     {
-        return Action::make($this->uniqueActionName('openMediaCenter'))
+        return Action::make('openMediaCenter')
             ->label('انتخاب / تغییر تصویر')
             ->icon('heroicon-m-photo')
             ->color('primary')
@@ -121,12 +121,12 @@ class MediaPicker extends Field
 
     public function getClearImageAction(): Action
     {
-        return Action::make($this->uniqueActionName('clearImage'))
+        return Action::make('clearImage')
             ->label('حذف تصویر')
             ->icon('heroicon-m-trash')
             ->color('gray')
             ->outlined()
-            ->visible(fn (): bool => filled($this->getCurrentPath()))
+            ->visible(fn (MediaPicker $component): bool => filled($component->getCurrentPath()))
             ->action(function (): void {
                 $this->applySelectedPath(null);
 
@@ -313,14 +313,6 @@ class MediaPicker extends Field
         }
 
         return null;
-    }
-
-    /**
-     * Filament registers field actions in setUp() before the container exists — do not call getStatePath() here.
-     */
-    protected function uniqueActionName(string $base): string
-    {
-        return $base.'_'.hash('crc32b', spl_object_id($this).':'.$this->getName());
     }
 
     protected function findMediaFile(?string $path): ?MediaFile

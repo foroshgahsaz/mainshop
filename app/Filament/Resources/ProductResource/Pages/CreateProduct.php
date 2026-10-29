@@ -64,7 +64,7 @@ class CreateProduct extends EditRecord
     {
         $this->record->refresh();
 
-        return ProductResource::getUrl('edit', ['record' => $this->record]);
+        return ProductResource::getUrl('edit', ['record' => $this->record->getKey()]);
     }
 
     protected function getSavedNotificationTitle(): ?string

@@ -46,7 +46,7 @@ class LowStockProductsTable extends BaseWidget
                 Tables\Actions\Action::make('edit')
                     ->label('ویرایش')
                     ->icon('heroicon-m-pencil-square')
-                    ->url(fn (Product $record): string => ProductResource::getUrl('edit', ['record' => $record])),
+                    ->url(fn (Product $record): string => ProductResource::getUrl('edit', ['record' => $record->getKey()])),
             ])
             ->emptyStateHeading('موجودی همه محصولات مناسب است')
             ->paginated(false);

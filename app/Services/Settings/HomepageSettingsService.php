@@ -151,43 +151,34 @@ class HomepageSettingsService
         return true;
     }
 
-    /** Re-import sidebar links (incl. icons) from the configured / default product family. */
+    /** Aggregate all sidebar-enabled families into homepage JSON (admin mirror). */
+    public function rebuildAggregatedHeroSidebarLinks(): void
+    {
+        $links = app(\App\Services\Shop\HomepageHeroHubService::class)->buildSidebarLinksForStorage();
+        if ($links === []) {
+            return;
+        }
+
+        $payload = $this->normalize([
+            ...$this->all(),
+            'hero_sidebar_links' => $links,
+        ]);
+
+        $this->settings->set(
+            self::SETTINGS_GROUP,
+            'data',
+            json_encode($payload, JSON_UNESCAPED_UNICODE)
+        );
+    }
+
+    /** @deprecated use rebuildAggregatedHeroSidebarLinks() */
     public function resyncHeroSidebarFromPrimaryFamily(): bool
     {
-        $family = null;
-        $familyId = $this->heroSidebarFamilyId();
-        if ($familyId !== null) {
-            $family = ProductFamily::query()->whereKey($familyId)->where('is_active', true)->first();
-        }
+        $before = $this->all()['hero_sidebar_links'] ?? [];
+        $this->rebuildAggregatedHeroSidebarLinks();
+        $after = $this->all()['hero_sidebar_links'] ?? [];
 
-        if ($family === null) {
-            $family = ProductFamily::query()
-                ->where('is_active', true)
-                ->where(function ($query) {
-                    $query->where('slug', 'chinese-service')
-                        ->orWhere('name', 'سرویس چینی');
-                })
-                ->orderBy('position')
-                ->first();
-        }
-
-        if ($family === null) {
-            return false;
-        }
-
-        $popup = app(ProductFamilyHomepagePopupService::class);
-        $links = $popup->storedLinkItemsForFamily($family);
-        if ($links === []) {
-            $links = [[
-                'label' => (string) $family->name,
-                'url' => route('products.index', ['product_family_id' => $family->id]),
-                'image' => trim((string) ($family->image ?? '')) ?: null,
-            ]];
-        }
-
-        $this->syncHeroSidebarFromFamily((int) $family->id, (string) $family->name, $links);
-
-        return true;
+        return $before !== $after;
     }
 
     /**

@@ -315,9 +315,12 @@ class MediaPicker extends Field
         return null;
     }
 
+    /**
+     * Filament registers field actions in setUp() before the container exists — do not call getStatePath() here.
+     */
     protected function uniqueActionName(string $base): string
     {
-        return $base.'_'.md5($this->getStatePath());
+        return $base.'_'.hash('crc32b', spl_object_id($this).':'.$this->getName());
     }
 
     protected function findMediaFile(?string $path): ?MediaFile

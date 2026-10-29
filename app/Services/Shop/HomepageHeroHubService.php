@@ -22,24 +22,11 @@ class HomepageHeroHubService
      */
     public function payload(): array
     {
-        $sidebarLinks = $this->homepageSettings->heroSidebarLinks();
         $sidebarTitle = $this->homepageSettings->heroSidebarTitle();
-
-        if ($sidebarLinks === []) {
-            $sidebarLinks = $this->linksFromHomepageSidebarFamilies();
-        }
-
-        if ($sidebarLinks === []) {
-            $sidebarFamily = $this->resolveSidebarFamily();
-
-            if ($sidebarFamily !== null) {
-                $sidebarTitle = (string) $sidebarFamily->name;
-                $sidebarLinks = $this->popupService->sidebarLinksForFamily($sidebarFamily);
-            }
-        }
+        $sidebarLinks = $this->buildSidebarLinksForDisplay();
 
         return [
-            'sidebar_title' => $sidebarTitle,
+            'sidebar_title' => $sidebarTitle !== '' ? $sidebarTitle : 'سرویس چینی',
             'sidebar_links' => $sidebarLinks,
             'quick_families' => $this->resolveQuickFamilies(),
         ];
@@ -48,27 +35,138 @@ class HomepageHeroHubService
     /**
      * @return list<array{label: string, url: string, image: ?string}>
      */
-    protected function linksFromHomepageSidebarFamilies(): array
+    public function buildSidebarLinksForDisplay(): array
     {
-        if (! $this->sidebarFamiliesColumnExists()) {
+        $links = [];
+        $includedFamilyIds = [];
+
+        $primary = $this->resolvePrimaryFamilyWithSubLinks();
+        if ($primary !== null) {
+            foreach ($this->popupService->activeLinkItemsForFamily($primary) as $link) {
+                $links[] = $link;
+            }
+            $includedFamilyIds[(int) $primary->id] = true;
+        }
+
+        if ($this->sidebarFamiliesColumnExists()) {
+            $families = ProductFamily::query()
+                ->where('is_active', true)
+                ->where('show_on_homepage_sidebar', true)
+                ->orderBy('position')
+                ->orderBy('id')
+                ->get();
+
+            foreach ($families as $family) {
+                if (isset($includedFamilyIds[(int) $family->id])) {
+                    continue;
+                }
+
+                foreach ($this->popupService->sidebarLinksForFamily($family) as $link) {
+                    $links[] = $link;
+                }
+            }
+        }
+
+        if ($links !== []) {
+            return $links;
+        }
+
+        $fallbackFamily = $this->resolveSidebarFamily();
+        if ($fallbackFamily === null) {
             return [];
         }
 
-        $families = ProductFamily::query()
-            ->where('is_active', true)
-            ->where('show_on_homepage_sidebar', true)
-            ->orderBy('position')
-            ->orderBy('id')
-            ->get();
+        return $this->popupService->sidebarLinksForFamily($fallbackFamily);
+    }
 
+    /**
+     * @return list<array{label: string, url: string, image: ?string}>
+     */
+    public function buildSidebarLinksForStorage(): array
+    {
         $links = [];
-        foreach ($families as $family) {
-            foreach ($this->popupService->sidebarLinksForFamily($family) as $link) {
+        $includedFamilyIds = [];
+
+        $primary = $this->resolvePrimaryFamilyWithSubLinks();
+        if ($primary !== null) {
+            foreach ($this->popupService->activeLinkItemsForFamily($primary, resolveImageUrls: false) as $link) {
                 $links[] = $link;
+            }
+            $includedFamilyIds[(int) $primary->id] = true;
+        }
+
+        if ($this->sidebarFamiliesColumnExists()) {
+            $families = ProductFamily::query()
+                ->where('is_active', true)
+                ->where('show_on_homepage_sidebar', true)
+                ->orderBy('position')
+                ->orderBy('id')
+                ->get();
+
+            foreach ($families as $family) {
+                if (isset($includedFamilyIds[(int) $family->id])) {
+                    continue;
+                }
+
+                $stored = $this->popupService->storedLinkItemsForFamily($family);
+                if ($stored !== []) {
+                    foreach ($stored as $link) {
+                        $links[] = $link;
+                    }
+
+                    continue;
+                }
+
+                $links[] = [
+                    'label' => (string) $family->name,
+                    'url' => route('products.index', ['product_family_id' => $family->id]),
+                    'image' => trim((string) ($family->image ?? '')) ?: null,
+                ];
             }
         }
 
         return $links;
+    }
+
+    protected function resolvePrimaryFamilyWithSubLinks(): ?ProductFamily
+    {
+        $candidates = collect();
+
+        $configuredId = $this->homepageSettings->heroSidebarFamilyId();
+        if ($configuredId !== null) {
+            $candidates->push($configuredId);
+        }
+
+        ProductFamily::query()
+            ->where('is_active', true)
+            ->where(function ($query) {
+                $query->where('slug', 'chinese-service')
+                    ->orWhere('name', 'سرویس چینی');
+            })
+            ->pluck('id')
+            ->each(fn (int $id) => $candidates->push($id));
+
+        $best = null;
+        $bestCount = 0;
+
+        foreach ($candidates->unique()->filter() as $familyId) {
+            $family = ProductFamily::query()
+                ->where('is_active', true)
+                ->whereKey($familyId)
+                ->first();
+
+            if ($family === null) {
+                continue;
+            }
+
+            $count = count($this->popupService->storedLinkItemsForFamily($family));
+            if ($count > $bestCount) {
+                $bestCount = $count;
+                $best = $family;
+            }
+        }
+
+        return $bestCount > 0 ? $best : null;
     }
 
     protected function sidebarFamiliesColumnExists(): bool

@@ -81,7 +81,7 @@ class MediaPicker extends Field
 
     public function getMediaCenterAction(): Action
     {
-        return Action::make('openMediaCenter')
+        return Action::make($this->uniqueActionName('openMediaCenter'))
             ->label('انتخاب / تغییر تصویر')
             ->icon('heroicon-m-photo')
             ->color('primary')
@@ -121,7 +121,7 @@ class MediaPicker extends Field
 
     public function getClearImageAction(): Action
     {
-        return Action::make('clearImage')
+        return Action::make($this->uniqueActionName('clearImage'))
             ->label('حذف تصویر')
             ->icon('heroicon-m-trash')
             ->color('gray')
@@ -313,6 +313,11 @@ class MediaPicker extends Field
         }
 
         return null;
+    }
+
+    protected function uniqueActionName(string $base): string
+    {
+        return $base.'_'.md5($this->getStatePath());
     }
 
     protected function findMediaFile(?string $path): ?MediaFile

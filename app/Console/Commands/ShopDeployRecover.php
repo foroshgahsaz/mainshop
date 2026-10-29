@@ -35,9 +35,8 @@ class ShopDeployRecover extends Command
         if ($homepageSettings->materializeHeroSidebarLinksIfEmpty()) {
             $this->components->info('Homepage hero sidebar links imported from product family settings.');
         }
-        if ($homepageSettings->resyncHeroSidebarFromPrimaryFamily()) {
-            $this->components->info('Homepage hero sidebar links refreshed from product family (icons/URLs).');
-        }
+        $homepageSettings->rebuildAggregatedHeroSidebarLinks();
+        $this->components->info('Homepage hero sidebar links aggregated from all enabled families.');
 
         if (! \App\Support\OrderProformaSplitColumns::available()) {
             $this->components->error(\App\Support\OrderProformaSplitColumns::migrationHint());

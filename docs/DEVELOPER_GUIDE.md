@@ -1324,7 +1324,8 @@ resources/views/layouts/shop.blade.php
 | 2026-10-29 | اسلاگ محصول از نام: `SlugFromTitle` — فقط space/NBSP/tab/خط‌جدید → `-` (نه `\h`؛ حروف فارسی/لاتین حفظ) |
 | 2026-10-29 | ادمین محصول: URL ویرایش با **id** (`getRecordRouteKeyName`، `getUrl`، لیست/ریدایrect/create) — فروشگاه همچنان slug |
 | 2026-10-29 | فرم محصول: `_slug_name_source` — اسلاگ دستی حفظ می‌شود؛ همگام با نام فقط وقتی اسلاگ از نام ساخته شده |
-| 2026-10-29 | hero سایدبار: چند خانوade با `show_on_homepage_sidebar` + زیرمجموعه ثابت «سرویس چینی»؛ نمایش از DB نه JSON تکی؛ MediaPicker اکشن یکتا در repeater؛ `rebuildAggregatedHeroSidebarLinks` |
+| 2026-10-29 | hero سایدبار: لیست بالا فقط زیرمجموعه «سرویس چینی»؛ خانواده‌های `show_on_homepage_sidebar` بدون repeater → ردیف آیکون پایین (flex دایره‌ای) |
+| 2026-10-29 | hero سایدبار (قبلی): چند خانوade + `rebuildAggregatedHeroSidebarLinks`؛ MediaPicker repeater |
 | 2026-10-29 | hero: قاب سفید + پنل `#EDF0F2`؛ کارت درگاه RTL (لوگو راست در DOM)؛ کش CSS با `?v=filemtime`؛ سه خانوade سریع با fallback نام فارسی |
 | 2026-10-28 | hero سایدبار: لینkها در JSON `homepage` (`hero_sidebar_links`) — تنظیم در `/admin/homepage-settings`؛ همگام از خانوade هنگام ذخیره؛ fallback DB خانوade؛ `shop:deploy-recover` اگر JSON خالی باشد از خانوade پر می‌کند |
 | 2026-10-28 | hero سایدبار: اگر `hero_sidebar_family_id` لینک نداشت، خانواده «سرویس چینی»/chinese-service که لینک دارد انتخاب می‌شود؛ `forgetHome` همیشه `shop:home:payload` را پاک می‌کند |

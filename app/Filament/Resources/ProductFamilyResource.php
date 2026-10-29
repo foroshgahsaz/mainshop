@@ -101,7 +101,7 @@ class ProductFamilyResource extends Resource
                         ->columnSpanFull(),
                     Forms\Components\Toggle::make('show_on_homepage_sidebar')
                         ->label('نمایش در لیست کنار اسلایدر (صفحه اصلی)')
-                        ->helperText('چند خانواده می‌توانند هم‌زمان فعال باشند. «سرویس چینی» با زیرمجموعه: فقط لینkها؛ بقیه بدون زیرمجموعه: یک ردیف با آیکون خانواده.')
+                        ->helperText('بدون زیرمجموعه: فقط ردیف آیکون پایین سایدبار (مثل پارس اپال). «سرویس چینی» زیرمجموعه دارد → فقط لینkهای repeater در لیست بالا.')
                         ->default(false),
                     Forms\Components\Toggle::make('homepage_popup_enabled')
                         ->label('پاپ‌آپ قدیمی (اختیاری)')

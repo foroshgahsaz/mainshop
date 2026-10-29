@@ -27,6 +27,9 @@ class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
 
+    /** Admin URLs use id — model route key is slug (shopfront); avoids 404 after create when slug changes from draft-* */
+    protected static ?string $recordRouteKeyName = 'id';
+
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static ?string $navigationLabel = 'محصولات';

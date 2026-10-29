@@ -62,6 +62,8 @@ class CreateProduct extends EditRecord
 
     protected function getRedirectUrl(): ?string
     {
+        $this->record->refresh();
+
         return ProductResource::getUrl('edit', ['record' => $this->record]);
     }
 

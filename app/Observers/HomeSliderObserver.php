@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\HomeSlider;
+use App\Services\Cache\ShopCacheService;
 use Illuminate\Support\Facades\Cache;
 
 class HomeSliderObserver
@@ -20,7 +21,7 @@ class HomeSliderObserver
     protected function flush(): void
     {
         Cache::forget('shop:home:sliders');
-        Cache::forget('shop:home:payload');
+        Cache::forget(ShopCacheService::HOME_PAYLOAD_KEY);
 
         if (method_exists(Cache::getStore(), 'tags')) {
             Cache::tags(['shop', 'home'])->flush();

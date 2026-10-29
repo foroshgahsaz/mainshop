@@ -3809,6 +3809,8 @@ html.checkout-coupon-alert-open {
 @media (min-width: 992px) {
   .home-hero-hub__aside {
     order: 2;
+    align-self: stretch;
+    min-height: 100%;
   }
 }
 

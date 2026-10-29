@@ -3714,6 +3714,7 @@ html.checkout-coupon-alert-open {
 /* ===== Homepage hero hub (compact slider + sidebar + gateway plans) ===== */
 .home-hero-hub {
   background: #edf0f2;
+  width: 100%;
   padding-top: 0.75rem;
   padding-bottom: 0.75rem;
 }
@@ -3723,6 +3724,10 @@ html.checkout-coupon-alert-open {
     padding-top: 1rem;
     padding-bottom: 1rem;
   }
+}
+
+.home-hero-hub__inner {
+  width: 100%;
 }
 
 .home-hero-hub__frame,
@@ -3768,23 +3773,28 @@ html.checkout-coupon-alert-open {
     order: 1;
     display: flex;
     flex-direction: column;
-    height: 100%;
-  }
-
-  .home-hero-hub__slider .homeHeroSwiper,
-  .home-hero-hub__slider .homeHeroSwiper .swiper-wrapper,
-  .home-hero-hub__slider .homeHeroSwiper .swiper-slide {
-    height: 100% !important;
+    min-height: 100%;
+    align-self: stretch;
   }
 
   .home-hero-hub__slider .homeHeroSwiper {
-    flex: 1;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
     min-height: 285px;
+    height: 100% !important;
   }
 
-  .home-hero-hub__slider .home-hero-hub__slide-link {
-    aspect-ratio: auto;
+  .home-hero-hub__slider .homeHeroSwiper .swiper-wrapper,
+  .home-hero-hub__slider .homeHeroSwiper .swiper-slide {
+    height: 100% !important;
+    flex: 1 1 auto;
+  }
+
+  .home-hero-hub__slider .swiper-slide > a,
+  .home-hero-hub__slider .swiper-slide > .home-hero-hub__slide-link {
     height: 100%;
+    min-height: 100%;
   }
 }
 
@@ -3802,15 +3812,17 @@ html.checkout-coupon-alert-open {
   }
 }
 
-.homeHeroSwiper {
+.home-hero-hub .homeHeroSwiper {
   border-radius: 0.85rem;
   overflow: hidden;
-  height: auto !important;
 }
 
-.homeHeroSwiper .swiper-wrapper,
-.homeHeroSwiper .swiper-slide {
-  height: auto !important;
+@media (max-width: 991.98px) {
+  .home-hero-hub .homeHeroSwiper,
+  .home-hero-hub .homeHeroSwiper .swiper-wrapper,
+  .home-hero-hub .homeHeroSwiper .swiper-slide {
+    height: auto !important;
+  }
 }
 
 .home-hero-hub__slide-link {
@@ -3825,8 +3837,9 @@ html.checkout-coupon-alert-open {
 
 @media (min-width: 992px) {
   .home-hero-hub__slide-link {
-    aspect-ratio: 750 / 285;
-    min-height: 0;
+    aspect-ratio: auto;
+    height: 100%;
+    min-height: 285px;
   }
 }
 

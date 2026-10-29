@@ -81,6 +81,8 @@ class ProductFamilyResource extends Resource
                                 ->maxLength(2048)
                                 ->placeholder('https://www.chinibazar.ir/products?brand_id=...')
                                 ->columnSpanFull(),
+                            ShopMediaPicker::image('image', 'product-family-sidebar-icons', 'آیکون کنار اسلایدر')
+                                ->columnSpanFull(),
                             Forms\Components\TextInput::make('position')
                                 ->label('ترتیب')
                                 ->numeric()
@@ -97,6 +99,10 @@ class ProductFamilyResource extends Resource
                         ->collapsible()
                         ->addActionLabel('افزودن لینک')
                         ->columnSpanFull(),
+                    Forms\Components\Toggle::make('show_on_homepage_sidebar')
+                        ->label('نمایش در لیست کنار اسلایدر (صفحه اصلی)')
+                        ->helperText('بدون زیرمجموعه: خودِ خانواده با نام و لینک محصولات؛ با لینkهای فعال: فقط همان لیست.')
+                        ->default(false),
                     Forms\Components\Toggle::make('homepage_popup_enabled')
                         ->label('پاپ‌آپ قدیمی (اختیاری)')
                         ->helperText('فقط اگر دوباره نوار دسته‌بندی دایره‌ای با پاپ‌آپ فعال شود.')

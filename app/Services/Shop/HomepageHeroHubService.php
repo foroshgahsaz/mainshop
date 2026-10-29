@@ -16,7 +16,7 @@ class HomepageHeroHubService
     /**
      * @return array{
      *     sidebar_title: string,
-     *     sidebar_links: list<array{label: string, url: string}>,
+     *     sidebar_links: list<array{label: string, url: string, image: ?string}>,
      *     quick_families: list<array{id: int, name: string, image: ?string, url: string}>
      * }
      */
@@ -26,11 +26,15 @@ class HomepageHeroHubService
         $sidebarTitle = $this->homepageSettings->heroSidebarTitle();
 
         if ($sidebarLinks === []) {
+            $sidebarLinks = $this->linksFromHomepageSidebarFamilies();
+        }
+
+        if ($sidebarLinks === []) {
             $sidebarFamily = $this->resolveSidebarFamily();
 
             if ($sidebarFamily !== null) {
                 $sidebarTitle = (string) $sidebarFamily->name;
-                $sidebarLinks = $this->popupService->activeLinkItemsForFamily($sidebarFamily);
+                $sidebarLinks = $this->popupService->sidebarLinksForFamily($sidebarFamily);
             }
         }
 
@@ -39,6 +43,37 @@ class HomepageHeroHubService
             'sidebar_links' => $sidebarLinks,
             'quick_families' => $this->resolveQuickFamilies(),
         ];
+    }
+
+    /**
+     * @return list<array{label: string, url: string, image: ?string}>
+     */
+    protected function linksFromHomepageSidebarFamilies(): array
+    {
+        if (! $this->sidebarFamiliesColumnExists()) {
+            return [];
+        }
+
+        $families = ProductFamily::query()
+            ->where('is_active', true)
+            ->where('show_on_homepage_sidebar', true)
+            ->orderBy('position')
+            ->orderBy('id')
+            ->get();
+
+        $links = [];
+        foreach ($families as $family) {
+            foreach ($this->popupService->sidebarLinksForFamily($family) as $link) {
+                $links[] = $link;
+            }
+        }
+
+        return $links;
+    }
+
+    protected function sidebarFamiliesColumnExists(): bool
+    {
+        return \Illuminate\Support\Facades\Schema::hasColumn('product_families', 'show_on_homepage_sidebar');
     }
 
     protected function resolveSidebarFamily(): ?ProductFamily

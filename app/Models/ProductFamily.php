@@ -14,6 +14,7 @@ class ProductFamily extends Model
         'is_active',
         'position',
         'homepage_popup_enabled',
+        'show_on_homepage_sidebar',
     ];
 
     protected function casts(): array
@@ -21,6 +22,7 @@ class ProductFamily extends Model
         return [
             'is_active' => 'boolean',
             'homepage_popup_enabled' => 'boolean',
+            'show_on_homepage_sidebar' => 'boolean',
             'position' => 'integer',
         ];
     }

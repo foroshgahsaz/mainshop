@@ -4,16 +4,61 @@ namespace App\Services\Shop;
 
 use App\Models\ProductFamily;
 use App\Models\ProductFamilyHomepagePopupItem;
+use App\Support\ShopFormatter;
+use App\Support\ShopMedia;
 
 class ProductFamilyHomepagePopupService
 {
     /**
-     * @return array{family_id: int, family_name: string, items: list<array{label: string, url: string}>}|null
+     * @return list<array{label: string, url: string, image: ?string}>
      */
+    public function sidebarLinksForFamily(ProductFamily $family): array
+    {
+        $items = $this->activeLinkItemsForFamily($family);
+
+        if ($items !== []) {
+            return $items;
+        }
+
+        return [$this->familyAsSidebarLink($family)];
+    }
+
+    /** @return array{label: string, url: string, image: ?string} */
+    public function familyAsSidebarLink(ProductFamily $family): array
+    {
+        $image = trim((string) ($family->image ?? ''));
+
+        return [
+            'label' => (string) $family->name,
+            'url' => route('products.index', ['product_family_id' => $family->id]),
+            'image' => $image !== '' ? ShopFormatter::productFamilyImage($image) : null,
+        ];
+    }
+
     /**
-     * @return list<array{label: string, url: string}>
+     * @return list<array{label: string, url: string, image: ?string}>
      */
-    public function activeLinkItemsForFamily(ProductFamily $family): array
+    public function activeLinkItemsForFamily(ProductFamily $family, bool $resolveImageUrls = true): array
+    {
+        return collect($this->storedLinkItemsForFamily($family))
+            ->map(function (array $link) use ($resolveImageUrls): array {
+                $path = trim((string) ($link['image'] ?? ''));
+
+                return [
+                    'label' => $link['label'],
+                    'url' => $link['url'],
+                    'image' => $path === ''
+                        ? null
+                        : ($resolveImageUrls ? ShopMedia::url($path) : $path),
+                ];
+            })
+            ->all();
+    }
+
+    /**
+     * @return list<array{label: string, url: string, image: ?string}>
+     */
+    public function storedLinkItemsForFamily(ProductFamily $family): array
     {
         return ProductFamilyHomepagePopupItem::query()
             ->where('product_family_id', $family->id)
@@ -28,9 +73,12 @@ class ProductFamilyHomepagePopupService
                     return null;
                 }
 
+                $imagePath = trim((string) ($row->image ?? ''));
+
                 return [
                     'label' => $label,
                     'url' => $url,
+                    'image' => $imagePath !== '' ? $imagePath : null,
                 ];
             })
             ->filter()

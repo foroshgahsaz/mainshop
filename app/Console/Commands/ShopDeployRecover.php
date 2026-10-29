@@ -31,8 +31,12 @@ class ShopDeployRecover extends Command
         Artisan::call('migrate', ['--force' => true]);
         $this->line(trim(Artisan::output()));
 
-        if (app(HomepageSettingsService::class)->materializeHeroSidebarLinksIfEmpty()) {
+        $homepageSettings = app(HomepageSettingsService::class);
+        if ($homepageSettings->materializeHeroSidebarLinksIfEmpty()) {
             $this->components->info('Homepage hero sidebar links imported from product family settings.');
+        }
+        if ($homepageSettings->resyncHeroSidebarFromPrimaryFamily()) {
+            $this->components->info('Homepage hero sidebar links refreshed from product family (icons/URLs).');
         }
 
         if (! \App\Support\OrderProformaSplitColumns::available()) {

@@ -21,10 +21,13 @@ class ShopCacheService
 {
     private const LISTING_INDEX_KEY = 'shop:products:list:index';
 
+    /** Bump when hero_hub / home payload shape changes so deploys never serve stale layout. */
+    public const HOME_PAYLOAD_KEY = 'shop:home:payload:v2';
+
     public function homePayload(): array
     {
         return $this->remember(
-            'shop:home:payload',
+            self::HOME_PAYLOAD_KEY,
             config('shop.cache.home_ttl'),
             function () {
                 $homepage = app(HomepageSettingsService::class);
@@ -459,6 +462,7 @@ class ShopCacheService
 
     protected function forgetHomeCache(): void
     {
+        Cache::forget(self::HOME_PAYLOAD_KEY);
         Cache::forget('shop:home:payload');
         Cache::forget('shop:home:sliders');
         Cache::forget('shop:home:sections');

@@ -2,6 +2,8 @@
 
 namespace App\Filament\Support;
 
+use App\Support\SlugFromTitle;
+
 trait RecordsProductLastEditor
 {
     /**
@@ -15,6 +17,15 @@ trait RecordsProductLastEditor
             $data['last_edited_by_user_id'] = $userId;
         }
 
-        return parent::mutateFormDataBeforeSave($data);
+        $data = parent::mutateFormDataBeforeSave($data);
+
+        $name = trim((string) ($data['name'] ?? ''));
+        $slug = trim((string) ($data['slug'] ?? ''));
+
+        if ($name !== '' && ($slug === '' || str_starts_with($slug, 'draft-'))) {
+            $data['slug'] = SlugFromTitle::fromProductName($name);
+        }
+
+        return $data;
     }
 }

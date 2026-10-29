@@ -151,8 +151,47 @@ class HomepageSettingsService
         return true;
     }
 
+    /** Re-import sidebar links (incl. icons) from the configured / default product family. */
+    public function resyncHeroSidebarFromPrimaryFamily(): bool
+    {
+        $family = null;
+        $familyId = $this->heroSidebarFamilyId();
+        if ($familyId !== null) {
+            $family = ProductFamily::query()->whereKey($familyId)->where('is_active', true)->first();
+        }
+
+        if ($family === null) {
+            $family = ProductFamily::query()
+                ->where('is_active', true)
+                ->where(function ($query) {
+                    $query->where('slug', 'chinese-service')
+                        ->orWhere('name', 'سرویس چینی');
+                })
+                ->orderBy('position')
+                ->first();
+        }
+
+        if ($family === null) {
+            return false;
+        }
+
+        $popup = app(ProductFamilyHomepagePopupService::class);
+        $links = $popup->storedLinkItemsForFamily($family);
+        if ($links === []) {
+            $links = [[
+                'label' => (string) $family->name,
+                'url' => route('products.index', ['product_family_id' => $family->id]),
+                'image' => trim((string) ($family->image ?? '')) ?: null,
+            ]];
+        }
+
+        $this->syncHeroSidebarFromFamily((int) $family->id, (string) $family->name, $links);
+
+        return true;
+    }
+
     /**
-     * @param  list<array{label: string, url: string}>  $links
+     * @param  list<array{label: string, url: string, image?: ?string}>  $links
      */
     public function syncHeroSidebarFromFamily(int $familyId, string $familyName, array $links): void
     {

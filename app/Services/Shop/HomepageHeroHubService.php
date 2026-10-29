@@ -145,13 +145,7 @@ class HomepageHeroHubService
     {
         $ids = $this->homepageSettings->heroQuickFamilyIds();
         if ($ids === []) {
-            $ids = ProductFamily::query()
-                ->where('is_active', true)
-                ->whereIn('slug', ['pars-opal', 'kitchenware', 'crystal-service'])
-                ->orderBy('position')
-                ->pluck('id')
-                ->take(3)
-                ->all();
+            $ids = $this->defaultQuickFamilyIds();
         }
 
         if ($ids === []) {
@@ -180,5 +174,36 @@ class HomepageHeroHubService
         }
 
         return $out;
+    }
+
+    /** @return list<int> */
+    protected function defaultQuickFamilyIds(): array
+    {
+        $slugs = ['pars-opal', 'kitchenware', 'crystal-service', 'crystal', 'opal-pars'];
+        $names = ['پارس اپال', 'پارس اوپال', 'لوازم آشپزخانه', 'سرویس بلور', 'سرویس بلور و کریستال'];
+
+        $bySlug = ProductFamily::query()
+            ->where('is_active', true)
+            ->whereIn('slug', $slugs)
+            ->orderBy('position')
+            ->pluck('id')
+            ->all();
+
+        if (count($bySlug) >= 3) {
+            return array_slice($bySlug, 0, 3);
+        }
+
+        $byName = ProductFamily::query()
+            ->where('is_active', true)
+            ->whereIn('name', $names)
+            ->orderBy('position')
+            ->pluck('id')
+            ->all();
+
+        return collect([...$bySlug, ...$byName])
+            ->unique()
+            ->take(3)
+            ->values()
+            ->all();
     }
 }

@@ -12,6 +12,7 @@ use App\Filament\Support\RichContentEditor;
 use App\Filament\Support\SeoFormSchema;
 use App\Models\Product;
 use App\Support\AdminAccess;
+use Illuminate\Database\Eloquent\Model;
 use App\Support\ShopLabels;
 use App\Support\SlugFromTitle;
 use Filament\Forms;
@@ -73,20 +74,65 @@ class ProductResource extends Resource
 
                         ...self::catalogTaxonomyFormFields(),
 
+                        Forms\Components\Hidden::make('_slug_name_source')
+                            ->dehydrated(false)
+                            ->afterStateHydrated(function (Forms\Components\Hidden $component, $state): void {
+                                if (filled($state)) {
+                                    return;
+                                }
+                                $record = $component->getLivewire()->getRecord();
+                                if (! $record instanceof Product) {
+                                    return;
+                                }
+                                $name = trim($record->name);
+                                $slug = trim((string) $record->slug);
+                                if ($name !== '' && $slug === SlugFromTitle::fromProductName($name)) {
+                                    $component->state($name);
+
+                                    return;
+                                }
+                                $component->state('__manual__');
+                            }),
+
                         Forms\Components\TextInput::make('name')
                             ->label('نام محصول')
                             ->required()
                             ->maxLength(255)
-                            ->live(debounce: 400)
-                            ->afterStateUpdated(
-                                fn ($state, callable $set) => $set('slug', SlugFromTitle::fromProductName($state))
-                            ),
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(function (?string $state, callable $set, Forms\Get $get): void {
+                                $slug = trim((string) $get('slug'));
+                                $source = (string) $get('_slug_name_source');
+                                $auto = SlugFromTitle::fromProductName($state);
+
+                                if ($slug === '' || str_starts_with($slug, 'draft-')) {
+                                    $set('slug', $auto);
+                                    $set('_slug_name_source', $state);
+
+                                    return;
+                                }
+
+                                if ($source !== '__manual__' && ($source === '' || $slug === SlugFromTitle::fromProductName($source))) {
+                                    $set('slug', $auto);
+                                    $set('_slug_name_source', $state);
+                                }
+                            }),
 
                         Forms\Components\TextInput::make('slug')
                             ->label('اسلاگ')
                             ->required()
                             ->unique(ignoreRecord: true)
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(function (?string $state, callable $set, Forms\Get $get): void {
+                                $name = trim((string) $get('name'));
+                                $slug = trim((string) $state);
+                                if ($name !== '' && $slug === SlugFromTitle::fromProductName($name)) {
+                                    $set('_slug_name_source', $name);
+                                } else {
+                                    $set('_slug_name_source', '__manual__');
+                                }
+                            })
+                            ->helperText('از نام ساخته می‌شود: فاصله → خط تیره (مثلاً سرویس-چینی). حروف فارسی و انگلیسی حفظ می‌شوند.'),
 
                         Forms\Components\Textarea::make('short_description')
                             ->label('توضیحات کوتاه')
@@ -260,7 +306,10 @@ class ProductResource extends Resource
                     ->label('محصول ویژه'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make()->label('ویرایش')->iconButton(),
+                Tables\Actions\EditAction::make()
+                    ->label('ویرایش')
+                    ->iconButton()
+                    ->url(fn (Product $record): string => static::getUrl('edit', ['record' => $record->getKey()])),
                 ProductDeleteActions::tableDeleteAction(),
             ])
             ->bulkActions([
@@ -303,6 +352,26 @@ class ProductResource extends Resource
             'create' => Pages\CreateProduct::route('/create'),
             'edit' => Pages\EditProduct::route('/{record}/edit'),
         ];
+    }
+
+    public static function getRecordRouteKeyName(): ?string
+    {
+        return 'id';
+    }
+
+    public static function getUrl(
+        string $name = 'index',
+        array $parameters = [],
+        bool $isAbsolute = true,
+        ?string $panel = null,
+        ?Model $tenant = null,
+    ): string {
+        $record = $parameters['record'] ?? null;
+        if ($record instanceof Product) {
+            $parameters['record'] = $record->getKey();
+        }
+
+        return parent::getUrl($name, $parameters, $isAbsolute, $panel, $tenant);
     }
 
     /**

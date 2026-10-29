@@ -37,38 +37,12 @@ class HomepageHeroHubService
      */
     public function buildSidebarLinksForDisplay(): array
     {
-        $links = [];
-        $includedFamilyIds = [];
-
         $primary = $this->resolvePrimaryFamilyWithSubLinks();
         if ($primary !== null) {
-            foreach ($this->popupService->activeLinkItemsForFamily($primary) as $link) {
-                $links[] = $link;
+            $links = $this->popupService->activeLinkItemsForFamily($primary);
+            if ($links !== []) {
+                return $links;
             }
-            $includedFamilyIds[(int) $primary->id] = true;
-        }
-
-        if ($this->sidebarFamiliesColumnExists()) {
-            $families = ProductFamily::query()
-                ->where('is_active', true)
-                ->where('show_on_homepage_sidebar', true)
-                ->orderBy('position')
-                ->orderBy('id')
-                ->get();
-
-            foreach ($families as $family) {
-                if (isset($includedFamilyIds[(int) $family->id])) {
-                    continue;
-                }
-
-                foreach ($this->popupService->sidebarLinksForFamily($family) as $link) {
-                    $links[] = $link;
-                }
-            }
-        }
-
-        if ($links !== []) {
-            return $links;
         }
 
         $fallbackFamily = $this->resolveSidebarFamily();
@@ -76,7 +50,7 @@ class HomepageHeroHubService
             return [];
         }
 
-        return $this->popupService->sidebarLinksForFamily($fallbackFamily);
+        return $this->popupService->activeLinkItemsForFamily($fallbackFamily);
     }
 
     /**
@@ -84,48 +58,12 @@ class HomepageHeroHubService
      */
     public function buildSidebarLinksForStorage(): array
     {
-        $links = [];
-        $includedFamilyIds = [];
-
         $primary = $this->resolvePrimaryFamilyWithSubLinks();
-        if ($primary !== null) {
-            foreach ($this->popupService->activeLinkItemsForFamily($primary, resolveImageUrls: false) as $link) {
-                $links[] = $link;
-            }
-            $includedFamilyIds[(int) $primary->id] = true;
+        if ($primary === null) {
+            return [];
         }
 
-        if ($this->sidebarFamiliesColumnExists()) {
-            $families = ProductFamily::query()
-                ->where('is_active', true)
-                ->where('show_on_homepage_sidebar', true)
-                ->orderBy('position')
-                ->orderBy('id')
-                ->get();
-
-            foreach ($families as $family) {
-                if (isset($includedFamilyIds[(int) $family->id])) {
-                    continue;
-                }
-
-                $stored = $this->popupService->storedLinkItemsForFamily($family);
-                if ($stored !== []) {
-                    foreach ($stored as $link) {
-                        $links[] = $link;
-                    }
-
-                    continue;
-                }
-
-                $links[] = [
-                    'label' => (string) $family->name,
-                    'url' => route('products.index', ['product_family_id' => $family->id]),
-                    'image' => trim((string) ($family->image ?? '')) ?: null,
-                ];
-            }
-        }
-
-        return $links;
+        return $this->popupService->activeLinkItemsForFamily($primary, resolveImageUrls: false);
     }
 
     protected function resolvePrimaryFamilyWithSubLinks(): ?ProductFamily
@@ -241,12 +179,30 @@ class HomepageHeroHubService
      */
     protected function resolveQuickFamilies(): array
     {
-        $ids = $this->homepageSettings->heroQuickFamilyIds();
-        if ($ids === []) {
-            $ids = $this->defaultQuickFamilyIds();
+        $ids = collect($this->homepageSettings->heroQuickFamilyIds());
+        if ($ids->isEmpty()) {
+            $ids = collect($this->defaultQuickFamilyIds());
         }
 
-        if ($ids === []) {
+        if ($this->sidebarFamiliesColumnExists()) {
+            $primaryId = $this->resolvePrimaryFamilyWithSubLinks()?->id;
+
+            $sidebarIconFamilyIds = ProductFamily::query()
+                ->where('is_active', true)
+                ->where('show_on_homepage_sidebar', true)
+                ->when($primaryId !== null, fn ($query) => $query->whereKeyNot($primaryId))
+                ->orderBy('position')
+                ->orderBy('id')
+                ->get()
+                ->filter(fn (ProductFamily $family): bool => $this->popupService->storedLinkItemsForFamily($family) === [])
+                ->map(fn (ProductFamily $family): int => (int) $family->id);
+
+            $ids = $ids->merge($sidebarIconFamilyIds)->unique()->values();
+        }
+
+        $ids = $ids->take(3);
+
+        if ($ids->isEmpty()) {
             return [];
         }
 
@@ -257,7 +213,7 @@ class HomepageHeroHubService
             ->keyBy('id');
 
         $out = [];
-        foreach ($ids as $id) {
+        foreach ($ids->all() as $id) {
             $family = $families->get($id);
             if ($family === null) {
                 continue;

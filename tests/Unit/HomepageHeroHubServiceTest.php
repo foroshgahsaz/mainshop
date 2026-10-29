@@ -51,7 +51,7 @@ class HomepageHeroHubServiceTest extends TestCase
         $this->assertSame('والاس', $payload['sidebar_links'][0]['label'] ?? null);
     }
 
-    public function test_sidebar_lists_chinese_sub_links_and_other_enabled_families(): void
+    public function test_sidebar_only_chinese_sub_links_quick_row_for_sidebar_families_without_children(): void
     {
         $chinese = ProductFamily::query()->create([
             'name' => 'سرویس چینی',
@@ -68,6 +68,14 @@ class HomepageHeroHubServiceTest extends TestCase
             'is_active' => true,
         ]);
 
+        ProductFamilyHomepagePopupItem::query()->create([
+            'product_family_id' => $chinese->id,
+            'label' => 'مارشال',
+            'url' => 'https://example.test/marshal',
+            'position' => 2,
+            'is_active' => true,
+        ]);
+
         $kitchen = ProductFamily::query()->create([
             'name' => 'لوازم آشپزخانه',
             'slug' => 'kitchenware',
@@ -78,8 +86,10 @@ class HomepageHeroHubServiceTest extends TestCase
 
         $payload = app(HomepageHeroHubService::class)->payload();
         $labels = array_column($payload['sidebar_links'], 'label');
+        $quickNames = array_column($payload['quick_families'], 'name');
 
-        $this->assertContains('والاس', $labels);
-        $this->assertContains('لوازم آشپزخانه', $labels);
+        $this->assertSame(['والاس', 'مارشال'], $labels);
+        $this->assertContains('لوازم آشپزخانه', $quickNames);
+        $this->assertNotContains('لوازم آشپزخانه', $labels);
     }
 }

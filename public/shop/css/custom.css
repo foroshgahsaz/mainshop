@@ -3712,44 +3712,43 @@ html.checkout-coupon-alert-open {
 }
 
 /* ===== Homepage hero hub (compact slider + sidebar + gateway plans) ===== */
-.home-hero-hub__frame {
-  background: #fff;
-  border-radius: 1rem;
-  padding: 0.65rem;
-  box-shadow: 0 8px 32px rgba(15, 23, 42, 0.06);
-}
-
-@media (min-width: 768px) {
-  .home-hero-hub__frame {
-    padding: 0.85rem;
-    border-radius: 1.25rem;
-  }
-}
-
-.home-hero-hub__panel {
+.home-hero-hub {
   background: #edf0f2;
-  border-radius: 0.85rem;
-  padding: 0.75rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
 }
 
 @media (min-width: 768px) {
-  .home-hero-hub__panel {
-    padding: 1rem 1rem 1.1rem;
-    border-radius: 1rem;
+  .home-hero-hub {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
   }
+}
+
+.home-hero-hub__frame,
+.home-hero-hub__panel {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .home-hero-hub__grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 0.75rem;
+  background: #fff;
+  border-radius: 1rem;
+  padding: 0.65rem;
 }
 
 @media (min-width: 992px) {
   .home-hero-hub__grid {
     grid-template-columns: minmax(0, 1fr) 220px;
     gap: 1rem;
-    align-items: start;
+    align-items: stretch;
+    padding: 0.85rem;
+    border-radius: 1.25rem;
   }
 }
 
@@ -3767,6 +3766,25 @@ html.checkout-coupon-alert-open {
 @media (min-width: 992px) {
   .home-hero-hub__slider {
     order: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .home-hero-hub__slider .homeHeroSwiper,
+  .home-hero-hub__slider .homeHeroSwiper .swiper-wrapper,
+  .home-hero-hub__slider .homeHeroSwiper .swiper-slide {
+    height: 100% !important;
+  }
+
+  .home-hero-hub__slider .homeHeroSwiper {
+    flex: 1;
+    min-height: 285px;
+  }
+
+  .home-hero-hub__slider .home-hero-hub__slide-link {
+    aspect-ratio: auto;
+    height: 100%;
   }
 }
 
@@ -3832,10 +3850,14 @@ html.checkout-coupon-alert-open {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0;
   flex: 1;
   min-height: 0;
   overflow: auto;
+}
+
+.home-hero-hub__brand-list li + li {
+  border-top: 1px solid #eef1f4;
 }
 
 .home-hero-hub__brand-link {
@@ -3843,20 +3865,17 @@ html.checkout-coupon-alert-open {
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  padding: 0.5rem 0.65rem;
-  border-radius: 0.55rem;
-  background: #fff;
+  padding: 0.5rem 0.25rem;
+  background: transparent;
   color: #334155;
   font-size: 0.82rem;
   font-weight: 700;
   text-decoration: none;
-  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
-  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
+  transition: color 0.15s ease;
 }
 
 .home-hero-hub__brand-link:hover {
   color: #c2410c;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
 }
 
 .home-hero-hub__brand-link-main {

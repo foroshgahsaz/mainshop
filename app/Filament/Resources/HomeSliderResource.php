@@ -49,7 +49,7 @@ class HomeSliderResource extends Resource
                         $h = (int) ($preset['height'] ?? 480);
                         $templateUrl = asset('shop/images/hero/banner-template-1920x480.svg');
 
-                        return "دسکتاپ و تبلت (از ۷۶۸px به بالا): {$w}×{$h} پیکسل. در باکس صفحه اصلی نسبت نمایش ≈750×285 (۲۵٪ کوتاه‌تر از 380) — قالب: {$templateUrl}";
+                        return "دسکتاپ (hero صفحه اصلی): آپلود {$w}×{$h} px (یا 1500×570 @2x). نسبت نمایش در باکس ≈ 750×285 (حداقل ارتفاع ~380px) — crop با object-fit:cover. قالب: {$templateUrl}";
                     }),
                 ShopMediaPicker::image('image_mobile', 'sliders/mobile', 'تصویر موبایل')
                     ->maxSize(4096)
@@ -61,7 +61,7 @@ class HomeSliderResource extends Resource
 
                         $templateUrl = asset('shop/images/hero/banner-template-750x400.svg');
 
-                        return "موبایل (عرض کمتر از ۷۶۸px): {$w}×{$h} پیکسل. اگر خالی باشد، تصویر دسکتاپ استفاده می‌شود. قالب: {$templateUrl}";
+                        return "موبایل (<768px): {$w}×{$h} px (یا 989×388 @2x). نسبت نمایش ≈989:388. اگر خالی باشد تصویر دسکتاپ. قالب: {$templateUrl}";
                     }),
                 Forms\Components\TextInput::make('link')
                     ->label('لینک')

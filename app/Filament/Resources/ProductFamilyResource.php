@@ -82,6 +82,7 @@ class ProductFamilyResource extends Resource
                                 ->placeholder('https://www.chinibazar.ir/products?brand_id=...')
                                 ->columnSpanFull(),
                             ShopMediaPicker::image('image', 'product-family-sidebar-icons', 'آیکون کنار اسلایدر')
+                                ->helperText('نمایش در لیست ≈۲۲×۲۲ پیکسل — فایل پیشنهادی: ۶۴×۶۴ یا ۷۲×۷۲ PNG/WebP با پس‌زمینه شفاف.')
                                 ->columnSpanFull(),
                             Forms\Components\TextInput::make('position')
                                 ->label('ترتیب')

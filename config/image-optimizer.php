@@ -95,6 +95,8 @@ return [
         'products' => 'product',
         'products/variants' => 'product',
         'brands' => 'logo',
+        'credit-plans' => 'logo',
+        'partners' => 'logo',
         'sliders' => 'slider',
         'sliders/mobile' => 'slider_mobile',
         'categories' => 'category',

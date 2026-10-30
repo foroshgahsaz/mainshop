@@ -12,7 +12,11 @@
     @include('shop.partials.home-hero-hub', [
         'sliders' => $sliders,
         'hero_hub' => $hero_hub ?? [],
-        'homepage_gateway_plans' => $homepage_gateway_plans ?? [],
+        'homepage_plan_widget' => $homepage_plan_widget ?? [],
+    ])
+
+    @include('shop.partials.home-partners', [
+        'homepage_partners' => $homepage_partners ?? [],
     ])
 
     {{-- SPECIAL SALE --}}

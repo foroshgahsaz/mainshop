@@ -9,9 +9,10 @@ use App\Models\MenuItem;
 use App\Models\Post;
 use App\Models\Product;
 use App\Models\ShippingMethod;
-use App\Services\Payment\PaymentGatewayCatalog;
 use App\Services\Settings\HomepageSettingsService;
+use App\Services\Shop\HomepageCreditPlanService;
 use App\Services\Shop\HomepageHeroHubService;
+use App\Services\Shop\HomepagePartnerService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -22,7 +23,7 @@ class ShopCacheService
     private const LISTING_INDEX_KEY = 'shop:products:list:index';
 
     /** Bump when hero_hub / home payload shape changes so deploys never serve stale layout. */
-    public const HOME_PAYLOAD_KEY = 'shop:home:payload:v2';
+    public const HOME_PAYLOAD_KEY = 'shop:home:payload:v3';
 
     public function homePayload(): array
     {
@@ -36,7 +37,8 @@ class ShopCacheService
                 return [
                     'sliders' => HomeSlider::active()->orderBy('position')->get(),
                     'hero_hub' => app(HomepageHeroHubService::class)->payload(),
-                    'homepage_gateway_plans' => app(PaymentGatewayCatalog::class)->homepagePlanCards(),
+                    'homepage_plan_widget' => app(HomepageCreditPlanService::class)->homepageWidget(),
+                    'homepage_partners' => app(HomepagePartnerService::class)->homepageItems(),
                     'discounted' => $productQuery()->whereNotNull('sale_price')->whereColumn('sale_price', '<', 'price')->latest()->take(8)->get(),
                     'best_sellers' => $productQuery()->orderByDesc('views')->take(8)->get(),
                     'new' => $homepage->resolveNewProducts($productQuery),

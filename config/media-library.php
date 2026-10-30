@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\Brand;
+use App\Models\CreditPlan;
+use App\Models\Partner;
 use App\Models\Category;
 use App\Models\HomeSlider;
 use App\Models\Page;
@@ -17,6 +19,8 @@ return [
         'sliders' => 'اسلایدر دسکتاپ',
         'sliders/mobile' => 'اسلایدر موبایل',
         'brands' => 'برند',
+        'credit-plans' => 'طرح',
+        'partners' => 'همکار',
         'categories' => 'دسته‌بندی',
         'product-families' => 'خانواده محصول',
         'posts' => 'مقاله',
@@ -33,6 +37,8 @@ return [
     'models' => [
         HomeSlider::class => ['image', 'image_mobile'],
         Brand::class => ['logo', 'og_image'],
+        CreditPlan::class => ['icon'],
+        Partner::class => ['logo'],
         Category::class => ['image', 'og_image'],
         ProductFamily::class => ['image'],
         Post::class => ['image', 'og_image'],

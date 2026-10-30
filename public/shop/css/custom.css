@@ -4120,3 +4120,89 @@ html.checkout-coupon-alert-open {
   color: #253b67;
 }
 
+.home-gateway-plan-card--continue {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease;
+}
+
+.home-gateway-plan-card--continue:hover {
+  box-shadow: 0 8px 24px rgba(7, 85, 163, 0.08);
+}
+
+.home-gateway-plan-card__body--center {
+  justify-content: center;
+}
+
+.home-gateway-plan-card__cta--static {
+  pointer-events: none;
+}
+
+.home-gateway-plan-card__logo--continue .home-gateway-plan-card__logo-fallback {
+  background: #08b8f4;
+  color: #fff;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.home-gateway-plan-card--listing {
+  height: 100%;
+}
+
+.home-partners-section {
+  background: #fff;
+  border-top: 1px solid #eef2f6;
+}
+
+.home-partners-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (min-width: 640px) {
+  .home-partners-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .home-partners-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+.home-partners-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 88px;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid #eef2f6;
+  background: #fafbfc;
+  text-decoration: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.home-partners-card:hover {
+  border-color: #d8e2ee;
+  box-shadow: 0 6px 18px rgba(15, 35, 65, 0.06);
+}
+
+.home-partners-card__logo {
+  max-width: 100%;
+  max-height: 48px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.home-partners-card__fallback {
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: #4d6285;
+}
+

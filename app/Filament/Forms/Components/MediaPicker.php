@@ -49,10 +49,16 @@ class MediaPicker extends Field
             return $this->extractPath($state);
         });
 
+        // Closures: cacheActions() runs per field instance (repeater rows) when state path exists.
         $this->registerActions([
-            $this->getMediaCenterAction(),
-            $this->getClearImageAction(),
+            fn (): Action => $this->getMediaCenterAction(),
+            fn (): Action => $this->getClearImageAction(),
         ]);
+    }
+
+    public function getMediaActionName(string $base): string
+    {
+        return $base.'_'.hash('crc32b', $this->getStatePath());
     }
 
     public function directory(string | Closure $directory): static
@@ -81,7 +87,7 @@ class MediaPicker extends Field
 
     public function getMediaCenterAction(): Action
     {
-        return Action::make('openMediaCenter')
+        return Action::make($this->getMediaActionName('openMediaCenter'))
             ->label('انتخاب / تغییر تصویر')
             ->icon('heroicon-m-photo')
             ->color('primary')
@@ -121,7 +127,7 @@ class MediaPicker extends Field
 
     public function getClearImageAction(): Action
     {
-        return Action::make('clearImage')
+        return Action::make($this->getMediaActionName('clearImage'))
             ->label('حذف تصویر')
             ->icon('heroicon-m-trash')
             ->color('gray')

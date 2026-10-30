@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Filament\Forms\Components\MediaPicker;
 use App\Filament\Support\ShopIconUpload;
 use App\Filament\Support\ShopMediaPicker;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -40,6 +39,8 @@ class ShopImageUploadFieldTest extends TestCase
     public function test_repeater_media_pickers_have_distinct_action_names(): void
     {
         $html = Livewire::test(ShopRepeaterMediaPickerFormStub::class)->html();
+
+        $this->assertStringContainsString('انتخاب / تغییر تصویر', $html);
 
         preg_match_all('/openMediaCenter_[a-f0-9]{8}/', $html, $matches);
 

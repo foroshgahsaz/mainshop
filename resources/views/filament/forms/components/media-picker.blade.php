@@ -6,8 +6,8 @@
             ->first(fn ($value) => is_string($value) && $value !== '');
     $previewUrl = $currentPath ? \App\Support\ShopMedia::url($currentPath) : null;
     /** @var \App\Filament\Forms\Components\MediaPicker $field */
-    $openAction = $getAction($field->getMediaActionName('openMediaCenter'));
-    $clearAction = $getAction($field->getMediaActionName('clearImage'));
+    $openAction = $field->getOpenMediaCenterAction();
+    $clearAction = $field->getClearImageActionForView();
     $mediaFile = $currentPath
         ? \App\Models\MediaFile::query()->where('disk', 'public')->where('path', $currentPath)->first()
         : null;

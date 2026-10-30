@@ -31,6 +31,8 @@ class MediaPicker extends Field
 
     protected int | Closure $maxSize = 51200;
 
+    protected ?string $cachedActionsStatePath = null;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -59,6 +61,31 @@ class MediaPicker extends Field
     public function getMediaActionName(string $base): string
     {
         return $base.'_'.hash('crc32b', $this->getStatePath());
+    }
+
+    public function getOpenMediaCenterAction(): ?Action
+    {
+        return $this->getAction($this->getMediaActionName('openMediaCenter'));
+    }
+
+    public function getClearImageActionForView(): ?Action
+    {
+        return $this->getAction($this->getMediaActionName('clearImage'));
+    }
+
+    /**
+     * @return array<string, Action>
+     */
+    public function getActions(): array
+    {
+        $statePath = $this->getStatePath();
+
+        if ($this->cachedActionsStatePath !== $statePath) {
+            $this->cachedActions = null;
+            $this->cachedActionsStatePath = $statePath;
+        }
+
+        return $this->cachedActions ??= $this->cacheActions();
     }
 
     public function directory(string | Closure $directory): static

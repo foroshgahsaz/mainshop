@@ -1324,6 +1324,8 @@ resources/views/layouts/shop.blade.php
 | 2026-10-29 | اسلاگ محصول از نام: `SlugFromTitle` — فقط space/NBSP/tab/خط‌جدید → `-` (نه `\h`؛ حروف فارسی/لاتین حفظ) |
 | 2026-10-29 | ادمین محصول: URL ویرایش با **id** (`getRecordRouteKeyName`، `getUrl`، لیست/ریدایrect/create) — فروشگاه همچنان slug |
 | 2026-10-29 | فرم محصول: `_slug_name_source` — اسلاگ دستی حفظ می‌شود؛ همگام با نام فقط وقتی اسلاگ از نام ساخته شده |
+| 2026-10-31 | MediaPicker: دکمه آپلود با `$field->getOpenMediaCenterAction()` (نه `$getAction` Filament)؛ invalidate کش اکشن هنگام عوض شدن state path |
+| 2026-10-31 | اسلایدر صفحه اصلی: دسکتاپ 1920×480 (نمایش ~750×285)، موبایل 750×400 (نمایش ~989×388) |
 | 2026-10-31 | MediaPicker در repeater خانواده: نام اکشن یکتا با `getStatePath` (آپلود آیکون روی ردیف درست) |
 | 2026-10-31 | hero hub: چیدمان mockup (`home-hero-hub__shell`، اسلایدر چپ / سایدبار راست با `direction:ltr`، `home-hero-hub__cards`) |
 | 2026-10-29 | hero: موبایل order اسلایدر→سایدبار؛ دسکتاپ RTL ستون سایدبار راست؛ رفع ناپدید شدن تصویر اسلایدر (flex روی slide، picture block) |

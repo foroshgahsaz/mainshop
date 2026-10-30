@@ -7,10 +7,8 @@
 
 <section class="home-hero-hub" aria-label="بنر و دسترسی سریع">
     <div class="home-hero-hub__inner max-w-site mx-auto px-4 mt-2 md:mt-4">
-    <div class="home-hero-hub__frame">
-    <div class="home-hero-hub__panel">
-        <div class="home-hero-hub__grid">
-            <div class="home-hero-hub__slider">
+        <div class="home-hero-hub__shell" aria-label="بنر و دسته‌بندی‌ها">
+            <div class="home-hero-hub__promo">
                 <div class="swiper homeHeroSwiper relative" aria-label="اسلایدر بنر">
                     <div class="swiper-wrapper">
                         @forelse($sliders as $i => $slider)
@@ -39,49 +37,44 @@
                 </div>
             </div>
 
-            <aside class="home-hero-hub__aside" aria-label="{{ $heroHub['sidebar_title'] ?? 'دسته‌بندی' }}">
+            <aside class="home-hero-hub__sidebar" aria-label="{{ $heroHub['sidebar_title'] ?? 'دسته‌بندی' }}">
                 @if ($sidebarLinks !== [])
-                    <ul class="home-hero-hub__brand-list">
+                    <nav class="home-hero-hub__nav-list" aria-label="دسته‌بندی اصلی">
                         @foreach ($sidebarLinks as $link)
-                            <li>
-                                <a href="{{ $link['url'] }}" class="home-hero-hub__brand-link">
-                                    <span class="home-hero-hub__brand-link-main">
-                                        @if (! empty($link['image']))
-                                            <img
-                                                src="{{ $link['image'] }}"
-                                                alt=""
-                                                class="home-hero-hub__brand-icon"
-                                                width="36"
-                                                height="36"
-                                                loading="lazy"
-                                            >
-                                        @else
-                                            <span class="home-hero-hub__brand-icon-fallback" aria-hidden="true"></span>
-                                        @endif
-                                        <span class="home-hero-hub__brand-label">{{ $link['label'] }}</span>
-                                    </span>
-                                    <i class="fas fa-chevron-left" aria-hidden="true"></i>
-                                </a>
-                            </li>
+                            <a href="{{ $link['url'] }}" class="home-hero-hub__nav-item">
+                                <span class="home-hero-hub__nav-label">{{ $link['label'] }}</span>
+                                @if (! empty($link['image']))
+                                    <img
+                                        src="{{ $link['image'] }}"
+                                        alt=""
+                                        class="home-hero-hub__nav-icon-img"
+                                        width="22"
+                                        height="22"
+                                        loading="lazy"
+                                    >
+                                @else
+                                    <span class="home-hero-hub__nav-icon-fallback" aria-hidden="true"></span>
+                                @endif
+                            </a>
                         @endforeach
-                    </ul>
+                    </nav>
                 @else
                     <p class="home-hero-hub__empty-hint">
                         لینک‌های «{{ $heroHub['sidebar_title'] }}» هنوز ثبت نشده.
-                        ادمین → <strong>تنظیمات → صفحه اصلی فروشگاه</strong> (لینک ویرایش) یا
+                        ادمین → <strong>تنظیمات → صفحه اصلی فروشگاه</strong> یا
                         <strong>فروشگاه → خانواده محصول → ویرایش {{ $heroHub['sidebar_title'] }}</strong>
                         → «لینک‌های کنار اسلایدر».
                     </p>
                 @endif
 
                 @if ($quickFamilies !== [])
-                    <div class="home-hero-hub__quick-families">
+                    <div class="home-hero-hub__category-list">
                         @foreach ($quickFamilies as $family)
-                            <a href="{{ $family['url'] }}" class="home-hero-hub__quick-family">
-                                <span class="home-hero-hub__quick-family-image">
-                                    <img src="{{ \App\Support\ShopFormatter::productFamilyImage($family['image']) }}" alt="{{ $family['name'] }}" loading="lazy">
+                            <a href="{{ $family['url'] }}" class="home-hero-hub__category">
+                                <span class="home-hero-hub__category-icon">
+                                    <img src="{{ \App\Support\ShopFormatter::productFamilyImage($family['image']) }}" alt="" loading="lazy">
                                 </span>
-                                <span class="home-hero-hub__quick-family-label">{{ $family['name'] }}</span>
+                                <span class="home-hero-hub__category-label">{{ $family['name'] }}</span>
                             </a>
                         @endforeach
                     </div>
@@ -90,9 +83,18 @@
         </div>
 
         @if ($gatewayPlans !== [])
-            <div class="home-hero-hub__gateways" aria-label="طرح‌های خرید اعتباری">
+            <div class="home-hero-hub__cards" aria-label="طرح‌های خرید اعتباری">
                 @foreach ($gatewayPlans as $plan)
                     <article class="home-gateway-plan-card">
+                        <div class="home-gateway-plan-card__body">
+                            <span class="home-gateway-plan-card__title-accent" aria-hidden="true"></span>
+                            <h3 class="home-gateway-plan-card__title">{{ $plan['label'] }}</h3>
+                            <p class="home-gateway-plan-card__intro">{{ $plan['intro'] }}</p>
+                            <a href="{{ $plan['plan_url'] }}" class="home-gateway-plan-card__cta">
+                                <span class="home-gateway-plan-card__cta-arrow" aria-hidden="true">←</span>
+                                <span>مشاهده طرح</span>
+                            </a>
+                        </div>
                         <div class="home-gateway-plan-card__logo">
                             @if ($plan['icon'])
                                 <img src="{{ $plan['icon'] }}" alt="{{ $plan['label'] }}" loading="lazy">
@@ -100,22 +102,9 @@
                                 <span class="home-gateway-plan-card__logo-fallback">{{ mb_substr($plan['label'], 0, 1) }}</span>
                             @endif
                         </div>
-                        <div class="home-gateway-plan-card__body">
-                            <div class="home-gateway-plan-card__title-wrap">
-                                <span class="home-gateway-plan-card__title-accent" aria-hidden="true"></span>
-                                <h3 class="home-gateway-plan-card__title">{{ $plan['label'] }}</h3>
-                            </div>
-                            <p class="home-gateway-plan-card__intro">{{ $plan['intro'] }}</p>
-                            <a href="{{ $plan['plan_url'] }}" class="home-gateway-plan-card__cta">
-                                <span>مشاهده طرح</span>
-                                <i class="fas fa-arrow-left-long" aria-hidden="true"></i>
-                            </a>
-                        </div>
                     </article>
                 @endforeach
             </div>
         @endif
-    </div>
-    </div>
     </div>
 </section>

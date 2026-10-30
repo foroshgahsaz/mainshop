@@ -1324,6 +1324,7 @@ resources/views/layouts/shop.blade.php
 | 2026-10-29 | اسلاگ محصول از نام: `SlugFromTitle` — فقط space/NBSP/tab/خط‌جدید → `-` (نه `\h`؛ حروف فارسی/لاتین حفظ) |
 | 2026-10-29 | ادمین محصول: URL ویرایش با **id** (`getRecordRouteKeyName`، `getUrl`، لیست/ریدایrect/create) — فروشگاه همچنان slug |
 | 2026-10-29 | فرم محصول: `_slug_name_source` — اسلاگ دستی حفظ می‌شود؛ همگام با نام فقط وقتی اسلاگ از نام ساخته شده |
+| 2026-10-31 | hero hub: چیدمان mockup (`home-hero-hub__shell`، اسلایدر چپ / سایدبار راست با `direction:ltr`، `home-hero-hub__cards`) |
 | 2026-10-29 | hero: موبایل order اسلایدر→سایدبار؛ دسکتاپ RTL ستون سایدبار راست؛ رفع ناپدید شدن تصویر اسلایدر (flex روی slide، picture block) |
 | 2026-10-29 | hero layout fix: پس‌زمینه `#EDF0F2` تمام‌عرض (`home-hero-hub__inner` برای max-width)؛ رفع override `height:auto` روی Swiper؛ `SHOP_CSS_VERSION` / `shop.assets.css_version` |
 | 2026-10-29 | hero: پس‌زمینه کل `section.home-hero-hub` = `#EDF0F2`؛ `home-hero-hub__grid` سفید؛ در دسکتاپ ارتفاع اسلایدر = ارتفاع grid (تصویر `object-fit: cover`)؛ لیست سایدبار با خط جداکننده |

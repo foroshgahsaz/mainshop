@@ -93,7 +93,7 @@ class DisplayImageService
     protected function heroThumbnailPreset(string $section = 'hero'): array
     {
         $hero = $this->homepageImages->forSection($section) ?? [];
-        $width = max(1, (int) ($hero['width'] ?? 1920));
+        $width = max(1, (int) ($hero['width'] ?? 940));
 
         return [
             'max_width' => min(3840, $width * 2),

@@ -56,8 +56,8 @@ class HomepageImageServiceTest extends TestCase
     {
         $optimizerPreset = app(HomepageImageService::class)->optimizerPreset('hero');
 
-        $this->assertSame(1920, $optimizerPreset['cover_width'] ?? null);
-        $this->assertSame(480, $optimizerPreset['cover_height'] ?? null);
+        $this->assertSame(940, $optimizerPreset['cover_width'] ?? null);
+        $this->assertSame(406, $optimizerPreset['cover_height'] ?? null);
         $this->assertArrayNotHasKey('max_width', $optimizerPreset);
     }
 

@@ -45,11 +45,11 @@ class HomeSliderResource extends Resource
                     ->columnSpanFull()
                     ->helperText(function (): string {
                         $preset = app(HomepageImageService::class)->forSection('hero') ?? [];
-                        $w = (int) ($preset['width'] ?? 1920);
-                        $h = (int) ($preset['height'] ?? 480);
-                        $templateUrl = asset('shop/images/hero/banner-template-1920x480.svg');
+                        $w = (int) ($preset['width'] ?? 940);
+                        $h = (int) ($preset['height'] ?? 406);
+                        $templateUrl = asset('shop/images/hero/banner-template-940x406.svg');
 
-                        return "دسکتاپ (hero صفحه اصلی): آپلود {$w}×{$h} px (یا 1500×570 @2x). نسبت نمایش در باکس ≈ 750×285 (حداقل ارتفاع ~380px) — crop با object-fit:cover. قالب: {$templateUrl}";
+                        return "دسکتاپ (hero صفحه اصلی): دقیقاً {$w}×{$h} px (یا 1880×812 @2x). نسبت نمایش همان {$w}:{$h} — بنر را همین اندازه بدهید. قالب: {$templateUrl}";
                     }),
                 ShopMediaPicker::image('image_mobile', 'sliders/mobile', 'تصویر موبایل')
                     ->maxSize(4096)

@@ -25,6 +25,8 @@ class ShopCacheService
     /** Bump when hero_hub / home payload shape changes so deploys never serve stale layout. */
     public const HOME_PAYLOAD_KEY = 'shop:home:payload:v3';
 
+    public const PLANS_INDEX_KEY = 'shop:plans:index:v1';
+
     public function homePayload(): array
     {
         return $this->remember(
@@ -343,7 +345,26 @@ class ShopCacheService
     public function forgetHome(): void
     {
         $this->forgetHomeCache();
+        $this->forgetPlansIndex();
         $this->flushTag('home');
+    }
+
+    /**
+     * @return list<array{id: int, label: string, intro: string, plan_url: string, icon: ?string}>
+     */
+    public function plansIndexCards(): array
+    {
+        return $this->remember(
+            self::PLANS_INDEX_KEY,
+            config('shop.cache.home_ttl'),
+            fn () => app(HomepageCreditPlanService::class)->allActiveCards(),
+            ['shop', 'home', 'plans']
+        );
+    }
+
+    public function forgetPlansIndex(): void
+    {
+        $this->forget(self::PLANS_INDEX_KEY);
     }
 
     /**

@@ -109,14 +109,14 @@
                 @endforeach
 
                 @if ($showPlansContinue)
-                    <a href="{{ $plansContinueUrl }}" class="home-gateway-plan-card home-gateway-plan-card--continue" aria-label="ادامه طرح‌ها">
+                    <a href="{{ $plansContinueUrl }}" class="home-gateway-plan-card home-gateway-plan-card--continue" aria-label="مشاهده همه طرح‌ها">
                         <div class="home-gateway-plan-card__body home-gateway-plan-card__body--center">
                             <span class="home-gateway-plan-card__title-accent" aria-hidden="true"></span>
-                            <h3 class="home-gateway-plan-card__title">ادامه طرح‌ها</h3>
-                            <p class="home-gateway-plan-card__intro">مشاهده همه طرح‌های فعال فروشگاه</p>
+                            <h3 class="home-gateway-plan-card__title">مشاهده همه</h3>
+                            <p class="home-gateway-plan-card__intro">همه طرح‌های خرید اعتباری فروشگاه</p>
                             <span class="home-gateway-plan-card__cta home-gateway-plan-card__cta--static">
                                 <span class="home-gateway-plan-card__cta-arrow" aria-hidden="true">←</span>
-                                <span>مشاهده لیست</span>
+                                <span>رفتن به لیست</span>
                             </span>
                         </div>
                         <div class="home-gateway-plan-card__logo home-gateway-plan-card__logo--continue" aria-hidden="true">

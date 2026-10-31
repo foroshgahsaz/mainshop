@@ -37,7 +37,26 @@ class CreditPlanAndPartnerHomepageTest extends TestCase
         $response->assertSee('طرح 1', false);
         $response->assertSee('طرح 4', false);
         $response->assertDontSee('طرح 5', false);
-        $response->assertSee('ادامه طرح‌ها', false);
+        $response->assertSee('مشاهده همه', false);
+    }
+
+    public function test_homepage_shows_view_all_with_exactly_four_plans(): void
+    {
+        for ($i = 1; $i <= 4; $i++) {
+            CreditPlan::query()->create([
+                'name' => "طرح {$i}",
+                'short_description' => "توضیح {$i}",
+                'plan_url' => "/plans/plan-{$i}/",
+                'position' => $i,
+                'show_on_homepage_desktop' => true,
+                'is_active' => true,
+            ]);
+        }
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('طرح 4', false)
+            ->assertSee('مشاهده همه', false);
     }
 
     public function test_plans_index_lists_all_active_plans(): void
@@ -54,7 +73,9 @@ class CreditPlanAndPartnerHomepageTest extends TestCase
         $this->get('/plans')
             ->assertOk()
             ->assertSee('دیجی‌پی', false)
-            ->assertSee('خرید اقساطی', false);
+            ->assertSee('خرید اقساطی', false)
+            ->assertSee('plans-index__hero', false)
+            ->assertSee('plans-index__grid', false);
     }
 
     public function test_homepage_shows_partners_section(): void

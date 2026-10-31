@@ -36,16 +36,12 @@ class ShopImageUploadFieldTest extends TestCase
         $this->assertStringNotContainsString('بدون تصویر', $html);
     }
 
-    public function test_repeater_media_pickers_have_distinct_action_names(): void
+    public function test_repeater_media_picker_mounts_open_action_by_state_path(): void
     {
-        $html = Livewire::test(ShopRepeaterMediaPickerFormStub::class)->html();
-
-        $this->assertStringContainsString('انتخاب / تغییر تصویر', $html);
-
-        preg_match_all('/openMediaCenter_[a-f0-9]{8}/', $html, $matches);
-
-        $this->assertGreaterThanOrEqual(2, count($matches[0] ?? []));
-        $this->assertSame(count($matches[0]), count(array_unique($matches[0])));
+        Livewire::test(ShopRepeaterMediaPickerFormStub::class)
+            ->call('mountFormComponentAction', 'data.items.record-0.image', 'openMediaCenter')
+            ->assertSet('mountedFormComponentActions', ['openMediaCenter'])
+            ->assertSet('mountedFormComponentActionsComponents', ['data.items.record-0.image']);
     }
 
     public function test_shop_icon_upload_uses_native_upload_view(): void

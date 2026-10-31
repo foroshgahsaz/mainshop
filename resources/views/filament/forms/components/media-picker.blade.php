@@ -6,12 +6,8 @@
             ->first(fn ($value) => is_string($value) && $value !== '');
     $previewUrl = $currentPath ? \App\Support\ShopMedia::url($currentPath) : null;
     /** @var \App\Filament\Forms\Components\MediaPicker $field */
-    $field->getActions();
-    $openActionName = $field->getMediaActionName('openMediaCenter');
-    $clearActionName = $field->getMediaActionName('clearImage');
-    // Filament's $getAction resolves repeater/relationship rows; $field->getAction() alone often returns null there.
-    $openAction = $getAction($openActionName) ?? $field->getOpenMediaCenterAction();
-    $clearAction = $getAction($clearActionName) ?? $field->getClearImageActionForView();
+    $openAction = $getAction('openMediaCenter') ?? $field->getAction('openMediaCenter');
+    $clearAction = $getAction('clearImage') ?? $field->getAction('clearImage');
     $mediaFile = $currentPath
         ? \App\Models\MediaFile::query()->where('disk', 'public')->where('path', $currentPath)->first()
         : null;
@@ -72,7 +68,7 @@
                     type="button"
                     color="primary"
                     icon="heroicon-m-photo"
-                    wire:click="mountFormComponentAction('{{ $getStatePath() }}', '{{ $openActionName }}')"
+                    wire:click="mountFormComponentAction('{{ $getStatePath() }}', 'openMediaCenter')"
                 >
                     انتخاب / تغییر تصویر
                 </x-filament::button>
@@ -86,7 +82,7 @@
                     color="gray"
                     outlined
                     icon="heroicon-m-trash"
-                    wire:click="mountFormComponentAction('{{ $getStatePath() }}', '{{ $clearActionName }}')"
+                    wire:click="mountFormComponentAction('{{ $getStatePath() }}', 'clearImage')"
                 >
                     حذف تصویر
                 </x-filament::button>

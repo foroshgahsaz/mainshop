@@ -4002,17 +4002,23 @@ html.checkout-coupon-alert-open {
   font-size: 1rem;
 }
 
-.home-hero-hub__cards-swiper .home-gateway-plan-card__logo--continue .home-gateway-plan-card__logo-fallback {
-  width: 52px;
-  height: 52px;
-  font-size: 1.5rem;
+.home-hero-hub__cards-swiper .home-gateway-plan-card__logo--continue img {
+  width: auto;
+  height: 56px;
+  max-width: 92%;
+  object-fit: contain;
 }
 
 .home-hero-hub__cards-swiper .home-gateway-plan-card__body {
   order: 0;
   width: 100%;
   flex: 1;
-  align-items: flex-start;
+  align-items: center;
+  text-align: center;
+}
+
+.home-hero-hub__cards-swiper .home-gateway-plan-card__title-accent {
+  margin-inline: auto;
 }
 
 .home-hero-hub__cards-swiper .home-gateway-plan-card__title {
@@ -4023,6 +4029,7 @@ html.checkout-coupon-alert-open {
   -webkit-box-orient: vertical;
   overflow: hidden;
   width: 100%;
+  text-align: center;
 }
 
 .home-hero-hub__cards-swiper .home-gateway-plan-card__intro {
@@ -4035,6 +4042,7 @@ html.checkout-coupon-alert-open {
   overflow: hidden;
   line-height: 1.45;
   width: 100%;
+  text-align: center;
 }
 
 .home-hero-hub__cards-swiper .home-gateway-plan-card__cta {
@@ -4112,10 +4120,11 @@ html.checkout-coupon-alert-open {
     font-size: 1.05rem;
   }
 
-  .home-hero-hub__cards--grid .home-gateway-plan-card__logo--continue .home-gateway-plan-card__logo-fallback {
-    width: 58px;
-    height: 58px;
-    font-size: 1.65rem;
+  .home-hero-hub__cards--grid .home-gateway-plan-card__logo--continue img {
+    width: auto;
+    height: 64px;
+    max-width: 100%;
+    object-fit: contain;
   }
 
   .home-hero-hub__cards--grid .home-gateway-plan-card__cta {
@@ -4311,11 +4320,12 @@ html.checkout-coupon-alert-open {
   pointer-events: none;
 }
 
-.home-gateway-plan-card__logo--continue .home-gateway-plan-card__logo-fallback {
-  background: #08b8f4;
-  color: #fff;
-  font-size: 2rem;
-  line-height: 1;
+.home-gateway-plan-card__logo--continue img {
+  width: auto;
+  height: 72px;
+  max-width: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 .home-gateway-plan-card--listing {

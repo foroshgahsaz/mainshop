@@ -69,7 +69,7 @@ return [
 
     /** Bump css_version after shop CSS changes if CDN/browser keeps old custom.css */
     'assets' => [
-        'css_version' => (int) env('SHOP_CSS_VERSION', 7),
+        'css_version' => (int) env('SHOP_CSS_VERSION', 8),
     ],
 
 ];

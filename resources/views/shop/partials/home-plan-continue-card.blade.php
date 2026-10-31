@@ -12,7 +12,14 @@
             <span>رفتن به لیست</span>
         </span>
     </div>
-    <div class="home-gateway-plan-card__logo home-gateway-plan-card__logo--continue" aria-hidden="true">
-        <span class="home-gateway-plan-card__logo-fallback">+</span>
+    <div class="home-gateway-plan-card__logo home-gateway-plan-card__logo--continue">
+        <img
+            src="{{ asset('shop/images/home-plans-view-all.png') }}"
+            alt=""
+            width="112"
+            height="120"
+            loading="lazy"
+            decoding="async"
+        >
     </div>
 </a>

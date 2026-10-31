@@ -11,7 +11,6 @@
 <section class="home-hero-hub" aria-label="بنر و دسترسی سریع">
     <div class="home-hero-hub__inner max-w-site mx-auto px-4 mt-2 md:mt-4">
         <div class="home-hero-hub__shell" aria-label="بنر و دسته‌بندی‌ها">
-            <div class="home-hero-hub__main">
             <div class="home-hero-hub__promo">
                 <div class="swiper homeHeroSwiper relative" aria-label="اسلایدر بنر">
                     <div class="swiper-wrapper">
@@ -39,35 +38,6 @@
                     </div>
                     <div class="swiper-pagination"></div>
                 </div>
-            </div>
-
-        @if ($planCards !== [] || $showPlansContinue)
-            <div class="home-hero-hub__cards-wrap" aria-label="طرح‌های خرید اعتباری">
-                <div class="home-hero-hub__cards home-hero-hub__cards--grid">
-                    @foreach ($planCards as $plan)
-                        @include('shop.partials.home-plan-card', ['plan' => $plan, 'headingTag' => 'h3'])
-                    @endforeach
-                    @if ($showPlansContinue)
-                        @include('shop.partials.home-plan-continue-card', ['plansContinueUrl' => $plansContinueUrl, 'headingTag' => 'h3'])
-                    @endif
-                </div>
-                <div class="swiper homePlansSwiper home-hero-hub__cards-swiper" aria-label="اسلایدر طرح‌های خرید">
-                    <div class="swiper-wrapper">
-                        @foreach ($planCards as $plan)
-                            <div class="swiper-slide">
-                                @include('shop.partials.home-plan-card', ['plan' => $plan, 'headingTag' => 'h3'])
-                            </div>
-                        @endforeach
-                        @if ($showPlansContinue)
-                            <div class="swiper-slide">
-                                @include('shop.partials.home-plan-continue-card', ['plansContinueUrl' => $plansContinueUrl, 'headingTag' => 'h3'])
-                            </div>
-                        @endif
-                    </div>
-                    <div class="swiper-pagination"></div>
-                </div>
-            </div>
-        @endif
             </div>
 
             <aside class="home-hero-hub__sidebar" aria-label="{{ $heroHub['sidebar_title'] ?? 'دسته‌بندی' }}">
@@ -114,5 +84,33 @@
                 @endif
             </aside>
         </div>
+
+        @if ($planCards !== [] || $showPlansContinue)
+            <div class="home-hero-hub__cards-wrap" aria-label="طرح‌های خرید اعتباری">
+                <div class="home-hero-hub__cards home-hero-hub__cards--grid">
+                    @foreach ($planCards as $plan)
+                        @include('shop.partials.home-plan-card', ['plan' => $plan, 'headingTag' => 'h3'])
+                    @endforeach
+                    @if ($showPlansContinue)
+                        @include('shop.partials.home-plan-continue-card', ['plansContinueUrl' => $plansContinueUrl, 'headingTag' => 'h3'])
+                    @endif
+                </div>
+                <div class="swiper homePlansSwiper home-hero-hub__cards-swiper" aria-label="اسلایدر طرح‌های خرید">
+                    <div class="swiper-wrapper">
+                        @foreach ($planCards as $plan)
+                            <div class="swiper-slide">
+                                @include('shop.partials.home-plan-card', ['plan' => $plan, 'headingTag' => 'h3'])
+                            </div>
+                        @endforeach
+                        @if ($showPlansContinue)
+                            <div class="swiper-slide">
+                                @include('shop.partials.home-plan-continue-card', ['plansContinueUrl' => $plansContinueUrl, 'headingTag' => 'h3'])
+                            </div>
+                        @endif
+                    </div>
+                    <div class="swiper-pagination"></div>
+                </div>
+            </div>
+        @endif
     </div>
 </section>

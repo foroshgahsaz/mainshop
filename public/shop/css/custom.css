@@ -3953,7 +3953,7 @@ html.checkout-coupon-alert-open {
 
 @media (min-width: 761px) {
   .home-hero-hub__cards-wrap {
-    padding-top: 18px;
+    padding-top: 0;
   }
 }
 

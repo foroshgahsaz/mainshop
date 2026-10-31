@@ -65,12 +65,16 @@ class MediaPicker extends Field
 
     public function getOpenMediaCenterAction(): ?Action
     {
-        return $this->getAction($this->getMediaActionName('openMediaCenter'));
+        $name = $this->getMediaActionName('openMediaCenter');
+
+        return $this->getActions()[$name] ?? $this->getAction($name);
     }
 
     public function getClearImageActionForView(): ?Action
     {
-        return $this->getAction($this->getMediaActionName('clearImage'));
+        $name = $this->getMediaActionName('clearImage');
+
+        return $this->getActions()[$name] ?? $this->getAction($name);
     }
 
     /**

@@ -577,9 +577,10 @@ Sidebar: `resources/views/filament/partials/admin-sidebar.blade.php` — panel �
 |------|------------|
 | زرین‌پال | `/admin/zarinpal` |
 | تارا | `/admin/tara` |
+| سداد | `/admin/sadad` |
 | یکپارچه‌سازی (legacy) | `/admin/manage-integrations` |
 
-ثبت در `AdminPanelProvider.php`: `ManageZarinpal`, `ManageTara`
+ثبت در `AdminPanelProvider.php`: `ManageZarinpal`, `ManageTara`, `ManageSadad`, ...
 
 ### 9.9 CSRF و امنیت callback
 
@@ -589,6 +590,7 @@ Sidebar: `resources/views/filament/partials/admin-sidebar.blade.php` — panel �
 $middleware->validateCsrfTokens(except: [
     'payment/callback',
     'payment/callback/tara',
+    'payment/callback/sadad',
 ]);
 ```
 
@@ -628,6 +630,23 @@ $middleware->validateCsrfTokens(except: [
 7. Feature test + به‌روزرسانی مستندات ([00-doc-maintenance.md](dev/00-doc-maintenance.md))
 
 **نمونه SOAP (PEC / پارسیان):** `ParsianGateway`، `PecIpgClient`، مستند نمونه در `docs/PHP.Samples.zip` — `OrderId` = `payments.id`، تأیید با `ConfirmPayment` پس از callback POST.
+
+### 9.13 درگاه سداد (cash / نقدی — بانک ملی)
+
+| مورد | مقدار |
+|------|--------|
+| نام config | `sadad` |
+| type | `cash` |
+| کلاس | `SadadGateway`، `SadadIpgClient`، `SadadSign` |
+| Admin | `/admin/sadad` → `ManageSadad.php` |
+| Callback | `/payment/callback/sadad` (POST — `token`, `ResCode`, `OrderId`) |
+| مستندات پروژه | `docs/PHP-master.zip`، `docs/15470-51A234D3-CD9B-4DEB-8D6A-F9D72518FCB9.pdf`؛ [راهنمای سداد](https://sadadpsp.ir/ipg-dargah-pardakht) |
+
+**جریان:** `PaymentRequest` (JSON + SignData Triple-DES) → redirect `sadad.shaparak.ir/VPG/Purchase?Token=…` → callback → `Advice/Verify`.
+
+**تنظیمات:** `merchant_id`, `terminal_id`, `terminal_key` (Base64), `amount_unit`, `callback_url`, `icon`.
+
+**OrderId** = `payments.id` (مثل پارسیان).
 
 ---
 
@@ -1324,6 +1343,7 @@ resources/views/layouts/shop.blade.php
 | 2026-10-29 | اسلاگ محصول از نام: `SlugFromTitle` — فقط space/NBSP/tab/خط‌جدید → `-` (نه `\h`؛ حروف فارسی/لاتین حفظ) |
 | 2026-10-29 | ادمین محصول: URL ویرایش با **id** (`getRecordRouteKeyName`، `getUrl`، لیست/ریدایrect/create) — فروشگاه همچنان slug |
 | 2026-10-29 | فرم محصول: `_slug_name_source` — اسلاگ دستی حفظ می‌شود؛ همگام با نام فقط وقتی اسلاگ از نام ساخته شده |
+| 2026-10-31 | درگاه **سداد** (`SadadGateway`): IPG JSON بانک ملی — `PaymentRequest` / `Verify`، SignData DES-EDE3؛ admin `/admin/sadad`؛ callback `/payment/callback/sadad`؛ مستندات `docs/PHP-master.zip` |
 | 2026-10-31 | MediaPicker: اکشن‌های `openMediaCenter` / `clearImage` ثابت روی هر فیلد (Filament با `mountFormComponentAction(statePath, name)` کامپوننت را پیدا می‌کند؛ نام هش‌شده با state path باعث unmount خالی می‌شد) |
 | 2026-10-31 | اسلایدر hero hub دسکتاپ: نمایش و آپلود **940×406** (`aspect-ratio` + preset `sliders`)؛ موبایل 750×400 (نمایش ≈989×388) |
 | 2026-10-31 | hero hub: چیدمان mockup (`home-hero-hub__shell`، اسلایدر چپ / سایدبار راست با `direction:ltr`، `home-hero-hub__cards`) |

@@ -8,6 +8,7 @@ use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\ManageBajetPay;
 use App\Filament\Pages\ManageDigiPay;
 use App\Filament\Pages\ManageParsian;
+use App\Filament\Pages\ManageSadad;
 use App\Filament\Pages\ManageTara;
 use App\Filament\Pages\ManageZarinpal;
 use App\Filament\Pages\ViewDatabaseBackups;
@@ -73,6 +74,7 @@ class AdminPanelProvider extends PanelProvider
                 ManageBajetPay::class,
                 ManageDigiPay::class,
                 ManageParsian::class,
+                ManageSadad::class,
                 ViewPaymentLogs::class,
                 ViewSiteErrorLogs::class,
                 ViewDatabaseBackups::class,

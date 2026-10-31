@@ -17,11 +17,11 @@ return [
         'hero' => [
             'label' => 'اسلایدر — دسکتاپ',
             'mode' => 'cover',
-            'width' => 1920,
-            'height' => 480,
+            'width' => 940,
+            'height' => 406,
             'quality' => 90,
             'format' => 'webp',
-            // Upload preset already crops to 1920×480; avoid a second cover pass (blur/artifacts).
+            // Upload preset crops to 940×406 (نسبت نمایش hero hub دسکتاپ).
             'enabled' => false,
         ],
 

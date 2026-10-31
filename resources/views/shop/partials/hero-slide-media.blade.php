@@ -18,8 +18,8 @@
         src="{{ $desktopUrl }}"
         alt="{{ $alt }}"
         class="hero-slide__img"
-        width="1920"
-        height="480"
+        width="940"
+        height="406"
         decoding="async"
         @if($isFirst) fetchpriority="high" @endif
         loading="{{ $isFirst ? 'eager' : 'lazy' }}"

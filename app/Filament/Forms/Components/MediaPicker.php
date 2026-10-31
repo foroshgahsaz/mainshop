@@ -31,8 +31,6 @@ class MediaPicker extends Field
 
     protected int | Closure $maxSize = 51200;
 
-    protected ?string $cachedActionsStatePath = null;
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -56,40 +54,6 @@ class MediaPicker extends Field
             fn (): Action => $this->getMediaCenterAction(),
             fn (): Action => $this->getClearImageAction(),
         ]);
-    }
-
-    public function getMediaActionName(string $base): string
-    {
-        return $base.'_'.hash('crc32b', $this->getStatePath());
-    }
-
-    public function getOpenMediaCenterAction(): ?Action
-    {
-        $name = $this->getMediaActionName('openMediaCenter');
-
-        return $this->getActions()[$name] ?? $this->getAction($name);
-    }
-
-    public function getClearImageActionForView(): ?Action
-    {
-        $name = $this->getMediaActionName('clearImage');
-
-        return $this->getActions()[$name] ?? $this->getAction($name);
-    }
-
-    /**
-     * @return array<string, Action>
-     */
-    public function getActions(): array
-    {
-        $statePath = $this->getStatePath();
-
-        if ($this->cachedActionsStatePath !== $statePath) {
-            $this->cachedActions = null;
-            $this->cachedActionsStatePath = $statePath;
-        }
-
-        return $this->cachedActions ??= $this->cacheActions();
     }
 
     public function directory(string | Closure $directory): static
@@ -118,7 +82,7 @@ class MediaPicker extends Field
 
     public function getMediaCenterAction(): Action
     {
-        return Action::make($this->getMediaActionName('openMediaCenter'))
+        return Action::make('openMediaCenter')
             ->label('انتخاب / تغییر تصویر')
             ->icon('heroicon-m-photo')
             ->color('primary')
@@ -158,7 +122,7 @@ class MediaPicker extends Field
 
     public function getClearImageAction(): Action
     {
-        return Action::make($this->getMediaActionName('clearImage'))
+        return Action::make('clearImage')
             ->label('حذف تصویر')
             ->icon('heroicon-m-trash')
             ->color('gray')

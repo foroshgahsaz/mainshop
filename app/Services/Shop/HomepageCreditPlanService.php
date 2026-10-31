@@ -34,25 +34,24 @@ class HomepageCreditPlanService
                 ->values()
                 ->all();
 
-            $activeCount = CreditPlan::query()->active()->count();
-
             return [
                 'cards' => $cards,
-                'show_continue' => $activeCount > count($cards),
+                'show_continue' => true,
                 'continue_url' => $continueUrl,
             ];
         }
 
         $gatewayCards = $this->gatewayCatalog->homepagePlanCards();
+        $mapped = array_map(fn (array $card) => [
+            'label' => $card['label'],
+            'intro' => $card['intro'],
+            'plan_url' => $card['plan_url'],
+            'icon' => $card['icon'],
+        ], $gatewayCards);
 
         return [
-            'cards' => array_map(fn (array $card) => [
-                'label' => $card['label'],
-                'intro' => $card['intro'],
-                'plan_url' => $card['plan_url'],
-                'icon' => $card['icon'],
-            ], $gatewayCards),
-            'show_continue' => false,
+            'cards' => array_slice($mapped, 0, self::HOMEPAGE_DESKTOP_LIMIT),
+            'show_continue' => count($mapped) > self::HOMEPAGE_DESKTOP_LIMIT,
             'continue_url' => $continueUrl,
         ];
     }

@@ -1332,6 +1332,7 @@ resources/views/layouts/shop.blade.php
 | 2026-10-29 | hero layout fix: پس‌زمینه `#EDF0F2` تمام‌عرض (`home-hero-hub__inner` برای max-width)؛ رفع override `height:auto` روی Swiper؛ `SHOP_CSS_VERSION` / `shop.assets.css_version` |
 | 2026-10-29 | hero: پس‌زمینه کل `section.home-hero-hub` = `#EDF0F2`؛ `home-hero-hub__grid` سفید؛ در دسکتاپ ارتفاع اسلایدر = ارتفاع grid (تصویر `object-fit: cover`)؛ لیست سایدبار با خط جداکننده |
 | 2026-10-29 | کش صفحه اصلی: `ShopCacheService::HOME_PAYLOAD_KEY` (`shop:home:payload:v2`) — با تغییر ساختار hero نسخه را بالا ببرید تا بعد از deploy چیدمان قدیمی از کش نیاید |
+| 2026-10-31 | **طرح‌ها** (`CreditPlanResource`، `/admin/credit-plans`) و **همکاران ما** (`PartnerResource`) — CRUD با آیکون/لوگو، ترتیب، لینک طرح؛ ویجت صفحه اصلی: حداکثر ۴ طرح با تیک «نمایش در دسکتاپ» + کارت «ادامه طرح‌ها» → `/plans`؛ بخش «همکاران ما» با تیک «نمایش در صفحه اصلی»؛ کش home `shop:home:payload:v3`؛ اگر حداقل یک طرح در DB باشد جایگزین کارت‌های درگاه می‌شود |
 | 2026-10-29 | hero سایدبار: لیست بالا فقط زیرمجموعه «سرویس چینی»؛ خانواده‌های `show_on_homepage_sidebar` بدون repeater → ردیف آیکون پایین (flex دایره‌ای) |
 | 2026-10-29 | hero سایدبار (قبلی): چند خانوade + `rebuildAggregatedHeroSidebarLinks`؛ MediaPicker repeater |
 | 2026-10-29 | hero: قاب سفید + پنل `#EDF0F2`؛ کارت درگاه RTL (لوگو راست در DOM)؛ کش CSS با `?v=filemtime`؛ سه خانوade سریع با fallback نام فارسی |

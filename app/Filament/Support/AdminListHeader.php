@@ -4,6 +4,8 @@ namespace App\Filament\Support;
 
 use App\Filament\Resources\AttributeResource;
 use App\Filament\Resources\BrandResource;
+use App\Filament\Resources\CreditPlanResource;
+use App\Filament\Resources\PartnerResource;
 use App\Filament\Resources\CategoryResource;
 use App\Filament\Resources\CouponResource;
 use App\Filament\Resources\FreightCarrierResource;
@@ -36,6 +38,8 @@ class AdminListHeader
             OrderResource::class => 'fa-shopping-bag',
             PaymentResource::class => 'fa-credit-card',
             BrandResource::class => 'fa-certificate',
+            CreditPlanResource::class => 'fa-hand-holding-usd',
+            PartnerResource::class => 'fa-handshake',
             CouponResource::class => 'fa-percent',
             PostResource::class => 'fa-newspaper',
             PageResource::class => 'fa-file-alt',

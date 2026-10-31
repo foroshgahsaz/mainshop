@@ -1,6 +1,9 @@
 @php
     $heroHub = $hero_hub ?? ['sidebar_title' => '', 'sidebar_links' => [], 'quick_families' => []];
-    $gatewayPlans = $homepage_gateway_plans ?? [];
+    $planWidget = $homepage_plan_widget ?? ['cards' => [], 'show_continue' => false, 'continue_url' => route('plans.index')];
+    $planCards = $planWidget['cards'] ?? [];
+    $showPlansContinue = (bool) ($planWidget['show_continue'] ?? false);
+    $plansContinueUrl = $planWidget['continue_url'] ?? route('plans.index');
     $sidebarLinks = $heroHub['sidebar_links'] ?? [];
     $quickFamilies = $heroHub['quick_families'] ?? [];
 @endphp
@@ -82,9 +85,9 @@
             </aside>
         </div>
 
-        @if ($gatewayPlans !== [])
+        @if ($planCards !== [] || $showPlansContinue)
             <div class="home-hero-hub__cards" aria-label="طرح‌های خرید اعتباری">
-                @foreach ($gatewayPlans as $plan)
+                @foreach ($planCards as $plan)
                     <article class="home-gateway-plan-card">
                         <div class="home-gateway-plan-card__body">
                             <span class="home-gateway-plan-card__title-accent" aria-hidden="true"></span>
@@ -104,6 +107,23 @@
                         </div>
                     </article>
                 @endforeach
+
+                @if ($showPlansContinue)
+                    <a href="{{ $plansContinueUrl }}" class="home-gateway-plan-card home-gateway-plan-card--continue" aria-label="ادامه طرح‌ها">
+                        <div class="home-gateway-plan-card__body home-gateway-plan-card__body--center">
+                            <span class="home-gateway-plan-card__title-accent" aria-hidden="true"></span>
+                            <h3 class="home-gateway-plan-card__title">ادامه طرح‌ها</h3>
+                            <p class="home-gateway-plan-card__intro">مشاهده همه طرح‌های فعال فروشگاه</p>
+                            <span class="home-gateway-plan-card__cta home-gateway-plan-card__cta--static">
+                                <span class="home-gateway-plan-card__cta-arrow" aria-hidden="true">←</span>
+                                <span>مشاهده لیست</span>
+                            </span>
+                        </div>
+                        <div class="home-gateway-plan-card__logo home-gateway-plan-card__logo--continue" aria-hidden="true">
+                            <span class="home-gateway-plan-card__logo-fallback">+</span>
+                        </div>
+                    </a>
+                @endif
             </div>
         @endif
     </div>

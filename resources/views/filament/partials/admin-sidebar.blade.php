@@ -17,6 +17,8 @@
     use App\Filament\Pages\ManageZarinpal;
     use App\Filament\Resources\AttributeResource;
     use App\Filament\Resources\BrandResource;
+    use App\Filament\Resources\CreditPlanResource;
+    use App\Filament\Resources\PartnerResource;
     use App\Filament\Resources\CategoryResource;
     use App\Filament\Resources\CouponResource;
     use App\Filament\Resources\HomeSliderResource;
@@ -121,6 +123,28 @@
                 ['label' => 'برندها', 'icon' => 'fa-certificate', 'items' => [
                     ['label' => 'لیست همه', 'url' => BrandResource::getUrl('index'), 'icon' => 'fa-list'],
                     ['label' => 'ایجاد برند', 'url' => BrandResource::getUrl('create'), 'icon' => 'fa-plus'],
+                ]],
+            ],
+        ],
+        'credit_plans' => [
+            'label' => 'طرح‌ها',
+            'icon' => 'fa-hand-holding-usd',
+            'routes' => ['filament.admin.resources.credit-plans.*'],
+            'menus' => [
+                ['label' => 'طرح‌ها', 'icon' => 'fa-hand-holding-usd', 'items' => [
+                    ['label' => 'لیست همه', 'url' => CreditPlanResource::getUrl('index'), 'icon' => 'fa-list'],
+                    ['label' => 'ایجاد طرح', 'url' => CreditPlanResource::getUrl('create'), 'icon' => 'fa-plus'],
+                ]],
+            ],
+        ],
+        'partners' => [
+            'label' => 'همکاران ما',
+            'icon' => 'fa-handshake',
+            'routes' => ['filament.admin.resources.partners.*'],
+            'menus' => [
+                ['label' => 'همکاران ما', 'icon' => 'fa-handshake', 'items' => [
+                    ['label' => 'لیست همه', 'url' => PartnerResource::getUrl('index'), 'icon' => 'fa-list'],
+                    ['label' => 'افزودن همکار', 'url' => PartnerResource::getUrl('create'), 'icon' => 'fa-plus'],
                 ]],
             ],
         ],
@@ -338,6 +362,8 @@
         ['id' => 'products', 'icon' => 'fa-box-open', 'tooltip' => 'محصولات', 'panel' => 'products'],
         ['id' => 'payments', 'icon' => 'fa-credit-card', 'tooltip' => 'پرداخت‌ها', 'panel' => 'payments'],
         ['id' => 'brands', 'icon' => 'fa-certificate', 'tooltip' => 'برندها', 'panel' => 'brands'],
+        ['id' => 'credit_plans', 'icon' => 'fa-hand-holding-usd', 'tooltip' => 'طرح‌ها', 'panel' => 'credit_plans'],
+        ['id' => 'partners', 'icon' => 'fa-handshake', 'tooltip' => 'همکاران ما', 'panel' => 'partners'],
         ['id' => 'discounts', 'icon' => 'fa-percent', 'tooltip' => 'تخفیف‌ها', 'panel' => 'discounts'],
         ['id' => 'orders', 'icon' => 'fa-shopping-bag', 'tooltip' => 'سفارش‌ها', 'panel' => 'orders'],
         ['id' => 'requests', 'icon' => 'fa-inbox', 'tooltip' => 'درخواست‌ها', 'panel' => 'requests', 'badge' => $pendingRequestsCount],

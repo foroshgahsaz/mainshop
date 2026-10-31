@@ -3,6 +3,7 @@
 use App\Services\Payment\BajetPayGateway;
 use App\Services\Payment\DigiPayGateway;
 use App\Services\Payment\ParsianGateway;
+use App\Services\Payment\SadadGateway;
 use App\Services\Payment\TaraGateway;
 use App\Services\Payment\ZarinpalGateway;
 
@@ -20,6 +21,18 @@ return [
             'login_account' => env('PARSIAN_LOGIN_ACCOUNT', ''),
             'callback_url' => env('PARSIAN_CALLBACK_URL', '/payment/callback/pec'),
             'amount_unit' => env('PARSIAN_AMOUNT_UNIT', 'toman'),
+        ],
+
+        'sadad' => [
+            'driver' => SadadGateway::class,
+            'type' => 'cash',
+            'label' => 'سداد',
+            'description' => 'پرداخت نقدی آنلاین (درگاه سداد — بانک ملی)',
+            'merchant_id' => env('SADAD_MERCHANT_ID', ''),
+            'terminal_id' => env('SADAD_TERMINAL_ID', ''),
+            'terminal_key' => env('SADAD_TERMINAL_KEY', ''),
+            'callback_url' => env('SADAD_CALLBACK_URL', '/payment/callback/sadad'),
+            'amount_unit' => env('SADAD_AMOUNT_UNIT', 'toman'),
         ],
 
         'zarinpal' => [

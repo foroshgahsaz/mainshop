@@ -62,6 +62,7 @@ class PaymentGatewayCatalog
             'bajet' => (bool) ($this->settings->bajet()['enabled'] ?? false),
             'digipay' => (bool) ($this->settings->digipay()['enabled'] ?? false),
             'parsian' => (bool) ($this->settings->parsian()['enabled'] ?? false),
+            'sadad' => (bool) ($this->settings->sadad()['enabled'] ?? false),
             default => false,
         };
     }
@@ -131,6 +132,7 @@ class PaymentGatewayCatalog
                 'bajet' => $this->settings->bajet(),
                 'digipay' => $this->settings->digipay(),
                 'parsian' => $this->settings->parsian(),
+                'sadad' => $this->settings->sadad(),
                 default => [],
             };
 
@@ -179,6 +181,7 @@ class PaymentGatewayCatalog
             'bajet' => $this->settings->bajet()['icon'] ?? null,
             'digipay' => $this->settings->digipay()['icon'] ?? null,
             'parsian' => $this->settings->parsian()['icon'] ?? null,
+            'sadad' => $this->settings->sadad()['icon'] ?? null,
             default => null,
         };
 

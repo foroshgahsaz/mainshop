@@ -29,6 +29,9 @@ class SettingsService
     /** @var array<string, mixed>|null */
     protected static ?array $parsianMemo = null;
 
+    /** @var array<string, mixed>|null */
+    protected static ?array $sadadMemo = null;
+
     public function get(string $group, string $key, mixed $default = null): mixed
     {
         $settings = $this->all();
@@ -50,8 +53,9 @@ class SettingsService
         static::$bajetMemo = null;
         static::$digipayMemo = null;
         static::$parsianMemo = null;
+        static::$sadadMemo = null;
 
-        if (in_array($group, ['zarinpal', 'tara', 'bajet', 'digipay', 'parsian', 'homepage'], true)) {
+        if (in_array($group, ['zarinpal', 'tara', 'bajet', 'digipay', 'parsian', 'sadad', 'homepage'], true)) {
             app(ShopCacheService::class)->forgetHome();
         }
     }
@@ -230,6 +234,27 @@ class SettingsService
             'callback_url' => (string) ($this->get('parsian', 'callback_url') ?: ($cfg['callback_url'] ?? '/payment/callback/pec')),
             'icon' => $this->get('parsian', 'icon') ?: null,
             ...$this->gatewayHomepagePlanFields('parsian'),
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    public function sadad(): array
+    {
+        if (static::$sadadMemo !== null) {
+            return static::$sadadMemo;
+        }
+
+        $cfg = config('payment.gateways.sadad', []);
+
+        return static::$sadadMemo = [
+            'enabled' => filter_var($this->get('sadad', 'enabled', false), FILTER_VALIDATE_BOOLEAN),
+            'merchant_id' => (string) ($this->get('sadad', 'merchant_id') ?: ($cfg['merchant_id'] ?? '')),
+            'terminal_id' => (string) ($this->get('sadad', 'terminal_id') ?: ($cfg['terminal_id'] ?? '')),
+            'terminal_key' => (string) ($this->get('sadad', 'terminal_key') ?: ($cfg['terminal_key'] ?? '')),
+            'amount_unit' => (string) ($this->get('sadad', 'amount_unit') ?: ($cfg['amount_unit'] ?? 'toman')),
+            'callback_url' => (string) ($this->get('sadad', 'callback_url') ?: ($cfg['callback_url'] ?? '/payment/callback/sadad')),
+            'icon' => $this->get('sadad', 'icon') ?: null,
+            ...$this->gatewayHomepagePlanFields('sadad'),
         ];
     }
 

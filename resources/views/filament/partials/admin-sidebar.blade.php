@@ -14,6 +14,7 @@
     use App\Filament\Pages\ManageDigiPay;
     use App\Filament\Pages\ManageTara;
     use App\Filament\Pages\ManageParsian;
+    use App\Filament\Pages\ManageSadad;
     use App\Filament\Pages\ManageZarinpal;
     use App\Filament\Resources\AttributeResource;
     use App\Filament\Resources\BrandResource;
@@ -243,11 +244,13 @@
                 'filament.admin.pages.bajet',
                 'filament.admin.pages.digipay',
                 'filament.admin.pages.parsian',
+                'filament.admin.pages.sadad',
             ],
             'menus' => [
                 ['label' => 'درگاه‌های پرداخت', 'icon' => 'fa-plug', 'items' => [
                     ['label' => 'زرین‌پال', 'url' => ManageZarinpal::getUrl(), 'icon' => 'fa-university'],
                     ['label' => 'پارسیان', 'url' => ManageParsian::getUrl(), 'icon' => 'fa-building-columns'],
+                    ['label' => 'سداد', 'url' => ManageSadad::getUrl(), 'icon' => 'fa-building-columns'],
                     ['label' => 'تارا', 'url' => ManageTara::getUrl(), 'icon' => 'fa-wallet'],
                     ['label' => 'باجت‌پی', 'url' => ManageBajetPay::getUrl(), 'icon' => 'fa-credit-card'],
                     ['label' => 'دیجی‌پی', 'url' => ManageDigiPay::getUrl(), 'icon' => 'fa-credit-card'],

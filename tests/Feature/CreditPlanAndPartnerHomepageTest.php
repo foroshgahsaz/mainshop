@@ -38,6 +38,7 @@ class CreditPlanAndPartnerHomepageTest extends TestCase
         $response->assertSee('طرح 4', false);
         $response->assertDontSee('طرح 5', false);
         $response->assertSee('مشاهده همه', false);
+        $response->assertSee('homePlansSwiper', false);
     }
 
     public function test_homepage_shows_view_all_with_exactly_four_plans(): void
@@ -90,7 +91,8 @@ class CreditPlanAndPartnerHomepageTest extends TestCase
         $this->get('/')
             ->assertOk()
             ->assertSee('همکاران ما', false)
-            ->assertSee('همکار تست', false);
+            ->assertSee('همکار تست', false)
+            ->assertSee('homePartnersSwiper', false);
     }
 
     public function test_db_plans_replace_gateway_cards_on_homepage(): void

@@ -8,18 +8,20 @@
             <div class="section-header mb-6">
                 <h2 class="section-title">همکاران ما</h2>
             </div>
-            <div class="home-partners-grid">
+            <div class="home-partners-grid home-partners-grid--desktop">
                 @foreach ($partners as $partner)
-                    @if (! empty($partner['link']))
-                        <a href="{{ $partner['link'] }}" class="home-partners-card" target="_blank" rel="noopener noreferrer">
-                            @include('shop.partials.home-partner-logo', ['partner' => $partner])
-                        </a>
-                    @else
-                        <div class="home-partners-card home-partners-card--static">
-                            @include('shop.partials.home-partner-logo', ['partner' => $partner])
-                        </div>
-                    @endif
+                    @include('shop.partials.home-partner-item', ['partner' => $partner])
                 @endforeach
+            </div>
+            <div class="swiper homePartnersSwiper home-partners-swiper" aria-label="اسلایدر همکاران">
+                <div class="swiper-wrapper">
+                    @foreach ($partners as $partner)
+                        <div class="swiper-slide">
+                            @include('shop.partials.home-partner-item', ['partner' => $partner])
+                        </div>
+                    @endforeach
+                </div>
+                <div class="swiper-pagination"></div>
             </div>
         </div>
     </section>

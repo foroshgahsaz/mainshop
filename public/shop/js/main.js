@@ -5,6 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initBrandsNavDropdowns();
   initMainSwiper();
   initHomeHeroSwiper();
+  initHomePlansSwiper();
+  initHomePartnersSwiper();
   initProductSwipers();
   initBlogSwiper();
   initProgTabs();
@@ -461,6 +463,67 @@ function initHomeHeroSwiper() {
     spaceBetween: 0,
     loop: true,
     grabCursor: true,
+    pagination: {
+      el: root.querySelector('.swiper-pagination'),
+      clickable: true,
+    },
+  });
+}
+
+const HOME_HUB_MOBILE_MQ = '(max-width: 760px)';
+
+function initResponsiveHomeSwiper(root, options) {
+  if (!root || typeof Swiper === 'undefined') {
+    return null;
+  }
+
+  const mq = window.matchMedia(HOME_HUB_MOBILE_MQ);
+  let instance = null;
+
+  const sync = () => {
+    if (mq.matches && !instance) {
+      instance = new Swiper(root, options);
+    } else if (!mq.matches && instance) {
+      instance.destroy(true, true);
+      instance = null;
+    }
+  };
+
+  sync();
+  mq.addEventListener('change', sync);
+
+  return { getInstance: () => instance };
+}
+
+function initHomePlansSwiper() {
+  const root = document.querySelector('.homePlansSwiper');
+  if (!root) {
+    return null;
+  }
+
+  return initResponsiveHomeSwiper(root, {
+    slidesPerView: 2,
+    spaceBetween: 10,
+    grabCursor: true,
+    watchOverflow: true,
+    pagination: {
+      el: root.querySelector('.swiper-pagination'),
+      clickable: true,
+    },
+  });
+}
+
+function initHomePartnersSwiper() {
+  const root = document.querySelector('.homePartnersSwiper');
+  if (!root) {
+    return null;
+  }
+
+  return initResponsiveHomeSwiper(root, {
+    slidesPerView: 2,
+    spaceBetween: 12,
+    grabCursor: true,
+    watchOverflow: true,
     pagination: {
       el: root.querySelector('.swiper-pagination'),
       clickable: true,

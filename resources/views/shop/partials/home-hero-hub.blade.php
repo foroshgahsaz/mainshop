@@ -11,6 +11,7 @@
 <section class="home-hero-hub" aria-label="بنر و دسترسی سریع">
     <div class="home-hero-hub__inner max-w-site mx-auto px-4 mt-2 md:mt-4">
         <div class="home-hero-hub__shell" aria-label="بنر و دسته‌بندی‌ها">
+            <div class="home-hero-hub__main">
             <div class="home-hero-hub__promo">
                 <div class="swiper homeHeroSwiper relative" aria-label="اسلایدر بنر">
                     <div class="swiper-wrapper">
@@ -38,6 +39,35 @@
                     </div>
                     <div class="swiper-pagination"></div>
                 </div>
+            </div>
+
+        @if ($planCards !== [] || $showPlansContinue)
+            <div class="home-hero-hub__cards-wrap" aria-label="طرح‌های خرید اعتباری">
+                <div class="home-hero-hub__cards home-hero-hub__cards--grid">
+                    @foreach ($planCards as $plan)
+                        @include('shop.partials.home-plan-card', ['plan' => $plan, 'headingTag' => 'h3'])
+                    @endforeach
+                    @if ($showPlansContinue)
+                        @include('shop.partials.home-plan-continue-card', ['plansContinueUrl' => $plansContinueUrl, 'headingTag' => 'h3'])
+                    @endif
+                </div>
+                <div class="swiper homePlansSwiper home-hero-hub__cards-swiper" aria-label="اسلایدر طرح‌های خرید">
+                    <div class="swiper-wrapper">
+                        @foreach ($planCards as $plan)
+                            <div class="swiper-slide">
+                                @include('shop.partials.home-plan-card', ['plan' => $plan, 'headingTag' => 'h3'])
+                            </div>
+                        @endforeach
+                        @if ($showPlansContinue)
+                            <div class="swiper-slide">
+                                @include('shop.partials.home-plan-continue-card', ['plansContinueUrl' => $plansContinueUrl, 'headingTag' => 'h3'])
+                            </div>
+                        @endif
+                    </div>
+                    <div class="swiper-pagination"></div>
+                </div>
+            </div>
+        @endif
             </div>
 
             <aside class="home-hero-hub__sidebar" aria-label="{{ $heroHub['sidebar_title'] ?? 'دسته‌بندی' }}">
@@ -84,47 +114,5 @@
                 @endif
             </aside>
         </div>
-
-        @if ($planCards !== [] || $showPlansContinue)
-            <div class="home-hero-hub__cards" aria-label="طرح‌های خرید اعتباری">
-                @foreach ($planCards as $plan)
-                    <article class="home-gateway-plan-card">
-                        <div class="home-gateway-plan-card__body">
-                            <span class="home-gateway-plan-card__title-accent" aria-hidden="true"></span>
-                            <h3 class="home-gateway-plan-card__title">{{ $plan['label'] }}</h3>
-                            <p class="home-gateway-plan-card__intro">{{ $plan['intro'] }}</p>
-                            <a href="{{ $plan['plan_url'] }}" class="home-gateway-plan-card__cta">
-                                <span class="home-gateway-plan-card__cta-arrow" aria-hidden="true">←</span>
-                                <span>مشاهده طرح</span>
-                            </a>
-                        </div>
-                        <div class="home-gateway-plan-card__logo">
-                            @if ($plan['icon'])
-                                <img src="{{ $plan['icon'] }}" alt="{{ $plan['label'] }}" loading="lazy">
-                            @else
-                                <span class="home-gateway-plan-card__logo-fallback">{{ mb_substr($plan['label'], 0, 1) }}</span>
-                            @endif
-                        </div>
-                    </article>
-                @endforeach
-
-                @if ($showPlansContinue)
-                    <a href="{{ $plansContinueUrl }}" class="home-gateway-plan-card home-gateway-plan-card--continue" aria-label="مشاهده همه طرح‌ها">
-                        <div class="home-gateway-plan-card__body home-gateway-plan-card__body--center">
-                            <span class="home-gateway-plan-card__title-accent" aria-hidden="true"></span>
-                            <h3 class="home-gateway-plan-card__title">مشاهده همه</h3>
-                            <p class="home-gateway-plan-card__intro">همه طرح‌های خرید اعتباری فروشگاه</p>
-                            <span class="home-gateway-plan-card__cta home-gateway-plan-card__cta--static">
-                                <span class="home-gateway-plan-card__cta-arrow" aria-hidden="true">←</span>
-                                <span>رفتن به لیست</span>
-                            </span>
-                        </div>
-                        <div class="home-gateway-plan-card__logo home-gateway-plan-card__logo--continue" aria-hidden="true">
-                            <span class="home-gateway-plan-card__logo-fallback">+</span>
-                        </div>
-                    </a>
-                @endif
-            </div>
-        @endif
     </div>
 </section>

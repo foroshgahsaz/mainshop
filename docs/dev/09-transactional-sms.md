@@ -54,6 +54,7 @@
 - `QUEUE_CONNECTION` باید worker داشته باشد (`php artisan queue:work` یا معادل در پاد).
 - با `sync`، job بعد از پاسخ HTTP در همان process اجرا می‌شود (برای ترافیک بالا worker جدا بهتر است).
 - درگاه SMS در ادمین (یکپارچه‌سازی‌ها / sms.ir) فعال باشد.
+- اگر از پاد `curl` به `api.sms.ir` وصل می‌شود ولی `Http::post` timeout می‌خورد: `SmsIrSmsSender` درخواست را با **HTTP/1.1** می‌فرستد (سازگاری با IIS/ARR sms.ir).
 
 ## پنل ادمین — موبایل
 

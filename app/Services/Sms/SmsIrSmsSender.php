@@ -4,6 +4,8 @@ namespace App\Services\Sms;
 
 use App\Contracts\SmsSender;
 use App\Services\Settings\SettingsService;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
@@ -33,19 +35,16 @@ class SmsIrSmsSender implements SmsSender
             throw new RuntimeException('شناسه قالب Verify در پنل sms.ir تنظیم نشده است.');
         }
 
-        $response = Http::timeout(15)
-            ->acceptJson()
-            ->withHeaders($this->headers($apiKey))
-            ->post(self::VERIFY_URL, [
-                'mobile' => $this->normalizeMobile($phone),
-                'templateId' => $templateId,
-                'parameters' => [
-                    [
-                        'name' => $parameter,
-                        'value' => $code,
-                    ],
+        $response = $this->post($apiKey, self::VERIFY_URL, [
+            'mobile' => $this->normalizeMobile($phone),
+            'templateId' => $templateId,
+            'parameters' => [
+                [
+                    'name' => $parameter,
+                    'value' => $code,
                 ],
-            ]);
+            ],
+        ]);
 
         $this->throwIfFailed($response);
     }
@@ -64,15 +63,12 @@ class SmsIrSmsSender implements SmsSender
             throw new RuntimeException('شماره خط اختصاصی sms.ir برای پیامک‌های سفارش تنظیم نشده است.');
         }
 
-        $response = Http::timeout(15)
-            ->acceptJson()
-            ->withHeaders($this->headers($apiKey))
-            ->post(self::BULK_URL, [
-                'lineNumber' => (int) $lineNumber,
-                'messageText' => $message,
-                'mobiles' => [$this->normalizeMobile($phone)],
-                'sendDateTime' => null,
-            ]);
+        $response = $this->request($apiKey)->post(self::BULK_URL, [
+            'lineNumber' => (int) $lineNumber,
+            'messageText' => $message,
+            'mobiles' => [$this->normalizeMobile($phone)],
+            'sendDateTime' => null,
+        ]);
 
         $this->throwIfFailed($response);
     }
@@ -102,6 +98,24 @@ class SmsIrSmsSender implements SmsSender
             'Content-Type' => 'application/json',
             'Accept' => 'application/json',
         ];
+    }
+
+    /**
+     * IIS/ARR سمت sms.ir گاهی POST روی HTTP/2 را بدون پاسخ نگه می‌دارد؛ HTTP/1.1 پایدارتر است.
+     */
+    protected function request(string $apiKey): PendingRequest
+    {
+        try {
+            return Http::timeout(25)
+                ->acceptJson()
+                ->withOptions(['version' => '1.1'])
+                ->withHeaders($this->headers($apiKey));
+        } catch (ConnectionException $e) {
+            throw new RuntimeException(
+                'sms.ir: اتصال به سرور پیامک برقرار نشد (timeout یا قطع شبکه).',
+                previous: $e
+            );
+        }
     }
 
     protected function throwIfFailed(Response $response): void

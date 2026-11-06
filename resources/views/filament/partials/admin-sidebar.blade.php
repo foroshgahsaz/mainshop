@@ -50,6 +50,7 @@
     use App\Filament\Resources\UserResource;
 
     use App\Support\AdminAccess;
+    use Illuminate\Support\Facades\Schema as SchemaFacade;
 
     $user = filament()->auth()->user();
     $salesManagerOnly = AdminAccess::isSalesManagerOnly($user);
@@ -85,7 +86,7 @@
             ['label' => 'افزودن آیتم', 'url' => MenuItemResource::getUrl('create'), 'icon' => 'fa-plus'],
         ]],
     ];
-    if (AdminAccess::canManageShopInAdmin($user)) {
+    if (AdminAccess::canManageShopInAdmin($user) && SchemaFacade::hasTable('shop_url_redirects')) {
         $contentMenus[] = [
             'label' => 'سئو',
             'icon' => 'fa-arrow-right-arrow-left',
@@ -232,7 +233,9 @@
                 'filament.admin.resources.product-questions.*',
                 'filament.admin.resources.home-sliders.*',
                 'filament.admin.resources.menu-items.*',
-                AdminAccess::canManageShopInAdmin($user) ? 'filament.admin.resources.shop-url-redirects.*' : null,
+                (AdminAccess::canManageShopInAdmin($user) && SchemaFacade::hasTable('shop_url_redirects'))
+                    ? 'filament.admin.resources.shop-url-redirects.*'
+                    : null,
             ])),
             'menus' => $contentMenus,
         ],

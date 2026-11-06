@@ -11,6 +11,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Schema;
 
 class ShopUrlRedirectResource extends Resource
 {
@@ -33,6 +34,16 @@ class ShopUrlRedirectResource extends Resource
     public static function canAccess(): bool
     {
         return AdminAccess::canManageShopInAdmin();
+    }
+
+    public static function canViewAny(): bool
+    {
+        return static::canAccess() && Schema::hasTable((new ShopUrlRedirect)->getTable());
+    }
+
+    public static function canCreate(): bool
+    {
+        return static::canViewAny();
     }
 
     public static function form(Form $form): Form

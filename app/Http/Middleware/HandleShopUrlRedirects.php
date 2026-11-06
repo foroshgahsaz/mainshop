@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Models\ShopUrlRedirect;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Symfony\Component\HttpFoundation\Response;
 
 class HandleShopUrlRedirects
@@ -30,6 +31,10 @@ class HandleShopUrlRedirects
         $path = '/'.ltrim($request->path(), '/');
         if ($path !== '/' && str_ends_with($path, '/')) {
             $path = rtrim($path, '/') ?: '/';
+        }
+
+        if (! Schema::hasTable((new ShopUrlRedirect)->getTable())) {
+            return $next($request);
         }
 
         $map = ShopUrlRedirect::activeMapByPath();

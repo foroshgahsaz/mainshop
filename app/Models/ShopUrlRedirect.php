@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 
 class ShopUrlRedirect extends Model
 {
@@ -77,6 +78,10 @@ class ShopUrlRedirect extends Model
      */
     public static function activeMapByPath(): \Illuminate\Support\Collection
     {
+        if (! Schema::hasTable((new self)->getTable())) {
+            return collect();
+        }
+
         return Cache::rememberForever(self::CACHE_KEY, function (): \Illuminate\Support\Collection {
             return self::query()
                 ->where('is_active', true)

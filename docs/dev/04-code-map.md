@@ -73,9 +73,10 @@
 | فایل | نقش |
 |------|-----|
 | `app/Support/AdminContentSeoAnalyzer.php` | `analyzeFull` سئو + خوانایی؛ چراغ‌ها (متا، بند، سرفصل، تراکم، alt؛ خوانایی: جمله، بند، پیوند، ریتم H2/H3) |
-| `resources/views/filament/components/seo-analysis-panel.blade.php` | پنل تحلیل؛ `$evaluate` + `$get` برای state واکنش‌پذیر |
-| `resources/views/filament/components/seo-google-preview.blade.php` | پیش‌نمایش snippet گوگل در تب |
-| `app/Filament/Support/SeoFormSchema.php` | تب‌های SEO (Yoast-like) + `ViewField` تحلیل/پیش‌نمایش |
+| `resources/views/filament/components/seo-analysis-panel.blade.php` | ستون کناری SEO Studio: گیج امتیاز ترکیبی، چک‌لیست، گزارش؛ `$evaluate` |
+| `resources/views/filament/components/seo-google-preview.blade.php` | پیش‌نمایش snippet (کلاس‌های `ss-*`) |
+| `public/css/seo-studio.css` + `seo-studio-*.blade.php` | پوستهٔ برند/hero/آمار و فرم ریدایرکت هم‌سبک |
+| `app/Filament/Support/SeoFormSchema.php` | SEO Studio: shell دو ستونه + تب‌ها + `ViewField` تحلیل |
 | `app/Models/ShopUrlRedirect.php`، `app/Http/Middleware/HandleShopUrlRedirects.php` | ریدایرکت ۳۰۱/۳۰۲ قابل تنظیم از ادمین (فروشگاه) |
 | `app/Filament/Resources/ShopUrlRedirectResource.php` | CRUD ریدایرکت؛ منو: محتوا → سئو (فقط ادمین کامل) |
 

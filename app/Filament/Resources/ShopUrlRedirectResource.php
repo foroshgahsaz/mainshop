@@ -7,6 +7,7 @@ use App\Filament\Support\AdminTable;
 use App\Models\ShopUrlRedirect;
 use App\Support\AdminAccess;
 use Filament\Forms;
+use Filament\Forms\Components\ViewField;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -49,58 +50,66 @@ class ShopUrlRedirectResource extends Resource
     public static function form(Form $form): Form
     {
         return $form->schema([
-            Forms\Components\Section::make('مسیر و مقصد')
-                ->description('مسیر قدیمی را بدون دامنه وارد کنید (مثلاً /محصول-قدیم). مقصد می‌تواند مسیر نسبی سایت یا آدرس کامل https باشد.')
-                ->schema([
-                    Forms\Components\TextInput::make('from_path')
-                        ->label('از (مسیر قدیمی)')
-                        ->required()
-                        ->maxLength(191)
-                        ->placeholder('/مسیر-قدیم')
-                        ->unique(ignoreRecord: true)
-                        ->rule(fn (): \Closure => function (string $attribute, $value, \Closure $fail): void {
-                            $normalized = ShopUrlRedirect::normalizeFromPath((string) $value);
-                            if ($normalized === '/') {
-                                $fail('مسیر مبدأ نمی‌تواند فقط ریشهٔ سایت (/) باشد.');
-                            }
-                        })
-                        ->live(onBlur: true)
-                        ->afterStateHydrated(function (Forms\Components\Component $component, mixed $state): void {
-                            if (! is_string($state) || $state === '') {
-                                return;
-                            }
-                            $component->state(ShopUrlRedirect::normalizeFromPath($state));
-                        })
-                        ->dehydrateStateUsing(fn (?string $state): string => ShopUrlRedirect::normalizeFromPath((string) ($state ?? '')))
-                        ->helperText('با / شروع شود؛ در صورت وارد کردن URL کامل، فقط مسیر ذخیره می‌شود.'),
+            ViewField::make('_redirect_shell_open')
+                ->view('filament.components.seo-redirect-form-start')
+                ->dehydrated(false)
+                ->columnSpanFull(),
+            ViewField::make('_redirect_section')
+                ->view('filament.components.seo-redirect-section-fields')
+                ->dehydrated(false)
+                ->columnSpanFull(),
+            Forms\Components\Grid::make(2)->schema([
+                Forms\Components\TextInput::make('from_path')
+                    ->label('از (مسیر قدیمی)')
+                    ->required()
+                    ->maxLength(191)
+                    ->placeholder('/مسیر-قدیم')
+                    ->unique(ignoreRecord: true)
+                    ->rule(fn (): \Closure => function (string $attribute, $value, \Closure $fail): void {
+                        $normalized = ShopUrlRedirect::normalizeFromPath((string) $value);
+                        if ($normalized === '/') {
+                            $fail('مسیر مبدأ نمی‌تواند فقط ریشهٔ سایت (/) باشد.');
+                        }
+                    })
+                    ->live(onBlur: true)
+                    ->afterStateHydrated(function (Forms\Components\Component $component, mixed $state): void {
+                        if (! is_string($state) || $state === '') {
+                            return;
+                        }
+                        $component->state(ShopUrlRedirect::normalizeFromPath($state));
+                    })
+                    ->dehydrateStateUsing(fn (?string $state): string => ShopUrlRedirect::normalizeFromPath((string) ($state ?? '')))
+                    ->helperText('با / شروع شود؛ در صورت وارد کردن URL کامل، فقط مسیر ذخیره می‌شود.'),
 
-                    Forms\Components\TextInput::make('to_target')
-                        ->label('به (مقصد)')
-                        ->required()
-                        ->maxLength(1024)
-                        ->placeholder('/products/slug یا https://…'),
+                Forms\Components\TextInput::make('to_target')
+                    ->label('به (مقصد)')
+                    ->required()
+                    ->maxLength(1024)
+                    ->placeholder('/products/slug یا https://…'),
 
-                    Forms\Components\Select::make('status_code')
-                        ->label('کد HTTP')
-                        ->options([
-                            301 => '۳۰۱ — دائمی',
-                            302 => '۳۰۲ — موقت',
-                            307 => '۳۰۷ — موقت (متد حفظ)',
-                            308 => '۳۰۸ — دائمی (متد حفظ)',
-                        ])
-                        ->default(301)
-                        ->required(),
+                Forms\Components\Select::make('status_code')
+                    ->label('کد HTTP')
+                    ->options([
+                        301 => '۳۰۱ — دائمی',
+                        302 => '۳۰۲ — موقت',
+                        307 => '۳۰۷ — موقت (متد حفظ)',
+                        308 => '۳۰۸ — دائمی (متد حفظ)',
+                    ])
+                    ->default(301)
+                    ->required(),
 
-                    Forms\Components\Toggle::make('is_active')
-                        ->label('فعال')
-                        ->default(true),
-
-                    Forms\Components\Textarea::make('notes')
-                        ->label('یادداشت')
-                        ->rows(2)
-                        ->columnSpanFull(),
-                ])
-                ->columns(2),
+                Forms\Components\Toggle::make('is_active')
+                    ->label('فعال')
+                    ->default(true),
+            ]),
+            Forms\Components\Textarea::make('notes')
+                ->label('یادداشت')
+                ->rows(2)
+                ->columnSpanFull(),
+            ViewField::make('_redirect_shell_close')
+                ->view('filament.components.seo-redirect-form-end')
+                ->dehydrated(false)
+                ->columnSpanFull(),
         ]);
     }
 

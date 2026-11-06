@@ -63,7 +63,8 @@ class CategoryResource extends Resource
                     Forms\Components\Textarea::make('description')
                         ->label('توضیحات')
                         ->rows(4)
-                        ->columnSpanFull(),
+                        ->columnSpanFull()
+                        ->live(debounce: 800),
                     ShopMediaPicker::image('image', 'categories', 'تصویر')->columnSpanFull(),
                     Forms\Components\Toggle::make('is_active')
                         ->label('فعال')

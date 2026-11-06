@@ -52,7 +52,8 @@ class RichContentEditor
             ->fileAttachmentsDirectory($attachmentsDirectory)
             ->fileAttachmentsDisk('public')
             ->fileAttachmentsVisibility('public')
-            ->columnSpanFull();
+            ->columnSpanFull()
+            ->live(debounce: 1200);
     }
 
     protected static function insertVideoAction(string $fieldName, string $attachmentsDirectory): Action

@@ -1086,16 +1086,17 @@ $settings->site();       // نام سایت، لوگو، ...
 | فایل | کار |
 |------|-----|
 | `app/Support/SeoPresenter.php` | meta، OG tags |
-| `app/Filament/Support/SeoFormSchema.php` | فیلدهای SEO در admin + پنل تحلیل |
+| `app/Filament/Support/SeoFormSchema.php` | فیلدهای SEO در admin — تب‌ها (تحلیل / گوگل / شبکه‌های اجتماعی / پیشرفته) + `ViewField` |
 | `app/Support/AdminContentSeoAnalyzer.php` | قوانین چراغ‌دار (بدون AI) برای همان فرم |
-| `resources/views/filament/components/seo-analysis-panel.blade.php` | رندر چراغ‌ها در Filament |
+| `resources/views/filament/components/seo-analysis-panel.blade.php` | پنل تحلیل دو ستونی (سئو \| خوانایی)، چراغ دایره‌ای، نوار امتیاز شبیه Yoast |
+| `resources/views/filament/components/seo-google-preview.blade.php` | پیش‌نمایش snippet در تب «نمایش در گوگل» (`$evaluate` + `$get`) |
 | `resources/views/components/seo-meta.blade.php` | render |
 | `SitemapController` | `/sitemap.xml` |
 | `robots.txt` | route در `web.php` |
 
-**فیلدهای SEO:** `meta_title`, `meta_description`, `focus_keyword`, `canonical`, ... روی Product، Category، Post، Page، Brand
+**فیلدهای SEO:** `meta_title`, `meta_description`, `meta_keywords`, `focus_keyword`, `og_title`, `og_description`, `og_image`, `canonical`, `robots` روی Product، Page و بقیه (دسته/برند/پست هم `og_title`/`og_description` دارند — migration `2026_11_06_230000_add_og_title_description_to_seo_tables`)
 
-**پنل SEO در ادمین (سبک Yoast، بدون AI):** در بخش «SEO و شبکه‌های اجتماعی» فیلد **کلمهٔ کلیدی تمرکز** + **دو ستون** (سئو | خوانایی) با خلاصهٔ امتیاز و چراغ سبز/زرد/قرمز. **ستون سئو** تا وقتی کلید تمرکز خالی است فقط همان را گوشزد می‌کند؛ پس از پر کردن، موارد: حضور عبارت در عنوان متا و توضیح متا، طول آن‌ها، مقدمه، شروع بند اول، بندهای بلند بدون کلید، H2/H3، حجم متن، تراکم تقریبی، alt تصاویر. **ستون خوانایی** همیشه فعال است (مستقل از کلید): میانگین طول جمله، سهم جملات خیلی بلند، بندهای سنگین، واژگان پیوند (اما/بنابراین/همچنین/…)، الگوی سبک جمله (مثلاً پایان با «می‌شود»)، ریتم سرفصل برای متن بلند، تکرار کلمهٔ اول بندها. منطق در `AdminContentSeoAnalyzer::analyzeFull()`؛ **بار فقط هنگام تایپ در ادمین** با debounce (نه storefront).
+**پنل SEO در ادمین (چیدمان شبیه Yoast، بدون AI):** بخش **سئو** با تب‌ها — **تحلیل سئو** (کلمهٔ کلیدی + دو ستون سئو \| خوانایی، نوار امتیاز و چراغ‌های دایره‌ای سبز/زرد/قرمز)، **نمایش در گوگل** (عنوان/توضیح متا + پیش‌نمایش snippet)، **شبکه‌های اجتماعی** (OG)، **پیشرفته** (canonical، robots). دادهٔ تحلیل و پیش‌نمایش با `$evaluate(fn (Get $get) => ...)` از state فرم خوانده می‌شود تا با `live()` واقعاً به‌روز شود (رفع خالی ماندن چراغ‌ها). **ستون سئو** تا وقتی کلید تمرکز خالی است فقط همان را گوشزد می‌کند؛ پس از پر کردن، موارد: حضور عبارت در عنوان متا و توضیح متا، طول آن‌ها، مقدمه، شروع بند اول، بندهای بلند بدون کلید، H2/H3، حجم متن، تراکم تقریبی، alt تصاویر. **ستون خوانایی** همیشه فعال است (مستقل از کلید): میانگین طول جمله، سهم جملات خیلی بلند، بندهای سنگین، واژگان پیوند، الگوی سبک جمله، ریتم سرفصل، تکرار کلمهٔ اول بندها. منطق در `AdminContentSeoAnalyzer::analyzeFull()`؛ **ری‌رندر ادمین** با debounce روی فیلدهای متا و rich editor (نه storefront).
 
 **فروشگاه:** `@section('meta')` + `<x-seo-meta>` روی صفحات کلیدی؛ `SeoPresenter::for()` می‌تواند `url` و `robots` را override کند.
 
@@ -1383,6 +1384,7 @@ resources/views/layouts/shop.blade.php
 | 2026-10-29 | فرم محصول: `_slug_name_source` — اسلاگ دستی حفظ می‌شود؛ همگام با نام فقط وقتی اسلاگ از نام ساخته شده |
 | 2026-11-05 | درگاه **نوپی** (`NopayGateway`, CPG Ver 2-5): `RequestToken` / `VerifyTransaction`؛ admin `/admin/nopay`؛ callback `/payment/callback/nopay`؛ مستند `docs/CPG Ver 2-5.pdf` |
 | 2026-11-07 | ادمین: پنل دو ستونی SEO + خوانایی (`analyzeFull`)، قواعد خوانایی (جمله/بند/پیوند/سرفصل)، UI گرادینت و شمارش چراغ‌ها؛ `focus_keyword` در `SeoFormSchema` |
+| 2026-11-07 | ادمین SEO: تب‌های Yoast-like در `SeoFormSchema`، پیش‌نمایش گوگل، چراغ دایره‌ای + نوار امتیاز؛ تحلیل با `$evaluate` در Blade؛ `og_title`/`og_description` برای category/brand/post؛ `RichContentEditor` با `live(debounce)` |
 | 2026-11-07 | SEO فروشگاه: `<x-seo-meta>` روی خانه، لیست محصول/دسته/برند، مجله (لیست+مقاله)، نویسنده، نتیجه پرداخت (`noindex`)؛ `SeoPresenter` پشتیبانی `url`/`robots` override، canonical بدون به‌هم‌خوردن با querystring |
 | 2026-11-06 | سداد / بانک ملی: مسیر مستعار `/payment/callback/bmi` → همان `sadadCallback` (برای ReturnUrl ثبت‌شده در پنل بانک) |
 | 2026-10-31 | درگاه **سداد** (`SadadGateway`): IPG JSON بانک ملی — `PaymentRequest` / `Verify`، SignData DES-EDE3؛ admin `/admin/sadad`؛ callback `/payment/callback/sadad`؛ مستندات `docs/PHP-master.zip` |

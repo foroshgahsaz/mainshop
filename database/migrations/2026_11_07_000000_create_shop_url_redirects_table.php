@@ -10,7 +10,8 @@ return new class extends Migration
     {
         Schema::create('shop_url_redirects', function (Blueprint $table) {
             $table->id();
-            $table->string('from_path', 512)->unique()->comment('مسیر قدیمی؛ با / شروع شود، مثلاً /old-url');
+            // utf8mb4 + UNIQUE: حداکثر طول امن برای ایندекс تک‌ستونه در MySQL قدیمی‌تر ~191 کاراکتر
+            $table->string('from_path', 191)->unique()->comment('مسیر قدیمی؛ با / شروع شود، مثلاً /old-url');
             $table->string('to_target', 1024)->comment('مقصد: مسیر سایت (با /) یا URL کامل');
             $table->unsignedSmallInteger('status_code')->default(301);
             $table->boolean('is_active')->default(true);

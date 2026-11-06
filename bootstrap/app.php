@@ -36,6 +36,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
         });
         $middleware->web(append: [
             \App\Http\Middleware\EnsureShopNotInMaintenance::class,
+            \App\Http\Middleware\HandleShopUrlRedirects::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

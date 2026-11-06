@@ -1095,7 +1095,7 @@ $settings->site();       // نام سایت، لوگو، ...
 
 **فیلدهای SEO:** `meta_title`, `meta_description`, `focus_keyword`, `canonical`, ... روی Product، Category، Post، Page، Brand
 
-**پنل SEO در ادمین (سبک Yoast، بدون AI):** در بخش «SEO و شبکه‌های اجتماعی» فیلد **کلمهٔ کلیدی تمرکز** + چراغ‌های سبز/زرد/قرمز: حضور عبارت در عنوان متا و توضیح متا، طول آن‌ها، مقدمه (پاراگراف اول)، شروع پاراگراف اول با کلید، پاراگراف‌های بلند بدون کلید، سرفصل H2/H3، حجم متن، تراکم تقریبی، alt تصاویر. منطق فقط `AdminContentSeoAnalyzer` است؛ روی سرعت فروشگاه اثری ندارد. در فرم، `ViewField` با `live(debounce)` روی کلید تمرکز و متن طولانی به‌روز می‌شود — **بار سروری فقط هنگام تایپ در ادمین** (نه در storefront).
+**پنل SEO در ادمین (سبک Yoast، بدون AI):** در بخش «SEO و شبکه‌های اجتماعی» فیلد **کلمهٔ کلیدی تمرکز** + **دو ستون** (سئو | خوانایی) با خلاصهٔ امتیاز و چراغ سبز/زرد/قرمز. **ستون سئو** تا وقتی کلید تمرکز خالی است فقط همان را گوشزد می‌کند؛ پس از پر کردن، موارد: حضور عبارت در عنوان متا و توضیح متا، طول آن‌ها، مقدمه، شروع بند اول، بندهای بلند بدون کلید، H2/H3، حجم متن، تراکم تقریبی، alt تصاویر. **ستون خوانایی** همیشه فعال است (مستقل از کلید): میانگین طول جمله، سهم جملات خیلی بلند، بندهای سنگین، واژگان پیوند (اما/بنابراین/همچنین/…)، الگوی سبک جمله (مثلاً پایان با «می‌شود»)، ریتم سرفصل برای متن بلند، تکرار کلمهٔ اول بندها. منطق در `AdminContentSeoAnalyzer::analyzeFull()`؛ **بار فقط هنگام تایپ در ادمین** با debounce (نه storefront).
 
 **فروشگاه:** `@section('meta')` + `<x-seo-meta>` روی صفحات کلیدی؛ `SeoPresenter::for()` می‌تواند `url` و `robots` را override کند.
 
@@ -1382,7 +1382,7 @@ resources/views/layouts/shop.blade.php
 | 2026-10-29 | ادمین محصول: URL ویرایش با **id** (`getRecordRouteKeyName`، `getUrl`، لیست/ریدایrect/create) — فروشگاه همچنان slug |
 | 2026-10-29 | فرم محصول: `_slug_name_source` — اسلاگ دستی حفظ می‌شود؛ همگام با نام فقط وقتی اسلاگ از نام ساخته شده |
 | 2026-11-05 | درگاه **نوپی** (`NopayGateway`, CPG Ver 2-5): `RequestToken` / `VerifyTransaction`؛ admin `/admin/nopay`؛ callback `/payment/callback/nopay`؛ مستند `docs/CPG Ver 2-5.pdf` |
-| 2026-11-07 | ادمین: `focus_keyword` + پنل چراغ SEO (`AdminContentSeoAnalyzer`، بدون AI) در `SeoFormSchema` برای محصول/مقاله/صفحه/دسته/برند |
+| 2026-11-07 | ادمین: پنل دو ستونی SEO + خوانایی (`analyzeFull`)، قواعد خوانایی (جمله/بند/پیوند/سرفصل)، UI گرادینت و شمارش چراغ‌ها؛ `focus_keyword` در `SeoFormSchema` |
 | 2026-11-07 | SEO فروشگاه: `<x-seo-meta>` روی خانه، لیست محصول/دسته/برند، مجله (لیست+مقاله)، نویسنده، نتیجه پرداخت (`noindex`)؛ `SeoPresenter` پشتیبانی `url`/`robots` override، canonical بدون به‌هم‌خوردن با querystring |
 | 2026-11-06 | سداد / بانک ملی: مسیر مستعار `/payment/callback/bmi` → همان `sadadCallback` (برای ReturnUrl ثبت‌شده در پنل بانک) |
 | 2026-10-31 | درگاه **سداد** (`SadadGateway`): IPG JSON بانک ملی — `PaymentRequest` / `Verify`، SignData DES-EDE3؛ admin `/admin/sadad`؛ callback `/payment/callback/sadad`؛ مستندات `docs/PHP-master.zip` |

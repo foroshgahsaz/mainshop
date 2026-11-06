@@ -72,7 +72,7 @@
 
 | فایل | نقش |
 |------|-----|
-| `app/Support/AdminContentSeoAnalyzer.php` | قوانین چراغ (عبارت در متا، مقدمه، پاراگراف‌ها، H2/H3، …) |
+| `app/Support/AdminContentSeoAnalyzer.php` | `analyzeFull` سئو + خوانایی؛ چراغ‌ها (متا، بند، سرفصل، تراکم، alt؛ خوانایی: جمله، بند، پیوند، ریتم H2/H3) |
 | `resources/views/filament/components/seo-analysis-panel.blade.php` | رندر پنل در فرم Filament |
 | `app/Filament/Support/SeoFormSchema.php` | فیلد `focus_keyword` + `ViewField` تحلیل |
 

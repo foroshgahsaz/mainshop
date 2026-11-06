@@ -61,7 +61,7 @@
 | 2.6 | سبد و موجودی | [DEVELOPER_GUIDE §8](DEVELOPER_GUIDE.md#8-سبد-checkout-و-سفارش) · §19 variant |
 | 2.7 | Checkout و کوپن | [DEVELOPER_GUIDE §8](DEVELOPER_GUIDE.md#8-سبد-checkout-و-سفارش) · §20 · §21 |
 | 2.8 | حساب کاربری `/account` | [DEVELOPER_GUIDE §4.3](DEVELOPER_GUIDE.md#43-livewire--applivewire) |
-| 2.9 | SEO فروشگاه (meta، canonical، بدون بار ادمین) | [DEVELOPER_GUIDE §23](DEVELOPER_GUIDE.md#23-محتوا-seo-منو-و-اسلایدر) |
+| 2.9 | SEO فروشگاه (meta، canonical) + ادمین: چراغ بدون AI | [DEVELOPER_GUIDE §23](DEVELOPER_GUIDE.md#23-محتوا-seo-منو-و-اسلایدر) |
 
 ### فاز ۳ — پنل ادمین (Filament)
 

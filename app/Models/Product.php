@@ -40,6 +40,7 @@ class Product extends Model
         'meta_title',
         'meta_description',
         'meta_keywords',
+        'focus_keyword',
         'og_title',
         'og_description',
         'og_image',

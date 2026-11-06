@@ -83,7 +83,7 @@ class CategoryResource extends Resource
                 ])
                 ->columns(2),
 
-            ...SeoFormSchema::contentSection(),
+            ...SeoFormSchema::contentSection('name', 'description'),
         ]);
     }
 

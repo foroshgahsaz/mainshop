@@ -1086,14 +1086,18 @@ $settings->site();       // نام سایت، لوگو، ...
 | فایل | کار |
 |------|-----|
 | `app/Support/SeoPresenter.php` | meta، OG tags |
-| `app/Filament/Support/SeoFormSchema.php` | فیلدهای SEO در admin |
+| `app/Filament/Support/SeoFormSchema.php` | فیلدهای SEO در admin + پنل تحلیل |
+| `app/Support/AdminContentSeoAnalyzer.php` | قوانین چراغ‌دار (بدون AI) برای همان فرم |
+| `resources/views/filament/components/seo-analysis-panel.blade.php` | رندر چراغ‌ها در Filament |
 | `resources/views/components/seo-meta.blade.php` | render |
 | `SitemapController` | `/sitemap.xml` |
 | `robots.txt` | route در `web.php` |
 
-**فیلدهای SEO:** `meta_title`, `meta_description`, `canonical`, ... روی Product، Category، Post، Page
+**فیلدهای SEO:** `meta_title`, `meta_description`, `focus_keyword`, `canonical`, ... روی Product، Category، Post، Page، Brand
 
-**فروشگاه (بدون بار اضافه):** صفحاتی که قبلاً فقط `@section('title')` داشتند الان `@section('meta')` با `<x-seo-meta>` می‌گیرند تا description، canonical و OG با مدل یا `route()` هم‌راستا باشند — خانه (`/`، canonical = `route('home')`)، لیست محصول/دسته/برند، مجله (لیست + مقاله)، نویسنده، نتیجه پرداخت (`noindex`). در `SeoPresenter::for()` می‌توان `url` و `robots` را override کرد؛ اگر مدل `canonical_url` نداشته باشد، برای canonical از همان `url` استفاده می‌شود (نه querystring جاری). **ادمین تغییری نکرده**؛ همان فیلدهای `SeoFormSchema` کافی است.
+**پنل SEO در ادمین (سبک Yoast، بدون AI):** در بخش «SEO و شبکه‌های اجتماعی» فیلد **کلمهٔ کلیدی تمرکز** + چراغ‌های سبز/زرد/قرمز: حضور عبارت در عنوان متا و توضیح متا، طول آن‌ها، مقدمه (پاراگراف اول)، شروع پاراگراف اول با کلید، پاراگراف‌های بلند بدون کلید، سرفصل H2/H3، حجم متن، تراکم تقریبی، alt تصاویر. منطق فقط `AdminContentSeoAnalyzer` است؛ روی سرعت فروشگاه اثری ندارد. در فرم، `ViewField` با `live(debounce)` روی کلید تمرکز و متن طولانی به‌روز می‌شود — **بار سروری فقط هنگام تایپ در ادمین** (نه در storefront).
+
+**فروشگاه:** `@section('meta')` + `<x-seo-meta>` روی صفحات کلیدی؛ `SeoPresenter::for()` می‌تواند `url` و `robots` را override کند.
 
 ### CMS
 
@@ -1378,6 +1382,7 @@ resources/views/layouts/shop.blade.php
 | 2026-10-29 | ادمین محصول: URL ویرایش با **id** (`getRecordRouteKeyName`، `getUrl`، لیست/ریدایrect/create) — فروشگاه همچنان slug |
 | 2026-10-29 | فرم محصول: `_slug_name_source` — اسلاگ دستی حفظ می‌شود؛ همگام با نام فقط وقتی اسلاگ از نام ساخته شده |
 | 2026-11-05 | درگاه **نوپی** (`NopayGateway`, CPG Ver 2-5): `RequestToken` / `VerifyTransaction`؛ admin `/admin/nopay`؛ callback `/payment/callback/nopay`؛ مستند `docs/CPG Ver 2-5.pdf` |
+| 2026-11-07 | ادمین: `focus_keyword` + پنل چراغ SEO (`AdminContentSeoAnalyzer`، بدون AI) در `SeoFormSchema` برای محصول/مقاله/صفحه/دسته/برند |
 | 2026-11-07 | SEO فروشگاه: `<x-seo-meta>` روی خانه، لیست محصول/دسته/برند، مجله (لیست+مقاله)، نویسنده، نتیجه پرداخت (`noindex`)؛ `SeoPresenter` پشتیبانی `url`/`robots` override، canonical بدون به‌هم‌خوردن با querystring |
 | 2026-11-06 | سداد / بانک ملی: مسیر مستعار `/payment/callback/bmi` → همان `sadadCallback` (برای ReturnUrl ثبت‌شده در پنل بانک) |
 | 2026-10-31 | درگاه **سداد** (`SadadGateway`): IPG JSON بانک ملی — `PaymentRequest` / `Verify`، SignData DES-EDE3؛ admin `/admin/sadad`؛ callback `/payment/callback/sadad`؛ مستندات `docs/PHP-master.zip` |

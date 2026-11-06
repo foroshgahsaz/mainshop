@@ -137,7 +137,8 @@ class ProductResource extends Resource
                         Forms\Components\Textarea::make('short_description')
                             ->label('توضیحات کوتاه')
                             ->maxLength(255)
-                            ->columnSpanFull(),
+                            ->columnSpanFull()
+                            ->live(debounce: 800),
 
                         RichContentEditor::make('description', 'توضیحات کامل', 'products'),
                     ])->columns(2),

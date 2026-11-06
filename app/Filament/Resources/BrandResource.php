@@ -51,7 +51,10 @@ class BrandResource extends Resource
                         ->label('اسلاگ')
                         ->required()
                         ->unique(ignoreRecord: true),
-                    Forms\Components\Textarea::make('description')->label('توضیحات')->columnSpanFull(),
+                    Forms\Components\Textarea::make('description')
+                        ->label('توضیحات')
+                        ->columnSpanFull()
+                        ->live(debounce: 800),
                     ShopMediaPicker::image('logo', 'brands', 'لوگو'),
                     Forms\Components\Toggle::make('is_active')->label('فعال')->default(true),
                     Forms\Components\TextInput::make('position')

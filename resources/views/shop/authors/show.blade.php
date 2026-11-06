@@ -2,6 +2,15 @@
 
 @section('title', $author->name . ' | نویسندگان | ' . site_name())
 
+@section('meta')
+    <x-seo-meta :seo="\App\Support\SeoPresenter::for(null, [
+        'title' => $author->name . ' | نویسندگان | ' . site_name(),
+        'description' => $author->bio ? \Illuminate\Support\Str::limit(strip_tags($author->bio), 300) : null,
+        'url' => route('authors.show', $author),
+        'type' => 'profile',
+    ])" />
+@endsection
+
 @section('content')
 <div class="max-w-site mx-auto px-4 md:px-6 py-6 md:py-10">
     <header class="mb-8 p-6 rounded-2xl bg-gray-50 border border-gray-100">

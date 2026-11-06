@@ -12,7 +12,8 @@ class SeoPresenter
         protected ?string $description = null,
         protected ?string $image = null,
         protected ?string $url = null,
-        protected ?string $type = 'website',
+        protected string $type = 'website',
+        protected ?string $robotsOverride = null,
     ) {}
 
     public static function for(?Model $model = null, array $overrides = []): self
@@ -23,8 +24,11 @@ class SeoPresenter
         $title = $overrides['title'] ?? null;
         $description = $overrides['description'] ?? null;
         $image = $overrides['image'] ?? null;
-        $url = $overrides['url'] ?? url()->current();
+        $url = array_key_exists('url', $overrides) ? $overrides['url'] : null;
         $type = $overrides['type'] ?? 'website';
+        $robotsOverride = isset($overrides['robots']) && is_string($overrides['robots'])
+            ? $overrides['robots']
+            : null;
 
         if ($model) {
             $title = $title ?: ($model->meta_title ?? $model->title ?? $model->name ?? $siteName);
@@ -32,6 +36,8 @@ class SeoPresenter
             $image = $image ?: self::resolveImage($model);
             $url = $model->canonical_url ?? $url;
         }
+
+        $url = $url ?: url()->current();
 
         if (! $title) {
             $title = $siteName;
@@ -41,7 +47,7 @@ class SeoPresenter
             $description = $site['description'] ?? 'فروشگاه آنلاین';
         }
 
-        return new self($model, $title, $description, $image, $url, $type);
+        return new self($model, $title, $description, $image, $url, $type, $robotsOverride);
     }
 
     public function title(): string
@@ -71,6 +77,10 @@ class SeoPresenter
 
     public function robots(): string
     {
+        if ($this->robotsOverride !== null && $this->robotsOverride !== '') {
+            return $this->robotsOverride;
+        }
+
         return $this->model?->robots ?? 'index,follow';
     }
 

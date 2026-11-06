@@ -16,6 +16,8 @@ class SeoRoutesTest extends TestCase
 
     public function test_seo_product_and_listing_routes_work(): void
     {
+        $this->get('/')->assertOk()->assertSee('rel="canonical"', false);
+
         $category = Category::create(['name' => 'Cat', 'slug' => 'cat', 'is_active' => true]);
         $brand = Brand::create(['name' => 'Brand', 'slug' => 'brand', 'is_active' => true]);
         $product = Product::create([
@@ -28,10 +30,10 @@ class SeoRoutesTest extends TestCase
             'is_active' => true,
         ]);
 
-        $this->get('/products')->assertOk();
+        $this->get('/products')->assertOk()->assertSee('rel="canonical"', false);
         $this->get('/products/'.$product->slug)->assertOk();
-        $this->get('/categories/'.$category->slug)->assertOk();
-        $this->get('/brands/'.$brand->slug)->assertOk();
+        $this->get('/categories/'.$category->slug)->assertOk()->assertSee('rel="canonical"', false);
+        $this->get('/brands/'.$brand->slug)->assertOk()->assertSee('rel="canonical"', false);
         $this->get('/product/'.$product->slug)->assertRedirect('/products/'.$product->slug);
     }
 
@@ -82,8 +84,8 @@ class SeoRoutesTest extends TestCase
             'published_at' => now(),
         ]);
 
-        $this->get('/blog')->assertOk();
-        $this->get('/blog/'.$post->slug)->assertOk()->assertSee('Hello');
-        $this->get('/authors/'.$author->slug)->assertOk()->assertSee('Writer');
+        $this->get('/blog')->assertOk()->assertSee('rel="canonical"', false);
+        $this->get('/blog/'.$post->slug)->assertOk()->assertSee('Hello')->assertSee('rel="canonical"', false);
+        $this->get('/authors/'.$author->slug)->assertOk()->assertSee('Writer')->assertSee('rel="canonical"', false);
     }
 }

@@ -2,6 +2,13 @@
 
 @section('title', 'مجله ' . site_name())
 
+@section('meta')
+    <x-seo-meta :seo="\App\Support\SeoPresenter::for(null, [
+        'title' => 'مجله ' . site_name(),
+        'url' => route('blog.index'),
+    ])" />
+@endsection
+
 @section('content')
 <div class="max-w-site mx-auto px-4 md:px-6 py-6 md:py-10">
     <h1 class="section-title mb-8">مجله {{ site_name() }}</h1>

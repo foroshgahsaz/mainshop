@@ -1086,7 +1086,9 @@ $settings->site();       // نام سایت، لوگو، ...
 | فایل | کار |
 |------|-----|
 | `app/Support/SeoPresenter.php` | meta، OG tags |
-| `app/Filament/Support/SeoFormSchema.php` | فیلدهای SEO در admin — تب‌ها (تحلیل / گوگل / شبکه‌های اجتماعی / پیشرفته) + `ViewField` |
+| `app/Filament/Support/SeoFormSchema.php` | فیلدهای SEO در admin — چیدمان **SEO Studio** (برند + hero + آمار + دو ستون) + تب‌ها + `ViewField` |
+| `public/css/seo-studio.css` | استایل scoped با پیشوند `.seo-studio-ui` برای فرم سئو و ریدایرکت |
+| `resources/views/filament/components/seo-studio-*.blade.php` | پوسته، سکشن‌ها، آمار، شروع/پایان فرم |
 | `app/Models/ShopUrlRedirect.php` + `ShopUrlRedirectResource` | ریدایرکت‌های ۳۰۱/۳۰۲ از مسیر قدیمی به مقصد (ادمین کامل)؛ کش `shop:url_redirects:active:v1` |
 | `app/Http/Middleware/HandleShopUrlRedirects.php` | اعمال ریدایرکت برای `GET`/`HEAD` (فروشگاه، نه `/admin` و نه callback) |
 | `app/Support/AdminContentSeoAnalyzer.php` | قوانین چراغ‌دار (بدون AI) + بررسی لینک داخلی و پیشنهاد مقصد از محصولات فعال |
@@ -1098,9 +1100,9 @@ $settings->site();       // نام سایت، لوگو، ...
 
 **فیلدهای SEO:** `meta_title`, `meta_description`, `meta_keywords`, `focus_keyword`, `og_title`, `og_description`, `og_image`, `canonical`, `robots` روی Product، Page و بقیه (دسته/برند/پست هم `og_title`/`og_description` دارند — migration `2026_11_06_230000_add_og_title_description_to_seo_tables`)
 
-**پنل SEO در ادمین (چیدمان شبیه Yoast، بدون AI):** بخش **سئو** با تب‌ها — **تحلیل سئو** (کلمهٔ کلیدی + دو ستون سئو \| خوانایی، نوار امتیاز و چراغ‌های دایره‌ای سبز/زرد/قرمز)، **نمایش در گوگل** (عنوان/توضیح متا + پیش‌نمایش snippet)، **شبکه‌های اجتماعی** (OG)، **پیشرفته** (canonical، robots). دادهٔ تحلیل و پیش‌نمایش با `$evaluate(fn (Get $get) => ...)` از state فرم خوانده می‌شود تا با `live()` واقعاً به‌روز شود (رفع خالی ماندن چراغ‌ها). **ستون سئو** تا وقتی کلید تمرکز خالی است فقط همان را گوشزد می‌کند؛ پس از پر کردن، موارد: حضور عبارت در عنوان متا و توضیح متا، طول آن‌ها، مقدمه، شروع بند اول، بندهای بلند بدون کلید، H2/H3، حجم متن، تراکم تقریبی، alt تصاویر، **لینک داخلی** (در متن بلند، بدون لینک یا فقط بیرونی → چراغ؛ پیشنهاد مسیر `/products/{slug}` از روی اولین واژهٔ کلید). **ستون خوانایی** همیشه فعال است (مستقل از کلید): میانگین طول جمله، سهم جملات خیلی بلند، بندهای سنگین، واژگان پیوند، الگوی سبک جمله، ریتم سرفصل، تکرار کلمهٔ اول بندها. منطق در `AdminContentSeoAnalyzer::analyzeFull()`؛ **ری‌رندر ادمین** با debounce روی فیلدهای متا و rich editor (نه storefront).
+**پنل SEO در ادمین (SEO Studio، بدون AI):** بخش **سئو** — هدر برند + باند بنفش + سه کارت آمار + **چیدمان دو ستونه** (فرم در `ss-main` | گیج امتیاز ترکیبی + چک‌لیست + گزارش در ستون کناری از `seo-analysis-panel`). تب‌ها: **تحلیل سئو** (کلمهٔ تمرکز، کلمات مرتبط، تحلیل)، **نمایش در گوگل** (متا + پیش‌نمایش)، **شبکه‌های اجتماعی**، **پیشرفته** (canonical، robots). دادهٔ تحلیل و پیش‌نمایش با `$evaluate(fn (Get $get) => ...)` از state فرم خوانده می‌شود تا با `live()` واقعاً به‌روز شود (رفع خالی ماندن چراغ‌ها). **ستون سئو** تا وقتی کلید تمرکز خالی است فقط همان را گوشزد می‌کند؛ پس از پر کردن، موارد: حضور عبارت در عنوان متا و توضیح متا، طول آن‌ها، مقدمه، شروع بند اول، بندهای بلند بدون کلید، H2/H3، حجم متن، تراکم تقریبی، alt تصاویر، **لینک داخلی** (در متن بلند، بدون لینک یا فقط بیرونی → چراغ؛ پیشنهاد مسیر `/products/{slug}` از روی اولین واژهٔ کلید). **ستون خوانایی** همیشه فعال است (مستقل از کلید): میانگین طول جمله، سهم جملات خیلی بلند، بندهای سنگین، واژگان پیوند، الگوی سبک جمله، ریتم سرفصل، تکرار کلمهٔ اول بندها. منطق در `AdminContentSeoAnalyzer::analyzeFull()`؛ **ری‌رندر ادمین** با debounce روی فیلدهای متا و rich editor (نه storefront).
 
-**ریدایرکت URL (شبیه Redirect manager پایه):** جدول `shop_url_redirects`؛ ادمین → محتوا → سئو → ریدایرکت‌ها (`ShopUrlRedirectResource`) — فقط **ادمین کامل**؛ میدلور `HandleShopUrlRedirects` بعد از maintenance اجرا می‌شود. ستون **`from_path` حداکثر ۱۹۱ کاراکتر** است (سازگار با ایندِکس `UNIQUE` و `utf8mb4` روی MySQL قدیمی‌تر). از/به به صورت مسیر با `/`؛ مقصد می‌تواند URL خارجی باشد. **تا وقتی migrate اجرا نشده** جدول نیست — میدلور و منوی ریدایرکت بدون خطا رد می‌شوند؛ بعد از `migrate` همه چیز فعال می‌شود.
+**ریدایرکت URL (شبیه Redirect manager پایه):** جدول `shop_url_redirects`؛ ادمین → محتوا → سئو → ریدایرکت‌ها (`ShopUrlRedirectResource`) — فقط **ادمین کامل**؛ فرم create/edit با همان پوستهٔ **SEO Studio** (`seo-redirect-form-*`). میدلور `HandleShopUrlRedirects` بعد از maintenance اجرا می‌شود. ستون **`from_path` حداکثر ۱۹۱ کاراکتر** است (سازگار با ایندِکس `UNIQUE` و `utf8mb4` روی MySQL قدیمی‌تر). از/به به صورت مسیر با `/`؛ مقصد می‌تواند URL خارجی باشد. **تا وقتی migrate اجرا نشده** جدول نیست — میدلور و منوی ریدایرکت بدون خطا رد می‌شوند؛ بعد از `migrate` همه چیز فعال می‌شود.
 
 **فروشگاه:** `@section('meta')` + `<x-seo-meta>` روی صفحات کلیدی؛ `SeoPresenter::for()` می‌تواند `url` و `robots` را override کند.
 
@@ -1393,6 +1395,7 @@ resources/views/layouts/shop.blade.php
 | 2026-11-07 | ریدایرکت: اگر جدول هنوز migrate نشده باشد — `Schema::hasTable` در میدلور و `canViewAny` تا از ۵۰۰ روی production بدون migrate جلوگیری شود |
 | 2026-11-07 | ریدایرکت: `from_path` به ۱۹۱ بایت برای ایندکس UNIQUE روی utf8mb4؛ migration اصلاحی `2026_11_07_010000` اگر جدول نیمه‌ساخته باشد |
 | 2026-11-07 | ریدایرکت: `2026_11_07_000000` اگر جدول از قبل باشد (migrate نصفه) دیگر `create` تکراری نمی‌زند |
+| 2026-11-07 | UI ادمین: پوستهٔ SEO Studio (`seo-studio.css` + ViewField) برای بلوک سئو محصول/محتوا و فرم ریدایرکت |
 | 2026-11-07 | SEO فروشگاه: `<x-seo-meta>` روی خانه، لیست محصول/دسته/برند، مجله (لیست+مقاله)، نویسنده، نتیجه پرداخت (`noindex`)؛ `SeoPresenter` پشتیبانی `url`/`robots` override، canonical بدون به‌هم‌خوردن با querystring |
 | 2026-11-06 | سداد / بانک ملی: مسیر مستعار `/payment/callback/bmi` → همان `sadadCallback` (برای ReturnUrl ثبت‌شده در پنل بانک) |
 | 2026-10-31 | درگاه **سداد** (`SadadGateway`): IPG JSON بانک ملی — `PaymentRequest` / `Verify`، SignData DES-EDE3؛ admin `/admin/sadad`؛ callback `/payment/callback/sadad`؛ مستندات `docs/PHP-master.zip` |

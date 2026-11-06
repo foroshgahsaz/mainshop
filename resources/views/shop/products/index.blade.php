@@ -3,6 +3,22 @@
 @section('title', ($pageTitle ?? 'لیست محصولات') . ' | ' . site_name())
 @section('body_class', 'listing-page')
 
+@php
+    $listingSeoModel = $category ?? $brand ?? null;
+    $listingCanonical = match (true) {
+        isset($category) => route('categories.show', $category),
+        isset($brand) => route('brands.show', $brand),
+        default => route('products.index'),
+    };
+@endphp
+
+@section('meta')
+    <x-seo-meta :seo="\App\Support\SeoPresenter::for($listingSeoModel, [
+        'title' => ($pageTitle ?? 'لیست کالاها') . ' | ' . site_name(),
+        'url' => $listingCanonical,
+    ])" />
+@endsection
+
 @section('content')
 @php
     $formAction = match (true) {

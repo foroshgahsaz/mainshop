@@ -2,6 +2,13 @@
 
 @section('title', site_name() . ' | فروشگاه آنلاین')
 
+@section('meta')
+    <x-seo-meta :seo="\App\Support\SeoPresenter::for(null, [
+        'title' => site_name() . ' | فروشگاه آنلاین',
+        'url' => route('home'),
+    ])" />
+@endsection
+
 @section('content')
     @if(session('success'))
         <div class="max-w-site mx-auto px-4 pt-3">

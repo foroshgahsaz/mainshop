@@ -20,11 +20,12 @@
 @section('body_class', 'product-page')
 
 @section('meta')
-    <x-seo-meta :seo="\App\Support\SeoPresenter::for($product, ['type' => 'product'])" />
     @php
-        $seoImage = \App\Support\SeoPresenter::for($product)->image();
+        $seo = \App\Support\SeoPresenter::for($product, ['type' => 'product']);
+        $seoImage = $seo->image();
         $effectivePrice = $product->effective_price ?? $product->price;
     @endphp
+    <x-seo-meta :seo="$seo" />
     <script type="application/ld+json">
     {!! json_encode([
         '@context' => 'https://schema.org',

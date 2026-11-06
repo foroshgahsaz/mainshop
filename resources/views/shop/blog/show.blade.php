@@ -2,6 +2,14 @@
 
 @section('title', $post->title . ' | ' . site_name())
 
+@section('meta')
+    <x-seo-meta :seo="\App\Support\SeoPresenter::for($post, [
+        'type' => 'article',
+        'title' => $post->title . ' | ' . site_name(),
+        'url' => route('blog.show', $post),
+    ])" />
+@endsection
+
 @section('content')
 <article class="max-w-site mx-auto px-4 md:px-6 py-6 md:py-10">
     <nav class="text-sm text-gray-400 mb-6">

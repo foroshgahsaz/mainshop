@@ -55,7 +55,7 @@ class ShopUrlRedirectResource extends Resource
                     Forms\Components\TextInput::make('from_path')
                         ->label('از (مسیر قدیمی)')
                         ->required()
-                        ->maxLength(512)
+                        ->maxLength(191)
                         ->placeholder('/مسیر-قدیم')
                         ->unique(ignoreRecord: true)
                         ->rule(fn (): \Closure => function (string $attribute, $value, \Closure $fail): void {

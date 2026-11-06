@@ -4,6 +4,7 @@
         @filemtime(public_path('adminpanel/styles.css')) ?: 0,
         @filemtime(public_path('adminpanel/filament-overrides.css')) ?: 0,
         @filemtime(public_path('css/filament-admin-order.css')) ?: 0,
+        @filemtime(public_path('css/seo-studio.css')) ?: 0,
     );
 @endphp
 <link rel="stylesheet" href="{{ asset('fonts/yekan/fonts.css') }}">

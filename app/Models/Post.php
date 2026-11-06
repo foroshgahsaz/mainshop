@@ -21,6 +21,8 @@ class Post extends Model
         'meta_description',
         'meta_keywords',
         'focus_keyword',
+        'og_title',
+        'og_description',
         'og_image',
         'canonical_url',
         'robots',

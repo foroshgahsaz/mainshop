@@ -60,7 +60,7 @@ class BrandResource extends Resource
                         ->default(0)
                         ->helperText('عدد کوچک‌تر = بالاتر در منوی برندها و لیست‌های سایت.'),
                 ])->columns(2),
-            ...SeoFormSchema::contentSection(),
+            ...SeoFormSchema::contentSection('name', 'description'),
         ]);
     }
 

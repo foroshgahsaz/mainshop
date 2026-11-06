@@ -1392,6 +1392,7 @@ resources/views/layouts/shop.blade.php
 | 2026-11-07 | ریدایرکت URL: `shop_url_redirects`، `HandleShopUrlRedirects`، `ShopUrlRedirectResource` (ادمین کامل)، کش؛ چک لینک داخلی + پیشنهاد `/products/...` در `AdminContentSeoAnalyzer` |
 | 2026-11-07 | ریدایرکت: اگر جدول هنوز migrate نشده باشد — `Schema::hasTable` در میدلور و `canViewAny` تا از ۵۰۰ روی production بدون migrate جلوگیری شود |
 | 2026-11-07 | ریدایرکت: `from_path` به ۱۹۱ بایت برای ایندکس UNIQUE روی utf8mb4؛ migration اصلاحی `2026_11_07_010000` اگر جدول نیمه‌ساخته باشد |
+| 2026-11-07 | ریدایرکت: `2026_11_07_000000` اگر جدول از قبل باشد (migrate نصفه) دیگر `create` تکراری نمی‌زند |
 | 2026-11-07 | SEO فروشگاه: `<x-seo-meta>` روی خانه، لیست محصول/دسته/برند، مجله (لیست+مقاله)، نویسنده، نتیجه پرداخت (`noindex`)؛ `SeoPresenter` پشتیبانی `url`/`robots` override، canonical بدون به‌هم‌خوردن با querystring |
 | 2026-11-06 | سداد / بانک ملی: مسیر مستعار `/payment/callback/bmi` → همان `sadadCallback` (برای ReturnUrl ثبت‌شده در پنل بانک) |
 | 2026-10-31 | درگاه **سداد** (`SadadGateway`): IPG JSON بانک ملی — `PaymentRequest` / `Verify`، SignData DES-EDE3؛ admin `/admin/sadad`؛ callback `/payment/callback/sadad`؛ مستندات `docs/PHP-master.zip` |

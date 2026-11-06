@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('shop_url_redirects')) {
+            return;
+        }
+
         Schema::create('shop_url_redirects', function (Blueprint $table) {
             $table->id();
             // utf8mb4 + UNIQUE: حداکثر طول امن برای ایندекс تک‌ستونه در MySQL قدیمی‌تر ~191 کاراکتر

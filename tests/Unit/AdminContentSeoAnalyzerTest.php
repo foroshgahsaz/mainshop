@@ -57,4 +57,22 @@ class AdminContentSeoAnalyzerTest extends TestCase
         }
         $this->assertTrue(in_array($byId['paragraphs_missing_keyword']['status'], ['ok', 'bad'], true));
     }
+
+    public function test_readability_runs_without_focus_keyword(): void
+    {
+        $full = AdminContentSeoAnalyzer::analyzeFull([
+            'focus_keyword' => '',
+            'primary_title' => '',
+            'meta_title' => '',
+            'meta_description' => '',
+            'content_html' => '<p>این یک پاراگراف است. جملهٔ دوم هم هست. همچنین نکتهٔ دیگری وجود دارد.</p>',
+        ]);
+
+        $this->assertFalse($full['has_focus']);
+        $this->assertSame('focus_keyword', $full['seo'][0]['id'] ?? null);
+        $this->assertNotEmpty($full['readability']);
+        $ids = array_column($full['readability'], 'id');
+        $this->assertContains('read_avg_sentence', $ids);
+        $this->assertContains('read_transitions', $ids);
+    }
 }

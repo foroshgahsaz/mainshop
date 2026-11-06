@@ -6,6 +6,7 @@ namespace App\Support;
  * تحلیل سبک Yoast برای ادمین — بدون AI؛ فقط قوانین ساده روی متن/HTML.
  *
  * @phpstan-type Check array{id: string, label: string, status: 'good'|'ok'|'bad', detail: string}
+ * @phpstan-type Analysis array{seo: list<Check>, readability: list<Check>, has_focus: bool}
  */
 final class AdminContentSeoAnalyzer
 {
@@ -17,8 +18,30 @@ final class AdminContentSeoAnalyzer
 
     private const META_DESC_MAX = 160;
 
-    /** @return list<Check> */
-    public static function analyze(array $state): array
+    /** حد واسط‌ها برای جمله (واژه) — متن فارسی معمولاً طولانی‌تر است */
+    private const SENTENCE_WORDS_GOOD_MIN = 10;
+
+    private const SENTENCE_WORDS_GOOD_MAX = 32;
+
+    private const SENTENCE_WORDS_LONG = 45;
+
+    /** طول پاراگراف (واژه) */
+    private const PARAGRAPH_HARD_MAX = 200;
+
+    /** واژگان انتقال/پیوند رایج فارسی */
+    private const TRANSITION_MARKERS = [
+        'اما', 'اگر', 'البته', 'بنابراین', 'همچنین', 'به‌علاوه', 'مثلا', 'مثلاً',
+        'زیرا', 'چون', 'در نتیجه', 'از سوی دیگر', 'از یک سو', 'به‌طور خلاصه',
+        'اولاً', 'ثانیاً', 'هم‌زمان', 'در عین حال', 'با این حال', 'پس', 'تا جایی که',
+        'به‌ویژه', 'به خصوص', 'به‌خصوص',
+    ];
+
+    /**
+     * تحلیل کامل: SEO + خوانایی (خوانایی مستقل از کلمهٔ تمرکز است).
+     *
+     * @return Analysis
+     */
+    public static function analyzeFull(array $state): array
     {
         $focus = self::normalizeWhitespace((string) ($state['focus_keyword'] ?? ''));
         $primaryTitle = self::normalizeWhitespace((string) ($state['primary_title'] ?? ''));
@@ -33,33 +56,45 @@ final class AdminContentSeoAnalyzer
         $bodyPlain = $plainFromHtml !== '' ? $plainFromHtml : $shortPlain;
         $paragraphs = self::paragraphsFromPlain($bodyPlain);
         $wordCount = self::wordCount($bodyPlain);
+        $sentences = self::sentencesFromPlain($bodyPlain);
 
-        $checks = [];
-
+        $seo = [];
         if ($focus === '') {
-            $checks[] = [
+            $seo[] = [
                 'id' => 'focus_keyword',
                 'label' => 'کلمهٔ کلیدی تمرکز',
                 'status' => 'bad',
-                'detail' => 'یک عبارت (ترجیحاً ۲–۴ واژه) در فیلد «کلمهٔ کلیدی تمرکز» وارد کنید؛ بقیهٔ بررسی‌ها به آن وابسته‌اند.',
+                'detail' => 'یک عبارت (ترجیحاً ۲–۴ واژه) در فیلد «کلمهٔ کلیدی تمرکز» وارد کنید؛ بقیهٔ بررسی‌های SEO به آن وابسته‌اند.',
             ];
-
-            return $checks;
+        } else {
+            $seo[] = self::checkFocusInMetaTitle($focus, $effectiveTitle);
+            $seo[] = self::checkFocusInMetaDescription($focus, $metaDescription);
+            $seo[] = self::checkMetaTitleLength($effectiveTitle);
+            $seo[] = self::checkMetaDescriptionLength($metaDescription);
+            $seo[] = self::checkFocusInIntroduction($focus, $paragraphs);
+            $seo[] = self::checkFirstParagraphStartsWithFocus($focus, $paragraphs);
+            $seo[] = self::checkParagraphsMissingKeyword($focus, $paragraphs);
+            $seo[] = self::checkSubheadings($focus, $contentHtml);
+            $seo[] = self::checkWordCount($wordCount);
+            $seo[] = self::checkKeywordDensity($focus, $bodyPlain, $wordCount);
+            $seo[] = self::checkImagesAlt($focus, $contentHtml);
         }
 
-        $checks[] = self::checkFocusInMetaTitle($focus, $effectiveTitle);
-        $checks[] = self::checkFocusInMetaDescription($focus, $metaDescription);
-        $checks[] = self::checkMetaTitleLength($effectiveTitle);
-        $checks[] = self::checkMetaDescriptionLength($metaDescription);
-        $checks[] = self::checkFocusInIntroduction($focus, $paragraphs);
-        $checks[] = self::checkFirstParagraphStartsWithFocus($focus, $paragraphs);
-        $checks[] = self::checkParagraphsMissingKeyword($focus, $paragraphs);
-        $checks[] = self::checkSubheadings($focus, $contentHtml);
-        $checks[] = self::checkWordCount($wordCount);
-        $checks[] = self::checkKeywordDensity($focus, $bodyPlain, $wordCount);
-        $checks[] = self::checkImagesAlt($focus, $contentHtml);
+        $readability = self::readabilityChecks($bodyPlain, $paragraphs, $sentences, $wordCount, $contentHtml);
 
-        return $checks;
+        return [
+            'seo' => $seo,
+            'readability' => $readability,
+            'has_focus' => $focus !== '',
+        ];
+    }
+
+    /** @return list<Check> — سازگاری با کالدهای قبلی؛ فقط SEO یا پیام تمرکز */
+    public static function analyze(array $state): array
+    {
+        $full = self::analyzeFull($state);
+
+        return $full['seo'];
     }
 
     /** @param  list<Check>  $checks */
@@ -75,6 +110,356 @@ final class AdminContentSeoAnalyzer
         }
 
         return (int) round($sum / count($checks));
+    }
+
+    /**
+     * @param  list<string>  $paragraphs
+     * @param  list<string>  $sentences
+     * @return list<Check>
+     */
+    private static function readabilityChecks(
+        string $bodyPlain,
+        array $paragraphs,
+        array $sentences,
+        int $wordCount,
+        string $contentHtml,
+    ): array {
+        $checks = [];
+        $checks[] = self::checkSentenceAverageLength($sentences);
+        $checks[] = self::checkLongSentencesRatio($sentences);
+        $checks[] = self::checkLongParagraphs($paragraphs);
+        $checks[] = self::checkTransitionWords($bodyPlain, $wordCount);
+        $checks[] = self::checkPassiveStyleHeuristic($sentences);
+        $checks[] = self::checkSubheadingRhythm($contentHtml, $wordCount);
+        $checks[] = self::checkParagraphVariety($paragraphs);
+
+        return $checks;
+    }
+
+    /** @param  list<string>  $sentences */
+    private static function checkSentenceAverageLength(array $sentences): array
+    {
+        if ($sentences === []) {
+            return [
+                'id' => 'read_avg_sentence',
+                'label' => 'میانگین طول جمله',
+                'status' => 'bad',
+                'detail' => 'متن قابل‌تحلیل نیست؛ جملات را با نقطه، علامت سؤال یا خط جدید جدا کنید.',
+            ];
+        }
+        $lengths = array_map(fn (string $s) => self::wordCount($s), $sentences);
+        $avg = array_sum($lengths) / max(1, count($lengths));
+        $avgRounded = round($avg, 1);
+
+        if ($avg >= self::SENTENCE_WORDS_GOOD_MIN && $avg <= self::SENTENCE_WORDS_GOOD_MAX) {
+            return [
+                'id' => 'read_avg_sentence',
+                'label' => 'میانگین طول جمله',
+                'status' => 'good',
+                'detail' => "حدود {$avgRounded} واژه در هر جمله — در بازهٔ راحت برای خواندن (".self::SENTENCE_WORDS_GOOD_MIN.'–'.self::SENTENCE_WORDS_GOOD_MAX.').',
+            ];
+        }
+        if ($avg < self::SENTENCE_WORDS_GOOD_MIN) {
+            return [
+                'id' => 'read_avg_sentence',
+                'label' => 'میانگین طول جمله',
+                'status' => 'ok',
+                'detail' => "جملات خیلی کوتاه‌اند (میانگین {$avgRounded} واژه) — گاهی جملهٔ مرکب‌تر کمک می‌کند.",
+            ];
+        }
+
+        return [
+            'id' => 'read_avg_sentence',
+            'label' => 'میانگین طول جمله',
+            'status' => 'ok',
+            'detail' => "جملات طولانی‌اند (میانگین {$avgRounded} واژه) — جملات را بشکنید (هدف تقریبی ".self::SENTENCE_WORDS_GOOD_MIN.'–'.self::SENTENCE_WORDS_GOOD_MAX.' واژه).',
+        ];
+    }
+
+    /** @param  list<string>  $sentences */
+    private static function checkLongSentencesRatio(array $sentences): array
+    {
+        if ($sentences === []) {
+            return [
+                'id' => 'read_long_sentences',
+                'label' => 'جملات بسیار طولانی',
+                'status' => 'bad',
+                'detail' => 'متنی برای شمارش جمله نیست.',
+            ];
+        }
+        $long = 0;
+        foreach ($sentences as $s) {
+            if (self::wordCount($s) >= self::SENTENCE_WORDS_LONG) {
+                $long++;
+            }
+        }
+        $ratio = $long / count($sentences);
+        if ($ratio === 0.0) {
+            return [
+                'id' => 'read_long_sentences',
+                'label' => 'جملات بسیار طولانی',
+                'status' => 'good',
+                'detail' => 'جمله‌ای با بیش از '.self::SENTENCE_WORDS_LONG.' واژه دیده نشد.',
+            ];
+        }
+        if ($ratio <= 0.12) {
+            return [
+                'id' => 'read_long_sentences',
+                'label' => 'جملات بسیار طولانی',
+                'status' => 'ok',
+                'detail' => (int) round($ratio * 100).'٪ از جملات خیلی طولانی‌اند؛ در صورت امکان کوتاه‌تر شوند بهتر است.',
+            ];
+        }
+
+        return [
+            'id' => 'read_long_sentences',
+            'label' => 'جملات بسیار طولانی',
+            'status' => 'bad',
+            'detail' => (int) round($ratio * 100).'٪ از جمله‌ها از '.self::SENTENCE_WORDS_LONG.' واژه طولانی‌ترند — خواندن سخت می‌شود.',
+        ];
+    }
+
+    /** @param  list<string>  $paragraphs */
+    private static function checkLongParagraphs(array $paragraphs): array
+    {
+        if ($paragraphs === []) {
+            return [
+                'id' => 'read_paragraph_wall',
+                'label' => 'بلوک متنی (پاراگراف طولانی)',
+                'status' => 'ok',
+                'detail' => 'پاراگراف مشخصی نیست؛ از Enter برای جداکردن بندها استفاده کنید.',
+            ];
+        }
+        $maxWords = 0;
+        foreach ($paragraphs as $p) {
+            $maxWords = max($maxWords, self::wordCount($p));
+        }
+        if ($maxWords <= self::PARAGRAPH_HARD_MAX) {
+            return [
+                'id' => 'read_paragraph_wall',
+                'label' => 'بلوک متنی (پاراگراف طولانی)',
+                'status' => 'good',
+                'detail' => "طولانی‌ترین بند حدود {$maxWords} واژه است — زیر ".self::PARAGRAPH_HARD_MAX.' واژه نگه دارید.',
+            ];
+        }
+        if ($maxWords <= self::PARAGRAPH_HARD_MAX + 80) {
+            return [
+                'id' => 'read_paragraph_wall',
+                'label' => 'بلوک متنی (پاراگراف طولانی)',
+                'status' => 'ok',
+                'detail' => "یک بند با حدود {$maxWords} واژه خیلی متراکم است؛ به ۲–۳ بند تقسیم شود.",
+            ];
+        }
+
+        return [
+            'id' => 'read_paragraph_wall',
+            'label' => 'بلوک متنی (پاراگراف طولانی)',
+            'status' => 'bad',
+            'detail' => "بندی با حدود {$maxWords} واژه — حتماً چند پاراگراف کوتاه‌تر کنید.",
+        ];
+    }
+
+    private static function checkTransitionWords(string $bodyPlain, int $wordCount): array
+    {
+        if ($wordCount < 80) {
+            return [
+                'id' => 'read_transitions',
+                'label' => 'واژگان پیوند (ارتباط بین جمله‌ها)',
+                'status' => 'ok',
+                'detail' => 'متن کوتاه است؛ پس از گسترش، از کلماتی مثل «اما»، «بنابراین»، «همچنین» برای پیوند استفاده کنید.',
+            ];
+        }
+        $norm = self::normalizeForMatch($bodyPlain);
+        $hits = 0;
+        foreach (self::TRANSITION_MARKERS as $m) {
+            $needle = self::normalizeForMatch($m);
+            if ($needle !== '' && mb_strpos($norm, $needle) !== false) {
+                $hits++;
+            }
+        }
+        if ($hits >= 3) {
+            return [
+                'id' => 'read_transitions',
+                'label' => 'واژگان پیوند (ارتباط بین جمله‌ها)',
+                'status' => 'good',
+                'detail' => 'چند پیوند‌دهندهٔ متنی (مثل «اما»، «بنابراین»، «همچنین») در متن دیده می‌شود.',
+            ];
+        }
+        if ($hits >= 1) {
+            return [
+                'id' => 'read_transitions',
+                'label' => 'واژگان پیوند (ارتباط بین جمله‌ها)',
+                'status' => 'ok',
+                'detail' => 'تعداد پیوند‌دهنده‌ها کم است — در بندهای میانی چند رابط منطقی اضافه کنید.',
+            ];
+        }
+
+        return [
+            'id' => 'read_transitions',
+            'label' => 'واژگان پیوند (ارتباط بین جمله‌ها)',
+            'status' => 'bad',
+            'detail' => 'تقریباً بدون «اما/بنابراین/همچنین/...» است؛ خواننده مسیر استدلال را سخت‌تر دنبال می‌کند.',
+        ];
+    }
+
+    /** @param  list<string>  $sentences */
+    private static function checkPassiveStyleHeuristic(array $sentences): array
+    {
+        if ($sentences === []) {
+            return [
+                'id' => 'read_passive_style',
+                'label' => 'تنوع ساخت جمله (نیمه‌اکتشافی)',
+                'status' => 'ok',
+                'detail' => 'جمله‌ای برای تحلیل نیست.',
+            ];
+        }
+        $passiveish = 0;
+        foreach ($sentences as $s) {
+            $t = trim($s);
+            if ($t === '') {
+                continue;
+            }
+            if (preg_match('/(می‌شود|میشود|شده است|شده‌اند|می‌گردد|گردید|گردیده)\s*$/u', $t)) {
+                $passiveish++;
+            }
+        }
+        $ratio = $passiveish / count($sentences);
+        if ($ratio <= 0.15) {
+            return [
+                'id' => 'read_passive_style',
+                'label' => 'تنوع ساخت جمله (نیمه‌اکتشافی)',
+                'status' => 'good',
+                'detail' => 'ساخت‌های «می‌شود/شده» در حد متعادل است.',
+            ];
+        }
+        if ($ratio <= 0.35) {
+            return [
+                'id' => 'read_passive_style',
+                'label' => 'تنوع ساخت جمله (نیمه‌اکتشافی)',
+                'status' => 'ok',
+                'detail' => (int) round($ratio * 100).'٪ از جمله‌ها با الگوی ثابت تمام می‌شوند — جملات فعال‌تر ترکیب کنید.',
+            ];
+        }
+
+        return [
+            'id' => 'read_passive_style',
+            'label' => 'تنوع ساخت جمله (نیمه‌اکتشافی)',
+            'status' => 'bad',
+            'detail' => 'زیاده از حد جمله با پسوندهای ثابت؛ متنوع‌تر بنویسید (قاعدهٔ سبک، نه دستور زبانی).',
+        ];
+    }
+
+    private static function checkSubheadingRhythm(string $contentHtml, int $wordCount): array
+    {
+        if ($wordCount < 120) {
+            return [
+                'id' => 'read_headings_rhythm',
+                'label' => 'ریتم سرفصل‌ها',
+                'status' => 'ok',
+                'detail' => 'متن کوتاه است؛ سرفصل اختیاری.',
+            ];
+        }
+        $hCount = preg_match_all('/<h[23]\b/iu', $contentHtml, $m) ? count($m[0]) : 0;
+        $approx = $wordCount / max(1, $hCount);
+        if ($hCount === 0) {
+            return [
+                'id' => 'read_headings_rhythm',
+                'label' => 'ریتم سرفصل‌ها',
+                'status' => 'bad',
+                'detail' => 'برای متن بلند، حداقل یک‌دو عنوان فرعی (H2/H3) بگذارید تا اسکن شود.',
+            ];
+        }
+        if ($approx <= 400 && $hCount >= 2) {
+            return [
+                'id' => 'read_headings_rhythm',
+                'label' => 'ریتم سرفصل‌ها',
+                'status' => 'good',
+                'detail' => "{$hCount} سرفصل فرعی — فاصله تا متن منطقی است.",
+            ];
+        }
+
+        return [
+            'id' => 'read_headings_rhythm',
+            'label' => 'ریتم سرفصل‌ها',
+            'status' => 'ok',
+            'detail' => "{$hCount} سرفصل؛ در متن‌های طولانی‌تر بین بخش‌ها عنوان فرعی بیشتری بگذارید.",
+        ];
+    }
+
+    /** @param  list<string>  $paragraphs */
+    private static function checkParagraphVariety(array $paragraphs): array
+    {
+        $substantial = array_values(array_filter($paragraphs, fn (string $p) => self::wordCount($p) >= 25));
+        if (count($substantial) < 2) {
+            return [
+                'id' => 'read_opening_repeat',
+                'label' => 'تنوع شروع بندها',
+                'status' => 'ok',
+                'detail' => 'بندهای بلند کافی برای مقایسهٔ شروع جمله نیست.',
+            ];
+        }
+        $firstWords = [];
+        foreach ($substantial as $p) {
+            $sent = self::sentencesFromPlain($p);
+            $first = $sent[0] ?? '';
+            $tokens = preg_split('/\s+/u', trim($first), 2, PREG_SPLIT_NO_EMPTY);
+            $fw = isset($tokens[0]) ? self::normalizeForMatch($tokens[0]) : '';
+            if ($fw !== '') {
+                $firstWords[] = $fw;
+            }
+        }
+        if (count($firstWords) < 2) {
+            return [
+                'id' => 'read_opening_repeat',
+                'label' => 'تنوع شروع بندها',
+                'status' => 'ok',
+                'detail' => 'بند کافی برای مقایسهٔ تکرار کلمهٔ اول نیست.',
+            ];
+        }
+        $counts = array_count_values($firstWords);
+        $maxRepeat = max($counts);
+        $total = count($firstWords);
+        if ($maxRepeat >= 3 || ($total >= 5 && $maxRepeat >= 2 && ($maxRepeat / $total) >= 0.45)) {
+            return [
+                'id' => 'read_opening_repeat',
+                'label' => 'تنوع شروع بندها',
+                'status' => 'bad',
+                'detail' => 'چند بند با همان کلمهٔ اول شروع می‌شوند؛ تنوع در ابتدای جمله بهتر است.',
+            ];
+        }
+        if ($maxRepeat >= 2) {
+            return [
+                'id' => 'read_opening_repeat',
+                'label' => 'تنوع شروع بندها',
+                'status' => 'ok',
+                'detail' => 'گاهی همان کلمهٔ اول تکرار شده؛ قابل قبول است.',
+            ];
+        }
+
+        return [
+            'id' => 'read_opening_repeat',
+            'label' => 'تنوع شروع بندها',
+            'status' => 'good',
+            'detail' => 'شروع بندها متنوع به‌نظر می‌رسد.',
+        ];
+    }
+
+    /** @return list<string> */
+    private static function sentencesFromPlain(string $plain): array
+    {
+        if ($plain === '') {
+            return [];
+        }
+        $parts = preg_split('/(?<=[\.\!\؟\?])\s+/u', $plain) ?: [];
+        $out = [];
+        foreach ($parts as $part) {
+            $t = self::normalizeWhitespace($part);
+            if ($t !== '' && mb_strlen($t) > 1) {
+                $out[] = $t;
+            }
+        }
+
+        return $out;
     }
 
     /** @return Check */

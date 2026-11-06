@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use App\Models\Product;
+
 /**
  * تحلیل سبک Yoast برای ادمین — بدون AI؛ فقط قوانین ساده روی متن/HTML.
  *
@@ -78,6 +80,7 @@ final class AdminContentSeoAnalyzer
             $seo[] = self::checkWordCount($wordCount);
             $seo[] = self::checkKeywordDensity($focus, $bodyPlain, $wordCount);
             $seo[] = self::checkImagesAlt($focus, $contentHtml);
+            $seo[] = self::checkInternalLinks($focus, $contentHtml, $wordCount);
         }
 
         $readability = self::readabilityChecks($bodyPlain, $paragraphs, $sentences, $wordCount, $contentHtml);
@@ -946,5 +949,111 @@ final class AdminContentSeoAnalyzer
         }
 
         return mb_substr($s, 0, $max - 1).'…';
+    }
+
+    private static function checkInternalLinks(string $focus, string $contentHtml, int $wordCount): array
+    {
+        if ($wordCount < 35) {
+            return [
+                'id' => 'internal_links',
+                'label' => 'لینک داخلی',
+                'status' => 'ok',
+                'detail' => 'متن کوتاه است؛ برای راهنمایی لینک داخلی، ابتدا بدنهٔ کافی بنویسید.',
+            ];
+        }
+
+        $linkCount = preg_match_all('/<a\s+[^>]*href\s*=\s*(["\'])(.*?)\1[^>]*>/is', $contentHtml, $m);
+        if ($linkCount === false || $linkCount < 1) {
+            $tail = self::suggestInternalLinkTargets($focus);
+
+            return [
+                'id' => 'internal_links',
+                'label' => 'لینک داخلی',
+                'status' => 'bad',
+                'detail' => 'در متن HTML هیچ لینک `<a href>` دیده نشد. برای SEO، به صفحات مرتبط همین سایت لینک دهید.'.($tail !== '' ? ' '.$tail : ''),
+            ];
+        }
+
+        $internal = 0;
+        foreach ($m[2] as $href) {
+            $href = trim((string) $href);
+            if ($href === '' || str_starts_with($href, '#')) {
+                continue;
+            }
+            $lower = strtolower($href);
+            if (str_starts_with($lower, 'mailto:') || str_starts_with($lower, 'tel:') || str_starts_with($lower, 'javascript:')) {
+                continue;
+            }
+            if (preg_match('#^https?://#i', $href) === 1) {
+                $host = parse_url($href, PHP_URL_HOST);
+                $appHost = request()->getHost();
+                if (is_string($host) && strcasecmp($host, $appHost) === 0) {
+                    $internal++;
+                }
+
+                continue;
+            }
+
+            $internal++;
+        }
+
+        if ($internal === 0) {
+            $tail = self::suggestInternalLinkTargets($focus);
+
+            return [
+                'id' => 'internal_links',
+                'label' => 'لینک داخلی',
+                'status' => 'bad',
+                'detail' => 'فقط لینک بیرونی دیده شد؛ حداقل یک لینک به مسیر نسبی سایت (مثلاً `/products/slug`) اضافه کنید.'.($tail !== '' ? ' '.$tail : ''),
+            ];
+        }
+
+        return [
+            'id' => 'internal_links',
+            'label' => 'لینک داخلی',
+            'status' => 'good',
+            'detail' => $internal === 1
+                ? 'یک لینک داخلی در متن پیدا شد.'
+                : $internal.' لینک داخلی در متن پیدا شد.',
+        ];
+    }
+
+    private static function suggestInternalLinkTargets(string $focus): string
+    {
+        $parts = preg_split('/\s+/u', self::normalizeWhitespace($focus)) ?: [];
+        $term = trim((string) ($parts[0] ?? ''));
+        if (mb_strlen($term) < 2) {
+            return '';
+        }
+
+        try {
+            $products = Product::query()
+                ->active()
+                ->where('name', 'like', '%'.$term.'%')
+                ->orderByDesc('views')
+                ->limit(3)
+                ->get(['name', 'slug']);
+        } catch (\Throwable) {
+            return '';
+        }
+
+        if ($products->isEmpty()) {
+            return '';
+        }
+
+        $lines = [];
+        foreach ($products as $p) {
+            $slug = (string) $p->slug;
+            if ($slug === '') {
+                continue;
+            }
+            $lines[] = '«'.self::ellipsis((string) $p->name, 40).'» — `/products/'.$slug.'`';
+        }
+
+        if ($lines === []) {
+            return '';
+        }
+
+        return 'نمونهٔ مقصد: '.implode('؛ ', $lines).'.';
     }
 }

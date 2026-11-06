@@ -76,6 +76,8 @@
 | `resources/views/filament/components/seo-analysis-panel.blade.php` | پنل تحلیل؛ `$evaluate` + `$get` برای state واکنش‌پذیر |
 | `resources/views/filament/components/seo-google-preview.blade.php` | پیش‌نمایش snippet گوگل در تب |
 | `app/Filament/Support/SeoFormSchema.php` | تب‌های SEO (Yoast-like) + `ViewField` تحلیل/پیش‌نمایش |
+| `app/Models/ShopUrlRedirect.php`، `app/Http/Middleware/HandleShopUrlRedirects.php` | ریدایرکت ۳۰۱/۳۰۲ قابل تنظیم از ادمین (فروشگاه) |
+| `app/Filament/Resources/ShopUrlRedirectResource.php` | CRUD ریدایرکت؛ منو: محتوا → سئو (فقط ادمین کامل) |
 
 ---
 

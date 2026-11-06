@@ -46,6 +46,7 @@
     use App\Filament\Resources\SalesRegionResource;
     use App\Filament\Resources\FreightCarrierResource;
     use App\Filament\Resources\ShippingMethodResource;
+    use App\Filament\Resources\ShopUrlRedirectResource;
     use App\Filament\Resources\UserResource;
 
     use App\Support\AdminAccess;
@@ -59,6 +60,40 @@
     $pendingRequestsCount = $user
         ? app(\App\Services\Representative\ProformaReservationRequestService::class)->pendingCountFor($user)
         : 0;
+
+    $contentMenus = [
+        ['label' => 'بلاگ', 'icon' => 'fa-file-alt', 'items' => [
+            ['label' => 'لیست همه', 'url' => PostResource::getUrl('index'), 'icon' => 'fa-list'],
+            ['label' => 'ایجاد مطلب', 'url' => PostResource::getUrl('create'), 'icon' => 'fa-plus'],
+        ]],
+        ['label' => 'صفحات', 'icon' => 'fa-file-lines', 'items' => [
+            ['label' => 'لیست همه', 'url' => PageResource::getUrl('index'), 'icon' => 'fa-list'],
+            ['label' => 'صفحه جدید', 'url' => PageResource::getUrl('create'), 'icon' => 'fa-plus'],
+        ]],
+        ['label' => 'نظرات', 'icon' => 'fa-comments', 'items' => [
+            ['label' => 'لیست همه', 'url' => ProductReviewResource::getUrl('index'), 'icon' => 'fa-list'],
+        ]],
+        ['label' => 'پرسش و پاسخ', 'icon' => 'fa-circle-question', 'items' => [
+            ['label' => 'لیست همه', 'url' => ProductQuestionResource::getUrl('index'), 'icon' => 'fa-list'],
+        ]],
+        ['label' => 'اسلایدر', 'icon' => 'fa-images', 'items' => [
+            ['label' => 'لیست همه', 'url' => HomeSliderResource::getUrl('index'), 'icon' => 'fa-list'],
+            ['label' => 'افزودن اسلاید', 'url' => HomeSliderResource::getUrl('create'), 'icon' => 'fa-plus'],
+        ]],
+        ['label' => 'منوی سایت', 'icon' => 'fa-bars', 'items' => [
+            ['label' => 'آیتم‌های منو', 'url' => MenuItemResource::getUrl('index'), 'icon' => 'fa-list'],
+            ['label' => 'افزودن آیتم', 'url' => MenuItemResource::getUrl('create'), 'icon' => 'fa-plus'],
+        ]],
+    ];
+    if (AdminAccess::canManageShopInAdmin($user)) {
+        $contentMenus[] = [
+            'label' => 'سئو',
+            'icon' => 'fa-arrow-right-arrow-left',
+            'items' => [
+                ['label' => 'ریدایرکت‌ها', 'url' => ShopUrlRedirectResource::getUrl('index'), 'icon' => 'fa-code-branch'],
+            ],
+        ];
+    }
 
     $panels = [
         'users' => [
@@ -190,38 +225,16 @@
         'content' => [
             'label' => 'محتوا',
             'icon' => 'fa-newspaper',
-            'routes' => [
+            'routes' => array_values(array_filter([
                 'filament.admin.resources.posts.*',
                 'filament.admin.resources.pages.*',
                 'filament.admin.resources.product-reviews.*',
                 'filament.admin.resources.product-questions.*',
                 'filament.admin.resources.home-sliders.*',
                 'filament.admin.resources.menu-items.*',
-            ],
-            'menus' => [
-                ['label' => 'بلاگ', 'icon' => 'fa-file-alt', 'items' => [
-                    ['label' => 'لیست همه', 'url' => PostResource::getUrl('index'), 'icon' => 'fa-list'],
-                    ['label' => 'ایجاد مطلب', 'url' => PostResource::getUrl('create'), 'icon' => 'fa-plus'],
-                ]],
-                ['label' => 'صفحات', 'icon' => 'fa-file-lines', 'items' => [
-                    ['label' => 'لیست همه', 'url' => PageResource::getUrl('index'), 'icon' => 'fa-list'],
-                    ['label' => 'صفحه جدید', 'url' => PageResource::getUrl('create'), 'icon' => 'fa-plus'],
-                ]],
-                ['label' => 'نظرات', 'icon' => 'fa-comments', 'items' => [
-                    ['label' => 'لیست همه', 'url' => ProductReviewResource::getUrl('index'), 'icon' => 'fa-list'],
-                ]],
-                ['label' => 'پرسش و پاسخ', 'icon' => 'fa-circle-question', 'items' => [
-                    ['label' => 'لیست همه', 'url' => ProductQuestionResource::getUrl('index'), 'icon' => 'fa-list'],
-                ]],
-                ['label' => 'اسلایدر', 'icon' => 'fa-images', 'items' => [
-                    ['label' => 'لیست همه', 'url' => HomeSliderResource::getUrl('index'), 'icon' => 'fa-list'],
-                    ['label' => 'افزودن اسلاید', 'url' => HomeSliderResource::getUrl('create'), 'icon' => 'fa-plus'],
-                ]],
-                ['label' => 'منوی سایت', 'icon' => 'fa-bars', 'items' => [
-                    ['label' => 'آیتم‌های منو', 'url' => MenuItemResource::getUrl('index'), 'icon' => 'fa-list'],
-                    ['label' => 'افزودن آیتم', 'url' => MenuItemResource::getUrl('create'), 'icon' => 'fa-plus'],
-                ]],
-            ],
+                AdminAccess::canManageShopInAdmin($user) ? 'filament.admin.resources.shop-url-redirects.*' : null,
+            ])),
+            'menus' => $contentMenus,
         ],
         'shipping' => [
             'label' => 'ارسال',

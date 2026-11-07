@@ -289,50 +289,59 @@
   line-height: 1.7;
 }
 
-.how-to-buy__cta-band {
-  background: linear-gradient(135deg, var(--htb-navy) 0%, var(--htb-navy-deep) 100%);
-  color: #fff;
-  padding: 36px 16px 44px;
+/* پایین صفحه — بدون نوار سرمه‌ای جدا (هم‌راستا با فوتر سایت) */
+.how-to-buy__end {
+  padding: 0 0 8px;
+  background: var(--htb-bg);
+}
+
+.how-to-buy__end-inner {
+  background: #fff;
+  border: 1px solid var(--htb-line);
+  border-radius: 16px;
+  padding: 20px 18px;
   text-align: center;
+  box-shadow: 0 8px 24px rgba(0, 26, 114, 0.06);
 }
 
-.how-to-buy__cta-band h2 {
-  margin: 0 0 8px;
-  font-size: 1.2rem;
+.how-to-buy-page main {
+  padding-bottom: 0;
 }
 
-.how-to-buy__cta-band p {
-  margin: 0 0 16px;
-  opacity: 0.92;
+.how-to-buy__end-lead {
+  margin: 0 0 14px;
   font-size: 0.9rem;
+  color: var(--htb-muted);
+  line-height: 1.7;
 }
 
-.how-to-buy__cta-actions {
+.how-to-buy__end-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   justify-content: center;
 }
 
-.how-to-buy__btn {
+.how-to-buy__end-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
   padding: 11px 20px;
   border-radius: 11px;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   text-decoration: none;
 }
 
-.how-to-buy__btn--white {
-  background: #fff;
-  color: var(--htb-navy);
+.how-to-buy__end-btn--primary {
+  background: var(--htb-navy);
+  color: #fff;
 }
 
-.how-to-buy__btn--outline {
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  color: #fff;
+.how-to-buy__end-btn--ghost {
+  background: #fff;
+  color: var(--htb-navy);
+  border: 1px solid var(--htb-line);
 }
 
 @media (max-width: 720px) {

@@ -1332,6 +1332,7 @@ resources/views/layouts/shop.blade.php
 |-------|--------|
 | 2026-11-07 | ادمین: تقویم شمسی سراسری برای Filament Date/DateTime/Time Picker — `ariaieboy/filament-jalali` + `FilamentJalaliPickers` |
 | 2026-11-07 | پیش‌نمایش فروشگاه: ستون `admin_shop_preview` (نمایش برای مدیر) روی دسته/محصول/برند/صفحه/پست/منو — فقط `is_admin` یا `is_sales_manager` در سایت می‌بیند؛ `ShopStaffPreview` |
+| 2026-11-07 | بنر قسطی صفحهٔ اصلی: زیر ۵ کارت طرح‌ها، ارتفاع ۱۳۲px (هم‌سطح کارت‌ها)، عرض `max-w-site` |
 | 2026-11-07 | بنر صفحهٔ اصلی خرید قسطی: `home-how-to-buy.webp` (+ نسخهٔ موبایل) — طرح بنفش با کارت‌های باجت‌پی/کالانو/دیجی‌پی/نئوپای |
 | 2026-11-07 | صفحهٔ اصلی: ترتیب — جدیدترین محصولات، بنر `/how-to-buy`، همکاران ما؛ بنر `public/shop/images/banners/home-how-to-buy.png` |
 | 2026-11-07 | راهنمای خرید اقساطی: `/how-to-buy/` — جدول مقایسه طرح‌ها؛ پایین صفحه بدون نوار سرمه‌ای دوبل (هم‌خوان با فوتر) |

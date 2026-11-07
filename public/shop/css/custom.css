@@ -4465,7 +4465,6 @@ html.checkout-coupon-alert-open {
 }
 
 .home-how-to-buy-banner {
-  --home-how-to-buy-banner-height: 200px;
   width: 100%;
   margin: 0;
   padding: 10px 0 0;
@@ -4474,7 +4473,6 @@ html.checkout-coupon-alert-open {
 .home-how-to-buy-banner__link {
   display: block;
   width: 100%;
-  height: var(--home-how-to-buy-banner-height, 200px);
   margin: 0;
   padding: 0;
   border: none;
@@ -4483,6 +4481,19 @@ html.checkout-coupon-alert-open {
   line-height: 0;
   overflow: hidden;
   background: #2a1060;
+}
+
+@media (max-width: 767px) {
+  .home-how-to-buy-banner__link {
+    height: auto;
+    aspect-ratio: 1080 / 500;
+  }
+}
+
+@media (min-width: 768px) {
+  .home-how-to-buy-banner__link {
+    height: 200px;
+  }
 }
 
 .home-how-to-buy-banner__link:hover,
@@ -4499,14 +4510,27 @@ html.checkout-coupon-alert-open {
 .home-how-to-buy-banner__img {
   display: block;
   width: 100%;
-  height: 100%;
   max-width: 100%;
   margin: 0;
   border: none;
   border-radius: 0;
   box-shadow: none;
-  object-fit: cover;
   object-position: center;
+}
+
+@media (max-width: 767px) {
+  .home-how-to-buy-banner__img {
+    height: auto;
+    aspect-ratio: 1080 / 500;
+    object-fit: contain;
+  }
+}
+
+@media (min-width: 768px) {
+  .home-how-to-buy-banner__img {
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
 .home-partners-section {

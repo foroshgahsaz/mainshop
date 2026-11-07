@@ -8,7 +8,10 @@
         : (file_exists($mobilePng)
             ? asset('shop/images/banners/home-how-to-buy-mobile.png')
             : $bannerDesktop);
-    $bannerAlt = 'چطوری از '.site_name().' قسطی خرید کنیم؟ راهنمای خرید اقساطی — باجت‌پی، دیجی‌پی، دیبا کارت';
+    $bannerV = '2026-11-07-v2';
+    $bannerDesktop = $bannerDesktop.'?v='.$bannerV;
+    $bannerMobile = $bannerMobile.'?v='.$bannerV;
+    $bannerAlt = 'چطوری از '.site_name().' قسطی خرید کنیم؟ راهنمای خرید اقساطی — باجت‌پی، کالانو، دیجی‌پی، نئوپای';
 @endphp
 
 <section class="home-how-to-buy-banner" aria-label="راهنمای خرید اقساطی">

@@ -4,8 +4,7 @@
 @endphp
 
 <section class="home-how-to-buy-banner" aria-label="راهنمای خرید اقساطی">
-    <div class="max-w-site mx-auto px-4">
-        <a href="{{ $howToBuyUrl }}" class="home-how-to-buy-banner__link">
+    <a href="{{ $howToBuyUrl }}" class="home-how-to-buy-banner__link" target="_blank" rel="noopener noreferrer">
             <img
                 src="{{ $bannerSrc }}"
                 alt="چطوری از {{ site_name() }} قسطی خرید کنیم؟ راهنمای خرید اقساطی — باجت‌پی، دیجی‌پی، دیبا کارت"
@@ -15,6 +14,5 @@
                 loading="lazy"
                 decoding="async"
             >
-        </a>
-    </div>
+    </a>
 </section>

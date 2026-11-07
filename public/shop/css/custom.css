@@ -4455,31 +4455,43 @@ html.checkout-coupon-alert-open {
 }
 
 .home-how-to-buy-banner {
-  padding: 8px 0 20px;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  max-width: none;
 }
 
 .home-how-to-buy-banner__link {
   display: block;
-  border-radius: 16px;
-  overflow: hidden;
-  border: 1px solid #e5eaf5;
-  box-shadow: 0 10px 28px rgba(0, 26, 114, 0.08);
-  transition: box-shadow 0.2s, transform 0.15s;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  line-height: 0;
 }
 
-.home-how-to-buy-banner__link:hover {
-  box-shadow: 0 14px 36px rgba(0, 26, 114, 0.12);
+.home-how-to-buy-banner__link:hover,
+.home-how-to-buy-banner__link:focus {
+  box-shadow: none;
+  opacity: 0.98;
 }
 
 .home-how-to-buy-banner__link:focus-visible {
   outline: 2px solid #001a72;
-  outline-offset: 3px;
+  outline-offset: -2px;
 }
 
 .home-how-to-buy-banner__img {
   display: block;
   width: 100%;
+  max-width: 100%;
   height: auto;
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .home-partners-section {

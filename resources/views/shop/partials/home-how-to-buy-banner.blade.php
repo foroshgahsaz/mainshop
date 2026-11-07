@@ -8,7 +8,7 @@
         : (file_exists($mobilePng)
             ? asset('shop/images/banners/home-how-to-buy-mobile.png')
             : $bannerDesktop);
-    $bannerV = '2026-11-07-h200';
+    $bannerV = '2026-11-07-mobile-aspect';
     $bannerDesktop = $bannerDesktop.'?v='.$bannerV;
     $bannerMobile = $bannerMobile.'?v='.$bannerV;
     $bannerAlt = 'چطوری از '.site_name().' قسطی خرید کنیم؟ راهنمای خرید اقساطی — باجت‌پی، کالانو، دیجی‌پی، نئوپای';
@@ -21,9 +21,9 @@
             <img
                 src="{{ $bannerDesktop }}"
                 alt="{{ $bannerAlt }}"
-                width="1280"
-                height="200"
-                sizes="100vw"
+                width="1080"
+                height="500"
+                sizes="(max-width: 767px) 100vw, 1280px"
                 class="home-how-to-buy-banner__img"
                 loading="lazy"
                 decoding="async"

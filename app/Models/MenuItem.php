@@ -2,12 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasAdminShopPreview;
+use App\Support\ShopStaffPreview;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class MenuItem extends Model
 {
+    use HasAdminShopPreview;
+
     public const TYPE_LINK = 'link';
 
     public const TYPE_MEGA_TRIGGER = 'mega_trigger';
@@ -34,6 +38,7 @@ class MenuItem extends Model
         'mega_column',
         'position',
         'is_active',
+        'admin_shop_preview',
         'open_in_new_tab',
         'icon',
     ];
@@ -42,6 +47,7 @@ class MenuItem extends Model
     {
         return [
             'is_active' => 'boolean',
+            'admin_shop_preview' => 'boolean',
             'open_in_new_tab' => 'boolean',
             'mega_column' => 'integer',
             'position' => 'integer',
@@ -60,12 +66,14 @@ class MenuItem extends Model
 
     public function resolveUrl(): string
     {
+        $staff = ShopStaffPreview::enabled();
+
         return match ($this->link_type) {
             'url' => $this->link_value ?: '#',
-            'category' => ($category = Category::query()->find($this->link_value))
+            'category' => ($category = Category::query()->find($this->link_value)) && $category->isVisibleOnShop($staff)
                 ? route('categories.show', $category)
                 : '#',
-            'brand' => ($brand = Brand::query()->where('is_active', true)->find($this->link_value))
+            'brand' => ($brand = Brand::query()->find($this->link_value)) && $brand->isVisibleOnShop($staff)
                 ? route('brands.show', $brand)
                 : '#',
             'page' => $this->link_value

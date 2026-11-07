@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasAdminShopPreview;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasAdminShopPreview, HasFactory, SoftDeletes;
 
     protected $attributes = [
         'robots' => 'index,follow',
@@ -34,6 +35,7 @@ class Product extends Model
         'sku',
         'weight',
         'is_active',
+        'admin_shop_preview',
         'is_featured',
         'views',
         'last_edited_by_user_id',
@@ -56,6 +58,7 @@ class Product extends Model
             'stock' => 'integer',
             'weight' => 'integer',
             'is_active' => 'boolean',
+            'admin_shop_preview' => 'boolean',
             'is_featured' => 'boolean',
             'views' => 'integer',
         ];

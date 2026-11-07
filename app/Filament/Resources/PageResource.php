@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PageResource\Pages;
+use App\Filament\Support\AdminShopPreviewToggle;
 use App\Filament\Support\AdminTable;
 use App\Filament\Support\RichContentEditor;
 use App\Filament\Support\SeoFormSchema;
@@ -39,6 +40,7 @@ class PageResource extends Resource
                     Forms\Components\TextInput::make('slug')->label('اسلاگ')->required()->unique(ignoreRecord: true),
                     RichContentEditor::make('content', 'محتوا', 'pages'),
                     Forms\Components\Toggle::make('is_active')->label('فعال')->default(true),
+                    AdminShopPreviewToggle::make(),
                 ])->columns(2),
             ...SeoFormSchema::contentSection(),
         ]);

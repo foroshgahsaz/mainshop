@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\CategoryResource\Pages;
 use App\Filament\Support\AdminImageColumn;
+use App\Filament\Support\AdminShopPreviewToggle;
 use App\Filament\Support\AdminTable;
 use App\Filament\Support\CategoryDeleteActions;
 use App\Filament\Support\SeoFormSchema;
@@ -69,6 +70,7 @@ class CategoryResource extends Resource
                     Forms\Components\Toggle::make('is_active')
                         ->label('فعال')
                         ->default(true),
+                    AdminShopPreviewToggle::make(),
                     Forms\Components\TextInput::make('position')
                         ->label('ترتیب')
                         ->numeric()

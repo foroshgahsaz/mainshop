@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Concerns\ListsShopProducts;
 use App\Models\Product;
 use App\Services\Cache\ShopCacheService;
+use App\Support\ShopStaffPreview;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
@@ -24,11 +25,16 @@ class ProductController extends Controller
 
     public function show(Product $product): View
     {
-        $cached = $this->cache->productBySlug($product->slug);
+        $staff = ShopStaffPreview::enabled();
+        abort_unless($product->isVisibleOnShop($staff), 404);
 
-        abort_unless($cached && $cached->is_active, 404);
+        $cached = $this->cache->productBySlug($product->slug, $staff);
 
-        $product = $cached;
+        $product = $cached ?? $product->load([
+            'category',
+            'brand',
+            'images' => fn ($q) => $q->orderBy('position'),
+        ]);
 
         Cache::remember(
             'shop:product:views:'.$product->id.':'.request()->ip(),

@@ -43,7 +43,7 @@
         <link rel="stylesheet" href="{{ asset('shop/css/listing.css') }}">
     @endif
     @auth
-        @if(auth()->user()->isAdmin())
+        @if(\App\Support\ShopStaffPreview::viewerIsStaff())
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous">
         @endif
     @endauth
@@ -52,9 +52,9 @@
     @livewireStyles
     @include('shop.partials.site-header-snippets')
 </head>
-<body class="bg-white min-h-screen font-yekan text-gray-800 has-mobile-bottom-nav @if(auth()->check() && auth()->user()->isAdmin()) has-admin-bar @endif @yield('body_class')">
+<body class="bg-white min-h-screen font-yekan text-gray-800 has-mobile-bottom-nav @if(auth()->check() && \App\Support\ShopStaffPreview::viewerIsStaff()) has-admin-bar @endif @yield('body_class')">
 
-    @if(auth()->check() && auth()->user()->isAdmin())
+    @if(auth()->check() && \App\Support\ShopStaffPreview::viewerIsStaff())
         @include('shop.partials.admin-bar')
     @endif
 

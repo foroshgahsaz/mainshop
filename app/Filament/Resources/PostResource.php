@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PostResource\Pages;
+use App\Filament\Support\AdminShopPreviewToggle;
 use App\Filament\Support\AdminTable;
 use App\Filament\Support\RichContentEditor;
 use App\Filament\Support\SeoFormSchema;
@@ -47,6 +48,7 @@ class PostResource extends Resource
                     RichContentEditor::make('content', 'محتوا', 'posts'),
                     ShopMediaPicker::image('image', 'posts', 'تصویر'),
                     Forms\Components\Toggle::make('is_active')->label('فعال')->default(true),
+                    AdminShopPreviewToggle::make(),
                     Forms\Components\DateTimePicker::make('published_at')->label('تاریخ انتشار'),
                 ])->columns(2),
             ...SeoFormSchema::contentSection(),

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\MenuItemResource\Pages;
+use App\Filament\Support\AdminShopPreviewToggle;
 use App\Filament\Support\AdminTable;
 use App\Models\Brand;
 use App\Models\Category;
@@ -123,6 +124,7 @@ class MenuItemResource extends Resource
                 Forms\Components\Toggle::make('is_active')
                     ->label('فعال')
                     ->default(true),
+                AdminShopPreviewToggle::make(),
                 Forms\Components\Toggle::make('open_in_new_tab')
                     ->label('باز شدن در تب جدید')
                     ->default(false),

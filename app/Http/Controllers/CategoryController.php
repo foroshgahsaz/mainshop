@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Concerns\ListsShopProducts;
 use App\Models\Category;
 use App\Services\Cache\ShopCacheService;
+use App\Support\ShopStaffPreview;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -18,7 +19,7 @@ class CategoryController extends Controller
 
     public function show(Category $category, Request $request): View
     {
-        abort_unless($category->is_active, 404);
+        abort_unless($category->isVisibleOnShop(ShopStaffPreview::enabled()), 404);
 
         return $this->productListingView($request, $this->cache, category: $category);
     }

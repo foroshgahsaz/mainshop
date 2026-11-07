@@ -1,6 +1,6 @@
 @php
     $howToBuyUrl = route('plans.how-to-buy');
-    $bannerSrc = asset('shop/images/banners/home-how-to-buy.png');
+    $bannerSrc = asset('shop/images/banners/home-how-to-buy.webp');
 @endphp
 
 <section class="home-how-to-buy-banner" aria-label="راهنمای خرید اقساطی">

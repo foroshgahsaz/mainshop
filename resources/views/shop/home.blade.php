@@ -22,6 +22,8 @@
         'homepage_plan_widget' => $homepage_plan_widget ?? [],
     ])
 
+    @include('shop.partials.home-how-to-buy-banner')
+
     {{-- NEW PRODUCTS --}}
     @if($new->isNotEmpty())
         <section class="other-products-section">
@@ -44,8 +46,6 @@
             </div>
         </section>
     @endif
-
-    @include('shop.partials.home-how-to-buy-banner')
 
     @include('shop.partials.home-partners', [
         'homepage_partners' => $homepage_partners ?? [],

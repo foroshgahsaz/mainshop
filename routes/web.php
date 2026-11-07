@@ -9,6 +9,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\Plans\CreditPlanIndexController;
 use App\Http\Controllers\Plans\DigipayLeasingController;
+use App\Http\Controllers\Plans\HowToBuyController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PaymentResultController;
 use App\Http\Controllers\ProductController;
@@ -74,6 +75,9 @@ Route::get('/product/{slug}', fn (string $slug) => redirect("/products/{$slug}",
 Route::get('/pages/{page:slug}', [PageController::class, 'show'])->name('pages.show');
 
 Route::get('/plans', CreditPlanIndexController::class)->name('plans.index');
+
+Route::redirect('/how-to-buy', '/how-to-buy/', 301);
+Route::get('/how-to-buy/', HowToBuyController::class)->name('plans.how-to-buy');
 
 Route::redirect('/plans/digipay-leasing', '/plans/digipay-leasing/', 301);
 Route::get('/plans/digipay-leasing/', DigipayLeasingController::class)->name('plans.digipay-leasing');

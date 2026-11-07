@@ -1,0 +1,306 @@
+/* How to buy — Chinibazar (Alo-style guide) */
+.how-to-buy {
+  --htb-primary: #c41e3a;
+  --htb-primary-soft: #fff0f2;
+  --htb-ink: #1f2937;
+  --htb-muted: #6b7280;
+  --htb-bg: #f8f9fb;
+  --htb-surface: #ffffff;
+  --htb-line: #e5e7eb;
+  color: var(--htb-ink);
+  background: var(--htb-bg);
+  line-height: 1.8;
+}
+
+.how-to-buy-page main {
+  background: var(--htb-bg);
+}
+
+.how-to-buy .htb-wrap {
+  width: min(1080px, calc(100% - 32px));
+  margin-inline: auto;
+}
+
+.how-to-buy__hero {
+  padding: 48px 0 40px;
+  text-align: center;
+  background: linear-gradient(180deg, #fff 0%, var(--htb-bg) 100%);
+  border-bottom: 1px solid var(--htb-line);
+}
+
+.how-to-buy__eyebrow {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--htb-primary);
+  background: var(--htb-primary-soft);
+  padding: 6px 14px;
+  border-radius: 999px;
+  margin-bottom: 14px;
+}
+
+.how-to-buy__hero h1 {
+  font-size: clamp(1.6rem, 4vw, 2.15rem);
+  font-weight: 800;
+  margin: 0 0 12px;
+}
+
+.how-to-buy__hero p {
+  max-width: 40rem;
+  margin: 0 auto;
+  color: var(--htb-muted);
+  font-size: 0.98rem;
+}
+
+.how-to-buy__hero-actions {
+  margin-top: 22px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.how-to-buy__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border-radius: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.1s, box-shadow 0.15s;
+}
+
+.how-to-buy__btn:active {
+  transform: scale(0.98);
+}
+
+.how-to-buy__btn--primary {
+  background: var(--htb-primary);
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(196, 30, 58, 0.25);
+}
+
+.how-to-buy__btn--ghost {
+  background: var(--htb-surface);
+  color: var(--htb-ink);
+  border: 1px solid var(--htb-line);
+}
+
+.how-to-buy__steps {
+  padding: 44px 0;
+}
+
+.how-to-buy__section-title {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.how-to-buy__section-title h2 {
+  font-size: 1.35rem;
+  font-weight: 800;
+  margin: 0 0 8px;
+}
+
+.how-to-buy__section-title p {
+  color: var(--htb-muted);
+  font-size: 0.92rem;
+  margin: 0;
+}
+
+.how-to-buy__step-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .how-to-buy__step-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .how-to-buy__step-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.how-to-buy__step {
+  background: var(--htb-surface);
+  border: 1px solid var(--htb-line);
+  border-radius: 14px;
+  padding: 20px 16px;
+  text-align: center;
+  position: relative;
+}
+
+.how-to-buy__step-num {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: var(--htb-primary);
+  color: #fff;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  font-size: 0.95rem;
+}
+
+.how-to-buy__step h3 {
+  font-size: 1rem;
+  font-weight: 800;
+  margin: 0 0 8px;
+}
+
+.how-to-buy__step p {
+  font-size: 0.85rem;
+  color: var(--htb-muted);
+  margin: 0;
+}
+
+.how-to-buy__plans {
+  padding: 20px 0 56px;
+}
+
+.how-to-buy__plan-row {
+  margin-bottom: 28px;
+}
+
+.how-to-buy__plan-row-head {
+  margin-bottom: 14px;
+}
+
+.how-to-buy__plan-row-head h3 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin: 0 0 4px;
+}
+
+.how-to-buy__plan-row-head p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--htb-muted);
+}
+
+.how-to-buy__plan-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.how-to-buy__plan-row--single .how-to-buy__plan-grid {
+  grid-template-columns: minmax(0, 360px);
+}
+
+@media (max-width: 800px) {
+  .how-to-buy__plan-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .how-to-buy__plan-row--single .how-to-buy__plan-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.how-to-buy__plan-card {
+  background: var(--htb-surface);
+  border: 1px solid var(--htb-line);
+  border-radius: 14px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 100%;
+}
+
+.how-to-buy__plan-card-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.how-to-buy__plan-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.how-to-buy__plan-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 6px;
+}
+
+.how-to-buy__plan-icon-fallback {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--htb-primary);
+}
+
+.how-to-buy__plan-card h4 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.how-to-buy__plan-card p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--htb-muted);
+  flex: 1;
+}
+
+.how-to-buy__plan-cta {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--htb-primary);
+  text-decoration: none;
+}
+
+.how-to-buy__plan-cta:hover {
+  text-decoration: underline;
+}
+
+.how-to-buy__note {
+  margin-top: 24px;
+  padding: 14px 16px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  color: #92400e;
+  text-align: center;
+}
+
+.how-to-buy__cta-band {
+  background: var(--htb-primary);
+  color: #fff;
+  padding: 36px 16px;
+  text-align: center;
+}
+
+.how-to-buy__cta-band h2 {
+  margin: 0 0 8px;
+  font-size: 1.25rem;
+}
+
+.how-to-buy__cta-band p {
+  margin: 0 0 18px;
+  opacity: 0.92;
+  font-size: 0.92rem;
+}
+
+.how-to-buy__cta-band .how-to-buy__btn--ghost {
+  background: #fff;
+  border-color: transparent;
+}

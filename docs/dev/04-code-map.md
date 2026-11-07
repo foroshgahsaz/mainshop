@@ -23,6 +23,7 @@
 | `app/Providers/Filament/AdminPanelProvider.php` | پنل `/admin` |
 | `app/Providers/Filament/RepresentativePanelProvider.php` | پنل `/representative` |
 | `app/Http/Controllers/Representative/RepresentativeBranchRegisterController.php` | صفحهٔ عمومی `/representative/branch/register/` (درخواست نمایندگی — استاتیک) |
+| `app/Http/Controllers/Plans/HowToBuyController.php` | راهنمای خرید اقساطی `/how-to-buy/` |
 
 ---
 

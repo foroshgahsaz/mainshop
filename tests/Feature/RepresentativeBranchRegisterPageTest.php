@@ -21,4 +21,10 @@ class RepresentativeBranchRegisterPageTest extends TestCase
         $this->get('/representative/branch/register')
             ->assertRedirect('/representative/branch/register/');
     }
+
+    public function test_hamta_style_client_path_redirects_to_branch_register(): void
+    {
+        $this->get('/client/branch/register/')
+            ->assertRedirect('/representative/branch/register/');
+    }
 }

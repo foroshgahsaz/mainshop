@@ -124,6 +124,8 @@ Route::get('/payment/result/{payment:tracking_code}', [PaymentResultController::
     ->middleware('signed')
     ->name('payment.result');
 
+Route::redirect('/client/branch/register', '/representative/branch/register/', 301);
+Route::redirect('/client/branch/register/', '/representative/branch/register/', 301);
 Route::redirect('/representative/branch/register', '/representative/branch/register/', 301);
 Route::get('/representative/branch/register/', RepresentativeBranchRegisterController::class)
     ->name('representative.branch.register');

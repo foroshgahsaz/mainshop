@@ -3,13 +3,13 @@
 @section('title', 'راهنمای خرید اقساطی | '.$siteName)
 
 @php
-    $seoDescription = 'راهنمای گام‌به‌گام خرید اعتباری و اقساطی از '.$siteName.'؛ انتخاب کالا، checkout و طرح‌های تارا، دیجی‌پی، نوپی، باجت‌پی و سایر درگاه‌ها.';
+    $seoDescription = 'مقایسهٔ طرح‌های خرید اقساطی از '.$siteName.'؛ سقف وام، اقساط، ضمانت و نحوهٔ پرداخت (BNPL تجارت، کالاپی، نوپی، بتا، تارا، دیجی‌پی، دیبا کارت).';
     $canonicalUrl = route('plans.how-to-buy');
 @endphp
 
 @section('meta')
     <x-seo-meta :seo="\App\Support\SeoPresenter::for(null, [
-        'title' => 'راهنمای خرید اقساطی از '.$siteName,
+        'title' => 'روش‌های خرید اقساطی از '.$siteName,
         'description' => $seoDescription,
         'url' => $canonicalUrl,
         'image' => $seoImage ?? null,
@@ -18,7 +18,7 @@
 @endsection
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('shop/css/how-to-buy.css') }}?v=2026-11-07">
+    <link rel="stylesheet" href="{{ asset('shop/css/how-to-buy.css') }}?v=2026-11-07-table">
 @endpush
 
 @section('body_class', 'how-to-buy-page')
@@ -28,97 +28,95 @@
     <header class="how-to-buy__hero">
         <div class="htb-wrap">
             <span class="how-to-buy__eyebrow">{{ $siteName }}</span>
-            <h1>چطور از {{ $siteName }} <span style="color:#c41e3a">قسطی</span> بخرم؟</h1>
+            <h1>روش‌های خرید اقساطی از <em>{{ $siteName }}</em></h1>
             <p>
-                مثل یک فروشگاه آنلاین معمولی کالا را انتخاب کنید؛ در مرحلهٔ پرداخت، یکی از طرح‌های اعتباری فعال را بزنید.
-                همهٔ مراحل زیر در وب‌سایت {{ $siteName }} انجام می‌شود — نیازی به واسطهٔ جدا نیست.
+                کالا را در {{ $siteName }} انتخاب کنید و در checkout یکی از طرح‌های زیر را بزنید.
+                اعداد سقف و اقساط راهنمای معرفی است؛ مقدار نهایی طبق اعتبارسنجی هر تأمین‌کننده تعیین می‌شود.
             </p>
-            <div class="how-to-buy__hero-actions">
-                <a class="how-to-buy__btn how-to-buy__btn--primary" href="{{ route('products.index') }}">شروع خرید ←</a>
-                <a class="how-to-buy__btn how-to-buy__btn--ghost" href="#payment-plans">مشاهده طرح‌های پرداخت</a>
+            <div class="how-to-buy__steps-strip" aria-label="مراحل کوتاه">
+                <span class="how-to-buy__step-chip">۱ — ورود</span>
+                <span class="how-to-buy__step-chip">۲ — سبد خرید</span>
+                <span class="how-to-buy__step-chip">۳ — انتخاب طرح</span>
+                <span class="how-to-buy__step-chip">۴ — تحویل</span>
             </div>
         </div>
     </header>
 
-    <section class="how-to-buy__steps">
+    <section class="how-to-buy__compare" id="payment-plans">
         <div class="htb-wrap">
-            <div class="how-to-buy__section-title">
-                <h2>مراحل خرید از {{ $siteName }}</h2>
-                <p>از انتخاب محصول تا تحویل — خلاصهٔ مسیر مشتری</p>
-            </div>
-            <div class="how-to-buy__step-grid">
-                <article class="how-to-buy__step">
-                    <span class="how-to-buy__step-num" aria-hidden="true">۱</span>
-                    <h3>ثبت‌نام / ورود</h3>
-                    <p>با شماره موبایل در {{ $siteName }} وارد شوید یا حساب بسازید.</p>
-                </article>
-                <article class="how-to-buy__step">
-                    <span class="how-to-buy__step-num" aria-hidden="true">۲</span>
-                    <h3>انتخاب کالا</h3>
-                    <p>محصول را به سبد اضافه کنید و به تسویه‌حساب بروید.</p>
-                </article>
-                <article class="how-to-buy__step">
-                    <span class="how-to-buy__step-num" aria-hidden="true">۳</span>
-                    <h3>پرداخت اعتباری</h3>
-                    <p>در checkout یکی از درگاه‌های اعتباری فعال (مثلاً تارا، دیجی‌پی، نوپی) را انتخاب کنید.</p>
-                </article>
-                <article class="how-to-buy__step">
-                    <span class="how-to-buy__step-num" aria-hidden="true">۴</span>
-                    <h3>پیگیری سفارش</h3>
-                    <p>پس از پرداخت موفق، وضعیت ارسال را از حساب کاربری دنبال کنید.</p>
-                </article>
-            </div>
-        </div>
-    </section>
-
-    <section class="how-to-buy__plans" id="payment-plans">
-        <div class="htb-wrap">
-            <div class="how-to-buy__section-title">
-                <h2>طرح‌های پرداخت در {{ $siteName }}</h2>
-                <p>در زمان checkout فقط درگاه‌های فعال برای سبد شما نمایش داده می‌شوند.</p>
+            <div class="how-to-buy__compare-title">
+                <h2>مقایسهٔ طرح‌های پرداخت اعتباری</h2>
+                <p>ستون‌ها مطابق جدول مرجع؛ فقط طرح‌های فعال در checkout نمایش داده می‌شوند.</p>
             </div>
 
-            @foreach ($planRows as $row)
-                <div class="how-to-buy__plan-row {{ count($row['plans']) === 1 ? 'how-to-buy__plan-row--single' : '' }}">
-                    <div class="how-to-buy__plan-row-head">
-                        <h3>{{ $row['title'] }}</h3>
-                        <p>{{ $row['lead'] }}</p>
-                    </div>
-                    <div class="how-to-buy__plan-grid">
-                        @foreach ($row['plans'] as $plan)
-                            <article class="how-to-buy__plan-card">
-                                <div class="how-to-buy__plan-card-top">
-                                    <div class="how-to-buy__plan-icon" aria-hidden="true">
-                                        @if (! empty($plan['icon']))
-                                            <img src="{{ $plan['icon'] }}" alt="">
-                                        @else
-                                            <span class="how-to-buy__plan-icon-fallback">{{ mb_substr($plan['label'], 0, 1) }}</span>
-                                        @endif
-                                    </div>
-                                    <h4>{{ $plan['label'] }}</h4>
-                                </div>
-                                <p>{{ $plan['description'] }}</p>
-                                @if (! empty($plan['cta']))
-                                    <a class="how-to-buy__plan-cta" href="{{ $plan['cta'] }}">شروع خرید ←</a>
-                                @endif
-                            </article>
-                        @endforeach
-                    </div>
+            <div class="how-to-buy__table-shell">
+                <div class="how-to-buy__table-scroll" role="region" aria-label="جدول طرح‌های اقساطی" tabindex="0">
+                    <table class="how-to-buy__table">
+                        <thead>
+                            <tr>
+                                <th scope="col">نام طرح / تأمین‌کننده</th>
+                                <th scope="col">سقف وام</th>
+                                <th scope="col">دسته‌بندی کالای مجاز</th>
+                                <th scope="col">تعداد اقساط</th>
+                                <th scope="col">نوع ضمانت</th>
+                                <th scope="col">رتبه اعتباری</th>
+                                <th scope="col">شرایط خاص</th>
+                                <th scope="col">نحوهٔ خرید</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($comparisonRows as $row)
+                                <tr>
+                                    <td>
+                                        <div class="how-to-buy__provider">
+                                            <span class="how-to-buy__provider-icon" aria-hidden="true">
+                                                @if (! empty($row['icon']))
+                                                    <img src="{{ $row['icon'] }}" alt="">
+                                                @else
+                                                    <span class="how-to-buy__provider-fallback">{{ mb_substr($row['label'], 0, 1) }}</span>
+                                                @endif
+                                            </span>
+                                            <span class="how-to-buy__provider-name">{{ $row['label'] }}</span>
+                                        </div>
+                                    </td>
+                                    <td><span class="how-to-buy__ceil">{{ $row['ceil'] }}</span></td>
+                                    <td><span class="how-to-buy__categories">{{ $row['categories'] }}</span></td>
+                                    <td>{{ $row['installments'] }}</td>
+                                    <td>{{ $row['guarantee'] }}</td>
+                                    <td>
+                                        <div class="how-to-buy__grades" aria-label="رتبه‌های مجاز">
+                                            @foreach ($row['credit_grades'] as $grade)
+                                                <span class="how-to-buy__grade how-to-buy__grade--{{ $grade }}">{{ $grade }}</span>
+                                            @endforeach
+                                        </div>
+                                    </td>
+                                    <td><span class="how-to-buy__special">{{ $row['special'] }}</span></td>
+                                    <td>
+                                        <a class="how-to-buy__buy-btn" href="{{ $row['buy_url'] }}">
+                                            نحوهٔ خرید با {{ $row['label'] }}؟
+                                        </a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
-            @endforeach
+            </div>
 
             <p class="how-to-buy__note">
-                لیست بالا راهنمای طرح‌هایی است که {{ $siteName }} پشتیبانی می‌کند یا در checkout ارائه می‌شود.
-                شرایط اعتبار، تعداد اقساط و سقف مبلغ طبق قوانین هر سرویس (بانک یا کیف پول) تعیین می‌شود.
+                سقف‌ها و اقساط جدول بالا برای آشنایی با طرح‌ها در {{ $siteName }} است و جایگزین تأیید بانک، کیف پول یا اپ هر سرویس نیست.
             </p>
         </div>
     </section>
 
     <section class="how-to-buy__cta-band">
         <div class="htb-wrap">
-            <h2>همین الان از {{ $siteName }} خرید کنید</h2>
-            <p>لیست کامل طرح‌ها را در صفحهٔ طرح‌های اعتباری هم ببینید.</p>
-            <a class="how-to-buy__btn how-to-buy__btn--ghost" href="{{ route('plans.index') }}">مشاهدهٔ صفحهٔ طرح‌ها</a>
+            <h2>همین حالا از {{ $siteName }} خرید کنید</h2>
+            <p>محصول را انتخاب کنید؛ در مرحلهٔ پرداخت طرح مناسب را فعال کنید.</p>
+            <div class="how-to-buy__cta-actions">
+                <a class="how-to-buy__btn how-to-buy__btn--white" href="{{ route('products.index') }}">رفتن به فروشگاه</a>
+                <a class="how-to-buy__btn how-to-buy__btn--outline" href="{{ route('plans.index') }}">سایر طرح‌ها</a>
+            </div>
         </div>
     </section>
 </div>

@@ -1,15 +1,21 @@
-/* How to buy — Chinibazar (Alo-style guide) */
+/* How to buy — comparison table (navy Chinibazar) */
 .how-to-buy {
-  --htb-primary: #c41e3a;
-  --htb-primary-soft: #fff0f2;
-  --htb-ink: #1f2937;
-  --htb-muted: #6b7280;
-  --htb-bg: #f8f9fb;
+  --htb-navy: #001a72;
+  --htb-navy-deep: #00145c;
+  --htb-navy-soft: #e8ecf7;
+  --htb-navy-muted: #4a5d8c;
+  --htb-ink: #1e293b;
+  --htb-muted: #64748b;
+  --htb-bg: #f4f6fb;
   --htb-surface: #ffffff;
-  --htb-line: #e5e7eb;
+  --htb-line: #d6deef;
+  --grade-a: #16a34a;
+  --grade-b: #2563eb;
+  --grade-c: #d97706;
+  --grade-d: #e11d48;
   color: var(--htb-ink);
   background: var(--htb-bg);
-  line-height: 1.8;
+  line-height: 1.75;
 }
 
 .how-to-buy-page main {
@@ -17,46 +23,294 @@
 }
 
 .how-to-buy .htb-wrap {
-  width: min(1080px, calc(100% - 32px));
+  width: min(1280px, calc(100% - 28px));
   margin-inline: auto;
 }
 
 .how-to-buy__hero {
-  padding: 48px 0 40px;
+  padding: 40px 0 32px;
   text-align: center;
   background: linear-gradient(180deg, #fff 0%, var(--htb-bg) 100%);
-  border-bottom: 1px solid var(--htb-line);
 }
 
 .how-to-buy__eyebrow {
   display: inline-block;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 700;
-  color: var(--htb-primary);
-  background: var(--htb-primary-soft);
+  color: var(--htb-navy);
+  background: var(--htb-navy-soft);
   padding: 6px 14px;
   border-radius: 999px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .how-to-buy__hero h1 {
-  font-size: clamp(1.6rem, 4vw, 2.15rem);
+  font-size: clamp(1.45rem, 3.5vw, 2rem);
   font-weight: 800;
-  margin: 0 0 12px;
+  margin: 0 0 10px;
+  color: var(--htb-navy-deep);
 }
 
-.how-to-buy__hero p {
-  max-width: 40rem;
+.how-to-buy__hero h1 em {
+  font-style: normal;
+  color: var(--htb-navy);
+}
+
+.how-to-buy__hero > .htb-wrap > p {
+  max-width: 42rem;
   margin: 0 auto;
   color: var(--htb-muted);
-  font-size: 0.98rem;
+  font-size: 0.95rem;
 }
 
-.how-to-buy__hero-actions {
-  margin-top: 22px;
+.how-to-buy__steps-strip {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.how-to-buy__step-chip {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--htb-navy-muted);
+  background: #fff;
+  border: 1px solid var(--htb-line);
+  border-radius: 999px;
+  padding: 8px 14px;
+}
+
+.how-to-buy__compare {
+  padding: 8px 0 48px;
+}
+
+.how-to-buy__compare-title {
+  text-align: center;
+  margin-bottom: 22px;
+}
+
+.how-to-buy__compare-title h2 {
+  font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+  font-weight: 800;
+  color: var(--htb-navy-deep);
+  margin: 0 0 6px;
+}
+
+.how-to-buy__compare-title p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--htb-muted);
+}
+
+.how-to-buy__table-shell {
+  background: linear-gradient(145deg, #eef2fb 0%, #e4eaf8 100%);
+  border: 1px solid var(--htb-line);
+  border-radius: 20px;
+  padding: 14px;
+  box-shadow: 0 16px 40px rgba(0, 26, 114, 0.08);
+}
+
+.how-to-buy__table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 14px;
+  background: var(--htb-surface);
+}
+
+.how-to-buy__table {
+  width: 100%;
+  min-width: 1040px;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.82rem;
+}
+
+.how-to-buy__table thead th {
+  background: linear-gradient(180deg, var(--htb-navy) 0%, var(--htb-navy-deep) 100%);
+  color: #fff;
+  font-weight: 700;
+  text-align: center;
+  padding: 14px 10px;
+  white-space: nowrap;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.how-to-buy__table thead th:first-child {
+  border-radius: 12px 0 0 0;
+  text-align: right;
+  padding-right: 16px;
+}
+
+.how-to-buy__table thead th:last-child {
+  border-radius: 0 12px 0 0;
+}
+
+.how-to-buy__table tbody td {
+  padding: 14px 10px;
+  vertical-align: middle;
+  text-align: center;
+  border-bottom: 1px solid var(--htb-line);
+  color: var(--htb-ink);
+  line-height: 1.65;
+}
+
+.how-to-buy__table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.how-to-buy__table tbody tr:nth-child(even) td {
+  background: #fafbff;
+}
+
+.how-to-buy__provider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: right;
+  min-width: 150px;
+}
+
+.how-to-buy__provider-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--htb-navy-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 1px solid var(--htb-line);
+}
+
+.how-to-buy__provider-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 4px;
+}
+
+.how-to-buy__provider-fallback {
+  font-weight: 800;
+  color: var(--htb-navy);
+  font-size: 1rem;
+}
+
+.how-to-buy__provider-name {
+  font-weight: 800;
+  color: var(--htb-navy);
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.how-to-buy__ceil {
+  font-weight: 700;
+  color: var(--htb-navy-deep);
+  white-space: nowrap;
+}
+
+.how-to-buy__categories {
+  max-width: 200px;
+  margin-inline: auto;
+  font-size: 0.8rem;
+  color: var(--htb-muted);
+  text-align: center;
+  line-height: 1.55;
+}
+
+.how-to-buy__grades {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+
+.how-to-buy__grade {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.how-to-buy__grade--A { background: var(--grade-a); }
+.how-to-buy__grade--B { background: var(--grade-b); }
+.how-to-buy__grade--C { background: var(--grade-c); }
+.how-to-buy__grade--D { background: var(--grade-d); }
+
+.how-to-buy__special {
+  max-width: 180px;
+  margin-inline: auto;
+  font-size: 0.78rem;
+  color: var(--htb-muted);
+  line-height: 1.5;
+}
+
+.how-to-buy__buy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 12px;
+  min-width: 132px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #0a2d9e 0%, var(--htb-navy) 100%);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(0, 26, 114, 0.25);
+  transition: transform 0.1s, box-shadow 0.15s;
+}
+
+.how-to-buy__buy-btn:hover {
+  box-shadow: 0 6px 18px rgba(0, 26, 114, 0.35);
+  color: #fff;
+}
+
+.how-to-buy__buy-btn:active {
+  transform: scale(0.98);
+}
+
+.how-to-buy__note {
+  margin-top: 18px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px dashed var(--htb-line);
+  font-size: 0.82rem;
+  color: var(--htb-navy-muted);
+  text-align: center;
+  line-height: 1.7;
+}
+
+.how-to-buy__cta-band {
+  background: linear-gradient(135deg, var(--htb-navy) 0%, var(--htb-navy-deep) 100%);
+  color: #fff;
+  padding: 36px 16px 44px;
+  text-align: center;
+}
+
+.how-to-buy__cta-band h2 {
+  margin: 0 0 8px;
+  font-size: 1.2rem;
+}
+
+.how-to-buy__cta-band p {
+  margin: 0 0 16px;
+  opacity: 0.92;
+  font-size: 0.9rem;
+}
+
+.how-to-buy__cta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
   justify-content: center;
 }
 
@@ -64,243 +318,30 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 22px;
-  border-radius: 12px;
+  padding: 11px 20px;
+  border-radius: 11px;
   font-weight: 700;
-  text-decoration: none;
-  transition: transform 0.1s, box-shadow 0.15s;
-}
-
-.how-to-buy__btn:active {
-  transform: scale(0.98);
-}
-
-.how-to-buy__btn--primary {
-  background: var(--htb-primary);
-  color: #fff;
-  box-shadow: 0 8px 24px rgba(196, 30, 58, 0.25);
-}
-
-.how-to-buy__btn--ghost {
-  background: var(--htb-surface);
-  color: var(--htb-ink);
-  border: 1px solid var(--htb-line);
-}
-
-.how-to-buy__steps {
-  padding: 44px 0;
-}
-
-.how-to-buy__section-title {
-  text-align: center;
-  margin-bottom: 28px;
-}
-
-.how-to-buy__section-title h2 {
-  font-size: 1.35rem;
-  font-weight: 800;
-  margin: 0 0 8px;
-}
-
-.how-to-buy__section-title p {
-  color: var(--htb-muted);
-  font-size: 0.92rem;
-  margin: 0;
-}
-
-.how-to-buy__step-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
-}
-
-@media (max-width: 900px) {
-  .how-to-buy__step-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 520px) {
-  .how-to-buy__step-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.how-to-buy__step {
-  background: var(--htb-surface);
-  border: 1px solid var(--htb-line);
-  border-radius: 14px;
-  padding: 20px 16px;
-  text-align: center;
-  position: relative;
-}
-
-.how-to-buy__step-num {
-  width: 36px;
-  height: 36px;
-  border-radius: 999px;
-  background: var(--htb-primary);
-  color: #fff;
-  font-weight: 800;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 12px;
-  font-size: 0.95rem;
-}
-
-.how-to-buy__step h3 {
-  font-size: 1rem;
-  font-weight: 800;
-  margin: 0 0 8px;
-}
-
-.how-to-buy__step p {
-  font-size: 0.85rem;
-  color: var(--htb-muted);
-  margin: 0;
-}
-
-.how-to-buy__plans {
-  padding: 20px 0 56px;
-}
-
-.how-to-buy__plan-row {
-  margin-bottom: 28px;
-}
-
-.how-to-buy__plan-row-head {
-  margin-bottom: 14px;
-}
-
-.how-to-buy__plan-row-head h3 {
-  font-size: 1.15rem;
-  font-weight: 800;
-  margin: 0 0 4px;
-}
-
-.how-to-buy__plan-row-head p {
-  margin: 0;
-  font-size: 0.88rem;
-  color: var(--htb-muted);
-}
-
-.how-to-buy__plan-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.how-to-buy__plan-row--single .how-to-buy__plan-grid {
-  grid-template-columns: minmax(0, 360px);
-}
-
-@media (max-width: 800px) {
-  .how-to-buy__plan-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .how-to-buy__plan-row--single .how-to-buy__plan-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.how-to-buy__plan-card {
-  background: var(--htb-surface);
-  border: 1px solid var(--htb-line);
-  border-radius: 14px;
-  padding: 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-height: 100%;
-}
-
-.how-to-buy__plan-card-top {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.how-to-buy__plan-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 12px;
-  background: #f3f4f6;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  overflow: hidden;
-}
-
-.how-to-buy__plan-icon img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  padding: 6px;
-}
-
-.how-to-buy__plan-icon-fallback {
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: var(--htb-primary);
-}
-
-.how-to-buy__plan-card h4 {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 800;
-}
-
-.how-to-buy__plan-card p {
-  margin: 0;
-  font-size: 0.85rem;
-  color: var(--htb-muted);
-  flex: 1;
-}
-
-.how-to-buy__plan-cta {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--htb-primary);
+  font-size: 0.9rem;
   text-decoration: none;
 }
 
-.how-to-buy__plan-cta:hover {
-  text-decoration: underline;
-}
-
-.how-to-buy__note {
-  margin-top: 24px;
-  padding: 14px 16px;
-  background: #fffbeb;
-  border: 1px solid #fde68a;
-  border-radius: 12px;
-  font-size: 0.88rem;
-  color: #92400e;
-  text-align: center;
-}
-
-.how-to-buy__cta-band {
-  background: var(--htb-primary);
-  color: #fff;
-  padding: 36px 16px;
-  text-align: center;
-}
-
-.how-to-buy__cta-band h2 {
-  margin: 0 0 8px;
-  font-size: 1.25rem;
-}
-
-.how-to-buy__cta-band p {
-  margin: 0 0 18px;
-  opacity: 0.92;
-  font-size: 0.92rem;
-}
-
-.how-to-buy__cta-band .how-to-buy__btn--ghost {
+.how-to-buy__btn--white {
   background: #fff;
-  border-color: transparent;
+  color: var(--htb-navy);
+}
+
+.how-to-buy__btn--outline {
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  color: #fff;
+}
+
+@media (max-width: 720px) {
+  .how-to-buy__table-shell {
+    padding: 10px;
+    border-radius: 16px;
+  }
+
+  .how-to-buy__compare-title h2 {
+    font-size: 1.05rem;
+  }
 }

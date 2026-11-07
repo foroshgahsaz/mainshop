@@ -4465,21 +4465,16 @@ html.checkout-coupon-alert-open {
 }
 
 .home-how-to-buy-banner {
+  --home-how-to-buy-banner-height: 200px;
   width: 100%;
   margin: 0;
   padding: 10px 0 0;
 }
 
-@media (min-width: 761px) {
-  .home-how-to-buy-banner {
-    padding-top: 10px;
-  }
-}
-
 .home-how-to-buy-banner__link {
   display: block;
   width: 100%;
-  height: var(--home-plan-strip-height, 132px);
+  height: var(--home-how-to-buy-banner-height, 200px);
   margin: 0;
   padding: 0;
   border: none;

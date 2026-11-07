@@ -10,8 +10,8 @@ class HowToBuyPageTest extends TestCase
     {
         $this->get('/how-to-buy/')
             ->assertOk()
-            ->assertSee('چطور از', false)
-            ->assertSee('قسطی', false)
+            ->assertSee('روش‌های خرید اقساطی', false)
+            ->assertSee('سقف وام', false)
             ->assertSee('دیجی‌پی', false)
             ->assertSee('نوپی', false)
             ->assertSee('تارا', false)

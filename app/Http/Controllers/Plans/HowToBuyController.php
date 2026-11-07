@@ -9,7 +9,7 @@ use App\Support\ShopMedia;
 use Illuminate\View\View;
 
 /**
- * راهنمای خرید اعتباری/اقساطی از چینی بازار (صفحهٔ استاتیک — شبیه aloghesti.com/how-to-buy).
+ * راهنمای خرید اعتباری/اقساطی از چینی بازار — جدول مقایسهٔ طرح‌ها (استاتیک).
  */
 class HowToBuyController extends Controller
 {
@@ -22,76 +22,99 @@ class HowToBuyController extends Controller
 
         $icon = fn (string $name): ?string => $gateways->definition($name)['icon'] ?? null;
 
-        $planRows = [
+        $homeCategories = 'لوازم خانگی برقی، یخچال، لباسشویی، ظروف و …';
+
+        $comparisonRows = [
             [
-                'id' => 'tejarat-bnpl',
-                'title' => 'خرید اعتباری بانک تجارت',
-                'lead' => 'طرح‌های مرتبط با تجارت و خرید الان، پرداخت بعداً',
-                'plans' => [
-                    [
-                        'label' => 'BNPL بانک تجارت',
-                        'description' => 'خرید اعتباری با طرح BNPL بانک تجارت — در checkout چینی بازار انتخاب می‌شود.',
-                        'icon' => null,
-                        'cta' => null,
-                    ],
-                    [
-                        'label' => 'کالاپی',
-                        'description' => 'اعتبار خرید کالا از طریق کالاپی؛ پس از انتخاب کالا در checkout درگاه را بزنید.',
-                        'icon' => null,
-                        'cta' => null,
-                    ],
-                    [
-                        'label' => $gateways->definition('nopay')['label'] ?: 'نوپی',
-                        'description' => 'پرداخت اعتباری نوپی (CPG) برای سبد خرید چینی بازار.',
-                        'icon' => $icon('nopay'),
-                        'cta' => route('products.index'),
-                    ],
-                ],
+                'key' => 'tejarat-bnpl',
+                'label' => 'BNPL بانک تجارت',
+                'icon' => null,
+                'ceil' => 'تا ۵۰۰ میلیون تومان',
+                'categories' => $homeCategories,
+                'installments' => '۳، ۶، ۱۲ و ۱۸ ماهه',
+                'guarantee' => 'بدون نیاز به ضامن',
+                'credit_grades' => ['B', 'C'],
+                'special' => 'ثبت‌نام در اپ بانک تجارت؛ انتخاب درگاه در checkout '.$siteName,
+                'buy_url' => route('products.index'),
             ],
             [
-                'id' => 'refah-beta',
-                'title' => 'بتا — بانک رفاه',
-                'lead' => 'اعتبار بانک رفاه از طریق باجت‌پی',
-                'plans' => [
-                    [
-                        'label' => 'بتا (باجت‌پی)',
-                        'description' => 'پرداخت اعتباری باجت‌پی — مرتبط با طرح‌های بانک رفاه؛ در مرحلهٔ پرداخت فعال می‌شود.',
-                        'icon' => $icon('bajet'),
-                        'cta' => route('products.index'),
-                    ],
-                ],
+                'key' => 'kalapi',
+                'label' => 'کالاپی',
+                'icon' => null,
+                'ceil' => 'تا ۳۰۰ میلیون تومان',
+                'categories' => $homeCategories,
+                'installments' => '۶، ۱۲ و ۲۴ ماهه',
+                'guarantee' => 'چک یا سفته (طبق پرونده)',
+                'credit_grades' => ['A', 'B'],
+                'special' => 'مشتریان دارای اعتبار کالاپی',
+                'buy_url' => route('products.index'),
             ],
             [
-                'id' => 'wallet-credit',
-                'title' => 'کیف پول و اعتبار دیجیتال',
-                'lead' => 'تارا، دیجی‌پی و دیبا کارت',
-                'plans' => [
-                    [
-                        'label' => $gateways->definition('tara')['label'] ?: 'تارا',
-                        'description' => 'پرداخت از کیف پول و اعتبار تارا.',
-                        'icon' => $icon('tara'),
-                        'cta' => route('products.index'),
-                    ],
-                    [
-                        'label' => $gateways->definition('digipay')['label'] ?: 'دیجی‌پی',
-                        'description' => 'خرید اقساطی دیجی‌پی از چینی بازار.',
-                        'icon' => $icon('digipay'),
-                        'cta' => route('plans.digipay-leasing'),
-                    ],
-                    [
-                        'label' => 'دیبا کارت',
-                        'description' => 'پرداخت با دیبا کارت در checkout (در صورت فعال بودن درگاه).',
-                        'icon' => null,
-                        'cta' => route('products.index'),
-                    ],
-                ],
+                'key' => 'nopay',
+                'label' => $gateways->definition('nopay')['label'] ?: 'نوپی',
+                'icon' => $icon('nopay'),
+                'ceil' => 'تا ۲۰۰ میلیون تومان',
+                'categories' => $homeCategories,
+                'installments' => '۲، ۳، ۴ و ۶ ماهه',
+                'guarantee' => 'بدون ضامن',
+                'credit_grades' => ['B', 'C', 'D'],
+                'special' => 'پرداخت CPG نوپی در '.$siteName,
+                'buy_url' => route('products.index'),
+            ],
+            [
+                'key' => 'bajet',
+                'label' => 'بتا — بانک رفاه',
+                'icon' => $icon('bajet'),
+                'ceil' => 'تا ۱۵۰ میلیون تومان',
+                'categories' => $homeCategories,
+                'installments' => '۳، ۶ و ۱۲ ماهه',
+                'guarantee' => 'بدون نیاز به ضامن',
+                'credit_grades' => ['A', 'B', 'C'],
+                'special' => 'اعتبار باجت‌پی (بتا) بانک رفاه',
+                'buy_url' => route('products.index'),
+            ],
+            [
+                'key' => 'tara',
+                'label' => $gateways->definition('tara')['label'] ?: 'تارا',
+                'icon' => $icon('tara'),
+                'ceil' => 'تا ۳۰۰ میلیون تومان',
+                'categories' => $homeCategories.', وسایل نقلیه سبک (طبق گروه کالا)',
+                'installments' => '۱۲، ۲۴ و ۳۶ ماهه',
+                'guarantee' => 'چک',
+                'credit_grades' => ['A', 'B', 'C'],
+                'special' => 'نیاز به کیف پول فعال تارا',
+                'buy_url' => route('products.index'),
+            ],
+            [
+                'key' => 'digipay',
+                'label' => $gateways->definition('digipay')['label'] ?: 'دیجی‌پی',
+                'icon' => $icon('digipay'),
+                'ceil' => 'تا ۲۰۰ میلیون تومان',
+                'categories' => $homeCategories,
+                'installments' => '۲، ۳، ۴ و ۶ ماهه',
+                'guarantee' => 'بدون ضامن',
+                'credit_grades' => ['B', 'C'],
+                'special' => 'سقف و اقساط نهایی در اپ دیجی‌پی',
+                'buy_url' => route('plans.digipay-leasing'),
+            ],
+            [
+                'key' => 'diba',
+                'label' => 'دیبا کارت',
+                'icon' => null,
+                'ceil' => 'تا ۱۰۰ میلیون تومان',
+                'categories' => $homeCategories,
+                'installments' => '۶ و ۱۲ ماهه',
+                'guarantee' => 'بدون ضامن',
+                'credit_grades' => ['B', 'D'],
+                'special' => 'دارندگان دیبا کارت فعال',
+                'buy_url' => route('products.index'),
             ],
         ];
 
         return view('plans.how-to-buy', [
             'siteName' => $siteName,
             'seoImage' => $ogImage,
-            'planRows' => $planRows,
+            'comparisonRows' => $comparisonRows,
         ]);
     }
 }

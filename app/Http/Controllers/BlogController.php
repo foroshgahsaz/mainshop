@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use App\Services\Cache\ShopCacheService;
+use App\Support\ShopStaffPreview;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
@@ -22,7 +23,12 @@ class BlogController extends Controller
 
     public function show(Post $post): View
     {
-        abort_unless($post->is_active && ($post->published_at === null || $post->published_at <= now()), 404);
+        $staff = ShopStaffPreview::enabled();
+        abort_unless($post->isVisibleOnShop($staff), 404);
+        abort_if(
+            ! $staff && $post->published_at !== null && $post->published_at > now(),
+            404
+        );
 
         $post->load('author');
 

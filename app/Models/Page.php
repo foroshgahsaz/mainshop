@@ -2,15 +2,19 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasAdminShopPreview;
 use Illuminate\Database\Eloquent\Model;
 
 class Page extends Model
 {
+    use HasAdminShopPreview;
+
     protected $fillable = [
         'slug',
         'title',
         'content',
         'is_active',
+        'admin_shop_preview',
         'meta_title',
         'meta_description',
         'meta_keywords',
@@ -26,6 +30,7 @@ class Page extends Model
     {
         return [
             'is_active' => 'boolean',
+            'admin_shop_preview' => 'boolean',
         ];
     }
 

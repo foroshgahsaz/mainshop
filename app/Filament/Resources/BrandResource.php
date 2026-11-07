@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\BrandResource\Pages;
 use App\Filament\Support\AdminImageColumn;
+use App\Filament\Support\AdminShopPreviewToggle;
 use App\Filament\Support\AdminTable;
 use App\Filament\Support\SeoFormSchema;
 use App\Filament\Support\ShopMediaPicker;
@@ -57,6 +58,7 @@ class BrandResource extends Resource
                         ->live(debounce: 800),
                     ShopMediaPicker::image('logo', 'brands', 'لوگو'),
                     Forms\Components\Toggle::make('is_active')->label('فعال')->default(true),
+                    AdminShopPreviewToggle::make(),
                     Forms\Components\TextInput::make('position')
                         ->label('ترتیب')
                         ->numeric()

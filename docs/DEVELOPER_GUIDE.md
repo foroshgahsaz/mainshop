@@ -211,6 +211,14 @@ Request → ShopCacheService::remember() → Redis
 | `SitemapController` | sitemap XML |
 | `Concerns/ListsShopProducts.php` | logic مشترک لیست |
 
+### 4.2.1 پیش‌نمایش «نمایش برای مدیر» (`admin_shop_preview`)
+
+در CRUD دسته، محصول، برند، صفحه، پست و آیتم منو تیک **نمایش برای مدیر** جدا از **فعال** است. اگر روشن باشد، آیتم فقط برای کاربری که در همان سشن، **مدیر سیستم** (`is_admin`) یا **مدیر فروش** (`is_sales_manager`) است در فروشگاه دیده می‌شود؛ مشتری هرگز نمی‌بیند (حتی اگر «فعال» هم روشن باشد).
+
+منطق: `App\Support\ShopStaffPreview` و scope `visibleOnShop()` روی مدل‌ها. کش فروشگاه برای بازدیدکنندهٔ staff پسوند `:staff` دارد.
+
+**ورود:** مدیر سیستم از OTP فروشگاه لاگین نمی‌کند (`ShopLoginGuard`); پس از ورود در `/admin` همان سشن در تب فروشگاه اعمال می‌شود. مدیر فروش می‌تواند از مودال ورود فروشگاه هم وارد شود.
+
 ### 4.3 Livewire — `app/Livewire/`
 
 | پوشه | کامپوننت | کار |
@@ -1318,7 +1326,9 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
-| 2026-11-07 | راهنمای خرید اقساطی: `/how-to-buy/` (`plans.how-to-buy`، `HowToBuyController`) — مراحل خرید + سه ردیف طرح (تجارت/BNPL/کالاپی/نوپی، بتا باجت‌پی، تارا/دیجی‌پی/دیبا کارت) |
+| 2026-11-07 | پیش‌نمایش فروشگاه: ستون `admin_shop_preview` (نمایش برای مدیر) روی دسته/محصول/برند/صفحه/پست/منو — فقط `is_admin` یا `is_sales_manager` در سایت می‌بیند؛ `ShopStaffPreview` |
+| 2026-11-07 | صفحهٔ اصلی: ترتیب — جدیدترین محصولات، بنر `/how-to-buy`، همکاران ما؛ بنر `public/shop/images/banners/home-how-to-buy.png` |
+| 2026-11-07 | راهنمای خرید اقساطی: `/how-to-buy/` — جدول مقایسه طرح‌ها؛ پایین صفحه بدون نوار سرمه‌ای دوبل (هم‌خوان با فوتر) |
 | 2026-11-07 | صفحهٔ عمومی درخواست نمایندگی: `/representative/branch/register/` (فرم مرحله‌ای نمایشی، مناطق فروش — فعلاً فقط دفتر تهران، بدون ادمین) |
 | 2026-11-03 | **وابستگی‌های امنیتی:** `symfony/yaml` ≥7.4.18 (GHSA-2v3c-qxhr-7vpv)، `vite` ≥6.4.5 (GHSA-8g5g-mxqh-grgj)، `follow-redirects` 1.16.2 (GHSA-mrwp-f3q8-3g9p) |
 | 2026-11-02 | لیست فشرده ادمین: `/admin/products` و `/admin/payments` — `admin-product-list.css` (بدون فاصله کنار سایدبار، سطرهای باریک‌تر)؛ چیدمان کلی در `filament-overrides.css` |

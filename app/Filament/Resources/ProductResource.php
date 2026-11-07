@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ProductResource\Pages;
 use App\Filament\Resources\ProductResource\RelationManagers;
 use App\Filament\Support\AdminImageColumn;
+use App\Filament\Support\AdminShopPreviewToggle;
 use App\Filament\Support\AdminTable;
 use App\Filament\Support\Filters\PriceRangeFilter;
 use App\Filament\Support\ProductDeleteActions;
@@ -181,6 +182,7 @@ class ProductResource extends Resource
                             ->label('فعال')
                             ->default(true)
                             ->helperText('در صورت غیرفعال بودن، محصول در سایت نمایش داده نمی‌شود'),
+                        AdminShopPreviewToggle::make(),
 
                         Forms\Components\Toggle::make('is_featured')
                             ->label('محصول ویژه')

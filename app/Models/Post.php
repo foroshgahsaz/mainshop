@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasAdminShopPreview;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Post extends Model
 {
+    use HasAdminShopPreview;
+
     protected $fillable = [
         'user_id',
         'title',
@@ -15,6 +18,7 @@ class Post extends Model
         'content',
         'image',
         'is_active',
+        'admin_shop_preview',
         'views',
         'published_at',
         'meta_title',
@@ -32,6 +36,7 @@ class Post extends Model
     {
         return [
             'is_active' => 'boolean',
+            'admin_shop_preview' => 'boolean',
             'views' => 'integer',
             'published_at' => 'datetime',
         ];

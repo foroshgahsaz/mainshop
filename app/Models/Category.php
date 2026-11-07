@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasAdminShopPreview;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Category extends Model
 {
+    use HasAdminShopPreview;
+
     protected $fillable = [
         'parent_id',
         'name',
@@ -15,6 +18,7 @@ class Category extends Model
         'description',
         'image',
         'is_active',
+        'admin_shop_preview',
         'position',
         'show_in_mega',
         'mega_column',
@@ -33,6 +37,7 @@ class Category extends Model
     {
         return [
             'is_active' => 'boolean',
+            'admin_shop_preview' => 'boolean',
             'show_in_mega' => 'boolean',
         ];
     }

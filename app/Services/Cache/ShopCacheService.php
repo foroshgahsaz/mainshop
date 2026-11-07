@@ -13,6 +13,7 @@ use App\Services\Settings\HomepageSettingsService;
 use App\Services\Shop\HomepageCreditPlanService;
 use App\Services\Shop\HomepageHeroHubService;
 use App\Services\Shop\HomepagePartnerService;
+use App\Support\ShopStaffPreview;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -29,12 +30,16 @@ class ShopCacheService
 
     public function homePayload(): array
     {
+        $staff = ShopStaffPreview::enabled();
+
         return $this->remember(
-            self::HOME_PAYLOAD_KEY,
+            self::HOME_PAYLOAD_KEY.$this->staffCacheSuffix($staff),
             config('shop.cache.home_ttl'),
-            function () {
+            function () use ($staff) {
                 $homepage = app(HomepageSettingsService::class);
-                $productQuery = fn () => Product::active()->with(['images' => fn ($q) => $q->orderBy('position')]);
+                $productQuery = fn () => Product::query()
+                    ->visibleOnShop($staff)
+                    ->with(['images' => fn ($q) => $q->orderBy('position')]);
 
                 return [
                     'sliders' => HomeSlider::active()->orderBy('position')->get(),
@@ -44,7 +49,16 @@ class ShopCacheService
                     'discounted' => $productQuery()->whereNotNull('sale_price')->whereColumn('sale_price', '<', 'price')->latest()->take(8)->get(),
                     'best_sellers' => $productQuery()->orderByDesc('views')->take(8)->get(),
                     'new' => $homepage->resolveNewProducts($productQuery),
-                    'posts' => Post::published()->with('author')->latest('published_at')->take(4)->get(),
+                    'posts' => Post::query()
+                        ->visibleOnShop($staff)
+                        ->where(function ($q) {
+                            $q->whereNull('published_at')
+                                ->orWhere('published_at', '<=', now());
+                        })
+                        ->with('author')
+                        ->latest('published_at')
+                        ->take(4)
+                        ->get(),
                 ];
             },
             ['shop', 'home']
@@ -53,24 +67,28 @@ class ShopCacheService
 
     public function categories()
     {
+        $staff = ShopStaffPreview::enabled();
+
         return $this->remember(
-            'shop:categories:active',
+            'shop:categories:active'.$this->staffCacheSuffix($staff),
             config('shop.cache.categories_ttl'),
-            fn () => Category::where('is_active', true)->orderBy('position')->get(),
+            fn () => Category::query()->visibleOnShop($staff)->orderBy('position')->get(),
             ['shop', 'categories']
         );
     }
 
     public function navCategories()
     {
+        $staff = ShopStaffPreview::enabled();
+
         return $this->remember(
-            'shop:categories:nav',
+            'shop:categories:nav'.$this->staffCacheSuffix($staff),
             config('shop.cache.categories_ttl'),
             fn () => Category::query()
-                ->where('is_active', true)
+                ->visibleOnShop($staff)
                 ->where('show_in_mega', true)
                 ->whereNull('parent_id')
-                ->with(['children' => fn ($q) => $q->where('is_active', true)->orderBy('position')])
+                ->with(['children' => fn ($q) => $q->visibleOnShop($staff)->orderBy('position')])
                 ->orderBy('position')
                 ->get(),
             ['shop', 'categories']
@@ -79,12 +97,14 @@ class ShopCacheService
 
     public function navigation(): array
     {
+        $staff = ShopStaffPreview::enabled();
+
         return $this->remember(
-            'shop:navigation',
+            'shop:navigation'.$this->staffCacheSuffix($staff),
             config('shop.cache.categories_ttl'),
-            function () {
+            function () use ($staff) {
                 $items = MenuItem::query()
-                    ->where('is_active', true)
+                    ->visibleOnShop($staff)
                     ->whereNull('parent_id')
                     ->orderBy('position')
                     ->get();
@@ -102,28 +122,30 @@ class ShopCacheService
     /** @return array{searchCategories: Collection, navCategories: Collection, navigation: array} */
     public function headerPayload(): array
     {
+        $staff = ShopStaffPreview::enabled();
+
         return $this->remember(
-            'shop:header:payload',
+            'shop:header:payload'.$this->staffCacheSuffix($staff),
             config('shop.cache.categories_ttl'),
-            function () {
+            function () use ($staff) {
                 $items = MenuItem::query()
-                    ->where('is_active', true)
+                    ->visibleOnShop($staff)
                     ->whereNull('parent_id')
                     ->orderBy('position')
                     ->get();
 
                 return [
-                    'searchCategories' => Category::where('is_active', true)->orderBy('position')->get(),
+                    'searchCategories' => Category::query()->visibleOnShop($staff)->orderBy('position')->get(),
                     'navBrands' => Brand::query()
-                        ->where('is_active', true)
+                        ->visibleOnShop($staff)
                         ->orderBy('position')
                         ->orderBy('name')
                         ->get(),
                     'navCategories' => Category::query()
-                        ->where('is_active', true)
+                        ->visibleOnShop($staff)
                         ->where('show_in_mega', true)
                         ->whereNull('parent_id')
-                        ->with(['children' => fn ($q) => $q->where('is_active', true)->orderBy('position')])
+                        ->with(['children' => fn ($q) => $q->visibleOnShop($staff)->orderBy('position')])
                         ->orderBy('position')
                         ->get(),
                     'navigation' => [
@@ -139,10 +161,12 @@ class ShopCacheService
 
     public function brands()
     {
+        $staff = ShopStaffPreview::enabled();
+
         return $this->remember(
-            'shop:brands:active',
+            'shop:brands:active'.$this->staffCacheSuffix($staff),
             config('shop.cache.categories_ttl'),
-            fn () => Brand::where('is_active', true)->orderBy('position')->get(),
+            fn () => Brand::query()->visibleOnShop($staff)->orderBy('position')->get(),
             ['shop', 'brands']
         );
     }
@@ -150,11 +174,14 @@ class ShopCacheService
     public function blogPosts(int $perPage = 12): LengthAwarePaginator
     {
         $page = (int) request()->get('page', 1);
+        $staff = ShopStaffPreview::enabled();
 
         return $this->remember(
-            'shop:blog:posts:page:'.$page,
+            'shop:blog:posts:page:'.$page.$this->staffCacheSuffix($staff),
             config('shop.cache.products_ttl'),
-            fn () => Post::published()
+            fn () => Post::query()
+                ->visibleOnShop($staff)
+                ->when(! $staff, fn ($q) => $q->published())
                 ->with('author')
                 ->latest('published_at')
                 ->paginate($perPage, ['*'], 'page', $page),
@@ -174,10 +201,12 @@ class ShopCacheService
         ];
     }
 
-    public function productBySlug(string $slug): ?Product
+    public function productBySlug(string $slug, ?bool $asStaff = null): ?Product
     {
+        $asStaff ??= ShopStaffPreview::enabled();
+
         return $this->remember(
-            "shop:product:{$slug}",
+            "shop:product:{$slug}".$this->staffCacheSuffix($asStaff),
             config('shop.cache.products_ttl'),
             fn () => Product::query()
                 ->with([
@@ -196,7 +225,7 @@ class ShopCacheService
                     'reviews as approved_reviews_avg' => fn ($q) => $q->where('is_approved', true),
                 ], 'rating')
                 ->where('slug', $slug)
-                ->where('is_active', true)
+                ->visibleOnShop($asStaff)
                 ->first(),
             ['shop', 'products']
         );
@@ -204,10 +233,13 @@ class ShopCacheService
 
     public function relatedProducts(int $categoryId, int $excludeProductId, int $limit = 8)
     {
+        $staff = ShopStaffPreview::enabled();
+
         return $this->remember(
-            "shop:related:{$categoryId}:{$excludeProductId}:{$limit}",
+            "shop:related:{$categoryId}:{$excludeProductId}:{$limit}".$this->staffCacheSuffix($staff),
             config('shop.cache.products_ttl'),
-            fn () => Product::active()
+            fn () => Product::query()
+                ->visibleOnShop($staff)
                 ->with(['images' => fn ($q) => $q->orderBy('position')])
                 ->where('category_id', $categoryId)
                 ->where('id', '!=', $excludeProductId)
@@ -226,6 +258,7 @@ class ShopCacheService
 
         $page = (int) ($filters['page'] ?? request()->get('page', 1));
         $filters['page'] = $page;
+        $filters['_staff_preview'] = ShopStaffPreview::enabled() ? 1 : 0;
         $cacheKey = 'shop:products:list:'.md5(json_encode($filters));
         $ttl = config('shop.cache.products_ttl');
 
@@ -415,7 +448,7 @@ class ShopCacheService
 
         return Product::query()
             ->with(['images' => fn ($q) => $q->orderBy('position'), 'category', 'brand'])
-            ->active()
+            ->visibleOnShop(ShopStaffPreview::enabled())
             ->when($filters['search'] ?? null, function ($q, $search) {
                 $q->where(function ($query) use ($search) {
                     $query->where('name', 'like', "%{$search}%")
@@ -433,6 +466,11 @@ class ShopCacheService
             ->when($filters['min_price'] ?? null, fn ($q, $min) => $q->whereRaw("{$effectivePrice} >= ?", [$min]))
             ->when($filters['max_price'] ?? null, fn ($q, $max) => $q->whereRaw("{$effectivePrice} <= ?", [$max]))
             ->orderBy($filters['sort'] ?? 'created_at', $filters['direction'] ?? 'desc');
+    }
+
+    protected function staffCacheSuffix(bool $staff): string
+    {
+        return $staff ? ':staff' : '';
     }
 
     protected function trackListingKey(string $key): void
@@ -486,6 +524,7 @@ class ShopCacheService
     protected function forgetHomeCache(): void
     {
         Cache::forget(self::HOME_PAYLOAD_KEY);
+        Cache::forget(self::HOME_PAYLOAD_KEY.$this->staffCacheSuffix(true));
         Cache::forget('shop:home:payload');
         Cache::forget('shop:home:sliders');
         Cache::forget('shop:home:sections');

@@ -22,6 +22,31 @@
         'homepage_plan_widget' => $homepage_plan_widget ?? [],
     ])
 
+    {{-- NEW PRODUCTS --}}
+    @if($new->isNotEmpty())
+        <section class="other-products-section">
+            <div class="max-w-site mx-auto px-4">
+                <div class="flex items-center justify-between section-header">
+                    <h2 class="section-title">جدیدترین محصولات</h2>
+                    <a href="{{ route('products.index') }}" class="section-nav-link">مشاهده همه</a>
+                </div>
+            </div>
+            <div class="other-products-slider product-slider-overlay relative">
+                <div class="swiper productSwiper">
+                    <div class="swiper-wrapper">
+                        @foreach($new as $product)
+                            <div class="swiper-slide h-auto">
+                                <x-shop.product-card :product="$product" variant="clothing" section="new_products" />
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </section>
+    @endif
+
+    @include('shop.partials.home-how-to-buy-banner')
+
     @include('shop.partials.home-partners', [
         'homepage_partners' => $homepage_partners ?? [],
     ])
@@ -53,29 +78,6 @@
                         @foreach($discounted as $product)
                             <div class="swiper-slide h-auto">
                                 <x-shop.deal-card :product="$product" section="deals" />
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-        </section>
-    @endif
-
-    {{-- NEW PRODUCTS --}}
-    @if($new->isNotEmpty())
-        <section class="other-products-section">
-            <div class="max-w-site mx-auto px-4">
-                <div class="flex items-center justify-between section-header">
-                    <h2 class="section-title">جدیدترین محصولات</h2>
-                    <a href="{{ route('products.index') }}" class="section-nav-link">مشاهده همه</a>
-                </div>
-            </div>
-            <div class="other-products-slider product-slider-overlay relative">
-                <div class="swiper productSwiper">
-                    <div class="swiper-wrapper">
-                        @foreach($new as $product)
-                            <div class="swiper-slide h-auto">
-                                <x-shop.product-card :product="$product" variant="clothing" section="new_products" />
                             </div>
                         @endforeach
                     </div>

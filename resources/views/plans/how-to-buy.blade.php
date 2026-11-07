@@ -18,7 +18,7 @@
 @endsection
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('shop/css/how-to-buy.css') }}?v=2026-11-07-table">
+    <link rel="stylesheet" href="{{ asset('shop/css/how-to-buy.css') }}?v=2026-11-07-end">
 @endpush
 
 @section('body_class', 'how-to-buy-page')
@@ -109,13 +109,12 @@
         </div>
     </section>
 
-    <section class="how-to-buy__cta-band">
-        <div class="htb-wrap">
-            <h2>همین حالا از {{ $siteName }} خرید کنید</h2>
-            <p>محصول را انتخاب کنید؛ در مرحلهٔ پرداخت طرح مناسب را فعال کنید.</p>
-            <div class="how-to-buy__cta-actions">
-                <a class="how-to-buy__btn how-to-buy__btn--white" href="{{ route('products.index') }}">رفتن به فروشگاه</a>
-                <a class="how-to-buy__btn how-to-buy__btn--outline" href="{{ route('plans.index') }}">سایر طرح‌ها</a>
+    <section class="how-to-buy__end" aria-label="ادامهٔ خرید">
+        <div class="htb-wrap how-to-buy__end-inner">
+            <p class="how-to-buy__end-lead">آمادهٔ خرید هستید؟ محصول را انتخاب کنید و در checkout طرح اعتباری را فعال کنید.</p>
+            <div class="how-to-buy__end-actions">
+                <a class="how-to-buy__end-btn how-to-buy__end-btn--primary" href="{{ route('products.index') }}">رفتن به فروشگاه</a>
+                <a class="how-to-buy__end-btn how-to-buy__end-btn--ghost" href="{{ route('plans.index') }}">مشاهدهٔ سایر طرح‌ها</a>
             </div>
         </div>
     </section>

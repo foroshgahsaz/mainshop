@@ -28,6 +28,19 @@ php artisan shop:deploy-recover
 
 اگر cache fail: در پنل cloud `CACHE_STORE=database`, `SESSION_DRIVER=database` → restart → دوباره recover.
 
+### مسیر عمومی جدید 404 می‌دهد (مثلاً `/representative/branch/register/`)
+
+| علت | اقدام |
+|-----|--------|
+| کد جدید روی سرور نیست | deploy از `master` بعد از merge |
+| **`route:cache` قدیمی** | `php artisan shop:deploy-recover` (اول `optimize:clear` می‌زند)؛ اگر دستی `route:cache` می‌کنید، بعد از pull حتماً دوباره بسازید |
+| آدرس همتا (Hamta) | مسیر ما **`/representative/branch/register/`** است؛ `/client/branch/register` فقط به همان redirect می‌شود |
+
+```bash
+php artisan route:clear
+php artisan route:list --path=representative/branch
+```
+
 لاگ:
 
 ```bash

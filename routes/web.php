@@ -14,6 +14,7 @@ use App\Http\Controllers\PaymentResultController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\Representative\PaymentReceiptPdfController;
 use App\Http\Controllers\Representative\ProformaPdfController;
+use App\Http\Controllers\Representative\RepresentativeBranchRegisterController;
 use App\Http\Controllers\Representative\RepresentativePaymentResultController;
 use App\Http\Controllers\ShopSearchSuggestController;
 use App\Http\Controllers\SitemapController;
@@ -118,6 +119,10 @@ Route::get('/payment/tara/{tracking}', [PaymentController::class, 'taraRedirect'
 Route::get('/payment/result/{payment:tracking_code}', [PaymentResultController::class, 'show'])
     ->middleware('signed')
     ->name('payment.result');
+
+Route::redirect('/representative/branch/register', '/representative/branch/register/', 301);
+Route::get('/representative/branch/register/', RepresentativeBranchRegisterController::class)
+    ->name('representative.branch.register');
 
 Route::get('/representative/payment/result/{payment:tracking_code}', [RepresentativePaymentResultController::class, 'show'])
     ->middleware('signed')

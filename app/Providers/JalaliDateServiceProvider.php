@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Support\FilamentJalaliPickers;
 use App\Support\ShopDate;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
@@ -44,6 +45,10 @@ class JalaliDateServiceProvider extends ServiceProvider
         TextEntry::macro('shopJalaliDate', function () {
             /** @var TextEntry $this */
             return $this->shopJalaliDateTime('Y/m/d');
+        });
+
+        $this->app->booted(function (): void {
+            FilamentJalaliPickers::registerDefaults();
         });
     }
 }

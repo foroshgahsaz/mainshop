@@ -321,6 +321,10 @@ components/shop/
 | `CrudSuccessNotification` | پیام فارسی موفقیت |
 | `ShopIconUpload` | آپلود آیکون درگاه/ارسال |
 
+### 5.7 تقویم شمسی در فرم‌های ادمین
+
+همهٔ `DatePicker` / `DateTimePicker` / `TimePicker` فیلامنت با پکیج [`ariaieboy/filament-jalali`](https://github.com/ariaieboy/filament-jalali) و `App\Support\FilamentJalaliPickers::registerDefaults()` به‌صورت سراسری شمسی می‌شوند (شروع هفته شنبه، نمایش `Y/m/d`، منطقهٔ `Asia/Tehran`). جایگزین تقویم میلادی مرورگر در فیلدهایی مثل «تاریخ انتشار» پست یا بازهٔ کوپن است.
+
 ---
 
 ## 6. مدل‌ها و دیتابیس
@@ -1326,6 +1330,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-07 | ادمین: تقویم شمسی سراسری برای Filament Date/DateTime/Time Picker — `ariaieboy/filament-jalali` + `FilamentJalaliPickers` |
 | 2026-11-07 | پیش‌نمایش فروشگاه: ستون `admin_shop_preview` (نمایش برای مدیر) روی دسته/محصول/برند/صفحه/پست/منو — فقط `is_admin` یا `is_sales_manager` در سایت می‌بیند؛ `ShopStaffPreview` |
 | 2026-11-07 | صفحهٔ اصلی: ترتیب — جدیدترین محصولات، بنر `/how-to-buy`، همکاران ما؛ بنر `public/shop/images/banners/home-how-to-buy.png` |
 | 2026-11-07 | راهنمای خرید اقساطی: `/how-to-buy/` — جدول مقایسه طرح‌ها؛ پایین صفحه بدون نوار سرمه‌ای دوبل (هم‌خوان با فوتر) |

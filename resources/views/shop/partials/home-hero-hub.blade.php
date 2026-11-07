@@ -112,5 +112,7 @@
                 </div>
             </div>
         @endif
+
+        @include('shop.partials.home-how-to-buy-banner')
     </div>
 </section>

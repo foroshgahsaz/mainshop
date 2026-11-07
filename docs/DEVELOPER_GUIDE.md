@@ -1318,6 +1318,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-07 | راهنمای خرید اقساطی: `/how-to-buy/` (`plans.how-to-buy`، `HowToBuyController`) — مراحل خرید + سه ردیف طرح (تجارت/BNPL/کالاپی/نوپی، بتا باجت‌پی، تارا/دیجی‌پی/دیبا کارت) |
 | 2026-11-07 | صفحهٔ عمومی درخواست نمایندگی: `/representative/branch/register/` (فرم مرحله‌ای نمایشی، مناطق فروش — فعلاً فقط دفتر تهران، بدون ادمین) |
 | 2026-11-03 | **وابستگی‌های امنیتی:** `symfony/yaml` ≥7.4.18 (GHSA-2v3c-qxhr-7vpv)، `vite` ≥6.4.5 (GHSA-8g5g-mxqh-grgj)، `follow-redirects` 1.16.2 (GHSA-mrwp-f3q8-3g9p) |
 | 2026-11-02 | لیست فشرده ادمین: `/admin/products` و `/admin/payments` — `admin-product-list.css` (بدون فاصله کنار سایدبار، سطرهای باریک‌تر)؛ چیدمان کلی در `filament-overrides.css` |

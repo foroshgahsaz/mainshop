@@ -134,6 +134,7 @@ echo "sales_mgr=".(int)$u->is_sales_manager." canAccess=".($u->canAccessPanel(fi
 - Provider: `app/Providers/Filament/RepresentativePanelProvider.php`
 - Login: `app/Filament/Representative/Pages/Auth/Login.php` (ارث از ادمین)
 - گارد: `app/Services/Auth/RepresentativeLoginGuard.php`
+- **درخواست نمایندگی (عمومی، فعلاً استاتیک):** `/representative/branch/register/` — فرم مرحله‌ای نمایشی + بلوک «مناطق فروش» (فعلاً فقط دفتر تهران، بدون ذخیره در دیتابیس و بدون ادمین). کنترلر: `RepresentativeBranchRegisterController`.
 - جزئیات فازها: [../representative/PHASE-PLAN-FA.md](../representative/PHASE-PLAN-FA.md)
 
 ---

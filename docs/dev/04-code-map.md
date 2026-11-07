@@ -22,6 +22,7 @@
 | `app/Providers/AppServiceProvider.php` | SMS، LoginResponse، Gate، Redis fallback، Filament hooks |
 | `app/Providers/Filament/AdminPanelProvider.php` | پنل `/admin` |
 | `app/Providers/Filament/RepresentativePanelProvider.php` | پنل `/representative` |
+| `app/Http/Controllers/Representative/RepresentativeBranchRegisterController.php` | صفحهٔ عمومی `/representative/branch/register/` (درخواست نمایندگی — استاتیک) |
 
 ---
 

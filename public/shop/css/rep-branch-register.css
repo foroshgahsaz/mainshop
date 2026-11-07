@@ -1,0 +1,403 @@
+/* Public representative branch registration (static mock) */
+.rep-branch-register {
+  --rbp-primary: #c41e3a;
+  --rbp-primary-dark: #9a1730;
+  --rbp-bg: #f7f5f6;
+  --rbp-surface: #ffffff;
+  --rbp-ink: #1c1917;
+  --rbp-muted: #6b6560;
+  --rbp-line: #e8e4e2;
+  --rbp-soft: #fff5f6;
+  color: var(--rbp-ink);
+  background: var(--rbp-bg);
+  font-family: inherit;
+  line-height: 1.75;
+}
+
+.rep-branch-register-page main {
+  background: var(--rbp-bg);
+}
+
+.rep-branch-register .rbp-wrap {
+  width: min(920px, calc(100% - 32px));
+  margin-inline: auto;
+}
+
+.rep-branch-register__top {
+  padding: 40px 0 24px;
+  text-align: center;
+}
+
+.rep-branch-register__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: var(--rbp-muted);
+  margin-bottom: 12px;
+}
+
+.rep-branch-register__brand-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--rbp-primary);
+}
+
+.rep-branch-register__title {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 800;
+  margin: 0 0 12px;
+}
+
+.rep-branch-register__lead {
+  max-width: 36rem;
+  margin: 0 auto;
+  color: var(--rbp-muted);
+  font-size: 0.95rem;
+}
+
+.rep-branch-register__notice {
+  margin: 20px auto 0;
+  max-width: 36rem;
+  padding: 12px 16px;
+  background: var(--rbp-soft);
+  border: 1px solid #f5d0d6;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  color: #7a2e3a;
+  text-align: right;
+}
+
+.rep-branch-register__card {
+  background: var(--rbp-surface);
+  border: 1px solid var(--rbp-line);
+  border-radius: 16px;
+  padding: 24px 20px 28px;
+  box-shadow: 0 12px 40px rgba(28, 25, 23, 0.06);
+}
+
+.rep-branch-register__steps {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.rep-branch-register__step-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--rbp-muted);
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #f3f1f0;
+  transition: background 0.2s, color 0.2s;
+}
+
+.rep-branch-register__step-pill.is-active {
+  background: var(--rbp-primary);
+  color: #fff;
+}
+
+.rep-branch-register__step-pill.is-done {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.rep-branch-register__step-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.rep-branch-register__step-pill.is-active .rep-branch-register__step-num {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.rep-branch-register__fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.rep-branch-register__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 640px) {
+  .rep-branch-register__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.rep-branch-register__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rep-branch-register__field--full {
+  grid-column: 1 / -1;
+}
+
+.rep-branch-register__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.rep-branch-register__input,
+.rep-branch-register__select,
+.rep-branch-register__textarea {
+  width: 100%;
+  border: 1px solid var(--rbp-line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  background: #fff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.rep-branch-register__input:focus,
+.rep-branch-register__select:focus,
+.rep-branch-register__textarea:focus {
+  outline: none;
+  border-color: var(--rbp-primary);
+  box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.15);
+}
+
+.rep-branch-register__textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.rep-branch-register__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--rbp-line);
+}
+
+.rep-branch-register__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 20px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.1s, background 0.15s;
+}
+
+.rep-branch-register__btn:active {
+  transform: scale(0.98);
+}
+
+.rep-branch-register__btn--ghost {
+  background: transparent;
+  border: 1px solid var(--rbp-line);
+  color: var(--rbp-ink);
+}
+
+.rep-branch-register__btn--ghost:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.rep-branch-register__btn--primary {
+  background: var(--rbp-primary);
+  color: #fff;
+}
+
+.rep-branch-register__btn--primary:hover {
+  background: var(--rbp-primary-dark);
+}
+
+.rep-branch-register__checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.875rem;
+  color: var(--rbp-muted);
+}
+
+.rep-branch-register__success {
+  text-align: center;
+  padding: 32px 16px;
+}
+
+.rep-branch-register__success-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 16px;
+  border-radius: 999px;
+  background: #e8f5e9;
+  color: #2e7d32;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+}
+
+.rep-branch-register__regions {
+  padding: 48px 0 64px;
+}
+
+.rep-branch-register__regions-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.rep-branch-register__regions-header h2 {
+  font-size: 1.35rem;
+  font-weight: 800;
+  margin: 0 0 8px;
+}
+
+.rep-branch-register__regions-header p {
+  color: var(--rbp-muted);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.rep-branch-register__regions-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
+  font-size: 0.8rem;
+  color: var(--rbp-muted);
+}
+
+.rep-branch-register__office-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  max-width: 520px;
+  margin-inline: auto;
+}
+
+.rep-branch-register__office {
+  background: var(--rbp-surface);
+  border: 1px solid var(--rbp-line);
+  border-radius: 14px;
+  padding: 20px;
+  position: relative;
+}
+
+.rep-branch-register__office-badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--rbp-primary);
+  background: var(--rbp-soft);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.rep-branch-register__office h3 {
+  margin: 0 0 16px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  padding-left: 72px;
+}
+
+.rep-branch-register__person {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.rep-branch-register__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--rbp-soft);
+  color: var(--rbp-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.rep-branch-register__person-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.rep-branch-register__person-role {
+  font-size: 0.8rem;
+  color: var(--rbp-muted);
+}
+
+.rep-branch-register__person-phone {
+  font-size: 0.85rem;
+  margin-top: 2px;
+  direction: ltr;
+  text-align: right;
+}
+
+.rep-branch-register__section-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--rbp-muted);
+  margin: 16px 0 8px;
+}
+
+.rep-branch-register__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.rep-branch-register__list li {
+  padding: 6px 0;
+  border-bottom: 1px dashed var(--rbp-line);
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.rep-branch-register__list li:last-child {
+  border-bottom: none;
+}
+
+.rep-branch-register__provinces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.rep-branch-register__province {
+  font-size: 0.8rem;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #f3f1f0;
+}
+
+.rep-branch-register__hidden {
+  display: none !important;
+}

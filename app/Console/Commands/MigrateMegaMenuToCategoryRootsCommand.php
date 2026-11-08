@@ -14,7 +14,8 @@ class MigrateMegaMenuToCategoryRootsCommand extends Command
 {
     protected $signature = 'shop:migrate-mega-menu-roots
                             {--dry-run : فقط گزارش}
-                            {--enable-roots : show_in_mega را روی دسته‌های ریشه فعال کند}';
+                            {--enable-roots : show_in_mega را روی دسته‌های ریشه فعال کند}
+                            {--write-fk : product_family_id روی دستهٔ ریشهٔ پیدا‌شده ست کند}';
 
     protected $description = 'لینک‌های مگا منو را از product_family_id به root_category_id منتقل می‌کند (بدون تغییر slug محصول)';
 
@@ -28,6 +29,7 @@ class MigrateMegaMenuToCategoryRootsCommand extends Command
 
         $dryRun = (bool) $this->option('dry-run');
         $enableRoots = (bool) $this->option('enable-roots');
+        $writeFk = (bool) $this->option('write-fk');
 
         $mapper = app(CatalogFamilyCategoryMapper::class);
         $familyToRoot = [];
@@ -42,8 +44,15 @@ class MigrateMegaMenuToCategoryRootsCommand extends Command
             }
 
             $familyToRoot[$family->id] = $rootId;
-            $rootName = \App\Models\Category::query()->whereKey($rootId)->value('name');
+            $rootName = Category::query()->whereKey($rootId)->value('name');
             $this->line("خانواده «{$family->name}» → ریشه دسته «{$rootName}» (#{$rootId})");
+
+            if ($writeFk && ! $dryRun) {
+                Category::query()
+                    ->whereKey($rootId)
+                    ->whereNull('product_family_id')
+                    ->update(['product_family_id' => $family->id]);
+            }
         }
 
         $linksUpdated = 0;

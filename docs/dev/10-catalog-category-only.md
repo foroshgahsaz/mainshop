@@ -17,7 +17,7 @@
 | D | هوم‌پیج هیرو از دسته + `shop:migrate-homepage-settings-categories` | این PR |
 | B/D | ادمین محصول بدون خانواده؛ لیست با `category_id` + زیرشاخه | این PR |
 | F | منوی ادمین بدون خانواده/کارخانه/قالب؛ drop ستون‌ها | جزئی (UI) — DB بعدی |
-| G | تست CI، deploy | migrate + cache |
+| G | `shop:catalog-diagnose-families`، infer از محصولات، env map | این PR |
 
 ## Deploy
 
@@ -25,8 +25,15 @@
 php artisan migrate --force && php artisan shop:deploy-recover
 php artisan shop:migrate-mega-menu-roots --enable-roots
 php artisan shop:migrate-homepage-settings-categories
+php artisan shop:catalog-diagnose-families
+php artisan shop:migrate-mega-menu-roots --enable-roots --write-fk
 php artisan cache:clear
 ```
+
+### آیا خروجی migrate «اوکی» است؟
+
+- **بله برای مگا منو** اگر حداقل ریشه‌های اصلی (مثلاً سرویس چینی و مبلمان) `show_in_mega` دارند و لینkهای سایدبار در تنظیمات صفحه اصلی پر است.
+- هشدار **«ریشه پیدا نشد»** یعنی درخت دسته نام/ریشهٔ هم‌نام خانواده ندارد؛ با deploy جدید mapper از **دستهٔ پرتکرار محصولات** حدس می‌زند. در غیر این صورت `SHOP_FAMILY_ROOT_CATEGORY_MAP` در env.
 
 برای بوت‌استرپ ریشه‌های مگا (قدیمی خانواده‌محور): `php artisan shop:bootstrap-mega-menu` — پس از مهاجرت ترجیحاً فقط `show_in_mega` روی دسته‌های ریشه.
 

@@ -132,6 +132,7 @@ app/Services/
 | `shop:finalize-catalog-category-only` | پایان مهاجرت کاتالوگ: مگا، هیرو، `show_in_mega` |
 | `shop:migrate-homepage-settings-categories` | family → category در JSON تنظیمات صفحه اصلی |
 | `shop:repair-mega-menu-schema` | جدول `mega_menu_links` idempotent |
+| `shop:seed-category-taxonomy` | درخت دسته استاندارد + مگا منو؛ حذف دسته‌های قبلی |
 | `shop:fix-storage-permissions` | chmod پوشه‌ها |
 | `shop:sync-public-storage` | چند پاد |
 | `shop:import-existing-media` | import فایل‌های موجود |

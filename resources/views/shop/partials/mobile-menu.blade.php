@@ -2,6 +2,12 @@
     $megaMenu = $megaMenu ?? ['has_families' => false, 'families' => []];
     $megaFamilies = $megaMenu['families'] ?? [];
     $hasMegaFamilies = !empty($megaMenu['has_families']) && $megaFamilies !== [];
+    $mobileNav = $navigation['mobile'] ?? collect();
+    $desktopNav = $navigation['desktop'] ?? collect();
+    $megaMenuItem = $mobileNav
+        ->concat($desktopNav)
+        ->first(fn ($item) => $item->item_type === \App\Models\MenuItem::TYPE_MEGA_TRIGGER);
+    $productsMenuLabel = $megaMenuItem?->label ?: 'محصولات';
 @endphp
 
 <!-- MOBILE MENU -->
@@ -21,7 +27,37 @@
     </div>
 
     <nav class="main-nav flex flex-col gap-1">
-      @foreach(($navigation['mobile'] ?? collect()) as $item)
+      @if($hasMegaFamilies)
+        <button type="button"
+                onclick="toggleAccordion('mobileMegaMenu'); resetMobileMegaSplit();"
+                class="main-nav-link flex justify-between items-center py-3 px-2 text-right w-full">
+          {{ $productsMenuLabel }}
+          <svg class="w-3 h-3 transition-transform" data-accordion-icon fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m6 9 6 6 6-6"/>
+          </svg>
+        </button>
+        @include('shop.partials.mobile-mega-split', ['megaFamilies' => $megaFamilies])
+      @else
+        <button type="button"
+                onclick="toggleAccordion('mobileMegaMenu')"
+                class="main-nav-link flex justify-between items-center py-3 px-2 text-right w-full">
+          {{ $productsMenuLabel }}
+          <svg class="w-3 h-3 transition-transform" data-accordion-icon fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m6 9 6 6 6-6"/>
+          </svg>
+        </button>
+        <div id="mobileMegaMenu" class="hidden shop-mobile-accordion-panel shop-mobile-accordion-panel--mega">
+          <a href="{{ route('products.index') }}" class="py-1 hover:text-brand-green font-bold">همه محصولات</a>
+          @foreach(($navCategories ?? collect()) as $cat)
+            <a href="{{ route('categories.show', $cat) }}" class="py-1 hover:text-brand-green">{{ $cat->name }}</a>
+            @foreach($cat->children as $child)
+              <a href="{{ route('categories.show', $child) }}" class="py-1 pr-3 hover:text-brand-green">— {{ $child->name }}</a>
+            @endforeach
+          @endforeach
+        </div>
+      @endif
+
+      @foreach($mobileNav as $item)
         @if($item->item_type === \App\Models\MenuItem::TYPE_BRANDS_TRIGGER)
           <button type="button"
                   onclick="toggleAccordion('mobileBrandsMenu')"
@@ -42,36 +78,6 @@
           @include('shop.partials.menu-mobile-link', ['item' => $item])
         @endif
       @endforeach
-
-      @if($hasMegaFamilies)
-        <button type="button"
-                onclick="toggleAccordion('mobileMegaMenu'); resetMobileMegaSplit();"
-                class="main-nav-link flex justify-between items-center py-3 px-2 text-right w-full">
-          محصولات
-          <svg class="w-3 h-3 transition-transform" data-accordion-icon fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="m6 9 6 6 6-6"/>
-          </svg>
-        </button>
-        @include('shop.partials.mobile-mega-split', ['megaFamilies' => $megaFamilies])
-      @else
-        <button type="button"
-                onclick="toggleAccordion('mobileMegaMenu')"
-                class="main-nav-link flex justify-between items-center py-3 px-2 text-right w-full">
-          محصولات
-          <svg class="w-3 h-3 transition-transform" data-accordion-icon fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="m6 9 6 6 6-6"/>
-          </svg>
-        </button>
-        <div id="mobileMegaMenu" class="hidden shop-mobile-accordion-panel shop-mobile-accordion-panel--mega">
-          <a href="{{ route('products.index') }}" class="py-1 hover:text-brand-green font-bold">همه محصولات</a>
-          @foreach(($navCategories ?? collect()) as $cat)
-            <a href="{{ route('categories.show', $cat) }}" class="py-1 hover:text-brand-green">{{ $cat->name }}</a>
-            @foreach($cat->children as $child)
-              <a href="{{ route('categories.show', $child) }}" class="py-1 pr-3 hover:text-brand-green">— {{ $child->name }}</a>
-            @endforeach
-          @endforeach
-        </div>
-      @endif
 
       @auth
         <a href="{{ route('account.orders') }}" class="main-nav-link py-3 px-2 hover:text-brand-green">سفارش‌های من</a>

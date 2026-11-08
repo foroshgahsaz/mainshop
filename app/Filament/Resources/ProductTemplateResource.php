@@ -34,6 +34,10 @@ class ProductTemplateResource extends Resource
 
     public static function canViewAny(): bool
     {
+        if (config('shop.catalog.category_only_admin', true)) {
+            return false;
+        }
+
         return AdminAccess::canAccessAdminResource(static::class);
     }
 

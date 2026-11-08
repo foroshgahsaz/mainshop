@@ -44,8 +44,21 @@ return [
     'catalog' => [
         /** فرم محصول و منوی ادمین بدون خانواده/کارخانه/قالب */
         'category_only_admin' => filter_var(env('SHOP_CATEGORY_ONLY_ADMIN', true), FILTER_VALIDATE_BOOL),
-        /** فیلتر لیست محصول با category_id شامل زیردسته‌ها */
+        /** فیلتر لیست محصول با category_id شامل زیرشاخه‌ها */
         'listing_includes_descendants' => filter_var(env('SHOP_LISTING_CATEGORY_DESCENDANTS', true), FILTER_VALIDATE_BOOL),
+        /**
+         * نگاشت دستی legacy: JSON {"family_id": root_category_id}
+         * مثال: SHOP_FAMILY_ROOT_CATEGORY_MAP='{"2":43,"3":55}'
+         */
+        'family_root_category_map' => (static function (): array {
+            $raw = env('SHOP_FAMILY_ROOT_CATEGORY_MAP', '');
+            if (! is_string($raw) || trim($raw) === '') {
+                return [];
+            }
+            $decoded = json_decode($raw, true);
+
+            return is_array($decoded) ? $decoded : [];
+        })(),
     ],
 
     'representative' => [

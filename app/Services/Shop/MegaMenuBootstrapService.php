@@ -111,6 +111,7 @@ final class MegaMenuBootstrapService
 
         return [
             'families_enabled' => $familiesEnabled,
+            'families_in_mega' => count($familyIdsInMega),
             'roots_updated' => $dryRun ? $roots->count() : $rootsUpdated,
             'descendants_updated' => $descendantsUpdated,
             'roots' => $rootsPlan,

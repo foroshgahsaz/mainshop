@@ -63,7 +63,10 @@ class BootstrapMegaMenuCommand extends Command
             collect($result['roots'])->map(fn (array $row) => [$row['name'], $row['family']])->all(),
         );
 
-        $this->line("خانواده‌های فعال در مگا: {$result['families_enabled']}");
+        $this->line(
+            "خانواده در ریل مگا: {$result['families_in_mega']}"
+            ." (تازه روشن‌شده: {$result['families_enabled']})"
+        );
         $this->line("دسته ریشه: {$result['roots_updated']} | زیردسته: {$result['descendants_updated']}");
 
         if ($this->option('dry-run')) {

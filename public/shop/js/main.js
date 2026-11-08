@@ -570,6 +570,24 @@ function initCategorySwiper(el) {
   });
 }
 
+function initListingCategorySwiper(el) {
+  if (!el || typeof Swiper === 'undefined') {
+    return null;
+  }
+
+  return new Swiper(el, {
+    slidesPerView: 'auto',
+    spaceBetween: 12,
+    grabCursor: true,
+    watchOverflow: true,
+    freeMode: {
+      enabled: true,
+      momentum: true,
+    },
+    resistanceRatio: 0.85,
+  });
+}
+
 function initFeaturedDealsSwiper(el) {
   const section = el.closest('.special-sale-section') || el.closest('.featured-deals-section');
 
@@ -592,7 +610,11 @@ function initFeaturedDealsSwiper(el) {
 
 function initProductSwipers() {
   document.querySelectorAll('.categorySwiper').forEach((el) => {
-    initCategorySwiper(el);
+    if (el.closest('.listing-category-carousel')) {
+      initListingCategorySwiper(el);
+    } else {
+      initCategorySwiper(el);
+    }
   });
 
   document.querySelectorAll('.featuredDealsSwiper').forEach((el) => {

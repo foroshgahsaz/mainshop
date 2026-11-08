@@ -5,13 +5,13 @@
 @endphp
 
 @if(isset($category) && $items->isNotEmpty())
-    <section class="listing-category-carousel featured-categories-section w-full" aria-label="زیردسته‌ها">
+    <section class="listing-category-carousel w-full" aria-label="زیردسته‌ها">
         <div class="swiper categorySwiper listing-category-carousel__swiper w-full">
             <div class="swiper-wrapper">
                 @foreach($items as $child)
                     <div class="swiper-slide">
                         <a href="{{ route('categories.show', $child) }}"
-                           class="category-card listing-category-carousel__card flex flex-col items-center justify-center bg-gray-50 rounded-2xl p-3 gap-2">
+                           class="category-card listing-category-carousel__card">
                             <div class="category-card__image">
                                 <img src="{{ ShopFormatter::categoryImage($child->image) }}"
                                      alt=""

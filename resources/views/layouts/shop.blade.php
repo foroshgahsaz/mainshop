@@ -8,8 +8,8 @@
         use App\Support\ShopLabels;
 
         $siteSettings = app(\App\Services\Settings\SettingsService::class)->site();
-        $needsSwiper = request()->routeIs('home', 'products.show');
         $needsListingAssets = request()->routeIs('products.*', 'categories.*', 'brands.*');
+        $needsSwiper = request()->routeIs('home', 'products.show') || $needsListingAssets;
     @endphp
     <script>
         window.__shopPrice = {

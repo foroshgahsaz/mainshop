@@ -1134,9 +1134,9 @@ $settings->site();       // نام سایت، لوگو، ...
 
 `link`, `mega_trigger`, `mega_promo`, `accordion` — `MenuItemObserver` → cache nav
 
-### مگا منو خانواده‌محور
+### مگا منو (درخت دسته)
 
-وقتی حداقل یک `ProductFamily` با `show_in_mega` فعال باشد، payload هدر (`ShopCacheService::headerPayload`) شامل `megaMenu` از `MegaMenuPayloadBuilder` است؛ `navCategories` برای مگا خالی می‌شود تا دوباره‌کاری نشود. UI: `overlays.blade.php` (دسکتاپ) و `mobile-menu.blade.php` (drill-down). جزئیات راه‌اندازی ادمین و migration در [dev/09-mega-menu-families.md](dev/09-mega-menu-families.md).
+وقتی حداقل یک `Category` ریشه با `show_in_mega` فعال باشد، payload هدر (`ShopCacheService::headerPayload`) شامل `megaMenu` از `MegaMenuPayloadBuilder` است (کلیدهای `roots` / `has_category_tree` و alias `families` برای سازگاری view). `navCategories` برای مگا خالی می‌شود. UI: `overlays.blade.php` (دسکتاپ) و `mobile-menu.blade.php` (drill-down). مهاجرت از مدل خانواده: [dev/10-catalog-category-only.md](dev/10-catalog-category-only.md). تاریخچه خانواده‌محور: [dev/09-mega-menu-families.md](dev/09-mega-menu-families.md).
 
 | موجودیت | Resource / سرویس |
 |---------|------------------|
@@ -1342,6 +1342,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-08 | کاتالوگ دسته‌محور: مگا منو از `Category.show_in_mega`، ویزارد نماینده `REP_CATALOG_MODE`، `shop:migrate-mega-menu-roots` — [dev/10-catalog-category-only.md](dev/10-catalog-category-only.md) |
 | 2026-11-08 | `MegaMenuBootstrapSeeder` / `shop:bootstrap-mega-menu` — ساخت مگا منو از دسته‌های موجود |
 | 2026-11-08 | ادمین: لینک مگا منو زیر **محتوا → منوی سایت** (بدون آیتم جدا در نوار Filament) |
 | 2026-11-08 | مگا منو: migration idempotent + repair؛ بدون FK سخت‌گیر؛ مخفی شدن منوی ادمین تا migrate کامل |

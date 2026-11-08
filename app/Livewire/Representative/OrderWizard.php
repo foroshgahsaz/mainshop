@@ -6,6 +6,7 @@ use App\Filament\Representative\Resources\DraftOrderResource;
 use App\Models\FreightCarrier;
 use App\Models\Order;
 use App\Models\Brand;
+use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductFamily;
 use App\Models\ProductPlant;
@@ -14,6 +15,7 @@ use App\Models\User;
 use App\Services\Media\DisplayImageService;
 use App\Services\Payment\PaymentGatewayCatalog;
 use App\Services\Representative\RepresentativeCatalogLookup;
+use App\Services\Representative\RepresentativeCategoryCatalogLookup;
 use App\Services\Representative\RepresentativeDraftCouponService;
 use App\Services\Representative\RepresentativeDraftOrderService;
 use App\Services\Representative\RepresentativeProformaPaymentService;
@@ -51,6 +53,13 @@ class OrderWizard extends Component
     public ?int $brandId = null;
 
     public ?int $templateId = null;
+
+    public ?int $categoryBrowseParentId = null;
+
+    public ?int $categoryLeafId = null;
+
+    /** @var list<int> */
+    public array $categoryPath = [];
 
     public string $productSearch = '';
 
@@ -112,8 +121,22 @@ class OrderWizard extends Component
         $this->plantId = $filters['plant_id'] ?? null;
         $this->brandId = $filters['brand_id'] ?? null;
         $this->templateId = $filters['template_id'] ?? null;
+        $this->categoryPath = array_values(array_map(
+            intval(...),
+            is_array($filters['category_path'] ?? null) ? $filters['category_path'] : [],
+        ));
+        $this->categoryLeafId = isset($filters['category_id']) ? (int) $filters['category_id'] : null;
+        $this->categoryBrowseParentId = $this->categoryPath !== []
+            ? (int) $this->categoryPath[array_key_last($this->categoryPath)]
+            : null;
         $hasItems = $order->items()->exists();
-        $this->step = $hasItems ? 'review' : 'family';
+        if ($hasItems) {
+            $this->step = 'review';
+        } elseif ($this->usesCategoryCatalog()) {
+            $this->step = $this->categoryLeafId !== null ? 'product' : 'category';
+        } else {
+            $this->step = 'family';
+        }
         $this->normalizeStepForCatalog();
 
         if ($hasItems) {
@@ -140,7 +163,56 @@ class OrderWizard extends Component
 
         $this->orderId = $order->id;
         $this->customerId = $customer->id;
-        $this->step = 'family';
+        $this->step = $this->usesCategoryCatalog() ? 'category' : 'family';
+    }
+
+    public function selectCategory(int $categoryId): void
+    {
+        $lookup = app(RepresentativeCategoryCatalogLookup::class);
+
+        if ($lookup->shouldDrillIntoCategory($categoryId)) {
+            $this->categoryPath[] = $categoryId;
+            $this->categoryBrowseParentId = $categoryId;
+            $this->categoryLeafId = null;
+            $this->brandId = null;
+            $this->step = 'category';
+        } else {
+            $this->categoryPath[] = $categoryId;
+            $this->categoryLeafId = $categoryId;
+            $this->categoryBrowseParentId = $categoryId;
+            $this->brandId = null;
+            $this->productSearch = '';
+            $this->resetPage();
+            $this->step = 'product';
+        }
+
+        $this->persistFilters();
+    }
+
+    public function goBackInCategory(): void
+    {
+        if ($this->categoryPath === []) {
+            $this->step = 'category';
+            $this->categoryBrowseParentId = null;
+
+            return;
+        }
+
+        array_pop($this->categoryPath);
+        $this->categoryBrowseParentId = $this->categoryPath !== []
+            ? (int) $this->categoryPath[array_key_last($this->categoryPath)]
+            : null;
+        $this->categoryLeafId = null;
+        $this->brandId = null;
+        $this->step = 'category';
+        $this->persistFilters();
+    }
+
+    public function selectProductBrand(?int $brandId): void
+    {
+        $this->brandId = $brandId;
+        $this->resetPage();
+        $this->persistFilters();
     }
 
     public function selectFamily(int $familyId): void
@@ -388,6 +460,15 @@ class OrderWizard extends Component
 
         $this->step = $step;
 
+        if ($step === 'category' && $this->usesCategoryCatalog() && $this->categoryLeafId !== null) {
+            array_pop($this->categoryPath);
+            $this->categoryLeafId = null;
+            $this->categoryBrowseParentId = $this->categoryPath !== []
+                ? (int) $this->categoryPath[array_key_last($this->categoryPath)]
+                : null;
+            $this->brandId = null;
+        }
+
         if ($step === 'review') {
             $this->refreshDraftLineItems();
             $this->syncLineQuantitiesFromOrder();
@@ -607,8 +688,39 @@ class OrderWizard extends Component
     }
 
     #[Computed]
+    public function catalogCategories(): Collection
+    {
+        if (! $this->usesCategoryCatalog() || $this->step !== 'category') {
+            return collect();
+        }
+
+        return app(RepresentativeCategoryCatalogLookup::class)
+            ->browseCategories($this->categoryBrowseParentId);
+    }
+
+    #[Computed]
+    public function productBrandFilters(): Collection
+    {
+        if (! $this->usesCategoryCatalog() || $this->step !== 'product' || $this->categoryLeafId === null) {
+            return collect();
+        }
+
+        return app(RepresentativeCategoryCatalogLookup::class)
+            ->brandsForCategory($this->categoryLeafId);
+    }
+
+    #[Computed]
     public function visibleWizardSteps(): array
     {
+        if ($this->usesCategoryCatalog()) {
+            return [
+                'customer' => 'مشتری',
+                'category' => 'دسته‌بندی',
+                'product' => 'محصول',
+                'review' => 'جمع‌بندی',
+            ];
+        }
+
         $steps = [
             'customer' => 'مشتری',
             'family' => 'خانواده',
@@ -669,6 +781,19 @@ class OrderWizard extends Component
     #[Computed]
     public function products(): ?LengthAwarePaginator
     {
+        if ($this->usesCategoryCatalog()) {
+            if ($this->step !== 'product' || $this->categoryLeafId === null) {
+                return null;
+            }
+
+            return app(RepresentativeCategoryCatalogLookup::class)->products(
+                $this->categoryLeafId,
+                $this->brandId,
+                trim($this->productSearch),
+                $this->getPage(),
+            );
+        }
+
         if ($this->step !== 'product' || ! $this->familyId || ! $this->brandId) {
             return null;
         }
@@ -696,6 +821,39 @@ class OrderWizard extends Component
     #[Computed]
     public function catalogSelectionSummary(): array
     {
+        if ($this->usesCategoryCatalog()) {
+            $path = $this->categoryPath;
+            $brandId = $this->brandId;
+
+            if ($path === [] && $this->orderId !== null) {
+                $filters = $this->findOwnedRepresentativeOrder()?->catalog_filters ?? [];
+                $path = array_values(array_map(
+                    intval(...),
+                    is_array($filters['category_path'] ?? null) ? $filters['category_path'] : [],
+                ));
+                $brandId ??= $filters['brand_id'] ?? null;
+            }
+
+            $names = $path === []
+                ? []
+                : Category::query()->whereIn('id', $path)->pluck('name', 'id')->all();
+
+            $trail = [];
+            foreach ($path as $id) {
+                if (isset($names[$id])) {
+                    $trail[] = $names[$id];
+                }
+            }
+
+            return [
+                'family' => null,
+                'plant' => null,
+                'brand' => $brandId ? Brand::query()->whereKey($brandId)->value('name') : null,
+                'template' => null,
+                'category' => $trail !== [] ? implode(' · ', $trail) : null,
+            ];
+        }
+
         $familyId = $this->familyId;
         $plantId = $this->plantId;
         $brandId = $this->brandId;
@@ -714,6 +872,7 @@ class OrderWizard extends Component
             'plant' => $plantId ? ProductPlant::query()->whereKey($plantId)->value('name') : null,
             'brand' => $brandId ? Brand::query()->whereKey($brandId)->value('name') : null,
             'template' => $templateId ? ProductTemplate::query()->whereKey($templateId)->value('name') : null,
+            'category' => null,
         ];
     }
 
@@ -749,6 +908,14 @@ class OrderWizard extends Component
 
     private function normalizeStepForCatalog(): void
     {
+        if ($this->usesCategoryCatalog()) {
+            if (! array_key_exists($this->step, $this->visibleWizardSteps)) {
+                $this->step = 'category';
+            }
+
+            return;
+        }
+
         if ($this->step === 'plant' && $this->familyId !== null && ! $this->catalogLookup()->familyHasPlants($this->familyId)) {
             $this->step = 'brand';
         }
@@ -780,7 +947,14 @@ class OrderWizard extends Component
             'plant_id' => $this->plantId,
             'brand_id' => $this->brandId,
             'template_id' => $this->templateId,
+            'category_id' => $this->categoryLeafId,
+            'category_path' => $this->categoryPath,
         ]);
+    }
+
+    private function usesCategoryCatalog(): bool
+    {
+        return config('shop.representative.catalog_mode', 'category') === 'category';
     }
 
     private function findOwnedDraft(): ?Order

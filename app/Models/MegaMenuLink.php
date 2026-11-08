@@ -12,6 +12,7 @@ class MegaMenuLink extends Model
     use HasAdminShopPreview;
 
     protected $fillable = [
+        'root_category_id',
         'product_family_id',
         'parent_id',
         'category_id',
@@ -34,6 +35,11 @@ class MegaMenuLink extends Model
     public function family(): BelongsTo
     {
         return $this->belongsTo(ProductFamily::class, 'product_family_id');
+    }
+
+    public function rootCategory(): BelongsTo
+    {
+        return $this->belongsTo(Category::class, 'root_category_id');
     }
 
     public function parent(): BelongsTo

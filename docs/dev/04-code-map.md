@@ -93,7 +93,8 @@ app/Services/
   Payment/        PaymentService, ZarinpalGateway, ParsianGateway, SadadGateway, PecIpgClient, SadadIpgClient, TaraGateway, ...
   Order/          OrderService, OrderDeletionService, ...
   Cache/          ShopCacheService
-  Shop/           MegaMenuPayloadBuilder
+  Shop/           MegaMenuPayloadBuilder, CategoryTreeService
+  Representative/ RepresentativeCategoryCatalogLookup
   Settings/       SettingsService, FooterSettingsService, ...
   Media/          MediaLibrary, ImageOptimizer, ...
   Auth/           OtpService, *Guard
@@ -147,7 +148,9 @@ app/Services/
 
 | فایل | نقش |
 |------|-----|
-| `app/Services/Shop/MegaMenuPayloadBuilder.php` | آرایهٔ `megaMenu` برای view |
+| `app/Services/Shop/MegaMenuPayloadBuilder.php` | آرایهٔ `megaMenu` برای view (ریشه = دسته) |
+| `app/Services/Shop/CategoryTreeService.php` | descendant ids برای فیلتر محصول در زیرشاخه |
+| `app/Services/Representative/RepresentativeCategoryCatalogLookup.php` | ویزارد نماینده — drill دسته + برند |
 | `app/Models/MegaMenuLink.php` | لینک دستی ستون/زیرآیتم |
 | `resources/views/shop/partials/overlays.blade.php` | مگا دسکتاپ + مودال جستجو |
 | `resources/views/shop/partials/mobile-menu.blade.php` | drill-down موبایل |

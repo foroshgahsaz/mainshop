@@ -4,20 +4,20 @@ namespace App\Services\Shop;
 
 use App\Models\Category;
 use App\Models\MegaMenuLink;
-use App\Models\ProductFamily;
 use App\Support\ShopStaffPreview;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * ساختار سبک مگا منو برای کش header — بدون Eloquent در خروجی.
+ * مگا منو فقط از درخت دسته — ریل = دسته‌های ریشه show_in_mega.
  */
 final class MegaMenuPayloadBuilder
 {
     /**
      * @return array{
+     *     has_category_tree: bool,
      *     has_families: bool,
-     *     families: list<array{
+     *     roots: list<array{
      *         id: int,
      *         name: string,
      *         all_products_url: string,
@@ -26,33 +26,20 @@ final class MegaMenuPayloadBuilder
      *             url: string,
      *             items: list<array{label: string, url: string}>
      *         }>
-     *     }>
+     *     }>,
+     *     families: list<array>
      * }
      */
     public function build(?bool $asStaff = null): array
     {
         $asStaff ??= ShopStaffPreview::enabled();
 
-        if (! $this->megaMenuSchemaReady()) {
-            return ['has_families' => false, 'families' => []];
+        if (! Schema::hasTable('mega_menu_links')) {
+            return $this->emptyPayload();
         }
-
-        $families = ProductFamily::query()
-            ->where('show_in_mega', true)
-            ->where('is_active', true)
-            ->orderBy('position')
-            ->orderBy('id')
-            ->get(['id', 'name', 'slug']);
-
-        if ($families->isEmpty()) {
-            return ['has_families' => false, 'families' => []];
-        }
-
-        $familyIds = $families->pluck('id')->all();
 
         $roots = Category::query()
             ->visibleOnShop($asStaff)
-            ->whereIn('product_family_id', $familyIds)
             ->whereNull('parent_id')
             ->where('show_in_mega', true)
             ->orderBy('position')
@@ -61,99 +48,106 @@ final class MegaMenuPayloadBuilder
                 'children' => fn ($q) => $q->visibleOnShop($asStaff)
                     ->where('show_in_mega', true)
                     ->orderBy('position')
-                    ->orderBy('id'),
+                    ->orderBy('id')
+                    ->with([
+                        'children' => fn ($q2) => $q2->visibleOnShop($asStaff)
+                            ->where('show_in_mega', true)
+                            ->orderBy('position')
+                            ->orderBy('id'),
+                    ]),
             ])
             ->get();
 
-        $rootsByFamily = $roots->groupBy('product_family_id');
+        if ($roots->isEmpty()) {
+            return $this->emptyPayload();
+        }
+
+        $rootIds = $roots->pluck('id')->all();
 
         $links = MegaMenuLink::query()
             ->visibleOnShop($asStaff)
-            ->whereIn('product_family_id', $familyIds)
             ->where('is_active', true)
+            ->when(
+                Schema::hasColumn('mega_menu_links', 'root_category_id'),
+                fn ($q) => $q->where(function ($inner) use ($rootIds): void {
+                    $inner->whereIn('root_category_id', $rootIds)
+                        ->orWhereIn('category_id', $rootIds);
+                }),
+                fn ($q) => $q->whereIn('category_id', $rootIds)
+            )
             ->orderBy('position')
             ->orderBy('id')
             ->get();
 
-        $linksByFamily = $links->groupBy('product_family_id');
+        $linksByCategoryId = $links->whereNotNull('category_id')->groupBy('category_id');
 
         $payload = [];
 
-        foreach ($families as $family) {
-            $familyRoots = $rootsByFamily->get($family->id, collect());
-            $familyLinks = $linksByFamily->get($family->id, collect());
+        foreach ($roots as $root) {
+            $columns = [];
 
-            $columns = $this->categoryColumns($familyRoots, $familyLinks);
-            $columns = array_merge($columns, $this->customColumns($familyLinks));
+            foreach ($root->children as $child) {
+                $items = [];
+
+                foreach ($child->children as $grandchild) {
+                    $items[] = [
+                        'label' => $grandchild->name,
+                        'url' => route('categories.show', $grandchild),
+                    ];
+                }
+
+                foreach ($linksByCategoryId->get($child->id, collect()) as $link) {
+                    $items[] = [
+                        'label' => $link->label,
+                        'url' => $link->url,
+                    ];
+                }
+
+                $columns[] = [
+                    'title' => $child->name,
+                    'url' => route('categories.show', $child),
+                    'items' => $items,
+                ];
+            }
+
+            $columns = array_merge($columns, $this->customColumnsForRoot($links, $root->id));
 
             $payload[] = [
-                'id' => $family->id,
-                'name' => $family->name,
-                'all_products_url' => route('products.index', ['product_family_id' => $family->id]),
+                'id' => $root->id,
+                'name' => $root->name,
+                'all_products_url' => route('categories.show', $root),
                 'columns' => $columns,
             ];
         }
 
         return [
-            'has_families' => $payload !== [],
+            'has_category_tree' => true,
+            'has_families' => true,
+            'roots' => $payload,
             'families' => $payload,
         ];
     }
 
     /**
-     * @param  Collection<int, Category>  $roots
-     * @param  Collection<int, MegaMenuLink>  $familyLinks
+     * @param  Collection<int, MegaMenuLink>  $links
      * @return list<array{title: string, url: string, items: list<array{label: string, url: string}>}>
      */
-    private function categoryColumns(Collection $roots, Collection $familyLinks): array
+    private function customColumnsForRoot(Collection $links, int $rootId): array
     {
-        $extras = $familyLinks
-            ->whereNotNull('category_id')
-            ->whereNull('parent_id')
-            ->groupBy('category_id');
-
-        $columns = [];
-
-        foreach ($roots as $root) {
-            $items = [];
-
-            foreach ($root->children as $child) {
-                $items[] = [
-                    'label' => $child->name,
-                    'url' => route('categories.show', $child),
-                ];
+        $scoped = $links->filter(function (MegaMenuLink $link) use ($rootId): bool {
+            if ($link->category_id !== null) {
+                return false;
             }
 
-            foreach ($extras->get($root->id, collect()) as $link) {
-                $items[] = [
-                    'label' => $link->label,
-                    'url' => $link->url,
-                ];
+            if (Schema::hasColumn('mega_menu_links', 'root_category_id')) {
+                return (int) $link->root_category_id === $rootId;
             }
 
-            $columns[] = [
-                'title' => $root->name,
-                'url' => route('categories.show', $root),
-                'items' => $items,
-            ];
-        }
+            return $link->parent_id === null && (int) ($link->product_family_id ?? 0) === 0;
+        });
 
-        return $columns;
-    }
-
-    /**
-     * @param  Collection<int, MegaMenuLink>  $familyLinks
-     * @return list<array{title: string, url: string, items: list<array{label: string, url: string}>}>
-     */
-    private function customColumns(Collection $familyLinks): array
-    {
-        $roots = $familyLinks
-            ->whereNull('category_id')
-            ->whereNull('parent_id');
-
-        $childrenByParent = $familyLinks
-            ->whereNotNull('parent_id')
-            ->groupBy('parent_id');
+        $roots = $scoped->whereNull('parent_id');
+        $childrenByParent = $scoped->whereNotNull('parent_id')->groupBy('parent_id');
 
         $columns = [];
 
@@ -177,11 +171,14 @@ final class MegaMenuPayloadBuilder
         return $columns;
     }
 
-    /** تا قبل از migrate، سایت نباید 500 بدهد — همان منوی قدیمی header. */
-    private function megaMenuSchemaReady(): bool
+    /** @return array{has_category_tree: false, has_families: false, roots: array, families: array} */
+    private function emptyPayload(): array
     {
-        return Schema::hasColumn('product_families', 'show_in_mega')
-            && Schema::hasColumn('categories', 'product_family_id')
-            && Schema::hasTable('mega_menu_links');
+        return [
+            'has_category_tree' => false,
+            'has_families' => false,
+            'roots' => [],
+            'families' => [],
+        ];
     }
 }

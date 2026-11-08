@@ -42,6 +42,8 @@ return [
     ],
 
     'representative' => [
+        /** category = درخت دسته؛ family = جریان قدیمی خانواده/کارخانه/قالب */
+        'catalog_mode' => env('REP_CATALOG_MODE', 'category'),
         'catalog_cache_seconds' => (int) env('REP_CATALOG_CACHE_SECONDS', 300),
         'products_per_page' => (int) env('REP_PRODUCTS_PER_PAGE', 60),
         'default_shipping_amount' => (int) env('REP_DEFAULT_SHIPPING_AMOUNT', 0),

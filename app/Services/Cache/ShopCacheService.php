@@ -137,7 +137,7 @@ class ShopCacheService
 
                 $megaMenu = app(MegaMenuPayloadBuilder::class)->build($staff);
 
-                $navCategories = $megaMenu['has_families']
+                $navCategories = (! empty($megaMenu['has_category_tree']) || ! empty($megaMenu['has_families']))
                     ? collect()
                     : Category::query()
                         ->visibleOnShop($staff)

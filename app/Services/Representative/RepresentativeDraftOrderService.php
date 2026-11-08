@@ -61,6 +61,16 @@ class RepresentativeDraftOrderService
                 ->value('name');
         }
 
+        $categoryPath = $filters['category_path'] ?? [];
+        if (is_array($categoryPath)) {
+            $categoryPath = array_values(array_filter(array_map(
+                static fn ($id) => is_numeric($id) ? (int) $id : null,
+                $categoryPath,
+            )));
+        } else {
+            $categoryPath = [];
+        }
+
         $order->update([
             'catalog_filters' => [
                 'family_id' => $filters['family_id'] ?? null,
@@ -68,6 +78,8 @@ class RepresentativeDraftOrderService
                 'brand_id' => $filters['brand_id'] ?? null,
                 'template_id' => $templateId,
                 'template_name' => $templateName,
+                'category_id' => isset($filters['category_id']) ? (int) $filters['category_id'] : null,
+                'category_path' => $categoryPath,
             ],
         ]);
     }

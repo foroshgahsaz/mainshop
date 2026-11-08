@@ -4,7 +4,6 @@ namespace App\Filament\Pages;
 
 use App\Filament\Support\CrudSuccessNotification;
 use App\Filament\Support\ShopMediaPicker;
-use App\Models\Category;
 use App\Services\Cache\ShopCacheService;
 use App\Services\Settings\HomepageSettingsService;
 use Filament\Forms;
@@ -44,68 +43,15 @@ class ManageHomepageSettings extends Page implements HasForms
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('باکس بالای صفحه (اسلایدر + سایدبار)')
-                    ->description('لینkهای کنار اسلایدر منبع اصلی نمایش هستند. اگر خالی بمانند، از فرزندان دستهٔ ریشهٔ انتخاب‌شده ساخته می‌شوند.')
+                Forms\Components\Section::make('بنر بالای صفحه (اسلایدر تمام‌عرض)')
+                    ->description('اسلایدرها از منوی «اسلایدرهای صفحه اصلی» مدیریت می‌شوند. اندازه پیشنهادی دسکتاپ: 2560×597 px (نسبت بنر تمام‌عرض).')
                     ->schema([
-                        Forms\Components\TextInput::make('hero_sidebar_title')
-                            ->label('عنوان لیست کنار اسلایدر')
-                            ->default('سرویس چینی')
-                            ->maxLength(120),
-                        Forms\Components\Repeater::make('hero_sidebar_links')
-                            ->label('لینk‌های کنار اسلایدر (نام + URL)')
-                            ->schema([
-                                Forms\Components\TextInput::make('label')
-                                    ->label('نام')
-                                    ->required()
-                                    ->maxLength(255),
-                                Forms\Components\TextInput::make('url')
-                                    ->label('آدرس (URL)')
-                                    ->required()
-                                    ->maxLength(2048)
-                                    ->columnSpanFull(),
-                                ShopMediaPicker::image('image', 'product-family-sidebar-icons', 'آیکون')
-                                    ->columnSpanFull(),
-                                Forms\Components\Toggle::make('is_active')
-                                    ->label('فعال')
-                                    ->default(true),
-                            ])
-                            ->columns(2)
-                            ->defaultItems(0)
-                            ->reorderable()
-                            ->collapsible()
-                            ->addActionLabel('افزودن لینk')
-                            ->columnSpanFull(),
-                        Forms\Components\Select::make('hero_sidebar_category_id')
-                            ->label('دستهٔ ریشه لیست کنار اسلایدر')
-                            ->options(fn () => Category::query()
-                                ->whereNull('parent_id')
-                                ->where('is_active', true)
-                                ->orderBy('position')
-                                ->pluck('name', 'id'))
-                            ->searchable()
-                            ->nullable()
-                            ->helperText('خالی = خودکار (سرویس چینی). اگر لینک‌های بالا خالی باشند از زیردسته‌های این ریشه ساخته می‌شود.'),
-                        Forms\Components\Select::make('hero_quick_category_ids')
-                            ->label('سه کاشی زیر لیست (پارس اپال، …)')
-                            ->options(fn () => Category::query()
-                                ->where('is_active', true)
-                                ->orderBy('position')
-                                ->pluck('name', 'id'))
-                            ->multiple()
-                            ->maxItems(3)
-                            ->searchable()
-                            ->helperText('حداکثر ۳ مورد. لینک هر کاشی = صفحه دسته. خالی = تلاش برای slugهای پیش‌فرض.'),
-                        Forms\Components\Hidden::make('hero_sidebar_family_id'),
-                        Forms\Components\Hidden::make('hero_quick_family_ids'),
-                        Forms\Components\Select::make('taxonomy_mode')
-                            ->label('حالت taxonomy (legacy)')
-                            ->options([
-                                HomepageSettingsService::TAXONOMY_CATEGORIES => 'دسته‌بندی‌ها',
-                                HomepageSettingsService::TAXONOMY_PRODUCT_FAMILIES => 'خانواده‌های محصول',
-                            ])
-                            ->helperText('دیگر در صفحه اصلی نمایش داده نمی‌شود.')
-                            ->required(),
-                    ])->columns(1),
+                        Forms\Components\Placeholder::make('hero_slider_hint')
+                            ->label('')
+                            ->content('سایدبار کنار اسلایدر حذف شده است. دسته‌بندی از مگا منو و صفحه دسته‌ها در دسترس است.'),
+                        Forms\Components\Hidden::make('taxonomy_mode')
+                            ->default(HomepageSettingsService::TAXONOMY_CATEGORIES),
+                    ]),
                 Forms\Components\Section::make('جدیدترین محصولات')
                     ->schema([
                         Forms\Components\Toggle::make('new_products_enabled')

@@ -8,6 +8,9 @@ use App\Services\Settings\HomepageSettingsService;
 use App\Support\ShopFormatter;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * @deprecated سایدبار hero حذف شد؛ فقط برای مهاجرت/خواندن JSON legacy استفاده شود.
+ */
 class HomepageHeroHubService
 {
     public function __construct(

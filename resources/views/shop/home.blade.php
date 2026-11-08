@@ -18,7 +18,6 @@
 
     @include('shop.partials.home-hero-hub', [
         'sliders' => $sliders,
-        'hero_hub' => $hero_hub ?? [],
         'homepage_plan_widget' => $homepage_plan_widget ?? [],
     ])
 

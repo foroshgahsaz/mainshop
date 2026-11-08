@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Models\Category;
 use App\Services\Settings\HomepageSettingsService;
-use App\Services\Shop\CategoryHomepageHeroService;
 use App\Services\Shop\CategoryTaxonomySeederService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
@@ -76,29 +75,10 @@ class SeedCategoryTaxonomyCommand extends Command
             return;
         }
 
-        $hero = app(CategoryHomepageHeroService::class);
-        $quickIds = collect([
-            Category::query()->where('name', 'ظروف پذیرایی')->value('id'),
-            Category::query()->whereNull('parent_id')->where('name', 'لوازم آشپزخانه')->value('id'),
-            Category::query()
-                ->where('name', 'مبلمان')
-                ->whereHas('parent', fn ($q) => $q->where('name', 'مبلمان ، فرش ، لوستر'))
-                ->value('id'),
-        ])
-            ->filter()
-            ->unique()
-            ->take(3)
-            ->values()
-            ->all();
-
         app(HomepageSettingsService::class)->mergeAndPersist([
             'taxonomy_mode' => HomepageSettingsService::TAXONOMY_CATEGORIES,
-            'hero_sidebar_category_id' => $chineseRoot->id,
-            'hero_sidebar_title' => (string) $chineseRoot->name,
-            'hero_sidebar_links' => $hero->sidebarLinksForRootCategory($chineseRoot, resolveImageUrls: false),
-            'hero_quick_category_ids' => $quickIds,
         ]);
 
-        $this->line('تنظیمات هیرو صفحه اصلی با درخت جدید همگام شد.');
+        $this->line('تنظیمات صفحه اصلی (taxonomy) با درخت جدید همگام شد.');
     }
 }

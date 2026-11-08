@@ -17,19 +17,19 @@ return [
         'hero' => [
             'label' => 'اسلایدر — دسکتاپ',
             'mode' => 'cover',
-            'width' => 940,
-            'height' => 406,
+            'width' => 2560,
+            'height' => 597,
             'quality' => 90,
             'format' => 'webp',
-            // Upload preset crops to 940×406 (نسبت نمایش hero hub دسکتاپ).
+            // Upload preset: بنر تمام‌عرض صفحه اصلی (نسبت 2560×597).
             'enabled' => false,
         ],
 
         'hero_mobile' => [
             'label' => 'اسلایدر — موبایل',
             'mode' => 'cover',
-            'width' => 750,
-            'height' => 400,
+            'width' => 1280,
+            'height' => 299,
             'quality' => 90,
             'format' => 'webp',
             'enabled' => false,

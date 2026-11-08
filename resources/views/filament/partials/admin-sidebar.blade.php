@@ -26,6 +26,7 @@
     use App\Filament\Resources\CouponResource;
     use App\Filament\Resources\HomeSliderResource;
     use App\Filament\Resources\MediaFileResource;
+    use App\Filament\Resources\MegaMenuLinkResource;
     use App\Filament\Resources\MenuItemResource;
     use App\Filament\Resources\OrderResource;
     use App\Filament\Resources\PageResource;
@@ -62,6 +63,19 @@
         ? app(\App\Services\Representative\ProformaReservationRequestService::class)->pendingCountFor($user)
         : 0;
 
+    $siteMenuItems = [
+        ['label' => 'آیتم‌های منو', 'url' => MenuItemResource::getUrl('index'), 'icon' => 'fa-list'],
+        ['label' => 'افزودن آیتم', 'url' => MenuItemResource::getUrl('create'), 'icon' => 'fa-plus'],
+    ];
+    if (
+        AdminAccess::canManageShopInAdmin($user)
+        && SchemaFacade::hasTable('mega_menu_links')
+        && SchemaFacade::hasColumn('product_families', 'show_in_mega')
+    ) {
+        $siteMenuItems[] = ['label' => 'لینک‌های مگا منو', 'url' => MegaMenuLinkResource::getUrl('index'), 'icon' => 'fa-list'];
+        $siteMenuItems[] = ['label' => 'افزودن مگا منو', 'url' => MegaMenuLinkResource::getUrl('create'), 'icon' => 'fa-plus'];
+    }
+
     $contentMenus = [
         ['label' => 'بلاگ', 'icon' => 'fa-file-alt', 'items' => [
             ['label' => 'لیست همه', 'url' => PostResource::getUrl('index'), 'icon' => 'fa-list'],
@@ -81,10 +95,7 @@
             ['label' => 'لیست همه', 'url' => HomeSliderResource::getUrl('index'), 'icon' => 'fa-list'],
             ['label' => 'افزودن اسلاید', 'url' => HomeSliderResource::getUrl('create'), 'icon' => 'fa-plus'],
         ]],
-        ['label' => 'منوی سایت', 'icon' => 'fa-bars', 'items' => [
-            ['label' => 'آیتم‌های منو', 'url' => MenuItemResource::getUrl('index'), 'icon' => 'fa-list'],
-            ['label' => 'افزودن آیتم', 'url' => MenuItemResource::getUrl('create'), 'icon' => 'fa-plus'],
-        ]],
+        ['label' => 'منوی سایت', 'icon' => 'fa-bars', 'items' => $siteMenuItems],
     ];
     if (AdminAccess::canManageShopInAdmin($user) && SchemaFacade::hasTable('shop_url_redirects')) {
         $contentMenus[] = [
@@ -233,6 +244,9 @@
                 'filament.admin.resources.product-questions.*',
                 'filament.admin.resources.home-sliders.*',
                 'filament.admin.resources.menu-items.*',
+                (AdminAccess::canManageShopInAdmin($user) && SchemaFacade::hasTable('mega_menu_links'))
+                    ? 'filament.admin.resources.mega-menu-links.*'
+                    : null,
                 (AdminAccess::canManageShopInAdmin($user) && SchemaFacade::hasTable('shop_url_redirects'))
                     ? 'filament.admin.resources.shop-url-redirects.*'
                     : null,

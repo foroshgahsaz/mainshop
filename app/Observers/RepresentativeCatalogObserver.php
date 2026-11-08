@@ -21,6 +21,10 @@ class RepresentativeCatalogObserver
         if ($model instanceof ProductFamily || $model instanceof ProductFamilyHomepagePopupItem) {
             $this->shopCache->forgetHome();
         }
+
+        if ($model instanceof ProductFamily) {
+            $this->shopCache->forgetCategory();
+        }
     }
 
     public function deleted(object $model): void
@@ -29,6 +33,10 @@ class RepresentativeCatalogObserver
 
         if ($model instanceof ProductFamily || $model instanceof ProductFamilyHomepagePopupItem) {
             $this->shopCache->forgetHome();
+        }
+
+        if ($model instanceof ProductFamily) {
+            $this->shopCache->forgetCategory();
         }
     }
 }

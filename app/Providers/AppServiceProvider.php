@@ -31,6 +31,8 @@ use App\Observers\BrandObserver;
 use App\Observers\CreditPlanObserver;
 use App\Observers\PartnerObserver;
 use App\Observers\CategoryObserver;
+use App\Observers\MegaMenuLinkObserver;
+use App\Models\MegaMenuLink;
 use App\Observers\HomeSliderObserver;
 use App\Observers\MediaUsageObserver;
 use App\Observers\MenuItemObserver;
@@ -155,6 +157,7 @@ class AppServiceProvider extends ServiceProvider
         ProductTemplate::observe($representativeCatalogObserver);
         ProductImage::observe(ProductImageObserver::class);
         Category::observe(CategoryObserver::class);
+        MegaMenuLink::observe(MegaMenuLinkObserver::class);
         Brand::observe(BrandObserver::class);
         CreditPlan::observe(CreditPlanObserver::class);
         Partner::observe(PartnerObserver::class);

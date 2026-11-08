@@ -1,6 +1,8 @@
 @php
     use App\Support\ShopFormatter;
 
+    $megaMenu = $megaMenu ?? ['has_families' => false, 'families' => []];
+    $megaFamilies = $megaMenu['families'] ?? [];
     $megaColumns = ($navCategories ?? collect())->take(3);
     $searchPopup = $searchPopup ?? [];
     $popularSearches = app(\App\Services\Settings\SearchPopupSettingsService::class)->popularSearchLinks();
@@ -16,33 +18,93 @@
 <!-- MEGA MENU backdrop + panel (desktop) -->
 <div id="megaMenuBackdrop" class="shop-mega-backdrop"></div>
 <div id="megaMenuBox"
-     class="shop-mega-menu fixed right-0 left-0 w-screen bg-white border-t border-gray-100 shadow-lg"
+     class="shop-mega-menu fixed right-0 left-0 w-screen bg-white border-t border-gray-100 shadow-lg {{ !empty($megaMenu['has_families']) ? 'shop-mega-menu--families' : '' }}"
      aria-hidden="true">
-  <div class="max-w-site mx-auto px-6 py-8 grid grid-cols-4 gap-8">
-    @forelse($megaColumns as $cat)
-      <div @if($cat->mega_column) data-mega-column="{{ $cat->mega_column }}" @endif>
-        <h4 class="font-bold text-gray-900 border-b pb-2 mb-3 text-sm">
-          <a href="{{ route('categories.show', $cat) }}" class="hover:text-brand-green">{{ $cat->name }}</a>
-        </h4>
-        <ul class="flex flex-col gap-2 text-gray-500 text-xs">
-          @foreach($cat->children->take(5) as $child)
-            <li><a href="{{ route('categories.show', $child) }}" class="hover:text-brand-green">{{ $child->name }}</a></li>
+  <div class="max-w-site mx-auto px-4 md:px-6 py-6">
+    @if(!empty($megaMenu['has_families']) && $megaFamilies !== [])
+      <div class="shop-mega-families" data-mega-families>
+        <aside class="shop-mega-families__rail" aria-label="خانواده محصول">
+          <ul class="shop-mega-families__rail-list" role="tablist">
+            @foreach($megaFamilies as $index => $family)
+              <li role="presentation">
+                <button type="button"
+                        class="shop-mega-families__rail-btn {{ $index === 0 ? 'is-active' : '' }}"
+                        role="tab"
+                        aria-selected="{{ $index === 0 ? 'true' : 'false' }}"
+                        data-mega-family-tab="{{ $family['id'] }}">
+                  <span>{{ $family['name'] }}</span>
+                  <svg class="shop-mega-families__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </li>
+            @endforeach
+          </ul>
+        </aside>
+        <div class="shop-mega-families__panels">
+          @foreach($megaFamilies as $index => $family)
+            <div class="shop-mega-families__panel {{ $index === 0 ? 'is-active' : '' }}"
+                 role="tabpanel"
+                 data-mega-family-panel="{{ $family['id'] }}"
+                 @if($index !== 0) hidden @endif>
+              <a href="{{ $family['all_products_url'] }}" class="shop-mega-families__all-link">
+                همه محصولات {{ $family['name'] }}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </a>
+              <div class="shop-mega-families__columns">
+                @forelse($family['columns'] as $column)
+                  <div class="shop-mega-families__column">
+                    <h4 class="shop-mega-families__column-title">
+                      <a href="{{ $column['url'] }}">{{ $column['title'] }}</a>
+                    </h4>
+                    @if(!empty($column['items']))
+                      <ul class="shop-mega-families__column-links">
+                        @foreach($column['items'] as $item)
+                          <li>
+                            <a href="{{ $item['url'] }}">{{ $item['label'] }}</a>
+                          </li>
+                        @endforeach
+                      </ul>
+                    @endif
+                  </div>
+                @empty
+                  <p class="text-sm text-gray-500">برای این خانواده دسته یا لینکی در مگا منو ثبت نشده است.</p>
+                @endforelse
+              </div>
+            </div>
           @endforeach
-          @if($cat->children->isEmpty())
-            <li><a href="{{ route('categories.show', $cat) }}" class="hover:text-brand-green">مشاهده همه</a></li>
-          @endif
-        </ul>
+        </div>
       </div>
-    @empty
-      <div class="col-span-3 text-sm text-gray-500">دسته‌بندی‌ای ثبت نشده است.</div>
-    @endforelse
-    <div class="bg-gradient-to-br from-emerald-50 to-teal-50 p-4 rounded-xl">
-      @php $megaPromo = $navigation['megaPromo'] ?? null; @endphp
-      <span class="text-brand-green font-bold text-sm block mb-1">{{ $megaPromo?->label ?? 'فروش ویژه' }}</span>
-      <p class="text-gray-500 text-[11px] leading-relaxed mb-4">بهترین محصولات با قیمت استثنایی</p>
-      <a href="{{ $megaPromo ? $megaPromo->resolveUrl() : route('products.index') }}"
-         class="text-xs text-white bg-brand-green py-2 px-3 rounded-lg block text-center font-bold">مشاهده همه</a>
-    </div>
+    @else
+      <div class="grid grid-cols-4 gap-8">
+        @forelse($megaColumns as $cat)
+          <div @if($cat->mega_column) data-mega-column="{{ $cat->mega_column }}" @endif>
+            <h4 class="font-bold text-gray-900 border-b pb-2 mb-3 text-sm">
+              <a href="{{ route('categories.show', $cat) }}" class="hover:text-brand-green">{{ $cat->name }}</a>
+            </h4>
+            <ul class="flex flex-col gap-2 text-gray-500 text-xs">
+              @foreach($cat->children->take(5) as $child)
+                <li><a href="{{ route('categories.show', $child) }}" class="hover:text-brand-green">{{ $child->name }}</a></li>
+              @endforeach
+              @if($cat->children->isEmpty())
+                <li><a href="{{ route('categories.show', $cat) }}" class="hover:text-brand-green">مشاهده همه</a></li>
+              @endif
+            </ul>
+          </div>
+        @empty
+          <div class="col-span-3 text-sm text-gray-500">دسته‌بندی‌ای ثبت نشده است.</div>
+        @endforelse
+        <div class="bg-gradient-to-br from-emerald-50 to-teal-50 p-4 rounded-xl">
+          @php $megaPromo = $navigation['megaPromo'] ?? null; @endphp
+          <span class="text-brand-green font-bold text-sm block mb-1">{{ $megaPromo?->label ?? 'فروش ویژه' }}</span>
+          <p class="text-gray-500 text-[11px] leading-relaxed mb-4">بهترین محصولات با قیمت استثنایی</p>
+          <a href="{{ $megaPromo ? $megaPromo->resolveUrl() : route('products.index') }}"
+             class="text-xs text-white bg-brand-green py-2 px-3 rounded-lg block text-center font-bold">مشاهده همه</a>
+        </div>
+      </div>
+    @endif
   </div>
 </div>
 
@@ -118,7 +180,7 @@
           </div>
         @endif
 
-        @if($showSearchCategories && $searchCategories->isNotEmpty())
+        @if($showSearchCategories && ($searchCategories ?? collect())->isNotEmpty())
           <div>
             <p class="search-modal__section-title">
               <svg class="w-3.5 h-3.5 text-brand-green" fill="currentColor" viewBox="0 0 24 24">

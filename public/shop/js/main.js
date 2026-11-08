@@ -2,6 +2,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initHeaderMetrics();
   initMobileBottomNavMetrics();
   initMegaMenu();
+  initMegaFamilyTabs();
+  initMobileMegaDrill();
   initBrandsNavDropdowns();
   initMainSwiper();
   initHomeHeroSwiper();
@@ -757,6 +759,108 @@ function initMegaMenu() {
   megaBox.addEventListener('mouseenter', open);
   megaBox.addEventListener('mouseleave', close);
   megaBackdrop?.addEventListener('click', close);
+}
+
+function initMegaFamilyTabs() {
+  const root = document.querySelector('[data-mega-families]');
+  if (!root || root.dataset.megaFamiliesBound === '1') {
+    return;
+  }
+  root.dataset.megaFamiliesBound = '1';
+
+  const tabs = root.querySelectorAll('[data-mega-family-tab]');
+  const panels = root.querySelectorAll('[data-mega-family-panel]');
+  if (!tabs.length || !panels.length) {
+    return;
+  }
+
+  const activate = (familyId) => {
+    tabs.forEach((tab) => {
+      const active = tab.dataset.megaFamilyTab === String(familyId);
+      tab.classList.toggle('is-active', active);
+      tab.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+    panels.forEach((panel) => {
+      const active = panel.dataset.megaFamilyPanel === String(familyId);
+      panel.classList.toggle('is-active', active);
+      panel.toggleAttribute('hidden', !active);
+    });
+  };
+
+  tabs.forEach((tab) => {
+    tab.addEventListener('mouseenter', () => activate(tab.dataset.megaFamilyTab));
+    tab.addEventListener('focus', () => activate(tab.dataset.megaFamilyTab));
+    tab.addEventListener('click', () => activate(tab.dataset.megaFamilyTab));
+  });
+}
+
+function initMobileMegaDrill() {
+  const root = document.querySelector('[data-mobile-mega-drill]');
+  if (!root || root.dataset.megaDrillBound === '1') {
+    return;
+  }
+  root.dataset.megaDrillBound = '1';
+
+  root._megaLevelStack = ['families'];
+  root._megaTitleStack = [''];
+  const toolbar = root.querySelector('[data-mega-drill-toolbar]');
+  const backBtn = root.querySelector('[data-mega-drill-back]');
+  const titleEl = root.querySelector('[data-mega-drill-title]');
+
+  const showLevel = (levelKey) => {
+    root.querySelectorAll('[data-mega-drill-level]').forEach((level) => {
+      const active = level.dataset.megaDrillLevel === levelKey;
+      level.classList.toggle('hidden', !active);
+      level.toggleAttribute('hidden', !active);
+    });
+    const showToolbar = levelKey !== 'families';
+    toolbar?.classList.toggle('hidden', !showToolbar);
+    if (titleEl) {
+      titleEl.textContent = showToolbar ? (root._megaTitleStack[root._megaTitleStack.length - 1] || '') : '';
+    }
+  };
+
+  root.querySelectorAll('[data-mega-drill-open]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const target = btn.dataset.megaDrillOpen;
+      if (!target) {
+        return;
+      }
+      const label = btn.querySelector('span')?.textContent?.trim() || btn.textContent?.trim() || '';
+      root._megaLevelStack.push(target);
+      root._megaTitleStack.push(label);
+      showLevel(target);
+    });
+  });
+
+  backBtn?.addEventListener('click', () => {
+    if (root._megaLevelStack.length <= 1) {
+      resetMobileMegaDrill();
+      return;
+    }
+    root._megaLevelStack.pop();
+    root._megaTitleStack.pop();
+    showLevel(root._megaLevelStack[root._megaLevelStack.length - 1]);
+  });
+}
+
+function resetMobileMegaDrill() {
+  const root = document.querySelector('[data-mobile-mega-drill]');
+  if (!root) {
+    return;
+  }
+  root.querySelectorAll('[data-mega-drill-level]').forEach((level) => {
+    const isFamilies = level.dataset.megaDrillLevel === 'families';
+    level.classList.toggle('hidden', !isFamilies);
+    level.toggleAttribute('hidden', !isFamilies);
+  });
+  root.querySelector('[data-mega-drill-toolbar]')?.classList.add('hidden');
+  const titleEl = root.querySelector('[data-mega-drill-title]');
+  if (titleEl) {
+    titleEl.textContent = '';
+  }
+  root._megaLevelStack = ['families'];
+  root._megaTitleStack = [''];
 }
 
 function initProgTabs() {

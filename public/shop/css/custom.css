@@ -1291,6 +1291,122 @@ body.mobile-menu-open {
   display: block !important;
 }
 
+.shop-mega-menu--families .shop-mega-families {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  min-height: 12rem;
+}
+
+.shop-mega-families__rail {
+  flex: 0 0 220px;
+  border-left: 1px solid #f1f5f9;
+  padding-left: 0.5rem;
+}
+
+.shop-mega-families__rail-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shop-mega-families__rail-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  text-align: right;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #475569;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.shop-mega-families__rail-btn:hover,
+.shop-mega-families__rail-btn.is-active {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.shop-mega-families__chevron {
+  flex-shrink: 0;
+  opacity: 0.45;
+}
+
+.shop-mega-families__panels {
+  flex: 1;
+  min-width: 0;
+}
+
+.shop-mega-families__panel[hidden] {
+  display: none !important;
+}
+
+.shop-mega-families__all-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #059669;
+  margin-bottom: 1rem;
+}
+
+.shop-mega-families__columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1.25rem 1.5rem;
+}
+
+.shop-mega-families__column-title {
+  font-size: 0.8125rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.5rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.shop-mega-families__column-title a:hover {
+  color: #059669;
+}
+
+.shop-mega-families__column-links {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.6875rem;
+  color: #64748b;
+}
+
+.shop-mega-families__column-links a:hover {
+  color: #059669;
+}
+
+.shop-mobile-mega-drill__row {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.shop-mobile-mega-drill__back {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
 .main-nav {
   overflow: visible;
   position: relative;

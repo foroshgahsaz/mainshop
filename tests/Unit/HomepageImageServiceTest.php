@@ -72,7 +72,7 @@ class HomepageImageServiceTest extends TestCase
     {
         $preset = app(HomepageImageService::class)->forSection('hero_mobile');
 
-        $this->assertSame(1170, $preset['width'] ?? null);
-        $this->assertSame(259, $preset['height'] ?? null);
+        $this->assertSame(1000, $preset['width'] ?? null);
+        $this->assertSame(500, $preset['height'] ?? null);
     }
 }

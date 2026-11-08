@@ -28,10 +28,11 @@ return [
         'hero_mobile' => [
             'label' => 'اسلایدر — موبایل',
             'mode' => 'cover',
-            'width' => 1170,
-            'height' => 259,
+            'width' => 1000,
+            'height' => 500,
             'quality' => 90,
             'format' => 'webp',
+            // Upload: بنر موبایل تمام‌عرض با نسبت 2:1 (مثلاً 1000×500 یا 1170×585 @2x).
             'enabled' => false,
         ],
 

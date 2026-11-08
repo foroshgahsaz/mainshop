@@ -33,18 +33,29 @@
 
 <div class="max-w-site mx-auto px-4 md:px-6 py-6 md:py-10 listing-page__inner">
     <nav class="listing-breadcrumb mb-4" aria-label="مسیر">
-        <a href="{{ route('home') }}">فروشگاه</a>
-        <span>/</span>
-        @if(isset($category))
-            <span>{{ $category->name }}</span>
+        <a href="{{ route('home') }}">صفحه اصلی</a>
+        @if(isset($category) && ($categoryTrail ?? []) !== [])
+            @foreach($categoryTrail as $crumb)
+                <span class="listing-breadcrumb__sep" aria-hidden="true">→</span>
+                @if($loop->last)
+                    <span class="listing-breadcrumb__current">{{ $crumb['name'] }}</span>
+                @else
+                    <a href="{{ route('categories.show', $crumb['slug']) }}">{{ $crumb['name'] }}</a>
+                @endif
+            @endforeach
         @elseif(isset($brand))
-            <span>{{ $brand->name }}</span>
+            <span class="listing-breadcrumb__sep" aria-hidden="true">→</span>
+            <span class="listing-breadcrumb__current">{{ $brand->name }}</span>
         @elseif($searchQuery)
-            <span>جستجو</span>
-        @else
-            <span>لیست کالاها</span>
+            <span class="listing-breadcrumb__sep" aria-hidden="true">→</span>
+            <span class="listing-breadcrumb__current">جستجو</span>
+        @elseif(!isset($category) && !isset($brand) && !$searchQuery)
+            <span class="listing-breadcrumb__sep" aria-hidden="true">→</span>
+            <span class="listing-breadcrumb__current">لیست کالاها</span>
         @endif
     </nav>
+
+    @include('shop.partials.category-listing-carousel')
 
     @if($searchQuery)
         <div class="listing-search-hero mb-6">

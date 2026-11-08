@@ -143,7 +143,7 @@ final class MegaMenuBootstrapService
      */
     private function defaultFamilyId(Collection $families): int
     {
-        $chinese = $families->first(fn (ProductFamily $f) => $f->slug === 'chinese-service'
+        $chinese = $families->first(fn (ProductFamily $f) => in_array($f->slug, ['chinese-service', 'سرویس-چینی'], true)
             || str_contains($f->name, 'چینی'));
 
         return ($chinese ?? $families->first())->id;
@@ -172,7 +172,47 @@ final class MegaMenuBootstrapService
             return (int) $familyId;
         }
 
+        $byName = $this->matchFamilyByCategoryName($root, $families);
+        if ($byName !== null) {
+            return $byName;
+        }
+
         return $fallbackFamilyId;
+    }
+
+    /**
+     * @param  Collection<int, ProductFamily>  $families
+     */
+    private function matchFamilyByCategoryName(Category $root, Collection $families): ?int
+    {
+        $categoryKey = $this->normalizeForMatch($root->name);
+
+        $best = null;
+        $bestLen = 0;
+
+        foreach ($families as $family) {
+            $familyKey = $this->normalizeForMatch($family->name);
+            if ($familyKey === '' || $categoryKey === '') {
+                continue;
+            }
+
+            if (str_contains($categoryKey, $familyKey) || str_contains($familyKey, $categoryKey)) {
+                $len = mb_strlen($familyKey);
+                if ($len > $bestLen) {
+                    $bestLen = $len;
+                    $best = $family->id;
+                }
+            }
+        }
+
+        return $best;
+    }
+
+    private function normalizeForMatch(string $value): string
+    {
+        $value = str_replace(["\u{200C}", ' '], '', trim($value));
+
+        return mb_strtolower($value);
     }
 
     /** @return list<int> */

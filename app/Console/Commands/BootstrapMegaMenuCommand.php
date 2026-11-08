@@ -14,7 +14,7 @@ class BootstrapMegaMenuCommand extends Command
         {--family= : اسلاگ یا شناسه خانواده — همه ستون‌ها زیر همین خانواده}
         {--list-families : فقط لیست خانواده‌های فعال (id, slug, name) و خروج}';
 
-    protected $description = 'آماده‌سازی مگا منو از دسته‌ها و خانواده‌های موجود (بدون لینک دستی)';
+    protected $description = 'آماده‌سازی مگا منو از دسته‌ها و خانواده‌های موجود (بدون لینک دستی؛ معادل db:seed --class=MegaMenuBootstrapSeeder)';
 
     public function handle(MegaMenuBootstrapService $service): int
     {

@@ -85,6 +85,15 @@ php artisan shop:bootstrap-mega-menu --family=chinese-service --no-interaction
 
 سرویس: `App\Services\Shop\MegaMenuBootstrapService`
 
+**سیدر (یک خط روی production):**
+
+```bash
+php artisan db:seed --class=MegaMenuBootstrapSeeder --force
+php artisan cache:clear
+```
+
+همهٔ دسته‌های ریشهٔ فعال → خانواده (از محصولات، یا تطابق نام، یا پیش‌فرض «سرویس چینی»). اسلاگ نمونه `chinese-service` نیست — روی چینی‌بازار مثلاً `سرویس-چینی` است؛ برای اجبار یک خانواده: `--family=1` یا `--family=سرویس-چینی`.
+
 ### مرحله ۱ — خانواده‌ها (ریل راست دسکتاپ / سطح اول موبایل)
 
 1. ادمین → **فروشگاه → خانواده محصول** (یا مسیر خانواده در سایدبار محصولات).

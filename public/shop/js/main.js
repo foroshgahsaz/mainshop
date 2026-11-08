@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initMobileBottomNavMetrics();
   initMegaMenu();
   initMegaFamilyTabs();
-  initMobileMegaDrill();
+  initMobileMegaSplit();
   initBrandsNavDropdowns();
   initMainSwiper();
   initHomeHeroSwiper();
@@ -768,75 +768,86 @@ function initMegaFamilyTabs() {
   });
 }
 
-function initMobileMegaDrill() {
-  const root = document.querySelector('[data-mobile-mega-drill]');
-  if (!root || root.dataset.megaDrillBound === '1') {
+function initMobileMegaSplit() {
+  const root = document.querySelector('[data-mobile-mega-split]');
+  if (!root || root.dataset.mobileMegaSplitBound === '1') {
     return;
   }
-  root.dataset.megaDrillBound = '1';
+  root.dataset.mobileMegaSplitBound = '1';
 
-  root._megaLevelStack = ['families'];
-  root._megaTitleStack = [''];
-  const toolbar = root.querySelector('[data-mega-drill-toolbar]');
-  const backBtn = root.querySelector('[data-mega-drill-back]');
-  const titleEl = root.querySelector('[data-mega-drill-title]');
+  const tabs = root.querySelectorAll('[data-mobile-mega-family-tab]');
+  const panels = root.querySelectorAll('[data-mobile-mega-family-panel]');
 
-  const showLevel = (levelKey) => {
-    root.querySelectorAll('[data-mega-drill-level]').forEach((level) => {
-      const active = level.dataset.megaDrillLevel === levelKey;
-      level.classList.toggle('hidden', !active);
-      level.classList.toggle('flex', active);
-      level.toggleAttribute('hidden', !active);
+  const activateFamily = (familyId) => {
+    tabs.forEach((tab) => {
+      const active = tab.dataset.mobileMegaFamilyTab === String(familyId);
+      tab.classList.toggle('is-active', active);
+      tab.setAttribute('aria-selected', active ? 'true' : 'false');
     });
-    const showToolbar = levelKey !== 'families';
-    toolbar?.classList.toggle('hidden', !showToolbar);
-    if (titleEl) {
-      titleEl.textContent = showToolbar ? (root._megaTitleStack[root._megaTitleStack.length - 1] || '') : '';
-    }
+    panels.forEach((panel) => {
+      const active = panel.dataset.mobileMegaFamilyPanel === String(familyId);
+      panel.classList.toggle('is-active', active);
+      panel.toggleAttribute('hidden', !active);
+    });
   };
 
-  root.querySelectorAll('[data-mega-drill-open]').forEach((btn) => {
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => activateFamily(tab.dataset.mobileMegaFamilyTab));
+  });
+
+  root.querySelectorAll('[data-mobile-mega-section-toggle]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const target = btn.dataset.megaDrillOpen;
-      if (!target) {
+      const section = btn.closest('.shop-mobile-mega-split__section');
+      if (!section) {
         return;
       }
-      const label = btn.querySelector('span')?.textContent?.trim() || btn.textContent?.trim() || '';
-      root._megaLevelStack.push(target);
-      root._megaTitleStack.push(label);
-      showLevel(target);
+      const panel = section.closest('[data-mobile-mega-family-panel]');
+      panel?.querySelectorAll('.shop-mobile-mega-split__section').forEach((other) => {
+        if (other !== section) {
+          other.classList.remove('is-expanded');
+          other.querySelector('[data-mobile-mega-section-toggle]')?.setAttribute('aria-expanded', 'false');
+        }
+      });
+      const expanded = section.classList.toggle('is-expanded');
+      btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
     });
   });
 
-  backBtn?.addEventListener('click', () => {
-    if (root._megaLevelStack.length <= 1) {
-      resetMobileMegaDrill();
-      return;
-    }
-    root._megaLevelStack.pop();
-    root._megaTitleStack.pop();
-    showLevel(root._megaLevelStack[root._megaLevelStack.length - 1]);
-  });
+  if (tabs.length) {
+    activateFamily(tabs[0].dataset.mobileMegaFamilyTab);
+  }
 }
 
-function resetMobileMegaDrill() {
-  const root = document.querySelector('[data-mobile-mega-drill]');
+function resetMobileMegaSplit() {
+  const root = document.querySelector('[data-mobile-mega-split]');
   if (!root) {
     return;
   }
-  root.querySelectorAll('[data-mega-drill-level]').forEach((level) => {
-    const isFamilies = level.dataset.megaDrillLevel === 'families';
-    level.classList.toggle('hidden', !isFamilies);
-    level.classList.toggle('flex', isFamilies);
-    level.toggleAttribute('hidden', !isFamilies);
-  });
-  root.querySelector('[data-mega-drill-toolbar]')?.classList.add('hidden');
-  const titleEl = root.querySelector('[data-mega-drill-title]');
-  if (titleEl) {
-    titleEl.textContent = '';
+  const firstTab = root.querySelector('[data-mobile-mega-family-tab]');
+  if (firstTab) {
+    const familyId = firstTab.dataset.mobileMegaFamilyTab;
+    root.querySelectorAll('[data-mobile-mega-family-tab]').forEach((tab, index) => {
+      tab.classList.toggle('is-active', index === 0);
+      tab.setAttribute('aria-selected', index === 0 ? 'true' : 'false');
+    });
+    root.querySelectorAll('[data-mobile-mega-family-panel]').forEach((panel, index) => {
+      const active = index === 0;
+      panel.classList.toggle('is-active', active);
+      panel.toggleAttribute('hidden', !active);
+      if (active) {
+        panel.querySelectorAll('.shop-mobile-mega-split__section').forEach((section, sIndex) => {
+          section.classList.toggle('is-expanded', sIndex === 0);
+          section.querySelector('[data-mobile-mega-section-toggle]')?.setAttribute('aria-expanded', sIndex === 0 ? 'true' : 'false');
+        });
+      }
+    });
+    if (familyId) {
+      const firstPanel = root.querySelector(`[data-mobile-mega-family-panel="${familyId}"]`);
+      firstPanel?.querySelectorAll('.shop-mobile-mega-split__section').forEach((section, sIndex) => {
+        section.classList.toggle('is-expanded', sIndex === 0);
+      });
+    }
   }
-  root._megaLevelStack = ['families'];
-  root._megaTitleStack = [''];
 }
 
 function initProgTabs() {
@@ -927,6 +938,7 @@ function switchTab(type) {
 window.toggleElement = toggleElement;
 window.requestCloseLoginModal = requestCloseLoginModal;
 window.toggleAccordion = toggleAccordion;
-window.resetMobileMegaDrill = resetMobileMegaDrill;
+window.resetMobileMegaSplit = resetMobileMegaSplit;
+window.resetMobileMegaDrill = resetMobileMegaSplit;
 window.switchTab = switchTab;
 window.openLoginModal = openLoginModal;

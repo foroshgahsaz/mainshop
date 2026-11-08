@@ -30,6 +30,15 @@ php artisan shop:migrate-mega-menu-roots --enable-roots --write-fk
 php artisan cache:clear
 ```
 
+## مراحل باقی‌مانده (پس از diagnose موفق)
+
+1. **deploy** آخرین master (رفع 500 محصول: import تکراری `Category` در `ListsShopProducts`)
+2. `php artisan migrate --force` و در صورت نبود جدول: `php artisan shop:repair-mega-menu-schema`
+3. ادمین: **صفحه اصلی** — سه کاشی = دسته‌های #47، #50، #51 (بلور/پذیرایی، آشپزخانه، مبلمان) نه لزوماً خانواده legacy
+4. ادمین: **دسته‌ها** — `show_in_mega` برای ریشه‌ها و ستون‌های سطح ۲/۳ مگا
+5. اختیاری (فاز F): حذف فیزیکی ستون‌های `product_family_id` / جداول خانواده پس از پایدار شدن
+6. پاکسازی: پاپ‌آپ JS/CSS خانواده (دیگر استفاده نمی‌شود)
+
 ### آیا خروجی migrate «اوکی» است؟
 
 - **بله برای مگا منو** اگر حداقل ریشه‌های اصلی (مثلاً سرویس چینی و مبلمان) `show_in_mega` دارند و لینkهای سایدبار در تنظیمات صفحه اصلی پر است.

@@ -7,6 +7,8 @@ use App\Models\Category;
 use App\Models\ProductFamily;
 use App\Services\Cache\ShopCacheService;
 use App\Services\Shop\CatalogFamilyCategoryMapper;
+use App\Services\Shop\CategoryListingNavService;
+use App\Support\ShopStaffPreview;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -59,6 +61,14 @@ trait ListsShopProducts
             default => 'لیست کالاها',
         };
 
+        $categoryTrail = [];
+        $categoryCarousel = collect();
+        if ($category !== null) {
+            $nav = app(CategoryListingNavService::class);
+            $categoryTrail = $nav->breadcrumbTrail($category);
+            $categoryCarousel = $nav->carouselCategories($category, ShopStaffPreview::enabled());
+        }
+
         return view('shop.products.index', [
             'products' => $products,
             'categories' => $categories,
@@ -69,6 +79,8 @@ trait ListsShopProducts
             'filters' => $filters,
             'priceBounds' => $priceBounds,
             'searchQuery' => $request->search,
+            'categoryTrail' => $categoryTrail,
+            'categoryCarousel' => $categoryCarousel,
         ]);
     }
 }

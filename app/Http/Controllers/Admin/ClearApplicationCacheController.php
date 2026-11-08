@@ -36,8 +36,8 @@ class ClearApplicationCacheController
 
         if ($failed === []) {
             Notification::make()
-                ->title('کش پاک شد')
-                ->body('cache، view، route، config و compiled با موفقیت پاک شدند.')
+                ->title('کش سیستم با موفقیت حذف شد')
+                ->body('کش سیستم با موفقیت حذف شد')
                 ->success()
                 ->send();
         } else {

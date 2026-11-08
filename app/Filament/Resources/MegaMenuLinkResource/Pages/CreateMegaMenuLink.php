@@ -8,11 +8,4 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateMegaMenuLink extends CreateRecord
 {
     protected static string $resource = MegaMenuLinkResource::class;
-
-    public function mount(): void
-    {
-        abort_unless(MegaMenuLinkResource::schemaReady(), 404);
-
-        parent::mount();
-    }
 }

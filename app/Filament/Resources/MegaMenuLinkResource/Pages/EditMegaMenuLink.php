@@ -9,10 +9,10 @@ class EditMegaMenuLink extends EditRecord
 {
     protected static string $resource = MegaMenuLinkResource::class;
 
-    public function mount(): void
+    public function mount(int | string $record): void
     {
         abort_unless(MegaMenuLinkResource::schemaReady(), 404);
 
-        parent::mount();
+        parent::mount($record);
     }
 }

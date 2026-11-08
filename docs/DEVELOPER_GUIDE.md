@@ -1342,6 +1342,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-08 | مگا منو: migration idempotent + repair؛ بدون FK سخت‌گیر؛ مخفی شدن منوی ادمین تا migrate کامل |
 | 2026-11-08 | فروشگاه: guard اسکیما مگا منو — اگر migrate نشده باشد منوی قدیمی (بدون 500) |
 | 2026-11-08 | فروشگاه: مگا منو خانواده‌محور (ریل خانواده + ستون دسته/لینک) — بدون لود اضافه؛ fallback منوی قدیمی تا فعال‌سازی `show_in_mega` — [dev/09-mega-menu-families.md](dev/09-mega-menu-families.md) |
 | 2026-11-08 | ادمین: دکمهٔ سبز «پاک کردن کش» در نوار بالا — `POST filament.admin.tools.clear-application-cache` (فقط مدیر سیستم) |

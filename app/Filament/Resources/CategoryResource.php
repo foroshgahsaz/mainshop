@@ -17,6 +17,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class CategoryResource extends Resource
@@ -56,7 +57,8 @@ class CategoryResource extends Resource
                         ->options(fn () => ProductFamily::query()->orderBy('position')->pluck('name', 'id'))
                         ->searchable()
                         ->helperText('ستون اصلی مگا منو فقط برای دسته‌های ریشه همان خانواده. زیردسته خانواده را از والد می‌گیرد.')
-                        ->placeholder('—'),
+                        ->placeholder('—')
+                        ->hidden(fn (): bool => ! Schema::hasColumn('categories', 'product_family_id')),
                     Forms\Components\TextInput::make('name')
                         ->label('نام')
                         ->required()

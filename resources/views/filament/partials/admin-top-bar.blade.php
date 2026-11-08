@@ -61,6 +61,21 @@
                 <span x-text="utilityLink.label || 'مشاهده'"></span>
             </a>
         </template>
+        @if(\App\Support\AdminAccess::canManageShopInAdmin())
+            <form method="POST"
+                  action="{{ route('filament.admin.tools.clear-application-cache') }}"
+                  class="admin-top-bar__logout-form"
+                  onsubmit="return confirm('کش برنامه (cache، view، route، config) پاک شود؟');">
+                @csrf
+                <button type="submit"
+                        class="fi-admin-global-btn fi-admin-global-btn-cache"
+                        title="پاک کردن کش"
+                        aria-label="پاک کردن کش">
+                    <i class="fas fa-broom" aria-hidden="true"></i>
+                    پاک کردن کش
+                </button>
+            </form>
+        @endif
         <a href="{{ url('/') }}"
            target="_blank"
            rel="noopener"

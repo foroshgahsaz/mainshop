@@ -275,6 +275,8 @@ components/shop/
 | دسترسی | `User::canAccessPanel(admin)` → `status && (is_admin \|\| is_sales_manager)` |
 | مدیر فروش | همان پنل؛ محدودیت در `AdminAccess` + `RestrictSalesManagerAdminAccess` — جزئیات [dev/01-roles-and-auth.md](dev/01-roles-and-auth.md) |
 
+**نوار بالا (`admin-top-bar`):** دکمهٔ سبز **پاک کردن کش** (کنار مشاهده فروشگاه، فقط `is_admin`) — `cache:clear`، `view:clear`، `route:clear`، `config:clear`، `clear-compiled`.
+
 ### 5.2 Resourceها — `app/Filament/Resources/`
 
 | Resource | Model | گروه منو |
@@ -1330,6 +1332,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-08 | ادمین: دکمهٔ سبز «پاک کردن کش» در نوار بالا — `POST filament.admin.tools.clear-application-cache` (فقط مدیر سیستم) |
 | 2026-11-07 | ادمین: تقویم شمسی سراسری برای Filament Date/DateTime/Time Picker — `ariaieboy/filament-jalali` + `FilamentJalaliPickers` |
 | 2026-11-07 | پیش‌نمایش فروشگاه: ستون `admin_shop_preview` (نمایش برای مدیر) روی دسته/محصول/برند/صفحه/پست/منو — فقط `is_admin` یا `is_sales_manager` در سایت می‌بیند؛ `ShopStaffPreview` |
 | 2026-11-07 | بنر قسطی صفحهٔ اصلی: تصاویر ۱۲۸۰×۲۰۰ (دسکتاپ) و ۱۰۸۰×۵۰۰ (موبایل)، ارتفاع CSS ۲۰۰px زیر کارت‌های طرح |

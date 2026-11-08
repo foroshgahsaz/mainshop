@@ -868,6 +868,16 @@ body.fi-body .fi-no-notification-icon {
     color: #181c32 !important;
 }
 
+.fi-admin-global-btn-cache {
+    background: #50cd89 !important;
+    color: #fff !important;
+}
+
+.fi-admin-global-btn-cache:hover {
+    background: #3dad73 !important;
+    color: #fff !important;
+}
+
 /* ===== نوار بالای محتوا ===== */
 .admin-top-bar {
     display: flex;

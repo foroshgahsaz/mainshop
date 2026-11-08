@@ -36,6 +36,12 @@ class ShopDeployRecover extends Command
             $this->components->info('Mega menu schema repaired: '.implode(', ', $megaRepair));
         }
 
+        Artisan::call('shop:migrate-homepage-settings-categories');
+        $homepageMigrateOut = trim(Artisan::output());
+        if ($homepageMigrateOut !== '' && $homepageMigrateOut !== 'تغییری لازم نبود.') {
+            $this->line($homepageMigrateOut);
+        }
+
         $homepageSettings = app(HomepageSettingsService::class);
         if ($homepageSettings->materializeHeroSidebarLinksIfEmpty()) {
             $this->components->info('Homepage hero sidebar links imported from product family settings.');

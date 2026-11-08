@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Concerns;
 
 use App\Models\Brand;
 use App\Models\Category;
-use App\Models\Category;
 use App\Models\ProductFamily;
 use App\Services\Cache\ShopCacheService;
 use App\Services\Shop\CatalogFamilyCategoryMapper;

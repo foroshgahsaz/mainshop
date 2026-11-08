@@ -70,6 +70,7 @@
     if (
         AdminAccess::canManageShopInAdmin($user)
         && SchemaFacade::hasTable('mega_menu_links')
+        && SchemaFacade::hasColumn('mega_menu_links', 'id')
         && SchemaFacade::hasColumn('categories', 'show_in_mega')
     ) {
         $siteMenuItems[] = ['label' => 'لینک‌های مگا منو', 'url' => MegaMenuLinkResource::getUrl('index'), 'icon' => 'fa-list'];

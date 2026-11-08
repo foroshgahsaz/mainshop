@@ -45,6 +45,7 @@ use App\Policies\OrderPolicy;
 use App\Policies\PaymentPolicy;
 use App\Policies\UserAddressPolicy;
 use App\Services\Cache\ShopCacheService;
+use App\Services\Shop\CategoryPathResolver;
 use App\Services\Media\ImageOptimizer;
 use App\Services\Media\MediaRegistry;
 use App\Services\Payment\PaymentGatewayCatalog;
@@ -194,6 +195,15 @@ class AppServiceProvider extends ServiceProvider
                 ->where('slug', $value)
                 ->where('is_author', true)
                 ->firstOrFail();
+        });
+
+        Route::bind('category', function (string $value) {
+            $category = app(CategoryPathResolver::class)->resolve($value);
+            if ($category === null) {
+                abort(404);
+            }
+
+            return $category;
         });
 
         \Filament\Tables\Actions\CreateAction::configureUsing(function ($action): void {

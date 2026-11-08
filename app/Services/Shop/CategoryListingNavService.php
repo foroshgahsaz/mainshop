@@ -8,8 +8,12 @@ use Illuminate\Support\Collection;
 
 final class CategoryListingNavService
 {
+    public function __construct(
+        protected CategoryPathResolver $paths,
+    ) {}
+
     /**
-     * @return list<array{id: int, name: string, slug: string}>
+     * @return list<array{id: int, name: string, slug: string, path: string}>
      */
     public function breadcrumbTrail(Category $category): array
     {
@@ -21,6 +25,7 @@ final class CategoryListingNavService
                 'id' => (int) $node->id,
                 'name' => (string) $node->name,
                 'slug' => (string) $node->slug,
+                'path' => $this->paths->pathFor($node),
             ]);
 
             if (! $node->parent_id) {
@@ -33,29 +38,14 @@ final class CategoryListingNavService
         return $trail;
     }
 
-    /** زیردسته‌های مستقیم، یا اگر برگ است هم‌سطح‌های همان والد. */
+    /** فقط زیردسته‌های مستقیم فعال — روی دستهٔ برگ خالی است. */
     public function carouselCategories(Category $category, ?bool $asStaff = null): Collection
     {
         $asStaff ??= ShopStaffPreview::enabled();
 
-        $children = Category::query()
-            ->visibleOnShop($asStaff)
-            ->where('parent_id', $category->id)
-            ->orderBy('position')
-            ->orderBy('id')
-            ->get();
-
-        if ($children->isNotEmpty()) {
-            return $children;
-        }
-
-        if ($category->parent_id === null) {
-            return collect();
-        }
-
         return Category::query()
             ->visibleOnShop($asStaff)
-            ->where('parent_id', $category->parent_id)
+            ->where('parent_id', $category->id)
             ->orderBy('position')
             ->orderBy('id')
             ->get();

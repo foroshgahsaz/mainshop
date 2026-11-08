@@ -39,7 +39,7 @@ class CategoryListingNavServiceTest extends TestCase
         $this->assertSame(['چینی ، بلور ، اپال', 'اپال', 'فالکن'], array_column($trail, 'name'));
     }
 
-    public function test_carousel_prefers_children_then_siblings(): void
+    public function test_carousel_only_lists_direct_children(): void
     {
         $root = Category::query()->create([
             'name' => 'ریشه',
@@ -57,6 +57,6 @@ class CategoryListingNavServiceTest extends TestCase
 
         $nav = app(CategoryListingNavService::class);
         $this->assertCount(1, $nav->carouselCategories($root));
-        $this->assertCount(1, $nav->carouselCategories($child));
+        $this->assertCount(0, $nav->carouselCategories($child));
     }
 }

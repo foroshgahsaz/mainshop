@@ -57,9 +57,13 @@ Migration: `database/migrations/2026_11_08_120000_mega_menu_product_families.php
 
 ## استقرار
 
+**ترتیب الزامی:** اول migrate، بعد recover/کش — وگرنه قبل از hotfix اسکیما، خطای `Unknown column 'show_in_mega'` و 500 روی layout فروشگاه.
+
 ```bash
 php artisan migrate --force && php artisan shop:deploy-recover
 ```
+
+اگر فقط کد deploy شده و migrate فراموش شده: همان دستور بالا. از hotfix `MegaMenuPayloadBuilder::megaMenuSchemaReady()` تا migrate، منوی قدیمی بدون 500.
 
 پس از فعال‌کردن خانواده در مگا، در صورت دیدن منوی قدیمی: `php artisan shop:cache-warm` یا پاک‌سازی کش از نوار ادمین.
 

@@ -7,6 +7,7 @@ use App\Models\MegaMenuLink;
 use App\Models\ProductFamily;
 use App\Support\ShopStaffPreview;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * ساختار سبک مگا منو برای کش header — بدون Eloquent در خروجی.
@@ -31,6 +32,10 @@ final class MegaMenuPayloadBuilder
     public function build(?bool $asStaff = null): array
     {
         $asStaff ??= ShopStaffPreview::enabled();
+
+        if (! $this->megaMenuSchemaReady()) {
+            return ['has_families' => false, 'families' => []];
+        }
 
         $families = ProductFamily::query()
             ->where('show_in_mega', true)
@@ -170,5 +175,13 @@ final class MegaMenuPayloadBuilder
         }
 
         return $columns;
+    }
+
+    /** تا قبل از migrate، سایت نباید 500 بدهد — همان منوی قدیمی header. */
+    private function megaMenuSchemaReady(): bool
+    {
+        return Schema::hasColumn('product_families', 'show_in_mega')
+            && Schema::hasColumn('categories', 'product_family_id')
+            && Schema::hasTable('mega_menu_links');
     }
 }

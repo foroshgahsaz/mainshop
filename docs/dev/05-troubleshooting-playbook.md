@@ -23,6 +23,19 @@ App\Models\User::where("is_sales_manager", true)->get(["id","phone"])->each(fn($
 ## B. Redis / 500 بعد از deploy
 
 ```bash
+php artisan migrate --force && php artisan shop:deploy-recover
+```
+
+### صفحهٔ اصلی 500 — `Unknown column 'show_in_mega'`
+
+| علت | اقدام |
+|-----|--------|
+| کد مگا منو merge شده ولی **migrate نشده** | `php artisan migrate --force` (migration `2026_11_08_120000_mega_menu_product_families.php`) سپس `shop:deploy-recover` یا پاک کردن کش |
+| بعد از migrate هنوز خطا | کش header: دکمهٔ «پاک کردن کش» در نوار ادمین یا `php artisan cache:clear` |
+
+از نسخهٔ بعد از hotfix، اگر migrate نشده باشد فروشگاه **منوی قدیمی** را نشان می‌دهد (بدون 500)؛ برای فعال شدن مگا منوی خانواده‌محور حتماً migrate لازم است.
+
+```bash
 php artisan shop:deploy-recover
 ```
 

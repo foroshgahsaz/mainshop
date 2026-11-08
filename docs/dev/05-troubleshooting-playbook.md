@@ -26,6 +26,13 @@ App\Models\User::where("is_sales_manager", true)->get(["id","phone"])->each(fn($
 php artisan migrate --force && php artisan shop:deploy-recover
 ```
 
+### `shop:seed-category-taxonomy` — MySQL 1093
+
+| علامت | `You can't specify target table 'categories' for update in FROM clause` |
+|--------|------------------------------------------------------------------------|
+| علت | محدودیت MySQL روی `DELETE … WHERE NOT EXISTS (SELECT … FROM categories)` |
+| رفع | deploy نسخهٔ دارای fix در `CategoryTaxonomySeederService::deleteAllCategories` (join + `whereIn` delete) |
+
 ### صفحهٔ اصلی 500 — `Unknown column 'show_in_mega'`
 
 | علت | اقدام |

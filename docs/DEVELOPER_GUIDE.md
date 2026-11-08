@@ -704,6 +704,7 @@ $middleware->validateCsrfTokens(except: [
 | Key | TTL پیش‌فرض | محتوا |
 |-----|-------------|--------|
 | `shop:home:payload` | 600s | slider، دسته، محصولات |
+| `shop:header:payload` (+ `:staff`) | 3600s | هدر: منو، برند، `navCategories` یا `megaMenu`، `searchCategories` |
 | `shop:categories:*` | 3600s | دسته‌ها |
 | `shop:product:{slug}` | 900s | جزئیات محصول |
 | `shop:shipping:active` | 3600s | روش ارسال |
@@ -1133,6 +1134,15 @@ $settings->site();       // نام سایت، لوگو، ...
 
 `link`, `mega_trigger`, `mega_promo`, `accordion` — `MenuItemObserver` → cache nav
 
+### مگا منو خانواده‌محور
+
+وقتی حداقل یک `ProductFamily` با `show_in_mega` فعال باشد، payload هدر (`ShopCacheService::headerPayload`) شامل `megaMenu` از `MegaMenuPayloadBuilder` است؛ `navCategories` برای مگا خالی می‌شود تا دوباره‌کاری نشود. UI: `overlays.blade.php` (دسکتاپ) و `mobile-menu.blade.php` (drill-down). جزئیات راه‌اندازی ادمین و migration در [dev/09-mega-menu-families.md](dev/09-mega-menu-families.md).
+
+| موجودیت | Resource / سرویس |
+|---------|------------------|
+| لینک دستی | `MegaMenuLinkResource` |
+| ساختار کش | `MegaMenuPayloadBuilder` |
+
 ### Rich content
 
 `RichContentEditor` + `public/shop/css/rich-content.css` — HTML محصول/بلاگ/صفحات؛ دکمه **«بارگذاری و درج ویدئو»** (فایل MP4/WebM یا URL) → `<figure class="rich-content-video">` — `shop.rich_content.video_max_size_kb`
@@ -1332,6 +1342,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-08 | فروشگاه: مگا منو خانواده‌محور (ریل خانواده + ستون دسته/لینک) — بدون لود اضافه؛ fallback منوی قدیمی تا فعال‌سازی `show_in_mega` — [dev/09-mega-menu-families.md](dev/09-mega-menu-families.md) |
 | 2026-11-08 | ادمین: دکمهٔ سبز «پاک کردن کش» در نوار بالا — `POST filament.admin.tools.clear-application-cache` (فقط مدیر سیستم) |
 | 2026-11-07 | ادمین: تقویم شمسی سراسری برای Filament Date/DateTime/Time Picker — `ariaieboy/filament-jalali` + `FilamentJalaliPickers` |
 | 2026-11-07 | پیش‌نمایش فروشگاه: ستون `admin_shop_preview` (نمایش برای مدیر) روی دسته/محصول/برند/صفحه/پست/منو — فقط `is_admin` یا `is_sales_manager` در سایت می‌بیند؛ `ShopStaffPreview` |

@@ -58,6 +58,10 @@ class ProductFamilyResource extends Resource
                     Forms\Components\Toggle::make('is_active')
                         ->label('فعال')
                         ->default(true),
+                    Forms\Components\Toggle::make('show_in_mega')
+                        ->label('نمایش در مگا منو')
+                        ->helperText('ریل راست مگا منو (دسکتاپ) و سطح اول منوی موبایل')
+                        ->default(false),
                     Forms\Components\TextInput::make('position')
                         ->label('ترتیب')
                         ->numeric()
@@ -120,6 +124,7 @@ class ProductFamilyResource extends Resource
                 Tables\Columns\TextColumn::make('name')->label('نام')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('slug')->label('اسلاگ'),
                 Tables\Columns\IconColumn::make('is_active')->label('فعال')->boolean(),
+                Tables\Columns\IconColumn::make('show_in_mega')->label('مگا منو')->boolean(),
                 Tables\Columns\IconColumn::make('homepage_popup_enabled')->label('پاپ‌آپ')->boolean(),
                 Tables\Columns\TextColumn::make('position')->label('ترتیب')->sortable(),
                 Tables\Columns\TextColumn::make('products_count')->counts('products')->label('محصولات'),

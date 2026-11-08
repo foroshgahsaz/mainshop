@@ -10,6 +10,7 @@ use App\Filament\Support\CategoryDeleteActions;
 use App\Filament\Support\SeoFormSchema;
 use App\Filament\Support\ShopMediaPicker;
 use App\Models\Category;
+use App\Models\ProductFamily;
 use App\Support\AdminAccess;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -50,6 +51,12 @@ class CategoryResource extends Resource
                         ->searchable()
                         ->preload()
                         ->placeholder('بدون والد (دسته اصلی)'),
+                    Forms\Components\Select::make('product_family_id')
+                        ->label('خانواده محصول (مگا منو)')
+                        ->options(fn () => ProductFamily::query()->orderBy('position')->pluck('name', 'id'))
+                        ->searchable()
+                        ->helperText('ستون اصلی مگا منو فقط برای دسته‌های ریشه همان خانواده. زیردسته خانواده را از والد می‌گیرد.')
+                        ->placeholder('—'),
                     Forms\Components\TextInput::make('name')
                         ->label('نام')
                         ->required()
@@ -97,6 +104,7 @@ class CategoryResource extends Resource
                 AdminImageColumn::make('image', 48, 'تصویر'),
                 Tables\Columns\TextColumn::make('name')->label('نام')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('parent.name')->label('والد')->placeholder('—'),
+                Tables\Columns\TextColumn::make('productFamily.name')->label('خانواده')->placeholder('—'),
                 Tables\Columns\IconColumn::make('show_in_mega')->label('مگامenu')->boolean(),
                 Tables\Columns\IconColumn::make('is_active')->label('فعال')->boolean(),
                 Tables\Columns\TextColumn::make('products_count')->counts('products')->label('محصولات')->sortable(),

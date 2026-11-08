@@ -47,7 +47,7 @@
 
 همه در `app/Filament/Resources/`:
 
-`AttributeResource`, `BrandResource`, `CategoryResource`, `CouponResource`, `FreightCarrierResource`, `HomeSliderResource`, `MediaFileResource`, `MenuItemResource`, `OrderResource`, `PageResource`, `PaymentResource`, `PostResource`, `ProductFamilyResource`, `ProductPlantResource`, `ProductQuestionResource`, `ProductResource`, `ProductReviewResource`, `ProductTemplateResource`, `ShippingMethodResource`, `UserResource`.
+`AttributeResource`, `BrandResource`, `CategoryResource`, `CouponResource`, `FreightCarrierResource`, `HomeSliderResource`, `MediaFileResource`, `MegaMenuLinkResource`, `MenuItemResource`, `OrderResource`, `PageResource`, `PaymentResource`, `PostResource`, `ProductFamilyResource`, `ProductPlantResource`, `ProductQuestionResource`, `ProductResource`, `ProductReviewResource`, `ProductTemplateResource`, `ShippingMethodResource`, `UserResource`.
 
 صفحات تنظیمات: `app/Filament/Pages/Manage*.php`, `Dashboard.php`.
 
@@ -93,6 +93,7 @@ app/Services/
   Payment/        PaymentService, ZarinpalGateway, ParsianGateway, SadadGateway, PecIpgClient, SadadIpgClient, TaraGateway, ...
   Order/          OrderService, OrderDeletionService, ...
   Cache/          ShopCacheService
+  Shop/           MegaMenuPayloadBuilder
   Settings/       SettingsService, FooterSettingsService, ...
   Media/          MediaLibrary, ImageOptimizer, ...
   Auth/           OtpService, *Guard
@@ -138,6 +139,18 @@ app/Services/
 ## Tests
 
 `tests/Feature/` — ۵۰+ فایل؛ مهم: `CheckoutAndPaymentLaunchTest`, `SalesManagerAccessTest`, `UnifiedLoginTest`, `RepresentativePhase1Test`, `AdminOtpLoginTest`.
+
+---
+
+## هدر فروشگاه (مگا منو)
+
+| فایل | نقش |
+|------|-----|
+| `app/Services/Shop/MegaMenuPayloadBuilder.php` | آرایهٔ `megaMenu` برای view |
+| `app/Models/MegaMenuLink.php` | لینک دستی ستون/زیرآیتم |
+| `resources/views/shop/partials/overlays.blade.php` | مگا دسکتاپ + مودال جستجو |
+| `resources/views/shop/partials/mobile-menu.blade.php` | drill-down موبایل |
+| `public/shop/js/main.js` | `initMegaFamilyTabs`, `initMobileMegaDrill` |
 
 ---
 

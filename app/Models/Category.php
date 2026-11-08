@@ -13,6 +13,7 @@ class Category extends Model
 
     protected $fillable = [
         'parent_id',
+        'product_family_id',
         'name',
         'slug',
         'description',
@@ -45,6 +46,26 @@ class Category extends Model
     public function parent(): BelongsTo
     {
         return $this->belongsTo(Category::class, 'parent_id');
+    }
+
+    public function productFamily(): BelongsTo
+    {
+        return $this->belongsTo(ProductFamily::class);
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(function (Category $category): void {
+            if ($category->parent_id && ! $category->product_family_id) {
+                $parentFamilyId = static::query()
+                    ->whereKey($category->parent_id)
+                    ->value('product_family_id');
+
+                if ($parentFamilyId) {
+                    $category->product_family_id = $parentFamilyId;
+                }
+            }
+        });
     }
 
     public function children(): HasMany

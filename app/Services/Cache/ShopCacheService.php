@@ -13,6 +13,7 @@ use App\Services\Settings\HomepageSettingsService;
 use App\Services\Shop\HomepageCreditPlanService;
 use App\Services\Shop\HomepageHeroHubService;
 use App\Services\Shop\HomepagePartnerService;
+use App\Services\Shop\MegaMenuPayloadBuilder;
 use App\Support\ShopStaffPreview;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -134,6 +135,18 @@ class ShopCacheService
                     ->orderBy('position')
                     ->get();
 
+                $megaMenu = app(MegaMenuPayloadBuilder::class)->build($staff);
+
+                $navCategories = $megaMenu['has_families']
+                    ? collect()
+                    : Category::query()
+                        ->visibleOnShop($staff)
+                        ->where('show_in_mega', true)
+                        ->whereNull('parent_id')
+                        ->with(['children' => fn ($q) => $q->visibleOnShop($staff)->orderBy('position')])
+                        ->orderBy('position')
+                        ->get();
+
                 return [
                     'searchCategories' => Category::query()->visibleOnShop($staff)->orderBy('position')->get(),
                     'navBrands' => Brand::query()
@@ -141,13 +154,8 @@ class ShopCacheService
                         ->orderBy('position')
                         ->orderBy('name')
                         ->get(),
-                    'navCategories' => Category::query()
-                        ->visibleOnShop($staff)
-                        ->where('show_in_mega', true)
-                        ->whereNull('parent_id')
-                        ->with(['children' => fn ($q) => $q->visibleOnShop($staff)->orderBy('position')])
-                        ->orderBy('position')
-                        ->get(),
+                    'navCategories' => $navCategories,
+                    'megaMenu' => $megaMenu,
                     'navigation' => [
                         'desktop' => $items->filter(fn ($item) => $item->showsOnDesktop())->values(),
                         'mobile' => $items->filter(fn ($item) => $item->showsOnMobile())->values(),

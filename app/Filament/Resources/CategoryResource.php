@@ -17,6 +17,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
@@ -126,5 +127,25 @@ class CategoryResource extends Resource
             'create' => Pages\CreateCategory::route('/create'),
             'edit' => Pages\EditCategory::route('/{record}/edit'),
         ];
+    }
+
+    public static function getRecordRouteKeyName(): ?string
+    {
+        return 'id';
+    }
+
+    public static function getUrl(
+        string $name = 'index',
+        array $parameters = [],
+        bool $isAbsolute = true,
+        ?string $panel = null,
+        ?Model $tenant = null,
+    ): string {
+        $record = $parameters['record'] ?? null;
+        if ($record instanceof Category) {
+            $parameters['record'] = $record->getKey();
+        }
+
+        return parent::getUrl($name, $parameters, $isAbsolute, $panel, $tenant);
     }
 }

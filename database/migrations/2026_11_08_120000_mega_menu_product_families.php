@@ -8,44 +8,54 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('product_families', function (Blueprint $table) {
-            $table->boolean('show_in_mega')->default(false)->after('is_active');
-        });
+        if (Schema::hasTable('product_families') && ! Schema::hasColumn('product_families', 'show_in_mega')) {
+            Schema::table('product_families', function (Blueprint $table) {
+                $table->boolean('show_in_mega')->default(false)->after('is_active');
+            });
+        }
 
-        Schema::table('categories', function (Blueprint $table) {
-            $table->foreignId('product_family_id')
-                ->nullable()
-                ->after('parent_id')
-                ->constrained('product_families')
-                ->nullOnDelete();
-        });
+        if (Schema::hasTable('categories') && ! Schema::hasColumn('categories', 'product_family_id')) {
+            Schema::table('categories', function (Blueprint $table) {
+                // بدون FK: روی بعضی MySQLها خطای 1824 «Failed to open referenced table» می‌دهد.
+                $table->unsignedBigInteger('product_family_id')->nullable()->after('parent_id');
+                $table->index('product_family_id');
+            });
+        }
 
-        Schema::create('mega_menu_links', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('product_family_id')->constrained('product_families')->cascadeOnDelete();
-            $table->foreignId('parent_id')->nullable()->constrained('mega_menu_links')->cascadeOnDelete();
-            $table->foreignId('category_id')->nullable()->constrained('categories')->nullOnDelete();
-            $table->string('label');
-            $table->string('url', 2048);
-            $table->unsignedInteger('position')->default(0);
-            $table->boolean('is_active')->default(true);
-            $table->boolean('admin_shop_preview')->default(false);
-            $table->timestamps();
+        if (! Schema::hasTable('mega_menu_links')) {
+            Schema::create('mega_menu_links', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('product_family_id');
+                $table->unsignedBigInteger('parent_id')->nullable();
+                $table->unsignedBigInteger('category_id')->nullable();
+                $table->string('label');
+                $table->string('url', 2048);
+                $table->unsignedInteger('position')->default(0);
+                $table->boolean('is_active')->default(true);
+                $table->boolean('admin_shop_preview')->default(false);
+                $table->timestamps();
 
-            $table->index(['product_family_id', 'position']);
-        });
+                $table->index(['product_family_id', 'position']);
+                $table->index('parent_id');
+                $table->index('category_id');
+            });
+        }
     }
 
     public function down(): void
     {
         Schema::dropIfExists('mega_menu_links');
 
-        Schema::table('categories', function (Blueprint $table) {
-            $table->dropConstrainedForeignId('product_family_id');
-        });
+        if (Schema::hasTable('categories') && Schema::hasColumn('categories', 'product_family_id')) {
+            Schema::table('categories', function (Blueprint $table) {
+                $table->dropColumn('product_family_id');
+            });
+        }
 
-        Schema::table('product_families', function (Blueprint $table) {
-            $table->dropColumn('show_in_mega');
-        });
+        if (Schema::hasTable('product_families') && Schema::hasColumn('product_families', 'show_in_mega')) {
+            Schema::table('product_families', function (Blueprint $table) {
+                $table->dropColumn('show_in_mega');
+            });
+        }
     }
 };

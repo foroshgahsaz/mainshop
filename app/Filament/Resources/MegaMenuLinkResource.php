@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Models\MegaMenuLink;
 use App\Support\AdminAccess;
 use Filament\Forms;
+use Illuminate\Support\Facades\Schema;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Resources\Resource;
@@ -31,9 +32,21 @@ class MegaMenuLinkResource extends Resource
 
     protected static ?string $pluralModelLabel = 'لینک‌های مگا منو';
 
+    public static function schemaReady(): bool
+    {
+        return Schema::hasTable('mega_menu_links')
+            && Schema::hasColumn('product_families', 'show_in_mega')
+            && Schema::hasColumn('categories', 'product_family_id');
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::schemaReady() && parent::shouldRegisterNavigation();
+    }
+
     public static function canViewAny(): bool
     {
-        return AdminAccess::canManageShopInAdmin();
+        return static::schemaReady() && AdminAccess::canManageShopInAdmin();
     }
 
     public static function form(Form $form): Form

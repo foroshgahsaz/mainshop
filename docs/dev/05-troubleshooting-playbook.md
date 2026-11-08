@@ -35,6 +35,16 @@ php artisan migrate --force && php artisan shop:deploy-recover
 
 از نسخهٔ بعد از hotfix، اگر migrate نشده باشد فروشگاه **منوی قدیمی** را نشان می‌دهد (بدون 500)؛ برای فعال شدن مگا منوی خانواده‌محور حتماً migrate لازم است.
 
+### ادمین `/admin/mega-menu-links` 500 — جدول `mega_menu_links` نیست
+
+| علت | اقدام |
+|-----|--------|
+| migrate نیمه‌کاره (`show_in_mega` اضافه شد، بعد FK خطا خورد) | deploy آخرین `master` سپس `php artisan migrate --force` — migrationهای `120000` (idempotent) + `130000_repair_mega_menu_schema` جدول را می‌سازند |
+| خطای `Duplicate column show_in_mega` | طبیعی بعد از شکست قبلی — با migration idempotent رد می‌شود و بقیه تکمیل می‌شود |
+| خطای `1824 Failed to open referenced table product_families` | در نسخهٔ جدید FK حذف شده؛ فقط ستون + index |
+
+تا migrate کامل نشود، منوی «لینک مگا منو» در سایدبار مخفی است و URL مستقیم 403 می‌دهد (نه 500).
+
 ```bash
 php artisan shop:deploy-recover
 ```

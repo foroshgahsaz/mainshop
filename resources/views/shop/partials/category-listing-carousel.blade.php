@@ -5,7 +5,7 @@
 @endphp
 
 @if(isset($category) && $items->isNotEmpty())
-    <section class="listing-category-carousel w-full" aria-label="زیردسته‌ها">
+    <section class="listing-category-carousel w-full" aria-label="زیردسته‌ها" data-carousel-count="{{ $items->count() }}">
         <div class="swiper categorySwiper listing-category-carousel__swiper w-full">
             <div class="swiper-wrapper">
                 @foreach($items as $child)

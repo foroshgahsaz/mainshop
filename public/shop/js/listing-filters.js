@@ -74,12 +74,20 @@ function initListingPriceSliders() {
         }
       }
 
-      const left = ((minVal - minBound) / (max - minBound)) * 100;
-      const right = 100 - ((maxVal - minBound) / (max - minBound)) * 100;
+      const span = Math.max(1, max - minBound);
+      const hasCustomMin = minVal > minBound;
+      const hasCustomMax = maxVal < max;
 
       if (fill) {
-        fill.style.right = `${Math.max(0, right)}%`;
-        fill.style.left = `${Math.max(0, left)}%`;
+        if (!hasCustomMin && !hasCustomMax) {
+          fill.style.opacity = '0';
+        } else {
+          fill.style.opacity = '1';
+          const left = ((minVal - minBound) / span) * 100;
+          const right = 100 - ((maxVal - minBound) / span) * 100;
+          fill.style.left = `${Math.max(0, Math.min(100, left))}%`;
+          fill.style.right = `${Math.max(0, Math.min(100, right))}%`;
+        }
       }
 
       if (minLabel) minLabel.textContent = formatPrice(minVal);

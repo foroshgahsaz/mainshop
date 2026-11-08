@@ -1321,13 +1321,30 @@ body.mobile-menu-open {
   text-align: right;
   padding: 0.65rem 0.75rem;
   border-radius: 0.5rem;
-  font-size: 0.8125rem;
+  font-size: 15px;
+  line-height: 25px;
   font-weight: 600;
   color: #475569;
   background: transparent;
   border: none;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
+}
+
+.shop-mega-families__rail-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.shop-mega-families__rail-icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  border-radius: 4px;
 }
 
 .shop-mega-families__rail-btn:hover,
@@ -1357,7 +1374,35 @@ body.mobile-menu-open {
   font-size: 0.75rem;
   font-weight: 700;
   color: #059669;
+  margin-top: 10px;
   margin-bottom: 1rem;
+}
+
+.shop-mega-families__column-title-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.shop-mega-families__column-icon {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.shop-mega-families__item-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.shop-mega-families__item-icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  opacity: 0.9;
 }
 
 .shop-mega-families__columns {

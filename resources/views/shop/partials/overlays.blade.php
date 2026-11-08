@@ -32,7 +32,12 @@
                         role="tab"
                         aria-selected="{{ $index === 0 ? 'true' : 'false' }}"
                         data-mega-family-tab="{{ $family['id'] }}">
-                  <span>{{ $family['name'] }}</span>
+                  <span class="shop-mega-families__rail-label">
+                    @if(!empty($family['image']))
+                      <img src="{{ $family['image'] }}" alt="" class="shop-mega-families__rail-icon" width="24" height="24" loading="lazy">
+                    @endif
+                    <span>{{ $family['name'] }}</span>
+                  </span>
                   <svg class="shop-mega-families__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
@@ -57,20 +62,30 @@
                 @forelse($family['columns'] as $column)
                   <div class="shop-mega-families__column">
                     <h4 class="shop-mega-families__column-title">
-                      <a href="{{ $column['url'] }}">{{ $column['title'] }}</a>
+                      <a href="{{ $column['url'] }}" class="shop-mega-families__column-title-link">
+                        @if(!empty($column['image']))
+                          <img src="{{ $column['image'] }}" alt="" class="shop-mega-families__column-icon" width="22" height="22" loading="lazy">
+                        @endif
+                        <span>{{ $column['title'] }}</span>
+                      </a>
                     </h4>
                     @if(!empty($column['items']))
                       <ul class="shop-mega-families__column-links">
                         @foreach($column['items'] as $item)
                           <li>
-                            <a href="{{ $item['url'] }}">{{ $item['label'] }}</a>
+                            <a href="{{ $item['url'] }}" class="shop-mega-families__item-link">
+                              @if(!empty($item['image']))
+                                <img src="{{ $item['image'] }}" alt="" class="shop-mega-families__item-icon" width="18" height="18" loading="lazy">
+                              @endif
+                              <span>{{ $item['label'] }}</span>
+                            </a>
                           </li>
                         @endforeach
                       </ul>
                     @endif
                   </div>
                 @empty
-                  <p class="text-sm text-gray-500">برای این خانواده دسته یا لینکی در مگا منو ثبت نشده است.</p>
+                  <p class="shop-mega-families__empty text-sm text-gray-500">در حال بارگزاری محصول</p>
                 @endforelse
               </div>
             </div>

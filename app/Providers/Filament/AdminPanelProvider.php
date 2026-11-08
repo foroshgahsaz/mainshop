@@ -16,6 +16,7 @@ use App\Filament\Pages\ManageZarinpal;
 use App\Filament\Pages\ViewDatabaseBackups;
 use App\Filament\Pages\ViewPaymentLogs;
 use App\Filament\Pages\ViewSiteErrorLogs;
+use App\Http\Controllers\Admin\ClearApplicationCacheController;
 use App\Http\Controllers\Admin\DownloadApplicationLogFileController;
 use App\Http\Controllers\Admin\DownloadDatabaseBackupController;
 use App\Http\Controllers\Admin\DownloadPaymentLogFileController;
@@ -114,6 +115,8 @@ class AdminPanelProvider extends PanelProvider
                     ->name('database-backups.download');
                 Route::get('/product-import/template', ProductImportTemplateController::class)
                     ->name('product-import.template');
+                Route::post('/tools/clear-application-cache', ClearApplicationCacheController::class)
+                    ->name('tools.clear-application-cache');
             });
     }
 }

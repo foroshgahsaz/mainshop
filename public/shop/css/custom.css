@@ -1439,17 +1439,242 @@ body.mobile-menu-open {
   color: #059669;
 }
 
-.shop-mobile-mega-drill__row {
-  background: transparent;
-  border: none;
-  cursor: pointer;
+@media (max-width: 767px) {
+  #megaMenuBox.shop-mega-menu,
+  .shop-mega-backdrop {
+    display: none !important;
+    pointer-events: none !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  .shop-mega-menu--families .shop-mega-families {
+    flex-direction: column;
+    gap: 1rem;
+    min-height: 0;
+  }
+
+  .shop-mega-families__rail {
+    flex: none;
+    width: 100%;
+    border-left: none;
+    border-bottom: 1px solid #e8eef4;
+    padding-left: 0;
+    padding-bottom: 0.75rem;
+  }
+
+  .shop-mega-families__rail-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .shop-mega-families__rail-btn {
+    font-size: 13px;
+    line-height: 1.4;
+    padding: 0.55rem 0.65rem;
+  }
+
+  .shop-mega-families__panels {
+    width: 100%;
+  }
+
+  .shop-mega-families__columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+}
+
+.shop-mobile-accordion-panel:not(.hidden) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0 0 0.5rem;
+  padding: 0.35rem 0.5rem 0.75rem 0;
+  border-right: 2px solid #d1fae5;
+  margin-right: 0.35rem;
+}
+
+.shop-mobile-accordion-panel--brands {
+  font-size: 0.8125rem;
+  color: #6b7280;
+  padding-right: 0.75rem;
+}
+
+.shop-mobile-accordion-panel--brands a {
+  padding: 0.35rem 0.25rem;
+}
+
+.shop-mobile-mega-drill:not(.hidden) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  max-height: min(52vh, 420px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.15rem 0 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.shop-mobile-mega-drill__toolbar:not(.hidden) {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.25rem;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #fff;
+  padding-bottom: 0.35rem;
+  margin-bottom: 0.25rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.shop-mobile-mega-drill__level:not(.hidden) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
 }
 
 .shop-mobile-mega-drill__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 0;
+  padding: 0.35rem 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #059669;
+}
+
+.shop-mobile-mega-drill__back-icon {
+  width: 0.9rem;
+  height: 0.9rem;
+  flex-shrink: 0;
+}
+
+.shop-mobile-mega-drill__title {
+  margin: 0;
+  font-size: 0.6875rem;
+  color: #9ca3af;
+  line-height: 1.4;
+}
+
+.shop-mobile-mega-drill__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  text-align: right;
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.65rem;
+  border: 1px solid #eef2f7;
+  background: #fafbfc;
+  color: #334155;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.shop-mobile-mega-drill__row:hover,
+.shop-mobile-mega-drill__row:focus-visible {
+  border-color: #a7f3d0;
+  background: #f0fdf4;
+  color: #047857;
+}
+
+.shop-mobile-mega-drill__row-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.shop-mobile-mega-drill__label {
+  line-height: 1.35;
+}
+
+.shop-mobile-mega-drill__thumb {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.shop-mobile-mega-drill__thumb--fallback {
+  display: inline-block;
+  background: linear-gradient(135deg, #e2e8f0, #f8fafc);
+}
+
+.shop-mobile-mega-drill__chevron {
+  width: 0.85rem;
+  height: 0.85rem;
+  flex-shrink: 0;
+  opacity: 0.45;
+}
+
+.shop-mobile-mega-drill__all-link {
+  display: block;
+  padding: 0.45rem 0.65rem;
+  margin-bottom: 0.15rem;
+  border-radius: 0.5rem;
+  background: #ecfdf5;
+  color: #047857;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.shop-mobile-mega-drill__link,
+.shop-mobile-mega-drill__heading-link {
+  display: block;
+  padding: 0.45rem 0.65rem;
+  border-radius: 0.5rem;
+  color: #475569;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.shop-mobile-mega-drill__heading-link {
+  font-weight: 800;
+  color: #0f172a;
+  background: #f8fafc;
+  border: 1px solid #eef2f7;
+}
+
+.shop-mobile-mega-drill__item-link {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.65rem;
+  padding-right: 0.85rem;
+  border-radius: 0.5rem;
+  color: #64748b;
+  font-size: 0.75rem;
+  text-decoration: none;
+}
+
+.shop-mobile-mega-drill__item-link:hover {
+  background: #f8fafc;
+  color: #059669;
+}
+
+.shop-mobile-mega-drill__item-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  border-radius: 4px;
 }
 
 .main-nav {

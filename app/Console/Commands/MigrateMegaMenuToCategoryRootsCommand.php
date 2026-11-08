@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Category;
 use App\Models\MegaMenuLink;
 use App\Models\ProductFamily;
 use App\Services\Shop\CatalogFamilyCategoryMapper;

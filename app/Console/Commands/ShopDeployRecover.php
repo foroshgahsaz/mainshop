@@ -36,7 +36,7 @@ class ShopDeployRecover extends Command
             $this->components->info('Homepage hero sidebar links imported from product family settings.');
         }
         $homepageSettings->rebuildAggregatedHeroSidebarLinks();
-        $this->components->info('Homepage hero sidebar links aggregated from all enabled families.');
+        $this->components->info('Homepage hero sidebar links rebuilt from category roots (settings / deploy).');
 
         if (! \App\Support\OrderProformaSplitColumns::available()) {
             $this->components->error(\App\Support\OrderProformaSplitColumns::migrationHint());

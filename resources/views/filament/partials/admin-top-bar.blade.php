@@ -65,7 +65,7 @@
             <form method="POST"
                   action="{{ route('filament.admin.tools.clear-application-cache') }}"
                   class="admin-top-bar__logout-form"
-                  onsubmit="return confirm('کش برنامه (cache، view، route، config) پاک شود؟');">
+                  onsubmit="return confirm('حافظه موقت سامانه حذف شود؟');">
                 @csrf
                 <button type="submit"
                         class="fi-admin-global-btn fi-admin-global-btn-cache"

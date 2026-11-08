@@ -571,7 +571,11 @@ function initCategorySwiper(el) {
 }
 
 function initListingCategorySwiper(el) {
-  if (!el || typeof Swiper === 'undefined') {
+  if (!el || el.classList.contains('swiper-initialized')) {
+    return null;
+  }
+
+  if (typeof Swiper === 'undefined') {
     return null;
   }
 

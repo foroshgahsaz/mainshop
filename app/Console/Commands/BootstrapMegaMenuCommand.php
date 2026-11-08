@@ -11,12 +11,19 @@ class BootstrapMegaMenuCommand extends Command
     protected $signature = 'shop:bootstrap-mega-menu
         {--dry-run : فقط گزارش بدون ذخیره}
         {--all-roots : همه دسته‌های ریشهٔ فعال (نه فقط show_in_mega قبلی)}
-        {--family= : اسلاگ یا شناسه خانواده — همه ستون‌ها زیر همین خانواده}';
+        {--family= : اسلاگ یا شناسه خانواده — همه ستون‌ها زیر همین خانواده}
+        {--list-families : فقط لیست خانواده‌های فعال (id, slug, name) و خروج}';
 
     protected $description = 'آماده‌سازی مگا منو از دسته‌ها و خانواده‌های موجود (بدون لینک دستی)';
 
     public function handle(MegaMenuBootstrapService $service): int
     {
+        if ($this->option('list-families')) {
+            $this->printFamiliesTable();
+
+            return self::SUCCESS;
+        }
+
         if (! $this->confirmUnlessForced()) {
             return self::SUCCESS;
         }
@@ -29,8 +36,21 @@ class BootstrapMegaMenuCommand extends Command
                 includeAllRoots: (bool) $this->option('all-roots'),
                 forceFamilyId: $forceFamilyId,
             );
+        } catch (\InvalidArgumentException $e) {
+            $this->components->error($e->getMessage());
+            $this->newLine();
+            $this->components->warn('خانواده‌های موجود:');
+            $this->printFamiliesTable();
+            $this->newLine();
+            $this->line('بدون --family اجرا کنید تا از محصولات/پیش‌فرض تخصیص داده شود.');
+            $this->line('مثال: php artisan shop:bootstrap-mega-menu --all-roots --no-interaction');
+
+            return self::FAILURE;
         } catch (\RuntimeException $e) {
             $this->components->error($e->getMessage());
+            if (str_contains($e->getMessage(), 'دستهٔ ریشه')) {
+                $this->line('امتحان: php artisan shop:bootstrap-mega-menu --all-roots --dry-run');
+            }
 
             return self::FAILURE;
         }
@@ -94,5 +114,29 @@ class BootstrapMegaMenuCommand extends Command
         }
 
         return $model->id;
+    }
+
+    private function printFamiliesTable(): void
+    {
+        $rows = ProductFamily::query()
+            ->where('is_active', true)
+            ->orderBy('position')
+            ->orderBy('id')
+            ->get(['id', 'slug', 'name', 'show_in_mega'])
+            ->map(fn (ProductFamily $f) => [
+                $f->id,
+                $f->slug,
+                $f->name,
+                $f->show_in_mega ? 'بله' : 'خیر',
+            ])
+            ->all();
+
+        if ($rows === []) {
+            $this->warn('هیچ خانوادهٔ فعالی در دیتابیس نیست.');
+
+            return;
+        }
+
+        $this->table(['id', 'slug', 'name', 'show_in_mega'], $rows);
     }
 }

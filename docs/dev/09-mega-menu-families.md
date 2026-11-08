@@ -65,6 +65,9 @@ Migration: `database/migrations/2026_11_08_120000_mega_menu_product_families.php
 ### بوت‌استرپ خودکار از دسته‌های فعلی
 
 ```bash
+# لیست خانواده‌ها (اسلاگ واقعی دیتابیس — نه حدس)
+php artisan shop:bootstrap-mega-menu --list-families
+
 # پیش‌نمایش بدون ذخیره
 php artisan shop:bootstrap-mega-menu --dry-run
 

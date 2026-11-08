@@ -53,12 +53,13 @@ class CategoryResource extends Resource
                         ->preload()
                         ->placeholder('بدون والد (دسته اصلی)'),
                     Forms\Components\Select::make('product_family_id')
-                        ->label('خانواده محصول (مگا منو)')
+                        ->label('خانواده محصول (legacy)')
                         ->options(fn () => ProductFamily::query()->orderBy('position')->pluck('name', 'id'))
                         ->searchable()
-                        ->helperText('ستون اصلی مگا منو فقط برای دسته‌های ریشه همان خانواده. زیردسته خانواده را از والد می‌گیرد.')
+                        ->helperText('دیگر برای مگا منو استفاده نمی‌شود؛ فقط سازگاری داده.')
                         ->placeholder('—')
-                        ->hidden(fn (): bool => ! Schema::hasColumn('categories', 'product_family_id')),
+                        ->hidden(fn (): bool => config('shop.catalog.category_only_admin', true)
+                            || ! Schema::hasColumn('categories', 'product_family_id')),
                     Forms\Components\TextInput::make('name')
                         ->label('نام')
                         ->required()

@@ -391,6 +391,10 @@ class ProductResource extends Resource
      */
     private static function catalogTaxonomyFormFields(): array
     {
+        if (config('shop.catalog.category_only_admin', true)) {
+            return [];
+        }
+
         if (! Schema::hasTable('product_families')) {
             return [];
         }

@@ -70,7 +70,7 @@
     if (
         AdminAccess::canManageShopInAdmin($user)
         && SchemaFacade::hasTable('mega_menu_links')
-        && SchemaFacade::hasColumn('product_families', 'show_in_mega')
+        && SchemaFacade::hasColumn('categories', 'show_in_mega')
     ) {
         $siteMenuItems[] = ['label' => 'لینک‌های مگا منو', 'url' => MegaMenuLinkResource::getUrl('index'), 'icon' => 'fa-list'];
         $siteMenuItems[] = ['label' => 'افزودن مگا منو', 'url' => MegaMenuLinkResource::getUrl('create'), 'icon' => 'fa-plus'];
@@ -153,9 +153,6 @@
                     ['label' => 'افزودن محصول', 'url' => ProductResource::getUrl('create'), 'icon' => 'fa-plus'],
                     ['label' => 'دسته‌بندی‌ها', 'url' => CategoryResource::getUrl('index'), 'icon' => 'fa-tags'],
                     ['label' => 'ویژگی‌ها', 'url' => AttributeResource::getUrl('index'), 'icon' => 'fa-list-ul'],
-                    ['label' => 'خانواده محصول', 'url' => ProductFamilyResource::getUrl('index'), 'icon' => 'fa-layer-group'],
-                    ['label' => 'کارخانه', 'url' => ProductPlantResource::getUrl('index'), 'icon' => 'fa-industry'],
-                    ['label' => 'قالب محصول', 'url' => ProductTemplateResource::getUrl('index'), 'icon' => 'fa-shapes'],
                 ]],
             ],
         ],

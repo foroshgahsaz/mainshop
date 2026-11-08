@@ -2,9 +2,11 @@
 
 namespace App\Services\Settings;
 
+use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductFamily;
-use App\Services\Shop\ProductFamilyHomepagePopupService;
+use App\Services\Shop\CatalogFamilyCategoryMapper;
+use App\Services\Shop\CategoryHomepageHeroService;
 use App\Support\ShopMedia;
 use Illuminate\Support\Collection;
 
@@ -46,13 +48,27 @@ class HomepageSettingsService
 
         return [
             'taxonomy_mode' => $data['taxonomy_mode'],
+            'hero_sidebar_category_id' => $data['hero_sidebar_category_id'],
             'hero_sidebar_family_id' => $data['hero_sidebar_family_id'],
             'hero_sidebar_title' => $data['hero_sidebar_title'],
             'hero_sidebar_links' => $data['hero_sidebar_links'],
+            'hero_quick_category_ids' => $data['hero_quick_category_ids'],
             'hero_quick_family_ids' => $data['hero_quick_family_ids'],
             'new_products_enabled' => $data['new_products_enabled'],
             'new_product_ids' => $this->formatIdsForAdmin($data['new_product_ids']),
         ];
+    }
+
+    /** @param  array<string, mixed>  $overrides */
+    public function mergeAndPersist(array $overrides): void
+    {
+        $payload = $this->normalize(array_replace_recursive($this->all(), $overrides));
+
+        $this->settings->set(
+            self::SETTINGS_GROUP,
+            'data',
+            json_encode($payload, JSON_UNESCAPED_UNICODE)
+        );
     }
 
     /** @param  array<string, mixed>  $data */
@@ -60,15 +76,17 @@ class HomepageSettingsService
     {
         $normalized = $this->normalize([
             'taxonomy_mode' => $data['taxonomy_mode'] ?? self::TAXONOMY_CATEGORIES,
+            'hero_sidebar_category_id' => $data['hero_sidebar_category_id'] ?? null,
             'hero_sidebar_family_id' => $data['hero_sidebar_family_id'] ?? null,
             'hero_sidebar_title' => $data['hero_sidebar_title'] ?? 'سرویس چینی',
             'hero_sidebar_links' => $data['hero_sidebar_links'] ?? [],
+            'hero_quick_category_ids' => $data['hero_quick_category_ids'] ?? [],
             'hero_quick_family_ids' => $data['hero_quick_family_ids'] ?? [],
             'new_products_enabled' => $data['new_products_enabled'] ?? true,
             'new_product_ids' => $data['new_product_ids'] ?? '',
         ]);
 
-        $normalized = $this->fillHeroSidebarLinksFromFamilyIfEmpty($normalized);
+        $normalized = $this->fillHeroSidebarLinksFromCategoryIfEmpty($normalized);
 
         $this->settings->set(
             self::SETTINGS_GROUP,
@@ -89,6 +107,13 @@ class HomepageSettingsService
     public function heroSidebarFamilyId(): ?int
     {
         $id = (int) ($this->all()['hero_sidebar_family_id'] ?? 0);
+
+        return $id > 0 ? $id : null;
+    }
+
+    public function heroSidebarCategoryId(): ?int
+    {
+        $id = (int) ($this->all()['hero_sidebar_category_id'] ?? 0);
 
         return $id > 0 ? $id : null;
     }
@@ -137,7 +162,7 @@ class HomepageSettingsService
             return false;
         }
 
-        $filled = $this->fillHeroSidebarLinksFromFamilyIfEmpty($this->all());
+        $filled = $this->fillHeroSidebarLinksFromCategoryIfEmpty($this->all());
         if (($filled['hero_sidebar_links'] ?? []) === []) {
             return false;
         }
@@ -201,6 +226,24 @@ class HomepageSettingsService
     }
 
     /** @return list<int> */
+    public function heroQuickCategoryIds(): array
+    {
+        $raw = $this->all()['hero_quick_category_ids'] ?? [];
+
+        if (! is_array($raw)) {
+            return [];
+        }
+
+        return collect($raw)
+            ->map(fn ($id) => (int) $id)
+            ->filter(fn (int $id) => $id > 0)
+            ->unique()
+            ->take(3)
+            ->values()
+            ->all();
+    }
+
+    /** @return list<int> */
     public function heroQuickFamilyIds(): array
     {
         $raw = $this->all()['hero_quick_family_ids'] ?? [];
@@ -260,9 +303,11 @@ class HomepageSettingsService
     {
         return [
             'taxonomy_mode' => self::TAXONOMY_CATEGORIES,
+            'hero_sidebar_category_id' => null,
             'hero_sidebar_family_id' => null,
             'hero_sidebar_title' => 'سرویس چینی',
             'hero_sidebar_links' => [],
+            'hero_quick_category_ids' => [],
             'hero_quick_family_ids' => [],
             'new_products_enabled' => true,
             'new_product_ids' => [],
@@ -279,13 +324,26 @@ class HomepageSettingsService
             $quickIds = [];
         }
 
+        $quickCategoryIds = $data['hero_quick_category_ids'] ?? [];
+        if (! is_array($quickCategoryIds)) {
+            $quickCategoryIds = [];
+        }
+
         return [
             'taxonomy_mode' => in_array($mode, [self::TAXONOMY_CATEGORIES, self::TAXONOMY_PRODUCT_FAMILIES], true)
                 ? $mode
                 : self::TAXONOMY_CATEGORIES,
+            'hero_sidebar_category_id' => $this->normalizeOptionalCategoryId($data['hero_sidebar_category_id'] ?? null),
             'hero_sidebar_family_id' => $this->normalizeOptionalFamilyId($data['hero_sidebar_family_id'] ?? null),
             'hero_sidebar_title' => trim((string) ($data['hero_sidebar_title'] ?? 'سرویس چینی')) ?: 'سرویس چینی',
             'hero_sidebar_links' => $this->normalizeHeroSidebarLinks($data['hero_sidebar_links'] ?? []),
+            'hero_quick_category_ids' => collect($quickCategoryIds)
+                ->map(fn ($id) => (int) $id)
+                ->filter(fn (int $id) => $id > 0)
+                ->unique()
+                ->take(3)
+                ->values()
+                ->all(),
             'hero_quick_family_ids' => collect($quickIds)
                 ->map(fn ($id) => (int) $id)
                 ->filter(fn (int $id) => $id > 0)
@@ -299,6 +357,13 @@ class HomepageSettingsService
     }
 
     protected function normalizeOptionalFamilyId(mixed $raw): ?int
+    {
+        $id = (int) $raw;
+
+        return $id > 0 ? $id : null;
+    }
+
+    protected function normalizeOptionalCategoryId(mixed $raw): ?int
     {
         $id = (int) $raw;
 
@@ -349,44 +414,51 @@ class HomepageSettingsService
     }
 
     /** @param  array<string, mixed>  $normalized */
-    protected function fillHeroSidebarLinksFromFamilyIfEmpty(array $normalized): array
+    protected function fillHeroSidebarLinksFromCategoryIfEmpty(array $normalized): array
     {
         if (($normalized['hero_sidebar_links'] ?? []) !== []) {
             return $normalized;
         }
 
-        $familyId = $normalized['hero_sidebar_family_id'] ?? null;
-        $family = null;
+        $categoryId = $normalized['hero_sidebar_category_id'] ?? null;
+        $category = null;
 
-        if ($familyId !== null) {
-            $family = ProductFamily::query()->whereKey($familyId)->where('is_active', true)->first();
+        if ($categoryId !== null) {
+            $category = Category::query()->whereKey($categoryId)->where('is_active', true)->first();
         }
 
-        if ($family === null) {
-            $family = ProductFamily::query()
+        if ($category === null) {
+            $familyId = $normalized['hero_sidebar_family_id'] ?? null;
+            if ($familyId !== null) {
+                $mapped = app(CatalogFamilyCategoryMapper::class)->rootCategoryIdForFamilyId((int) $familyId);
+                if ($mapped !== null) {
+                    $category = Category::query()->whereKey($mapped)->where('is_active', true)->first();
+                    $normalized['hero_sidebar_category_id'] = $mapped;
+                }
+            }
+        }
+
+        if ($category === null) {
+            $category = Category::query()
+                ->whereNull('parent_id')
                 ->where('is_active', true)
-                ->where(function ($query) {
-                    $query->where('slug', 'chinese-service')
+                ->where(function ($query): void {
+                    $query->where('slug', 'سرویس-چینی')
+                        ->orWhere('slug', 'chinese-service')
                         ->orWhere('name', 'سرویس چینی');
                 })
                 ->orderBy('position')
                 ->first();
         }
 
-        if ($family === null) {
+        if ($category === null) {
             return $normalized;
         }
 
-        $popup = app(ProductFamilyHomepagePopupService::class);
-        $links = $popup->storedLinkItemsForFamily($family);
-        if ($links === []) {
-            $links = [$popup->familyAsSidebarLink($family)];
-            $links[0]['image'] = trim((string) ($family->image ?? '')) ?: null;
-        }
-
-        $normalized['hero_sidebar_family_id'] = (int) $family->id;
-        $normalized['hero_sidebar_title'] = (string) $family->name;
-        $normalized['hero_sidebar_links'] = $links;
+        $hero = app(CategoryHomepageHeroService::class);
+        $normalized['hero_sidebar_category_id'] = (int) $category->id;
+        $normalized['hero_sidebar_title'] = (string) $category->name;
+        $normalized['hero_sidebar_links'] = $hero->sidebarLinksForRootCategory($category, resolveImageUrls: false);
 
         return $normalized;
     }

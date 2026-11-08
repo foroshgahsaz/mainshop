@@ -64,9 +64,7 @@
                 @else
                     <p class="home-hero-hub__empty-hint">
                         لینک‌های «{{ $heroHub['sidebar_title'] }}» هنوز ثبت نشده.
-                        ادمین → <strong>تنظیمات → صفحه اصلی فروشگاه</strong> یا
-                        <strong>فروشگاه → خانواده محصول → ویرایش {{ $heroHub['sidebar_title'] }}</strong>
-                        → «لینک‌های کنار اسلایدر».
+                        ادمین → <strong>تنظیمات → صفحه اصلی فروشگاه</strong> → لینک‌های کنار اسلایدر یا دستهٔ ریشه.
                     </p>
                 @endif
 
@@ -75,7 +73,7 @@
                         @foreach ($quickFamilies as $family)
                             <a href="{{ $family['url'] }}" class="home-hero-hub__category">
                                 <span class="home-hero-hub__category-icon">
-                                    <img src="{{ \App\Support\ShopFormatter::productFamilyImage($family['image']) }}" alt="" loading="lazy">
+                                    <img src="{{ \App\Services\Shop\HomepageHeroHubService::quickTileImageUrl($family['image']) }}" alt="" loading="lazy">
                                 </span>
                                 <span class="home-hero-hub__category-label">{{ $family['name'] }}</span>
                             </a>

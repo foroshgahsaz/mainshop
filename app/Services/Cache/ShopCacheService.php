@@ -13,6 +13,8 @@ use App\Services\Settings\HomepageSettingsService;
 use App\Services\Shop\HomepageCreditPlanService;
 use App\Services\Shop\HomepageHeroHubService;
 use App\Services\Shop\HomepagePartnerService;
+use App\Services\Shop\CatalogFamilyCategoryMapper;
+use App\Services\Shop\CategoryTreeService;
 use App\Services\Shop\MegaMenuPayloadBuilder;
 use App\Support\ShopStaffPreview;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -467,9 +469,32 @@ class ShopCacheService
                         ->orWhereHas('category', fn ($c) => $c->where('name', 'like', "%{$search}%"));
                 });
             })
-            ->when($filters['category_id'] ?? null, fn ($q, $id) => $q->where('category_id', $id))
+            ->when($filters['category_id'] ?? null, function ($q, $id): void {
+                $categoryId = (int) $id;
+                if ($categoryId <= 0) {
+                    return;
+                }
+
+                if (config('shop.catalog.listing_includes_descendants', true)) {
+                    $ids = app(CategoryTreeService::class)->descendantIdsIncludingSelf($categoryId);
+                    $q->whereIn('category_id', $ids);
+                } else {
+                    $q->where('category_id', $categoryId);
+                }
+            })
             ->when($filters['brand_id'] ?? null, fn ($q, $id) => $q->where('brand_id', $id))
-            ->when($filters['product_family_id'] ?? null, fn ($q, $id) => $q->where('product_family_id', $id))
+            ->when($filters['product_family_id'] ?? null, function ($q, $id): void {
+                $familyId = (int) $id;
+                $categoryId = app(CatalogFamilyCategoryMapper::class)->rootCategoryIdForFamilyId($familyId);
+                if ($categoryId !== null && config('shop.catalog.listing_includes_descendants', true)) {
+                    $ids = app(CategoryTreeService::class)->descendantIdsIncludingSelf($categoryId);
+                    $q->whereIn('category_id', $ids);
+
+                    return;
+                }
+
+                $q->where('product_family_id', $familyId);
+            })
             ->when($filters['product_template_id'] ?? null, fn ($q, $id) => $q->where('product_template_id', $id))
             ->when($filters['min_price'] ?? null, fn ($q, $min) => $q->whereRaw("{$effectivePrice} >= ?", [$min]))
             ->when($filters['max_price'] ?? null, fn ($q, $max) => $q->whereRaw("{$effectivePrice} <= ?", [$max]))

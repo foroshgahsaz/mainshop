@@ -2,15 +2,12 @@
 
 namespace App\Filament\Pages;
 
-use App\Filament\Resources\ProductFamilyResource;
 use App\Filament\Support\CrudSuccessNotification;
 use App\Filament\Support\ShopMediaPicker;
-use App\Models\ProductFamily;
+use App\Models\Category;
 use App\Services\Cache\ShopCacheService;
 use App\Services\Settings\HomepageSettingsService;
 use Filament\Forms;
-use Filament\Forms\Get;
-use Illuminate\Support\HtmlString;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
@@ -48,7 +45,7 @@ class ManageHomepageSettings extends Page implements HasForms
         return $form
             ->schema([
                 Forms\Components\Section::make('باکس بالای صفحه (اسلایدر + سایدبار)')
-                    ->description('لینkهای کنار اسلایدر را اینجا مستقیم وارد کنید (منبع اصلی نمایش در سایت). با ذخیره، در صورت خالی بودن از خانوade محصول هم پر می‌شود.')
+                    ->description('لینkهای کنار اسلایدر منبع اصلی نمایش هستند. اگر خالی بمانند، از فرزندان دستهٔ ریشهٔ انتخاب‌شده ساخته می‌شوند.')
                     ->schema([
                         Forms\Components\TextInput::make('hero_sidebar_title')
                             ->label('عنوان لیست کنار اسلایدر')
@@ -78,69 +75,35 @@ class ManageHomepageSettings extends Page implements HasForms
                             ->collapsible()
                             ->addActionLabel('افزودن لینk')
                             ->columnSpanFull(),
-                        Forms\Components\Select::make('hero_sidebar_family_id')
-                            ->label('خانواده لیست کنار اسلایدر')
-                            ->options(fn () => ProductFamily::query()->where('is_active', true)->orderBy('position')->pluck('name', 'id'))
+                        Forms\Components\Select::make('hero_sidebar_category_id')
+                            ->label('دستهٔ ریشه لیست کنار اسلایدر')
+                            ->options(fn () => Category::query()
+                                ->whereNull('parent_id')
+                                ->where('is_active', true)
+                                ->orderBy('position')
+                                ->pluck('name', 'id'))
                             ->searchable()
                             ->nullable()
-                            ->live()
-                            ->helperText('خالی = خانواده با slug «chinese-service».'),
-                        Forms\Components\Placeholder::make('hero_sidebar_links_help')
-                            ->label('مدیریت لینک‌ها (والاس، مارشال، …)')
-                            ->content(function (Get $get): HtmlString|string {
-                                $id = (int) $get('hero_sidebar_family_id');
-                                if ($id <= 0) {
-                                    $id = (int) (ProductFamily::query()
-                                        ->where('slug', 'chinese-service')
-                                        ->value('id') ?? 0);
-                                }
-
-                                $candidates = ProductFamily::query()
-                                    ->where('is_active', true)
-                                    ->where(function ($query) {
-                                        $query->where('slug', 'chinese-service')
-                                            ->orWhere('name', 'سرویس چینی');
-                                    })
-                                    ->orderBy('position')
-                                    ->get();
-
-                                if ($candidates->isEmpty()) {
-                                    return 'ابتدا خانواده «سرویس چینی» را در **فروشگاه → خانواده محصول** بسازید (slug: chinese-service).';
-                                }
-
-                                $lines = [];
-                                foreach ($candidates as $family) {
-                                    $activeCount = $family->homepagePopupItems()->where('is_active', true)->count();
-                                    $editUrl = ProductFamilyResource::getUrl('edit', ['record' => $family->id]);
-                                    $lines[] = '<li><a href="'.e($editUrl).'" target="_blank" rel="noopener" class="font-bold text-primary-600 underline">'
-                                        .e($family->name).' (#'.$family->id.', slug: '.e($family->slug).')</a>'
-                                        .' — <span class="text-gray-500">'.$activeCount.' لینک فعال</span></li>';
-                                }
-
-                                $selected = $id > 0 ? ProductFamily::query()->find($id) : null;
-
-                                return new HtmlString(
-                                    '<p class="text-sm leading-6 text-gray-600 dark:text-gray-400">'
-                                    .'لینک‌ها در ویرایش خانواده → «لینک‌های کنار اسلایدر». '
-                                    .($selected ? 'انتخاب فعلی: <strong>#'.e((string) $selected->id).'</strong>.' : 'انتخاب فعلی: <strong>خودکار (chinese-service)</strong>.')
-                                    .'</p><ul class="mt-2 list-disc pr-5 text-sm space-y-1">'.implode('', $lines).'</ul>'
-                                );
-                            })
-                            ->columnSpanFull(),
-                        Forms\Components\Select::make('hero_quick_family_ids')
-                            ->label('سه خانواده زیر لیست (پارس اپال، …)')
-                            ->options(fn () => ProductFamily::query()->where('is_active', true)->orderBy('position')->pluck('name', 'id'))
+                            ->helperText('خالی = خودکار (سرویس چینی). اگر لینک‌های بالا خالی باشند از زیردسته‌های این ریشه ساخته می‌شود.'),
+                        Forms\Components\Select::make('hero_quick_category_ids')
+                            ->label('سه کاشی زیر لیست (پارس اپال، …)')
+                            ->options(fn () => Category::query()
+                                ->where('is_active', true)
+                                ->orderBy('position')
+                                ->pluck('name', 'id'))
                             ->multiple()
                             ->maxItems(3)
                             ->searchable()
-                            ->helperText('حداکثر ۳ مورد. خالی = تلاش برای slugهای pars-opal، kitchenware، crystal-service.'),
+                            ->helperText('حداکثر ۳ مورد. لینک هر کاشی = صفحه دسته. خالی = تلاش برای slugهای پیش‌فرض.'),
+                        Forms\Components\Hidden::make('hero_sidebar_family_id'),
+                        Forms\Components\Hidden::make('hero_quick_family_ids'),
                         Forms\Components\Select::make('taxonomy_mode')
                             ->label('حالت taxonomy (legacy)')
                             ->options([
                                 HomepageSettingsService::TAXONOMY_CATEGORIES => 'دسته‌بندی‌ها',
                                 HomepageSettingsService::TAXONOMY_PRODUCT_FAMILIES => 'خانواده‌های محصول',
                             ])
-                            ->helperText('دیگر در صفحه اصلی نمایش داده نمی‌شود؛ فقط برای سازگاری تنظیمات.')
+                            ->helperText('دیگر در صفحه اصلی نمایش داده نمی‌شود.')
                             ->required(),
                     ])->columns(1),
                 Forms\Components\Section::make('جدیدترین محصولات')

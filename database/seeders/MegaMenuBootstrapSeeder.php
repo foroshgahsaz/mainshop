@@ -33,7 +33,11 @@ class MegaMenuBootstrapSeeder extends Seeder
             ['ستون (دسته ریشه)', 'خانواده'],
             collect($result['roots'])->map(fn (array $row) => [$row['name'], $row['family']])->all(),
         );
-        $out?->line("خانواده در مگا: {$result['families_enabled']} | ریشه: {$result['roots_updated']} | زیردسته: {$result['descendants_updated']}");
+        $out?->line(
+            "خانواده در ریل مگا: {$result['families_in_mega']}"
+            ." (تازه روشن‌شده: {$result['families_enabled']})"
+            ." | ریشه: {$result['roots_updated']} | زیردسته: {$result['descendants_updated']}"
+        );
         $out?->warn('کش: php artisan cache:clear یا پاک کردن کش از ادمین.');
     }
 }

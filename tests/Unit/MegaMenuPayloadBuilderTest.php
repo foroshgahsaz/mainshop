@@ -84,4 +84,72 @@ class MegaMenuPayloadBuilderTest extends TestCase
         $this->assertContains('استک ۶ نفره', $labels);
         $this->assertContains('پیشنهاد ویژه', $labels);
     }
+
+    public function test_items_and_columns_follow_position_order(): void
+    {
+        $root = Category::query()->create([
+            'name' => 'ریشه',
+            'slug' => 'root-pos',
+            'is_active' => true,
+            'show_in_mega' => true,
+            'position' => 0,
+        ]);
+
+        $colB = Category::query()->create([
+            'parent_id' => $root->id,
+            'name' => 'ستون دوم',
+            'slug' => 'col-b',
+            'is_active' => true,
+            'show_in_mega' => true,
+            'position' => 10,
+        ]);
+
+        Category::query()->create([
+            'parent_id' => $root->id,
+            'name' => 'ستون اول',
+            'slug' => 'col-a',
+            'is_active' => true,
+            'show_in_mega' => true,
+            'position' => 0,
+        ]);
+
+        Category::query()->create([
+            'parent_id' => $colB->id,
+            'name' => 'زیردسته دوم',
+            'slug' => 'grand-b',
+            'is_active' => true,
+            'show_in_mega' => true,
+            'position' => 5,
+        ]);
+
+        Category::query()->create([
+            'parent_id' => $colB->id,
+            'name' => 'زیردسته اول',
+            'slug' => 'grand-a',
+            'is_active' => true,
+            'show_in_mega' => true,
+            'position' => 0,
+        ]);
+
+        $linkData = [
+            'category_id' => $colB->id,
+            'label' => 'لینک مگا',
+            'url' => '/mega-link',
+            'position' => 2,
+            'is_active' => true,
+        ];
+
+        if (Schema::hasColumn('mega_menu_links', 'root_category_id')) {
+            $linkData['root_category_id'] = $root->id;
+        }
+
+        MegaMenuLink::query()->create($linkData);
+
+        $payload = app(MegaMenuPayloadBuilder::class)->build(false);
+        $columns = $payload['roots'][0]['columns'];
+        $this->assertSame(['ستون اول', 'ستون دوم'], array_column($columns, 'title'));
+
+        $labels = array_column($columns[1]['items'], 'label');
+        $this->assertSame(['زیردسته اول', 'لینک مگا', 'زیردسته دوم'], $labels);
+    }
 }

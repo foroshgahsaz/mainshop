@@ -46,7 +46,12 @@
                                     class="shop-mobile-mega-split__section-head"
                                     data-mobile-mega-section-toggle
                                     aria-expanded="{{ $colIndex === 0 ? 'true' : 'false' }}">
-                                <span>{{ $column['title'] }}</span>
+                                <span class="shop-mobile-mega-split__section-title">
+                                    @if(!empty($column['image']))
+                                        <img src="{{ $column['image'] }}" alt="" class="shop-mobile-mega-split__section-icon" width="22" height="22" loading="lazy">
+                                    @endif
+                                    <span>{{ $column['title'] }}</span>
+                                </span>
                                 <svg class="shop-mobile-mega-split__section-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                                     <path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
@@ -93,7 +98,12 @@
                         <a href="{{ $column['url'] }}"
                            class="shop-mobile-mega-split__flat-link"
                            onclick="toggleElement('mobileMenu', false)">
-                            <span>{{ $column['title'] }}</span>
+                            <span class="shop-mobile-mega-split__flat-title">
+                                @if(!empty($column['image']))
+                                    <img src="{{ $column['image'] }}" alt="" class="shop-mobile-mega-split__section-icon" width="22" height="22" loading="lazy">
+                                @endif
+                                <span>{{ $column['title'] }}</span>
+                            </span>
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                                 <path d="m15 9-6 6 6 6" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>

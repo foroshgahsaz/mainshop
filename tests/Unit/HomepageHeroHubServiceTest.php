@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Models\Category;
 use App\Models\ProductFamily;
 use App\Models\ProductFamilyHomepagePopupItem;
 use App\Services\Settings\HomepageSettingsService;
@@ -41,6 +42,9 @@ class HomepageHeroHubServiceTest extends TestCase
         app(SettingsService::class)->set('homepage', 'data', json_encode([
             'taxonomy_mode' => 'categories',
             'hero_sidebar_family_id' => $empty->id,
+            'hero_sidebar_links' => [
+                ['label' => 'والاس', 'url' => 'https://example.test/wallace', 'is_active' => true],
+            ],
             'hero_quick_family_ids' => [],
             'new_products_enabled' => true,
             'new_product_ids' => [],
@@ -76,13 +80,23 @@ class HomepageHeroHubServiceTest extends TestCase
             'is_active' => true,
         ]);
 
-        $kitchen = ProductFamily::query()->create([
+        $kitchenCategory = Category::query()->create([
             'name' => 'لوازم آشپزخانه',
             'slug' => 'kitchenware',
             'is_active' => true,
             'position' => 1,
-            'show_on_homepage_sidebar' => true,
         ]);
+
+        app(SettingsService::class)->set('homepage', 'data', json_encode([
+            'taxonomy_mode' => 'categories',
+            'hero_sidebar_links' => [
+                ['label' => 'والاس', 'url' => 'https://example.test/wallace', 'is_active' => true],
+                ['label' => 'مارشال', 'url' => 'https://example.test/marshal', 'is_active' => true],
+            ],
+            'hero_quick_category_ids' => [$kitchenCategory->id],
+            'new_products_enabled' => true,
+            'new_product_ids' => [],
+        ], JSON_UNESCAPED_UNICODE));
 
         $payload = app(HomepageHeroHubService::class)->payload();
         $labels = array_column($payload['sidebar_links'], 'label');

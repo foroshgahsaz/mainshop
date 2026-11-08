@@ -2,14 +2,18 @@
 
 namespace App\Services\Shop;
 
+use App\Models\Category;
 use App\Models\ProductFamily;
 use App\Services\Settings\HomepageSettingsService;
+use App\Support\ShopFormatter;
+use Illuminate\Support\Facades\Schema;
 
 class HomepageHeroHubService
 {
     public function __construct(
         protected HomepageSettingsService $homepageSettings,
-        protected ProductFamilyHomepagePopupService $popupService,
+        protected CategoryHomepageHeroService $categoryHero,
+        protected CatalogFamilyCategoryMapper $familyCategoryMapper,
     ) {}
 
     /**
@@ -27,7 +31,7 @@ class HomepageHeroHubService
         return [
             'sidebar_title' => $sidebarTitle !== '' ? $sidebarTitle : 'سرویس چینی',
             'sidebar_links' => $sidebarLinks,
-            'quick_families' => $this->resolveQuickFamilies(),
+            'quick_families' => $this->resolveQuickTiles(),
         ];
     }
 
@@ -36,20 +40,19 @@ class HomepageHeroHubService
      */
     public function buildSidebarLinksForDisplay(): array
     {
-        $primary = $this->resolvePrimaryFamilyWithSubLinks();
-        if ($primary !== null) {
-            $links = $this->popupService->activeLinkItemsForFamily($primary);
-            if ($links !== []) {
-                return $links;
-            }
+        $fromSettings = $this->homepageSettings->heroSidebarLinks();
+        if ($fromSettings !== []) {
+            return $fromSettings;
         }
 
-        $fallbackFamily = $this->resolveSidebarFamily();
-        if ($fallbackFamily === null) {
-            return [];
+        $root = $this->resolvePrimaryRootCategory();
+        if ($root !== null) {
+            $links = $this->categoryHero->sidebarLinksForRootCategory($root);
+
+            return $this->rewriteLegacyFamilyUrls($links);
         }
 
-        return $this->popupService->activeLinkItemsForFamily($fallbackFamily);
+        return $this->legacyFamilySidebarFallback();
     }
 
     /**
@@ -57,155 +60,165 @@ class HomepageHeroHubService
      */
     public function buildSidebarLinksForStorage(): array
     {
-        $primary = $this->resolvePrimaryFamilyWithSubLinks();
-        if ($primary === null) {
+        $root = $this->resolvePrimaryRootCategory();
+        if ($root === null) {
             return [];
         }
 
-        return $this->popupService->activeLinkItemsForFamily($primary, resolveImageUrls: false);
+        return $this->categoryHero->sidebarLinksForRootCategory($root, resolveImageUrls: false);
     }
 
-    protected function resolvePrimaryFamilyWithSubLinks(): ?ProductFamily
+    protected function resolvePrimaryRootCategory(): ?Category
     {
-        $candidates = collect();
-
-        $configuredId = $this->homepageSettings->heroSidebarFamilyId();
+        $configuredId = $this->homepageSettings->heroSidebarCategoryId();
         if ($configuredId !== null) {
-            $candidates->push($configuredId);
-        }
-
-        ProductFamily::query()
-            ->where('is_active', true)
-            ->where(function ($query) {
-                $query->where('slug', 'chinese-service')
-                    ->orWhere('name', 'سرویس چینی');
-            })
-            ->pluck('id')
-            ->each(fn (int $id) => $candidates->push($id));
-
-        $best = null;
-        $bestCount = 0;
-
-        foreach ($candidates->unique()->filter() as $familyId) {
-            $family = ProductFamily::query()
-                ->where('is_active', true)
-                ->whereKey($familyId)
-                ->first();
-
-            if ($family === null) {
-                continue;
-            }
-
-            $count = count($this->popupService->storedLinkItemsForFamily($family));
-            if ($count > $bestCount) {
-                $bestCount = $count;
-                $best = $family;
-            }
-        }
-
-        return $bestCount > 0 ? $best : null;
-    }
-
-    protected function sidebarFamiliesColumnExists(): bool
-    {
-        return \Illuminate\Support\Facades\Schema::hasColumn('product_families', 'show_on_homepage_sidebar');
-    }
-
-    protected function resolveSidebarFamily(): ?ProductFamily
-    {
-        $configuredId = $this->homepageSettings->heroSidebarFamilyId();
-
-        $candidateIds = collect();
-        if ($configuredId !== null) {
-            $candidateIds->push($configuredId);
-        }
-
-        ProductFamily::query()
-            ->where('is_active', true)
-            ->where(function ($query) {
-                $query->where('slug', 'chinese-service')
-                    ->orWhere('name', 'سرویس چینی');
-            })
-            ->pluck('id')
-            ->each(fn (int $id) => $candidateIds->push($id));
-
-        $candidateIds = $candidateIds->unique()->filter()->values();
-
-        $bestFamily = null;
-        $bestLinkCount = 0;
-
-        foreach ($candidateIds as $familyId) {
-            $family = ProductFamily::query()
-                ->where('is_active', true)
-                ->whereKey($familyId)
-                ->first();
-
-            if ($family === null) {
-                continue;
-            }
-
-            $linkCount = count($this->popupService->activeLinkItemsForFamily($family));
-            if ($linkCount > $bestLinkCount) {
-                $bestLinkCount = $linkCount;
-                $bestFamily = $family;
-            }
-        }
-
-        if ($bestFamily !== null && $bestLinkCount > 0) {
-            return $bestFamily;
-        }
-
-        if ($configuredId !== null) {
-            return ProductFamily::query()
+            $configured = Category::query()
                 ->where('is_active', true)
                 ->whereKey($configuredId)
                 ->first();
+
+            if ($configured !== null) {
+                return $configured;
+            }
         }
 
-        return ProductFamily::query()
-            ->where('is_active', true)
-            ->where('slug', 'chinese-service')
-            ->first()
-            ?? ProductFamily::query()
+        $legacyFamilyId = $this->homepageSettings->heroSidebarFamilyId();
+        if ($legacyFamilyId !== null) {
+            $mapped = $this->familyCategoryMapper->rootCategoryIdForFamilyId($legacyFamilyId);
+            if ($mapped !== null) {
+                return Category::query()->where('is_active', true)->whereKey($mapped)->first();
+            }
+        }
+
+        foreach ($this->defaultRootCategoryCandidates() as $candidateId) {
+            $category = Category::query()
                 ->where('is_active', true)
-                ->where('name', 'سرویس چینی')
-                ->orderBy('position')
+                ->whereKey($candidateId)
                 ->first();
+
+            if ($category !== null) {
+                return $category;
+            }
+        }
+
+        return Category::query()
+            ->whereNull('parent_id')
+            ->where('is_active', true)
+            ->where(function ($query): void {
+                $query->where('slug', 'سرویس-چینی')
+                    ->orWhere('slug', 'chinese-service')
+                    ->orWhere('name', 'سرویس چینی');
+            })
+            ->orderBy('position')
+            ->first();
+    }
+
+    /** @return list<int> */
+    protected function defaultRootCategoryCandidates(): array
+    {
+        $candidates = collect();
+
+        if (Schema::hasTable('product_families')) {
+            ProductFamily::query()
+                ->where('is_active', true)
+                ->where(function ($query): void {
+                    $query->where('slug', 'chinese-service')
+                        ->orWhere('name', 'سرویس چینی');
+                })
+                ->pluck('id')
+                ->each(function (int $familyId) use ($candidates): void {
+                    $mapped = $this->familyCategoryMapper->rootCategoryIdForFamilyId($familyId);
+                    if ($mapped !== null) {
+                        $candidates->push($mapped);
+                    }
+                });
+        }
+
+        return $candidates->unique()->filter()->values()->all();
+    }
+
+    /**
+     * @return list<array{label: string, url: string, image: ?string}>
+     */
+    protected function legacyFamilySidebarFallback(): array
+    {
+        if (! Schema::hasTable('product_families')) {
+            return [];
+        }
+
+        $family = null;
+        $familyId = $this->homepageSettings->heroSidebarFamilyId();
+        if ($familyId !== null) {
+            $family = ProductFamily::query()->where('is_active', true)->whereKey($familyId)->first();
+        }
+
+        $family ??= ProductFamily::query()
+            ->where('is_active', true)
+            ->where(function ($query): void {
+                $query->where('slug', 'chinese-service')
+                    ->orWhere('name', 'سرویس چینی');
+            })
+            ->orderBy('position')
+            ->first();
+
+        if ($family === null) {
+            return [];
+        }
+
+        return $this->rewriteLegacyFamilyUrls(
+            $this->categoryHero->legacyFamilySidebarLinks($family),
+        );
+    }
+
+    /**
+     * @param  list<array{label: string, url: string, image: ?string}>  $links
+     * @return list<array{label: string, url: string, image: ?string}>
+     */
+    protected function rewriteLegacyFamilyUrls(array $links): array
+    {
+        return array_map(function (array $link): array {
+            $url = (string) ($link['url'] ?? '');
+            if (preg_match('/product_family_id=(\d+)/', $url, $matches) === 1) {
+                $familyId = (int) $matches[1];
+                $categoryId = $this->familyCategoryMapper->rootCategoryIdForFamilyId($familyId);
+                if ($categoryId !== null) {
+                    $category = Category::query()->whereKey($categoryId)->first();
+                    if ($category !== null) {
+                        $link['url'] = route('categories.show', $category);
+                    } else {
+                        $link['url'] = route('products.index', ['category_id' => $categoryId]);
+                    }
+                }
+            }
+
+            return $link;
+        }, $links);
     }
 
     /**
      * @return list<array{id: int, name: string, image: ?string, url: string}>
      */
-    protected function resolveQuickFamilies(): array
+    protected function resolveQuickTiles(): array
     {
-        $ids = collect($this->homepageSettings->heroQuickFamilyIds());
+        $ids = collect($this->homepageSettings->heroQuickCategoryIds());
+
         if ($ids->isEmpty()) {
-            $ids = collect($this->defaultQuickFamilyIds());
+            $ids = collect($this->homepageSettings->heroQuickFamilyIds())
+                ->map(fn (int $familyId): ?int => $this->familyCategoryMapper->rootCategoryIdForFamilyId($familyId))
+                ->filter();
         }
 
-        if ($this->sidebarFamiliesColumnExists()) {
-            $primaryId = $this->resolvePrimaryFamilyWithSubLinks()?->id;
-
-            $sidebarIconFamilyIds = ProductFamily::query()
-                ->where('is_active', true)
-                ->where('show_on_homepage_sidebar', true)
-                ->when($primaryId !== null, fn ($query) => $query->whereKeyNot($primaryId))
-                ->orderBy('position')
-                ->orderBy('id')
-                ->get()
-                ->filter(fn (ProductFamily $family): bool => $this->popupService->storedLinkItemsForFamily($family) === [])
-                ->map(fn (ProductFamily $family): int => (int) $family->id);
-
-            $ids = $ids->merge($sidebarIconFamilyIds)->unique()->values();
+        if ($ids->isEmpty()) {
+            $ids = collect($this->defaultQuickCategoryIds());
         }
 
-        $ids = $ids->take(3);
+        $ids = $ids->unique()->take(3);
 
         if ($ids->isEmpty()) {
             return [];
         }
 
-        $families = ProductFamily::query()
+        $categories = Category::query()
             ->where('is_active', true)
             ->whereIn('id', $ids)
             ->get()
@@ -213,16 +226,18 @@ class HomepageHeroHubService
 
         $out = [];
         foreach ($ids->all() as $id) {
-            $family = $families->get($id);
-            if ($family === null) {
+            $category = $categories->get($id);
+            if ($category === null) {
                 continue;
             }
 
+            $imagePath = trim((string) ($category->image ?? ''));
+
             $out[] = [
-                'id' => (int) $family->id,
-                'name' => (string) $family->name,
-                'image' => $family->image,
-                'url' => route('products.index', ['product_family_id' => $family->id]),
+                'id' => (int) $category->id,
+                'name' => (string) $category->name,
+                'image' => $imagePath !== '' ? $imagePath : null,
+                'url' => route('categories.show', $category),
             ];
         }
 
@@ -230,12 +245,12 @@ class HomepageHeroHubService
     }
 
     /** @return list<int> */
-    protected function defaultQuickFamilyIds(): array
+    protected function defaultQuickCategoryIds(): array
     {
-        $slugs = ['pars-opal', 'kitchenware', 'crystal-service', 'crystal', 'opal-pars'];
+        $slugs = ['pars-opal', 'kitchenware', 'crystal-service', 'لوازم-آشپزخانه', 'سرویس-بلور'];
         $names = ['پارس اپال', 'پارس اوپال', 'لوازم آشپزخانه', 'سرویس بلور', 'سرویس بلور و کریستال'];
 
-        $bySlug = ProductFamily::query()
+        $bySlug = Category::query()
             ->where('is_active', true)
             ->whereIn('slug', $slugs)
             ->orderBy('position')
@@ -246,17 +261,42 @@ class HomepageHeroHubService
             return array_slice($bySlug, 0, 3);
         }
 
-        $byName = ProductFamily::query()
+        $byName = Category::query()
             ->where('is_active', true)
             ->whereIn('name', $names)
             ->orderBy('position')
             ->pluck('id')
             ->all();
 
+        if (Schema::hasTable('product_families')) {
+            $familySlugs = ['pars-opal', 'kitchenware', 'crystal-service'];
+            ProductFamily::query()
+                ->where('is_active', true)
+                ->whereIn('slug', $familySlugs)
+                ->pluck('id')
+                ->each(function (int $familyId) use (&$byName): void {
+                    $mapped = $this->familyCategoryMapper->rootCategoryIdForFamilyId($familyId);
+                    if ($mapped !== null) {
+                        $byName[] = $mapped;
+                    }
+                });
+        }
+
         return collect([...$bySlug, ...$byName])
             ->unique()
             ->take(3)
             ->values()
             ->all();
+    }
+
+    /** @param  ?string  $imagePath */
+    public static function quickTileImageUrl(mixed $imagePath): string
+    {
+        $path = trim((string) $imagePath);
+        if ($path === '') {
+            return asset('shop/images/placeholder-category.svg');
+        }
+
+        return ShopFormatter::productFamilyImage($path);
     }
 }

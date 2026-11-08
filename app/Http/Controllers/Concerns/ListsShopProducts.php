@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Concerns;
 
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\Category;
 use App\Models\ProductFamily;
 use App\Services\Cache\ShopCacheService;
+use App\Services\Shop\CatalogFamilyCategoryMapper;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -21,11 +23,20 @@ trait ListsShopProducts
             ? ProductFamily::query()->whereKey((int) $request->product_family_id)->where('is_active', true)->first()
             : null;
 
+        $categoryId = $category?->id ?? ($request->filled('category_id') ? (int) $request->category_id : null);
+        if ($categoryId === null && $productFamily !== null) {
+            $mapped = app(CatalogFamilyCategoryMapper::class)->rootCategoryIdForFamily($productFamily);
+            if ($mapped !== null) {
+                $categoryId = $mapped;
+                $category = Category::query()->whereKey($mapped)->first();
+            }
+        }
+
         $filters = [
             'search' => $request->search,
-            'category_id' => $category?->id ?? $request->category_id,
+            'category_id' => $categoryId,
             'brand_id' => $brand?->id ?? $request->brand_id,
-            'product_family_id' => $productFamily?->id,
+            'product_family_id' => $categoryId === null ? $productFamily?->id : null,
             'product_template_id' => $request->filled('product_template_id')
                 ? (int) $request->product_template_id
                 : null,

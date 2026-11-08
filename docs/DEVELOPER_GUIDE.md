@@ -1342,6 +1342,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-08 | فاز D/B: هیرو صفحه اصلی از دسته، لیست محصول با زیرشاخه، ادمین بدون خانواده/کارخانه در منو، `shop:migrate-homepage-settings-categories` — [dev/10](dev/10-catalog-category-only.md) |
 | 2026-11-08 | کاتالوگ دسته‌محور: مگا منو از `Category.show_in_mega`، ویزارد نماینده `REP_CATALOG_MODE`، `shop:migrate-mega-menu-roots` — [dev/10-catalog-category-only.md](dev/10-catalog-category-only.md) |
 | 2026-11-08 | `MegaMenuBootstrapSeeder` / `shop:bootstrap-mega-menu` — ساخت مگا منو از دسته‌های موجود |
 | 2026-11-08 | ادمین: لینک مگا منو زیر **محتوا → منوی سایت** (بدون آیتم جدا در نوار Filament) |

@@ -14,8 +14,9 @@
 | A | این سند + `shop:migrate-mega-menu-roots` | انجام شد |
 | B/C | `MegaMenuPayloadBuilder` دسته‌محور، `root_category_id` | انجام شد |
 | E | `RepresentativeCategoryCatalogLookup` + ویزارد + `catalog_filters.category_*` | انجام شد |
-| D | هوم‌پیج/پاپ‌آپ خانواده | بعدی (هنوز family-based) |
-| F | حذف Resource خانواده از ادمین، drop ستون‌ها | بعدی |
+| D | هوم‌پیج هیرو از دسته + `shop:migrate-homepage-settings-categories` | این PR |
+| B/D | ادمین محصول بدون خانواده؛ لیست با `category_id` + زیرشاخه | این PR |
+| F | منوی ادمین بدون خانواده/کارخانه/قالب؛ drop ستون‌ها | جزئی (UI) — DB بعدی |
 | G | تست CI، deploy | migrate + cache |
 
 ## Deploy
@@ -23,6 +24,7 @@
 ```bash
 php artisan migrate --force && php artisan shop:deploy-recover
 php artisan shop:migrate-mega-menu-roots --enable-roots
+php artisan shop:migrate-homepage-settings-categories
 php artisan cache:clear
 ```
 

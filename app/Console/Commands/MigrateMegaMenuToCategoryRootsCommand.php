@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Category;
 use App\Models\MegaMenuLink;
 use App\Models\ProductFamily;
+use App\Services\Shop\CatalogFamilyCategoryMapper;
 use App\Services\Cache\ShopCacheService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Schema;
@@ -28,29 +28,21 @@ class MigrateMegaMenuToCategoryRootsCommand extends Command
         $dryRun = (bool) $this->option('dry-run');
         $enableRoots = (bool) $this->option('enable-roots');
 
+        $mapper = app(CatalogFamilyCategoryMapper::class);
         $familyToRoot = [];
-        $families = ProductFamily::query()->where('is_active', true)->get(['id', 'name']);
+        $families = ProductFamily::query()->where('is_active', true)->get(['id', 'name', 'slug']);
 
         foreach ($families as $family) {
-            $root = Category::query()
-                ->whereNull('parent_id')
-                ->where('product_family_id', $family->id)
-                ->orderBy('position')
-                ->orderBy('id')
-                ->first();
+            $rootId = $mapper->rootCategoryIdForFamily($family);
+            if ($rootId === null) {
+                $this->warn("خانواده «{$family->name}» — ریشه دسته پیدا نشد.");
 
-            if ($root === null) {
-                $root = Category::query()
-                    ->whereNull('parent_id')
-                    ->where('is_active', true)
-                    ->orderBy('position')
-                    ->first();
+                continue;
             }
 
-            if ($root !== null) {
-                $familyToRoot[$family->id] = $root->id;
-                $this->line("خانواده «{$family->name}» → ریشه دسته «{$root->name}» (#{$root->id})");
-            }
+            $familyToRoot[$family->id] = $rootId;
+            $rootName = \App\Models\Category::query()->whereKey($rootId)->value('name');
+            $this->line("خانواده «{$family->name}» → ریشه دسته «{$rootName}» (#{$rootId})");
         }
 
         $linksUpdated = 0;

@@ -41,6 +41,13 @@ return [
         'video_max_size_kb' => (int) env('SHOP_RICH_CONTENT_VIDEO_MAX_KB', 102400),
     ],
 
+    'catalog' => [
+        /** فرم محصول و منوی ادمین بدون خانواده/کارخانه/قالب */
+        'category_only_admin' => filter_var(env('SHOP_CATEGORY_ONLY_ADMIN', true), FILTER_VALIDATE_BOOL),
+        /** فیلتر لیست محصول با category_id شامل زیردسته‌ها */
+        'listing_includes_descendants' => filter_var(env('SHOP_LISTING_CATEGORY_DESCENDANTS', true), FILTER_VALIDATE_BOOL),
+    ],
+
     'representative' => [
         /** category = درخت دسته؛ family = جریان قدیمی خانواده/کارخانه/قالب */
         'catalog_mode' => env('REP_CATALOG_MODE', 'category'),

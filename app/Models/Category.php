@@ -78,8 +78,8 @@ class Category extends Model
         return $this->hasMany(Product::class);
     }
 
-    public function getRouteKeyName(): string
+    public function getRouteKey(): string
     {
-        return 'slug';
+        return app(\App\Services\Shop\CategoryPathResolver::class)->pathFor($this);
     }
 }

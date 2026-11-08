@@ -40,7 +40,7 @@
                 @if($loop->last)
                     <span class="listing-breadcrumb__current">{{ $crumb['name'] }}</span>
                 @else
-                    <a href="{{ route('categories.show', $crumb['slug']) }}">{{ $crumb['name'] }}</a>
+                    <a href="{{ route('categories.show', ['category' => $crumb['path']]) }}">{{ $crumb['name'] }}</a>
                 @endif
             @endforeach
         @elseif(isset($brand))
@@ -55,8 +55,6 @@
         @endif
     </nav>
 
-    @include('shop.partials.category-listing-carousel')
-
     @if($searchQuery)
         <div class="listing-search-hero mb-6">
             <div class="listing-search-hero__icon">
@@ -70,22 +68,26 @@
                 <p class="listing-search-hero__count">{{ number_format($products->total()) }} محصول یافت شد</p>
             </div>
         </div>
-    @else
-        <div class="mb-6">
-            <h1 class="section-title">{{ $pageTitle ?? 'لیست کالاها' }}</h1>
-            @if(isset($category) && $category->description)
-                <p class="text-sm text-gray-500 mt-2">{{ $category->description }}</p>
-            @endif
-            @if(isset($brand) && $brand->description)
-                <p class="text-sm text-gray-500 mt-2">{{ $brand->description }}</p>
-            @endif
-        </div>
     @endif
 
     <div class="listing-layout">
         @include('shop.partials.product-filters')
 
         <div class="listing-layout__content">
+            @unless($searchQuery)
+                <div class="listing-page__intro mb-4">
+                    <h1 class="section-title">{{ $pageTitle ?? 'لیست کالاها' }}</h1>
+                    @if(isset($category) && $category->description)
+                        <p class="text-sm text-gray-500 mt-2">{{ $category->description }}</p>
+                    @endif
+                    @if(isset($brand) && $brand->description)
+                        <p class="text-sm text-gray-500 mt-2">{{ $brand->description }}</p>
+                    @endif
+                </div>
+            @endunless
+
+            @include('shop.partials.category-listing-carousel')
+
             <div class="listing-toolbar">
                 <div class="listing-toolbar__start">
                     <button type="button" class="listing-filter-toggle lg:hidden" data-open-filters>

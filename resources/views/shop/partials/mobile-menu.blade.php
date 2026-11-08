@@ -27,11 +27,11 @@
                   onclick="toggleAccordion('mobileBrandsMenu')"
                   class="main-nav-link flex justify-between items-center py-3 px-2 text-right w-full">
             {{ $item->label }}
-            <svg class="w-3 h-3 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <svg class="w-3 h-3 transition-transform" data-accordion-icon fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
               <path d="m6 9 6 6 6-6"/>
             </svg>
           </button>
-          <div id="mobileBrandsMenu" class="hidden flex-col gap-2 pr-4 text-xs text-gray-500 border-r-2 border-emerald-100 mr-2 mb-2">
+          <div id="mobileBrandsMenu" class="hidden shop-mobile-accordion-panel shop-mobile-accordion-panel--brands">
             @forelse(($navBrands ?? collect()) as $brand)
               <a href="{{ route('brands.show', $brand) }}" class="py-1 hover:text-brand-green">{{ $brand->name }}</a>
             @empty
@@ -48,32 +48,39 @@
                 onclick="toggleAccordion('mobileMegaMenu'); resetMobileMegaDrill();"
                 class="main-nav-link flex justify-between items-center py-3 px-2 text-right w-full">
           محصولات
-          <svg id="accordionIcon" class="w-3 h-3 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <svg class="w-3 h-3 transition-transform" data-accordion-icon fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
             <path d="m6 9 6 6 6-6"/>
           </svg>
         </button>
         <div id="mobileMegaMenu"
-             class="hidden shop-mobile-mega-drill pr-2 text-xs text-gray-600 border-r-2 border-emerald-100 mr-2"
+             class="hidden shop-mobile-mega-drill"
              data-mobile-mega-drill>
-          <div class="shop-mobile-mega-drill__toolbar hidden mb-2" data-mega-drill-toolbar>
+          <div class="shop-mobile-mega-drill__toolbar hidden" data-mega-drill-toolbar>
             <button type="button"
-                    class="shop-mobile-mega-drill__back flex items-center gap-1 py-2 text-brand-green font-bold"
+                    class="shop-mobile-mega-drill__back"
                     data-mega-drill-back>
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <svg class="shop-mobile-mega-drill__back-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M9 6l6 6-6 6"/>
               </svg>
               بازگشت
             </button>
-            <p class="text-[11px] text-gray-400 mt-1" data-mega-drill-title></p>
+            <p class="shop-mobile-mega-drill__title" data-mega-drill-title></p>
           </div>
 
-          <div class="shop-mobile-mega-drill__level flex flex-col gap-1" data-mega-drill-level="families">
+          <div class="shop-mobile-mega-drill__level is-active" data-mega-drill-level="families">
             @foreach($megaFamilies as $family)
               <button type="button"
-                      class="shop-mobile-mega-drill__row py-2 px-2 text-right w-full flex justify-between items-center hover:text-brand-green"
+                      class="shop-mobile-mega-drill__row"
                       data-mega-drill-open="family-{{ $family['id'] }}">
-                <span>{{ $family['name'] }}</span>
-                <svg class="w-3 h-3 opacity-60" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                <span class="shop-mobile-mega-drill__row-main">
+                  @if(!empty($family['image']))
+                    <img src="{{ $family['image'] }}" alt="" class="shop-mobile-mega-drill__thumb" width="28" height="28" loading="lazy">
+                  @else
+                    <span class="shop-mobile-mega-drill__thumb shop-mobile-mega-drill__thumb--fallback" aria-hidden="true"></span>
+                  @endif
+                  <span class="shop-mobile-mega-drill__label">{{ $family['name'] }}</span>
+                </span>
+                <svg class="shop-mobile-mega-drill__chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="m9 6 6 6-6 6"/>
                 </svg>
               </button>
@@ -81,25 +88,32 @@
           </div>
 
           @foreach($megaFamilies as $family)
-            <div class="shop-mobile-mega-drill__level hidden flex-col gap-1"
+            <div class="shop-mobile-mega-drill__level hidden"
                  data-mega-drill-level="family-{{ $family['id'] }}"
                  hidden>
               <a href="{{ $family['all_products_url'] }}"
-                 class="py-2 px-2 text-brand-green font-bold hover:underline"
+                 class="shop-mobile-mega-drill__all-link"
                  onclick="toggleElement('mobileMenu', false)">همه محصولات {{ $family['name'] }}</a>
               @foreach($family['columns'] as $colIndex => $column)
                 @if(!empty($column['items']))
                   <button type="button"
-                          class="shop-mobile-mega-drill__row py-2 px-2 text-right w-full flex justify-between items-center hover:text-brand-green"
+                          class="shop-mobile-mega-drill__row"
                           data-mega-drill-open="column-{{ $family['id'] }}-{{ $colIndex }}">
-                    <span>{{ $column['title'] }}</span>
-                    <svg class="w-3 h-3 opacity-60" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                    <span class="shop-mobile-mega-drill__row-main">
+                      @if(!empty($column['image']))
+                        <img src="{{ $column['image'] }}" alt="" class="shop-mobile-mega-drill__thumb" width="26" height="26" loading="lazy">
+                      @else
+                        <span class="shop-mobile-mega-drill__thumb shop-mobile-mega-drill__thumb--fallback" aria-hidden="true"></span>
+                      @endif
+                      <span class="shop-mobile-mega-drill__label">{{ $column['title'] }}</span>
+                    </span>
+                    <svg class="shop-mobile-mega-drill__chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                       <path d="m9 6 6 6-6 6"/>
                     </svg>
                   </button>
                 @else
                   <a href="{{ $column['url'] }}"
-                     class="py-2 px-2 hover:text-brand-green"
+                     class="shop-mobile-mega-drill__link"
                      onclick="toggleElement('mobileMenu', false)">{{ $column['title'] }}</a>
                 @endif
               @endforeach
@@ -107,16 +121,21 @@
 
             @foreach($family['columns'] as $colIndex => $column)
               @if(!empty($column['items']))
-                <div class="shop-mobile-mega-drill__level hidden flex-col gap-1"
+                <div class="shop-mobile-mega-drill__level hidden"
                      data-mega-drill-level="column-{{ $family['id'] }}-{{ $colIndex }}"
                      hidden>
                   <a href="{{ $column['url'] }}"
-                     class="py-2 px-2 font-bold text-gray-800 hover:text-brand-green"
+                     class="shop-mobile-mega-drill__heading-link"
                      onclick="toggleElement('mobileMenu', false)">{{ $column['title'] }}</a>
                   @foreach($column['items'] as $item)
                     <a href="{{ $item['url'] }}"
-                       class="py-1.5 px-2 pr-4 hover:text-brand-green"
-                       onclick="toggleElement('mobileMenu', false)">{{ $item['label'] }}</a>
+                       class="shop-mobile-mega-drill__item-link"
+                       onclick="toggleElement('mobileMenu', false)">
+                      @if(!empty($item['image']))
+                        <img src="{{ $item['image'] }}" alt="" class="shop-mobile-mega-drill__item-icon" width="20" height="20" loading="lazy">
+                      @endif
+                      <span>{{ $item['label'] }}</span>
+                    </a>
                   @endforeach
                 </div>
               @endif
@@ -128,11 +147,11 @@
                 onclick="toggleAccordion('mobileMegaMenu')"
                 class="main-nav-link flex justify-between items-center py-3 px-2 text-right w-full">
           محصولات
-          <svg id="accordionIcon" class="w-3 h-3 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <svg class="w-3 h-3 transition-transform" data-accordion-icon fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
             <path d="m6 9 6 6 6-6"/>
           </svg>
         </button>
-        <div id="mobileMegaMenu" class="hidden flex-col gap-2 pr-4 text-xs text-gray-500 border-r-2 border-emerald-100 mr-2">
+        <div id="mobileMegaMenu" class="hidden shop-mobile-accordion-panel shop-mobile-accordion-panel--mega">
           <a href="{{ route('products.index') }}" class="py-1 hover:text-brand-green font-bold">همه محصولات</a>
           @foreach(($navCategories ?? collect()) as $cat)
             <a href="{{ route('categories.show', $cat) }}" class="py-1 hover:text-brand-green">{{ $cat->name }}</a>

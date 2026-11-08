@@ -785,6 +785,7 @@ function initMobileMegaDrill() {
     root.querySelectorAll('[data-mega-drill-level]').forEach((level) => {
       const active = level.dataset.megaDrillLevel === levelKey;
       level.classList.toggle('hidden', !active);
+      level.classList.toggle('flex', active);
       level.toggleAttribute('hidden', !active);
     });
     const showToolbar = levelKey !== 'families';
@@ -826,6 +827,7 @@ function resetMobileMegaDrill() {
   root.querySelectorAll('[data-mega-drill-level]').forEach((level) => {
     const isFamilies = level.dataset.megaDrillLevel === 'families';
     level.classList.toggle('hidden', !isFamilies);
+    level.classList.toggle('flex', isFamilies);
     level.toggleAttribute('hidden', !isFamilies);
   });
   root.querySelector('[data-mega-drill-toolbar]')?.classList.add('hidden');
@@ -887,11 +889,16 @@ function toggleElement(id, show) {
 
 function toggleAccordion(id) {
   const menu = document.getElementById(id);
-  const icon = document.getElementById('accordionIcon');
+  if (!menu) {
+    return;
+  }
+
   const open = menu.classList.contains('hidden');
   menu.classList.toggle('hidden', !open);
-  menu.classList.toggle('flex', open);
-  icon.classList.toggle('rotate-180', open);
+
+  const trigger = menu.previousElementSibling;
+  const icon = trigger?.querySelector?.('[data-accordion-icon]');
+  icon?.classList.toggle('rotate-180', open);
 }
 
 function switchTab(type) {
@@ -920,5 +927,6 @@ function switchTab(type) {
 window.toggleElement = toggleElement;
 window.requestCloseLoginModal = requestCloseLoginModal;
 window.toggleAccordion = toggleAccordion;
+window.resetMobileMegaDrill = resetMobileMegaDrill;
 window.switchTab = switchTab;
 window.openLoginModal = openLoginModal;

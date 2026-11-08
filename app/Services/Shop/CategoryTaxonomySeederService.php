@@ -115,13 +115,22 @@ final class CategoryTaxonomySeederService
 
         $guard = 0;
         while (Category::query()->exists() && $guard < 50_000) {
-            $deleted = Category::query()
-                ->whereDoesntHave('children')
+            $leafIds = DB::table('categories as c')
+                ->select('c.id')
+                ->leftJoin('categories as children', 'children.parent_id', '=', 'c.id')
+                ->whereNull('children.id')
                 ->limit(500)
-                ->delete();
-            if ($deleted === 0) {
-                Category::query()->limit(500)->delete();
+                ->pluck('c.id');
+
+            if ($leafIds->isEmpty()) {
+                $leafIds = Category::query()->orderByDesc('id')->limit(500)->pluck('id');
             }
+
+            if ($leafIds->isEmpty()) {
+                break;
+            }
+
+            Category::query()->whereIn('id', $leafIds->all())->delete();
             $guard++;
         }
 

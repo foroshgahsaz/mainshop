@@ -1342,6 +1342,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-08 | ادمین دسته: URL ویرایش با **id** (`CategoryResource::getRecordRouteKeyName`) — فروشگاه همچنان مسیر تودرتو از `Category::getRouteKey()` |
 | 2026-11-08 | کاروسل زیردسته در لیست: Swiper روی `categories.show` / `products.index` / `brands.show` (قبلاً فقط home و صفحه محصول) |
 | 2026-11-08 | URL دسته تودرتو `/categories/{root}/{child}/…`، ریدایرکت ۳۰۱ از اسلاگ تخت؛ کاروسل فقط زیردستهٔ مستقیم در ستون محتوا |
 | 2026-11-08 | صفحه دسته: breadcrumb کامل (صفحه اصلی → …)، اسلایدر زیردسته با آیکون پیش‌فرض؛ پیام پاک کش ادمین |

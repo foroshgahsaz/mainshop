@@ -239,8 +239,12 @@ class ShopCacheService
         );
     }
 
-    public function relatedProducts(int $categoryId, int $excludeProductId, int $limit = 8)
+    public function relatedProducts(?int $categoryId, int $excludeProductId, int $limit = 8)
     {
+        if ($categoryId === null) {
+            return collect();
+        }
+
         $staff = ShopStaffPreview::enabled();
 
         return $this->remember(

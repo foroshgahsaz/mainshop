@@ -11,8 +11,8 @@
     <source
         media="(max-width: 767px)"
         srcset="{{ $mobileUrl }}"
-        width="1170"
-        height="259"
+        width="1000"
+        height="500"
     >
     <img
         src="{{ $desktopUrl }}"

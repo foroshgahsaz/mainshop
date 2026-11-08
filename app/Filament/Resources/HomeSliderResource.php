@@ -55,10 +55,10 @@ class HomeSliderResource extends Resource
                     ->columnSpanFull()
                     ->helperText(function (): string {
                         $preset = app(HomepageImageService::class)->forSection('hero_mobile') ?? [];
-                        $w = (int) ($preset['width'] ?? 1170);
-                        $h = (int) ($preset['height'] ?? 259);
+                        $w = (int) ($preset['width'] ?? 1000);
+                        $h = (int) ($preset['height'] ?? 500);
 
-                        return "موبایل (<768px): پیشنهاد {$w}×{$h} px (نسبت همان دسکتاپ؛ روی iPhone/Android رتینا واضح است). جایگزین @2x: 1080×239. اگر خالی باشد تصویر دسکتاپ.";
+                        return "موبایل (<768px): {$w}×{$h} px (نسبت 2:1 — بنر بلندتر و خواناتر). برای رتینا: 1170×585 یا 2000×1000. اگر خالی باشد تصویر دسکتاپ.";
                     }),
                 Forms\Components\TextInput::make('link')
                     ->label('لینک')

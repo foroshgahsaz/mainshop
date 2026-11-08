@@ -41,8 +41,8 @@ return [
         ],
 
         'slider_mobile' => [
-            'cover_width' => 1170,
-            'cover_height' => 259,
+            'cover_width' => 1000,
+            'cover_height' => 500,
             'quality' => 90,
             'format' => 'webp',
         ],

@@ -1136,7 +1136,7 @@ $settings->site();       // نام سایت، لوگو، ...
 
 ### مگا منو (درخت دسته)
 
-وقتی حداقل یک `Category` ریشه با `show_in_mega` فعال باشد، payload هدر (`ShopCacheService::headerPayload`) شامل `megaMenu` از `MegaMenuPayloadBuilder` است (کلیدهای `roots` / `has_category_tree` و alias `families` برای سازگاری view). `navCategories` برای مگا خالی می‌شود. UI: `overlays.blade.php` (دسکتاپ) و `mobile-menu.blade.php` (موبایل: نمای split دوستونه مثل دیجی‌کالا با `mobile-mega-split` و `initMobileMegaSplit`؛ پنل دسکتاپ زیر ۷۶۸px مخفی است). مهاجرت از مدل خانواده: [dev/10-catalog-category-only.md](dev/10-catalog-category-only.md). تاریخچه خانواده‌محور: [dev/09-mega-menu-families.md](dev/09-mega-menu-families.md).
+وقتی حداقل یک `Category` ریشه با `show_in_mega` فعال باشد، payload هدر (`ShopCacheService::headerPayload`) شامل `megaMenu` از `MegaMenuPayloadBuilder` است (کلیدهای `roots` / `has_category_tree` و alias `families` برای سازگاری view). `navCategories` برای مگا خالی می‌شود. UI: `overlays.blade.php` (دسکتاپ) و `mobile-menu.blade.php` (موبایل: نمای split دوستونه مثل دیجی‌کالا با `mobile-mega-split` و `initMobileMegaSplit`؛ همان payload دسکتاپ با `position` برای ستون‌ها و آیتم‌ها؛ پنل دسکتاپ زیر ۷۶۸px مخفی است). مهاجرت از مدل خانواده: [dev/10-catalog-category-only.md](dev/10-catalog-category-only.md). تاریخچه خانواده‌محور: [dev/09-mega-menu-families.md](dev/09-mega-menu-families.md).
 
 | موجودیت | Resource / سرویس |
 |---------|------------------|

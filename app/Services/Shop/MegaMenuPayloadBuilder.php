@@ -88,33 +88,19 @@ final class MegaMenuPayloadBuilder
             $columns = [];
 
             foreach ($root->children as $child) {
-                $items = [];
-
-                foreach ($child->children as $grandchild) {
-                    $items[] = [
-                        'label' => $grandchild->name,
-                        'url' => route('categories.show', $grandchild),
-                        'image' => $this->categoryImageUrl($grandchild->image),
-                    ];
-                }
-
-                foreach ($linksByCategoryId->get($child->id, collect()) as $link) {
-                    $items[] = [
-                        'label' => $link->label,
-                        'url' => $link->url,
-                        'image' => null,
-                    ];
-                }
+                $items = $this->sortedColumnItems($child, $linksByCategoryId->get($child->id, collect()));
 
                 $columns[] = [
                     'title' => $child->name,
                     'url' => route('categories.show', $child),
                     'image' => $this->categoryImageUrl($child->image),
                     'items' => $items,
+                    'sort' => (int) $child->position,
+                    'sort_id' => (int) $child->id,
                 ];
             }
 
-            $columns = array_merge($columns, $this->customColumnsForRoot($links, $root->id));
+            $columns = $this->sortMegaColumns(array_merge($columns, $this->customColumnsForRoot($links, $root->id)));
 
             $payload[] = [
                 'id' => $root->id,
@@ -157,25 +143,110 @@ final class MegaMenuPayloadBuilder
         $columns = [];
 
         foreach ($roots as $root) {
-            $items = [];
+            $entries = [];
 
             foreach ($childrenByParent->get($root->id, collect()) as $child) {
-                $items[] = [
+                $entries[] = [
+                    'sort' => (int) $child->position,
+                    'sort_id' => (int) $child->id,
                     'label' => $child->label,
                     'url' => $child->url,
                     'image' => null,
                 ];
             }
 
+            usort($entries, static function (array $a, array $b): int {
+                $byPos = $a['sort'] <=> $b['sort'];
+                if ($byPos !== 0) {
+                    return $byPos;
+                }
+
+                return $a['sort_id'] <=> $b['sort_id'];
+            });
+
+            $items = array_map(static fn (array $row): array => [
+                'label' => $row['label'],
+                'url' => $row['url'],
+                'image' => $row['image'],
+            ], $entries);
+
             $columns[] = [
                 'title' => $root->label,
                 'url' => $root->url,
                 'image' => null,
                 'items' => $items,
+                'sort' => (int) $root->position,
+                'sort_id' => (int) $root->id,
             ];
         }
 
         return $columns;
+    }
+
+    /**
+     * @param  Collection<int, MegaMenuLink>  $childLinks
+     * @return list<array{label: string, url: string, image: ?string}>
+     */
+    private function sortedColumnItems(Category $child, Collection $childLinks): array
+    {
+        $entries = [];
+
+        foreach ($child->children as $grandchild) {
+            $entries[] = [
+                'sort' => (int) $grandchild->position,
+                'sort_id' => (int) $grandchild->id,
+                'label' => $grandchild->name,
+                'url' => route('categories.show', $grandchild),
+                'image' => $this->categoryImageUrl($grandchild->image),
+            ];
+        }
+
+        foreach ($childLinks as $link) {
+            $entries[] = [
+                'sort' => (int) $link->position,
+                'sort_id' => 1_000_000 + (int) $link->id,
+                'label' => $link->label,
+                'url' => $link->url,
+                'image' => null,
+            ];
+        }
+
+        usort($entries, static function (array $a, array $b): int {
+            $byPos = $a['sort'] <=> $b['sort'];
+            if ($byPos !== 0) {
+                return $byPos;
+            }
+
+            return $a['sort_id'] <=> $b['sort_id'];
+        });
+
+        return array_map(static fn (array $row): array => [
+            'label' => $row['label'],
+            'url' => $row['url'],
+            'image' => $row['image'],
+        ], $entries);
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $columns
+     * @return list<array<string, mixed>>
+     */
+    private function sortMegaColumns(array $columns): array
+    {
+        usort($columns, static function (array $a, array $b): int {
+            $byPos = ((int) ($a['sort'] ?? 0)) <=> ((int) ($b['sort'] ?? 0));
+            if ($byPos !== 0) {
+                return $byPos;
+            }
+
+            return ((int) ($a['sort_id'] ?? 0)) <=> ((int) ($b['sort_id'] ?? 0));
+        });
+
+        return array_map(static function (array $column): array {
+            unset($column['sort'], $column['sort_id']);
+
+            return $column;
+        }, $columns);
     }
 
     private function categoryImageUrl(mixed $path): string

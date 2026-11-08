@@ -44,7 +44,7 @@ class ManageHomepageSettings extends Page implements HasForms
         return $form
             ->schema([
                 Forms\Components\Section::make('بنر بالای صفحه (اسلایدر تمام‌عرض)')
-                    ->description('اسلایدرها از منوی «اسلایدرهای صفحه اصلی» مدیریت می‌شوند. اندازه پیشنهادی دسکتاپ: 2560×597 px (نسبت بنر تمام‌عرض).')
+                    ->description('اسلایدرها از منوی «اسلایدرهای صفحه اصلی» مدیریت می‌شوند. دسکتاپ: 2560×567 px — موبایل: 1170×259 px (یا 1080×239 @2x).')
                     ->schema([
                         Forms\Components\Placeholder::make('hero_slider_hint')
                             ->label('')

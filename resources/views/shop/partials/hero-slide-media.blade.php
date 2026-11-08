@@ -11,15 +11,15 @@
     <source
         media="(max-width: 767px)"
         srcset="{{ $mobileUrl }}"
-        width="1280"
-        height="299"
+        width="1170"
+        height="259"
     >
     <img
         src="{{ $desktopUrl }}"
         alt="{{ $alt }}"
         class="hero-slide__img"
         width="2560"
-        height="597"
+        height="567"
         decoding="async"
         @if($isFirst) fetchpriority="high" @endif
         loading="{{ $isFirst ? 'eager' : 'lazy' }}"

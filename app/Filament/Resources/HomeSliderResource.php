@@ -45,23 +45,20 @@ class HomeSliderResource extends Resource
                     ->columnSpanFull()
                     ->helperText(function (): string {
                         $preset = app(HomepageImageService::class)->forSection('hero') ?? [];
-                        $w = (int) ($preset['width'] ?? 940);
-                        $h = (int) ($preset['height'] ?? 406);
-                        $templateUrl = asset('shop/images/hero/banner-template-940x406.svg');
+                        $w = (int) ($preset['width'] ?? 2560);
+                        $h = (int) ($preset['height'] ?? 567);
 
-                        return "دسکتاپ (hero صفحه اصلی): دقیقاً {$w}×{$h} px (یا 1880×812 @2x). نسبت نمایش همان {$w}:{$h} — بنر را همین اندازه بدهید. قالب: {$templateUrl}";
+                        return "دسکتاپ (hero تمام‌عرض): {$w}×{$h} px — همان نسبت نمایش. ترجیحاً WebP/JPEG با کیفیت بالا.";
                     }),
                 ShopMediaPicker::image('image_mobile', 'sliders/mobile', 'تصویر موبایل')
                     ->maxSize(4096)
                     ->columnSpanFull()
                     ->helperText(function (): string {
                         $preset = app(HomepageImageService::class)->forSection('hero_mobile') ?? [];
-                        $w = (int) ($preset['width'] ?? 750);
-                        $h = (int) ($preset['height'] ?? 400);
+                        $w = (int) ($preset['width'] ?? 1170);
+                        $h = (int) ($preset['height'] ?? 259);
 
-                        $templateUrl = asset('shop/images/hero/banner-template-750x400.svg');
-
-                        return "موبایل (<768px): {$w}×{$h} px (یا 989×388 @2x). نسبت نمایش ≈989:388. اگر خالی باشد تصویر دسکتاپ. قالب: {$templateUrl}";
+                        return "موبایل (<768px): پیشنهاد {$w}×{$h} px (نسبت همان دسکتاپ؛ روی iPhone/Android رتینا واضح است). جایگزین @2x: 1080×239. اگر خالی باشد تصویر دسکتاپ.";
                     }),
                 Forms\Components\TextInput::make('link')
                     ->label('لینک')

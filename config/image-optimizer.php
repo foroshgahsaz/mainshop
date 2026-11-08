@@ -35,14 +35,14 @@ return [
 
         'slider' => [
             'cover_width' => 2560,
-            'cover_height' => 597,
+            'cover_height' => 567,
             'quality' => 90,
             'format' => 'webp',
         ],
 
         'slider_mobile' => [
-            'cover_width' => 1280,
-            'cover_height' => 299,
+            'cover_width' => 1170,
+            'cover_height' => 259,
             'quality' => 90,
             'format' => 'webp',
         ],

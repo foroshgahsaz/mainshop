@@ -18,18 +18,18 @@ return [
             'label' => 'اسلایدر — دسکتاپ',
             'mode' => 'cover',
             'width' => 2560,
-            'height' => 597,
+            'height' => 567,
             'quality' => 90,
             'format' => 'webp',
-            // Upload preset: بنر تمام‌عرض صفحه اصلی (نسبت 2560×597).
+            // Upload preset: بنر تمام‌عرض صفحه اصلی (نسبت 2560×567).
             'enabled' => false,
         ],
 
         'hero_mobile' => [
             'label' => 'اسلایدر — موبایل',
             'mode' => 'cover',
-            'width' => 1280,
-            'height' => 299,
+            'width' => 1170,
+            'height' => 259,
             'quality' => 90,
             'format' => 'webp',
             'enabled' => false,

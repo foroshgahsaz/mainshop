@@ -895,6 +895,10 @@ function toggleElement(id, show) {
       document.body.classList.remove('mobile-menu-open');
       document.body.style.overflow = '';
     }
+    document.querySelectorAll('[data-open-mobile-menu]').forEach((trigger) => {
+      trigger.setAttribute('aria-expanded', show ? 'true' : 'false');
+      trigger.classList.toggle('is-active', show);
+    });
     return;
   }
 

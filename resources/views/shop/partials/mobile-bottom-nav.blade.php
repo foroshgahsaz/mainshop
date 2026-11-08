@@ -23,6 +23,24 @@
         </a>
 
         <button type="button"
+                class="mobile-bottom-nav__item mobile-bottom-nav__item--categories"
+                data-open-mobile-menu
+                onclick="toggleElement('mobileMenu', true)"
+                aria-label="دسته‌بندی"
+                aria-controls="mobileMenu"
+                aria-expanded="false">
+            <span class="mobile-bottom-nav__icon mobile-bottom-nav__icon--categories" aria-hidden="true">
+                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="3" y="3" width="8.5" height="8.5" rx="2.25" fill="currentColor" fill-opacity="0.35"/>
+                    <rect x="12.5" y="3" width="8.5" height="8.5" rx="2.25" fill="currentColor"/>
+                    <rect x="3" y="12.5" width="8.5" height="8.5" rx="2.25" fill="currentColor"/>
+                    <rect x="12.5" y="12.5" width="8.5" height="8.5" rx="2.25" fill="currentColor" fill-opacity="0.35"/>
+                </svg>
+            </span>
+            <span class="mobile-bottom-nav__label">دسته‌بندی</span>
+        </button>
+
+        <button type="button"
                 class="mobile-bottom-nav__item"
                 onclick="toggleSearchModal(true)"
                 aria-label="جستجو">

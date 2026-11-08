@@ -3537,6 +3537,15 @@ html.checkout-coupon-alert-open {
   color: #3bb371;
 }
 
+.mobile-bottom-nav__item--categories {
+  color: #0284c7;
+}
+
+.mobile-bottom-nav__item--categories.is-active,
+body.mobile-menu-open .mobile-bottom-nav__item--categories {
+  color: #0369a1;
+}
+
 .mobile-bottom-nav__icon {
   position: relative;
   display: inline-flex;

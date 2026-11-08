@@ -47,13 +47,7 @@ class HomepageSettingsService
         $data = $this->all();
 
         return [
-            'taxonomy_mode' => $data['taxonomy_mode'],
-            'hero_sidebar_category_id' => $data['hero_sidebar_category_id'],
-            'hero_sidebar_family_id' => $data['hero_sidebar_family_id'],
-            'hero_sidebar_title' => $data['hero_sidebar_title'],
-            'hero_sidebar_links' => $data['hero_sidebar_links'],
-            'hero_quick_category_ids' => $data['hero_quick_category_ids'],
-            'hero_quick_family_ids' => $data['hero_quick_family_ids'],
+            'taxonomy_mode' => $data['taxonomy_mode'] ?? self::TAXONOMY_CATEGORIES,
             'new_products_enabled' => $data['new_products_enabled'],
             'new_product_ids' => $this->formatIdsForAdmin($data['new_product_ids']),
         ];
@@ -74,19 +68,12 @@ class HomepageSettingsService
     /** @param  array<string, mixed>  $data */
     public function saveFromAdminForm(array $data): void
     {
-        $normalized = $this->normalize([
-            'taxonomy_mode' => $data['taxonomy_mode'] ?? self::TAXONOMY_CATEGORIES,
-            'hero_sidebar_category_id' => $data['hero_sidebar_category_id'] ?? null,
-            'hero_sidebar_family_id' => $data['hero_sidebar_family_id'] ?? null,
-            'hero_sidebar_title' => $data['hero_sidebar_title'] ?? 'سرویس چینی',
-            'hero_sidebar_links' => $data['hero_sidebar_links'] ?? [],
-            'hero_quick_category_ids' => $data['hero_quick_category_ids'] ?? [],
-            'hero_quick_family_ids' => $data['hero_quick_family_ids'] ?? [],
+        $existing = $this->all();
+        $normalized = $this->normalize(array_replace($existing, [
+            'taxonomy_mode' => $data['taxonomy_mode'] ?? $existing['taxonomy_mode'] ?? self::TAXONOMY_CATEGORIES,
             'new_products_enabled' => $data['new_products_enabled'] ?? true,
             'new_product_ids' => $data['new_product_ids'] ?? '',
-        ]);
-
-        $normalized = $this->fillHeroSidebarLinksFromCategoryIfEmpty($normalized);
+        ]));
 
         $this->settings->set(
             self::SETTINGS_GROUP,

@@ -3872,41 +3872,22 @@ html.checkout-coupon-alert-open {
 .home-hero-hub__shell {
   background: #fff;
   border-radius: 18px;
-  padding: 18px;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-  align-items: stretch;
+  padding: 12px;
+  width: 100%;
 }
 
 @media (min-width: 761px) {
   .home-hero-hub__shell {
-    direction: ltr;
-    grid-template-columns: minmax(0, 3.1fr) minmax(270px, 1fr);
-    gap: 18px;
-    align-items: start;
-  }
-}
-
-@media (min-width: 1051px) {
-  .home-hero-hub__shell {
-    grid-template-columns: minmax(0, 3.1fr) minmax(270px, 1fr);
+    padding: 18px;
   }
 }
 
 .home-hero-hub__promo {
+  width: 100%;
   min-width: 0;
   overflow: hidden;
-  background: #65000b;
-  order: 1;
-}
-
-.home-hero-hub__sidebar {
-  order: 2;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  direction: rtl;
+  background: #0a1628;
+  border-radius: 12px;
 }
 
 .home-hero-hub .homeHeroSwiper {
@@ -3918,10 +3899,13 @@ html.checkout-coupon-alert-open {
   position: relative;
   width: 100%;
   overflow: hidden;
-  background: #65000b;
+  background: #0a1628;
+  aspect-ratio: 2560 / 597;
 }
 
 .home-hero-hub__slide-link .hero-slide__picture {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
@@ -3930,6 +3914,8 @@ html.checkout-coupon-alert-open {
 .home-hero-hub__slide-link img,
 .home-hero-hub__slide-link .hero-slide__img {
   width: 100%;
+  height: 100%;
+  min-height: 0;
   display: block;
   object-fit: cover;
   object-position: center;
@@ -3939,12 +3925,6 @@ html.checkout-coupon-alert-open {
   .home-hero-hub__shell {
     padding: 10px;
   }
-
-  .home-hero-hub__slide-link img,
-  .home-hero-hub__slide-link .hero-slide__img {
-    height: auto;
-    aspect-ratio: 989 / 388;
-  }
 }
 
 @media (min-width: 761px) {
@@ -3952,23 +3932,6 @@ html.checkout-coupon-alert-open {
   .home-hero-hub .homeHeroSwiper .swiper-wrapper,
   .home-hero-hub .homeHeroSwiper .swiper-slide {
     height: auto;
-  }
-
-  .home-hero-hub__slide-link {
-    aspect-ratio: 940 / 406;
-  }
-
-  .home-hero-hub__slide-link .hero-slide__picture {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-  }
-
-  .home-hero-hub__slide-link img,
-  .home-hero-hub__slide-link .hero-slide__img {
-    height: 100%;
-    min-height: 0;
   }
 }
 

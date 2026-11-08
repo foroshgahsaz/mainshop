@@ -64,35 +64,12 @@ class ProductFamilyHomepagePopupTest extends TestCase
         $this->assertSame('برند', $items[0]['label']);
     }
 
-    public function test_home_payload_includes_hero_hub_sidebar_links(): void
+    public function test_home_payload_omits_legacy_hero_hub(): void
     {
-        $family = ProductFamily::query()->create([
-            'name' => 'تست',
-            'slug' => 'test-family',
-            'is_active' => true,
-            'homepage_popup_enabled' => false,
-            'position' => 0,
-        ]);
-
-        ProductFamilyHomepagePopupItem::query()->create([
-            'product_family_id' => $family->id,
-            'label' => 'لینک',
-            'url' => 'https://example.test/x',
-            'position' => 0,
-            'is_active' => true,
-        ]);
-
-        app(SettingsService::class)->set('homepage', 'data', json_encode([
-            'taxonomy_mode' => HomepageSettingsService::TAXONOMY_PRODUCT_FAMILIES,
-            'hero_sidebar_family_id' => $family->id,
-            'hero_quick_family_ids' => [],
-            'new_products_enabled' => true,
-            'new_product_ids' => [],
-        ], JSON_UNESCAPED_UNICODE));
         app(ShopCacheService::class)->forgetHome();
 
-        $heroHub = app(ShopCacheService::class)->homePayload()['hero_hub'] ?? [];
+        $payload = app(ShopCacheService::class)->homePayload();
 
-        $this->assertSame('لینک', $heroHub['sidebar_links'][0]['label'] ?? null);
+        $this->assertArrayNotHasKey('hero_hub', $payload);
     }
 }

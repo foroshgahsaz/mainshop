@@ -1,16 +1,13 @@
 @php
-    $heroHub = $hero_hub ?? ['sidebar_title' => '', 'sidebar_links' => [], 'quick_families' => []];
     $planWidget = $homepage_plan_widget ?? ['cards' => [], 'show_continue' => false, 'continue_url' => route('plans.index')];
     $planCards = $planWidget['cards'] ?? [];
     $showPlansContinue = (bool) ($planWidget['show_continue'] ?? false);
     $plansContinueUrl = $planWidget['continue_url'] ?? route('plans.index');
-    $sidebarLinks = $heroHub['sidebar_links'] ?? [];
-    $quickFamilies = $heroHub['quick_families'] ?? [];
 @endphp
 
-<section class="home-hero-hub" aria-label="بنر و دسترسی سریع">
+<section class="home-hero-hub" aria-label="بنر صفحه اصلی">
     <div class="home-hero-hub__inner max-w-site mx-auto px-4 mt-2 md:mt-4">
-        <div class="home-hero-hub__shell" aria-label="بنر و دسته‌بندی‌ها">
+        <div class="home-hero-hub__shell" aria-label="اسلایدر بنر">
             <div class="home-hero-hub__promo">
                 <div class="swiper homeHeroSwiper relative" aria-label="اسلایدر بنر">
                     <div class="swiper-wrapper">
@@ -39,48 +36,6 @@
                     <div class="swiper-pagination"></div>
                 </div>
             </div>
-
-            <aside class="home-hero-hub__sidebar" aria-label="{{ $heroHub['sidebar_title'] ?? 'دسته‌بندی' }}">
-                @if ($sidebarLinks !== [])
-                    <nav class="home-hero-hub__nav-list" aria-label="دسته‌بندی اصلی">
-                        @foreach ($sidebarLinks as $link)
-                            <a href="{{ $link['url'] }}" class="home-hero-hub__nav-item">
-                                <span class="home-hero-hub__nav-label">{{ $link['label'] }}</span>
-                                @if (! empty($link['image']))
-                                    <img
-                                        src="{{ $link['image'] }}"
-                                        alt=""
-                                        class="home-hero-hub__nav-icon-img"
-                                        width="22"
-                                        height="22"
-                                        loading="lazy"
-                                    >
-                                @else
-                                    <span class="home-hero-hub__nav-icon-fallback" aria-hidden="true"></span>
-                                @endif
-                            </a>
-                        @endforeach
-                    </nav>
-                @else
-                    <p class="home-hero-hub__empty-hint">
-                        لینک‌های «{{ $heroHub['sidebar_title'] }}» هنوز ثبت نشده.
-                        ادمین → <strong>تنظیمات → صفحه اصلی فروشگاه</strong> → لینک‌های کنار اسلایدر یا دستهٔ ریشه.
-                    </p>
-                @endif
-
-                @if ($quickFamilies !== [])
-                    <div class="home-hero-hub__category-list">
-                        @foreach ($quickFamilies as $family)
-                            <a href="{{ $family['url'] }}" class="home-hero-hub__category">
-                                <span class="home-hero-hub__category-icon">
-                                    <img src="{{ \App\Services\Shop\HomepageHeroHubService::quickTileImageUrl($family['image']) }}" alt="" loading="lazy">
-                                </span>
-                                <span class="home-hero-hub__category-label">{{ $family['name'] }}</span>
-                            </a>
-                        @endforeach
-                    </div>
-                @endif
-            </aside>
         </div>
 
         @if ($planCards !== [] || $showPlansContinue)

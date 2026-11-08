@@ -28,5 +28,7 @@ class HomepageHeroHubTest extends TestCase
         $response->assertSee('home-gateway-plan-card', false);
         $response->assertSee('خرید اعتباری تست', false);
         $response->assertDontSee('دسته‌بندی محصولات', false);
+        $response->assertDontSee('home-hero-hub__sidebar', false);
+        $response->assertDontSee('home-hero-hub__nav-list', false);
     }
 }

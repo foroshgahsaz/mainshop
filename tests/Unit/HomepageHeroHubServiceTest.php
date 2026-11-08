@@ -2,12 +2,7 @@
 
 namespace Tests\Unit;
 
-use App\Models\Category;
-use App\Models\ProductFamily;
-use App\Models\ProductFamilyHomepagePopupItem;
-use App\Services\Settings\HomepageSettingsService;
-use App\Services\Settings\SettingsService;
-use App\Services\Shop\HomepageHeroHubService;
+use App\Services\Cache\ShopCacheService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -15,95 +10,10 @@ class HomepageHeroHubServiceTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_sidebar_uses_family_with_links_when_configured_family_is_empty(): void
+    public function test_home_payload_no_longer_includes_hero_hub_sidebar(): void
     {
-        $empty = ProductFamily::query()->create([
-            'name' => 'سرویس چینی',
-            'slug' => 'chinese-service-empty',
-            'is_active' => true,
-            'position' => 0,
-        ]);
+        $payload = app(ShopCacheService::class)->homePayload();
 
-        $withLinks = ProductFamily::query()->create([
-            'name' => 'سرویس چینی',
-            'slug' => 'chinese-service',
-            'is_active' => true,
-            'position' => 1,
-        ]);
-
-        ProductFamilyHomepagePopupItem::query()->create([
-            'product_family_id' => $withLinks->id,
-            'label' => 'والاس',
-            'url' => 'https://example.test/wallace',
-            'position' => 1,
-            'is_active' => true,
-        ]);
-
-        app(SettingsService::class)->set('homepage', 'data', json_encode([
-            'taxonomy_mode' => 'categories',
-            'hero_sidebar_family_id' => $empty->id,
-            'hero_sidebar_links' => [
-                ['label' => 'والاس', 'url' => 'https://example.test/wallace', 'is_active' => true],
-            ],
-            'hero_quick_family_ids' => [],
-            'new_products_enabled' => true,
-            'new_product_ids' => [],
-        ], JSON_UNESCAPED_UNICODE));
-
-        $payload = app(HomepageHeroHubService::class)->payload();
-
-        $this->assertSame('والاس', $payload['sidebar_links'][0]['label'] ?? null);
-    }
-
-    public function test_sidebar_only_chinese_sub_links_quick_row_for_sidebar_families_without_children(): void
-    {
-        $chinese = ProductFamily::query()->create([
-            'name' => 'سرویس چینی',
-            'slug' => 'chinese-service',
-            'is_active' => true,
-            'position' => 0,
-        ]);
-
-        ProductFamilyHomepagePopupItem::query()->create([
-            'product_family_id' => $chinese->id,
-            'label' => 'والاس',
-            'url' => 'https://example.test/wallace',
-            'position' => 1,
-            'is_active' => true,
-        ]);
-
-        ProductFamilyHomepagePopupItem::query()->create([
-            'product_family_id' => $chinese->id,
-            'label' => 'مارشال',
-            'url' => 'https://example.test/marshal',
-            'position' => 2,
-            'is_active' => true,
-        ]);
-
-        $kitchenCategory = Category::query()->create([
-            'name' => 'لوازم آشپزخانه',
-            'slug' => 'kitchenware',
-            'is_active' => true,
-            'position' => 1,
-        ]);
-
-        app(SettingsService::class)->set('homepage', 'data', json_encode([
-            'taxonomy_mode' => 'categories',
-            'hero_sidebar_links' => [
-                ['label' => 'والاس', 'url' => 'https://example.test/wallace', 'is_active' => true],
-                ['label' => 'مارشال', 'url' => 'https://example.test/marshal', 'is_active' => true],
-            ],
-            'hero_quick_category_ids' => [$kitchenCategory->id],
-            'new_products_enabled' => true,
-            'new_product_ids' => [],
-        ], JSON_UNESCAPED_UNICODE));
-
-        $payload = app(HomepageHeroHubService::class)->payload();
-        $labels = array_column($payload['sidebar_links'], 'label');
-        $quickNames = array_column($payload['quick_families'], 'name');
-
-        $this->assertSame(['والاس', 'مارشال'], $labels);
-        $this->assertContains('لوازم آشپزخانه', $quickNames);
-        $this->assertNotContains('لوازم آشپزخانه', $labels);
+        $this->assertArrayNotHasKey('hero_hub', $payload);
     }
 }

@@ -1445,6 +1445,7 @@ resources/views/layouts/shop.blade.php
 | 2026-11-06 | سداد / بانک ملی: مسیر مستعار `/payment/callback/bmi` → همان `sadadCallback` (برای ReturnUrl ثبت‌شده در پنل بانک) |
 | 2026-10-31 | درگاه **سداد** (`SadadGateway`): IPG JSON بانک ملی — `PaymentRequest` / `Verify`، SignData DES-EDE3؛ admin `/admin/sadad`؛ callback `/payment/callback/sadad`؛ مستندات `docs/PHP-master.zip` |
 | 2026-10-31 | MediaPicker: اکشن‌های `openMediaCenter` / `clearImage` ثابت روی هر فیلد (Filament با `mountFormComponentAction(statePath, name)` کامپوننت را پیدا می‌کند؛ نام هش‌شده با state path باعث unmount خالی می‌شد) |
+| 2026-11-08 | hero صفحه اصلی: سایدبار کنار اسلایدر حذف شد؛ اسلایدر تمام‌عرض با نسبت **2560×597**؛ `shop:home:payload:v4` (بدون `hero_hub`) |
 | 2026-10-31 | اسلایدر hero hub دسکتاپ: نمایش و آپلود **940×406** (`aspect-ratio` + preset `sliders`)؛ موبایل 750×400 (نمایش ≈989×388) |
 | 2026-10-31 | hero hub: چیدمان mockup (`home-hero-hub__shell`، اسلایدر چپ / سایدبار راست با `direction:ltr`، `home-hero-hub__cards`) |
 | 2026-10-29 | hero: موبایل order اسلایدر→سایدبار؛ دسکتاپ RTL ستون سایدبار راست؛ رفع ناپدید شدن تصویر اسلایدر (flex روی slide، picture block) |

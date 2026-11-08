@@ -56,8 +56,8 @@ class HomepageImageServiceTest extends TestCase
     {
         $optimizerPreset = app(HomepageImageService::class)->optimizerPreset('hero');
 
-        $this->assertSame(940, $optimizerPreset['cover_width'] ?? null);
-        $this->assertSame(406, $optimizerPreset['cover_height'] ?? null);
+        $this->assertSame(2560, $optimizerPreset['cover_width'] ?? null);
+        $this->assertSame(597, $optimizerPreset['cover_height'] ?? null);
         $this->assertArrayNotHasKey('max_width', $optimizerPreset);
     }
 
@@ -72,7 +72,7 @@ class HomepageImageServiceTest extends TestCase
     {
         $preset = app(HomepageImageService::class)->forSection('hero_mobile');
 
-        $this->assertSame(750, $preset['width'] ?? null);
-        $this->assertSame(400, $preset['height'] ?? null);
+        $this->assertSame(1280, $preset['width'] ?? null);
+        $this->assertSame(299, $preset['height'] ?? null);
     }
 }

@@ -25,7 +25,7 @@
 
 ### موبایل (`resources/views/shop/partials/mobile-menu.blade.php`)
 
-داخل آکاردئون «محصولات»، سه سطح drill-down با دکمهٔ بازگشت — داده از همان `megaMenu` رندر شده (بدون AJAX).
+آکاردئون مگا (برچسب از `MenuItem` نوع `mega_trigger`، پیش‌فرض «محصولات») **اولین آیتم** منوی موبایل است؛ داخل آن `mobile-mega-split` (ریل + پنل) با همان `megaMenu` (بدون AJAX).
 
 ## داده و قوانین
 

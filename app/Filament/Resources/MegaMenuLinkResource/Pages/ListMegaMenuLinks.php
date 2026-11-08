@@ -10,6 +10,13 @@ class ListMegaMenuLinks extends ListRecords
 {
     protected static string $resource = MegaMenuLinkResource::class;
 
+    public function mount(): void
+    {
+        abort_unless(MegaMenuLinkResource::schemaReady(), 404);
+
+        parent::mount();
+    }
+
     protected function getHeaderActions(): array
     {
         return [

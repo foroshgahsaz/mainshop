@@ -39,7 +39,7 @@ php artisan migrate --force && php artisan shop:deploy-recover
 
 | علت | اقدام |
 |-----|--------|
-| migrate نیمه‌کاره (`show_in_mega` اضافه شد، بعد FK خطا خورد) | deploy آخرین `master` سپس `php artisan migrate --force` — migrationهای `120000` (idempotent) + `130000_repair_mega_menu_schema` جدول را می‌سازند |
+| migrate نیمه‌کاره (`show_in_mega` اضافه شد، جدول نه) / `Nothing to migrate` ولی جدول نیست | deploy آخرین `master` سپس `php artisan shop:repair-mega-menu-schema` (یا `shop:deploy-recover`) — **بدون وابستگی به ردیف migrations** جدول را می‌سازد |
 | خطای `Duplicate column show_in_mega` | طبیعی بعد از شکست قبلی — با migration idempotent رد می‌شود و بقیه تکمیل می‌شود |
 | خطای `1824 Failed to open referenced table product_families` | در نسخهٔ جدید FK حذف شده؛ فقط ستون + index |
 

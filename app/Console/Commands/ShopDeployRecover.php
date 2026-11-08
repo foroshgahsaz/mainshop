@@ -31,6 +31,11 @@ class ShopDeployRecover extends Command
         Artisan::call('migrate', ['--force' => true]);
         $this->line(trim(Artisan::output()));
 
+        $megaRepair = app(\App\Services\Shop\MegaMenuSchemaRepair::class)->ensure();
+        if ($megaRepair !== []) {
+            $this->components->info('Mega menu schema repaired: '.implode(', ', $megaRepair));
+        }
+
         $homepageSettings = app(HomepageSettingsService::class);
         if ($homepageSettings->materializeHeroSidebarLinksIfEmpty()) {
             $this->components->info('Homepage hero sidebar links imported from product family settings.');

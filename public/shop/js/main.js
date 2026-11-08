@@ -575,15 +575,14 @@ function initListingCategorySwiper(el) {
     return null;
   }
 
-  const slideCount = el.querySelectorAll('.swiper-slide').length;
+  const isRtl = document.documentElement.getAttribute('dir') === 'rtl';
 
   return new Swiper(el, {
     slidesPerView: 'auto',
-    spaceBetween: 18,
+    spaceBetween: 16,
     grabCursor: true,
     watchOverflow: true,
-    centeredSlides: slideCount > 0 && slideCount <= 5,
-    centeredSlidesBounds: true,
+    rtl: isRtl,
     freeMode: {
       enabled: true,
       momentum: true,

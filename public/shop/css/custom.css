@@ -4047,12 +4047,12 @@ html.checkout-coupon-alert-open {
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
   margin-top: auto;
-  padding: 16px 4px 0;
+  padding: 10px 4px 0;
 }
 
 @media (max-width: 760px) {
   .home-hero-hub__category-list {
-    padding-top: 12px;
+    padding-top: 10px;
   }
 }
 

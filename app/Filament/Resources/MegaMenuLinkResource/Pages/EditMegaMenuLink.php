@@ -8,4 +8,11 @@ use Filament\Resources\Pages\EditRecord;
 class EditMegaMenuLink extends EditRecord
 {
     protected static string $resource = MegaMenuLinkResource::class;
+
+    public function mount(): void
+    {
+        abort_unless(MegaMenuLinkResource::schemaReady(), 404);
+
+        parent::mount();
+    }
 }

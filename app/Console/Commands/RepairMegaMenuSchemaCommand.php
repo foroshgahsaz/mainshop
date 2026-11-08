@@ -2,34 +2,32 @@
 
 namespace App\Console\Commands;
 
+use App\Services\Cache\ShopCacheService;
+use App\Services\Shop\MegaMenuSchemaRepair;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Artisan;
 
 class RepairMegaMenuSchemaCommand extends Command
 {
     protected $signature = 'shop:repair-mega-menu-schema';
 
-    protected $description = 'اجرای migration تعمیر اسکیما مگا منو (جدول mega_menu_links و ستون‌ها)';
+    protected $description = 'ساخت/تکمیل جدول mega_menu_links و ستون‌های مرتبط (بدون وابستگی به جدول migrations)';
 
-    public function handle(): int
+    public function handle(MegaMenuSchemaRepair $repair, ShopCacheService $cache): int
     {
-        Artisan::call('migrate', [
-            '--force' => true,
-            '--path' => 'database/migrations/2026_11_08_130000_repair_mega_menu_schema.php',
-        ]);
-        $this->line(Artisan::output());
+        $actions = $repair->ensure();
 
-        Artisan::call('migrate', [
-            '--force' => true,
-            '--path' => 'database/migrations/2026_11_08_160000_ensure_mega_menu_links_table.php',
-        ]);
-        $this->line(Artisan::output());
+        if ($actions === []) {
+            $this->info('اسکیما مگا منو از قبل کامل است.');
 
-        Artisan::call('migrate', [
-            '--force' => true,
-            '--path' => 'database/migrations/2026_11_08_140000_mega_menu_root_category.php',
-        ]);
-        $this->line(Artisan::output());
+            return self::SUCCESS;
+        }
+
+        foreach ($actions as $action) {
+            $this->line('✓ '.$action);
+        }
+
+        $cache->forgetMenus();
+        $cache->forgetCategory();
 
         $this->info('تعمیر اسکیما مگا منو تمام شد.');
 

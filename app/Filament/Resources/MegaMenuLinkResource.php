@@ -22,11 +22,7 @@ class MegaMenuLinkResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-link';
 
-    protected static ?string $navigationLabel = 'لینک مگا منو';
-
-    protected static ?string $navigationGroup = 'فروشگاه';
-
-    protected static ?int $navigationSort = 4;
+    protected static bool $shouldRegisterNavigation = false;
 
     protected static ?string $modelLabel = 'لینک مگا منو';
 
@@ -37,11 +33,6 @@ class MegaMenuLinkResource extends Resource
         return Schema::hasTable('mega_menu_links')
             && Schema::hasColumn('product_families', 'show_in_mega')
             && Schema::hasColumn('categories', 'product_family_id');
-    }
-
-    public static function shouldRegisterNavigation(): bool
-    {
-        return static::schemaReady() && parent::shouldRegisterNavigation();
     }
 
     public static function canViewAny(): bool

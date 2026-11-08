@@ -11,6 +11,7 @@ use App\Filament\Resources\CouponResource;
 use App\Filament\Resources\FreightCarrierResource;
 use App\Filament\Resources\HomeSliderResource;
 use App\Filament\Resources\MediaFileResource;
+use App\Filament\Resources\MegaMenuLinkResource;
 use App\Filament\Resources\MenuItemResource;
 use App\Filament\Resources\OrderResource;
 use App\Filament\Resources\PageResource;
@@ -45,6 +46,7 @@ class AdminListHeader
             PageResource::class => 'fa-file-alt',
             HomeSliderResource::class => 'fa-images',
             MenuItemResource::class => 'fa-bars',
+            MegaMenuLinkResource::class => 'fa-bars',
             MediaFileResource::class => 'fa-photo-film',
             AttributeResource::class => 'fa-tags',
             ProductFamilyResource::class => 'fa-layer-group',

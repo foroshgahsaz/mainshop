@@ -64,6 +64,38 @@
         </section>
     @endif
 
+    @if ($step === 'category')
+        <section class="rep-wizard-panel">
+            <header class="rep-wizard-header">
+                <h2 class="rep-wizard-title">دسته‌بندی</h2>
+                @if ($catalogTrail['category'])
+                    <p class="rep-wizard-hint">مسیر: <strong>{{ $catalogTrail['category'] }}</strong></p>
+                @else
+                    <p class="rep-wizard-hint">یک دستهٔ اصلی یا زیردسته را انتخاب کنید.</p>
+                @endif
+            </header>
+            <div class="rep-wizard-panel__body">
+                @if ($categoryPath !== [])
+                    <p class="rep-wizard-hint mb-3">
+                        <button type="button" class="rep-btn-secondary rep-btn-secondary--compact" wire:click="goBackInCategory">بازگشت به سطح قبل</button>
+                    </p>
+                @endif
+                <div class="rep-chip-grid" role="list">
+                    @forelse ($this->catalogCategories as $category)
+                        <button type="button"
+                                role="listitem"
+                                class="rep-chip"
+                                wire:click="selectCategory({{ $category->id }})">
+                            {{ $category->name }}
+                        </button>
+                    @empty
+                        <p class="rep-wizard-empty">دسته‌ای با محصول فعال در این سطح نیست.</p>
+                    @endforelse
+                </div>
+            </div>
+        </section>
+    @endif
+
     @if ($step === 'family')
         <section class="rep-wizard-panel">
             <header class="rep-wizard-header">
@@ -169,12 +201,35 @@
         <section class="rep-wizard-panel">
             <header class="rep-wizard-header">
                 <h2 class="rep-wizard-title">انتخاب محصول</h2>
-                @if ($catalogTrail['family'] || $catalogTrail['plant'] || $catalogTrail['brand'] || $catalogTrail['template'])
+                @if ($catalogTrail['category'])
+                    <p class="rep-wizard-hint rep-catalog-trail">دسته: <strong>{{ $catalogTrail['category'] }}</strong></p>
+                @elseif ($catalogTrail['family'] || $catalogTrail['plant'] || $catalogTrail['brand'] || $catalogTrail['template'])
                     <p class="rep-wizard-hint rep-catalog-trail">
                         {{ collect([$catalogTrail['family'], $catalogTrail['plant'], $catalogTrail['brand'], $catalogTrail['template']])->filter()->implode(' · ') }}
                     </p>
                 @endif
             </header>
+            @if ($step === 'product' && $this->productBrandFilters->isNotEmpty())
+                <div class="rep-wizard-panel__body rep-brand-bar" style="padding-bottom: 0;">
+                    <p class="rep-wizard-hint">فیلتر برند (اختیاری):</p>
+                    <div class="rep-chip-grid" role="list">
+                        <button type="button"
+                                role="listitem"
+                                class="rep-chip {{ $brandId === null ? 'is-selected' : '' }}"
+                                wire:click="selectProductBrand(null)">
+                            همه برندها
+                        </button>
+                        @foreach ($this->productBrandFilters as $brand)
+                            <button type="button"
+                                    role="listitem"
+                                    class="rep-chip {{ (int) $brandId === (int) $brand->id ? 'is-selected' : '' }}"
+                                    wire:click="selectProductBrand({{ $brand->id }})">
+                                {{ $brand->name }}
+                            </button>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
             <div class="rep-wizard-toolbar">
                 <label class="rep-field rep-field--grow">
                     <span class="rep-field__label">جستجو</span>

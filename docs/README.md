@@ -21,7 +21,8 @@
 | ۹ | [dev/07-add-payment-gateway.md](dev/07-add-payment-gateway.md) | **افزودن درگاه پرداخت** — فایل‌به‌فایل |
 | ۱۰ | [dev/08-add-limited-access.md](dev/08-add-limited-access.md) | **دسترسی محدود / مدیر فروش / Resource جدید** |
 | ۱۱ | [dev/09-transactional-sms.md](dev/09-transactional-sms.md) | **پیامک تراکنشی** — قالب‌ها، رویدادها، صف |
-| ۱۱ب | [dev/09-mega-menu-families.md](dev/09-mega-menu-families.md) | **مگا منو خانواده‌محور** — کش header، ادمین، موبایل drill-down |
+| ۱۱ب | [dev/09-mega-menu-families.md](dev/09-mega-menu-families.md) | **مگا منو (تاریخچه خانواده‌محور)** |
+| ۱۱ج | [dev/10-catalog-category-only.md](dev/10-catalog-category-only.md) | **کاتالوگ دسته‌محور** — مگا منو، ویزارد نماینده، مهاجرت |
 | — | [PROJECT-PHASES.md](PROJECT-PHASES.md) | تا کجا پیش رفته‌ایم (فازهای محصول) |
 | — | [dev/00-doc-maintenance.md](dev/00-doc-maintenance.md) | **الزام:** هر فیچر = به‌روز doc |
 

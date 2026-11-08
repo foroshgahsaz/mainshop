@@ -31,8 +31,7 @@ class MegaMenuLinkResource extends Resource
     public static function schemaReady(): bool
     {
         return Schema::hasTable('mega_menu_links')
-            && Schema::hasColumn('product_families', 'show_in_mega')
-            && Schema::hasColumn('categories', 'product_family_id');
+            && Schema::hasColumn('categories', 'show_in_mega');
     }
 
     public static function canViewAny(): bool
@@ -42,37 +41,73 @@ class MegaMenuLinkResource extends Resource
 
     public static function form(Form $form): Form
     {
+        $usesRootCategory = Schema::hasColumn('mega_menu_links', 'root_category_id');
+
         return $form->schema([
             Forms\Components\Section::make('لینک دستی مگا منو')
-                ->description('ستون سفارشی: «ستون دسته» خالی و «لینک والد» خالی. زیرمجموعه: لینک والد را انتخاب کنید. زیر یک دسته: ستون دسته را پر کنید (بدون لینک والد).')
+                ->description('ستون سفارشی: «ستون دسته» خالی و «لینک والد» خالی. زیرمجموعه: لینک والد را انتخاب کنید. زیر یک ستون دسته: ستون دسته را پر کنید (بدون لینک والد). ریل مگا منو = دستهٔ ریشه با show_in_mega.')
                 ->schema([
-                    Forms\Components\Select::make('product_family_id')
-                        ->label('خانواده محصول')
-                        ->relationship('family', 'name')
-                        ->searchable()
-                        ->preload()
-                        ->required()
-                        ->live(),
+                    $usesRootCategory
+                        ? Forms\Components\Select::make('root_category_id')
+                            ->label('ستون ریشه مگا (دستهٔ سطح ۱)')
+                            ->options(fn (): array => Category::query()
+                                ->whereNull('parent_id')
+                                ->where('show_in_mega', true)
+                                ->orderBy('position')
+                                ->pluck('name', 'id')
+                                ->all())
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->live()
+                        : Forms\Components\Select::make('product_family_id')
+                            ->label('خانواده محصول (legacy)')
+                            ->relationship('family', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->live(),
                     Forms\Components\Select::make('parent_id')
                         ->label('لینک والد (ستون سفارشی)')
-                        ->options(fn (Get $get): array => MegaMenuLink::query()
-                            ->where('product_family_id', $get('product_family_id'))
-                            ->whereNull('category_id')
-                            ->whereNull('parent_id')
-                            ->orderBy('position')
-                            ->pluck('label', 'id')
-                            ->all())
+                        ->options(function (Get $get) use ($usesRootCategory): array {
+                            $query = MegaMenuLink::query()
+                                ->whereNull('category_id')
+                                ->whereNull('parent_id')
+                                ->orderBy('position');
+
+                            if ($usesRootCategory && filled($get('root_category_id'))) {
+                                $query->where('root_category_id', $get('root_category_id'));
+                            } elseif (filled($get('product_family_id'))) {
+                                $query->where('product_family_id', $get('product_family_id'));
+                            }
+
+                            return $query->pluck('label', 'id')->all();
+                        })
                         ->searchable()
                         ->placeholder('—')
                         ->hidden(fn (Get $get) => filled($get('category_id'))),
                     Forms\Components\Select::make('category_id')
-                        ->label('ستون دسته (لینک زیر دسته)')
-                        ->options(fn (Get $get): array => Category::query()
-                            ->where('product_family_id', $get('product_family_id'))
-                            ->whereNull('parent_id')
-                            ->orderBy('position')
-                            ->pluck('name', 'id')
-                            ->all())
+                        ->label('ستون دسته (سطح ۲ در همان ریشه)')
+                        ->options(function (Get $get) use ($usesRootCategory): array {
+                            if ($usesRootCategory && filled($get('root_category_id'))) {
+                                return Category::query()
+                                    ->where('parent_id', $get('root_category_id'))
+                                    ->orderBy('position')
+                                    ->pluck('name', 'id')
+                                    ->all();
+                            }
+
+                            if (filled($get('product_family_id'))) {
+                                return Category::query()
+                                    ->where('product_family_id', $get('product_family_id'))
+                                    ->whereNull('parent_id')
+                                    ->orderBy('position')
+                                    ->pluck('name', 'id')
+                                    ->all();
+                            }
+
+                            return [];
+                        })
                         ->searchable()
                         ->placeholder('—')
                         ->hidden(fn (Get $get) => filled($get('parent_id'))),
@@ -101,9 +136,13 @@ class MegaMenuLinkResource extends Resource
 
     public static function table(Table $table): Table
     {
+        $usesRootCategory = Schema::hasColumn('mega_menu_links', 'root_category_id');
+
         return AdminTable::configure($table)
             ->columns([
-                Tables\Columns\TextColumn::make('family.name')->label('خانواده')->sortable(),
+                $usesRootCategory
+                    ? Tables\Columns\TextColumn::make('rootCategory.name')->label('ریشه مگا')->sortable()->placeholder('—')
+                    : Tables\Columns\TextColumn::make('family.name')->label('خانواده')->sortable(),
                 Tables\Columns\TextColumn::make('label')->label('عنوان')->searchable(),
                 Tables\Columns\TextColumn::make('category.name')->label('ستون دسته')->placeholder('—'),
                 Tables\Columns\TextColumn::make('parent.label')->label('والد')->placeholder('—'),

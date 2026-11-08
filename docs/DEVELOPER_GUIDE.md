@@ -1342,6 +1342,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-08 | درخت دسته استاندارد: `shop:seed-category-taxonomy` / `CategoryTaxonomySeeder` — مگا منو + حذف دسته‌های قبلی — [dev/10](dev/10-catalog-category-only.md) |
 | 2026-11-08 | پایان مهاجرت کاتالوگ: `shop:finalize-catalog-category-only`، `CategoryMegaMenuVisibilityService`، deploy-recover همگام‌سازی هیرو/mega؛ حذف پاپ‌آپ خانواده — [dev/10](dev/10-catalog-category-only.md) |
 | 2026-11-08 | فاز G: `shop:catalog-diagnose-families`، infer ریشه از محصولات، `SHOP_FAMILY_ROOT_CATEGORY_MAP`، `--write-fk` |
 | 2026-11-08 | فاز D/B: هیرو صفحه اصلی از دسته، لیست محصول با زیرشاخه، ادمین بدون خانواده/کارخانه در منو، `shop:migrate-homepage-settings-categories` — [dev/10](dev/10-catalog-category-only.md) |

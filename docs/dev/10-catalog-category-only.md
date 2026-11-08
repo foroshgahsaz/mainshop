@@ -46,6 +46,17 @@ php artisan cache:clear
 
 برای بوت‌استرپ ریشه‌های مگا (قدیمی خانواده‌محور): `php artisan shop:bootstrap-mega-menu` — پس از مهاجرت ترجیحاً فقط `show_in_mega` روی دسته‌های ریشه.
 
+### درخت استاندارد فروشگاه (از صفر)
+
+جایگزینی کامل دسته‌ها + `show_in_mega` برای مگا منو (حذف دسته‌های قبلی؛ نگاشت محصول با تطابق نام):
+
+```bash
+php artisan shop:seed-category-taxonomy --dry-run
+php artisan shop:seed-category-taxonomy --force
+```
+
+سیدر: `Database\Seeders\CategoryTaxonomySeeder` — تعریف درخت در `CategoryTaxonomyBlueprint`.
+
 ## ادمین
 
 - **محتوا → منوی سایت → لینک‌های مگا منو**: فیلد «ستون ریشه مگا» (`root_category_id`).

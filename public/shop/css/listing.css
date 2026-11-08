@@ -3,7 +3,9 @@
 .listing-breadcrumb {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 0.5rem;
+  margin-top: 10px;
   font-size: 12px;
   color: #9ca3af;
 }
@@ -42,11 +44,19 @@
 }
 
 .listing-category-carousel .swiper-slide {
-  width: 142px !important;
-  max-width: 142px;
+  width: 132px !important;
+  max-width: 132px;
   flex-shrink: 0;
   height: auto;
   display: flex;
+  margin-inline-end: 0;
+}
+
+.listing-category-carousel[data-carousel-count="2"] .swiper-wrapper,
+.listing-category-carousel[data-carousel-count="3"] .swiper-wrapper,
+.listing-category-carousel[data-carousel-count="4"] .swiper-wrapper,
+.listing-category-carousel[data-carousel-count="5"] .swiper-wrapper {
+  justify-content: center;
 }
 
 .listing-category-carousel__card {
@@ -56,9 +66,9 @@
   justify-content: center;
   gap: 0.5rem;
   padding: 0.75rem 0.5rem;
-  width: 142px !important;
-  max-width: 142px !important;
-  min-height: 132px;
+  width: 132px !important;
+  max-width: 132px !important;
+  min-height: 128px;
   aspect-ratio: auto !important;
   height: auto !important;
   border: 1px solid #f1f5f9;
@@ -464,6 +474,7 @@ body.listing-filters-open {
   position: relative;
   height: 32px;
   margin-bottom: 0.75rem;
+  direction: ltr;
 }
 
 .price-range-track {
@@ -507,6 +518,14 @@ body.listing-filters-open {
   background: transparent;
 }
 
+.price-range-inputs .price-range-min {
+  z-index: 2;
+}
+
+.price-range-inputs .price-range-max {
+  z-index: 3;
+}
+
 .price-range-inputs input[type="range"]::-webkit-slider-runnable-track {
   height: 6px;
   background: transparent;
@@ -548,6 +567,7 @@ body.listing-filters-open {
   display: flex;
   justify-content: space-between;
   gap: 0.5rem;
+  direction: rtl;
   font-size: 11px;
   color: #6b7280;
   font-weight: 600;

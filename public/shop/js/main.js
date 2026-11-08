@@ -575,11 +575,15 @@ function initListingCategorySwiper(el) {
     return null;
   }
 
+  const slideCount = el.querySelectorAll('.swiper-slide').length;
+
   return new Swiper(el, {
     slidesPerView: 'auto',
-    spaceBetween: 12,
+    spaceBetween: 18,
     grabCursor: true,
     watchOverflow: true,
+    centeredSlides: slideCount > 0 && slideCount <= 5,
+    centeredSlidesBounds: true,
     freeMode: {
       enabled: true,
       momentum: true,

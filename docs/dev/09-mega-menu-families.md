@@ -62,6 +62,26 @@ Migration: `database/migrations/2026_11_08_120000_mega_menu_product_families.php
 1. `php artisan migrate --force` اجرا شده باشد (جدول `mega_menu_links` و ستون‌ها موجود).
 2. بعد از هر تغییر محتوا: **پاک کردن کش** (نوار ادمین) یا `shop:deploy-recover`.
 
+### بوت‌استرپ خودکار از دسته‌های فعلی
+
+```bash
+# پیش‌نمایش بدون ذخیره
+php artisan shop:bootstrap-mega-menu --dry-run
+
+# اعمال (دسته‌هایی که قبلاً در مگا منو بودند = show_in_mega روی ریشه)
+php artisan shop:bootstrap-mega-menu --no-interaction
+
+# همه دسته‌های ریشهٔ فعال
+php artisan shop:bootstrap-mega-menu --all-roots --no-interaction
+
+# همه ستون‌ها زیر یک خانواده (مثلاً سرویس چینی)
+php artisan shop:bootstrap-mega-menu --family=chinese-service --no-interaction
+```
+
+منطق: برای هر دستهٔ ریشه، خانواده از `product_family_id` موجود، یا پرتکرارترین خانوادهٔ محصولات همان شاخه، یا خانوادهٔ پیش‌فرض (اسلاگ `chinese-service`) انتخاب می‌شود. زیردسته‌ها همان خانواده را می‌گیرند. لینک دستی نمی‌سازد.
+
+سرویس: `App\Services\Shop\MegaMenuBootstrapService`
+
 ### مرحله ۱ — خانواده‌ها (ریل راست دسکتاپ / سطح اول موبایل)
 
 1. ادمین → **فروشگاه → خانواده محصول** (یا مسیر خانواده در سایدبار محصولات).

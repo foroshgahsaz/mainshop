@@ -127,6 +127,7 @@ app/Services/
 | `shop:diagnose-uploads` | آپلود |
 | `shop:verify-storage` | دیسک |
 | `shop:cache-warm` | گرم کردن cache فروشگاه |
+| `shop:bootstrap-mega-menu` | اتصال دسته/خانواده برای مگا منو از دادهٔ موجود |
 | `shop:fix-storage-permissions` | chmod پوشه‌ها |
 | `shop:sync-public-storage` | چند پاد |
 | `shop:import-existing-media` | import فایل‌های موجود |

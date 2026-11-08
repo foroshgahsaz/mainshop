@@ -4,6 +4,7 @@ namespace App\Services\Shop;
 
 use App\Models\Category;
 use App\Models\MegaMenuLink;
+use App\Support\ShopFormatter;
 use App\Support\ShopStaffPreview;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
@@ -93,6 +94,7 @@ final class MegaMenuPayloadBuilder
                     $items[] = [
                         'label' => $grandchild->name,
                         'url' => route('categories.show', $grandchild),
+                        'image' => $this->categoryImageUrl($grandchild->image),
                     ];
                 }
 
@@ -100,12 +102,14 @@ final class MegaMenuPayloadBuilder
                     $items[] = [
                         'label' => $link->label,
                         'url' => $link->url,
+                        'image' => null,
                     ];
                 }
 
                 $columns[] = [
                     'title' => $child->name,
                     'url' => route('categories.show', $child),
+                    'image' => $this->categoryImageUrl($child->image),
                     'items' => $items,
                 ];
             }
@@ -115,6 +119,7 @@ final class MegaMenuPayloadBuilder
             $payload[] = [
                 'id' => $root->id,
                 'name' => $root->name,
+                'image' => $this->categoryImageUrl($root->image),
                 'all_products_url' => route('categories.show', $root),
                 'columns' => $columns,
             ];
@@ -158,17 +163,26 @@ final class MegaMenuPayloadBuilder
                 $items[] = [
                     'label' => $child->label,
                     'url' => $child->url,
+                    'image' => null,
                 ];
             }
 
             $columns[] = [
                 'title' => $root->label,
                 'url' => $root->url,
+                'image' => null,
                 'items' => $items,
             ];
         }
 
         return $columns;
+    }
+
+    private function categoryImageUrl(mixed $path): string
+    {
+        $trimmed = trim((string) $path);
+
+        return ShopFormatter::categoryImage($trimmed !== '' ? $trimmed : null);
     }
 
     /** @return array{has_category_tree: false, has_families: false, roots: array, families: array} */

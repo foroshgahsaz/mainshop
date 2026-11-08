@@ -16,28 +16,28 @@
 | E | `RepresentativeCategoryCatalogLookup` + ویزارد + `catalog_filters.category_*` | انجام شد |
 | D | هوم‌پیج هیرو از دسته + `shop:migrate-homepage-settings-categories` | این PR |
 | B/D | ادمین محصول بدون خانواده؛ لیست با `category_id` + زیرشاخه | این PR |
-| F | منوی ادمین بدون خانواده/کارخانه/قالب؛ drop ستون‌ها | جزئی (UI) — DB بعدی |
-| G | `shop:catalog-diagnose-families`، infer از محصولات، env map | این PR |
+| F | منوی ادمین بدون خانواده/کارخانه/قالب؛ drop ستون‌ها | UI ✅ — حذف فیزیکی DB بعد از پایداری |
+| G | `shop:catalog-diagnose-families`، infer از محصولات، env map | انجام شد |
+| ops | `shop:finalize-catalog-category-only` + deploy-recover | این PR |
 
 ## Deploy
 
 ```bash
 php artisan migrate --force && php artisan shop:deploy-recover
-php artisan shop:migrate-mega-menu-roots --enable-roots
-php artisan shop:migrate-homepage-settings-categories
-php artisan shop:catalog-diagnose-families
-php artisan shop:migrate-mega-menu-roots --enable-roots --write-fk
+# deploy-recover خودکار: repair-mega-schema، migrate-homepage-settings-categories
+
+# یک‌جا (پس از diagnose موفق):
+php artisan shop:finalize-catalog-category-only
+php artisan shop:catalog-diagnose-families   # فقط sanity check
 php artisan cache:clear
 ```
 
 ## مراحل باقی‌مانده (پس از diagnose موفق)
 
-1. **deploy** آخرین master (رفع 500 محصول: import تکراری `Category` در `ListsShopProducts`)
-2. `php artisan migrate --force` و در صورت نبود جدول: `php artisan shop:repair-mega-menu-schema`
-3. ادمین: **صفحه اصلی** — سه کاشی = دسته‌های #47، #50، #51 (بلور/پذیرایی، آشپزخانه، مبلمان) نه لزوماً خانواده legacy
-4. ادمین: **دسته‌ها** — `show_in_mega` برای ریشه‌ها و ستون‌های سطح ۲/۳ مگا
-5. اختیاری (فاز F): حذف فیزیکی ستون‌های `product_family_id` / جداول خانواده پس از پایدار شدن
-6. پاکسازی: پاپ‌آپ JS/CSS خانواده (دیگر استفاده نمی‌شود)
+1. **deploy** آخرین `master` و `php artisan shop:deploy-recover` (یا `shop:finalize-catalog-category-only`)
+2. در صورت نبود جدول: `php artisan shop:repair-mega-menu-schema`
+3. **ادمین (اختیاری):** تصاویر/ترتیب کاشی‌های هیرو و ستون‌های مگا را ریزتنظیم کنید — پیش‌فرض‌ها از mapper پر می‌شوند
+4. **فاز F (بعداً):** حذف فیزیکی ستون‌های `product_family_id` / جداول خانواده — فقط وقتی URLهای `product_family_id` دیگر در لاگ نیستند
 
 ### آیا خروجی migrate «اوکی» است؟
 
@@ -62,3 +62,5 @@ php artisan cache:clear
 - `App\Services\Shop\CategoryTreeService`
 - `App\Services\Representative\RepresentativeCategoryCatalogLookup`
 - `App\Console\Commands\MigrateMegaMenuToCategoryRootsCommand`
+- `App\Console\Commands\FinalizeCatalogCategoryOnlyCommand`
+- `App\Services\Shop\CategoryMegaMenuVisibilityService`

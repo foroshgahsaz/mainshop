@@ -2500,7 +2500,6 @@ html.checkout-coupon-alert-open {
   padding: 0;
 }
 
-.family-homepage-popup,
 .chinese-brands-modal {
   position: fixed;
   inset: 0;
@@ -2516,13 +2515,11 @@ html.checkout-coupon-alert-open {
   transition: opacity 0.25s ease;
 }
 
-.family-homepage-popup.is-open,
 .chinese-brands-modal.is-open {
   opacity: 1;
   pointer-events: auto;
 }
 
-.family-homepage-popup__panel,
 .chinese-brands-modal__panel {
   background: #fff;
   width: 100%;
@@ -2534,12 +2531,10 @@ html.checkout-coupon-alert-open {
   transition: transform 0.25s ease;
 }
 
-.family-homepage-popup.is-open .family-homepage-popup__panel,
 .chinese-brands-modal.is-open .chinese-brands-modal__panel {
   transform: translateY(0);
 }
 
-.family-homepage-popup__header,
 .chinese-brands-modal__header {
   display: flex;
   align-items: center;
@@ -2548,7 +2543,6 @@ html.checkout-coupon-alert-open {
   margin-bottom: 0.35rem;
 }
 
-.family-homepage-popup__title,
 .chinese-brands-modal__title {
   margin: 0;
   font-size: 1.05rem;
@@ -2556,7 +2550,6 @@ html.checkout-coupon-alert-open {
   color: #181c32;
 }
 
-.family-homepage-popup__close,
 .chinese-brands-modal__close {
   border: none;
   background: #f3f4f6;
@@ -2570,19 +2563,16 @@ html.checkout-coupon-alert-open {
   cursor: pointer;
 }
 
-.family-homepage-popup__close:hover,
 .chinese-brands-modal__close:hover {
   background: #e5e7eb;
 }
 
-.family-homepage-popup__hint,
 .chinese-brands-modal__hint {
   margin: 0 0 0.85rem;
   font-size: 0.8rem;
   color: #9ca3af;
 }
 
-.family-homepage-popup__list,
 .chinese-brands-modal__list {
   list-style: none;
   margin: 0;
@@ -2592,7 +2582,6 @@ html.checkout-coupon-alert-open {
   gap: 0.5rem;
 }
 
-.family-homepage-popup__item,
 .chinese-brands-modal__item {
   display: flex;
   align-items: center;
@@ -2606,14 +2595,12 @@ html.checkout-coupon-alert-open {
   transition: border-color 0.15s, background 0.15s;
 }
 
-.family-homepage-popup__item:hover,
 .chinese-brands-modal__item:hover {
   border-color: #3bb371;
   background: #f0fdf4;
   color: #166534;
 }
 
-.family-homepage-popup__index,
 .chinese-brands-modal__index {
   width: 1.75rem;
   height: 1.75rem;
@@ -2628,7 +2615,6 @@ html.checkout-coupon-alert-open {
   flex-shrink: 0;
 }
 
-.family-homepage-popup__name,
 .chinese-brands-modal__name {
   flex: 1;
 }

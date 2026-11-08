@@ -6,38 +6,38 @@
 @endphp
 
 <section class="home-hero-hub" aria-label="بنر صفحه اصلی">
-    <div class="home-hero-hub__inner max-w-site mx-auto px-4 mt-2 md:mt-4">
-        <div class="home-hero-hub__shell" aria-label="اسلایدر بنر">
-            <div class="home-hero-hub__promo">
-                <div class="swiper homeHeroSwiper relative" aria-label="اسلایدر بنر">
-                    <div class="swiper-wrapper">
-                        @forelse($sliders as $i => $slider)
-                            <div class="swiper-slide">
-                                @if($slider->link)
-                                    <a href="{{ $slider->link }}" class="home-hero-hub__slide-link">
-                                        @include('shop.partials.hero-slide-media', ['slider' => $slider, 'isFirst' => $i === 0])
-                                    </a>
-                                @else
-                                    <div class="home-hero-hub__slide-link">
-                                        @include('shop.partials.hero-slide-media', ['slider' => $slider, 'isFirst' => $i === 0])
-                                    </div>
-                                @endif
-                            </div>
-                        @empty
-                            @foreach(['slide-ai.svg', 'slide-discount.svg'] as $i => $hero)
-                                <div class="swiper-slide">
-                                    <a href="{{ route('products.index') }}" class="home-hero-hub__slide-link">
-                                        <img src="{{ asset('shop/images/hero/'.$hero) }}" alt="بنر" loading="{{ $i === 0 ? 'eager' : 'lazy' }}" draggable="false">
-                                    </a>
+    <div class="home-hero-hub__promo-wrap" aria-label="اسلایدر بنر">
+        <div class="home-hero-hub__promo">
+            <div class="swiper homeHeroSwiper relative" aria-label="اسلایدر بنر">
+                <div class="swiper-wrapper">
+                    @forelse($sliders as $i => $slider)
+                        <div class="swiper-slide">
+                            @if($slider->link)
+                                <a href="{{ $slider->link }}" class="home-hero-hub__slide-link">
+                                    @include('shop.partials.hero-slide-media', ['slider' => $slider, 'isFirst' => $i === 0])
+                                </a>
+                            @else
+                                <div class="home-hero-hub__slide-link">
+                                    @include('shop.partials.hero-slide-media', ['slider' => $slider, 'isFirst' => $i === 0])
                                 </div>
-                            @endforeach
-                        @endforelse
-                    </div>
-                    <div class="swiper-pagination"></div>
+                            @endif
+                        </div>
+                    @empty
+                        @foreach(['slide-ai.svg', 'slide-discount.svg'] as $i => $hero)
+                            <div class="swiper-slide">
+                                <a href="{{ route('products.index') }}" class="home-hero-hub__slide-link">
+                                    <img src="{{ asset('shop/images/hero/'.$hero) }}" alt="بنر" loading="{{ $i === 0 ? 'eager' : 'lazy' }}" draggable="false">
+                                </a>
+                            </div>
+                        @endforeach
+                    @endforelse
                 </div>
+                <div class="swiper-pagination"></div>
             </div>
         </div>
+    </div>
 
+    <div class="home-hero-hub__inner max-w-site mx-auto px-4">
         @if ($planCards !== [] || $showPlansContinue)
             <div class="home-hero-hub__cards-wrap" aria-label="طرح‌های خرید اعتباری">
                 <div class="home-hero-hub__cards home-hero-hub__cards--grid">

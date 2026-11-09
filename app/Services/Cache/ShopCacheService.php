@@ -14,6 +14,8 @@ use App\Services\Shop\HomepageCreditPlanService;
 use App\Services\Shop\HomepagePartnerService;
 use App\Services\Shop\CatalogFamilyCategoryMapper;
 use App\Services\Shop\CategoryTreeService;
+use App\Services\Settings\SearchPopupSettingsService;
+use App\Services\Shop\CategoryPathResolver;
 use App\Services\Shop\MegaMenuPayloadBuilder;
 use App\Support\ShopStaffPreview;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -29,6 +31,29 @@ class ShopCacheService
     public const HOME_PAYLOAD_KEY = 'shop:home:payload:v4';
 
     public const PLANS_INDEX_KEY = 'shop:plans:index:v1';
+
+    /** @var array<string, mixed>|null */
+    private ?array $headerPayloadMemo = null;
+
+    /** @var array<string, mixed>|null */
+    private ?array $headerViewDataMemo = null;
+
+    /**
+     * دادهٔ یک‌بار-per-request برای header، overlays و mobile-menu (بدون ۳× خواندن کش).
+     *
+     * @return array<string, mixed>
+     */
+    public function headerViewData(): array
+    {
+        if ($this->headerViewDataMemo !== null) {
+            return $this->headerViewDataMemo;
+        }
+
+        return $this->headerViewDataMemo = array_merge(
+            $this->headerPayload(),
+            ['searchPopup' => app(SearchPopupSettingsService::class)->all()],
+        );
+    }
 
     public function homePayload(): array
     {
@@ -123,9 +148,13 @@ class ShopCacheService
     /** @return array{searchCategories: Collection, navCategories: Collection, navigation: array} */
     public function headerPayload(): array
     {
+        if ($this->headerPayloadMemo !== null) {
+            return $this->headerPayloadMemo;
+        }
+
         $staff = ShopStaffPreview::enabled();
 
-        return $this->remember(
+        return $this->headerPayloadMemo = $this->remember(
             'shop:header:payload'.$this->staffCacheSuffix($staff),
             config('shop.cache.categories_ttl'),
             function () use ($staff) {
@@ -147,8 +176,16 @@ class ShopCacheService
                         ->orderBy('position')
                         ->get();
 
+                $searchCategories = Category::query()
+                    ->visibleOnShop($staff)
+                    ->orderBy('position')
+                    ->orderBy('id')
+                    ->get(['id', 'name', 'slug', 'parent_id', 'position', 'is_active', 'admin_shop_preview']);
+
+                app(CategoryPathResolver::class)->attachListingPaths($searchCategories);
+
                 return [
-                    'searchCategories' => Category::query()->visibleOnShop($staff)->orderBy('position')->get(),
+                    'searchCategories' => $searchCategories,
                     'navBrands' => Brand::query()
                         ->visibleOnShop($staff)
                         ->orderBy('position')
@@ -331,6 +368,7 @@ class ShopCacheService
     public function warm(): void
     {
         $this->homePayload();
+        $this->headerPayload();
         $this->categories();
         $this->brands();
         $this->productPriceBounds();
@@ -347,17 +385,26 @@ class ShopCacheService
 
     public function forgetCategory(): void
     {
+        $this->headerPayloadMemo = null;
+        $this->headerViewDataMemo = null;
         $this->forget('shop:categories:active');
+        $this->forget('shop:categories:active:staff');
         $this->forget('shop:categories:nav');
+        $this->forget('shop:categories:nav:staff');
         $this->forget('shop:header:payload');
+        $this->forget('shop:header:payload:staff');
         $this->flushTag('home');
         $this->flushTag('products');
     }
 
     public function forgetMenus(): void
     {
+        $this->headerPayloadMemo = null;
+        $this->headerViewDataMemo = null;
         $this->forget('shop:navigation');
+        $this->forget('shop:navigation:staff');
         $this->forget('shop:header:payload');
+        $this->forget('shop:header:payload:staff');
         if ($this->supportsTags()) {
             Cache::tags(['shop', 'menus'])->flush();
         }

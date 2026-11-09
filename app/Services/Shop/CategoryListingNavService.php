@@ -17,25 +17,7 @@ final class CategoryListingNavService
      */
     public function breadcrumbTrail(Category $category): array
     {
-        $trail = [];
-        $node = $category;
-
-        while ($node !== null) {
-            array_unshift($trail, [
-                'id' => (int) $node->id,
-                'name' => (string) $node->name,
-                'slug' => (string) $node->slug,
-                'path' => $this->paths->pathFor($node),
-            ]);
-
-            if (! $node->parent_id) {
-                break;
-            }
-
-            $node = Category::query()->whereKey($node->parent_id)->first();
-        }
-
-        return $trail;
+        return $this->paths->breadcrumbTrail($category);
     }
 
     /** فقط زیردسته‌های مستقیم فعال — روی دستهٔ برگ خالی است. */

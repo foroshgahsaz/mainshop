@@ -180,10 +180,7 @@ class AppServiceProvider extends ServiceProvider
             'shop.partials.overlays',
             'shop.partials.mobile-menu',
         ], function ($view) {
-            $view->with(array_merge(
-                app(ShopCacheService::class)->headerPayload(),
-                ['searchPopup' => app(SearchPopupSettingsService::class)->all()],
-            ));
+            $view->with(app(ShopCacheService::class)->headerViewData());
         });
 
         Gate::policy(Order::class, OrderPolicy::class);

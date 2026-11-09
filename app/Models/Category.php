@@ -80,6 +80,11 @@ class Category extends Model
 
     public function getRouteKey(): string
     {
+        $precomputed = $this->getAttribute('listing_path');
+        if (is_string($precomputed) && $precomputed !== '') {
+            return $precomputed;
+        }
+
         return app(\App\Services\Shop\CategoryPathResolver::class)->pathFor($this);
     }
 }

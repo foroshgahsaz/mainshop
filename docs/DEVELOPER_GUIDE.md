@@ -716,7 +716,7 @@ $middleware->validateCsrfTokens(except: [
 ### دستورات
 
 ```bash
-php artisan shop:cache-warm      # پر کردن cache
+php artisan shop:cache-warm      # پر کردن cache (شامل هدر/megaMenu)
 php artisan cache:clear          # پاک کردن
 ```
 
@@ -1342,6 +1342,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-09 | کارایی دسته/هدر: `headerViewData` یک‌بار per-request؛ `shop:cache-warm` شامل header؛ breadcrumb بدون query تکراری؛ `listing_path` پیش‌محاسبه در کش جستجو |
 | 2026-11-08 | منوی پایین موبایل: آیتم «دسته‌بندی» → همان `#mobileMenu` منوی همبرگری |
 | 2026-11-08 | ادمین دسته: URL ویرایش با **id** (`CategoryResource::getRecordRouteKeyName`) — فروشگاه همچنان مسیر تودرتو از `Category::getRouteKey()` |
 | 2026-11-08 | کاروسل زیردسته در لیست: Swiper روی `categories.show` / `products.index` / `brands.show` (قبلاً فقط home و صفحه محصول) |

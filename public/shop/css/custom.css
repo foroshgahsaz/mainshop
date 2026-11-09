@@ -1162,9 +1162,14 @@ body.has-admin-bar .store-admin-bar {
   z-index: 100;
 }
 
+html {
+  overflow-x: clip;
+}
+
 .shop-app-shell {
   position: relative;
   min-height: 100vh;
+  max-width: 100%;
 }
 
 body.has-admin-bar .shop-app-shell {
@@ -4356,10 +4361,10 @@ body.mobile-menu-open .mobile-bottom-nav__item--categories {
 }
 
 .home-hero-hub__promo-wrap {
-  width: 100vw;
-  max-width: 100vw;
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
+  width: 100%;
+  max-width: 100%;
+  margin-left: 0;
+  margin-right: 0;
   padding: 0;
 }
 

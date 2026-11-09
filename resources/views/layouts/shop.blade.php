@@ -32,7 +32,6 @@
     @if (! empty($siteSettings['favicon']))
         <link rel="icon" href="{{ \App\Support\ShopMedia::url($siteSettings['favicon']) }}">
     @endif
-    <link rel="preload" href="{{ asset('fonts/yekan/fonts.css') }}" as="style">
     <link rel="stylesheet" href="{{ asset('fonts/yekan/fonts.css') }}">
     <link rel="stylesheet" href="{{ ShopAsset::url('shop/css/tailwind.css', 'tailwind_css') }}">
     @if ($needsSwiper)

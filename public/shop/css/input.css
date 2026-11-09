@@ -1,5 +1,4 @@
-@import './fonts.css';
-
+/* فونت فقط از /fonts/yekan/fonts.css در layout — داخل tailwind تکرار نشود */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

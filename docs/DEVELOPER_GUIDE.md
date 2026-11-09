@@ -1346,6 +1346,7 @@ resources/views/layouts/shop.blade.php
 | 2026-11-09 | خروجی min در `storage/app/public/shop-min` (نه `public/shop`) — رفع Permission denied روی Liara |
 | 2026-11-09 | URL فایل‌های min: `route filesystem.public` (`/data/shop-min/...`) — رفع 404 و به‌هم‌ریختگی UI وقتی `FILESYSTEM_PUBLIC_URL` هنوز `/storage` است |
 | 2026-11-09 | route `/data/*`: `Content-Type` صریح برای `.css`/`.js` (رفع `text/plain` و استایل نشدن min)؛ Font Awesome فروشگاه از `public/vendor/fontawesome` |
+| 2026-11-09 | فونت یکبار از `fonts/yekan/fonts.css`؛ حذف `@font-face` از tailwind؛ اسکرول افقی hero: حذف `100vw` breakout |
 | 2026-11-09 | کارایی دسته/هدر: `headerViewData` یک‌بار per-request؛ `shop:cache-warm` شامل header؛ breadcrumb بدون query تکراری؛ `listing_path` پیش‌محاسبه در کش جستجو |
 | 2026-11-08 | منوی پایین موبایل: آیتم «دسته‌بندی» → همان `#mobileMenu` منوی همبرگری |
 | 2026-11-08 | ادمین دسته: URL ویرایش با **id** (`CategoryResource::getRecordRouteKeyName`) — فروشگاه همچنان مسیر تودرتو از `Category::getRouteKey()` |

@@ -118,6 +118,8 @@ php artisan test --filter=SalesManagerAccessTest
 
 برای استایل جدید فروشگاه: ترجیحاً `public/shop/css/custom.css`.
 
+فونت فروشگاه: یک فایل `fonts/yekan/fonts.css` در layout؛ `@font-face` داخل `tailwind.css` نیست (تکرار دانلود woff جلوگیری می‌شود).
+
 فشرده‌سازی اختیاری: ادمین → تنظیمات عمومی → **فشرده‌سازی CSS/JS فروشگاه**؛ یا `php artisan shop:minify-assets`. خروجی در `storage/app/public/shop-min/` (روی Liara: دیسک `/data`، URL با route `/data/shop-min/...` — نه `/storage/...`) ذخیره می‌شود؛ ظاهر تغییر نمی‌کند.
 
 ---

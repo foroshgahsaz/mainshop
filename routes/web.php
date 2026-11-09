@@ -20,6 +20,7 @@ use App\Http\Controllers\Representative\RepresentativePaymentResultController;
 use App\Http\Controllers\ShopSearchSuggestController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\ThumbnailController;
+use App\Support\PublicDiskFileMime;
 use App\Livewire\Account\AccountDashboard;
 use App\Livewire\Account\AddressManager;
 use App\Livewire\Account\OrderList;
@@ -51,7 +52,15 @@ Route::get('/data/{path}', function (string $path) {
         abort(404);
     }
 
-    return response()->file($disk->path($path));
+    $absolute = $disk->path($path);
+    $headers = [];
+    $mime = PublicDiskFileMime::forPath($path);
+
+    if ($mime !== null) {
+        $headers['Content-Type'] = $mime;
+    }
+
+    return response()->file($absolute, $headers);
 })->where('path', '.*')->name('filesystem.public');
 
 Route::get('/session/ping', fn () => response()->noContent()->header('Cache-Control', 'no-store'))

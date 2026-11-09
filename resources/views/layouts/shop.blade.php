@@ -45,7 +45,7 @@
     @endif
     @auth
         @if(\App\Support\ShopStaffPreview::viewerIsStaff())
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous">
+            <link rel="stylesheet" href="{{ asset('vendor/fontawesome/6.4.0/css/all.min.css') }}">
         @endif
     @endauth
     <style>[x-cloak]{display:none!important}</style>

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @php
+        use App\Support\ShopAsset;
         use App\Support\ShopLabels;
 
         $siteSettings = app(\App\Services\Settings\SettingsService::class)->site();
@@ -33,14 +34,14 @@
     @endif
     <link rel="preload" href="{{ asset('fonts/yekan/fonts.css') }}" as="style">
     <link rel="stylesheet" href="{{ asset('fonts/yekan/fonts.css') }}">
-    <link rel="stylesheet" href="{{ asset('shop/css/tailwind.css') }}">
+    <link rel="stylesheet" href="{{ ShopAsset::url('shop/css/tailwind.css', 'tailwind_css') }}">
     @if ($needsSwiper)
         <link rel="stylesheet" href="{{ asset('shop/vendor/swiper/swiper-bundle.min.css') }}">
     @endif
-    <link rel="stylesheet" href="{{ asset('shop/css/custom.css') }}?v={{ config('shop.assets.css_version', 1) }}-{{ filemtime(public_path('shop/css/custom.css')) ?: 1 }}">
-    <link rel="stylesheet" href="{{ asset('shop/css/rich-content.css') }}">
+    <link rel="stylesheet" href="{{ ShopAsset::url('shop/css/custom.css', 'custom_css') }}">
+    <link rel="stylesheet" href="{{ ShopAsset::url('shop/css/rich-content.css', 'rich_content_css') }}">
     @if ($needsListingAssets)
-        <link rel="stylesheet" href="{{ asset('shop/css/listing.css') }}">
+        <link rel="stylesheet" href="{{ ShopAsset::url('shop/css/listing.css', 'listing_css') }}">
     @endif
     @auth
         @if(\App\Support\ShopStaffPreview::viewerIsStaff())
@@ -87,9 +88,9 @@
     @if ($needsSwiper)
         <script src="{{ asset('shop/vendor/swiper/swiper-bundle.min.js') }}" defer></script>
     @endif
-    <script src="{{ asset('shop/js/main.js') }}" defer></script>
+    <script src="{{ ShopAsset::url('shop/js/main.js', 'main_js') }}" defer></script>
     @if ($needsListingAssets)
-        <script src="{{ asset('shop/js/listing-filters.js') }}" defer></script>
+        <script src="{{ ShopAsset::url('shop/js/listing-filters.js', 'listing_filters_js') }}" defer></script>
     @endif
     @stack('scripts')
     @include('partials.livewire-scripts')

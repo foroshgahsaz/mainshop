@@ -40,4 +40,48 @@ class CategoryPathResolverTest extends TestCase
         $this->assertTrue($leaf->is($resolver->resolve('opal-root/opal/pars-apal')));
         $this->assertTrue($leaf->is($resolver->resolve('pars-apal')));
     }
+
+    public function test_breadcrumb_trail_builds_incremental_paths(): void
+    {
+        $root = Category::query()->create([
+            'name' => 'ریشه',
+            'slug' => 'root',
+            'is_active' => true,
+            'position' => 0,
+        ]);
+        $leaf = Category::query()->create([
+            'name' => 'برگ',
+            'slug' => 'leaf',
+            'parent_id' => $root->id,
+            'is_active' => true,
+            'position' => 0,
+        ]);
+
+        $trail = app(CategoryPathResolver::class)->breadcrumbTrail($leaf);
+
+        $this->assertSame(['root', 'root/leaf'], array_column($trail, 'path'));
+    }
+
+    public function test_attach_listing_paths_without_extra_queries_in_route_key(): void
+    {
+        $root = Category::query()->create([
+            'name' => 'ریشه',
+            'slug' => 'r',
+            'is_active' => true,
+            'position' => 0,
+        ]);
+        $leaf = Category::query()->create([
+            'name' => 'برگ',
+            'slug' => 'l',
+            'parent_id' => $root->id,
+            'is_active' => true,
+            'position' => 0,
+        ]);
+
+        $collection = Category::query()->whereIn('id', [$root->id, $leaf->id])->get(['id', 'name', 'slug', 'parent_id']);
+        app(CategoryPathResolver::class)->attachListingPaths($collection);
+
+        $resolved = $collection->firstWhere('id', $leaf->id);
+        $this->assertSame('r/l', $resolved->getRouteKey());
+    }
 }

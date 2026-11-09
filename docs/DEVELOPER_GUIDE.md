@@ -1342,6 +1342,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-09 | فشرده‌سازی CSS/JS فروشگاه: `shop:minify-assets` + `/admin/shop-asset-settings` (انتخاب فایل‌های min) |
 | 2026-11-09 | کارایی دسته/هدر: `headerViewData` یک‌بار per-request؛ `shop:cache-warm` شامل header؛ breadcrumb بدون query تکراری؛ `listing_path` پیش‌محاسبه در کش جستجو |
 | 2026-11-08 | منوی پایین موبایل: آیتم «دسته‌بندی» → همان `#mobileMenu` منوی همبرگری |
 | 2026-11-08 | ادمین دسته: URL ویرایش با **id** (`CategoryResource::getRecordRouteKeyName`) — فروشگاه همچنان مسیر تودرتو از `Category::getRouteKey()` |

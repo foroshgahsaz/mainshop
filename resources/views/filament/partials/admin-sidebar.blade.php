@@ -1,5 +1,6 @@
 @php
     use App\Filament\Pages\ManageFooterSettings;
+    use App\Filament\Pages\ManageShopAssetSettings;
     use App\Filament\Pages\ManageSiteHeaderSettings;
     use App\Filament\Pages\ManageSearchPopupSettings;
     use App\Filament\Pages\ManageGeneralSettings;
@@ -352,6 +353,7 @@
                     ['label' => 'هدر سایت', 'url' => ManageSiteHeaderSettings::getUrl(), 'icon' => 'fa-code'],
                     ['label' => 'پاپ‌آپ جستجو', 'url' => ManageSearchPopupSettings::getUrl(), 'icon' => 'fa-magnifying-glass'],
                     ['label' => 'صفحه اصلی فروشگاه', 'url' => ManageHomepageSettings::getUrl(), 'icon' => 'fa-house'],
+                    ['label' => 'فشرده‌سازی CSS/JS فروشگاه', 'url' => ManageShopAssetSettings::getUrl(), 'icon' => 'fa-compress'],
                     ['label' => 'مجوزها', 'url' => ManageTrustBadges::getUrl(), 'icon' => 'fa-certificate'],
                 ]],
                 ['label' => 'پیامک', 'icon' => 'fa-sms', 'items' => [

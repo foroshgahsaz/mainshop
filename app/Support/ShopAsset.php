@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Services\Settings\ShopAssetSettingsService;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
 final class ShopAsset
@@ -29,7 +30,7 @@ final class ShopAsset
             if (Storage::disk('public')->exists($storageRelative)) {
                 $mtime = (int) Storage::disk('public')->lastModified($storageRelative);
 
-                return Storage::disk('public')->url($storageRelative).'?v='.$version.'-'.$mtime;
+                return self::publicDiskUrl($storageRelative).'?v='.$version.'-'.$mtime;
             }
 
             $minPublic = self::minPathFor($publicPath);
@@ -97,5 +98,19 @@ final class ShopAsset
         }
 
         return null;
+    }
+
+    /**
+     * URL عمومی فایل روی دیسک public — روی Runflare/Liara با route `/data/{path}` (نه `/storage/...`).
+     */
+    public static function publicDiskUrl(string $relativePath): string
+    {
+        $relativePath = ltrim(str_replace('\\', '/', $relativePath), '/');
+
+        if (Route::has('filesystem.public')) {
+            return route('filesystem.public', ['path' => $relativePath]);
+        }
+
+        return Storage::disk('public')->url($relativePath);
     }
 }

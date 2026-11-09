@@ -50,6 +50,10 @@ final class ShopAssetMinifier
                 ? (new CSS($source))->minify()
                 : (new JS($source))->minify();
 
+            if ($definition['type'] === 'css') {
+                $output = $this->rewriteCssUrlsForStorageDelivery($output, $relative);
+            }
+
             if (! $disk->put($outputRelative, $output)) {
                 throw new RuntimeException(
                     'نوشتن فایل فشرده ممکن نیست ('.$outputRelative.'). پوشه storage/app/public/shop-min باید برای www-data قابل نوشتن باشد؛ php artisan shop:fix-storage-permissions'
@@ -66,5 +70,47 @@ final class ShopAssetMinifier
         }
 
         return $results;
+    }
+
+    /**
+     * فایل min از /data/shop-min/css سرو می‌شود؛ url(../…) باید به مسیر webpublic (مثلاً /shop/fonts) تبدیل شود.
+     */
+    private function rewriteCssUrlsForStorageDelivery(string $css, string $sourcePublicRelative): string
+    {
+        $baseDir = str_replace('\\', '/', dirname($sourcePublicRelative));
+
+        return (string) preg_replace_callback(
+            '/url\((["\']?)(\.\.?\/[^)\'"]+)\1\)/',
+            function (array $matches) use ($baseDir): string {
+                $quote = $matches[1];
+                $resolved = $this->resolvePublicRelativePath($baseDir, $matches[2]);
+
+                return 'url('.$quote.asset($resolved).$quote.')';
+            },
+            $css
+        );
+    }
+
+    private function resolvePublicRelativePath(string $baseDir, string $relativeUrl): string
+    {
+        $relativeUrl = str_replace('\\', '/', $relativeUrl);
+        $segments = explode('/', $baseDir.'/'.$relativeUrl);
+        $resolved = [];
+
+        foreach ($segments as $segment) {
+            if ($segment === '' || $segment === '.') {
+                continue;
+            }
+
+            if ($segment === '..') {
+                array_pop($resolved);
+
+                continue;
+            }
+
+            $resolved[] = $segment;
+        }
+
+        return implode('/', $resolved);
     }
 }

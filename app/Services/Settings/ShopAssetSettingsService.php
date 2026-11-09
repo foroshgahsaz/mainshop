@@ -15,7 +15,7 @@ class ShopAssetSettingsService
         'tailwind_css' => [
             'path' => 'shop/css/tailwind.css',
             'type' => 'css',
-            'label' => 'CSS پایه (Tailwind)',
+            'label' => 'CSS پایه (Tailwind) — ترجیحاً بدون min (فونت داخل فایل است)',
         ],
         'custom_css' => [
             'path' => 'shop/css/custom.css',

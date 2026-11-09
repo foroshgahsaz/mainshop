@@ -3,9 +3,12 @@
 namespace App\Support;
 
 use App\Services\Settings\ShopAssetSettingsService;
+use Illuminate\Support\Facades\Storage;
 
 final class ShopAsset
 {
+    public const MIN_STORAGE_PREFIX = 'shop-min';
+
     /**
      * آدرس فایل استاتیک فروشگاه با نسخه؛ در صورت تنظیم ادمین و وجود .min همان سرو می‌شود.
      */
@@ -13,13 +16,36 @@ final class ShopAsset
     {
         $publicPath = ltrim(str_replace('\\', '/', $publicPath), '/');
 
-        $resolved = self::resolvePath($publicPath, $assetKey);
-        $fullPath = public_path($resolved);
+        $key = $assetKey ?? self::keyForPath($publicPath);
+        $serveMin = $key !== null
+            && app(ShopAssetSettingsService::class)->shouldServeMinified($key)
+            && self::minifiedFileExists($publicPath);
 
         $version = (int) config('shop.assets.css_version', 1);
+
+        if ($serveMin) {
+            $storageRelative = self::minStorageRelativePath($publicPath);
+
+            if (Storage::disk('public')->exists($storageRelative)) {
+                $mtime = (int) Storage::disk('public')->lastModified($storageRelative);
+
+                return Storage::disk('public')->url($storageRelative).'?v='.$version.'-'.$mtime;
+            }
+
+            $minPublic = self::minPathFor($publicPath);
+            $fullPath = public_path($minPublic);
+
+            if (is_file($fullPath)) {
+                $mtime = (int) filemtime($fullPath);
+
+                return asset($minPublic).'?v='.$version.'-'.$mtime;
+            }
+        }
+
+        $fullPath = public_path($publicPath);
         $mtime = is_file($fullPath) ? (int) filemtime($fullPath) : 1;
 
-        return asset($resolved).'?v='.$version.'-'.$mtime;
+        return asset($publicPath).'?v='.$version.'-'.$mtime;
     }
 
     public static function resolvePath(string $publicPath, ?string $assetKey = null): string
@@ -27,9 +53,8 @@ final class ShopAsset
         $key = $assetKey ?? self::keyForPath($publicPath);
 
         if ($key !== null && app(ShopAssetSettingsService::class)->shouldServeMinified($key)) {
-            $minPath = self::minPathFor($publicPath);
-            if (is_file(public_path($minPath))) {
-                return $minPath;
+            if (self::minifiedFileExists($publicPath)) {
+                return self::minPathFor($publicPath);
             }
         }
 
@@ -43,6 +68,24 @@ final class ShopAsset
         }
 
         return $publicPath;
+    }
+
+    /** مسیر روی دیسک public (storage/app/public) برای فایل min ساخته‌شده از ادمین. */
+    public static function minStorageRelativePath(string $publicPath): string
+    {
+        $minPublic = self::minPathFor($publicPath);
+        $suffix = preg_replace('#^shop/#', '', $minPublic) ?? $minPublic;
+
+        return self::MIN_STORAGE_PREFIX.'/'.$suffix;
+    }
+
+    public static function minifiedFileExists(string $publicPath): bool
+    {
+        if (Storage::disk('public')->exists(self::minStorageRelativePath($publicPath))) {
+            return true;
+        }
+
+        return is_file(public_path(self::minPathFor($publicPath)));
     }
 
     public static function keyForPath(string $publicPath): ?string

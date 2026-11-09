@@ -10,7 +10,7 @@ class MinifyShopAssetsCommand extends Command
     protected $signature = 'shop:minify-assets
                             {--only= : کلیدهای جدا شده با کاما (مثلاً custom_css,main_js)}';
 
-    protected $description = 'ساخت فایل‌های .min.css و .min.js فروشگاه از روی منابع public/shop';
+    protected $description = 'ساخت فایل‌های .min.css و .min.js در storage/app/public/shop-min از روی منابع public/shop';
 
     public function handle(ShopAssetMinifier $minifier): int
     {

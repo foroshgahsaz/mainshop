@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Filament\Support\CrudSuccessNotification;
 use App\Services\Settings\ShopAssetSettingsService;
 use App\Services\Shop\ShopAssetMinifier;
+use App\Support\ShopAsset;
 use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -45,13 +46,13 @@ class ManageShopAssetSettings extends Page implements HasForms
         $serveFields = [];
 
         foreach (ShopAssetSettingsService::ASSET_DEFINITIONS as $key => $definition) {
-            $minPath = preg_replace('/\.(css|js)$/i', '.min.$1', $definition['path']);
-            $exists = is_file(public_path($minPath));
+            $exists = ShopAsset::minifiedFileExists($definition['path']);
+            $storagePath = ShopAsset::minStorageRelativePath($definition['path']);
 
             $serveFields[] = Forms\Components\Toggle::make('serve.'.$key)
                 ->label($definition['label'])
                 ->helperText($exists
-                    ? "فایل {$minPath} موجود است."
+                    ? "فایل storage/{$storagePath} موجود است."
                     : 'ابتدا «ساخت فایل‌های فشرده» را بزنید؛ تا آن زمان نسخهٔ اصلی لود می‌شود.')
                 ->inline(false)
                 ->disabled(fn (callable $get) => ! (bool) $get('enabled'));
@@ -81,9 +82,19 @@ class ManageShopAssetSettings extends Page implements HasForms
                 ->icon('heroicon-o-arrow-path')
                 ->requiresConfirmation()
                 ->modalHeading('ساخت/به‌روزرسانی .min.css و .min.js')
-                ->modalDescription('از روی فایل‌های فعلی public/shop ساخته می‌شود. بعد از تغییر CSS/JS در کد، دوباره این دکمه را بزنید.')
+                ->modalDescription('از روی فایل‌های فعلی public/shop ساخته می‌شود و در storage/app/public/shop-min ذخیره می‌گردد (بدون نیاز به نوشتن روی public/shop). بعد از تغییر CSS/JS در کد، دوباره این دکمه را بزنید.')
                 ->action(function (ShopAssetMinifier $minifier): void {
-                    $results = $minifier->build();
+                    try {
+                        $results = $minifier->build();
+                    } catch (\Throwable $e) {
+                        Notification::make()
+                            ->danger()
+                            ->title('ساخت فایل فشرده ناموفق بود')
+                            ->body($e->getMessage())
+                            ->send();
+
+                        return;
+                    }
 
                     if ($results === []) {
                         Notification::make()

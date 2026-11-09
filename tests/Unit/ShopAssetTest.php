@@ -39,7 +39,9 @@ class ShopAssetTest extends TestCase
         app(ShopAssetSettingsService::class)->forgetCache();
 
         $this->assertSame($minRelative, ShopAsset::resolvePath($relative, 'custom_css'));
-        $this->assertStringContainsString('shop-min/css/custom.min.css', ShopAsset::url($relative, 'custom_css'));
+        $url = ShopAsset::url($relative, 'custom_css');
+        $this->assertStringContainsString('shop-min/css/custom.min.css', $url);
+        $this->assertStringContainsString('/data/', $url);
 
         @unlink(public_path($relative));
     }

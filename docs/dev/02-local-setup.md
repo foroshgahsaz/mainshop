@@ -118,7 +118,7 @@ php artisan test --filter=SalesManagerAccessTest
 
 برای استایل جدید فروشگاه: ترجیحاً `public/shop/css/custom.css`.
 
-فشرده‌سازی اختیاری: ادمین → تنظیمات عمومی → **فشرده‌سازی CSS/JS فروشگاه**؛ یا `php artisan shop:minify-assets`. خروجی در `storage/app/public/shop-min/` (URL: `/storage/shop-min/...`) ذخیره می‌شود تا روی پرود بدون نوشتن روی `public/shop` کار کند؛ ظاهر تغییر نمی‌کند.
+فشرده‌سازی اختیاری: ادمین → تنظیمات عمومی → **فشرده‌سازی CSS/JS فروشگاه**؛ یا `php artisan shop:minify-assets`. خروجی در `storage/app/public/shop-min/` (روی Liara: دیسک `/data`، URL با route `/data/shop-min/...` — نه `/storage/...`) ذخیره می‌شود؛ ظاهر تغییر نمی‌کند.
 
 ---
 

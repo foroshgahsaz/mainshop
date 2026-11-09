@@ -4,8 +4,10 @@ namespace App\Services\Shop;
 
 use App\Services\Settings\ShopAssetSettingsService;
 use App\Support\ShopAsset;
+use Illuminate\Support\Facades\Storage;
 use MatthiasMullie\Minify\CSS;
 use MatthiasMullie\Minify\JS;
+use RuntimeException;
 
 final class ShopAssetMinifier
 {
@@ -15,6 +17,7 @@ final class ShopAssetMinifier
      */
     public function build(?array $onlyKeys = null): array
     {
+        $disk = Storage::disk('public');
         $results = [];
 
         foreach (ShopAssetSettingsService::ASSET_DEFINITIONS as $key => $definition) {
@@ -29,8 +32,16 @@ final class ShopAssetMinifier
                 continue;
             }
 
-            $minRelative = ShopAsset::minPathFor($relative);
-            $target = public_path($minRelative);
+            $outputRelative = ShopAsset::minStorageRelativePath($relative);
+            $targetDir = dirname($disk->path($outputRelative));
+
+            if (! is_dir($targetDir)) {
+                if (! @mkdir($targetDir, 0775, true) && ! is_dir($targetDir)) {
+                    throw new RuntimeException(
+                        'پوشهٔ خروجی فشرده‌سازی قابل ساخت نیست ('.$targetDir.'). روی سرور: php artisan shop:fix-storage-permissions'
+                    );
+                }
+            }
 
             $input = (string) file_get_contents($source);
             $bytesBefore = strlen($input);
@@ -39,16 +50,16 @@ final class ShopAssetMinifier
                 ? (new CSS($source))->minify()
                 : (new JS($source))->minify();
 
-            if (! is_dir(dirname($target))) {
-                mkdir(dirname($target), 0755, true);
+            if (! $disk->put($outputRelative, $output)) {
+                throw new RuntimeException(
+                    'نوشتن فایل فشرده ممکن نیست ('.$outputRelative.'). پوشه storage/app/public/shop-min باید برای www-data قابل نوشتن باشد؛ php artisan shop:fix-storage-permissions'
+                );
             }
-
-            file_put_contents($target, $output);
 
             $results[] = [
                 'key' => $key,
                 'source' => $relative,
-                'output' => $minRelative,
+                'output' => $outputRelative,
                 'bytes_before' => $bytesBefore,
                 'bytes_after' => strlen($output),
             ];

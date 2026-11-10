@@ -1,6 +1,7 @@
 <?php
 
 use App\Services\Payment\BajetPayGateway;
+use App\Services\Payment\DarikGateway;
 use App\Services\Payment\DigiPayGateway;
 use App\Services\Payment\ParsianGateway;
 use App\Services\Payment\SadadGateway;
@@ -100,6 +101,24 @@ return [
             'amount_unit' => env('NOPAY_AMOUNT_UNIT', 'toman'),
             'test_mode' => env('NOPAY_TEST_MODE', false),
             'test_cell_number' => env('NOPAY_TEST_CELL_NUMBER', ''),
+        ],
+
+        'darik' => [
+            'driver' => DarikGateway::class,
+            'type' => 'credit',
+            'label' => 'داریک',
+            'description' => 'پرداخت اعتباری از کیف پول داریک (رمز پیامکی)',
+            'api_key' => env('DARIK_API_KEY', ''),
+            'username' => env('DARIK_USERNAME', ''),
+            'password' => env('DARIK_PASSWORD', ''),
+            'sandbox' => env('DARIK_SANDBOX', true),
+            'base_url' => env('DARIK_BASE_URL', ''),
+            'sandbox_base_url' => env('DARIK_SANDBOX_BASE_URL', ''),
+            'merchant_code' => env('DARIK_MERCHANT_CODE', ''),
+            'merchant_group_id' => env('DARIK_MERCHANT_GROUP_ID', 2),
+            'province_id' => env('DARIK_PROVINCE_ID', 8),
+            'amount_unit' => env('DARIK_AMOUNT_UNIT', 'toman'),
+            'icon' => null,
         ],
 
         'tara' => [

@@ -131,6 +131,12 @@ Route::match(['get', 'post'], '/payment/callback/bmi', [PaymentController::class
 Route::match(['get', 'post'], '/payment/callback/nopay', [PaymentController::class, 'nopayCallback'])->name('payment.callback.nopay');
 Route::match(['get', 'post'], '/payment/callback/toopi', [PaymentController::class, 'nopayCallback'])->name('payment.callback.toopi');
 Route::get('/payment/tara/{tracking}', [PaymentController::class, 'taraRedirect'])->name('payment.tara.redirect');
+Route::middleware('auth')->group(function () {
+    Route::get('/payment/darik/{tracking}', [PaymentController::class, 'darikOtp'])->name('payment.darik.otp');
+    Route::post('/payment/darik/{tracking}/confirm', [PaymentController::class, 'darikConfirm'])->name('payment.darik.confirm');
+    Route::post('/payment/darik/{tracking}/resend', [PaymentController::class, 'darikResendOtp'])->name('payment.darik.resend');
+    Route::post('/payment/darik/{tracking}/cancel', [PaymentController::class, 'darikCancel'])->name('payment.darik.cancel');
+});
 Route::get('/payment/result/{payment:tracking_code}', [PaymentResultController::class, 'show'])
     ->middleware('signed')
     ->name('payment.result');

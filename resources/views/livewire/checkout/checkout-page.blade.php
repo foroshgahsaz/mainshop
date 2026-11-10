@@ -225,6 +225,17 @@
                                 </div>
                             @endif
                             @error('paymentMethod') <span class="checkout-field-error">{{ $message }}</span> @enderror
+
+                            @if($paymentMethod === 'darik')
+                                <div class="mt-4">
+                                    <label class="checkout-field-label" for="darik-member-code">شناسه کیف پول داریک (۱۶ رقم — با 5892)</label>
+                                    <input id="darik-member-code" type="text" inputmode="numeric" maxlength="16"
+                                           wire:model="darikMemberCode" class="checkout-input" dir="ltr" autocomplete="off"
+                                           placeholder="5892xxxxxxxxxxxx">
+                                    <p class="text-xs text-gray-500 mt-1">این شناسه روی کارت یا اپ داریک مشتری است؛ برای پرداخت نمایندگی در پروفایل مشتری هم ذخیره می‌شود.</p>
+                                    @error('darikMemberCode') <span class="checkout-field-error">{{ $message }}</span> @enderror
+                                </div>
+                            @endif
                         </section>
                     </div>
 

@@ -7,6 +7,7 @@ use App\Support\UserDisplayName;
 use App\Models\City;
 use App\Models\Province;
 use App\Models\User;
+use App\Rules\DarikMemberCode;
 use App\Rules\IranianPostalCode;
 use App\Services\Auth\OtpService;
 use App\Services\Cache\ShopCacheService;
@@ -34,6 +35,8 @@ class CheckoutPage extends Component
     public string $couponCode = '';
 
     public string $paymentMethod = 'zarinpal';
+
+    public string $darikMemberCode = '';
 
     public ?string $note = null;
 
@@ -97,6 +100,7 @@ class CheckoutPage extends Component
     ): void {
         $this->awaitingLogin = false;
         $this->paymentMethod = $this->defaultPaymentMethod($catalog);
+        $this->darikMemberCode = (string) (auth()->user()->darik_member_code ?? '');
 
         $addresses = auth()->user()->addresses;
         $default = $addresses->firstWhere('is_default', true) ?? $addresses->first();
@@ -213,7 +217,22 @@ class CheckoutPage extends Component
         if (! $isCod) {
             try {
                 $paymentModel = $payment->createForOrder($order, $this->paymentMethod);
-                $url = $payment->initiate($paymentModel, $order);
+
+                if ($this->paymentMethod === 'darik') {
+                    $memberCode = DarikMemberCode::normalize($this->darikMemberCode);
+                    $paymentModel->update([
+                        'raw_response' => [
+                            'darik' => ['member_code' => $memberCode],
+                        ],
+                    ]);
+
+                    $user = auth()->user();
+                    if ($user && $user->darik_member_code !== $memberCode) {
+                        $user->update(['darik_member_code' => $memberCode]);
+                    }
+                }
+
+                $url = $payment->initiate($paymentModel->fresh(), $order);
                 $this->redirect($url, navigate: false);
             } catch (\Throwable $e) {
                 session()->flash('error', $e instanceof \RuntimeException
@@ -292,6 +311,12 @@ class CheckoutPage extends Component
                 Rule::exists('user_addresses', 'id')->where('user_id', auth()->id()),
             ],
             'paymentMethod' => ['required', Rule::in($allowed)],
+            'darikMemberCode' => [
+                Rule::requiredIf(fn () => $this->paymentMethod === 'darik'),
+                'nullable',
+                'string',
+                new DarikMemberCode,
+            ],
         ];
 
         if (app(CheckoutService::class)->hasActiveShippingMethods()) {
@@ -335,6 +360,7 @@ class CheckoutPage extends Component
             'shippingMethodId.exists' => 'روش ارسال معتبر نیست.',
             'paymentMethod.required' => 'روش پرداخت را انتخاب کنید.',
             'paymentMethod.in' => 'روش پرداخت معتبر نیست.',
+            'darikMemberCode.required' => 'شناسه کیف پول داریک را وارد کنید.',
             'receiver_name.required' => 'نام گیرنده را وارد کنید.',
             'receiver_phone.required' => 'موبایل گیرنده را وارد کنید.',
             'receiver_phone.regex' => 'موبایل گیرنده باید با 09 شروع شود و ۱۱ رقم باشد.',

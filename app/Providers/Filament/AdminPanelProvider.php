@@ -6,6 +6,7 @@ use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\CouponAnalyticsPage;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\ManageBajetPay;
+use App\Filament\Pages\ManageDarik;
 use App\Filament\Pages\ManageDigiPay;
 use App\Filament\Pages\ManageParsian;
 use App\Filament\Pages\ManageCodPayment;
@@ -80,6 +81,7 @@ class AdminPanelProvider extends PanelProvider
                 ManageParsian::class,
                 ManageSadad::class,
                 ManageNopay::class,
+                ManageDarik::class,
                 ManageCodPayment::class,
                 ViewPaymentLogs::class,
                 ViewSiteErrorLogs::class,

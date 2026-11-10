@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Payment;
 use App\Notifications\PaymentSuccessNotification;
+use App\Services\Payment\DarikGateway;
 use App\Services\Payment\PaymentAuditLogger;
 use App\Services\Payment\PaymentAuditStep;
 use App\Services\Payment\PaymentService;
@@ -56,6 +57,189 @@ class PaymentController extends Controller
     public function nopayCallback(Request $request)
     {
         return $this->handleCallback($request);
+    }
+
+    public function darikOtp(string $tracking)
+    {
+        $payment = Payment::query()
+            ->where('tracking_code', $tracking)
+            ->where('gateway', 'darik')
+            ->firstOrFail();
+
+        $this->assertDarikPaymentAccess($payment);
+
+        if ($payment->status !== Payment::STATUS_PENDING) {
+            return redirect()->to($this->paymentReturnUrl($payment))
+                ->with('error', 'این پرداخت داریک دیگر در انتظار رمز نیست.');
+        }
+
+        if (! data_get($payment->raw_response, 'darik.transaction_token')) {
+            return redirect()->to($this->paymentReturnUrl($payment))
+                ->with('error', 'اطلاعات تراکنش داریک یافت نشد.');
+        }
+
+        return response()
+            ->view('payments.darik-otp', [
+                'payment' => $payment,
+                'order' => $payment->order,
+                'resendUrl' => route('payment.darik.resend', ['tracking' => $payment->tracking_code]),
+                'confirmUrl' => route('payment.darik.confirm', ['tracking' => $payment->tracking_code]),
+                'cancelUrl' => route('payment.darik.cancel', ['tracking' => $payment->tracking_code]),
+            ])
+            ->header('Cache-Control', 'no-store');
+    }
+
+    public function darikConfirm(Request $request, string $tracking)
+    {
+        $payment = Payment::query()
+            ->where('tracking_code', $tracking)
+            ->where('gateway', 'darik')
+            ->firstOrFail();
+
+        $this->assertDarikPaymentAccess($payment);
+
+        $request->validate([
+            'otp' => ['required', 'regex:/^\d{5}$/'],
+        ], [
+            'otp.required' => 'رمز خرید را وارد کنید.',
+            'otp.regex' => 'رمز خرید باید ۵ رقم باشد.',
+        ]);
+
+        return $this->processDarikVerification($payment, $otp);
+    }
+
+    public function darikCancel(string $tracking)
+    {
+        $payment = Payment::query()
+            ->where('tracking_code', $tracking)
+            ->where('gateway', 'darik')
+            ->firstOrFail();
+
+        $this->assertDarikPaymentAccess($payment);
+
+        return $this->processDarikVerification($payment, '', 'cancel');
+    }
+
+    public function darikResendOtp(string $tracking, DarikGateway $gateway)
+    {
+        $payment = Payment::query()
+            ->where('tracking_code', $tracking)
+            ->where('gateway', 'darik')
+            ->firstOrFail();
+
+        $this->assertDarikPaymentAccess($payment);
+
+        try {
+            $gateway->resendOtp($payment);
+        } catch (\Throwable $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', 'رمز خرید مجدداً ارسال شد.');
+    }
+
+    protected function processDarikVerification(Payment $payment, string $otp, string $status = 'confirm')
+    {
+        $order = $payment->order()->first();
+
+        $this->paymentAudit->step(
+            $payment,
+            PaymentAuditStep::CALLBACK_RECEIVED,
+            'darik_otp_submit',
+            'ارسال رمز خرید داریک از سایت.',
+            ['status' => $status]
+        );
+
+        try {
+            $payment = $this->paymentService->verify($payment, $otp, $status);
+        } catch (\Throwable $e) {
+            $this->paymentAudit->failure(
+                $payment,
+                PaymentAuditStep::VERIFY_RESULT,
+                'darik_verify_exception',
+                'خطا هنگام تأیید پرداخت داریک.',
+                $e
+            );
+
+            Log::error('Darik verify failed', [
+                'payment_id' => $payment->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            if ($order) {
+                try {
+                    $this->sms->paymentFailed($order->fresh(['user']), $payment);
+                } catch (\Throwable $smsError) {
+                    Log::error('Darik payment-failed sms failed', [
+                        'payment_id' => $payment->id,
+                        'error' => $smsError->getMessage(),
+                    ]);
+                }
+            }
+
+            return redirect()->route('payment.darik.otp', ['tracking' => $payment->tracking_code])
+                ->with('error', $e->getMessage());
+        }
+
+        if ($status === 'confirm' && $payment->status === Payment::STATUS_FAILED) {
+            $errorCode = strtoupper((string) data_get($payment->raw_response, 'errorCode', ''));
+            $message = (string) data_get($payment->raw_response, 'message', 'رمز خرید نامعتبر است.');
+
+            if ($errorCode === 'INVALID_OTP' || $errorCode === 'INVALID_INPUT') {
+                $payment->update(['status' => Payment::STATUS_PENDING]);
+
+                return redirect()->route('payment.darik.otp', ['tracking' => $payment->tracking_code])
+                    ->with('error', $message !== '' ? $message : 'رمز خرید نامعتبر است. دوباره تلاش کنید.');
+            }
+        }
+
+        if ($payment->status === Payment::STATUS_SUCCESS) {
+            try {
+                $payment->loadMissing('user', 'order');
+                $payment->user?->notify(new PaymentSuccessNotification($payment));
+
+                if ($order) {
+                    $order = $order->fresh();
+                    $this->sms->orderPaid($order, $payment);
+
+                    if (! $order->isPaid()) {
+                        $this->sms->paymentPartialRemaining($order, (int) $order->remainingAmount());
+                    }
+                }
+            } catch (\Throwable $e) {
+                Log::error('Darik post-success notification failed', [
+                    'payment_id' => $payment->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        } elseif ($order && in_array($payment->status, [Payment::STATUS_FAILED, Payment::STATUS_CANCELED], true)) {
+            try {
+                $this->sms->paymentFailed($order->fresh(['user']), $payment);
+            } catch (\Throwable $e) {
+                Log::error('Darik payment-failed sms failed', [
+                    'payment_id' => $payment->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return $this->redirectToPaymentResult($payment->fresh());
+    }
+
+    protected function assertDarikPaymentAccess(Payment $payment): void
+    {
+        $user = auth()->user();
+        if ($user === null) {
+            abort(403);
+        }
+
+        $allowed = $user->id === $payment->user_id
+            || $user->id === $payment->paid_by_representative_id
+            || $user->is_admin;
+
+        if (! $allowed) {
+            abort(403);
+        }
     }
 
     public function taraRedirect(string $tracking, TaraGateway $gateway, SettingsService $settings)

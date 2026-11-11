@@ -110,6 +110,10 @@
     .product-price-stock-update .ppu-fields--3 {
         grid-template-columns: repeat(3, 1fr);
     }
+
+    .product-price-stock-update .ppu-field--search {
+        grid-column: 1 / -1;
+    }
 }
 
 .product-price-stock-update .ppu-card--site-sales {
@@ -365,6 +369,22 @@
 
 .product-price-stock-update .ppu-table tbody tr:last-child td {
     border-bottom: none;
+}
+
+.product-price-stock-update .ppu-col-sku {
+    min-width: 6.5rem;
+    max-width: 9rem;
+}
+
+.product-price-stock-update .ppu-sku {
+    display: block;
+    font-family: ui-monospace, monospace;
+    font-size: 0.75rem;
+    color: #475569;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 8.5rem;
 }
 
 .product-price-stock-update .ppu-id {

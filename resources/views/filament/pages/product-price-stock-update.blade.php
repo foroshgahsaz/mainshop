@@ -56,6 +56,17 @@
                             <option value="out_of_stock">ناموجود</option>
                         </select>
                     </div>
+                    <div class="ppu-field ppu-field--search">
+                        <label class="ppu-label" for="ppu-filter-search">جستجو</label>
+                        <input
+                            id="ppu-filter-search"
+                            type="search"
+                            class="ppu-input"
+                            wire:model.live.debounce.400ms="search"
+                            placeholder="نام، SKU یا شناسه محصول"
+                            autocomplete="off"
+                        >
+                    </div>
                 </div>
             </section>
 
@@ -153,6 +164,7 @@
                     <thead>
                         <tr>
                             <th class="ppu-col-id">شناسه</th>
+                            <th class="ppu-col-sku">SKU</th>
                             <th class="ppu-col-name">نام محصول</th>
                             <th class="ppu-col-cat">دسته</th>
                             <th class="ppu-col-price">قیمت (تومان)</th>
@@ -166,6 +178,9 @@
                         @forelse($this->products as $product)
                             <tr wire:key="product-row-{{ $product->id }}">
                                 <td class="ppu-col-id" dir="ltr"><span class="ppu-id">{{ $product->id }}</span></td>
+                                <td class="ppu-col-sku" dir="ltr">
+                                    <span class="ppu-sku" title="{{ $product->sku ?? '' }}">{{ $product->sku ?: '—' }}</span>
+                                </td>
                                 <td class="ppu-col-name">
                                     <span class="ppu-product-name" title="{{ $product->name }}">{{ $product->name }}</span>
                                 </td>
@@ -238,7 +253,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="ppu-empty">محصولی با این فیلتر یافت نشد.</td>
+                                <td colspan="9" class="ppu-empty">محصولی با این فیلتر یافت نشد.</td>
                             </tr>
                         @endforelse
                     </tbody>

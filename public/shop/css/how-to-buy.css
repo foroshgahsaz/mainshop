@@ -219,6 +219,11 @@
   line-height: 1.55;
 }
 
+.how-to-buy__grades-empty {
+  color: #94a3b8;
+  font-size: 0.95rem;
+}
+
 .how-to-buy__grades {
   display: flex;
   flex-wrap: wrap;

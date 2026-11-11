@@ -11,8 +11,9 @@ use App\Support\AdminAccess;
 use App\Support\ShopLabels;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Validation\Rule;
 use Livewire\WithPagination;
 
 class ProductPriceStockUpdate extends Page
@@ -54,6 +55,9 @@ class ProductPriceStockUpdate extends Page
 
     /** @var array<int, int|string|null> */
     public array $rowCategories = [];
+
+    /** @var array<int, string|null> */
+    public array $rowSkus = [];
 
     public string $bulkPricePercent = '';
 
@@ -138,10 +142,17 @@ class ProductPriceStockUpdate extends Page
             "rowPrices.{$productId}" => ['required', 'integer', 'min:0'],
             "rowStocks.{$productId}" => ['required', 'integer', 'min:0', 'max:999999'],
             "rowCategories.{$productId}" => ['required', 'integer', 'exists:categories,id'],
+            "rowSkus.{$productId}" => [
+                'nullable',
+                'string',
+                'max:255',
+                Rule::unique(Product::class, 'sku')->ignore($productId),
+            ],
         ], [], [
             "rowPrices.{$productId}" => 'قیمت',
             "rowStocks.{$productId}" => 'موجودی',
             "rowCategories.{$productId}" => 'دسته‌بندی',
+            "rowSkus.{$productId}" => 'SKU',
         ]);
 
         $product = Product::query()->whereKey($productId)->firstOrFail();
@@ -151,12 +162,13 @@ class ProductPriceStockUpdate extends Page
             (int) $this->rowPrices[$productId],
             (int) $this->rowStocks[$productId],
             (int) $this->rowCategories[$productId],
+            isset($this->rowSkus[$productId]) ? (string) $this->rowSkus[$productId] : null,
             auth()->id(),
         );
 
         Notification::make()
             ->title('ذخیره شد')
-            ->body('دسته، قیمت و موجودی «'.$product->name.'» به‌روزرسانی شد.')
+            ->body('SKU، دسته، قیمت و موجودی «'.$product->name.'» به‌روزرسانی شد.')
             ->success()
             ->send();
     }
@@ -305,6 +317,7 @@ class ProductPriceStockUpdate extends Page
         $this->rowPrices = [];
         $this->rowStocks = [];
         $this->rowCategories = [];
+        $this->rowSkus = [];
     }
 
     public function rendering(): void
@@ -318,6 +331,9 @@ class ProductPriceStockUpdate extends Page
             }
             if (! array_key_exists($product->id, $this->rowCategories)) {
                 $this->rowCategories[$product->id] = $product->category_id;
+            }
+            if (! array_key_exists($product->id, $this->rowSkus)) {
+                $this->rowSkus[$product->id] = $product->sku ?? '';
             }
         }
     }

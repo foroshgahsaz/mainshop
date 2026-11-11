@@ -42,6 +42,8 @@ class ProductPriceStockUpdate extends Page
     /** @var ''|'all'|'in_stock'|'out_of_stock' */
     public string $filterStock = 'all';
 
+    public string $search = '';
+
     public bool $hideShopPrices = false;
 
     /** @var array<int, int|string> */
@@ -81,6 +83,12 @@ class ProductPriceStockUpdate extends Page
     }
 
     public function updatedFilterStock(): void
+    {
+        $this->resetPage();
+        $this->resetRowInputs();
+    }
+
+    public function updatedSearch(): void
     {
         $this->resetPage();
         $this->resetRowInputs();
@@ -275,6 +283,19 @@ class ProductPriceStockUpdate extends Page
             'out_of_stock' => $query->where('stock', '<=', 0),
             default => null,
         };
+
+        $term = trim($this->search);
+        if ($term !== '') {
+            $like = '%'.$term.'%';
+            $query->where(function (Builder $inner) use ($term, $like): void {
+                $inner->where('name', 'like', $like)
+                    ->orWhere('sku', 'like', $like);
+
+                if (ctype_digit($term)) {
+                    $inner->orWhere('id', (int) $term);
+                }
+            });
+        }
 
         return $query;
     }

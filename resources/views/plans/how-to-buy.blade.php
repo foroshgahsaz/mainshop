@@ -3,7 +3,7 @@
 @section('title', 'راهنمای خرید اقساطی | '.$siteName)
 
 @php
-    $seoDescription = 'مقایسهٔ طرح‌های خرید اقساطی از '.$siteName.'؛ سقف وام، اقساط، ضمانت و نحوهٔ پرداخت (BNPL تجارت، کالاپی، نوپی، بتا، تارا، دیجی‌پی، دیبا کارت).';
+    $seoDescription = 'مقایسهٔ طرح‌های خرید اقساطی از '.$siteName.'؛ سقف وام، اقساط، ضمانت، رتبه اعتباری و نحوهٔ خرید (کالاپی، الوپی، باجت، نوپی، تارا، دیجی‌پی و سایر طرح‌ها).';
     $canonicalUrl = route('plans.how-to-buy');
 @endphp
 
@@ -18,7 +18,7 @@
 @endsection
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('shop/css/how-to-buy.css') }}?v=2026-11-07-end">
+    <link rel="stylesheet" href="{{ asset('shop/css/how-to-buy.css') }}?v=2026-11-11-plans">
 @endpush
 
 @section('body_class', 'how-to-buy-page')
@@ -84,11 +84,15 @@
                                     <td>{{ $row['installments'] }}</td>
                                     <td>{{ $row['guarantee'] }}</td>
                                     <td>
-                                        <div class="how-to-buy__grades" aria-label="رتبه‌های مجاز">
-                                            @foreach ($row['credit_grades'] as $grade)
-                                                <span class="how-to-buy__grade how-to-buy__grade--{{ $grade }}">{{ $grade }}</span>
-                                            @endforeach
-                                        </div>
+                                        @if (! empty($row['credit_grades']))
+                                            <div class="how-to-buy__grades" aria-label="رتبه‌های مجاز">
+                                                @foreach ($row['credit_grades'] as $grade)
+                                                    <span class="how-to-buy__grade how-to-buy__grade--{{ $grade }}">{{ $grade }}</span>
+                                                @endforeach
+                                            </div>
+                                        @else
+                                            <span class="how-to-buy__grades-empty" aria-hidden="true">—</span>
+                                        @endif
                                     </td>
                                     <td><span class="how-to-buy__special">{{ $row['special'] }}</span></td>
                                     <td>

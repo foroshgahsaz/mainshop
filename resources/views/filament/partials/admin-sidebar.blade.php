@@ -12,6 +12,7 @@
     use App\Filament\Pages\ManageHomepageSettings;
     use App\Filament\Pages\ManageMediaPresets;
     use App\Filament\Pages\ManageBajetPay;
+    use App\Filament\Pages\ManageDarik;
     use App\Filament\Pages\ManageDigiPay;
     use App\Filament\Pages\ManageTara;
     use App\Filament\Pages\ManageParsian;
@@ -293,6 +294,7 @@
                     ['label' => 'تارا', 'url' => ManageTara::getUrl(), 'icon' => 'fa-wallet'],
                     ['label' => 'باجت‌پی', 'url' => ManageBajetPay::getUrl(), 'icon' => 'fa-credit-card'],
                     ['label' => 'دیجی‌پی', 'url' => ManageDigiPay::getUrl(), 'icon' => 'fa-credit-card'],
+                    ['label' => 'داریک', 'url' => ManageDarik::getUrl(), 'icon' => 'fa-wallet'],
                 ]],
             ],
         ],

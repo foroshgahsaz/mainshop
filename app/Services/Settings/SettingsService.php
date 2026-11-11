@@ -36,6 +36,9 @@ class SettingsService
     protected static ?array $nopayMemo = null;
 
     /** @var array<string, mixed>|null */
+    protected static ?array $darikMemo = null;
+
+    /** @var array<string, mixed>|null */
     protected static ?array $codMemo = null;
 
     public function get(string $group, string $key, mixed $default = null): mixed
@@ -61,9 +64,10 @@ class SettingsService
         static::$parsianMemo = null;
         static::$sadadMemo = null;
         static::$nopayMemo = null;
+        static::$darikMemo = null;
         static::$codMemo = null;
 
-        if (in_array($group, ['zarinpal', 'tara', 'bajet', 'digipay', 'parsian', 'sadad', 'nopay', 'cod', 'homepage'], true)) {
+        if (in_array($group, ['zarinpal', 'tara', 'bajet', 'digipay', 'parsian', 'sadad', 'nopay', 'darik', 'cod', 'homepage'], true)) {
             app(ShopCacheService::class)->forgetHome();
         }
     }
@@ -296,6 +300,39 @@ class SettingsService
             'icon' => $this->get('nopay', 'icon') ?: $this->get('toopi', 'icon') ?: null,
             ...$this->gatewayCheckoutDisplayFields('nopay'),
             ...$this->gatewayHomepagePlanFields('nopay'),
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    public function darik(): array
+    {
+        if (static::$darikMemo !== null) {
+            return static::$darikMemo;
+        }
+
+        $cfg = config('payment.gateways.darik', []);
+        $sandbox = filter_var($this->get('darik', 'sandbox', $cfg['sandbox'] ?? true), FILTER_VALIDATE_BOOLEAN);
+
+        $apiDefault = $sandbox
+            ? ($cfg['sandbox_base_url'] ?? '')
+            : ($cfg['base_url'] ?? '');
+
+        return static::$darikMemo = [
+            'enabled' => filter_var($this->get('darik', 'enabled', false), FILTER_VALIDATE_BOOLEAN),
+            'sandbox' => $sandbox,
+            'api_key' => (string) ($this->get('darik', 'api_key') ?: ($cfg['api_key'] ?? '')),
+            'username' => (string) ($this->get('darik', 'username') ?: ($cfg['username'] ?? '')),
+            'password' => (string) ($this->get('darik', 'password') ?: ($cfg['password'] ?? '')),
+            'merchant_code' => (string) ($this->get('darik', 'merchant_code') ?: ($cfg['merchant_code'] ?? '')),
+            'merchant_group_id' => (int) ($this->get('darik', 'merchant_group_id') ?: ($cfg['merchant_group_id'] ?? 2)),
+            'province_id' => (int) ($this->get('darik', 'province_id') ?: ($cfg['province_id'] ?? 8)),
+            'amount_unit' => (string) ($this->get('darik', 'amount_unit') ?: ($cfg['amount_unit'] ?? 'toman')),
+            'base_url' => rtrim((string) ($this->get('darik', $sandbox ? 'sandbox_base_url' : 'base_url') ?: $apiDefault), '/'),
+            'sandbox_base_url' => (string) ($this->get('darik', 'sandbox_base_url') ?: ($cfg['sandbox_base_url'] ?? '')),
+            'production_base_url' => (string) ($this->get('darik', 'base_url') ?: ($cfg['base_url'] ?? '')),
+            'icon' => $this->get('darik', 'icon') ?: null,
+            ...$this->gatewayCheckoutDisplayFields('darik'),
+            ...$this->gatewayHomepagePlanFields('darik'),
         ];
     }
 

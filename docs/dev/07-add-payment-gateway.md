@@ -7,6 +7,7 @@
 - الگوهای موجود: `ZarinpalGateway` (نقدی REST)، `ParsianGateway` (نقدی SOAP / PEC)، `SadadGateway` (نقدی JSON / سداد)، `TaraGateway` (اعتباری + redirect میانی).
 - مستندات درگاه سداد در repo: `docs/PHP-master.zip`، `docs/15470-51A234D3-CD9B-4DEB-8D6A-F9D72518FCB9.pdf`؛ مسیر مستعار `/payment/callback/bmi` همان سداد است اگر پنل بانک فقط این URL را بپذیرد.
 - درگاه **نوپی (CPG)**: `docs/CPG Ver 2-5.pdf` — `NopayGateway`، `RequestToken` + `VerifyTransaction`.
+- درگاه **داریک (کیف پول اعتباری)**: `docs/darik.pdf` — `DarikGateway` + `DarikApiClient`؛ جریان `Login` → `Order` → `SendOTP` → صفحه `/payment/darik/{tracking}` → `Confirm` با OTP پنج‌رقمی (بدون redirect خارجی).
 - قرارداد: `app/Services/Payment/PaymentGatewayInterface.php`
   - `initiate(Payment, Order): string` — URL یا مسیر redirect
   - `verify(Payment, authority, status): GatewayVerificationResult`

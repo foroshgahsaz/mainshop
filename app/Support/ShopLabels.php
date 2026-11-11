@@ -97,6 +97,7 @@ class ShopLabels
             'sadad' => 'سداد',
             'nopay' => 'نوپی',
             'toopi' => 'نوپی',
+            'darik' => 'داریک',
             default => $gateway ?? '—',
         };
     }

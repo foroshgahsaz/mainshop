@@ -107,6 +107,7 @@ class PaymentGatewayCatalog
             'parsian' => (bool) ($this->settings->parsian()['enabled'] ?? false),
             'sadad' => (bool) ($this->settings->sadad()['enabled'] ?? false),
             'nopay' => (bool) ($this->settings->nopay()['enabled'] ?? false),
+            'darik' => (bool) ($this->settings->darik()['enabled'] ?? false),
             default => false,
         };
     }
@@ -178,6 +179,7 @@ class PaymentGatewayCatalog
                 'parsian' => $this->settings->parsian(),
                 'sadad' => $this->settings->sadad(),
                 'nopay' => $this->settings->nopay(),
+                'darik' => $this->settings->darik(),
                 default => [],
             };
 
@@ -227,6 +229,7 @@ class PaymentGatewayCatalog
             'parsian' => $this->settings->parsian()['icon'] ?? null,
             'sadad' => $this->settings->sadad()['icon'] ?? null,
             'nopay' => $this->settings->nopay()['icon'] ?? null,
+            'darik' => $this->settings->darik()['icon'] ?? null,
             default => null,
         };
 
@@ -259,6 +262,7 @@ class PaymentGatewayCatalog
             'parsian' => $this->settings->parsian(),
             'sadad' => $this->settings->sadad(),
             'nopay' => $this->settings->nopay(),
+            'darik' => $this->settings->darik(),
             default => [],
         };
     }

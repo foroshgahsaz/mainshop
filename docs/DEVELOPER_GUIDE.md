@@ -682,6 +682,19 @@ $middleware->validateCsrfTokens(except: [
 
 **تنظیمات:** `api_base_url` (از نامه نوپی)، `service_username`, `service_password_encrypted` (ترجیحاً), `merchant_number`, `public_key`, `test_mode`, `test_cell_number`.
 
+### 9.15 درگاه داریک (credit — کیف پول `docs/darik.pdf`)
+
+| مورد | مقدار |
+|------|--------|
+| نام config | `darik` |
+| type | `credit` |
+| کلاس | `DarikGateway`, `DarikApiClient` |
+| Admin | `/admin/darik` → `ManageDarik.php` |
+| OTP UI | `/payment/darik/{tracking}` — `Confirm` با OTP پنج‌رقمی |
+| شناسه خریدار | `users.darik_member_code` (۱۶ رقم، با `5892`) — checkout و مشتری نماینده |
+
+**جریان:** `Login` (ApiKey) → `Order` → `SendOTP` → صفحه سایت → `Confirm`.
+
 ---
 
 ## 10. احراز هویت و OTP

@@ -152,7 +152,7 @@
             <header class="ppu-table-head">
                 <div>
                     <h2 id="ppu-table-title" class="ppu-card__title">لیست محصولات</h2>
-                    <p class="ppu-card__subtitle">ویرایش سطری دسته، قیمت و موجودی — پس از تغییر «ذخیره» همان ردیف را بزنید</p>
+                    <p class="ppu-card__subtitle">ویرایش سطری SKU، دسته، قیمت و موجودی — پس از تغییر «ذخیره» همان ردیف را بزنید</p>
                 </div>
                 <span class="ppu-count-badge">{{ number_format($this->products->total()) }} محصول</span>
             </header>
@@ -179,7 +179,15 @@
                             <tr wire:key="product-row-{{ $product->id }}">
                                 <td class="ppu-col-id" dir="ltr"><span class="ppu-id">{{ $product->id }}</span></td>
                                 <td class="ppu-col-sku" dir="ltr">
-                                    <span class="ppu-sku" title="{{ $product->sku ?? '' }}">{{ $product->sku ?: '—' }}</span>
+                                    <input
+                                        type="text"
+                                        class="ppu-input ppu-input--cell ppu-input--sku ppu-input--ltr"
+                                        dir="ltr"
+                                        wire:model="rowSkus.{{ $product->id }}"
+                                        placeholder="SKU"
+                                        aria-label="SKU محصول {{ $product->id }}"
+                                        autocomplete="off"
+                                    >
                                 </td>
                                 <td class="ppu-col-name">
                                     <span class="ppu-product-name" title="{{ $product->name }}">{{ $product->name }}</span>

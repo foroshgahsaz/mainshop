@@ -376,15 +376,11 @@
     max-width: 9rem;
 }
 
-.product-price-stock-update .ppu-sku {
-    display: block;
+.product-price-stock-update .ppu-input--sku {
     font-family: ui-monospace, monospace;
     font-size: 0.75rem;
-    color: #475569;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 8.5rem;
+    min-width: 6.5rem;
+    max-width: 9rem;
 }
 
 .product-price-stock-update .ppu-id {

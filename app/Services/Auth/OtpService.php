@@ -3,9 +3,11 @@
 namespace App\Services\Auth;
 
 use App\Contracts\SmsSender;
+use App\Models\OtpMessage;
 use App\Models\User;
 use App\Services\Settings\SettingsService;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class OtpService
@@ -20,6 +22,7 @@ class OtpService
         $phone = $this->normalizePhone($phone);
         $code = $this->generate($phone);
         $this->sms->sendOtp($phone, $code);
+        $this->recordSentOtp($phone, $code);
     }
 
     public function generate(string $phone): string
@@ -112,5 +115,26 @@ class OtpService
     protected function cacheKey(string $phone): string
     {
         return 'otp:phone:'.Str::slug($phone);
+    }
+
+    protected function recordSentOtp(string $phone, string $code): void
+    {
+        try {
+            if (! Schema::hasTable('otp_messages')) {
+                return;
+            }
+
+            $user = User::findByLoginPhone($phone);
+
+            OtpMessage::query()->create([
+                'phone' => $phone,
+                'code' => $code,
+                'user_id' => $user?->id,
+                'user_name' => $user?->name,
+                'sent_at' => now(),
+            ]);
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 }

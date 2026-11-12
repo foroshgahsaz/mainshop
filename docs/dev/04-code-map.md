@@ -34,7 +34,7 @@
 | `app/Models/User.php` | `canAccessPanel`, نقش‌ها |
 | `app/Services/Auth/AdminLoginGuard.php` | OTP ورود ادمین |
 | `app/Services/Auth/RepresentativeLoginGuard.php` | OTP نماینده |
-| `app/Services/Auth/OtpService.php` | send/verify OTP |
+| `app/Services/Auth/OtpService.php` | send/verify OTP + ثبت `otp_messages` |
 | `app/Services/Auth/LoginRedirectService.php` | ریدایرکت بعد از login فروشگاه |
 | `app/Filament/Pages/Auth/Login.php` | صفحه ورود ادمین |
 | `app/Http/Responses/Filament/AdminLoginResponse.php` | ریدایرکت پس از login |
@@ -47,7 +47,7 @@
 
 همه در `app/Filament/Resources/`:
 
-`AttributeResource`, `BrandResource`, `CategoryResource`, `CouponResource`, `FreightCarrierResource`, `HomeSliderResource`, `MediaFileResource`, `MegaMenuLinkResource`, `MenuItemResource`, `OrderResource`, `PageResource`, `PaymentResource`, `PostResource`, `ProductFamilyResource`, `ProductPlantResource`, `ProductQuestionResource`, `ProductResource`, `ProductReviewResource`, `ProductTemplateResource`, `ShippingMethodResource`, `UserResource`.
+`AttributeResource`, `BrandResource`, `CategoryResource`, `CouponResource`, `FreightCarrierResource`, `HomeSliderResource`, `MediaFileResource`, `MegaMenuLinkResource`, `MenuItemResource`, `OrderResource`, `OtpMessageResource`, `PageResource`, `PaymentResource`, `PostResource`, `ProductFamilyResource`, `ProductPlantResource`, `ProductQuestionResource`, `ProductResource`, `ProductReviewResource`, `ProductTemplateResource`, `ShippingMethodResource`, `UserResource`.
 
 صفحات تنظیمات: `app/Filament/Pages/Manage*.php`, `Dashboard.php`.
 
@@ -108,7 +108,7 @@ app/Services/
 
 ## Models (۳۶ مدل)
 
-`app/Models/` — `Product`, `Order`, `Payment`, `User`, `MediaFile`, `RepresentativeProfile`, ...
+`app/Models/` — `Product`, `Order`, `Payment`, `User`, `OtpMessage`, `MediaFile`, `RepresentativeProfile`, ...
 
 ---
 

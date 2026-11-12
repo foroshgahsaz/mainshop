@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Filament\Resources\OrderResource;
+use App\Filament\Resources\OtpMessageResource;
 use App\Filament\Resources\ProductResource;
 use App\Filament\Resources\ReservationRequestResource;
 use App\Filament\Resources\UserResource;
@@ -36,6 +37,8 @@ class SalesManagerAccessTest extends TestCase
         $this->assertTrue(AdminAccess::canAccessAdminResource(ReservationRequestResource::class));
         $this->assertContains('filament.admin.resources.reservation-requests.*', AdminAccess::salesManagerAllowedRoutePatterns());
         $this->assertContains('filament.admin.resources.users.create', AdminAccess::salesManagerAllowedRoutePatterns());
+        $this->assertFalse(OtpMessageResource::canAccess());
+        $this->assertNotContains('filament.admin.resources.otp-messages.*', AdminAccess::salesManagerAllowedRoutePatterns());
     }
 
     public function test_sales_manager_can_edit_assigned_representative_only(): void

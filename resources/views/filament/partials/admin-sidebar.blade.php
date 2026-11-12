@@ -50,6 +50,7 @@
     use App\Filament\Resources\FreightCarrierResource;
     use App\Filament\Resources\ShippingMethodResource;
     use App\Filament\Resources\ShopUrlRedirectResource;
+    use App\Filament\Resources\OtpMessageResource;
     use App\Filament\Resources\UserResource;
 
     use App\Support\AdminAccess;
@@ -114,12 +115,13 @@
         'users' => [
             'label' => 'کاربران',
             'icon' => 'fa-users',
-            'routes' => ['filament.admin.resources.users.*'],
+            'routes' => ['filament.admin.resources.users.*', 'filament.admin.resources.otp-messages.*'],
             'menus' => [
                 ['label' => 'کاربران', 'icon' => 'fa-users', 'items' => [
                     ['label' => 'مشتریان', 'url' => UserResource::getUrl('index'), 'icon' => 'fa-user'],
                     ['label' => 'غیر مشتری', 'url' => UserResource::getUrl('index', ['activeTab' => 'staff']), 'icon' => 'fa-user-tie'],
                     ['label' => 'افزودن کاربر', 'url' => UserResource::getUrl('create'), 'icon' => 'fa-plus'],
+                    ['label' => 'مدیریت OTP', 'url' => OtpMessageResource::getUrl('index'), 'icon' => 'fa-key'],
                 ]],
             ],
         ],
@@ -347,6 +349,7 @@
                 'filament.admin.pages.kavenegar',
                 'filament.admin.pages.sms-ir',
                 'filament.admin.pages.transactional-sms',
+                'filament.admin.resources.otp-messages.*',
             ],
             'menus' => [
                 ['label' => 'تنظیمات عمومی', 'icon' => 'fa-globe', 'items' => [
@@ -359,6 +362,7 @@
                     ['label' => 'مجوزها', 'url' => ManageTrustBadges::getUrl(), 'icon' => 'fa-certificate'],
                 ]],
                 ['label' => 'پیامک', 'icon' => 'fa-sms', 'items' => [
+                    ['label' => 'مدیریت OTP', 'url' => OtpMessageResource::getUrl('index'), 'icon' => 'fa-key'],
                     ['label' => 'sms.ir', 'url' => ManageSmsIr::getUrl(), 'icon' => 'fa-comment-dots'],
                     ['label' => 'متن پیامک تراکنشی', 'url' => ManageTransactionalSms::getUrl(), 'icon' => 'fa-sms'],
                     ['label' => 'کاوه‌نگار', 'url' => ManageIntegrations::getUrl(), 'icon' => 'fa-comment-sms'],

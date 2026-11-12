@@ -20,7 +20,7 @@
                     <input type="checkbox" wire:model.live="disableShopPurchase" class="ppu-checkbox">
                     <span>غیر قابل فروش</span>
                 </label>
-                <p class="ppu-site-sales-hint">قیمت‌ها نمایش داده می‌شوند؛ افزودن به سبد و ثبت سفارش غیرفعال است.</p>
+                <p class="ppu-site-sales-hint">قیمت‌ها نمایش داده می‌شوند؛ دکمه «افزودن به سبد» مثل همیشه است ولی پس از کلیک چیزی به سبد اضافه نمی‌شود.</p>
             </div>
         </section>
 

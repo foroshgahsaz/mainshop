@@ -8,12 +8,13 @@ use RuntimeException;
 
 class KavenegarSmsSender implements SmsSender
 {
-    public function sendOtp(string $phone, string $code): void
+    public function sendOtp(string $phone, string $code, ?int $templateId = null): void
     {
         $apiKey = app(\App\Services\Settings\SettingsService::class)->kavenegar()['api_key']
             ?: config('sms.kavenegar.api_key');
         $template = app(\App\Services\Settings\SettingsService::class)->kavenegar()['otp_template']
             ?: config('sms.kavenegar.otp_template');
+        unset($templateId); // فقط sms.ir از شناسه عددی قالب استفاده می‌کند.
 
         if (empty($apiKey)) {
             throw new RuntimeException('کلید API کاوه‌نگار تنظیم نشده است.');

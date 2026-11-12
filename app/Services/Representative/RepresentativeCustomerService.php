@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\UserAddress;
 use App\Rules\IranianNationalCode;
 use App\Services\Auth\OtpService;
+use App\Services\Settings\SettingsService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -104,7 +105,8 @@ class RepresentativeCustomerService
         $cooldown = (int) config('shop.otp.throttle_seconds', 60);
         Cache::put($throttleKey, now()->addSeconds($cooldown)->getTimestamp(), now()->addSeconds($cooldown));
 
-        app(SmsSender::class)->sendOtp($phone, $code);
+        $transferTemplateId = app(SettingsService::class)->smsIrTransferTemplateId();
+        app(SmsSender::class)->sendOtp($phone, $code, $transferTemplateId);
         $this->recordTransferOtp($phone, $code, $customer);
     }
 

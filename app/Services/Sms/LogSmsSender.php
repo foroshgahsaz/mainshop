@@ -7,11 +7,12 @@ use Illuminate\Support\Facades\Log;
 
 class LogSmsSender implements SmsSender
 {
-    public function sendOtp(string $phone, string $code): void
+    public function sendOtp(string $phone, string $code, ?int $templateId = null): void
     {
         Log::info('OTP SMS', [
             'phone' => $phone,
             'code' => $code,
+            'template_id' => $templateId,
         ]);
     }
 

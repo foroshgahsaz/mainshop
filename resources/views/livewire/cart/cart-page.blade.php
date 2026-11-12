@@ -61,13 +61,22 @@
                 </div>
 
                 <div class="cart-invoice__totals cart-invoice__totals--compact">
-                    <a href="{{ route('checkout') }}" class="shop-btn-gold cart-invoice__checkout">
-                        @if(shop_prices_hidden())
-                            ادامه و تسویه حساب
-                        @else
+                    @if (shop_purchase_disabled())
+                        <p class="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 mb-3">
+                            فعلاً امکان تسویه آنلاین وجود ندارد (حالت غیر قابل فروش).
+                        </p>
+                        <span class="shop-btn-gold cart-invoice__checkout opacity-50 cursor-not-allowed pointer-events-none" aria-disabled="true">
                             ادامه و تسویه حساب ({{ shop_money($summary['total']) }})
-                        @endif
-                    </a>
+                        </span>
+                    @else
+                        <a href="{{ route('checkout') }}" class="shop-btn-gold cart-invoice__checkout">
+                            @if(shop_prices_hidden())
+                                ادامه و تسویه حساب
+                            @else
+                                ادامه و تسویه حساب ({{ shop_money($summary['total']) }})
+                            @endif
+                        </a>
+                    @endif
                 </div>
             </div>
 
@@ -76,7 +85,11 @@
                     <span class="shop-mobile-bar__label">مبلغ قابل پرداخت</span>
                     <span class="shop-mobile-bar__price">{{ shop_money($summary['total']) }}</span>
                 </div>
-                <a href="{{ route('checkout') }}" class="shop-mobile-bar__btn">تسویه حساب</a>
+                @if (shop_purchase_disabled())
+                    <span class="shop-mobile-bar__btn opacity-50 cursor-not-allowed pointer-events-none" aria-disabled="true">غیر قابل فروش</span>
+                @else
+                    <a href="{{ route('checkout') }}" class="shop-mobile-bar__btn">تسویه حساب</a>
+                @endif
             </div>
         @endif
     </div>

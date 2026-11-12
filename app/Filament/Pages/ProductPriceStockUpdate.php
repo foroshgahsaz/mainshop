@@ -47,6 +47,8 @@ class ProductPriceStockUpdate extends Page
 
     public bool $hideShopPrices = false;
 
+    public bool $disableShopPurchase = false;
+
     /** @var array<int, int|string> */
     public array $rowPrices = [];
 
@@ -72,6 +74,7 @@ class ProductPriceStockUpdate extends Page
     {
         $this->resetPage();
         $this->hideShopPrices = ShopLabels::shopPricesHidden();
+        $this->disableShopPurchase = ShopLabels::shopPurchaseDisabled();
     }
 
     public function updatedFilterCategoryId(): void
@@ -107,6 +110,19 @@ class ProductPriceStockUpdate extends Page
             ->body($this->hideShopPrices
                 ? 'قیمت‌ها در فروشگاه (کارت محصول، سبد، checkout و …) نمایش داده نمی‌شوند.'
                 : 'قیمت‌ها در فروشگاه به‌صورت ریال نمایش داده می‌شوند.')
+            ->success()
+            ->send();
+    }
+
+    public function updatedDisableShopPurchase(SettingsService $settings): void
+    {
+        $settings->set('site', 'disable_shop_purchase', $this->disableShopPurchase);
+
+        Notification::make()
+            ->title($this->disableShopPurchase ? 'فروش آنلاین (افزودن به سبد) غیرفعال شد' : 'فروش آنلاین فعال شد')
+            ->body($this->disableShopPurchase
+                ? 'قیمت‌ها در سایت نمایش داده می‌شوند؛ دکمهٔ افزودن به سبد و تسویه غیرفعال است.'
+                : 'مشتریان می‌توانند دوباره به سبد اضافه کنند و سفارش ثبت کنند.')
             ->success()
             ->send();
     }

@@ -43,3 +43,10 @@ if (! function_exists('shop_prices_hidden')) {
         return \App\Support\ShopLabels::shopPricesHidden();
     }
 }
+
+if (! function_exists('shop_purchase_disabled')) {
+    function shop_purchase_disabled(): bool
+    {
+        return \App\Support\ShopLabels::shopPurchaseDisabled();
+    }
+}

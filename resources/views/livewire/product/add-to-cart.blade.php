@@ -83,12 +83,12 @@
 
 
     @php
-        $purchaseBlocked = ($shopPricesHidden ?? false) || $selectedStock === 0;
+        $purchaseBlocked = ($shopPricesHidden ?? false) || ($shopPurchaseDisabled ?? false) || $selectedStock === 0;
     @endphp
 
     <div class="flex items-center gap-3 flex-wrap">
 
-        @if (! ($shopPricesHidden ?? false))
+        @if (! ($shopPricesHidden ?? false) && ! ($shopPurchaseDisabled ?? false))
             <div class="product-qty">
 
                 <button type="button" wire:click="decrementQuantity" aria-label="کم کردن">−</button>
@@ -117,6 +117,15 @@
                     تماس بگیرید
                 </button>
             @endif
+        @elseif ($shopPurchaseDisabled ?? false)
+            <button
+                type="button"
+                disabled
+                class="product-add-cart flex-1 min-w-[200px] opacity-60 cursor-not-allowed"
+                title="فعلاً امکان خرید آنلاین نیست"
+            >
+                غیر قابل فروش
+            </button>
         @else
             <button type="button"
 

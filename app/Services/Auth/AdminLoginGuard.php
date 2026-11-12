@@ -13,7 +13,7 @@ class AdminLoginGuard
             return false;
         }
 
-        return $user->is_admin || $user->isSalesManager();
+        return $user->is_admin || $user->isSalesManager() || $user->isBankdar();
     }
 
     public function assertAllowed(?User $user, string $field = 'otpPhone'): void

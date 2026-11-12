@@ -7,7 +7,6 @@ use App\Filament\Resources\SalesRegionResource\Pages\EditSalesRegion;
 use App\Filament\Resources\UserResource\Pages\CreateUser;
 use App\Filament\Resources\UserResource\Pages\EditUser;
 use App\Filament\Resources\UserResource\Pages\ListUsers;
-use App\Models\City;
 use App\Models\Province;
 use App\Models\RepresentativeProfile;
 use App\Models\SalesRegion;
@@ -30,7 +29,7 @@ class SalesRegionTest extends TestCase
 
     private function resetAccessMemo(): void
     {
-        foreach (['memoUser', 'memoIsFullAdmin', 'memoIsSalesManagerOnly'] as $p) {
+        foreach (['memoUser', 'memoIsFullAdmin', 'memoIsSalesManagerOnly', 'memoIsBankdarOnly'] as $p) {
             $r = new \ReflectionProperty(AdminAccess::class, $p);
             $r->setValue(null, null);
         }
@@ -44,7 +43,7 @@ class SalesRegionTest extends TestCase
         Filament::setCurrentPanel(Filament::getPanel('admin'));
     }
 
-    public function test_regions_scope_representative_management(): void
+    public function test_admin_region_is_name_and_provinces_only_then_sales_manager_creates_bankdars(): void
     {
         $p = [];
         foreach (['تهران', 'البرز', 'قم', 'گیلان'] as $i => $name) {
@@ -52,168 +51,124 @@ class SalesRegionTest extends TestCase
         }
 
         $admin = $this->user('09130000001', ['is_admin' => 1]);
-        $m1 = $this->user('09130000002', ['is_sales_manager' => 1]);
-        $m2 = $this->user('09130000003', ['is_sales_manager' => 1]);
+        $sales = $this->user('09130000002', ['is_sales_manager' => 1]);
 
-        $legacyRep = $this->user('09130000009', ['is_representative' => 1]);
-        RepresentativeProfile::query()->create(['user_id' => $legacyRep->id, 'province_id' => $p[1]->id, 'max_active_reservations' => 3]);
-
-        // Admin defines regions
         $this->actAs($admin);
         Livewire::test(CreateSalesRegion::class)
-            ->fillForm(['name' => 'مرکز', 'sales_manager_id' => $m1->id, 'province_ids' => [$p[0]->id, $p[1]->id]])
+            ->fillForm(['name' => 'مرکز', 'province_ids' => [$p[0]->id, $p[1]->id]])
             ->call('create')->assertHasNoFormErrors();
         $center = SalesRegion::query()->where('name', 'مرکز')->firstOrFail();
         $this->assertEqualsCanonicalizing([$p[0]->id, $p[1]->id], $center->provinces()->pluck('id')->all());
-        $this->assertSame($m1->id, $legacyRep->representativeProfile()->first()->sales_manager_id, 'legacy rep reassigned to region manager');
 
         Livewire::test(CreateSalesRegion::class)
-            ->fillForm(['name' => 'شمال', 'sales_manager_id' => $m2->id, 'province_ids' => [$p[3]->id]])
+            ->fillForm(['name' => 'شمال', 'province_ids' => [$p[3]->id]])
             ->call('create')->assertHasNoFormErrors();
 
-        // province already in another region is rejected
         Livewire::test(CreateSalesRegion::class)
-            ->fillForm(['name' => 'تکراری', 'sales_manager_id' => $m2->id, 'province_ids' => [$p[0]->id]])
+            ->fillForm(['name' => 'تکراری', 'province_ids' => [$p[0]->id]])
             ->call('create')->assertHasFormErrors(['province_ids']);
 
-        // one manager, several regions
-        Livewire::test(CreateSalesRegion::class)
-            ->fillForm(['name' => 'قم', 'sales_manager_id' => $m1->id, 'province_ids' => [$p[2]->id]])
+        // sales manager creates bankdar for Mazandaran-like province (گیلان here)
+        $this->actAs($sales);
+        Livewire::test(CreateUser::class)
+            ->fillForm([
+                'name' => 'بنکدار گیلان',
+                'phone' => '09130000020',
+                'status' => true,
+                'password' => 'secret123',
+                'bankdar_province_id' => $p[3]->id,
+            ])
             ->call('create')->assertHasNoFormErrors();
-        $this->assertCount(3, app(SalesRegionService::class)->provinceIdsForManager($m1->id));
 
-        // admin creates rep: manager required, province must be in manager's region
-        $base = ['name' => 'نماینده جدید', 'phone' => '09130000010', 'status' => true, 'user_kind' => 'staff', 'is_representative' => true, 'password' => 'secret123'];
+        $bankdar = User::query()->where('phone', '09130000020')->firstOrFail();
+        $this->assertTrue((bool) $bankdar->is_bankdar);
+        $this->assertFalse((bool) $bankdar->is_sales_manager);
+        $this->assertSame($sales->id, (int) $bankdar->created_by_sales_manager_id);
+        $this->assertSame($p[3]->id, (int) $bankdar->bankdar_province_id);
+
+        // second bankdar same province allowed
         Livewire::test(CreateUser::class)
-            ->fillForm($base + ['rep_province_id' => $p[0]->id])
-            ->call('create')->assertHasFormErrors(['rep_sales_manager_id']);
-        Livewire::test(CreateUser::class)
-            ->fillForm($base + ['rep_sales_manager_id' => $m2->id, 'rep_province_id' => $p[0]->id])
-            ->call('create')->assertHasFormErrors(['rep_province_id']);
-        Livewire::test(CreateUser::class)
-            ->fillForm($base + ['rep_sales_manager_id' => $m2->id, 'rep_province_id' => $p[3]->id])
+            ->fillForm([
+                'name' => 'بنکدار دوم',
+                'phone' => '09130000021',
+                'status' => true,
+                'password' => 'secret123',
+                'bankdar_province_id' => $p[3]->id,
+            ])
             ->call('create')->assertHasNoFormErrors();
-        $northRep = User::query()->where('phone', '09130000010')->firstOrFail();
-        $this->assertSame($m2->id, $northRep->representativeProfile->sales_manager_id);
 
-        // sales manager creates rep: manager forced to self, province limited to own regions
-        $this->actAs($m1);
-        $smBase = ['name' => 'نماینده مدیر', 'phone' => '09130000011', 'status' => true, 'password' => 'secret123'];
+        // bankdar creates rep — province locked to own
+        $this->actAs($bankdar);
         Livewire::test(CreateUser::class)
-            ->fillForm($smBase + ['rep_province_id' => $p[3]->id])
-            ->call('create')->assertHasFormErrors(['rep_province_id']);
-        Livewire::test(CreateUser::class)
-            ->fillForm($smBase + ['rep_province_id' => $p[2]->id, 'is_admin' => true])
+            ->fillForm([
+                'name' => 'نماینده گیلان',
+                'phone' => '09130000030',
+                'status' => true,
+                'password' => 'secret123',
+                'rep_city_id' => null,
+            ])
             ->call('create')->assertHasNoFormErrors();
-        $own = User::query()->where('phone', '09130000011')->firstOrFail();
-        $this->assertTrue((bool) $own->is_representative);
-        $this->assertFalse((bool) $own->is_admin);
-        $this->assertSame($m1->id, $own->representativeProfile->sales_manager_id);
 
-        // list only own reps
+        $rep = User::query()->where('phone', '09130000030')->firstOrFail();
+        $this->assertTrue((bool) $rep->is_representative);
+        $this->assertSame($bankdar->id, (int) $rep->representativeProfile->sales_manager_id);
+        $this->assertSame($p[3]->id, (int) $rep->representativeProfile->province_id);
+
         Livewire::test(ListUsers::class)
-            ->assertCanSeeTableRecords([$own, $legacyRep])
-            ->assertCanNotSeeTableRecords([$northRep]);
+            ->assertCanSeeTableRecords([$rep]);
 
-        // cannot edit other manager's rep
-        $this->get('/admin/users/'.$northRep->id.'/edit')->assertForbidden();
-
-        // can edit own rep but not escalate roles
-        Livewire::test(EditUser::class, ['record' => $own->id])
-            ->set('userEditTab', 'access')
-            ->fillForm(['is_admin' => true])
-            ->call('save');
-        $this->assertFalse((bool) $own->fresh()->is_admin);
-
-        // region manager change moves its reps
-        $this->actAs($admin);
-        Livewire::test(EditSalesRegion::class, ['record' => $center->id])
-            ->fillForm(['sales_manager_id' => $m2->id])
-            ->call('save')->assertHasNoFormErrors();
-        $this->assertSame($m2->id, $legacyRep->representativeProfile()->first()->sales_manager_id);
-
+        // other sales manager cannot see this bankdar/rep
+        $otherSales = $this->user('09130000003', ['is_sales_manager' => 1]);
+        $this->actAs($otherSales);
+        Livewire::test(ListUsers::class)
+            ->assertCanNotSeeTableRecords([$bankdar, $rep]);
     }
 
     public function test_representatives_for_region_match_provinces(): void
     {
-        $m1 = $this->user('09130000002', ['is_sales_manager' => 1]);
         $pTehran = Province::query()->create(['name' => 'تهران', 'slug' => 'teh-'.uniqid(), 'position' => 1]);
         $pGilan = Province::query()->create(['name' => 'گیلان', 'slug' => 'gil-'.uniqid(), 'position' => 2]);
 
-        $region = SalesRegion::query()->create(['name' => 'مرکز', 'sales_manager_id' => $m1->id]);
+        $region = SalesRegion::query()->create(['name' => 'مرکز']);
         $pTehran->update(['sales_region_id' => $region->id]);
 
-        $inRegion = $this->user('09130000020', ['is_representative' => 1]);
+        $bankdar = $this->user('09130000040', ['is_bankdar' => 1, 'bankdar_province_id' => $pTehran->id]);
+        $repIn = $this->user('09130000041', ['is_representative' => 1]);
         RepresentativeProfile::query()->create([
-            'user_id' => $inRegion->id,
-            'sales_manager_id' => $m1->id,
+            'user_id' => $repIn->id,
+            'sales_manager_id' => $bankdar->id,
             'province_id' => $pTehran->id,
+            'max_active_reservations' => 3,
         ]);
-
-        $outRegion = $this->user('09130000021', ['is_representative' => 1]);
+        $repOut = $this->user('09130000042', ['is_representative' => 1]);
         RepresentativeProfile::query()->create([
-            'user_id' => $outRegion->id,
-            'sales_manager_id' => $m1->id,
+            'user_id' => $repOut->id,
+            'sales_manager_id' => $bankdar->id,
             'province_id' => $pGilan->id,
-        ]);
-
-        $service = app(SalesRegionService::class);
-        $ids = $service->representativesForRegion($region->fresh('provinces'))->pluck('id')->all();
-
-        $this->assertSame([$inRegion->id], $ids);
-    }
-
-    public function test_regions_page_admin_only(): void
-    {
-        $admin = $this->user('09130000001', ['is_admin' => 1]);
-        $m1 = $this->user('09130000002', ['is_sales_manager' => 1]);
-        SalesRegion::query()->create(['name' => 'مرکز', 'sales_manager_id' => $m1->id]);
-        $this->actAs($admin);
-        $this->get('/admin/sales-regions')->assertOk()->assertSee('مرکز')->assertSee('افزودن منطقه');
-        $this->get('/admin/sales-regions/create')->assertOk();
-        $this->get('/admin')->assertOk()->assertSee('مناطق فروش');
-    }
-
-    public function test_access_tab_fills_saved_representative_profile(): void
-    {
-        $manager = $this->user('09130000040', ['is_sales_manager' => 1]);
-        $province = Province::query()->create(['name' => 'مازندران', 'slug' => 'maz-'.uniqid(), 'position' => 1]);
-        $city = City::query()->create([
-            'province_id' => $province->id,
-            'name' => 'ساری',
-            'slug' => 'sari-'.uniqid(),
-            'position' => 1,
-        ]);
-        $region = SalesRegion::query()->create(['name' => 'شمال', 'sales_manager_id' => $manager->id]);
-        $province->update(['sales_region_id' => $region->id]);
-
-        $rep = $this->user('09130000041', ['is_representative' => 1]);
-        RepresentativeProfile::query()->create([
-            'user_id' => $rep->id,
-            'sales_manager_id' => $manager->id,
-            'province_id' => $province->id,
-            'city_id' => $city->id,
             'max_active_reservations' => 3,
         ]);
 
-        $this->actAs($manager);
-
-        Livewire::withQueryParams(['tab' => 'access'])
-            ->test(EditUser::class, ['record' => $rep->id])
-            ->assertFormSet([
-                'is_representative' => true,
-                'representativeProfile.sales_manager_id' => $manager->id,
-                'representativeProfile.province_id' => $province->id,
-                'representativeProfile.city_id' => $city->id,
-                'representativeProfile.max_active_reservations' => 3,
-            ]);
+        $ids = app(SalesRegionService::class)->representativesForRegion($region)->pluck('id')->all();
+        $this->assertContains($repIn->id, $ids);
+        $this->assertNotContains($repOut->id, $ids);
     }
 
-    public function test_regions_page_forbidden_for_sales_manager(): void
+    public function test_edit_region_provinces_without_manager(): void
     {
-        $m1 = $this->user('09130000002', ['is_sales_manager' => 1]);
-        $this->actAs($m1);
-        $this->get('/admin')->assertOk()->assertDontSee('افزودن منطقه')->assertSee('نمایندگان من');
-        $this->get('/admin/sales-regions')->assertForbidden();
+        $admin = $this->user('09130000050', ['is_admin' => 1]);
+        $p1 = Province::query()->create(['name' => 'آذربایجان', 'slug' => 'az-'.uniqid(), 'position' => 1]);
+        $p2 = Province::query()->create(['name' => 'اردبیل', 'slug' => 'ar-'.uniqid(), 'position' => 2]);
+        $region = SalesRegion::query()->create(['name' => 'شمال‌غرب']);
+        $p1->update(['sales_region_id' => $region->id]);
+
+        $this->actAs($admin);
+        Livewire::test(EditSalesRegion::class, ['record' => $region->id])
+            ->fillForm(['name' => 'شمال‌غرب', 'province_ids' => [$p1->id, $p2->id]])
+            ->call('save')->assertHasNoFormErrors();
+
+        $this->assertEqualsCanonicalizing(
+            [$p1->id, $p2->id],
+            $region->fresh()->provinces()->pluck('id')->all()
+        );
     }
 }

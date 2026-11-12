@@ -58,6 +58,8 @@
 
     $user = filament()->auth()->user();
     $salesManagerOnly = AdminAccess::isSalesManagerOnly($user);
+    $bankdarOnly = AdminAccess::isBankdarOnly($user);
+    $limitedStaffOnly = AdminAccess::isLimitedStaffOnly($user);
     $brand = filament()->getBrandName();
     $isDashboard = request()->routeIs('filament.admin.pages.dashboard');
     $profileUrl = UserResource::getUrl('edit', ['record' => $user->id], panel: 'admin');
@@ -371,15 +373,26 @@
         ],
     ];
 
-    if ($salesManagerOnly) {
+    if ($limitedStaffOnly) {
         $panels = array_intersect_key($panels, array_flip(['products', 'brands', 'orders', 'requests', 'payments', 'users', 'media']));
-        $panels['users']['menus'] = [
-            ['label' => 'کاربران', 'icon' => 'fa-users', 'items' => [
-                ['label' => 'نمایندگان من', 'url' => UserResource::getUrl('index', ['activeTab' => 'representatives']), 'icon' => 'fa-user-tie'],
-                ['label' => 'افزودن نماینده', 'url' => UserResource::getUrl('create'), 'icon' => 'fa-user-plus'],
-                ['label' => 'مشتریان نمایندگان من', 'url' => UserResource::getUrl('index', ['activeTab' => 'rep_customers']), 'icon' => 'fa-user'],
-            ]],
-        ];
+        if ($salesManagerOnly) {
+            $panels['users']['menus'] = [
+                ['label' => 'کاربران', 'icon' => 'fa-users', 'items' => [
+                    ['label' => 'بنکدارهای من', 'url' => UserResource::getUrl('index', ['activeTab' => 'bankdars']), 'icon' => 'fa-store'],
+                    ['label' => 'افزودن بنکدار', 'url' => UserResource::getUrl('create'), 'icon' => 'fa-user-plus'],
+                    ['label' => 'نمایندگان زیرمجموعه', 'url' => UserResource::getUrl('index', ['activeTab' => 'representatives']), 'icon' => 'fa-user-tie'],
+                    ['label' => 'مشتریان زیرمجموعه', 'url' => UserResource::getUrl('index', ['activeTab' => 'rep_customers']), 'icon' => 'fa-user'],
+                ]],
+            ];
+        } else {
+            $panels['users']['menus'] = [
+                ['label' => 'کاربران', 'icon' => 'fa-users', 'items' => [
+                    ['label' => 'نمایندگان من', 'url' => UserResource::getUrl('index', ['activeTab' => 'representatives']), 'icon' => 'fa-user-tie'],
+                    ['label' => 'افزودن نماینده', 'url' => UserResource::getUrl('create'), 'icon' => 'fa-user-plus'],
+                    ['label' => 'مشتریان نمایندگان من', 'url' => UserResource::getUrl('index', ['activeTab' => 'rep_customers']), 'icon' => 'fa-user'],
+                ]],
+            ];
+        }
         $panels['media']['menus'] = [
             ['label' => 'کتابخانه رسانه', 'icon' => 'fa-photo-film', 'items' => [
                 ['label' => 'همه فایل‌ها', 'url' => MediaFileResource::getUrl('index'), 'icon' => 'fa-images'],
@@ -424,7 +437,7 @@
         ['id' => 'settings', 'icon' => 'fa-cog', 'tooltip' => 'تنظیمات', 'panel' => 'settings'],
     ];
 
-    if ($salesManagerOnly) {
+    if ($limitedStaffOnly) {
         $navIcons = array_values(array_filter(
             $navIcons,
             fn (array $icon): bool => ($icon['isLink'] ?? false)

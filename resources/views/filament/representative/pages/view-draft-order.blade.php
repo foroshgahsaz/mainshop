@@ -185,11 +185,11 @@
                         @else
                             مهلت رزرو تمام شده.
                         @endif
-                        برای پرداخت، درخواست رزرو مجدد را برای مدیر منطقه بفرستید.
+                        برای پرداخت، درخواست رزرو مجدد را برای بنکدار بفرستید.
                     </p>
                     @if ($reservationRequest?->isPending())
                         <p class="rep-wizard-hint rep-reservation-request rep-reservation-request--pending">
-                            درخواست رزرو مجدد در {{ $reservationRequest->created_at->shopJalali() }} ثبت شد و در انتظار بررسی مدیر منطقه است.
+                            درخواست رزرو مجدد در {{ $reservationRequest->created_at->shopJalali() }} ثبت شد و در انتظار بررسی بنکدار است.
                         </p>
                     @else
                         @if ($reservationRequest?->status === \App\Models\ProformaReservationRequest::STATUS_REJECTED)

@@ -46,12 +46,6 @@ class SalesRegionResource extends Resource
                         ->label('نام منطقه')
                         ->required()
                         ->maxLength(255),
-                    Forms\Components\Select::make('sales_manager_id')
-                        ->label('مدیر منطقه')
-                        ->options(fn () => User::query()->where('is_sales_manager', true)->orderBy('name')->pluck('name', 'id'))
-                        ->searchable()
-                        ->required()
-                        ->helperText('از بین کاربرانی که نقش «مدیر فروش» دارند. یک مدیر می‌تواند چند منطقه داشته باشد.'),
                     Forms\Components\Select::make('province_ids')
                         ->label('استان‌ها')
                         ->multiple()
@@ -63,10 +57,10 @@ class SalesRegionResource extends Resource
                                 ->when($record?->exists, fn (Builder $q) => $q->orWhere('sales_region_id', $record->id)))
                             ->orderBy('position')
                             ->pluck('name', 'id'))
-                        ->helperText('هر استان فقط در یک منطقه؛ استان‌های منطقه‌های دیگر نمایش داده نمی‌شوند. نمایندگان این استان‌ها به مدیر این منطقه منتقل می‌شوند.')
+                        ->helperText('هر استان فقط در یک منطقه. بنکدارها را مدیر فروش جداگانه برای هر استان تعریف می‌کند.')
                         ->columnSpanFull(),
                 ])
-                ->columns(2),
+                ->columns(1),
             Forms\Components\Section::make('نمایندگان این منطقه')
                 ->schema([
                     Forms\Components\View::make('region_representatives')
@@ -96,14 +90,26 @@ class SalesRegionResource extends Resource
     public static function table(Table $table): Table
     {
         return AdminTable::configure($table)
-            ->modifyQueryUsing(fn (Builder $query) => $query->with(['salesManager:id,name', 'provinces:id,name,sales_region_id']))
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['provinces:id,name,sales_region_id']))
             ->columns([
                 Tables\Columns\TextColumn::make('name')->label('منطقه')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('salesManager.name')->label('مدیر منطقه')->placeholder('—'),
                 Tables\Columns\TextColumn::make('provinces.name')
                     ->label('استان‌ها')
                     ->badge()
                     ->wrap(),
+                Tables\Columns\TextColumn::make('bankdars_count')
+                    ->label('بنکدارها')
+                    ->state(function (SalesRegion $record): int {
+                        $provinceIds = $record->provinces->pluck('id')->all();
+                        if ($provinceIds === []) {
+                            return 0;
+                        }
+
+                        return User::query()
+                            ->where('is_bankdar', true)
+                            ->whereIn('bankdar_province_id', $provinceIds)
+                            ->count();
+                    }),
                 Tables\Columns\TextColumn::make('representatives_count')
                     ->label('نمایندگان')
                     ->state(fn (SalesRegion $record): int => app(SalesRegionService::class)

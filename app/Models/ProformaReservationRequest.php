@@ -65,13 +65,27 @@ class ProformaReservationRequest extends Model
             return $query;
         }
 
-        if (! $user->isSalesManager()) {
-            return $query->whereRaw('1 = 0');
+        if ($user->isBankdar()) {
+            return $query->where(fn (Builder $q) => $q
+                ->where('sales_manager_id', $user->id)
+                ->orWhereNull('sales_manager_id'));
         }
 
-        return $query->where(fn (Builder $q) => $q
-            ->where('sales_manager_id', $user->id)
-            ->orWhereNull('sales_manager_id'));
+        if ($user->isSalesManager()) {
+            $bankdarIds = User::query()
+                ->where('is_bankdar', true)
+                ->where('created_by_sales_manager_id', $user->id)
+                ->pluck('id')
+                ->map(fn ($id) => (int) $id)
+                ->all();
+
+            return $query->where(fn (Builder $q) => $q
+                ->when($bankdarIds !== [], fn (Builder $q) => $q->whereIn('sales_manager_id', $bankdarIds))
+                ->orWhereNull('sales_manager_id')
+                ->orWhere('sales_manager_id', $user->id));
+        }
+
+        return $query->whereRaw('1 = 0');
     }
 
     public function order(): BelongsTo

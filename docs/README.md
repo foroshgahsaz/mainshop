@@ -23,6 +23,7 @@
 | ۱۱ | [dev/09-transactional-sms.md](dev/09-transactional-sms.md) | **پیامک تراکنشی** — قالب‌ها، رویدادها، صف |
 | ۱۱ب | [dev/09-mega-menu-families.md](dev/09-mega-menu-families.md) | **مگا منو (تاریخچه خانواده‌محور)** |
 | ۱۱ج | [dev/10-catalog-category-only.md](dev/10-catalog-category-only.md) | **کاتالوگ دسته‌محور** — مگا منو، ویزارد نماینده، مهاجرت |
+| ۱۱د | [dev/11-bankdar-sales-hierarchy.md](dev/11-bankdar-sales-hierarchy.md) | **مدیر فروش → بنکدار → نماینده** — مناطق، اسکوپ، انتقال مشتری |
 | — | [PROJECT-PHASES.md](PROJECT-PHASES.md) | تا کجا پیش رفته‌ایم (فازهای محصول) |
 | — | [dev/00-doc-maintenance.md](dev/00-doc-maintenance.md) | **الزام:** هر فیچر = به‌روز doc |
 

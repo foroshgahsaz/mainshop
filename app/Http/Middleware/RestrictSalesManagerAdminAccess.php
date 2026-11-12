@@ -14,7 +14,7 @@ class RestrictSalesManagerAdminAccess
     {
         $user = $request->user();
 
-        if (! $user instanceof User || ! AdminAccess::isSalesManagerOnly($user)) {
+        if (! $user instanceof User || ! AdminAccess::isLimitedStaffOnly($user)) {
             return $next($request);
         }
 
@@ -36,7 +36,7 @@ class RestrictSalesManagerAdminAccess
             }
         }
 
-        foreach (AdminAccess::salesManagerAllowedRoutePatterns() as $pattern) {
+        foreach (AdminAccess::limitedStaffAllowedRoutePatterns() as $pattern) {
             if ($request->routeIs($pattern)) {
                 return $next($request);
             }

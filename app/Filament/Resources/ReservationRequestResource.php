@@ -94,7 +94,7 @@ class ReservationRequestResource extends Resource
                     ->label('مبلغ')
                     ->formatStateUsing(fn (?int $state) => ShopLabels::formatMoney($state)),
                 Tables\Columns\TextColumn::make('salesManager.name')
-                    ->label('مدیر منطقه')
+                    ->label('بنکدار')
                     ->placeholder('همه مدیران')
                     ->visible(fn (): bool => AdminAccess::isFullAdmin()),
                 Tables\Columns\TextColumn::make('status')

@@ -134,7 +134,7 @@ class ViewDraftOrder extends ViewRecord
 
             Notification::make()
                 ->title('درخواست رزرو مجدد ثبت شد')
-                ->body('درخواست برای مدیر منطقه ارسال شد. پس از تأیید، امکان پرداخت فعال می‌شود.')
+                ->body('درخواست برای بنکدار ارسال شد. پس از تأیید، امکان پرداخت فعال می‌شود.')
                 ->success()
                 ->send();
         } catch (ValidationException $e) {

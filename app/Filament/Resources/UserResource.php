@@ -53,7 +53,8 @@ class UserResource extends Resource
 
     public static function canCreate(): bool
     {
-        return AdminAccess::canCreateRepresentativesInAdmin();
+        return AdminAccess::canCreateRepresentativesInAdmin()
+            || AdminAccess::canCreateBankdarsInAdmin();
     }
 
     public static function canDelete($record): bool
@@ -67,7 +68,7 @@ class UserResource extends Resource
             return true;
         }
 
-        if (! AdminAccess::isSalesManagerOnly() || ! $record instanceof User) {
+        if (! AdminAccess::isLimitedStaffOnly() || ! $record instanceof User) {
             return false;
         }
 
@@ -75,11 +76,14 @@ class UserResource extends Resource
             return true;
         }
 
-        $manager = auth()->user();
-        $record->loadMissing('representativeProfile');
+        $actor = auth()->user();
 
-        return $manager instanceof User
-            && app(SalesRegionService::class)->managesUser($manager, $record);
+        if ($record->exists && ! $record->relationLoaded('representativeProfile')) {
+            $record->loadMissing('representativeProfile');
+        }
+
+        return $actor instanceof User
+            && app(SalesRegionService::class)->managesUser($actor, $record);
     }
 
     public static function form(Form $form): Form
@@ -112,7 +116,11 @@ class UserResource extends Resource
     protected static function createFormSchema(): array
     {
         if (AdminAccess::isSalesManagerOnly()) {
-            return static::createRepresentativeFormSchemaForSalesManager();
+            return static::createBankdarFormSchemaForSalesManager();
+        }
+
+        if (AdminAccess::isBankdarOnly()) {
+            return static::createRepresentativeFormSchemaForBankdar();
         }
 
         return [
@@ -126,8 +134,40 @@ class UserResource extends Resource
     }
 
     /** @return array<int, Forms\Components\Component> */
-    protected static function createRepresentativeFormSchemaForSalesManager(): array
+    protected static function createBankdarFormSchemaForSalesManager(): array
     {
+        return [
+            ...static::profileTabSchema(),
+            ...static::accountTabSchema(),
+            Forms\Components\Hidden::make('user_kind')->default('staff'),
+            Forms\Components\Hidden::make('is_bankdar')->default(true),
+            Forms\Components\Hidden::make('is_representative')->default(false),
+            Forms\Components\Hidden::make('is_admin')->default(false),
+            Forms\Components\Hidden::make('is_author')->default(false),
+            Forms\Components\Hidden::make('is_sales_manager')->default(false),
+            Forms\Components\Section::make('استان بنکدار')
+                ->description('هر منطقه/استان می‌تواند چند بنکدار داشته باشد. بنکدار فقط برای همین استان نماینده می‌سازد.')
+                ->schema([
+                    Forms\Components\Select::make('bankdar_province_id')
+                        ->label('استان')
+                        ->options(fn (): array => app(SalesRegionService::class)->provinceOptionsAvailableForBankdar())
+                        ->in(fn (): array => app(SalesRegionService::class)->provinceIdsAvailableForBankdar())
+                        ->validationMessages(['in' => 'استان باید در یکی از مناطق فروش تعریف شده باشد.'])
+                        ->searchable()
+                        ->required()
+                        ->helperText('فقط استان‌هایی که مدیر سیستم در مناطق فروش ثبت کرده است.'),
+                ])
+                ->columnSpanFull(),
+        ];
+    }
+
+    /** @return array<int, Forms\Components\Component> */
+    protected static function createRepresentativeFormSchemaForBankdar(): array
+    {
+        $provinceId = (int) (auth()->user()?->bankdar_province_id ?? 0);
+        $provinceName = $provinceId > 0
+            ? (string) (Province::query()->whereKey($provinceId)->value('name') ?? '')
+            : '';
 
         return [
             ...static::profileTabSchema(),
@@ -137,9 +177,30 @@ class UserResource extends Resource
             Forms\Components\Hidden::make('is_admin')->default(false),
             Forms\Components\Hidden::make('is_author')->default(false),
             Forms\Components\Hidden::make('is_sales_manager')->default(false),
+            Forms\Components\Hidden::make('is_bankdar')->default(false),
+            Forms\Components\Hidden::make('rep_province_id')->default($provinceId ?: null),
             Forms\Components\Section::make('پروفایل نمایندگی')
-                ->description('این نماینده به‌صورت خودکار زیرمجموعه شما (مدیر منطقه) ثبت می‌شود.')
-                ->schema(static::representativeProfileFieldsForCreate(includeSalesManager: false))
+                ->description('این نماینده زیرمجموعه شما (بنکدار) ثبت می‌شود. استان فعالیت همان استان شماست و قابل تغییر نیست.')
+                ->schema([
+                    Forms\Components\Placeholder::make('locked_province')
+                        ->label('استان فعالیت')
+                        ->content($provinceName !== '' ? $provinceName : 'استان بنکدار تعیین نشده — با مدیر فروش هماهنگ کنید.'),
+                    Forms\Components\Select::make('rep_city_id')
+                        ->label('شهر فعالیت')
+                        ->options(fn (): array => static::cityOptions($provinceId ?: null))
+                        ->searchable()
+                        ->required()
+                        ->disabled($provinceId <= 0)
+                        ->dehydrated(false),
+                    Forms\Components\TextInput::make('rep_max_active_reservations')
+                        ->label('سقف رزرو همزمان')
+                        ->numeric()
+                        ->default(3)
+                        ->minValue(1)
+                        ->maxValue(50)
+                        ->dehydrated(false)
+                        ->helperText('حداکثر پیش‌فاکتور باز با رزرو موجودی (پیش‌فرض ۳).'),
+                ])
                 ->columns(2)
                 ->columnSpanFull(),
         ];
@@ -333,23 +394,27 @@ class UserResource extends Resource
                 ])
                 ->default('customer')
                 ->required()
-                ->disabled(fn (): bool => AdminAccess::isSalesManagerOnly())
+                ->disabled(fn (): bool => AdminAccess::isLimitedStaffOnly())
                 ->live(),
             Forms\Components\Fieldset::make('نقش‌های غیر مشتری')
                 ->schema([
                     Forms\Components\Toggle::make('is_admin')
                         ->label('مدیر — دسترسی پنل ادمین')
-                        ->disabled(fn (): bool => AdminAccess::isSalesManagerOnly()),
+                        ->disabled(fn (): bool => AdminAccess::isLimitedStaffOnly()),
                     Forms\Components\Toggle::make('is_author')
                         ->label('نویسنده — انتشار در بلاگ')
-                        ->disabled(fn (): bool => AdminAccess::isSalesManagerOnly()),
+                        ->disabled(fn (): bool => AdminAccess::isLimitedStaffOnly()),
                     Forms\Components\Toggle::make('is_representative')
                         ->label('نماینده — پنل نمایندگی')
-                        ->disabled(fn (): bool => AdminAccess::isSalesManagerOnly())
+                        ->disabled(fn (): bool => AdminAccess::isLimitedStaffOnly())
                         ->live(),
                     Forms\Components\Toggle::make('is_sales_manager')
-                        ->label('مدیر فروش — سفارش‌ها، پرداخت‌ها، کاربران و مدیریت کامل محصولات')
-                        ->disabled(fn (): bool => AdminAccess::isSalesManagerOnly()),
+                        ->label('مدیر فروش — مدیریت بنکدارها و زیرمجموعه فروش')
+                        ->disabled(fn (): bool => AdminAccess::isLimitedStaffOnly()),
+                    Forms\Components\Toggle::make('is_bankdar')
+                        ->label('بنکدار — مدیریت نمایندگان استان')
+                        ->disabled(fn (): bool => AdminAccess::isLimitedStaffOnly())
+                        ->live(),
                 ])
                 ->columns(2)
                 ->visible(fn (Get $get): bool => $get('user_kind') === 'staff'),
@@ -381,7 +446,7 @@ class UserResource extends Resource
                     $city = $profile->city?->name ?? '—';
                     $cap = $profile->max_active_reservations;
 
-                    return "مدیر منطقه: {$manager} · منطقه: {$region} · استان: {$province} · شهر: {$city} · سقف رزرو همزمان: {$cap}";
+                    return "بنکدار: {$manager} · منطقه: {$region} · استان: {$province} · شهر: {$city} · سقف رزرو همزمان: {$cap}";
                 })
                 ->visible(fn (?User $record): bool => (bool) $record?->isRepresentative());
         }
@@ -417,31 +482,33 @@ class UserResource extends Resource
     /** @return array<int, Forms\Components\Component> */
     protected static function representativeProfileFieldsForEdit(): array
     {
-        $salesManagerOnly = AdminAccess::isSalesManagerOnly();
+        $bankdarOnly = AdminAccess::isBankdarOnly();
 
         return [
             Forms\Components\Select::make('sales_manager_id')
-                ->label('مدیر منطقه')
+                ->label('بنکدار')
                 ->options(fn (Get $get, mixed $record): array => static::salesManagerOptions(
                     static::salesManagerIdFromProfileForm($get, $record)
                 ))
                 ->searchable()
                 ->required()
                 ->live()
-                ->disabled($salesManagerOnly)
-                ->dehydrated(! $salesManagerOnly)
+                ->disabled($bankdarOnly)
+                ->dehydrated(! $bankdarOnly)
                 ->afterStateUpdated(fn (Set $set) => $set('province_id', null))
-                ->helperText('فقط مدیرانی که حداقل یک منطقه فروش دارند. درخواست‌های رزرو مجدد برای این مدیر ارسال می‌شود.'),
+                ->helperText('بنکدار مسئول این نماینده. درخواست‌های رزرو مجدد برای همین بنکدار ارسال می‌شود.'),
             Forms\Components\Select::make('province_id')
                 ->label('استان فعالیت')
                 ->options(fn (Get $get, mixed $record): array => static::provinceOptionsForProfileForm($get, $record))
                 ->in(fn (Get $get, mixed $record): array => static::provinceIdsForProfileForm($get, $record))
-                ->validationMessages(['in' => 'استان فعالیت باید در یکی از مناطق همین مدیر منطقه باشد.'])
+                ->validationMessages(['in' => 'استان فعالیت باید استان همین بنکدار باشد.'])
                 ->searchable()
                 ->required()
                 ->live()
+                ->disabled($bankdarOnly)
+                ->dehydrated(! $bankdarOnly)
                 ->afterStateUpdated(fn (Set $set) => $set('city_id', null))
-                ->helperText('فقط استان‌های مناطق همین مدیر منطقه.'),
+                ->helperText($bankdarOnly ? 'استان بنکدار — غیرقابل تغییر.' : 'فقط استان همین بنکدار.'),
             Forms\Components\Select::make('city_id')
                 ->label('شهر فعالیت')
                 ->options(fn (Get $get, mixed $record): array => static::cityOptions(
@@ -551,7 +618,7 @@ class UserResource extends Resource
 
         if ($includeSalesManager) {
             $fields[] = Forms\Components\Select::make('rep_sales_manager_id')
-                ->label('مدیر منطقه')
+                ->label('بنکدار')
                 ->options(fn (): array => static::salesManagerOptions())
                 ->in(fn (): array => array_keys(static::salesManagerOptions()))
                 ->searchable()
@@ -559,7 +626,7 @@ class UserResource extends Resource
                 ->live()
                 ->dehydrated(false)
                 ->afterStateUpdated(fn (Set $set) => $set('rep_province_id', null))
-                ->helperText('فقط مدیرانی که حداقل یک منطقه فروش دارند (ادمین → مناطق فروش در سایدبار).');
+                ->helperText('بنکدار مسئول نماینده (مدیر فروش از کاربران → افزودن بنکدار).');
         }
 
         return [
@@ -572,13 +639,13 @@ class UserResource extends Resource
                 ->in(fn (Get $get): array => app(SalesRegionService::class)->provinceIdsForManager(
                     $includeSalesManager ? (int) $get('rep_sales_manager_id') : (int) auth()->id()
                 ))
-                ->validationMessages(['in' => 'استان فعالیت باید در یکی از مناطق همین مدیر منطقه باشد.'])
+                ->validationMessages(['in' => 'استان فعالیت باید استان همین بنکدار باشد.'])
                 ->searchable()
                 ->required()
                 ->live()
                 ->dehydrated(false)
                 ->afterStateUpdated(fn (Set $set) => $set('rep_city_id', null))
-                ->helperText($includeSalesManager ? 'فقط استان‌های مناطق مدیر انتخاب‌شده.' : 'فقط استان‌های مناطق شما.'),
+                ->helperText($includeSalesManager ? 'فقط استان بنکدار انتخاب‌شده.' : 'استان شما (بنکدار).'),
             Forms\Components\Select::make('rep_city_id')
                 ->label('شهر فعالیت')
                 ->options(fn (Get $get): array => static::cityOptions($get('rep_province_id')))
@@ -661,15 +728,20 @@ class UserResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->visible(fn (): bool => AdminAccess::canManageShopInAdmin()),
                 Tables\Columns\TextColumn::make('representativeProfile.salesManager.name')
-                    ->label('مدیر منطقه')
+                    ->label('بنکدار')
                     ->description(fn (User $record): ?string => $record->representativeProfile?->province?->name)
                     ->placeholder(fn (User $record): string => $record->isRepresentative() ? 'تعیین نشده' : '—')
                     ->toggleable(),
+                Tables\Columns\TextColumn::make('bankdarProvince.name')
+                    ->label('استان بنکدار')
+                    ->placeholder('—')
+                    ->toggleable()
+                    ->visible(fn (): bool => AdminAccess::canManageShopInAdmin() || AdminAccess::isSalesManagerOnly()),
                 Tables\Columns\TextColumn::make('createdByRepresentative.name')
                     ->label('نماینده ثبت‌کننده')
                     ->placeholder('—')
                     ->toggleable()
-                    ->visible(fn (): bool => AdminAccess::canManageShopInAdmin() || AdminAccess::isSalesManagerOnly()),
+                    ->visible(fn (): bool => AdminAccess::canManageShopInAdmin() || AdminAccess::isLimitedStaffOnly()),
                 Tables\Columns\TextColumn::make('last_login_at')
                     ->label('آخرین ورود')
                     ->shopJalaliDateTime()
@@ -686,9 +758,9 @@ class UserResource extends Resource
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('rep_sales_manager')
-                    ->label('مدیر منطقه نماینده')
-                    ->options(fn (): array => ['none' => 'بدون مدیر منطقه']
-                        + User::query()->where('is_sales_manager', true)->orderBy('name')->pluck('name', 'id')->all())
+                    ->label('بنکدار نماینده')
+                    ->options(fn (): array => ['none' => 'بدون بنکدار']
+                        + User::query()->where('is_bankdar', true)->orderBy('name')->pluck('name', 'id')->all())
                     ->visible(fn (): bool => AdminAccess::canManageShopInAdmin())
                     ->query(function (Builder $query, array $data): Builder {
                         $value = $data['value'] ?? null;

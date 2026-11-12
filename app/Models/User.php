@@ -36,6 +36,9 @@ class User extends Authenticatable implements FilamentUser
         'is_author',
         'is_representative',
         'is_sales_manager',
+        'is_bankdar',
+        'bankdar_province_id',
+        'created_by_sales_manager_id',
         'created_by_representative_id',
         'password',
         'last_login_at',
@@ -67,6 +70,7 @@ class User extends Authenticatable implements FilamentUser
             'is_author' => 'boolean',
             'is_representative' => 'boolean',
             'is_sales_manager' => 'boolean',
+            'is_bankdar' => 'boolean',
             'password' => 'hashed',
         ];
     }
@@ -78,7 +82,7 @@ class User extends Authenticatable implements FilamentUser
         }
 
         if ($panel->getId() === 'admin') {
-            return $this->status && ($this->is_admin || $this->isSalesManager());
+            return $this->status && ($this->is_admin || $this->isSalesManager() || $this->isBankdar());
         }
 
         return $this->is_admin && $this->status;
@@ -99,12 +103,18 @@ class User extends Authenticatable implements FilamentUser
         return (bool) $this->is_sales_manager;
     }
 
+    public function isBankdar(): bool
+    {
+        return (bool) $this->is_bankdar;
+    }
+
     public function isCustomer(): bool
     {
         return ! $this->is_admin
             && ! $this->is_author
             && ! $this->is_representative
-            && ! $this->is_sales_manager;
+            && ! $this->is_sales_manager
+            && ! $this->is_bankdar;
     }
 
     public static function findByLoginPhone(string $phone): ?self
@@ -161,11 +171,13 @@ class User extends Authenticatable implements FilamentUser
 
     public const ADMIN_LIST_SEGMENT_SALES_MANAGER = 'sales_manager';
 
+    public const ADMIN_LIST_SEGMENT_BANKDAR = 'bankdar';
+
     public const ADMIN_LIST_SEGMENT_REPRESENTATIVE = 'representative';
 
     public const ADMIN_LIST_SEGMENT_AUTHOR = 'author';
 
-    /** دستهٔ اصلی برای تب/فیلتر لیست کاربران ادمین (اولویت: مدیر سیستم → مدیر منطقه → نماینده → نویسنده → مشتری). */
+    /** دستهٔ اصلی برای تب/فیلتر لیست کاربران ادمین (اولویت: مدیر سیستم → مدیر فروش → بنکدار → نماینده → نویسنده → مشتری). */
     public function adminListSegment(): string
     {
         if ($this->is_admin) {
@@ -174,6 +186,10 @@ class User extends Authenticatable implements FilamentUser
 
         if ($this->is_sales_manager) {
             return self::ADMIN_LIST_SEGMENT_SALES_MANAGER;
+        }
+
+        if ($this->is_bankdar) {
+            return self::ADMIN_LIST_SEGMENT_BANKDAR;
         }
 
         if ($this->is_representative) {
@@ -191,7 +207,8 @@ class User extends Authenticatable implements FilamentUser
     {
         return match ($this->adminListSegment()) {
             self::ADMIN_LIST_SEGMENT_SYSTEM_ADMIN => 'مدیر سیستم',
-            self::ADMIN_LIST_SEGMENT_SALES_MANAGER => 'مدیر منطقه',
+            self::ADMIN_LIST_SEGMENT_SALES_MANAGER => 'مدیر فروش',
+            self::ADMIN_LIST_SEGMENT_BANKDAR => 'بنکدار',
             self::ADMIN_LIST_SEGMENT_REPRESENTATIVE => 'نماینده',
             self::ADMIN_LIST_SEGMENT_AUTHOR => 'نویسنده',
             default => 'مشتری',
@@ -203,6 +220,7 @@ class User extends Authenticatable implements FilamentUser
         return match ($this->adminListSegment()) {
             self::ADMIN_LIST_SEGMENT_SYSTEM_ADMIN => 'danger',
             self::ADMIN_LIST_SEGMENT_SALES_MANAGER => 'warning',
+            self::ADMIN_LIST_SEGMENT_BANKDAR => 'primary',
             self::ADMIN_LIST_SEGMENT_REPRESENTATIVE => 'info',
             self::ADMIN_LIST_SEGMENT_AUTHOR => 'gray',
             default => 'success',
@@ -213,6 +231,7 @@ class User extends Authenticatable implements FilamentUser
     {
         return ((int) $this->is_admin)
             + ((int) $this->is_sales_manager)
+            + ((int) $this->is_bankdar)
             + ((int) $this->is_representative)
             + ((int) $this->is_author) > 1;
     }
@@ -241,7 +260,8 @@ class User extends Authenticatable implements FilamentUser
         return [
             self::ADMIN_LIST_SEGMENT_CUSTOMER => 'مشتری',
             self::ADMIN_LIST_SEGMENT_SYSTEM_ADMIN => 'مدیر سیستم',
-            self::ADMIN_LIST_SEGMENT_SALES_MANAGER => 'مدیر منطقه',
+            self::ADMIN_LIST_SEGMENT_SALES_MANAGER => 'مدیر فروش',
+            self::ADMIN_LIST_SEGMENT_BANKDAR => 'بنکدار',
             self::ADMIN_LIST_SEGMENT_REPRESENTATIVE => 'نماینده',
             self::ADMIN_LIST_SEGMENT_AUTHOR => 'نویسنده',
         ];
@@ -254,20 +274,27 @@ class User extends Authenticatable implements FilamentUser
             self::ADMIN_LIST_SEGMENT_SALES_MANAGER => $query
                 ->where('is_sales_manager', true)
                 ->where('is_admin', false),
+            self::ADMIN_LIST_SEGMENT_BANKDAR => $query
+                ->where('is_bankdar', true)
+                ->where('is_admin', false)
+                ->where('is_sales_manager', false),
             self::ADMIN_LIST_SEGMENT_REPRESENTATIVE => $query
                 ->where('is_representative', true)
                 ->where('is_admin', false)
-                ->where('is_sales_manager', false),
+                ->where('is_sales_manager', false)
+                ->where('is_bankdar', false),
             self::ADMIN_LIST_SEGMENT_AUTHOR => $query
                 ->where('is_author', true)
                 ->where('is_admin', false)
                 ->where('is_sales_manager', false)
+                ->where('is_bankdar', false)
                 ->where('is_representative', false),
             self::ADMIN_LIST_SEGMENT_CUSTOMER => $query
                 ->where('is_admin', false)
                 ->where('is_author', false)
                 ->where('is_representative', false)
-                ->where('is_sales_manager', false),
+                ->where('is_sales_manager', false)
+                ->where('is_bankdar', false),
             default => $query,
         };
     }
@@ -281,7 +308,11 @@ class User extends Authenticatable implements FilamentUser
         }
 
         if ($this->is_sales_manager) {
-            $roles[] = 'مدیر منطقه';
+            $roles[] = 'مدیر فروش';
+        }
+
+        if ($this->is_bankdar) {
+            $roles[] = 'بنکدار';
         }
 
         if ($this->is_representative) {
@@ -298,6 +329,21 @@ class User extends Authenticatable implements FilamentUser
     public function salesRegions(): HasMany
     {
         return $this->hasMany(SalesRegion::class, 'sales_manager_id');
+    }
+
+    public function bankdarProvince(): BelongsTo
+    {
+        return $this->belongsTo(Province::class, 'bankdar_province_id');
+    }
+
+    public function createdBySalesManager(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by_sales_manager_id');
+    }
+
+    public function bankdarsCreated(): HasMany
+    {
+        return $this->hasMany(User::class, 'created_by_sales_manager_id');
     }
 
     public function representativeProfile(): HasOne

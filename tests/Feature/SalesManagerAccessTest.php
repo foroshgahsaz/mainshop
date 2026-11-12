@@ -32,7 +32,8 @@ class SalesManagerAccessTest extends TestCase
         $this->assertTrue(AdminAccess::canAccessAdminResource(ProductResource::class));
         $this->assertTrue(AdminAccess::canManageProductsInAdmin($manager));
         $this->assertFalse(AdminAccess::canManageShopInAdmin($manager));
-        $this->assertTrue(AdminAccess::canCreateRepresentativesInAdmin($manager));
+        $this->assertTrue(AdminAccess::canCreateBankdarsInAdmin($manager));
+        $this->assertFalse(AdminAccess::canCreateRepresentativesInAdmin($manager));
         $this->assertTrue(UserResource::canCreate());
         $this->assertTrue(AdminAccess::canAccessAdminResource(ReservationRequestResource::class));
         $this->assertContains('filament.admin.resources.reservation-requests.*', AdminAccess::salesManagerAllowedRoutePatterns());
@@ -41,14 +42,37 @@ class SalesManagerAccessTest extends TestCase
         $this->assertNotContains('filament.admin.resources.otp-messages.*', AdminAccess::salesManagerAllowedRoutePatterns());
     }
 
-    public function test_sales_manager_can_edit_assigned_representative_only(): void
+    public function test_bankdar_can_create_representatives_only(): void
+    {
+        $bankdar = User::make([
+            'is_bankdar' => true,
+            'is_sales_manager' => false,
+            'is_admin' => false,
+            'status' => true,
+            'bankdar_province_id' => 5,
+        ]);
+        $bankdar->id = 9;
+
+        $this->actingAs($bankdar);
+
+        $this->assertTrue($bankdar->canAccessPanel(filament()->getPanel('admin')));
+        $this->assertTrue(AdminAccess::isBankdarOnly($bankdar));
+        $this->assertTrue(AdminAccess::canCreateRepresentativesInAdmin($bankdar));
+        $this->assertFalse(AdminAccess::canCreateBankdarsInAdmin($bankdar));
+        $this->assertTrue(AdminAccess::canAccessAdminResource(UserResource::class));
+    }
+
+    public function test_sales_manager_can_edit_assigned_bankdar_and_subtree_reps(): void
     {
         $manager = User::make(['is_sales_manager' => true, 'is_admin' => false]);
         $manager->id = 7;
 
+        $ownBankdar = User::make(['is_bankdar' => true, 'created_by_sales_manager_id' => 7]);
+        $ownBankdar->id = 8;
+
         $ownRep = User::make(['is_representative' => true]);
         $ownRep->id = 10;
-        $ownRep->setRelation('representativeProfile', new RepresentativeProfile(['sales_manager_id' => 7]));
+        $ownRep->setRelation('representativeProfile', new RepresentativeProfile(['sales_manager_id' => 8]));
 
         $otherRep = User::make(['is_representative' => true]);
         $otherRep->id = 11;
@@ -56,16 +80,23 @@ class SalesManagerAccessTest extends TestCase
 
         $this->actingAs($manager);
 
-        $this->assertTrue(UserResource::canEdit($ownRep));
-        $this->assertFalse(UserResource::canEdit($otherRep));
+        $service = app(\App\Services\Representative\SalesRegionService::class);
+        $this->assertTrue($service->managesBankdar($manager, $ownBankdar));
+        $this->assertTrue(UserResource::canEdit($ownBankdar));
+        $this->assertSame(8, (int) $ownRep->representativeProfile->sales_manager_id);
+        $this->assertSame(99, (int) $otherRep->representativeProfile->sales_manager_id);
+        $this->assertFalse($service->managesBankdar($manager, User::make([
+            'is_bankdar' => true,
+            'created_by_sales_manager_id' => 55,
+        ])));
     }
 
-    public function test_reservation_requests_are_scoped_to_own_or_unassigned_for_sales_manager(): void
+    public function test_reservation_requests_are_scoped_for_bankdar_and_sales_manager(): void
     {
-        $manager = User::make(['is_sales_manager' => true, 'is_admin' => false]);
-        $manager->id = 7;
+        $bankdar = User::make(['is_bankdar' => true, 'is_admin' => false, 'is_sales_manager' => false]);
+        $bankdar->id = 7;
 
-        $query = ProformaReservationRequest::query()->visibleTo($manager);
+        $query = ProformaReservationRequest::query()->visibleTo($bankdar);
         $sql = str_replace(['"', '`'], '', $query->toSql());
         $this->assertStringContainsString('sales_manager_id = ?', $sql);
         $this->assertStringContainsString('sales_manager_id is null', $sql);
@@ -92,7 +123,19 @@ class SalesManagerAccessTest extends TestCase
         $guard->assertAllowed($manager);
     }
 
-    public function test_customer_type_excludes_sales_manager(): void
+    public function test_bankdar_passes_admin_login_guard(): void
+    {
+        $bankdar = new User([
+            'is_bankdar' => true,
+            'is_sales_manager' => false,
+            'is_admin' => false,
+            'status' => true,
+        ]);
+
+        $this->assertTrue(app(AdminLoginGuard::class)->canAccessAdminLogin($bankdar));
+    }
+
+    public function test_customer_type_excludes_sales_manager_and_bankdar(): void
     {
         $manager = new User([
             'is_sales_manager' => true,
@@ -102,5 +145,13 @@ class SalesManagerAccessTest extends TestCase
 
         $this->assertFalse($manager->isCustomer());
         $this->assertStringContainsString('مدیر فروش', $manager->staffRoleLabel());
+
+        $bankdar = new User([
+            'is_bankdar' => true,
+            'is_sales_manager' => false,
+            'status' => true,
+        ]);
+        $this->assertFalse($bankdar->isCustomer());
+        $this->assertStringContainsString('بنکدار', $bankdar->staffRoleLabel());
     }
 }

@@ -55,7 +55,7 @@ class EditUser extends EditRecord
 
     protected function getFormActions(): array
     {
-        if (AdminAccess::isSalesManagerOnly()
+        if (AdminAccess::isLimitedStaffOnly()
             && auth()->id() !== $this->getRecord()->getKey()
             && ! UserResource::canEdit($this->getRecord())) {
             return [];
@@ -77,7 +77,7 @@ class EditUser extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        if (AdminAccess::isSalesManagerOnly()
+        if (AdminAccess::isLimitedStaffOnly()
             && auth()->id() !== $this->getRecord()->getKey()
             && ! UserResource::canEdit($this->getRecord())) {
             return $data;
@@ -96,8 +96,8 @@ class EditUser extends EditRecord
             $data['phone'] = app(OtpService::class)->normalizePhone((string) $data['phone']);
         }
 
-        if (AdminAccess::isSalesManagerOnly()) {
-            foreach (['is_admin', 'is_author', 'is_representative', 'is_sales_manager'] as $flag) {
+        if (AdminAccess::isLimitedStaffOnly()) {
+            foreach (['is_admin', 'is_author', 'is_representative', 'is_sales_manager', 'is_bankdar'] as $flag) {
                 $data[$flag] = (bool) $user->{$flag};
             }
 
@@ -130,6 +130,9 @@ class EditUser extends EditRecord
             'is_author' => $user->is_author,
             'is_representative' => $user->is_representative,
             'is_sales_manager' => $user->is_sales_manager,
+            'is_bankdar' => $user->is_bankdar,
+            'bankdar_province_id' => $user->bankdar_province_id,
+            'created_by_sales_manager_id' => $user->created_by_sales_manager_id,
         ];
     }
 
@@ -164,7 +167,7 @@ class EditUser extends EditRecord
 
     public function save(bool $shouldRedirect = true, bool $shouldSendSavedNotification = true): void
     {
-        if (AdminAccess::isSalesManagerOnly()
+        if (AdminAccess::isLimitedStaffOnly()
             && auth()->id() !== $this->getRecord()->getKey()
             && ! UserResource::canEdit($this->getRecord())) {
             return;

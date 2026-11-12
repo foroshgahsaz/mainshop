@@ -704,7 +704,7 @@ $middleware->validateCsrfTokens(except: [
 | `OtpService` | generate، send، verify؛ بعد از SMS موفق ردیف در `otp_messages` |
 | `config/shop.php` → `otp` | length، expire، throttle |
 | Cache key | `otp:phone:{phone}` |
-| ادمین | `/admin/otp-messages` — `OtpMessageResource` (فقط مدیر سیستم) |
+| ادمین | `/admin/otp-messages` — `OtpMessageResource` (فقط مدیر سیستم). 404 بعد از deploy → `shop:deploy-recover` یا دکمه پاک کردن کش (کش Filament) |
 
 **Shop login:** مشتری — مودال/`/login` (staff نباید از این مسیر برای ادمین استفاده کند).  
 **Admin login:** `/admin/login` — `AdminLoginGuard`: `is_admin` یا `is_sales_manager` + `status`. جزئیات: [dev/01-roles-and-auth.md](dev/01-roles-and-auth.md)
@@ -1359,6 +1359,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-12 | 404 مسیر Filament جدید (مثل `/admin/otp-messages`): کش `filament/panels/admin.php` + `route:cache` اگر Resource تازه در کش نباشد پاک می‌شود؛ دکمه کش ادمین `filament:clear-cached-components` |
 | 2026-11-12 | ادمین: `/admin/otp-messages` لیست OTPهای ارسال‌شده (شماره، کد، نام، زمان جلالی) — فقط مدیر سیستم |
 | 2026-11-12 | تب دسترسی کاربر: پر شدن استان/شهر/مدیر نماینده از `representativeProfile` — `userEditTab` قبل از `fillForm` |
 | 2026-11-09 | فشرده‌سازی CSS/JS فروشگاه: `shop:minify-assets` + `/admin/shop-asset-settings` (انتخاب فایل‌های min) |

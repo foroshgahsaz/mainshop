@@ -99,8 +99,6 @@ class AddToCart extends Component
         }
 
         if (ShopLabels::shopPurchaseDisabled()) {
-            session()->flash('error', 'این محصول در حال حاضر غیر قابل فروش است.');
-
             return;
         }
 

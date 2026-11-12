@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\Cart\CartService;
+use App\Support\ShopLabels;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use RuntimeException;
@@ -16,6 +17,10 @@ class CartAddController extends Controller
             'product_variant_id' => ['nullable', 'integer', 'exists:product_variants,id'],
             'quantity' => ['nullable', 'integer', 'min:1', 'max:99'],
         ]);
+
+        if (ShopLabels::shopPurchaseDisabled()) {
+            return back();
+        }
 
         try {
             $cart->add(

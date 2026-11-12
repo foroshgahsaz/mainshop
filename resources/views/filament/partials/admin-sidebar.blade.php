@@ -62,7 +62,10 @@
     $limitedStaffOnly = AdminAccess::isLimitedStaffOnly($user);
     $brand = filament()->getBrandName();
     $isDashboard = request()->routeIs('filament.admin.pages.dashboard');
-    $profileUrl = UserResource::getUrl('edit', ['record' => $user->id], panel: 'admin');
+    $profileUrl = $user
+        ? UserResource::getUrl('edit', ['record' => $user], panel: 'admin').'?tab=profile'
+        : filament()->getUrl();
+    $profileName = trim((string) ($user?->name ?? ''));
     $dashboardUrl = filament()->getUrl();
     $pendingRequestsCount = $user
         ? app(\App\Services\Representative\ProformaReservationRequestService::class)->pendingCountFor($user)
@@ -482,7 +485,7 @@
         return true;
     };
 
-    $initial = mb_substr($user?->name ?? 'ا', 0, 1);
+    $initial = mb_substr($profileName !== '' ? $profileName : 'ا', 0, 1);
 @endphp
 
 <div class="sidebar-secondary">
@@ -515,10 +518,15 @@
     @endforeach
 
     <a href="{{ $profileUrl }}"
-       class="sidebar-user-icon d-flex align-items-center justify-content-center text-white fw-bold text-decoration-none"
-       style="background: linear-gradient(135deg, #7239ea 0%, #9d5cff 100%); font-size: 14px;"
-       data-tooltip="پروفایل: {{ $user?->name ?? 'کاربر' }}"
-       aria-label="پروفایل کاربر">{{ $initial }}</a>
+       class="sidebar-user-profile text-decoration-none"
+       data-tooltip="پروفایل: {{ $profileName !== '' ? $profileName : 'کاربر' }}"
+       aria-label="پروفایل کاربر در ادمین">
+        <span class="sidebar-user-icon d-flex align-items-center justify-content-center text-white fw-bold"
+              style="background: linear-gradient(135deg, #7239ea 0%, #9d5cff 100%); font-size: 14px;">{{ $initial }}</span>
+        @if ($profileName !== '')
+            <span class="sidebar-user-name">{{ $profileName }}</span>
+        @endif
+    </a>
 </div>
 
 <div class="sidebar-primary" id="sidebarPrimary">

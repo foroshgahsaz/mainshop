@@ -400,7 +400,7 @@ php artisan migrate:rollback --step=1
 | `Payment/` | `TaraRefundService` | استرداد تارا |
 | `Cache/` | `ShopCacheService` | کش فروشگاه |
 | `Settings/` | `SettingsService` | تنظیمات DB + env |
-| `Auth/` | `OtpService` | OTP |
+| `Auth/` | `OtpService` | OTP + آرشیو `otp_messages` |
 | `Auth/` | `ShopLoginGuard` | جدا کردن login ادمین/فروشگاه |
 | `Sms/` | `KavenegarSmsSender`, `LogSmsSender` | SMS |
 | `Sms/` | `OrderSmsNotifier` | SMS سفارش |
@@ -701,12 +701,15 @@ $middleware->validateCsrfTokens(except: [
 
 | فایل | کار |
 |------|-----|
-| `OtpService` | generate، send، verify |
+| `OtpService` | generate، send، verify؛ بعد از SMS موفق ردیف در `otp_messages` |
 | `config/shop.php` → `otp` | length، expire، throttle |
-| Cache key | `otp:{phone}` |
+| Cache key | `otp:phone:{phone}` |
+| ادمین | `/admin/otp-messages` — `OtpMessageResource` (فقط مدیر سیستم) |
 
 **Shop login:** مشتری — مودال/`/login` (staff نباید از این مسیر برای ادمین استفاده کند).  
 **Admin login:** `/admin/login` — `AdminLoginGuard`: `is_admin` یا `is_sales_manager` + `status`. جزئیات: [dev/01-roles-and-auth.md](dev/01-roles-and-auth.md)
+
+لیست ادمین شماره، کد، نام (`users.name` در لحظهٔ ارسال) و زمان جلالی با ثانیه را نشان می‌دهد. خطا در ثبت آرشیو، ارسال SMS را متوقف نمی‌کند.
 
 ---
 
@@ -1255,6 +1258,7 @@ $settings->site();       // نام سایت، لوگو، ...
 | `TaraSplitPaymentTest.php` | پرداخت ترکیبی تارا + refund |
 | `CheckoutPageTest.php` | layout checkout، icon درگاه/ارسال |
 | `ShopLivewireTest.php` | OTP، cart، add-to-cart |
+| `OtpMessageAdminTest.php` | آرشیو OTP و صفحه `/admin/otp-messages` |
 | `ShopAuthSecurityTest.php` | admin نتواند shop login |
 | `SeoRoutesTest.php` | slug routes، sitemap، redirect |
 | `LivewireFileUploadControllerTest.php` | آپلود temp |
@@ -1355,6 +1359,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-12 | ادمین: `/admin/otp-messages` لیست OTPهای ارسال‌شده (شماره، کد، نام، زمان جلالی) — فقط مدیر سیستم |
 | 2026-11-12 | تب دسترسی کاربر: پر شدن استان/شهر/مدیر نماینده از `representativeProfile` — `userEditTab` قبل از `fillForm` |
 | 2026-11-09 | فشرده‌سازی CSS/JS فروشگاه: `shop:minify-assets` + `/admin/shop-asset-settings` (انتخاب فایل‌های min) |
 | 2026-11-09 | خروجی min در `storage/app/public/shop-min` (نه `public/shop`) — رفع Permission denied روی Liara |

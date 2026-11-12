@@ -148,8 +148,16 @@ echo "sales_mgr=".(int)$u->is_sales_manager." canAccess=".($u->canAccessPanel(fi
 | زمان ارسال مجدد | `SettingsService` + `smsir.resend_minutes` |
 | کش کد | `Cache` با کلید `otp:phone:{phone}` |
 | درایور SMS | `SMS_DRIVER` → `log` / `smsir` / `kavenegar` |
+| آرشیو ارسال | جدول `otp_messages` — بعد از SMS موفق در `OtpService::send` |
 
 لوکال: `SMS_DRIVER=log` — کد در `storage/logs/laravel.log` یا cache (بسته به پیاده‌سازی `LogSmsSender`).
+
+### مدیریت OTP در ادمین
+
+- URL: **`/admin/otp-messages`** — فقط مدیر سیستم (`AdminAccess::canManageShopInAdmin`). مدیر فروش این صفحه را نمی‌بیند.
+- منو: **کاربران → مدیریت OTP** و **تنظیمات → پیامک → مدیریت OTP**.
+- ستون‌ها: شماره موبایل، کد OTP، نام و نام خانوادگی (`users.name` در لحظهٔ ارسال)، زمان ارسال دقیق جلالی (`Y/m/d H:i:s`، `Asia/Tehran`).
+- کش OTP بعد از verify پاک می‌شود؛ ردیف لیست باقی می‌ماند.
 
 ---
 

@@ -108,7 +108,7 @@
 
 | # | موضوع | محل |
 |---|--------|-----|
-| 7.1 | OTP فروشگاه و ادمین | [DEVELOPER_GUIDE §10](DEVELOPER_GUIDE.md#10-احراز-هویت-و-otp) |
+| 7.1 | OTP فروشگاه و ادمین + لیست `/admin/otp-messages` | [DEVELOPER_GUIDE §10](DEVELOPER_GUIDE.md#10-احراز-هویت-و-otp) · [dev/01](dev/01-roles-and-auth.md) |
 | 7.2 | SMS (log / smsir / kavenegar) | [DEVELOPER_GUIDE §13](DEVELOPER_GUIDE.md#13-sms-و-notification) |
 | 7.3 | پیامک تراکنشی سفارش | `TransactionalSmsDispatcher` · [dev/04-code-map.md](dev/04-code-map.md) |
 

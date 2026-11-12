@@ -14,6 +14,7 @@ use App\Services\Cart\CartService;
 use App\Services\Cart\StockService;
 use App\Services\Order\OrderActivityLogger;
 use App\Services\Sms\OrderSmsNotifier;
+use App\Support\ShopLabels;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -72,6 +73,10 @@ class CheckoutService
         string $paymentMethod = 'online',
         ?string $note = null
     ): Order {
+        if (ShopLabels::shopPurchaseDisabled()) {
+            throw new RuntimeException('فعلاً امکان ثبت سفارش آنلاین وجود ندارد (غیر قابل فروش).');
+        }
+
         if ($this->hasActiveShippingMethods() && ! $shippingMethodId) {
             throw new RuntimeException('روش ارسال را انتخاب کنید.');
         }

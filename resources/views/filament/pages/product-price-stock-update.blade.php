@@ -6,14 +6,22 @@
                     <i class="fa-solid fa-store-slash"></i>
                 </span>
                 <div>
-                    <h2 id="ppu-site-sales-title" class="ppu-card__title">غیرفعال کردن فروش</h2>
-                    <p class="ppu-card__subtitle">با فعال بودن این گزینه، <strong>قیمت در کل سایت</strong> پنهان می‌شود و دکمه خرید به <strong>تماس بگیرید</strong> تغییر می‌کند.</p>
+                    <h2 id="ppu-site-sales-title" class="ppu-card__title">تنظیمات فروش در سایت</h2>
+                    <p class="ppu-card__subtitle">دو حالت مستقل: پنهان کردن قیمت، یا نمایش قیمت بدون امکان خرید آنلاین.</p>
                 </div>
             </header>
-            <label class="ppu-site-sales-toggle">
-                <input type="checkbox" wire:model.live="hideShopPrices" class="ppu-checkbox">
-                <span>عدم نمایش قیمت در سایت</span>
-            </label>
+            <div class="ppu-site-sales-toggles">
+                <label class="ppu-site-sales-toggle">
+                    <input type="checkbox" wire:model.live="hideShopPrices" class="ppu-checkbox">
+                    <span>عدم نمایش قیمت در سایت</span>
+                </label>
+                <p class="ppu-site-sales-hint">قیمت پنهان می‌شود و دکمهٔ «تماس بگیرید» نمایش داده می‌شود.</p>
+                <label class="ppu-site-sales-toggle">
+                    <input type="checkbox" wire:model.live="disableShopPurchase" class="ppu-checkbox">
+                    <span>غیر قابل فروش</span>
+                </label>
+                <p class="ppu-site-sales-hint">قیمت‌ها نمایش داده می‌شوند؛ افزودن به سبد و ثبت سفارش غیرفعال است.</p>
+            </div>
         </section>
 
         <div class="ppu-toolbar">

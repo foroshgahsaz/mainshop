@@ -129,6 +129,15 @@ class ShopLabels
         );
     }
 
+    /** قیمت‌ها نمایش داده می‌شوند ولی افزودن به سبد و تسویه غیرفعال است. */
+    public static function shopPurchaseDisabled(): bool
+    {
+        return filter_var(
+            app(SettingsService::class)->get('site', 'disable_shop_purchase', false),
+            FILTER_VALIDATE_BOOLEAN
+        );
+    }
+
     /** قیمت فروشگاه (UI) — ریال؛ در صورت «عدم نمایش قیمت» خط تیره. */
     public static function formatShopMoney(?int $shopAmountTomans): string
     {

@@ -122,6 +122,19 @@
     background: linear-gradient(180deg, #fffbeb 0%, #fff 100%);
 }
 
+.product-price-stock-update .ppu-site-sales-toggles {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.product-price-stock-update .ppu-site-sales-hint {
+    margin: 0 1.75rem 0.75rem 0;
+    font-size: 0.8rem;
+    color: #64748b;
+    line-height: 1.5;
+}
+
 .product-price-stock-update .ppu-site-sales-toggle {
     display: flex;
     align-items: center;

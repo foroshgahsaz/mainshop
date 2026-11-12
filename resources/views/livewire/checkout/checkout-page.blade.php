@@ -29,7 +29,13 @@
             <div class="mb-4 p-3 bg-red-50 text-red-700 rounded-xl text-sm">{{ session('error') }}</div>
         @endif
 
-        @if (! ($awaitingLogin ?? false) && $preview)
+        @if (shop_purchase_disabled() && ! ($awaitingLogin ?? false))
+            <div class="shop-card p-6 md:p-8 max-w-lg">
+                <p class="text-gray-700 font-medium mb-2">فعلاً امکان ثبت سفارش آنلاین نیست.</p>
+                <p class="text-sm text-gray-500 mb-4">حالت <strong>غیر قابل فروش</strong> فعال است؛ قیمت‌ها در سایت دیده می‌شوند ولی خرید آنلاین متوقف شده است.</p>
+                <a href="{{ route('cart') }}" class="shop-btn-primary inline-flex">بازگشت به سبد</a>
+            </div>
+        @elseif (! ($awaitingLogin ?? false) && $preview)
             <form wire:submit="placeOrder" id="checkoutForm" class="checkout-layout" wire:init="syncCouponAlertOnLoad">
                 <div class="checkout-row">
                     <section class="shop-card checkout-card">

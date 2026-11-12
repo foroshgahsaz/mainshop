@@ -8,10 +8,12 @@ use App\Models\ShoppingCart;
 use App\Models\User;
 use App\Services\Cache\ShopCacheService;
 use App\Support\ShopFormatter;
+use App\Support\ShopLabels;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
 
 class CartService
 {
@@ -27,6 +29,10 @@ class CartService
 
     public function add(int $productId, int $quantity = 1, ?int $variantId = null): void
     {
+        if (ShopLabels::shopPurchaseDisabled()) {
+            throw new RuntimeException('فعلاً امکان افزودن به سبد خرید وجود ندارد (غیر قابل فروش).');
+        }
+
         $product = Product::active()->findOrFail($productId);
         $variant = $variantId ? ProductVariant::where('product_id', $productId)->findOrFail($variantId) : null;
 

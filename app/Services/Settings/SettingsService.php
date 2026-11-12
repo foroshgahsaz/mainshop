@@ -399,6 +399,7 @@ class SettingsService
                 'سایت در حال بروزرسانی می‌باشد. لطفاً کمی بعد دوباره سر بزنید.'
             ),
             'hide_shop_prices' => filter_var($this->get('site', 'hide_shop_prices', false), FILTER_VALIDATE_BOOLEAN),
+            'disable_shop_purchase' => filter_var($this->get('site', 'disable_shop_purchase', false), FILTER_VALIDATE_BOOLEAN),
         ];
     }
 

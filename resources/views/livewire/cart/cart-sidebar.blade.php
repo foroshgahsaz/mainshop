@@ -119,10 +119,17 @@
                     <span class="text-brand-green">{{ shop_money($summary['total']) }}</span>
                 </div>
             </div>
-            <a href="{{ route('checkout') }}"
-               class="block w-full bg-brand-gold text-white py-3 rounded-xl text-sm font-bold text-center hover:opacity-90 transition-opacity">
-                تکمیل سفارش
-            </a>
+            @if (shop_purchase_disabled())
+                <span class="block w-full bg-gray-400 text-white py-3 rounded-xl text-sm font-bold text-center opacity-80 cursor-not-allowed"
+                      aria-disabled="true">
+                    غیر قابل فروش
+                </span>
+            @else
+                <a href="{{ route('checkout') }}"
+                   class="block w-full bg-brand-gold text-white py-3 rounded-xl text-sm font-bold text-center hover:opacity-90 transition-opacity">
+                    تکمیل سفارش
+                </a>
+            @endif
             <a href="{{ route('cart') }}"
                data-close-cart
                class="block w-full text-center text-xs text-gray-500 hover:text-brand-green py-1">

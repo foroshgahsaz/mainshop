@@ -220,11 +220,22 @@ body.fi-body .fi-panel-admin {
     color: #fff;
 }
 
+.fi-admin-shell .sidebar-user-profile {
+    margin-top: auto;
+    margin-bottom: 10px;
+    align-self: stretch;
+}
+
 .fi-admin-shell .sidebar-user-icon {
     width: 44px;
     height: 44px;
-    margin-top: auto;
+    margin-top: 0;
     align-self: center;
+}
+
+.fi-admin-shell .sidebar-user-name {
+    max-width: 92px;
+    color: rgba(255, 255, 255, 0.92);
 }
 
 .fi-admin-shell .sidebar-primary {

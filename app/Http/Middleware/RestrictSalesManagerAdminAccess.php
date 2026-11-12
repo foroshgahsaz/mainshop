@@ -14,7 +14,7 @@ class RestrictSalesManagerAdminAccess
     {
         $user = $request->user();
 
-        if (! $user instanceof User || ! AdminAccess::isLimitedStaffOnly($user)) {
+        if (! $user instanceof User) {
             return $next($request);
         }
 
@@ -25,6 +25,27 @@ class RestrictSalesManagerAdminAccess
         }
 
         if ($request->routeIs('livewire.*', 'default.livewire.*')) {
+            return $next($request);
+        }
+
+        // نماینده: فقط ویرایش پروفایل خودش در ادمین
+        if (AdminAccess::isRepresentativeProfileOnly($user)) {
+            if ($routeName === 'filament.admin.resources.users.edit') {
+                $recordId = $request->route('record');
+
+                if ($recordId !== null && (int) $recordId === (int) $user->getKey()) {
+                    return $next($request);
+                }
+            }
+
+            if ($request->routeIs('filament.admin.auth.logout')) {
+                return $next($request);
+            }
+
+            abort(403);
+        }
+
+        if (! AdminAccess::isLimitedStaffOnly($user)) {
             return $next($request);
         }
 

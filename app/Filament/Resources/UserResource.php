@@ -68,12 +68,19 @@ class UserResource extends Resource
             return true;
         }
 
-        if (! AdminAccess::isLimitedStaffOnly() || ! $record instanceof User) {
+        if (! $record instanceof User) {
             return false;
         }
 
-        if ((int) auth()->id() === (int) $record->getKey()) {
+        // پروفایل خود کاربر (مدیر فروش / بنکدار / نماینده)
+        if ((int) auth()->id() === (int) $record->getKey()
+            && (AdminAccess::isLimitedStaffOnly() || AdminAccess::isRepresentativeProfileOnly())
+        ) {
             return true;
+        }
+
+        if (! AdminAccess::isLimitedStaffOnly()) {
+            return false;
         }
 
         $actor = auth()->user();

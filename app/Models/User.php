@@ -82,7 +82,13 @@ class User extends Authenticatable implements FilamentUser
         }
 
         if ($panel->getId() === 'admin') {
-            return $this->status && ($this->is_admin || $this->isSalesManager() || $this->isBankdar());
+            // نماینده فقط برای ویرایش پروفایل خودش وارد ادمین می‌شود (middleware محدود می‌کند)
+            return $this->status && (
+                $this->is_admin
+                || $this->isSalesManager()
+                || $this->isBankdar()
+                || $this->isRepresentative()
+            );
         }
 
         return $this->is_admin && $this->status;

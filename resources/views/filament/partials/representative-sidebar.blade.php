@@ -3,10 +3,16 @@
     use App\Filament\Representative\Resources\CustomerResource;
     use App\Filament\Representative\Resources\DraftOrderResource;
 
+    use App\Filament\Resources\UserResource;
+
     $user = filament()->auth()->user();
     $brand = filament()->getBrandName();
     $isDashboard = request()->routeIs('filament.representative.pages.dashboard');
-    $profileUrl = route('account.dashboard');
+    // نقش‌های غیرمشتری نباید به /account فروشگاه بروند — پروفایل در پنل ادمین
+    $profileUrl = $user
+        ? UserResource::getUrl('edit', ['record' => $user], panel: 'admin').'?tab=profile'
+        : filament()->getUrl();
+    $profileName = trim((string) ($user?->name ?? ''));
     $dashboardUrl = filament()->getUrl();
 
     $panels = [
@@ -67,7 +73,7 @@
         return $current === $target || str_starts_with($current, $target.'/');
     };
 
-    $initial = mb_substr($user?->name ?? 'ن', 0, 1);
+    $initial = mb_substr($profileName !== '' ? $profileName : 'ن', 0, 1);
 @endphp
 
 <div class="sidebar-secondary">
@@ -97,10 +103,15 @@
     @endforeach
 
     <a href="{{ $profileUrl }}"
-       class="sidebar-user-icon d-flex align-items-center justify-content-center text-white fw-bold text-decoration-none"
-       style="background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%); font-size: 14px;"
-       data-tooltip="حساب فروشگاه: {{ $user?->name ?? 'نماینده' }}"
-       aria-label="حساب کاربری فروشگاه">{{ $initial }}</a>
+       class="sidebar-user-profile text-decoration-none"
+       data-tooltip="پروفایل: {{ $profileName !== '' ? $profileName : 'نماینده' }}"
+       aria-label="پروفایل کاربر در ادمین">
+        <span class="sidebar-user-icon d-flex align-items-center justify-content-center text-white fw-bold"
+              style="background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%); font-size: 14px;">{{ $initial }}</span>
+        @if ($profileName !== '')
+            <span class="sidebar-user-name">{{ $profileName }}</span>
+        @endif
+    </a>
 </div>
 
 <div class="sidebar-primary" id="sidebarPrimary">

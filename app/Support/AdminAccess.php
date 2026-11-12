@@ -26,6 +26,8 @@ class AdminAccess
 
     private static ?bool $memoIsBankdarOnly = null;
 
+    private static ?bool $memoIsRepresentativeProfileOnly = null;
+
     /** @var array<class-string, true> */
     protected const LIMITED_STAFF_RESOURCES = [
         OrderResource::class => true,
@@ -131,6 +133,32 @@ class AdminAccess
             && ! $current->isSalesManager();
 
         return static::$memoIsBankdarOnly;
+    }
+
+    /**
+     * نمایندهٔ خالص — فقط مجاز به ویرایش پروفایل خودش در ادمین (نه منوی فروش).
+     */
+    public static function isRepresentativeProfileOnly(?User $user = null): bool
+    {
+        if ($user !== null) {
+            return $user->isRepresentative()
+                && ! $user->isAdmin()
+                && ! $user->isSalesManager()
+                && ! $user->isBankdar();
+        }
+
+        if (static::$memoIsRepresentativeProfileOnly !== null) {
+            return static::$memoIsRepresentativeProfileOnly;
+        }
+
+        $current = static::user();
+        static::$memoIsRepresentativeProfileOnly = $current !== null
+            && $current->isRepresentative()
+            && ! $current->isAdmin()
+            && ! $current->isSalesManager()
+            && ! $current->isBankdar();
+
+        return static::$memoIsRepresentativeProfileOnly;
     }
 
     /** مدیر فروش یا بنکدار با منوی محدود ادمین (نه مدیر سیستم). */

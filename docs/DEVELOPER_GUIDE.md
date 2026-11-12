@@ -1359,6 +1359,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-12 | ویزارد نماینده — انتخاب محصول: حذف فاصله خالی فیلتر برند (`flex` روی نوار برند)، کارت کامل با نام/قیمت/دکمه، گرید ۲ستونه موبایل و نوار ابزار فشرده |
 | 2026-11-12 | 404 مسیر Filament جدید (مثل `/admin/otp-messages`): کش `filament/panels/admin.php` + `route:cache` اگر Resource تازه در کش نباشد پاک می‌شود؛ دکمه کش ادمین `filament:clear-cached-components` |
 | 2026-11-12 | ادمین: `/admin/otp-messages` لیست OTPهای ارسال‌شده (شماره، کد، نام، زمان جلالی) — فقط مدیر سیستم |
 | 2026-11-12 | تب دسترسی کاربر: پر شدن استان/شهر/مدیر نماینده از `representativeProfile` — `userEditTab` قبل از `fillForm` |

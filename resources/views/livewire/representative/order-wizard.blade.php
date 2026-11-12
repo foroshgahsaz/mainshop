@@ -198,51 +198,53 @@
     @endif
 
     @if ($step === 'product')
-        <section class="rep-wizard-panel">
-            <header class="rep-wizard-header">
-                <h2 class="rep-wizard-title">انتخاب محصول</h2>
-                @if ($catalogTrail['category'])
-                    <p class="rep-wizard-hint rep-catalog-trail">دسته: <strong>{{ $catalogTrail['category'] }}</strong></p>
-                @elseif ($catalogTrail['family'] || $catalogTrail['plant'] || $catalogTrail['brand'] || $catalogTrail['template'])
-                    <p class="rep-wizard-hint rep-catalog-trail">
-                        {{ collect([$catalogTrail['family'], $catalogTrail['plant'], $catalogTrail['brand'], $catalogTrail['template']])->filter()->implode(' · ') }}
-                    </p>
-                @endif
-            </header>
-            @if ($step === 'product' && $this->productBrandFilters->isNotEmpty())
-                <div class="rep-wizard-panel__body rep-brand-bar" style="padding-bottom: 0;">
-                    <p class="rep-wizard-hint">فیلتر برند (اختیاری):</p>
-                    <div class="rep-chip-grid" role="list">
-                        <button type="button"
-                                role="listitem"
-                                class="rep-chip {{ $brandId === null ? 'is-selected' : '' }}"
-                                wire:click="selectProductBrand(null)">
-                            همه برندها
-                        </button>
-                        @foreach ($this->productBrandFilters as $brand)
+        <section class="rep-wizard-panel rep-wizard-panel--products">
+            <div class="rep-product-chrome">
+                <header class="rep-wizard-header rep-wizard-header--compact">
+                    <h2 class="rep-wizard-title">انتخاب محصول</h2>
+                    @if ($catalogTrail['category'])
+                        <p class="rep-wizard-hint rep-catalog-trail">دسته: <strong>{{ $catalogTrail['category'] }}</strong></p>
+                    @elseif ($catalogTrail['family'] || $catalogTrail['plant'] || $catalogTrail['brand'] || $catalogTrail['template'])
+                        <p class="rep-wizard-hint rep-catalog-trail">
+                            {{ collect([$catalogTrail['family'], $catalogTrail['plant'], $catalogTrail['brand'], $catalogTrail['template']])->filter()->implode(' · ') }}
+                        </p>
+                    @endif
+                </header>
+                @if ($this->productBrandFilters->isNotEmpty())
+                    <div class="rep-brand-bar">
+                        <p class="rep-wizard-hint">فیلتر برند (اختیاری):</p>
+                        <div class="rep-chip-grid" role="list">
                             <button type="button"
                                     role="listitem"
-                                    class="rep-chip {{ (int) $brandId === (int) $brand->id ? 'is-selected' : '' }}"
-                                    wire:click="selectProductBrand({{ $brand->id }})">
-                                {{ $brand->name }}
+                                    class="rep-chip {{ $brandId === null ? 'is-selected' : '' }}"
+                                    wire:click="selectProductBrand(null)">
+                                همه برندها
                             </button>
-                        @endforeach
+                            @foreach ($this->productBrandFilters as $brand)
+                                <button type="button"
+                                        role="listitem"
+                                        class="rep-chip {{ (int) $brandId === (int) $brand->id ? 'is-selected' : '' }}"
+                                        wire:click="selectProductBrand({{ $brand->id }})">
+                                    {{ $brand->name }}
+                                </button>
+                            @endforeach
+                        </div>
                     </div>
+                @endif
+                <div class="rep-wizard-toolbar rep-wizard-toolbar--products">
+                    <label class="rep-field rep-field--grow">
+                        <span class="rep-field__label">جستجو</span>
+                        <input type="search"
+                               wire:model.live.debounce.400ms="productSearch"
+                               class="rep-field__input"
+                               placeholder="نام یا کد کالا…"
+                               autocomplete="off">
+                    </label>
+                    <label class="rep-field rep-field--qty">
+                        <span class="rep-field__label">تعداد افزودن</span>
+                        <input type="number" min="1" max="999" wire:model="quantity" class="rep-field__input rep-field__input--qty">
+                    </label>
                 </div>
-            @endif
-            <div class="rep-wizard-toolbar">
-                <label class="rep-field rep-field--grow">
-                    <span class="rep-field__label">جستجو</span>
-                    <input type="search"
-                           wire:model.live.debounce.400ms="productSearch"
-                           class="rep-field__input"
-                           placeholder="نام یا کد کالا…"
-                           autocomplete="off">
-                </label>
-                <label class="rep-field rep-field--qty">
-                    <span class="rep-field__label">تعداد افزودن</span>
-                    <input type="number" min="1" max="999" wire:model="quantity" class="rep-field__input rep-field__input--qty">
-                </label>
             </div>
             <div class="rep-wizard-panel__body rep-wizard-panel__body--products">
             @php $products = $this->products; @endphp
@@ -275,7 +277,7 @@
                                 @endif
                             </button>
                             <div class="rep-product-card__body">
-                                <h3 class="rep-product-card__title">{{ $product->name }}</h3>
+                                <h3 class="rep-product-card__title" title="{{ $product->name }}">{{ $product->name }}</h3>
                                 <dl class="rep-product-card__meta">
                                     <div><dt>کد</dt><dd>{{ $product->sku ?: '—' }}</dd></div>
                                     <div><dt>قیمت</dt><dd>{{ $this->formatMoney($product->effective_price) }}</dd></div>
@@ -291,8 +293,8 @@
                                     <span wire:loading.remove wire:target="openProductImages">گالری</span>
                                     <span wire:loading wire:target="openProductImages">…</span>
                                 </button>
-                                <button type="button" class="rep-btn-primary" wire:click="addProduct({{ $product->id }})">
-                                    افزودن به سفارش
+                                <button type="button" class="rep-btn-primary rep-product-card__add" wire:click="addProduct({{ $product->id }})">
+                                    افزودن
                                 </button>
                             </div>
                         </li>

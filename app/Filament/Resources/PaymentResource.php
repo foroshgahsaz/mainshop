@@ -8,6 +8,7 @@ use App\Filament\Support\UserTableColumns;
 use App\Filament\Support\PaymentDeleteActions;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Services\Representative\SalesRegionService;
 use App\Support\AdminAccess;
 use App\Support\ShopLabels;
 use Filament\Forms\Form;
@@ -47,7 +48,22 @@ class PaymentResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->with(['order', 'user']);
+        $query = parent::getEloquentQuery()->with(['order', 'user']);
+
+        if (AdminAccess::isLimitedStaffOnly()) {
+            $repIds = app(SalesRegionService::class)
+                ->managedRepresentativeIds((int) auth()->id());
+
+            $query->whereHas('order', function (Builder $q) use ($repIds): void {
+                if ($repIds === []) {
+                    $q->whereRaw('1 = 0');
+                } else {
+                    $q->whereIn('representative_id', $repIds);
+                }
+            });
+        }
+
+        return $query;
     }
 
     public static function table(Table $table): Table

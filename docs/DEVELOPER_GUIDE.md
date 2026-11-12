@@ -272,8 +272,8 @@ components/shop/
 | URL | `/admin` |
 | Panel ID | `admin` |
 | ورود | **`/admin/login`** — `App\Filament\Pages\Auth\Login` |
-| دسترسی | `User::canAccessPanel(admin)` → `status && (is_admin \|\| is_sales_manager)` |
-| مدیر فروش | همان پنل؛ محدودیت در `AdminAccess` + `RestrictSalesManagerAdminAccess` — جزئیات [dev/01-roles-and-auth.md](dev/01-roles-and-auth.md) |
+| دسترسی | `User::canAccessPanel(admin)` → `status && (is_admin \|\| is_sales_manager \|\| is_bankdar)` |
+| مدیر فروش / بنکدار | همان پنل؛ محدودیت در `AdminAccess` + `RestrictSalesManagerAdminAccess` — [dev/01](dev/01-roles-and-auth.md) · [dev/11](dev/11-bankdar-sales-hierarchy.md) |
 
 **نوار بالا (`admin-top-bar`):** دکمهٔ سبز **پاک کردن کش** (کنار مشاهده فروشگاه، فقط `is_admin`) — `cache:clear`، `view:clear`، `route:clear`، `config:clear`، `clear-compiled`.
 
@@ -707,7 +707,7 @@ $middleware->validateCsrfTokens(except: [
 | ادمین | `/admin/otp-messages` — `OtpMessageResource` (فقط مدیر سیستم). 404 بعد از deploy → `shop:deploy-recover` یا دکمه پاک کردن کش (کش Filament) |
 
 **Shop login:** مشتری — مودال/`/login` (staff نباید از این مسیر برای ادمین استفاده کند).  
-**Admin login:** `/admin/login` — `AdminLoginGuard`: `is_admin` یا `is_sales_manager` + `status`. جزئیات: [dev/01-roles-and-auth.md](dev/01-roles-and-auth.md)
+**Admin login:** `/admin/login` — `AdminLoginGuard`: `is_admin` یا `is_sales_manager` یا `is_bankdar` + `status`. جزئیات: [dev/01-roles-and-auth.md](dev/01-roles-and-auth.md) · سلسله‌مراتب بنکدار: [dev/11-bankdar-sales-hierarchy.md](dev/11-bankdar-sales-hierarchy.md)
 
 لیست ادمین شماره، کد، نام (`users.name` در لحظهٔ ارسال) و زمان جلالی با ثانیه را نشان می‌دهد. خطا در ثبت آرشیو، ارسال SMS را متوقف نمی‌کند.
 
@@ -1340,7 +1340,8 @@ resources/views/layouts/shop.blade.php
 | سند | محتوا |
 |-----|--------|
 | [docs/README.md](README.md) | فهرست کامل فازهای ۰–۱۰۰ با لینک |
-| [dev/01-roles-and-auth.md](dev/01-roles-and-auth.md) | مشتری / ادمین / مدیر فروش / نماینده |
+| [dev/01-roles-and-auth.md](dev/01-roles-and-auth.md) | مشتری / ادمین / مدیر فروش / بنکدار / نماینده |
+| [dev/11-bankdar-sales-hierarchy.md](dev/11-bankdar-sales-hierarchy.md) | مدیر فروش → بنکدار → نماینده؛ اسکوپ؛ انتقال مشتری OTP |
 | [dev/02-local-setup.md](dev/02-local-setup.md) | نصب لوکال |
 | [dev/03-production-k8s-liara.md](dev/03-production-k8s-liara.md) | deploy، env بدون `.env`، Redis، `/data` |
 | [dev/04-code-map.md](dev/04-code-map.md) | نقشه فایل و `shop:*` |
@@ -1502,6 +1503,7 @@ resources/views/layouts/shop.blade.php
 | 2026-10-27 | ویزارد نماینده — انتخاب محصول: کارت با تصویر اصلی (`rep_product_card`)، گرید؛ رفع گالری (بارگذاری همه تصاویر، بدون lazy+p hidden) |
 | 2026-10-27 | ویزارد نماینده: تب‌های کارخانه/قالب فقط وقتی برای خانواده/برند انتخاب‌شده در کاتالوگ وجود دارد (`RepresentativeCatalogLookup` + `OrderWizard`) |
 | 2026-10-27 | بازگشت پارسیان: مسیر alias **`/payment/callback/pec`** (همان handler که `/payment/callback/parsian`)؛ پس از verify ریدایرکت به صفحه امضاشده **`payment.result`**؛ رفع TypeError ویجت `OrdersTrendChart` (Carbon) |
+| 2026-11-12 | **سلسله‌مراتب بنکدار:** منطقه = نام+استان؛ نقش `is_bankdar`؛ مدیر فروش CRUD بنکدار؛ بنکدار CRUD نماینده با استان قفل؛ اسکوپ سفارش/کاربر؛ انتقال مشتری با OTP روی کد ملی — [dev/11](dev/11-bankdar-sales-hierarchy.md) |
 | 2026-10-25 | صفحه استاتیک `/plans/digipay-leasing/` — معرفی خرید اقساطی دیجی‌پی در چینی بازار (`DigipayLeasingController`، `plans-leasing.css`، سقف اعتبار ۲۰۰M) |
 | 2026-10-23 | checkout کد تخفیف: پیام دقیق (کف سبد، درگاه، …) + مودال؛ ادمین: آنالیز `/admin/coupons/{id}/analytics` (`CouponAnalyticsPage`)، درگاه‌های مجاز (Select چندتایی)، npm `follow-redirects` ≥1.16.1؛ پس از deploy: `migrate --force` + `optimize:clear` |
 

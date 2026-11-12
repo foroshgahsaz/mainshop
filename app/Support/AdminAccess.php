@@ -24,8 +24,10 @@ class AdminAccess
 
     private static ?bool $memoIsSalesManagerOnly = null;
 
+    private static ?bool $memoIsBankdarOnly = null;
+
     /** @var array<class-string, true> */
-    protected const SALES_MANAGER_RESOURCES = [
+    protected const LIMITED_STAFF_RESOURCES = [
         OrderResource::class => true,
         PaymentResource::class => true,
         UserResource::class => true,
@@ -41,7 +43,7 @@ class AdminAccess
     ];
 
     /** @var list<string> */
-    protected const SALES_MANAGER_ROUTE_PATTERNS = [
+    protected const LIMITED_STAFF_ROUTE_PATTERNS = [
         'filament.admin.pages.dashboard',
         'filament.admin.resources.orders.*',
         'filament.admin.resources.payments.*',
@@ -112,17 +114,42 @@ class AdminAccess
         return static::$memoIsSalesManagerOnly;
     }
 
+    public static function isBankdarOnly(?User $user = null): bool
+    {
+        if ($user !== null) {
+            return $user->isBankdar() && ! $user->isAdmin() && ! $user->isSalesManager();
+        }
+
+        if (static::$memoIsBankdarOnly !== null) {
+            return static::$memoIsBankdarOnly;
+        }
+
+        $current = static::user();
+        static::$memoIsBankdarOnly = $current !== null
+            && $current->isBankdar()
+            && ! $current->isAdmin()
+            && ! $current->isSalesManager();
+
+        return static::$memoIsBankdarOnly;
+    }
+
+    /** مدیر فروش یا بنکدار با منوی محدود ادمین (نه مدیر سیستم). */
+    public static function isLimitedStaffOnly(?User $user = null): bool
+    {
+        return static::isSalesManagerOnly($user) || static::isBankdarOnly($user);
+    }
+
     public static function canAccessAdminResource(string $resourceClass): bool
     {
         if (static::isFullAdmin()) {
             return true;
         }
 
-        if (! static::isSalesManagerOnly()) {
+        if (! static::isLimitedStaffOnly()) {
             return false;
         }
 
-        return isset(static::SALES_MANAGER_RESOURCES[$resourceClass]);
+        return isset(static::LIMITED_STAFF_RESOURCES[$resourceClass]);
     }
 
     public static function canManageShopInAdmin(?User $user = null): bool
@@ -130,8 +157,14 @@ class AdminAccess
         return static::isFullAdmin($user);
     }
 
-    /** مدیر منطقه (مدیر فروش) می‌تواند فقط نماینده جدید بسازد — نه هر نوع کاربر. */
+    /** بنکدار (و ادمین) می‌تواند نماینده بسازد. */
     public static function canCreateRepresentativesInAdmin(?User $user = null): bool
+    {
+        return static::isFullAdmin($user) || static::isBankdarOnly($user);
+    }
+
+    /** مدیر فروش (و ادمین) می‌تواند بنکدار بسازد. */
+    public static function canCreateBankdarsInAdmin(?User $user = null): bool
     {
         return static::isFullAdmin($user) || static::isSalesManagerOnly($user);
     }
@@ -140,12 +173,18 @@ class AdminAccess
     {
         $user ??= static::user();
 
-        return static::isFullAdmin($user) || static::isSalesManagerOnly($user);
+        return static::isFullAdmin($user) || static::isLimitedStaffOnly($user);
     }
 
     /** @return list<string> */
     public static function salesManagerAllowedRoutePatterns(): array
     {
-        return self::SALES_MANAGER_ROUTE_PATTERNS;
+        return self::LIMITED_STAFF_ROUTE_PATTERNS;
+    }
+
+    /** @return list<string> */
+    public static function limitedStaffAllowedRoutePatterns(): array
+    {
+        return self::LIMITED_STAFF_ROUTE_PATTERNS;
     }
 }

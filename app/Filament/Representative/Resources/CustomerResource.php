@@ -51,10 +51,23 @@ class CustomerResource extends Resource
                         ->required()
                         ->length(10)
                         ->rules([new IranianNationalCode])
-                        ->unique(User::class, 'national_code', ignoreRecord: true)
-                        ->validationMessages([
-                            'unique' => 'مشتری با این کد ملی قبلاً ثبت شده است.',
-                        ]),
+                        ->live(onBlur: true)
+                        ->afterStateUpdated(function (?string $state, $livewire): void {
+                            if (method_exists($livewire, 'lookupNationalCode')) {
+                                $livewire->lookupNationalCode($state);
+                            }
+                        })
+                        ->helperText('اگر مشتری با این کد ملی موجود باشد، نمایندگی فعلی نمایش داده می‌شود.'),
+                    Forms\Components\View::make('customer_transfer_panel')
+                        ->view('filament.representative.partials.customer-transfer')
+                        ->viewData(fn ($component): array => [
+                            'existingCustomerMessage' => $component->getLivewire()->existingCustomerMessage ?? null,
+                            'canTransferExistingCustomer' => (bool) ($component->getLivewire()->canTransferExistingCustomer ?? false),
+                            'transferOtpSent' => (bool) ($component->getLivewire()->transferOtpSent ?? false),
+                        ])
+                        ->dehydrated(false)
+                        ->columnSpanFull()
+                        ->visible(fn ($livewire): bool => filled($livewire->existingCustomerMessage ?? null)),
                     Forms\Components\TextInput::make('darik_member_code')
                         ->label('شناسه کیف پول داریک')
                         ->maxLength(16)

@@ -39,6 +39,17 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'is_admin' => false,
             'is_sales_manager' => true,
+            'is_bankdar' => false,
+        ]);
+    }
+
+    public function bankdar(?int $provinceId = null): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_admin' => false,
+            'is_sales_manager' => false,
+            'is_bankdar' => true,
+            'bankdar_province_id' => $provinceId,
         ]);
     }
 

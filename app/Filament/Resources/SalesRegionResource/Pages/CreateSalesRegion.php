@@ -18,7 +18,7 @@ class CreateSalesRegion extends CreateRecord
         try {
             return app(SalesRegionService::class)->save(
                 new SalesRegion,
-                ['name' => $data['name'], 'sales_manager_id' => $data['sales_manager_id']],
+                ['name' => $data['name']],
                 $data['province_ids'] ?? [],
             );
         } catch (ValidationException $e) {

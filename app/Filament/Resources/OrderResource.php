@@ -8,6 +8,7 @@ use App\Filament\Support\UserTableColumns;
 use App\Filament\Support\OrderDeleteActions;
 use App\Models\Order;
 use App\Services\Payment\PaymentGatewayCatalog;
+use App\Services\Representative\SalesRegionService;
 use App\Support\AdminAccess;
 use App\Support\ShopLabels;
 use Filament\Resources\Resource;
@@ -41,7 +42,13 @@ class OrderResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->with(['user', 'representative', 'payments']);
+        $query = parent::getEloquentQuery()->with(['user', 'representative', 'payments']);
+
+        if (AdminAccess::isLimitedStaffOnly()) {
+            $query = app(SalesRegionService::class)->scopeOrdersManagedBy($query, (int) auth()->id());
+        }
+
+        return $query;
     }
 
     public static function table(Table $table): Table

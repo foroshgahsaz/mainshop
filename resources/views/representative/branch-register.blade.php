@@ -159,7 +159,7 @@
                     <div class="rep-branch-register__person">
                         <span class="rep-branch-register__avatar" aria-hidden="true">{{ mb_substr($tehranOffice['manager']['name'], 0, 1) }}</span>
                         <div>
-                            <div class="rep-branch-register__person-name">مدیر منطقه {{ $tehranOffice['manager']['name'] }}</div>
+                            <div class="rep-branch-register__person-name">بنکدار {{ $tehranOffice['manager']['name'] }}</div>
                             <div class="rep-branch-register__person-phone">{{ $tehranOffice['manager']['phone'] }}</div>
                         </div>
                     </div>

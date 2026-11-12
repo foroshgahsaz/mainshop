@@ -60,7 +60,8 @@
 | `app/Filament/Representative/Resources/DraftOrderResource.php` | پیش‌نویس/پیش‌فاکتور |
 | `app/Filament/Representative/Resources/CustomerResource.php` | مشتری نماینده |
 | `app/Livewire/Representative/OrderWizard.php` | ویزارد |
-| `app/Services/Representative/*` | منطق پیش‌سفارش، PDF، پرداخت |
+| `app/Services/Representative/*` | منطق پیش‌سفارش، PDF، پرداخت، `SalesRegionService`، انتقال مشتری OTP |
+| `docs/dev/11-bankdar-sales-hierarchy.md` | مدیر فروش → بنکدار → نماینده |
 
 ---
 

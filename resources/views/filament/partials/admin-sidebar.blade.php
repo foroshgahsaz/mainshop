@@ -120,8 +120,12 @@
             'routes' => ['filament.admin.resources.users.*', 'filament.admin.resources.otp-messages.*'],
             'menus' => [
                 ['label' => 'کاربران', 'icon' => 'fa-users', 'items' => [
-                    ['label' => 'مشتریان', 'url' => UserResource::getUrl('index'), 'icon' => 'fa-user'],
-                    ['label' => 'غیر مشتری', 'url' => UserResource::getUrl('index', ['activeTab' => 'staff']), 'icon' => 'fa-user-tie'],
+                    ['label' => 'مشتریان', 'url' => UserResource::getUrl('index', ['activeTab' => \App\Models\User::ADMIN_LIST_SEGMENT_CUSTOMER]), 'icon' => 'fa-user'],
+                    ['label' => 'مدیران فروش', 'url' => UserResource::getUrl('index', ['activeTab' => \App\Models\User::ADMIN_LIST_SEGMENT_SALES_MANAGER]), 'icon' => 'fa-user-tie'],
+                    ['label' => 'بنکدارها', 'url' => UserResource::getUrl('index', ['activeTab' => \App\Models\User::ADMIN_LIST_SEGMENT_BANKDAR]), 'icon' => 'fa-store'],
+                    ['label' => 'مدیران سیستم', 'url' => UserResource::getUrl('index', ['activeTab' => \App\Models\User::ADMIN_LIST_SEGMENT_SYSTEM_ADMIN]), 'icon' => 'fa-user-shield'],
+                    ['label' => 'نمایندگان', 'url' => UserResource::getUrl('index', ['activeTab' => \App\Models\User::ADMIN_LIST_SEGMENT_REPRESENTATIVE]), 'icon' => 'fa-handshake'],
+                    ['label' => 'نویسندگان', 'url' => UserResource::getUrl('index', ['activeTab' => \App\Models\User::ADMIN_LIST_SEGMENT_AUTHOR]), 'icon' => 'fa-pen'],
                     ['label' => 'افزودن کاربر', 'url' => UserResource::getUrl('create'), 'icon' => 'fa-plus'],
                     ['label' => 'مدیریت OTP', 'url' => OtpMessageResource::getUrl('index'), 'icon' => 'fa-key'],
                 ]],
@@ -446,10 +450,36 @@
     }
 
     $isMenuItemActive = function (string $url): bool {
-        $current = url()->current();
-        $target = rtrim($url, '/');
+        $parts = parse_url($url) ?: [];
+        $targetPath = rtrim((string) ($parts['path'] ?? ''), '/');
+        $currentPath = rtrim((string) request()->getPathInfo(), '/');
 
-        return $current === $target || str_starts_with($current, $target.'/');
+        if ($currentPath !== $targetPath) {
+            return $targetPath !== '' && str_starts_with($currentPath, $targetPath.'/');
+        }
+
+        parse_str((string) ($parts['query'] ?? ''), $wanted);
+
+        if ($wanted === []) {
+            return ! request()->filled('activeTab');
+        }
+
+        foreach ($wanted as $key => $value) {
+            $currentValue = request()->query($key);
+
+            if ($key === 'activeTab'
+                && ($currentValue === null || $currentValue === '')
+                && (string) $value === \App\Models\User::ADMIN_LIST_SEGMENT_CUSTOMER
+            ) {
+                continue;
+            }
+
+            if ((string) $currentValue !== (string) $value) {
+                return false;
+            }
+        }
+
+        return true;
     };
 
     $initial = mb_substr($user?->name ?? 'ا', 0, 1);

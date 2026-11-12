@@ -57,6 +57,7 @@
 - سرویس: `RepresentativeCustomerService::lookupByNationalCode` / `sendTransferOtp` / `confirmTransfer`
 - UI: `/representative/customers/create` — پس از blur روی کد ملی، باکس هشدار + دکمه «انتقال مشتری به خود»
 - OTP جدا از ورود (`otp:customer-transfer:{phone}`)؛ پس از تأیید، `created_by_representative_id` به نماینده فعلی منتقل می‌شود
+- ارسال SMS: همان Verify sms.ir مثل ورود، با قالب جدا — پیش‌فرض **`785592`** (`sms.smsir.transfer_template_id` / ادمین → sms.ir → «انتقال نمایندگی»؛ پارامتر `#CODE#`)
 
 ## فایل‌های اصلی
 

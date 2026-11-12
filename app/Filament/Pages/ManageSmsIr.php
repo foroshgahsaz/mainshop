@@ -40,6 +40,7 @@ class ManageSmsIr extends Page implements HasForms
             'enabled' => $smsIr['enabled'],
             'api_key' => $smsIr['api_key'],
             'template_id' => $smsIr['template_id'] ?: null,
+            'transfer_template_id' => $smsIr['transfer_template_id'] ?: 785592,
             'otp_parameter' => $smsIr['otp_parameter'],
             'line_number' => $smsIr['line_number'],
             'resend_minutes' => $smsIr['resend_minutes'],
@@ -62,10 +63,15 @@ class ManageSmsIr extends Page implements HasForms
                             ->revealable()
                             ->helperText('کلید را از بخش برنامه‌نویسان پنل sms.ir کپی کنید و با هدر X-API-KEY ارسال می‌شود.'),
                         Forms\Components\TextInput::make('template_id')
-                            ->label('شناسه قالب Verify')
+                            ->label('شناسه قالب Verify (ورود)')
                             ->numeric()
                             ->placeholder('123456')
                             ->helperText('در محیط Sandbox قالب پیش‌فرض ۱۲۳۴۵۶ با متن «کد تایید شما: #CODE#» است.'),
+                        Forms\Components\TextInput::make('transfer_template_id')
+                            ->label('شناسه قالب Verify (انتقال نمایندگی)')
+                            ->numeric()
+                            ->default(785592)
+                            ->helperText('OTP تأیید انتقال مشتری بین نمایندگی‌ها — پیش‌فرض ۷۸۵۵۹۲. همان پارامتر Code مثل ورود.'),
                         Forms\Components\TextInput::make('otp_parameter')
                             ->label('نام پارامتر قالب')
                             ->placeholder('Code')
@@ -97,6 +103,7 @@ class ManageSmsIr extends Page implements HasForms
             'enabled' => $data['enabled'] ?? false,
             'api_key' => $data['api_key'] ?? '',
             'template_id' => $data['template_id'] ?? '',
+            'transfer_template_id' => (int) ($data['transfer_template_id'] ?? 785592) ?: 785592,
             'otp_parameter' => $data['otp_parameter'] ?: 'Code',
             'line_number' => $data['line_number'] ?? '',
             'resend_minutes' => max(1, min(15, (int) ($data['resend_minutes'] ?? 2))),

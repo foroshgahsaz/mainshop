@@ -18,18 +18,20 @@ class SmsIrSmsSender implements SmsSender
         protected SettingsService $settings
     ) {}
 
-    public function sendOtp(string $phone, string $code): void
+    public function sendOtp(string $phone, string $code, ?int $templateId = null): void
     {
         $config = $this->settings->smsIr();
         $apiKey = (string) ($config['api_key'] ?? '');
-        $templateId = (int) ($config['template_id'] ?? 0);
+        $resolvedTemplateId = $templateId !== null && $templateId > 0
+            ? $templateId
+            : (int) ($config['template_id'] ?? 0);
         $parameter = (string) ($config['otp_parameter'] ?: 'Code');
 
         if ($apiKey === '') {
             throw new RuntimeException('کلید API سامانه sms.ir تنظیم نشده است.');
         }
 
-        if ($templateId < 1) {
+        if ($resolvedTemplateId < 1) {
             throw new RuntimeException('شناسه قالب Verify در پنل sms.ir تنظیم نشده است.');
         }
 
@@ -38,7 +40,7 @@ class SmsIrSmsSender implements SmsSender
             ->withHeaders($this->headers($apiKey))
             ->post(self::VERIFY_URL, [
                 'mobile' => $this->normalizeMobile($phone),
-                'templateId' => $templateId,
+                'templateId' => $resolvedTemplateId,
                 'parameters' => [
                     [
                         'name' => $parameter,

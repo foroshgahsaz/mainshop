@@ -1503,6 +1503,7 @@ resources/views/layouts/shop.blade.php
 | 2026-10-27 | ویزارد نماینده — انتخاب محصول: کارت با تصویر اصلی (`rep_product_card`)، گرید؛ رفع گالری (بارگذاری همه تصاویر، بدون lazy+p hidden) |
 | 2026-10-27 | ویزارد نماینده: تب‌های کارخانه/قالب فقط وقتی برای خانواده/برند انتخاب‌شده در کاتالوگ وجود دارد (`RepresentativeCatalogLookup` + `OrderWizard`) |
 | 2026-10-27 | بازگشت پارسیان: مسیر alias **`/payment/callback/pec`** (همان handler که `/payment/callback/parsian`)؛ پس از verify ریدایرکت به صفحه امضاشده **`payment.result`**؛ رفع TypeError ویجت `OrdersTrendChart` (Carbon) |
+| 2026-11-12 | OTP انتقال نمایندگی: قالب Verify sms.ir **`785592`** (`transfer_template_id` در `/admin/sms-ir` و `SMSIR_TRANSFER_TEMPLATE_ID`) — همان پارامتر Code مثل ورود |
 | 2026-11-12 | **سلسله‌مراتب بنکدار:** منطقه = نام+استان؛ نقش `is_bankdar`؛ مدیر فروش CRUD بنکدار؛ بنکدار CRUD نماینده با استان قفل؛ اسکوپ سفارش/کاربر؛ انتقال مشتری با OTP روی کد ملی — [dev/11](dev/11-bankdar-sales-hierarchy.md) |
 | 2026-10-25 | صفحه استاتیک `/plans/digipay-leasing/` — معرفی خرید اقساطی دیجی‌پی در چینی بازار (`DigipayLeasingController`، `plans-leasing.css`، سقف اعتبار ۲۰۰M) |
 | 2026-10-23 | checkout کد تخفیف: پیام دقیق (کف سبد، درگاه، …) + مودال؛ ادمین: آنالیز `/admin/coupons/{id}/analytics` (`CouponAnalyticsPage`)، درگاه‌های مجاز (Select چندتایی)، npm `follow-redirects` ≥1.16.1؛ پس از deploy: `migrate --force` + `optimize:clear` |

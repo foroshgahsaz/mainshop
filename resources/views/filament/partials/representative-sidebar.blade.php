@@ -13,6 +13,10 @@
         ? UserResource::getUrl('edit', ['record' => $user], panel: 'admin').'?tab=profile'
         : filament()->getUrl();
     $profileName = trim((string) ($user?->name ?? ''));
+    $profileRole = $user ? $user->adminListSegmentLabel() : 'نماینده';
+    if ($profileRole === 'مشتری') {
+        $profileRole = 'نماینده';
+    }
     $dashboardUrl = filament()->getUrl();
 
     $panels = [
@@ -110,6 +114,9 @@
               style="background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%); font-size: 14px;">{{ $initial }}</span>
         @if ($profileName !== '')
             <span class="sidebar-user-name">{{ $profileName }}</span>
+        @endif
+        @if ($profileRole !== '')
+            <span class="sidebar-user-role">{{ $profileRole }}</span>
         @endif
     </a>
 </div>

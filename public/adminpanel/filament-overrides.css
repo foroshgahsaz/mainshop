@@ -238,6 +238,11 @@ body.fi-body .fi-panel-admin {
     color: rgba(255, 255, 255, 0.92);
 }
 
+.fi-admin-shell .sidebar-user-role {
+    max-width: 92px;
+    color: rgba(255, 255, 255, 0.62);
+}
+
 .fi-admin-shell .sidebar-primary {
     width: var(--ax-sidebar-menu) !important;
     right: var(--ax-sidebar-rail) !important;

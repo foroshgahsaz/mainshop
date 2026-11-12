@@ -66,6 +66,10 @@
         ? UserResource::getUrl('edit', ['record' => $user], panel: 'admin').'?tab=profile'
         : filament()->getUrl();
     $profileName = trim((string) ($user?->name ?? ''));
+    $profileRole = $user ? $user->adminListSegmentLabel() : '';
+    if ($profileRole === 'مشتری') {
+        $profileRole = '';
+    }
     $dashboardUrl = filament()->getUrl();
     $pendingRequestsCount = $user
         ? app(\App\Services\Representative\ProformaReservationRequestService::class)->pendingCountFor($user)
@@ -525,6 +529,9 @@
               style="background: linear-gradient(135deg, #7239ea 0%, #9d5cff 100%); font-size: 14px;">{{ $initial }}</span>
         @if ($profileName !== '')
             <span class="sidebar-user-name">{{ $profileName }}</span>
+        @endif
+        @if ($profileRole !== '')
+            <span class="sidebar-user-role">{{ $profileRole }}</span>
         @endif
     </a>
 </div>

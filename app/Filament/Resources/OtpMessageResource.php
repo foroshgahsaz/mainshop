@@ -16,6 +16,8 @@ class OtpMessageResource extends Resource
 {
     protected static ?string $model = OtpMessage::class;
 
+    protected static ?string $slug = 'otp-messages';
+
     protected static ?string $navigationIcon = 'heroicon-o-key';
 
     protected static ?string $navigationLabel = 'مدیریت OTP';

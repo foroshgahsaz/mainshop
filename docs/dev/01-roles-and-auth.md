@@ -155,6 +155,7 @@ echo "sales_mgr=".(int)$u->is_sales_manager." canAccess=".($u->canAccessPanel(fi
 ### مدیریت OTP در ادمین
 
 - URL: **`/admin/otp-messages`** — فقط مدیر سیستم (`AdminAccess::canManageShopInAdmin`). مدیر فروش این صفحه را نمی‌بیند.
+- اگر بعد از deploy این آدرس 404 داد: کش Filament (`bootstrap/cache/filament/panels/admin.php`) یا `route:cache` قدیمی است — `php artisan shop:deploy-recover` یا دکمه پاک کردن کش در ادمین.
 - منو: **کاربران → مدیریت OTP** و **تنظیمات → پیامک → مدیریت OTP**.
 - ستون‌ها: شماره موبایل، کد OTP، نام و نام خانوادگی (`users.name` در لحظهٔ ارسال)، زمان ارسال دقیق جلالی (`Y/m/d H:i:s`، `Asia/Tehran`).
 - کش OTP بعد از verify پاک می‌شود؛ ردیف لیست باقی می‌ماند.

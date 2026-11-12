@@ -27,6 +27,11 @@ class ShopDeployRecover extends Command
         Artisan::call('optimize:clear');
         $this->line(trim(Artisan::output()));
 
+        if (array_key_exists('filament:clear-cached-components', Artisan::all())) {
+            Artisan::call('filament:clear-cached-components');
+            $this->line(trim(Artisan::output()));
+        }
+
         $this->components->info('Running migrations…');
         Artisan::call('migrate', ['--force' => true]);
         $this->line(trim(Artisan::output()));

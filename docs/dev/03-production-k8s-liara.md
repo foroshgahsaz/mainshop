@@ -37,7 +37,7 @@ php artisan shop:deploy-recover
 
 `shop:deploy-recover` چه می‌کند:
 
-- پاک کردن config/route/view/cache (با fallback اگر Redis down باشد) — **بدون این مرحله، routeهای تازهٔ deploy (مثلاً صفحهٔ عمومی) ممکن است 404 بدهند**
+- پاک کردن config/route/view/cache و **Filament component cache** (`filament:clear-cached-components`) — **بدون این مرحله، routeهای تازهٔ deploy (صفحهٔ عمومی یا Resource ادمین مثل `/admin/otp-messages`) ممکن است 404 بدهند**
 - `migrate --force`
 - در صورت سالم بودن Redis: `--optimize` (config/route/view cache)
 

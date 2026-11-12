@@ -17,6 +17,7 @@ use App\Filament\Pages\ManageZarinpal;
 use App\Filament\Pages\ViewDatabaseBackups;
 use App\Filament\Pages\ViewPaymentLogs;
 use App\Filament\Pages\ViewSiteErrorLogs;
+use App\Filament\Resources\OtpMessageResource;
 use App\Http\Controllers\Admin\ClearApplicationCacheController;
 use App\Http\Controllers\Admin\DownloadApplicationLogFileController;
 use App\Http\Controllers\Admin\DownloadDatabaseBackupController;
@@ -69,6 +70,9 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make('کاربران')->icon('heroicon-o-users'),
                 NavigationGroup::make('محتوا')->icon('heroicon-o-document-text'),
                 NavigationGroup::make('تنظیمات')->icon('heroicon-o-cog-6-tooth'),
+            ])
+            ->resources([
+                OtpMessageResource::class,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')

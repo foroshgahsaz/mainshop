@@ -53,6 +53,7 @@ use App\Services\Representative\SalesRegionService;
 use App\Services\Settings\SearchPopupSettingsService;
 use App\Services\Settings\SettingsService;
 use App\Services\Sms\SmsSenderFactory;
+use App\Support\FilamentAdminComponentCache;
 use App\Support\MediaPath;
 use App\Support\ShopMedia;
 use App\Support\ShopStoragePaths;
@@ -87,6 +88,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function register(): void
     {
+        FilamentAdminComponentCache::forgetIfStale();
+
         $this->app->bind(FileUploadController::class, LivewireFileUploadController::class);
 
         $this->app->bind(SmsSender::class, fn () => app(SmsSenderFactory::class)->make());

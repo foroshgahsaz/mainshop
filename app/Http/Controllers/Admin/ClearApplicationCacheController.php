@@ -17,6 +17,7 @@ class ClearApplicationCacheController
         'route:clear',
         'config:clear',
         'clear-compiled',
+        'filament:clear-cached-components',
     ];
 
     public function __invoke(Request $request): RedirectResponse

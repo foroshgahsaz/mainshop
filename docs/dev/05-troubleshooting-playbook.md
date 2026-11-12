@@ -64,6 +64,7 @@ php artisan shop:deploy-recover
 |-----|--------|
 | کد جدید روی سرور نیست | deploy از `master` بعد از merge |
 | **`route:cache` قدیمی** | `php artisan shop:deploy-recover` (اول `optimize:clear` می‌زند)؛ اگر دستی `route:cache` می‌کنید، بعد از pull حتماً دوباره بسازید |
+| **Filament `panels/admin.php` قدیمی** | Resource جدید (مثل `/admin/otp-messages`) در کش کامپوننت نیست → 404. `shop:deploy-recover` یا دکمه «پاک کردن کش» ادمین (`filament:clear-cached-components`). از boot اگر فایل Resource روی دیسک باشد و در کش نباشد، کش Filament+route پاک می‌شود. |
 | آدرس همتا (Hamta) | مسیر ما **`/representative/branch/register/`** است؛ `/client/branch/register` فقط به همان redirect می‌شود |
 
 ```bash

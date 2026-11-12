@@ -8,6 +8,7 @@ use App\Filament\Support\AdminTable;
 use App\Filament\Support\UserTableColumns;
 use App\Filament\Support\ShopMediaPicker;
 use App\Models\City;
+use App\Models\Province;
 use App\Models\RepresentativeProfile;
 use App\Models\User;
 use App\Rules\IranianNationalCode;
@@ -396,7 +397,17 @@ class UserResource extends Resource
                     ->relationship('representativeProfile')
                     ->schema(static::representativeProfileFieldsForEdit())
                     ->columns(2)
-                    ->visible(fn (Get $get): bool => $get('user_kind') === 'staff' && (bool) $get('is_representative'));
+                    ->visible(function (Get $get, mixed $record): bool {
+                        if ($get('user_kind') === 'staff' && (bool) $get('is_representative')) {
+                            return true;
+                        }
+
+                        if ($record instanceof User) {
+                            return $record->isRepresentative();
+                        }
+
+                        return $record instanceof RepresentativeProfile;
+                    });
             }
         }
 
@@ -411,7 +422,9 @@ class UserResource extends Resource
         return [
             Forms\Components\Select::make('sales_manager_id')
                 ->label('مدیر منطقه')
-                ->options(fn (?RepresentativeProfile $record): array => static::salesManagerOptions($record?->sales_manager_id))
+                ->options(fn (Get $get, mixed $record): array => static::salesManagerOptions(
+                    static::salesManagerIdFromProfileForm($get, $record)
+                ))
                 ->searchable()
                 ->required()
                 ->live()
@@ -421,10 +434,8 @@ class UserResource extends Resource
                 ->helperText('فقط مدیرانی که حداقل یک منطقه فروش دارند. درخواست‌های رزرو مجدد برای این مدیر ارسال می‌شود.'),
             Forms\Components\Select::make('province_id')
                 ->label('استان فعالیت')
-                ->options(fn (Get $get, ?RepresentativeProfile $record): array => app(SalesRegionService::class)
-                    ->provinceOptionsForManager((int) ($get('sales_manager_id') ?: $record?->sales_manager_id)))
-                ->in(fn (Get $get, ?RepresentativeProfile $record): array => app(SalesRegionService::class)
-                    ->provinceIdsForManager((int) ($get('sales_manager_id') ?: $record?->sales_manager_id)))
+                ->options(fn (Get $get, mixed $record): array => static::provinceOptionsForProfileForm($get, $record))
+                ->in(fn (Get $get, mixed $record): array => static::provinceIdsForProfileForm($get, $record))
                 ->validationMessages(['in' => 'استان فعالیت باید در یکی از مناطق همین مدیر منطقه باشد.'])
                 ->searchable()
                 ->required()
@@ -433,9 +444,12 @@ class UserResource extends Resource
                 ->helperText('فقط استان‌های مناطق همین مدیر منطقه.'),
             Forms\Components\Select::make('city_id')
                 ->label('شهر فعالیت')
-                ->options(fn (Get $get): array => static::cityOptions($get('province_id')))
+                ->options(fn (Get $get, mixed $record): array => static::cityOptions(
+                    $get('province_id') ?: static::representativeProfileFromFormRecord($record)?->province_id
+                ))
                 ->searchable()
-                ->disabled(fn (Get $get): bool => ! $get('province_id')),
+                ->disabled(fn (Get $get, mixed $record): bool => ! ($get('province_id')
+                    ?: static::representativeProfileFromFormRecord($record)?->province_id)),
             Forms\Components\TextInput::make('max_active_reservations')
                 ->label('سقف رزرو همزمان')
                 ->numeric()
@@ -444,6 +458,65 @@ class UserResource extends Resource
                 ->maxValue(50)
                 ->helperText('حداکثر پیش‌فاکتور باز با رزرو موجودی (پیش‌فرض ۳).'),
         ];
+    }
+
+    protected static function representativeProfileFromFormRecord(mixed $record): ?RepresentativeProfile
+    {
+        if ($record instanceof RepresentativeProfile) {
+            return $record;
+        }
+
+        if ($record instanceof User) {
+            $record->loadMissing('representativeProfile');
+
+            return $record->representativeProfile;
+        }
+
+        return null;
+    }
+
+    protected static function salesManagerIdFromProfileForm(Get $get, mixed $record): ?int
+    {
+        if (filled($get('sales_manager_id'))) {
+            return (int) $get('sales_manager_id');
+        }
+
+        $fromProfile = static::representativeProfileFromFormRecord($record)?->sales_manager_id;
+
+        return $fromProfile ? (int) $fromProfile : null;
+    }
+
+    /** @return array<int, string> */
+    protected static function provinceOptionsForProfileForm(Get $get, mixed $record): array
+    {
+        $options = app(SalesRegionService::class)->provinceOptionsForManager(
+            static::salesManagerIdFromProfileForm($get, $record)
+        );
+
+        $currentId = (int) ($get('province_id') ?: static::representativeProfileFromFormRecord($record)?->province_id);
+        if ($currentId > 0 && ! isset($options[$currentId])) {
+            $name = Province::query()->whereKey($currentId)->value('name');
+            if (is_string($name) && $name !== '') {
+                $options[$currentId] = $name.' (خارج از منطقه فعلی)';
+            }
+        }
+
+        return $options;
+    }
+
+    /** @return list<int> */
+    protected static function provinceIdsForProfileForm(Get $get, mixed $record): array
+    {
+        $ids = app(SalesRegionService::class)->provinceIdsForManager(
+            static::salesManagerIdFromProfileForm($get, $record)
+        );
+
+        $currentId = (int) ($get('province_id') ?: static::representativeProfileFromFormRecord($record)?->province_id);
+        if ($currentId > 0 && ! in_array($currentId, $ids, true)) {
+            $ids[] = $currentId;
+        }
+
+        return $ids;
     }
 
     /** @return array<int, string> */

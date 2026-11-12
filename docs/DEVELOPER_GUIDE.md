@@ -1355,6 +1355,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-12 | تب دسترسی کاربر: پر شدن استان/شهر/مدیر نماینده از `representativeProfile` — `userEditTab` قبل از `fillForm` |
 | 2026-11-09 | فشرده‌سازی CSS/JS فروشگاه: `shop:minify-assets` + `/admin/shop-asset-settings` (انتخاب فایل‌های min) |
 | 2026-11-09 | خروجی min در `storage/app/public/shop-min` (نه `public/shop`) — رفع Permission denied روی Liara |
 | 2026-11-09 | URL فایل‌های min: `route filesystem.public` (`/data/shop-min/...`) — رفع 404 و به‌هم‌ریختگی UI وقتی `FILESYSTEM_PUBLIC_URL` هنوز `/storage` است |

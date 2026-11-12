@@ -139,6 +139,26 @@ class EditUser extends EditRecord
 
         $data['user_kind'] = CreateUser::resolveUserKindFromFlags($data);
 
+        $user = $this->getRecord();
+        if ($user instanceof User) {
+            $user->loadMissing([
+                'representativeProfile.salesManager',
+                'representativeProfile.province.salesRegion',
+                'representativeProfile.province',
+                'representativeProfile.city',
+            ]);
+
+            $profile = $user->representativeProfile;
+            if ($profile) {
+                $data['representativeProfile'] = [
+                    'sales_manager_id' => $profile->sales_manager_id,
+                    'province_id' => $profile->province_id,
+                    'city_id' => $profile->city_id,
+                    'max_active_reservations' => $profile->max_active_reservations,
+                ];
+            }
+        }
+
         return $data;
     }
 
@@ -155,16 +175,9 @@ class EditUser extends EditRecord
 
     public function mount(int|string $record): void
     {
-        parent::mount($record);
-
         $this->userEditTab = UserEditTabs::resolveActive('edit');
 
-        $this->getRecord()->loadMissing([
-            'representativeProfile.salesManager',
-            'representativeProfile.province.salesRegion',
-            'representativeProfile.province',
-            'representativeProfile.city',
-        ]);
+        parent::mount($record);
     }
 
     protected function afterSave(): void

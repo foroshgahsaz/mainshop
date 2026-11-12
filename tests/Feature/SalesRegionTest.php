@@ -7,6 +7,7 @@ use App\Filament\Resources\SalesRegionResource\Pages\EditSalesRegion;
 use App\Filament\Resources\UserResource\Pages\CreateUser;
 use App\Filament\Resources\UserResource\Pages\EditUser;
 use App\Filament\Resources\UserResource\Pages\ListUsers;
+use App\Models\City;
 use App\Models\Province;
 use App\Models\RepresentativeProfile;
 use App\Models\SalesRegion;
@@ -171,6 +172,41 @@ class SalesRegionTest extends TestCase
         $this->get('/admin/sales-regions')->assertOk()->assertSee('مرکز')->assertSee('افزودن منطقه');
         $this->get('/admin/sales-regions/create')->assertOk();
         $this->get('/admin')->assertOk()->assertSee('مناطق فروش');
+    }
+
+    public function test_access_tab_fills_saved_representative_profile(): void
+    {
+        $manager = $this->user('09130000040', ['is_sales_manager' => 1]);
+        $province = Province::query()->create(['name' => 'مازندران', 'slug' => 'maz-'.uniqid(), 'position' => 1]);
+        $city = City::query()->create([
+            'province_id' => $province->id,
+            'name' => 'ساری',
+            'slug' => 'sari-'.uniqid(),
+            'position' => 1,
+        ]);
+        $region = SalesRegion::query()->create(['name' => 'شمال', 'sales_manager_id' => $manager->id]);
+        $province->update(['sales_region_id' => $region->id]);
+
+        $rep = $this->user('09130000041', ['is_representative' => 1]);
+        RepresentativeProfile::query()->create([
+            'user_id' => $rep->id,
+            'sales_manager_id' => $manager->id,
+            'province_id' => $province->id,
+            'city_id' => $city->id,
+            'max_active_reservations' => 3,
+        ]);
+
+        $this->actAs($manager);
+
+        Livewire::withQueryParams(['tab' => 'access'])
+            ->test(EditUser::class, ['record' => $rep->id])
+            ->assertFormSet([
+                'is_representative' => true,
+                'representativeProfile.sales_manager_id' => $manager->id,
+                'representativeProfile.province_id' => $province->id,
+                'representativeProfile.city_id' => $city->id,
+                'representativeProfile.max_active_reservations' => 3,
+            ]);
     }
 
     public function test_regions_page_forbidden_for_sales_manager(): void

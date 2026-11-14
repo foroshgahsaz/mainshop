@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\Auth\Login;
+use App\Filament\Pages\BankdarSubtreePage;
 use App\Filament\Pages\CouponAnalyticsPage;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\ManageBajetPay;
@@ -91,6 +92,7 @@ class AdminPanelProvider extends PanelProvider
                 ViewSiteErrorLogs::class,
                 ViewDatabaseBackups::class,
                 CouponAnalyticsPage::class,
+                BankdarSubtreePage::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([])

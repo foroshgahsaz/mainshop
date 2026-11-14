@@ -68,7 +68,13 @@
 | مشتری | ایجاد زیر نماینده؛ حذف فقط اگر سفارش نداشته باشد (soft-delete) |
 | داشبورد | آمار/روند/نقشه/آخرین سفارش‌ها اسکوپ‌شده به نمایندگان زیرمجموعه |
 
-سرویس‌ها: `BankdarCatalogService`, `BankdarOrderService`, `UserSoftDeletionService`.
+سرویس‌ها: `BankdarCatalogService`, `BankdarOrderService`, `UserSoftDeletionService`, `BankdarSubtreeService`.
+
+## مشاهده زیرمجموعه (ادمین سیستم)
+
+در لیست کاربران → تب **بنکدارها**، برای هر بنکدار دکمه **مشاهده زیرمجموعه** (`BankdarSubtreePage`، مسیر `/admin/bankdars/{id}/subtree`) درخت را نشان می‌دهد:
+
+مدیر فروش → بنکدار → نمایندگان (با لینک ویرایش کاربر).
 
 ## انتقال مشتری (T7)
 

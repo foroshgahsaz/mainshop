@@ -5,6 +5,7 @@ namespace App\Filament\Representative\Resources\CustomerResource\Pages;
 use App\Filament\Representative\Resources\CustomerResource;
 use App\Models\User;
 use App\Services\Representative\RepresentativeCustomerService;
+use App\Services\Representative\SalesRegionService;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
@@ -25,6 +26,21 @@ class CreateCustomer extends CreateRecord
     public bool $transferOtpSent = false;
 
     public string $transferOtp = '';
+
+    public function mount(): void
+    {
+        parent::mount();
+
+        $provinceId = app(SalesRegionService::class)
+            ->activityProvinceIdForRepresentative(auth()->user());
+
+        if ($provinceId !== null) {
+            $this->form->fill([
+                ...$this->form->getRawState(),
+                'province_id' => $provinceId,
+            ]);
+        }
+    }
 
     public function lookupNationalCode(?string $state): void
     {

@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Pages\ProductListImport;
+use App\Filament\Pages\ProductPriceStockUpdate;
 use App\Filament\Resources\OrderResource;
 use App\Filament\Resources\OtpMessageResource;
 use App\Filament\Resources\ProductResource;
@@ -60,6 +62,31 @@ class SalesManagerAccessTest extends TestCase
         $this->assertTrue(AdminAccess::canCreateRepresentativesInAdmin($bankdar));
         $this->assertFalse(AdminAccess::canCreateBankdarsInAdmin($bankdar));
         $this->assertTrue(AdminAccess::canAccessAdminResource(UserResource::class));
+    }
+
+    public function test_bankdar_can_manage_products_and_excel_import(): void
+    {
+        $bankdar = User::make([
+            'is_bankdar' => true,
+            'is_sales_manager' => false,
+            'is_admin' => false,
+            'status' => true,
+            'bankdar_province_id' => 5,
+        ]);
+        $bankdar->id = 9;
+
+        $this->actingAs($bankdar);
+
+        $this->assertTrue(AdminAccess::isLimitedStaffOnly($bankdar));
+        $this->assertTrue(AdminAccess::canManageProductsInAdmin($bankdar));
+        $this->assertTrue(AdminAccess::canImportProductsInAdmin($bankdar));
+        $this->assertTrue(AdminAccess::canAccessAdminResource(ProductResource::class));
+        $this->assertTrue(ProductResource::canCreate());
+        $this->assertTrue(ProductListImport::canAccess());
+        $this->assertTrue(ProductPriceStockUpdate::canAccess());
+        $this->assertContains('filament.admin.pages.product-list-import', AdminAccess::limitedStaffAllowedRoutePatterns());
+        $this->assertContains('filament.admin.product-import.template', AdminAccess::limitedStaffAllowedRoutePatterns());
+        $this->assertContains('filament.admin.resources.products.*', AdminAccess::limitedStaffAllowedRoutePatterns());
     }
 
     public function test_sales_manager_can_edit_assigned_bankdar_and_subtree_reps(): void

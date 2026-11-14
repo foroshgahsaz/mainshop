@@ -11,7 +11,7 @@
 | **مشتری** | همهٔ فلگ‌های staff خاموش | فروشگاه + `/account` | مودال «ورود» در هدر یا `/login` |
 | **مدیر سیستم** | `is_admin=1`, `status=1` | Filament ادمین | **`/admin/login`** |
 | **مدیر فروش** | `is_sales_manager=1`, `is_admin=0`, `status=1` | همان Filament با منوی محدود — CRUD بنکدار | **`/admin/login`** |
-| **بنکدار** | `is_bankdar=1`, `bankdar_province_id`, `created_by_sales_manager_id` | همان Filament با منوی محدود — CRUD نماینده استان خودش | **`/admin/login`** |
+| **بنکدار** | `is_bankdar=1`, `bankdar_province_id`, `created_by_sales_manager_id` | همان Filament با منوی محدود — CRUD نماینده استان خودش + محصولات/بارگذاری اکسل | **`/admin/login`** |
 | **نماینده** | `is_representative=1`, `status=1` | Filament نماینده | **`/representative/login`** |
 
 جزئیات سلسله‌مراتب: [dev/11-bankdar-sales-hierarchy.md](11-bankdar-sales-hierarchy.md)
@@ -83,6 +83,7 @@ return $this->status && ($this->is_admin || $this->isSalesManager());
 
 - **مدیر فروش:** منوی کاربران → **افزودن بنکدار**؛ فقط بنکدارها و زیرمجموعه خودش را می‌بیند.
 - **بنکدار:** منوی کاربران → **افزودن نماینده**؛ استان فعالیت نماینده = استان بنکدار (قفل)؛ فقط شهر انتخاب می‌شود.
+- **بنکدار — محصولات:** منوی محصولات → لیست / افزودن محصول / **بارگذاری اکسل محصول** / بروزرسانی قیمت (`AdminAccess::canManageProductsInAdmin` / `canImportProductsInAdmin`).
 - آواتار سایدبار (حرف اول نام) برای همهٔ نقش‌های غیرمشتری به **ویرایش پروفایل ادمین** (`/admin/users/{id}/edit?tab=profile`) می‌رود، نه `/account` فروشگاه؛ زیر آواتار نام کامل نمایش داده می‌شود.
 
 اگر در هدر «داشبورد نمایندگی» می‌بینید، با حساب **نماینده** وارد شده‌اید.

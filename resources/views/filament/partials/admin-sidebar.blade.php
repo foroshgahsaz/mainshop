@@ -167,7 +167,7 @@
                 ['label' => 'محصولات', 'icon' => 'fa-box-open', 'items' => [
                     ['label' => 'لیست همه', 'url' => ProductResource::getUrl('index'), 'icon' => 'fa-list'],
                     ['label' => 'بروزرسانی قیمت', 'url' => ProductPriceStockUpdate::getUrl(), 'icon' => 'fa-tags'],
-                    ['label' => 'ورود لیست محصول', 'url' => ProductListImport::getUrl(), 'icon' => 'fa-file-excel'],
+                    ['label' => 'بارگذاری اکسل محصول', 'url' => ProductListImport::getUrl(), 'icon' => 'fa-file-excel'],
                     ['label' => 'افزودن محصول', 'url' => ProductResource::getUrl('create'), 'icon' => 'fa-plus'],
                     ['label' => 'دسته‌بندی‌ها', 'url' => CategoryResource::getUrl('index'), 'icon' => 'fa-tags'],
                     ['label' => 'ویژگی‌ها', 'url' => AttributeResource::getUrl('index'), 'icon' => 'fa-list-ul'],

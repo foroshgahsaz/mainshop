@@ -59,7 +59,7 @@ class ProductListImport extends Page
 
     public static function canAccess(): bool
     {
-        return AdminAccess::canManageProductsInAdmin();
+        return AdminAccess::canImportProductsInAdmin();
     }
 
     public function beginImport(ProductExcelImportParser $parser): void

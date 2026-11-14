@@ -38,16 +38,26 @@ class Dashboard extends BaseDashboard
 
     protected function getHeaderActions(): array
     {
-        if (! AdminAccess::isSalesManagerOnly()) {
-            return [];
+        if (AdminAccess::isBankdarOnly()) {
+            return [
+                Actions\Action::make('newRepresentative')
+                    ->label('افزودن نماینده')
+                    ->icon('heroicon-o-user-plus')
+                    ->color('primary')
+                    ->url(UserResource::getUrl('create')),
+            ];
         }
 
-        return [
-            Actions\Action::make('newRepresentative')
-                ->label('افزودن نماینده')
-                ->icon('heroicon-o-user-plus')
-                ->color('primary')
-                ->url(UserResource::getUrl('create')),
-        ];
+        if (AdminAccess::isSalesManagerOnly()) {
+            return [
+                Actions\Action::make('newBankdar')
+                    ->label('افزودن بنکدار')
+                    ->icon('heroicon-o-user-plus')
+                    ->color('primary')
+                    ->url(UserResource::getUrl('create')),
+            ];
+        }
+
+        return [];
     }
 }

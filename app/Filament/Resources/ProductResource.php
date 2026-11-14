@@ -345,10 +345,20 @@ class ProductResource extends Resource
             ->defaultSort('updated_at', 'desc')
             ->filters([
                 Tables\Filters\SelectFilter::make('category_id')
-                    ->relationship('category', 'name')
+                    ->relationship(
+                        'category',
+                        'name',
+                        fn ($query) => app(\App\Services\Catalog\BankdarCatalogService::class)
+                            ->scopeCategoriesForActor($query),
+                    )
                     ->label('دسته‌بندی'),
                 Tables\Filters\SelectFilter::make('brand_id')
-                    ->relationship('brand', 'name')
+                    ->relationship(
+                        'brand',
+                        'name',
+                        fn ($query) => app(\App\Services\Catalog\BankdarCatalogService::class)
+                            ->scopeBrandsForActor($query),
+                    )
                     ->label('برند'),
                 PriceRangeFilter::make('price', 10000000),
                 Tables\Filters\TernaryFilter::make('is_active')

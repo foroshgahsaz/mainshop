@@ -3,12 +3,13 @@
 namespace App\Services\Auth;
 
 use App\Models\User;
+use App\Services\Shop\SoftDeletesSchemaRepair;
 use App\Support\AdminAccess;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 /**
- * ورود موقت مدیر سیستم به پنل بنکدار یا نماینده — بدون remember و با بازگشت امن.
+ * ورود موقت مدیر سیستم به پنل مدیر فروش / بنکدار / نماینده — بدون remember و با بازگشت امن.
  *
  * سشن فقط چند کلید سبک نگه می‌دارد؛ isActive() کوئری DB ندارد.
  */
@@ -55,7 +56,7 @@ class AdminImpersonationService
             return false;
         }
 
-        if (! $actor->isAdmin() || ! $actor->status || $actor->trashed()) {
+        if (! $actor->isAdmin() || ! $actor->status || $this->isTrashedSafe($actor)) {
             return false;
         }
 
@@ -67,32 +68,32 @@ class AdminImpersonationService
             return false;
         }
 
-        if (! $target->status || $target->trashed()) {
+        if (! $target->status || $this->isTrashedSafe($target)) {
             return false;
         }
 
-        if ($target->isAdmin() || $target->isSalesManager()) {
+        if ($target->isAdmin()) {
             return false;
         }
 
-        $isBankdar = $target->isBankdar();
-        $isRep = $target->isRepresentative();
-
-        if ($isBankdar === $isRep) {
-            return false;
-        }
-
-        return true;
+        return $this->resolveTargetRole($target) !== null;
     }
 
     public function start(User $actor, User $target): string
     {
         abort_unless($this->canStart($actor, $target), 403);
 
-        $role = $target->isBankdar() ? 'bankdar' : 'representative';
-        $returnTab = $role === 'bankdar'
-            ? User::ADMIN_LIST_SEGMENT_BANKDAR
-            : User::ADMIN_LIST_SEGMENT_REPRESENTATIVE;
+        // جلوگیری از ۵۰۰ داشبورد وقتی SoftDeletes روی مدل هست ولی ستون migrate نشده
+        app(SoftDeletesSchemaRepair::class)->ensureOnce();
+
+        $role = $this->resolveTargetRole($target);
+        abort_unless($role !== null, 403);
+
+        $returnTab = match ($role) {
+            'sales_manager' => User::ADMIN_LIST_SEGMENT_SALES_MANAGER,
+            'bankdar' => User::ADMIN_LIST_SEGMENT_BANKDAR,
+            default => User::ADMIN_LIST_SEGMENT_REPRESENTATIVE,
+        };
 
         session([
             self::SESSION_ACTOR_ID => (int) $actor->getKey(),
@@ -114,14 +115,16 @@ class AdminImpersonationService
             'ip' => request()->ip(),
         ]);
 
-        return $role === 'bankdar'
-            ? url('/admin')
-            : url('/representative');
+        return $role === 'representative'
+            ? url('/representative')
+            : url('/admin');
     }
 
     public function stop(): string
     {
         abort_unless($this->isActive(), 403);
+
+        app(SoftDeletesSchemaRepair::class)->ensureOnce();
 
         $actorId = (int) session(self::SESSION_ACTOR_ID);
         $targetId = (int) session(self::SESSION_TARGET_ID);
@@ -174,5 +177,32 @@ class AdminImpersonationService
             self::SESSION_TARGET_ROLE,
             self::SESSION_RETURN_TAB,
         ]);
+    }
+
+    /**
+     * دقیقاً یکی از نقش‌های مجاز برای impersonation.
+     *
+     * @return null|'sales_manager'|'bankdar'|'representative'
+     */
+    public function resolveTargetRole(User $target): ?string
+    {
+        $flags = [
+            'sales_manager' => $target->isSalesManager(),
+            'bankdar' => $target->isBankdar(),
+            'representative' => $target->isRepresentative(),
+        ];
+
+        $active = array_keys(array_filter($flags));
+
+        return count($active) === 1 ? $active[0] : null;
+    }
+
+    protected function isTrashedSafe(User $user): bool
+    {
+        try {
+            return $user->trashed();
+        } catch (\Throwable) {
+            return false;
+        }
     }
 }

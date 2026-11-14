@@ -935,9 +935,16 @@ class UserResource extends Resource
                     ->icon('heroicon-o-arrow-right-on-rectangle')
                     ->color('warning')
                     ->iconButton()
-                    ->tooltip(fn (User $record): string => $record->isBankdar()
-                        ? 'ورود موقت به پنل بنکدار'
-                        : 'ورود موقت به پنل نماینده')
+                    ->tooltip(function (User $record): string {
+                        $role = app(\App\Services\Auth\AdminImpersonationService::class)->resolveTargetRole($record);
+
+                        return match ($role) {
+                            'sales_manager' => 'ورود موقت به پنل مدیر فروش',
+                            'bankdar' => 'ورود موقت به پنل بنکدار',
+                            'representative' => 'ورود موقت به پنل نماینده',
+                            default => 'ورود موقت به پنل',
+                        };
+                    })
                     ->requiresConfirmation()
                     ->modalHeading('ورود موقت به پنل این کاربر؟')
                     ->modalDescription('به‌عنوان این کاربر وارد می‌شوید و دسترسی‌های همان نقش را می‌بینید. با «بازگشت به ادمین» دوباره مدیر سیستم می‌شوید.')

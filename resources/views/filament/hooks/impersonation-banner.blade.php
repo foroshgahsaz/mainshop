@@ -4,6 +4,7 @@
 @if ($ctx)
     @php
         $roleLabel = match ($ctx['target_role']) {
+            'sales_manager' => 'مدیر فروش',
             'bankdar' => 'بنکدار',
             'representative' => 'نماینده',
             default => 'کاربر',

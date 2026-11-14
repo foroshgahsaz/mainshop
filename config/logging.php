@@ -47,7 +47,10 @@ return [
     */
 
     'deprecations' => [
-        'channel' => env('LOG_DEPRECATIONS_CHANNEL', 'null'),
+        // اگر env اشتباه «deprecations» بگذارد، کانال هم‌نام پایین تعریف شده تا ۵۰۰ نشود.
+        'channel' => ($dep = env('LOG_DEPRECATIONS_CHANNEL')) !== null && $dep !== ''
+            ? $dep
+            : 'null',
         'trace' => env('LOG_DEPRECATIONS_TRACE', false),
     ],
 
@@ -134,6 +137,12 @@ return [
         ],
 
         'null' => [
+            'driver' => 'monolog',
+            'handler' => NullHandler::class,
+        ],
+
+        // برخی .env مقدار LOG_DEPRECATIONS_CHANNEL=deprecations می‌گذارند (نه null).
+        'deprecations' => [
             'driver' => 'monolog',
             'handler' => NullHandler::class,
         ],

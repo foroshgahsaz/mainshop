@@ -218,7 +218,7 @@ class ShopCacheService
 
     public function blogPosts(int $perPage = 12): LengthAwarePaginator
     {
-        $page = (int) request()->get('page', 1);
+        $page = (int) request()->query('page', 1);
         $staff = ShopStaffPreview::enabled();
 
         return $this->remember(
@@ -305,7 +305,7 @@ class ShopCacheService
             return $this->buildProductListingQuery($filters)->paginate($perPage);
         }
 
-        $page = (int) ($filters['page'] ?? request()->get('page', 1));
+        $page = (int) ($filters['page'] ?? request()->query('page', 1));
         $filters['page'] = $page;
         $filters['_staff_preview'] = ShopStaffPreview::enabled() ? 1 : 0;
         $cacheKey = 'shop:products:list:'.md5(json_encode($filters));

@@ -97,4 +97,49 @@ class BankdarSubtreePageTest extends TestCase
             ->assertSee('زیرمجموعه')
             ->assertSee('بنکدار');
     }
+
+    public function test_sales_manager_can_open_own_bankdar_subtree_only(): void
+    {
+        $manager = User::query()->forceCreate([
+            'name' => 'مدیر فروش',
+            'phone' => '09121110011',
+            'password' => bcrypt('x'),
+            'status' => true,
+            'is_sales_manager' => true,
+        ]);
+
+        $own = User::query()->forceCreate([
+            'name' => 'بنکدار من',
+            'phone' => '09121110012',
+            'password' => bcrypt('x'),
+            'status' => true,
+            'is_bankdar' => true,
+            'created_by_sales_manager_id' => $manager->id,
+        ]);
+
+        $other = User::query()->forceCreate([
+            'name' => 'بنکدار دیگر',
+            'phone' => '09121110013',
+            'password' => bcrypt('x'),
+            'status' => true,
+            'is_bankdar' => true,
+            'created_by_sales_manager_id' => 999,
+        ]);
+
+        $this->actingAs($manager);
+        foreach (['memoUser', 'memoIsFullAdmin', 'memoIsSalesManagerOnly', 'memoIsBankdarOnly'] as $p) {
+            (new \ReflectionProperty(AdminAccess::class, $p))->setValue(null, null);
+        }
+
+        $this->assertTrue(AdminAccess::canViewBankdarSubtreeInAdmin($manager));
+        $this->assertTrue(BankdarSubtreePage::canAccess());
+        $this->assertContains('filament.admin.pages.bankdar-subtree', AdminAccess::limitedStaffAllowedRoutePatterns());
+
+        Livewire::test(BankdarSubtreePage::class, ['record' => $own->id])
+            ->assertSuccessful()
+            ->assertSee('بنکدار من');
+
+        Livewire::test(BankdarSubtreePage::class, ['record' => $other->id])
+            ->assertForbidden();
+    }
 }

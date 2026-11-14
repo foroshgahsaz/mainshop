@@ -904,9 +904,22 @@ class UserResource extends Resource
                     ->label('مشاهده زیرمجموعه')
                     ->icon('heroicon-o-share')
                     ->color('primary')
-                    ->button()
-                    ->outlined()
-                    ->visible(fn (User $record): bool => AdminAccess::canManageShopInAdmin() && $record->isBankdar())
+                    ->iconButton()
+                    ->tooltip('مشاهده زیرمجموعه')
+                    ->visible(function (User $record): bool {
+                        if (! $record->isBankdar() || ! AdminAccess::canViewBankdarSubtreeInAdmin()) {
+                            return false;
+                        }
+
+                        if (AdminAccess::isSalesManagerOnly()) {
+                            $actor = auth()->user();
+
+                            return $actor instanceof User
+                                && app(SalesRegionService::class)->managesBankdar($actor, $record);
+                        }
+
+                        return true;
+                    })
                     ->url(fn (User $record): string => \App\Filament\Pages\BankdarSubtreePage::getUrl([
                         'record' => $record->getKey(),
                     ])),

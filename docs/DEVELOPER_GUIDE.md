@@ -1505,6 +1505,7 @@ resources/views/layouts/shop.blade.php
 | 2026-10-27 | ویزارد نماینده — انتخاب محصول: کارت با تصویر اصلی (`rep_product_card`)، گرید؛ رفع گالری (بارگذاری همه تصاویر، بدون lazy+p hidden) |
 | 2026-10-27 | ویزارد نماینده: تب‌های کارخانه/قالب فقط وقتی برای خانواده/برند انتخاب‌شده در کاتالوگ وجود دارد (`RepresentativeCatalogLookup` + `OrderWizard`) |
 | 2026-10-27 | بازگشت پارسیان: مسیر alias **`/payment/callback/pec`** (همان handler که `/payment/callback/parsian`)؛ پس از verify ریدایرکت به صفحه امضاشده **`payment.result`**؛ رفع TypeError ویجت `OrdersTrendChart` (Carbon) |
+| 2026-11-14 | رفع ۵۰۰ ورود موقت: تعویض هویت خارج از Livewire (`/staff/impersonation/start/{user}` signed) |
 | 2026-11-14 | رفع ۵۰۰ از کانال لاگ `deprecations` تعریف‌نشده + جایگزینی `Request::get` با `query()` |
 | 2026-11-14 | رفع ۵۰۰ داشبورد بدون `deleted_at`: `ConditionalSoftDeletingScope` + `shop:repair-soft-deletes` |
 | 2026-11-14 | ورود موقت: مدیر فروش هم؛ `SoftDeletesSchemaRepair::ensureOnce` برای جلوگیری از ۵۰۰ داشبورد بدون `deleted_at` |

@@ -106,7 +106,7 @@ class AdminImpersonationService
 
         AdminAccess::flushMemo();
         Auth::login($target, remember: false);
-        request()->session()->regenerate();
+        $this->refreshAuthSession($target);
 
         Log::info('admin.impersonation.start', [
             'actor_id' => (int) $actor->getKey(),
@@ -155,7 +155,7 @@ class AdminImpersonationService
 
         AdminAccess::flushMemo();
         Auth::login($actor, remember: false);
-        request()->session()->regenerate();
+        $this->refreshAuthSession($actor);
 
         Log::info('admin.impersonation.stop', [
             'actor_id' => $actorId,
@@ -164,6 +164,19 @@ class AdminImpersonationService
         ]);
 
         return url('/admin/users?activeTab='.urlencode($returnTab));
+    }
+
+    /**
+     * بعد از عوض کردن هویت: regenerate + هماهنگ‌کردن password_hash برای AuthenticateSession.
+     */
+    protected function refreshAuthSession(User $user): void
+    {
+        $session = request()->session();
+        $session->regenerate();
+        $session->put(
+            'password_hash_'.Auth::getDefaultDriver(),
+            $user->getAuthPassword()
+        );
     }
 
     /** پاک‌سازی کلیدهای impersonation بدون تغییر کاربر فعلی (مثلاً روی Logout). */

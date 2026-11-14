@@ -153,6 +153,63 @@ class AdminImpersonationTest extends TestCase
         $this->assertTrue(auth()->user()->is($rep));
     }
 
+    public function test_signed_start_route_switches_user_and_lands_on_admin(): void
+    {
+        $admin = User::query()->forceCreate([
+            'name' => 'ادمین',
+            'phone' => '09120000021',
+            'password' => bcrypt('x'),
+            'status' => true,
+            'is_admin' => true,
+        ]);
+
+        $bankdar = User::query()->forceCreate([
+            'name' => 'بنکدار',
+            'phone' => '09120000022',
+            'password' => bcrypt('x'),
+            'status' => true,
+            'is_bankdar' => true,
+        ]);
+
+        $this->actingAs($admin);
+
+        $url = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+            'admin.impersonation.start',
+            now()->addMinutes(2),
+            ['user' => $bankdar->getKey()],
+        );
+
+        $this->get($url)
+            ->assertRedirect('/admin');
+
+        $this->assertTrue(auth()->user()->is($bankdar));
+        $this->assertTrue(app(AdminImpersonationService::class)->isActive());
+        $this->assertSame('bankdar', session(AdminImpersonationService::SESSION_TARGET_ROLE));
+    }
+
+    public function test_unsigned_start_route_is_rejected(): void
+    {
+        $admin = User::query()->forceCreate([
+            'name' => 'ادمین',
+            'phone' => '09120000023',
+            'password' => bcrypt('x'),
+            'status' => true,
+            'is_admin' => true,
+        ]);
+
+        $bankdar = User::query()->forceCreate([
+            'name' => 'بنکدار',
+            'phone' => '09120000024',
+            'password' => bcrypt('x'),
+            'status' => true,
+            'is_bankdar' => true,
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.impersonation.start', ['user' => $bankdar->getKey()]))
+            ->assertForbidden();
+    }
+
     public function test_stop_route_requires_active_impersonation_and_restores_admin(): void
     {
         $admin = User::query()->forceCreate([

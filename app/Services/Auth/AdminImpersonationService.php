@@ -83,8 +83,8 @@ class AdminImpersonationService
     {
         abort_unless($this->canStart($actor, $target), 403);
 
-        // جلوگیری از ۵۰۰ داشبورد وقتی SoftDeletes روی مدل هست ولی ستون migrate نشده
-        app(SoftDeletesSchemaRepair::class)->ensureOnce();
+        // best-effort — خرابی repair نباید خودِ ورود موقت را ۵۰۰ کند
+        $this->ensureSoftDeletesSchemaQuietly();
 
         $role = $this->resolveTargetRole($target);
         abort_unless($role !== null, 403);
@@ -95,6 +95,12 @@ class AdminImpersonationService
             default => User::ADMIN_LIST_SEGMENT_REPRESENTATIVE,
         };
 
+        // اول login (خودش session را migrate می‌کند)، بعد کلیدهای impersonation
+        // تا regenerate دوم کلیدها را از دست ندهد / قفل سشن نسازد.
+        AdminAccess::flushMemo();
+        Auth::login($target, remember: false);
+        $this->syncPasswordHashForAuthenticateSession($target);
+
         session([
             self::SESSION_ACTOR_ID => (int) $actor->getKey(),
             self::SESSION_TARGET_ID => (int) $target->getKey(),
@@ -104,16 +110,16 @@ class AdminImpersonationService
             self::SESSION_RETURN_TAB => $returnTab,
         ]);
 
-        AdminAccess::flushMemo();
-        Auth::login($target, remember: false);
-        $this->refreshAuthSession($target);
-
-        Log::info('admin.impersonation.start', [
-            'actor_id' => (int) $actor->getKey(),
-            'target_id' => (int) $target->getKey(),
-            'target_role' => $role,
-            'ip' => request()->ip(),
-        ]);
+        try {
+            Log::info('admin.impersonation.start', [
+                'actor_id' => (int) $actor->getKey(),
+                'target_id' => (int) $target->getKey(),
+                'target_role' => $role,
+                'ip' => request()->ip(),
+            ]);
+        } catch (\Throwable) {
+            // لاگ خراب = ورود موقت نباید بترکد
+        }
 
         return $role === 'representative'
             ? url('/representative')
@@ -124,7 +130,7 @@ class AdminImpersonationService
     {
         abort_unless($this->isActive(), 403);
 
-        app(SoftDeletesSchemaRepair::class)->ensureOnce();
+        $this->ensureSoftDeletesSchemaQuietly();
 
         $actorId = (int) session(self::SESSION_ACTOR_ID);
         $targetId = (int) session(self::SESSION_TARGET_ID);
@@ -144,39 +150,64 @@ class AdminImpersonationService
             request()->session()->invalidate();
             request()->session()->regenerateToken();
 
-            Log::warning('admin.impersonation.stop_actor_missing', [
-                'actor_id' => $actorId,
-                'target_id' => $targetId,
-                'ip' => request()->ip(),
-            ]);
+            try {
+                Log::warning('admin.impersonation.stop_actor_missing', [
+                    'actor_id' => $actorId,
+                    'target_id' => $targetId,
+                    'ip' => request()->ip(),
+                ]);
+            } catch (\Throwable) {
+            }
 
             abort(403, 'نشست مدیر سیستم قابل بازیابی نیست.');
         }
 
         AdminAccess::flushMemo();
         Auth::login($actor, remember: false);
-        $this->refreshAuthSession($actor);
+        $this->syncPasswordHashForAuthenticateSession($actor);
 
-        Log::info('admin.impersonation.stop', [
-            'actor_id' => $actorId,
-            'target_id' => $targetId,
-            'ip' => request()->ip(),
-        ]);
+        try {
+            Log::info('admin.impersonation.stop', [
+                'actor_id' => $actorId,
+                'target_id' => $targetId,
+                'ip' => request()->ip(),
+            ]);
+        } catch (\Throwable) {
+        }
 
         return url('/admin/users?activeTab='.urlencode($returnTab));
     }
 
     /**
-     * بعد از عوض کردن هویت: regenerate + هماهنگ‌کردن password_hash برای AuthenticateSession.
+     * Auth::login خودش session را migrate می‌کند — regenerate دوباره نکن
+     * (قفل/از‌دست‌رفتن داده روی درایورهای سشن پروداکشن).
+     * password_hash را برای Filament AuthenticateSession همگام کن؛ password تهی امن است.
      */
-    protected function refreshAuthSession(User $user): void
+    protected function syncPasswordHashForAuthenticateSession(User $user): void
     {
         $session = request()->session();
-        $session->regenerate();
-        $session->put(
-            'password_hash_'.Auth::getDefaultDriver(),
-            $user->getAuthPassword()
-        );
+        $guard = Auth::getDefaultDriver();
+
+        // هم‌ارز AuthenticateSession؛ password تهی (کاربر OTP) هم امن است
+        $password = $user->getAuthPassword();
+        $password = is_string($password) ? $password : '';
+
+        $session->put('password_hash_'.$guard, $password);
+        $session->put('password_hash_sha256_'.$guard, hash('sha256', $password));
+    }
+
+    protected function ensureSoftDeletesSchemaQuietly(): void
+    {
+        try {
+            app(SoftDeletesSchemaRepair::class)->ensureOnce();
+        } catch (\Throwable $e) {
+            try {
+                Log::warning('admin.impersonation.soft_deletes_repair_skipped', [
+                    'message' => $e->getMessage(),
+                ]);
+            } catch (\Throwable) {
+            }
+        }
     }
 
     /** پاک‌سازی کلیدهای impersonation بدون تغییر کاربر فعلی (مثلاً روی Logout). */

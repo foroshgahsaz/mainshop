@@ -90,6 +90,38 @@ class AdminImpersonationTest extends TestCase
         $this->assertTrue(AdminAccess::isSalesManagerOnly());
     }
 
+    public function test_admin_can_impersonate_bankdar_with_null_password(): void
+    {
+        $admin = User::query()->forceCreate([
+            'name' => 'ادمین',
+            'phone' => '09120000061',
+            'password' => bcrypt('x'),
+            'status' => true,
+            'is_admin' => true,
+        ]);
+
+        $bankdar = User::query()->forceCreate([
+            'name' => 'بنکدار بدون پسورد',
+            'phone' => '09120000062',
+            'password' => null,
+            'status' => true,
+            'is_bankdar' => true,
+        ]);
+
+        $this->actingAs($admin);
+        $this->flushAccessMemo();
+
+        $url = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+            'admin.impersonation.start',
+            now()->addMinutes(2),
+            ['user' => $bankdar->getKey()],
+        );
+
+        $this->get($url)->assertRedirect('/admin');
+        $this->assertTrue(auth()->user()->is($bankdar));
+        $this->assertSame('', (string) session('password_hash_'.auth()->getDefaultDriver()));
+    }
+
     public function test_admin_can_impersonate_bankdar_and_stop(): void
     {
         $admin = User::query()->forceCreate([

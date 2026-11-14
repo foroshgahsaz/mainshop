@@ -66,7 +66,8 @@
 ### ورود موقت به پنل مدیر فروش / بنکدار / نماینده (فقط مدیر سیستم)
 
 - در `/admin/users` روی ردیف **مدیر فروش**، **بنکدار** یا **نماینده**: آیکون «ورود به پنل» (تأیید مودال).
-- سرویس: `AdminImpersonationService` — سشن سبک (`admin_impersonation.*`)، بدون `remember`، `session()->regenerate()`، لاگ `admin.impersonation.start|stop`.
+- سرویس: `AdminImpersonationService` — سشن سبک (`admin_impersonation.*`)، بدون `remember`، `session()->regenerate()` + همگام `password_hash_*` برای `AuthenticateSession`، لاگ `admin.impersonation.start|stop`.
+- اکشن Filament فقط به روت signed ریدایرکت می‌کند؛ تعویض هویت در `GET /staff/impersonation/start/{user}` (`StartAdminImpersonationController`) انجام می‌شود — نه داخل `livewire.update` (جلوگیری از ۵۰۰).
 - مدیر فروش / بنکدار → `/admin` با محدودیت همان نقش؛ نماینده → `/representative`.
 - قبل از ورود: `SoftDeletesSchemaRepair::ensureOnce()` تا نبودن `orders.deleted_at` باعث ۵۰۰ داشبورد نشود.
 - بنر چسبان «بازگشت به ادمین» → `POST /staff/impersonation/stop` (CSRF + throttle).

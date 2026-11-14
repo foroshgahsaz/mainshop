@@ -44,6 +44,8 @@
 | `app/Services/User/UserSoftDeletionService.php` | soft-delete کاربر بدون سفارش |
 | `app/Filament/Pages/BankdarSubtreePage.php` | درخت زیرمجموعه بنکدار (ادمین / مدیر فروش / بنکدار) |
 | `app/Services/Auth/AdminImpersonationService.php` | ورود موقت مدیر سیستم به پنل مدیر فروش / بنکدار / نماینده |
+| `app/Http/Controllers/Admin/StartAdminImpersonationController.php` | شروع ورود موقت (روت signed خارج از Livewire) |
+| `app/Http/Controllers/Admin/StopAdminImpersonationController.php` | بازگشت از ورود موقت به ادمین |
 | `app/Services/Representative/BankdarSubtreeService.php` | ساخت درخت مدیر فروش → بنکدار → نماینده |
 | `app/Services/Shop/SoftDeletesSchemaRepair.php` | اطمینان از `orders/users.deleted_at` در deploy |
 | `app/Support/ConditionalSoftDeletingScope.php` | SoftDeletes بدون ستون → بدون شرط SQL (نه ۵۰۰) |

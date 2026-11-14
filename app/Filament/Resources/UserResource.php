@@ -959,9 +959,16 @@ class UserResource extends Resource
                         $actor = auth()->user();
                         abort_unless($actor instanceof User, 403);
 
-                        $url = app(\App\Services\Auth\AdminImpersonationService::class)->start($actor, $record);
+                        $svc = app(\App\Services\Auth\AdminImpersonationService::class);
+                        abort_unless($svc->canStart($actor, $record), 403);
 
-                        return redirect()->to($url);
+                        // شروع ورود موقت خارج از Livewire (روت signed) تا Auth::login
+                        // وسط livewire.update باعث ۵۰۰ نشود.
+                        return redirect()->to(\Illuminate\Support\Facades\URL::temporarySignedRoute(
+                            'admin.impersonation.start',
+                            now()->addMinutes(2),
+                            ['user' => $record->getKey()],
+                        ));
                     }),
                 Tables\Actions\EditAction::make()->label('ویرایش')->iconButton(),
                 Tables\Actions\RestoreAction::make()

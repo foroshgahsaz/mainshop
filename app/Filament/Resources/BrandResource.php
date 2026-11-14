@@ -9,12 +9,15 @@ use App\Filament\Support\AdminTable;
 use App\Filament\Support\SeoFormSchema;
 use App\Filament\Support\ShopMediaPicker;
 use App\Models\Brand;
+use App\Services\Catalog\BankdarCatalogService;
 use App\Support\AdminAccess;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class BrandResource extends Resource
@@ -36,6 +39,32 @@ class BrandResource extends Resource
     public static function canViewAny(): bool
     {
         return AdminAccess::canAccessAdminResource(static::class);
+    }
+
+    public static function canCreate(): bool
+    {
+        return AdminAccess::canManageCatalogDefinitionsInAdmin();
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return AdminAccess::canManageCatalogDefinitionsInAdmin();
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return AdminAccess::canManageCatalogDefinitionsInAdmin();
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return AdminAccess::canManageCatalogDefinitionsInAdmin();
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return app(BankdarCatalogService::class)
+            ->scopeBrandsForActor(parent::getEloquentQuery());
     }
 
     public static function form(Form $form): Form
@@ -64,6 +93,14 @@ class BrandResource extends Resource
                         ->numeric()
                         ->default(0)
                         ->helperText('عدد کوچک‌تر = بالاتر در منوی برندها و لیست‌های سایت.'),
+                    Forms\Components\Select::make('bankdar_id')
+                        ->label('بنکدار مالک')
+                        ->options(fn (): array => app(BankdarCatalogService::class)->bankdarOptions())
+                        ->searchable()
+                        ->preload()
+                        ->nullable()
+                        ->helperText('اگر مشخص شود، فقط همان بنکدار این برند و محصولاتش را در پنل می‌بیند.')
+                        ->visible(fn (): bool => AdminAccess::canManageCatalogDefinitionsInAdmin()),
                 ])->columns(2),
             ...SeoFormSchema::contentSection('name', 'description'),
         ]);
@@ -76,6 +113,11 @@ class BrandResource extends Resource
                 AdminImageColumn::make('logo', 40, 'لوگو')->circular(),
                 Tables\Columns\TextColumn::make('name')->label('نام')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('slug')->label('اسلاگ'),
+                Tables\Columns\TextColumn::make('bankdar.name')
+                    ->label('بنکدار')
+                    ->placeholder('—')
+                    ->toggleable()
+                    ->visible(fn (): bool => AdminAccess::canManageCatalogDefinitionsInAdmin() || AdminAccess::isSalesManagerOnly()),
                 Tables\Columns\IconColumn::make('is_active')->label('فعال')->boolean(),
                 Tables\Columns\TextColumn::make('position')
                     ->label('ترتیب')
@@ -85,8 +127,14 @@ class BrandResource extends Resource
             ])
             ->defaultSort('position')
             ->actions([
-                Tables\Actions\EditAction::make()->label('ویرایش')->iconButton(),
-                Tables\Actions\DeleteAction::make()->label('حذف')->iconButton()
+                Tables\Actions\EditAction::make()
+                    ->label('ویرایش')
+                    ->iconButton()
+                    ->visible(fn (): bool => AdminAccess::canManageCatalogDefinitionsInAdmin()),
+                Tables\Actions\DeleteAction::make()
+                    ->label('حذف')
+                    ->iconButton()
+                    ->visible(fn (): bool => AdminAccess::canManageCatalogDefinitionsInAdmin())
                     ->successNotificationTitle('حذف شد'),
             ]);
     }

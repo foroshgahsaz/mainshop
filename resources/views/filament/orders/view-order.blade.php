@@ -71,7 +71,7 @@
             <aside class="admin-order__sidebar">
                 @include('filament.orders.partials.customer-box', ['order' => $order])
                 @include('filament.orders.partials.address-box', ['order' => $order])
-                @if(\App\Support\AdminAccess::canManageShopInAdmin())
+                @if(\App\Support\AdminAccess::canEditOrdersInAdmin())
                     @include('filament.orders.partials.order-actions', [
                         'order' => $order,
                         'editStatus' => $editStatus,

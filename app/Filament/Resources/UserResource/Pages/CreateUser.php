@@ -21,7 +21,9 @@ class CreateUser extends CreateRecord
         }
 
         if (AdminAccess::isBankdarOnly()) {
-            return 'افزودن نماینده';
+            $kind = (string) ($this->form->getRawState()['bankdar_create_kind'] ?? 'representative');
+
+            return $kind === 'customer' ? 'افزودن مشتری' : 'افزودن نماینده';
         }
 
         return parent::getTitle();
@@ -46,12 +48,33 @@ class CreateUser extends CreateRecord
         }
 
         if (AdminAccess::isBankdarOnly()) {
-            $data['is_representative'] = true;
+            $raw = $this->form->getRawState();
+            $kind = (string) ($raw['bankdar_create_kind'] ?? 'representative');
+
             $data['is_admin'] = false;
             $data['is_author'] = false;
             $data['is_sales_manager'] = false;
             $data['is_bankdar'] = false;
             $data['status'] = $data['status'] ?? true;
+
+            if ($kind === 'customer') {
+                $repId = (int) ($data['created_by_representative_id'] ?? $raw['created_by_representative_id'] ?? 0);
+                $actor = auth()->user();
+                if ($repId <= 0 || ! $actor || ! app(SalesRegionService::class)->managesRepresentative(
+                    $actor,
+                    \App\Models\User::query()->findOrFail($repId),
+                )) {
+                    throw ValidationException::withMessages([
+                        'data.created_by_representative_id' => 'نماینده باید زیرمجموعه شما باشد.',
+                    ]);
+                }
+
+                $data['is_representative'] = false;
+                $data['created_by_representative_id'] = $repId;
+            } else {
+                $data['is_representative'] = true;
+                unset($data['created_by_representative_id']);
+            }
         }
 
         return static::stripVirtualAccessFormKeys($data);
@@ -66,6 +89,10 @@ class CreateUser extends CreateRecord
         $raw = $this->form->getRawState();
 
         if (AdminAccess::isBankdarOnly()) {
+            if (($raw['bankdar_create_kind'] ?? 'representative') === 'customer') {
+                return;
+            }
+
             $bankdar = auth()->user();
             $provinceId = (int) ($bankdar?->bankdar_province_id ?? 0);
             if ($provinceId <= 0) {
@@ -154,6 +181,7 @@ class CreateUser extends CreateRecord
             $data['rep_city_id'],
             $data['rep_max_active_reservations'],
             $data['locked_province'],
+            $data['bankdar_create_kind'],
         );
 
         return $data;

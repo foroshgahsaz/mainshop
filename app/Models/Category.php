@@ -21,6 +21,7 @@ class Category extends Model
         'is_active',
         'admin_shop_preview',
         'position',
+        'bankdar_id',
         'show_in_mega',
         'mega_column',
         'meta_title',
@@ -41,6 +42,11 @@ class Category extends Model
             'admin_shop_preview' => 'boolean',
             'show_in_mega' => 'boolean',
         ];
+    }
+
+    public function bankdar(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'bankdar_id');
     }
 
     public function parent(): BelongsTo

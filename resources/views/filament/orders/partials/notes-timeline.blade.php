@@ -1,7 +1,7 @@
 <section class="admin-order__section admin-order__section--notes">
     <h2 class="admin-order__section-title">یادداشت‌ها و تاریخچه سفارش</h2>
 
-    @if(\App\Support\AdminAccess::canManageShopInAdmin())
+    @if(\App\Support\AdminAccess::canEditOrdersInAdmin())
     <form wire:submit="addNote" class="admin-order__note-form">
         <label class="admin-order__label">افزودن یادداشت</label>
         <textarea wire:model="newNote" rows="3" class="admin-order__textarea" placeholder="یادداشت خصوصی یا پیام برای مشتری..."></textarea>

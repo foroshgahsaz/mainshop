@@ -89,6 +89,30 @@ class SalesManagerAccessTest extends TestCase
         $this->assertContains('filament.admin.resources.products.*', AdminAccess::limitedStaffAllowedRoutePatterns());
     }
 
+    public function test_bankdar_dashboard_orders_customers_and_catalog_gates(): void
+    {
+        $bankdar = User::make([
+            'is_bankdar' => true,
+            'is_sales_manager' => false,
+            'is_admin' => false,
+            'status' => true,
+            'bankdar_province_id' => 5,
+        ]);
+        $bankdar->id = 9;
+
+        $this->actingAs($bankdar);
+
+        $this->assertTrue(AdminAccess::canCreateOrdersInAdmin($bankdar));
+        $this->assertTrue(AdminAccess::canEditOrdersInAdmin($bankdar));
+        $this->assertTrue(AdminAccess::canCreateCustomersInAdmin($bankdar));
+        $this->assertTrue(AdminAccess::canSoftDeleteShopRecordsInAdmin($bankdar));
+        $this->assertFalse(AdminAccess::canManageCatalogDefinitionsInAdmin($bankdar));
+        $this->assertTrue(OrderResource::canCreate());
+        $this->assertTrue(\App\Filament\Resources\BrandResource::canViewAny());
+        $this->assertFalse(\App\Filament\Resources\BrandResource::canCreate());
+        $this->assertFalse(\App\Filament\Resources\CategoryResource::canCreate());
+    }
+
     public function test_sales_manager_can_edit_assigned_bankdar_and_subtree_reps(): void
     {
         $manager = User::make(['is_sales_manager' => true, 'is_admin' => false]);

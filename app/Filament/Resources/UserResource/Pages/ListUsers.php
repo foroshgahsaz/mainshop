@@ -85,7 +85,7 @@ class ListUsers extends AdminListRecords
         }
 
         if (AdminAccess::isBankdarOnly()) {
-            return 'افزودن نماینده';
+            return 'افزودن کاربر';
         }
 
         return 'افزودن کاربر';
@@ -94,7 +94,8 @@ class ListUsers extends AdminListRecords
     public static function canShowTopBarCreate(): bool
     {
         return AdminAccess::canCreateRepresentativesInAdmin()
-            || AdminAccess::canCreateBankdarsInAdmin();
+            || AdminAccess::canCreateBankdarsInAdmin()
+            || AdminAccess::canCreateCustomersInAdmin();
     }
 
     protected function extraListHeaderActions(): array
@@ -110,7 +111,7 @@ class ListUsers extends AdminListRecords
         if (AdminAccess::isBankdarOnly()) {
             return [
                 Actions\CreateAction::make()
-                    ->label('افزودن نماینده')
+                    ->label('افزودن نماینده / مشتری')
                     ->icon('heroicon-o-user-plus'),
             ];
         }

@@ -2,7 +2,7 @@
 
 الگوی فعلی پروژه: **یک پنل Filament (`/admin`)** + محدودیت در PHP، نه پنل جدا برای هر نقش.
 
-نقش‌های پیاده‌سازی‌شده: **مدیر فروش** (`is_sales_manager`) و **بنکدار** (`is_bankdar`) — هر دو از `AdminAccess::isLimitedStaffOnly()` و منوی محدود (از جمله محصولات و بارگذاری اکسل).
+نقش‌های پیاده‌سازی‌شده: **مدیر فروش** (`is_sales_manager`) و **بنکدار** (`is_bankdar`) — هر دو از `AdminAccess::isLimitedStaffOnly()` و منوی محدود (محصولات، اکسل، سفارش، کاربر). بنکدار: برند/دسته فقط مشاهده (اختصاص `bankdar_id` توسط ادمین)؛ soft-delete سفارش/محصول/مشتری بدون سفارش؛ داشبورد اسکوپ‌شده — جزئیات در [11-bankdar-sales-hierarchy.md](11-bankdar-sales-hierarchy.md).
 
 ---
 

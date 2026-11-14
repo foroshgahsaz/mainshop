@@ -6,6 +6,7 @@ use App\Filament\Resources\CategoryResource;
 use App\Models\Category;
 use App\Services\Category\CategoryDeletionResult;
 use App\Services\Category\CategoryDeletionService;
+use App\Support\AdminAccess;
 use Filament\Actions\DeleteAction as PageDeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Support\Exceptions\Halt;
@@ -19,6 +20,7 @@ class CategoryDeleteActions
         return Tables\Actions\DeleteAction::make()
             ->label('حذف')
             ->iconButton()
+            ->visible(fn (): bool => AdminAccess::canManageCatalogDefinitionsInAdmin())
             ->requiresConfirmation()
             ->modalDescription('محصولاتی که در سفارش‌ها ثبت شده‌اند به دسته دیگر منتقل و آرشیو می‌شوند.')
             ->action(function (Category $record): void {

@@ -12,6 +12,7 @@ use App\Filament\Support\ProductDeleteActions;
 use App\Filament\Support\RichContentEditor;
 use App\Filament\Support\SeoFormSchema;
 use App\Models\Product;
+use App\Services\Catalog\BankdarCatalogService;
 use App\Support\AdminAccess;
 use Illuminate\Database\Eloquent\Model;
 use App\Support\ShopLabels;
@@ -59,12 +60,30 @@ class ProductResource extends Resource
 
     public static function canEdit(Model $record): bool
     {
-        return AdminAccess::canManageProductsInAdmin();
+        if (! AdminAccess::canManageProductsInAdmin()) {
+            return false;
+        }
+
+        if (AdminAccess::isBankdarOnly() && $record instanceof Product) {
+            return app(BankdarCatalogService::class)
+                ->productBelongsToBankdar($record, (int) auth()->id());
+        }
+
+        return true;
     }
 
     public static function canDelete(Model $record): bool
     {
-        return AdminAccess::canManageProductsInAdmin();
+        if (! AdminAccess::canManageProductsInAdmin()) {
+            return false;
+        }
+
+        if (AdminAccess::isBankdarOnly() && $record instanceof Product) {
+            return app(BankdarCatalogService::class)
+                ->productBelongsToBankdar($record, (int) auth()->id());
+        }
+
+        return true;
     }
 
     public static function canDeleteAny(): bool
@@ -80,14 +99,22 @@ class ProductResource extends Resource
                     ->schema([
                         Forms\Components\Select::make('category_id')
                             ->label('دسته‌بندی')
-                            ->relationship('category', 'name')
+                            ->relationship(
+                                'category',
+                                'name',
+                                fn ($query) => app(BankdarCatalogService::class)->scopeCategoriesForActor($query),
+                            )
                             ->required()
                             ->searchable()
                             ->preload(),
 
                         Forms\Components\Select::make('brand_id')
                             ->label('برند')
-                            ->relationship('brand', 'name')
+                            ->relationship(
+                                'brand',
+                                'name',
+                                fn ($query) => app(BankdarCatalogService::class)->scopeBrandsForActor($query),
+                            )
                             ->searchable()
                             ->preload()
                             ->live()
@@ -328,6 +355,8 @@ class ProductResource extends Resource
                     ->label('وضعیت'),
                 Tables\Filters\TernaryFilter::make('is_featured')
                     ->label('محصول ویژه'),
+                Tables\Filters\TrashedFilter::make()
+                    ->visible(fn (): bool => AdminAccess::isFullAdmin()),
             ])
             ->actions([
                 Tables\Actions\Action::make('viewStorefront')
@@ -342,18 +371,23 @@ class ProductResource extends Resource
                     ->label('ویرایش')
                     ->iconButton()
                     ->url(fn (Product $record): string => static::getUrl('edit', ['record' => $record->getKey()])),
+                Tables\Actions\RestoreAction::make()
+                    ->label('بازیابی')
+                    ->visible(fn (Product $record): bool => AdminAccess::isFullAdmin() && $record->trashed()),
                 ProductDeleteActions::tableDeleteAction(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     ProductDeleteActions::tableBulkDeleteAction(),
+                    Tables\Actions\RestoreBulkAction::make()
+                        ->visible(fn (): bool => AdminAccess::isFullAdmin()),
                 ]),
             ]);
     }
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->with([
+        $query = parent::getEloquentQuery()->with([
             'category:id,name',
             'brand:id,name',
             'productFamily:id,name',
@@ -366,6 +400,12 @@ class ProductResource extends Resource
                 ->orderBy('position')
                 ->limit(1),
         ]);
+
+        if (AdminAccess::isFullAdmin()) {
+            $query = $query->withTrashed();
+        }
+
+        return app(BankdarCatalogService::class)->scopeProductsForActor($query);
     }
 
     public static function getRelations(): array

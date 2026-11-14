@@ -34,6 +34,7 @@ class OrderDeletionService
                 $this->stockService->restoreOrderItems($locked);
             }
 
+            // soft-delete: از لیست فروشگاه و داشبورد بنکدار/نماینده پنهان می‌شود؛ ادمین بازیابی می‌کند.
             $locked->delete();
 
             return 'deleted';

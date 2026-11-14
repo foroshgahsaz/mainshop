@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Concerns\HasAdminShopPreview;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Brand extends Model
@@ -18,6 +19,7 @@ class Brand extends Model
         'is_active',
         'admin_shop_preview',
         'position',
+        'bankdar_id',
         'meta_title',
         'meta_description',
         'meta_keywords',
@@ -41,6 +43,11 @@ class Brand extends Model
     public function getRouteKeyName(): string
     {
         return 'slug';
+    }
+
+    public function bankdar(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'bankdar_id');
     }
 
     public function products(): HasMany

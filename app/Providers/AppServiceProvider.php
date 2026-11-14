@@ -113,6 +113,13 @@ class AppServiceProvider extends ServiceProvider
             }
         );
 
+        // SoftDeletes روی Order/User بدون ستون deleted_at → ۵۰۰ داشبورد/کرون
+        try {
+            app(\App\Services\Shop\SoftDeletesSchemaRepair::class)->ensureOnce();
+        } catch (\Throwable) {
+            // در boot اولیه DB ممکن است آماده نباشد
+        }
+
         $this->ensureRuntimeCacheAndSessionAreReachable();
 
         foreach (ShopStoragePaths::persistentDirectories() as $directory) {

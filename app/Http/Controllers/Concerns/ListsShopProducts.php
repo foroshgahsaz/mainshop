@@ -43,9 +43,9 @@ trait ListsShopProducts
                 : null,
             'min_price' => $request->min_price,
             'max_price' => $request->max_price,
-            'sort' => $request->get('sort', 'created_at'),
-            'direction' => $request->get('direction', 'desc'),
-            'page' => $request->get('page', 1),
+            'sort' => $request->query('sort', 'created_at'),
+            'direction' => $request->query('direction', 'desc'),
+            'page' => $request->query('page', 1),
         ];
 
         $products = $cache->productListing($filters);

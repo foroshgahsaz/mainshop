@@ -11,7 +11,7 @@ class ProductImportTemplateController
 {
     public function __invoke(): StreamedResponse
     {
-        abort_unless(AdminAccess::canManageProductsInAdmin(), 403);
+        abort_unless(AdminAccess::canImportProductsInAdmin(), 403);
 
         return response()->streamDownload(function (): void {
             $writer = WriterFactory::createFromFile('product-import-template.xlsx');

@@ -52,6 +52,26 @@ class ProductResource extends Resource
         return AdminAccess::canAccessAdminResource(static::class);
     }
 
+    public static function canCreate(): bool
+    {
+        return AdminAccess::canManageProductsInAdmin();
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return AdminAccess::canManageProductsInAdmin();
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return AdminAccess::canManageProductsInAdmin();
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return AdminAccess::canManageProductsInAdmin();
+    }
+
     public static function form(Form $form): Form
     {
         return $form

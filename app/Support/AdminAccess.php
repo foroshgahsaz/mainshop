@@ -197,11 +197,21 @@ class AdminAccess
         return static::isFullAdmin($user) || static::isSalesManagerOnly($user);
     }
 
+    /**
+     * مدیریت محصولات در ادمین: لیست، افزودن، ویرایش، بروزرسانی قیمت، ورود اکسل.
+     * شامل مدیر سیستم، مدیر فروش و بنکدار.
+     */
     public static function canManageProductsInAdmin(?User $user = null): bool
     {
         $user ??= static::user();
 
         return static::isFullAdmin($user) || static::isLimitedStaffOnly($user);
+    }
+
+    /** ورود لیست محصول از اکسل (همان سطح دسترسی مدیریت محصول). */
+    public static function canImportProductsInAdmin(?User $user = null): bool
+    {
+        return static::canManageProductsInAdmin($user);
     }
 
     /** @return list<string> */

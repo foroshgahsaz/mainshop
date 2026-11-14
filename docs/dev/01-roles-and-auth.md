@@ -72,7 +72,7 @@
 - مدیر فروش / بنکدار → `/admin` با محدودیت همان نقش؛ نماینده → `/representative`.
 - قبل از ورود: `SoftDeletesSchemaRepair::ensureOnce()` به‌صورت best-effort (خرابی repair ورود موقت را نمی‌شکند).
 
-- بنر چسبان «بازگشت به ادمین» → `POST /staff/impersonation/stop` (CSRF + throttle).
+- بنر چسبان «بازگشت به ادمین» داخل `.main-content` لایه‌اوت ادمین/نماینده (نه `BODY_START`) تا زیر سایدبار ثابت نرود → `POST /staff/impersonation/stop` (CSRF + throttle).
 - غیر از مدیر سیستم این دکمه را نمی‌بینند. روی Logout کلیدهای سشن پاک می‌شوند.
 - بنر فقط وقتی کلید سشن هست رندر می‌شود (بدون کوئری اضافه روی هر درخواست عادی).
 

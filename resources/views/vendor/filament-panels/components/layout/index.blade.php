@@ -16,6 +16,10 @@
         <div class="sidebar-backdrop" id="sidebarBackdrop" hidden aria-hidden="true"></div>
 
         <div class="main-content" id="mainContent">
+            {{-- داخل main-content تا زیر سایدبار ثابت نرود --}}
+            @if (session()->has(\App\Services\Auth\AdminImpersonationService::SESSION_ACTOR_ID))
+                @include('filament.hooks.impersonation-banner')
+            @endif
             @unless (request()->routeIs('filament.representative.*'))
                 @include('filament.partials.admin-top-bar', [
                     'adminTopBarCreate' => view()->shared('adminTopBarCreate'),

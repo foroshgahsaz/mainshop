@@ -63,6 +63,15 @@
 - کلاس: `app/Filament/Pages/Auth/Login.php` → `redirectAfterAdminLogin()`.
 - binding: `app/Http/Responses/Filament/AdminLoginResponse.php` در `AppServiceProvider`.
 
+### ورود موقت به پنل بنکدار / نماینده (فقط مدیر سیستم)
+
+- در `/admin/users` روی ردیف **بنکدار** یا **نماینده**: آیکون «ورود به پنل» (تأیید مودال).
+- سرویس: `AdminImpersonationService` — سشن سبک (`admin_impersonation.*`)، بدون `remember`، `session()->regenerate()`، لاگ `admin.impersonation.start|stop`.
+- بنکدار → `/admin` با محدودیت همان نقش؛ نماینده → `/representative`.
+- بنر چسبان «بازگشت به ادمین» → `POST /staff/impersonation/stop` (CSRF + throttle).
+- مدیر فروش / بنکدار این دکمه را نمی‌بینند. روی Logout کلیدهای سشن پاک می‌شوند.
+- بنر فقط وقتی کلید سشن هست رندر می‌شود (بدون کوئری اضافه روی هر درخواست عادی).
+
 ### دسترسی پنل
 
 ```php

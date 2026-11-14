@@ -106,6 +106,13 @@ class AppServiceProvider extends ServiceProvider
         View::share('adminTopBarCreate', null);
         View::share('adminTopBarUtilityLink', null);
 
+        \Illuminate\Support\Facades\Event::listen(
+            \Illuminate\Auth\Events\Logout::class,
+            function (): void {
+                app(\App\Services\Auth\AdminImpersonationService::class)->forgetSessionKeys();
+            }
+        );
+
         $this->ensureRuntimeCacheAndSessionAreReachable();
 
         foreach (ShopStoragePaths::persistentDirectories() as $directory) {

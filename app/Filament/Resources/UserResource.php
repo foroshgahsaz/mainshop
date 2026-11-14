@@ -467,6 +467,33 @@ class UserResource extends Resource
                 ])
                 ->columns(1)
                 ->visible(fn (Get $get): bool => $get('user_kind') === 'staff'),
+            Forms\Components\Fieldset::make('انتساب بنکدار')
+                ->schema([
+                    Forms\Components\Select::make('created_by_sales_manager_id')
+                        ->label('مدیر فروش')
+                        ->options(fn (): array => User::query()
+                            ->where('is_sales_manager', true)
+                            ->where('status', true)
+                            ->orderBy('name')
+                            ->pluck('name', 'id')
+                            ->all())
+                        ->searchable()
+                        ->required(fn (Get $get): bool => ($get('staff_role') ?? null) === 'bankdar')
+                        ->helperText('بنکدار فقط در پنل همین مدیر فروش دیده می‌شود.')
+                        ->disabled(fn (): bool => ! AdminAccess::canManageShopInAdmin())
+                        ->dehydrated(fn (): bool => AdminAccess::canManageShopInAdmin()),
+                    Forms\Components\Select::make('bankdar_province_id')
+                        ->label('استان بنکدار')
+                        ->options(fn (): array => app(SalesRegionService::class)->provinceOptionsAvailableForBankdar())
+                        ->in(fn (): array => app(SalesRegionService::class)->provinceIdsAvailableForBankdar())
+                        ->searchable()
+                        ->required(fn (Get $get): bool => ($get('staff_role') ?? null) === 'bankdar')
+                        ->helperText('استان فعالیت بنکدار برای ساخت نماینده.'),
+                ])
+                ->columns(2)
+                ->visible(fn (Get $get): bool => $get('user_kind') === 'staff'
+                    && ($get('staff_role') ?? null) === 'bankdar'
+                    && (AdminAccess::canManageShopInAdmin() || AdminAccess::isSalesManagerOnly())),
         ];
 
         if (! $forCreate) {
@@ -742,6 +769,8 @@ class UserResource extends Resource
     {
         $query = parent::getEloquentQuery()->with([
             'createdByRepresentative',
+            'createdBySalesManager:id,name',
+            'bankdarProvince:id,name',
             'representativeProfile.salesManager:id,name',
             'representativeProfile.province:id,name',
         ]);
@@ -774,16 +803,31 @@ class UserResource extends Resource
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->visible(fn (): bool => AdminAccess::canManageShopInAdmin()),
-                Tables\Columns\TextColumn::make('representativeProfile.salesManager.name')
-                    ->label('بنکدار')
-                    ->description(fn (User $record): ?string => $record->representativeProfile?->province?->name)
-                    ->placeholder(fn (User $record): string => $record->isRepresentative() ? 'تعیین نشده' : '—')
-                    ->toggleable(),
+                Tables\Columns\TextColumn::make('createdBySalesManager.name')
+                    ->label('مدیر فروش')
+                    ->placeholder(fn (User $record): string => $record->isBankdar() ? 'تعیین نشده' : '—')
+                    ->toggleable()
+                    ->visible(fn (): bool => AdminAccess::canManageShopInAdmin() || AdminAccess::isSalesManagerOnly()),
                 Tables\Columns\TextColumn::make('bankdarProvince.name')
                     ->label('استان بنکدار')
                     ->placeholder('—')
                     ->toggleable()
                     ->visible(fn (): bool => AdminAccess::canManageShopInAdmin() || AdminAccess::isSalesManagerOnly()),
+                Tables\Columns\TextColumn::make('representativeProfile.salesManager.name')
+                    ->label('بنکدار')
+                    ->description(fn (User $record): ?string => $record->isRepresentative()
+                        ? ($record->representativeProfile?->province?->name)
+                        : null)
+                    ->placeholder(fn (User $record): string => $record->isRepresentative() ? 'تعیین نشده' : '—')
+                    ->toggleable()
+                    // فقط برای نمایندگان معنا دارد؛ برای بنکدار خالی بماند تا با «مدیر فروش» اشتباه نشود.
+                    ->formatStateUsing(function (?string $state, User $record): string {
+                        if (! $record->isRepresentative()) {
+                            return '—';
+                        }
+
+                        return $state !== null && $state !== '' ? $state : 'تعیین نشده';
+                    }),
                 Tables\Columns\TextColumn::make('createdByRepresentative.name')
                     ->label('نماینده ثبت‌کننده')
                     ->placeholder('—')
@@ -804,6 +848,23 @@ class UserResource extends Resource
                     ->sortable(),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('created_by_sales_manager_id')
+                    ->label('مدیر فروش بنکدار')
+                    ->options(fn (): array => User::query()
+                        ->where('is_sales_manager', true)
+                        ->orderBy('name')
+                        ->pluck('name', 'id')
+                        ->all())
+                    ->visible(fn (): bool => AdminAccess::canManageShopInAdmin())
+                    ->query(function (Builder $query, array $data): Builder {
+                        $value = $data['value'] ?? null;
+                        if ($value === null || $value === '') {
+                            return $query;
+                        }
+
+                        return $query->where('is_bankdar', true)
+                            ->where('created_by_sales_manager_id', (int) $value);
+                    }),
                 Tables\Filters\SelectFilter::make('rep_sales_manager')
                     ->label('بنکدار نماینده')
                     ->options(fn (): array => ['none' => 'بدون بنکدار']

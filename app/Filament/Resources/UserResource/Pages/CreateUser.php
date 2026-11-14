@@ -138,6 +138,16 @@ class CreateUser extends CreateRecord
                 $role = static::resolveStaffRoleFromFlags($data) ?? '';
             }
             $data = static::applyStaffRoleFlags($data, $role !== '' ? $role : null);
+
+            if ($role === 'bankdar') {
+                $managerId = (int) ($raw['created_by_sales_manager_id'] ?? $data['created_by_sales_manager_id'] ?? 0);
+                $provinceId = (int) ($raw['bankdar_province_id'] ?? $data['bankdar_province_id'] ?? 0);
+                $data['created_by_sales_manager_id'] = $managerId > 0 ? $managerId : null;
+                $data['bankdar_province_id'] = $provinceId > 0 ? $provinceId : null;
+            } else {
+                $data['created_by_sales_manager_id'] = null;
+                $data['bankdar_province_id'] = null;
+            }
         }
 
         return static::normalizeUserKind($data);

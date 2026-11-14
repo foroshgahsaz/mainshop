@@ -41,6 +41,16 @@ class ShopDeployRecover extends Command
             $this->components->info('Mega menu schema repaired: '.implode(', ', $megaRepair));
         }
 
+        $bankdarRepair = app(\App\Services\Representative\BankdarHierarchyRepair::class)
+            ->repairMissingSalesManagerLinks();
+        if (($bankdarRepair['linked'] ?? 0) > 0 || ($bankdarRepair['province_filled'] ?? 0) > 0) {
+            $this->components->info(sprintf(
+                'Bankdar hierarchy repaired: %d sales-manager link(s), %d province(s).',
+                $bankdarRepair['linked'],
+                $bankdarRepair['province_filled'],
+            ));
+        }
+
         Artisan::call('shop:migrate-homepage-settings-categories');
         $homepageMigrateOut = trim(Artisan::output());
         if ($homepageMigrateOut !== '' && $homepageMigrateOut !== 'تغییری لازم نبود.') {

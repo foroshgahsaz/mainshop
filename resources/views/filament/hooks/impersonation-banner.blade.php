@@ -27,13 +27,16 @@
         </div>
     </div>
     <style>
+        /* داخل .main-content رندر می‌شود — هم‌عرض محتوا، نه زیر سایدبار */
         .fi-impersonation-banner {
             position: sticky;
             top: 0;
-            z-index: 60;
+            z-index: 40;
             background: #b45309;
             color: #fff;
             box-shadow: 0 1px 0 rgba(0,0,0,.08);
+            width: 100%;
+            box-sizing: border-box;
         }
         .fi-impersonation-banner__inner {
             display: flex;
@@ -41,16 +44,20 @@
             align-items: center;
             justify-content: space-between;
             gap: .75rem 1rem;
-            max-width: 80rem;
-            margin: 0 auto;
-            padding: .65rem 1rem;
+            padding: .65rem 1.25rem;
         }
         .fi-impersonation-banner__text {
             margin: 0;
             font-size: .9rem;
-            line-height: 1.4;
+            line-height: 1.45;
+            flex: 1 1 14rem;
+            min-width: 0;
+            overflow-wrap: anywhere;
         }
         .fi-impersonation-banner__sep { opacity: .7; margin: 0 .35rem; }
+        .fi-impersonation-banner__form {
+            flex: 0 0 auto;
+        }
         .fi-impersonation-banner__btn {
             appearance: none;
             border: 1px solid rgba(255,255,255,.45);
@@ -61,6 +68,7 @@
             border-radius: .55rem;
             padding: .4rem .85rem;
             cursor: pointer;
+            white-space: nowrap;
         }
         .fi-impersonation-banner__btn:hover {
             background: rgba(255,255,255,.22);

@@ -243,9 +243,21 @@ class RepresentativeCustomerService
             ]);
         }
 
+        $lockedProvinceId = app(SalesRegionService::class)
+            ->activityProvinceIdForRepresentative($representative);
         $provinceId = (int) ($data['province_id'] ?? 0);
+        if ($lockedProvinceId !== null) {
+            $provinceId = $lockedProvinceId;
+        }
+
         $cityId = (int) ($data['city_id'] ?? 0);
         $addressLine = trim((string) ($data['address'] ?? ''));
+
+        if ($lockedProvinceId === null) {
+            throw ValidationException::withMessages([
+                'province_id' => 'استان فعالیت نماینده تعیین نشده است. با بنکدار هماهنگ کنید.',
+            ]);
+        }
 
         validator(
             [

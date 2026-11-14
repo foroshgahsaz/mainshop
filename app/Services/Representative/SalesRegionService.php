@@ -128,6 +128,34 @@ class SalesRegionService
         }
     }
 
+    /**
+     * استان فعالیت نماینده: پروفایل، وگرنه استان بنکدار بالادست.
+     */
+    public function activityProvinceIdForRepresentative(?User $representative): ?int
+    {
+        if (! $representative instanceof User || ! $representative->isRepresentative()) {
+            return null;
+        }
+
+        $profile = $representative->representativeProfile;
+        $fromProfile = (int) ($profile?->province_id ?? 0);
+        if ($fromProfile > 0) {
+            return $fromProfile;
+        }
+
+        $bankdarId = (int) ($profile?->sales_manager_id ?? 0);
+        if ($bankdarId <= 0) {
+            return null;
+        }
+
+        $fromBankdar = (int) (User::query()
+            ->whereKey($bankdarId)
+            ->where('is_bankdar', true)
+            ->value('bankdar_province_id') ?? 0);
+
+        return $fromBankdar > 0 ? $fromBankdar : null;
+    }
+
     public function assertBankdarProvinceAvailable(?int $provinceId): void
     {
         if (! $provinceId || ! in_array($provinceId, $this->provinceIdsAvailableForBankdar(), true)) {

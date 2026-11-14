@@ -4,9 +4,11 @@ namespace App\Filament\Representative\Resources;
 
 use App\Filament\Representative\Resources\CustomerResource\Pages;
 use App\Models\City;
+use App\Models\Province;
 use App\Models\User;
 use App\Rules\IranianNationalCode;
 use App\Services\Representative\RepresentativeCustomerService;
+use App\Services\Representative\SalesRegionService;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -73,19 +75,37 @@ class CustomerResource extends Resource
                 ->schema([
                     Forms\Components\Select::make('province_id')
                         ->label('استان')
-                        ->options(fn () => \App\Models\Province::query()->orderBy('position')->pluck('name', 'id'))
+                        ->options(function (): array {
+                            $provinceId = static::lockedActivityProvinceId();
+                            if ($provinceId === null) {
+                                return [];
+                            }
+
+                            return Province::query()
+                                ->whereKey($provinceId)
+                                ->pluck('name', 'id')
+                                ->all();
+                        })
+                        ->default(fn (): ?int => static::lockedActivityProvinceId())
                         ->required()
-                        ->searchable()
+                        ->disabled()
+                        ->dehydrated()
+                        ->helperText('استان آدرس همان استان فعالیت شماست و قابل تغییر نیست.')
                         ->live(),
                     Forms\Components\Select::make('city_id')
                         ->label('شهر')
-                        ->options(fn (Get $get) => City::query()
-                            ->when($get('province_id'), fn ($q, $id) => $q->where('province_id', $id))
-                            ->orderBy('position')
-                            ->pluck('name', 'id'))
+                        ->options(function (Get $get): array {
+                            $provinceId = (int) ($get('province_id') ?: static::lockedActivityProvinceId() ?: 0);
+
+                            return City::query()
+                                ->when($provinceId > 0, fn ($q) => $q->where('province_id', $provinceId))
+                                ->orderBy('position')
+                                ->pluck('name', 'id')
+                                ->all();
+                        })
                         ->required()
                         ->searchable()
-                        ->disabled(fn (Get $get): bool => ! $get('province_id')),
+                        ->disabled(fn (): bool => static::lockedActivityProvinceId() === null),
                     Forms\Components\Textarea::make('address')
                         ->label('آدرس')
                         ->required()
@@ -98,6 +118,15 @@ class CustomerResource extends Resource
                 ->columns(2)
                 ->visibleOn('create'),
         ]);
+    }
+
+    protected static function lockedActivityProvinceId(): ?int
+    {
+        $user = auth()->user();
+
+        return $user instanceof User
+            ? app(SalesRegionService::class)->activityProvinceIdForRepresentative($user)
+            : null;
     }
 
     public static function table(Table $table): Table

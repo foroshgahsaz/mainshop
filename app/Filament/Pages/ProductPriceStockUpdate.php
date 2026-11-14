@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
+use App\Services\Catalog\BankdarCatalogService;
 use App\Services\Product\ProductPriceStockUpdateService;
 use App\Services\Settings\SettingsService;
 use App\Support\AdminAccess;
@@ -101,8 +102,15 @@ class ProductPriceStockUpdate extends Page
         $this->resetRowInputs();
     }
 
+    public function canManageSiteSalesToggles(): bool
+    {
+        return AdminAccess::canManageShopInAdmin();
+    }
+
     public function updatedHideShopPrices(SettingsService $settings): void
     {
+        abort_unless($this->canManageSiteSalesToggles(), 403);
+
         $settings->set('site', 'hide_shop_prices', $this->hideShopPrices);
 
         Notification::make()
@@ -116,6 +124,8 @@ class ProductPriceStockUpdate extends Page
 
     public function updatedDisableShopPurchase(SettingsService $settings): void
     {
+        abort_unless($this->canManageSiteSalesToggles(), 403);
+
         $settings->set('site', 'disable_shop_purchase', $this->disableShopPurchase);
 
         Notification::make()
@@ -137,7 +147,10 @@ class ProductPriceStockUpdate extends Page
     /** @return array<int, string> */
     public function getCategoryOptionsProperty(): array
     {
-        return Category::query()
+        $catalog = app(BankdarCatalogService::class);
+
+        return $catalog
+            ->scopeCategoriesForActor(Category::query())
             ->orderBy('name')
             ->pluck('name', 'id')
             ->all();
@@ -146,7 +159,10 @@ class ProductPriceStockUpdate extends Page
     /** @return array<int, string> */
     public function getBrandOptionsProperty(): array
     {
-        return Brand::query()
+        $catalog = app(BankdarCatalogService::class);
+
+        return $catalog
+            ->scopeBrandsForActor(Brand::query())
             ->orderBy('name')
             ->pluck('name', 'id')
             ->all();
@@ -154,24 +170,33 @@ class ProductPriceStockUpdate extends Page
 
     public function saveProduct(int $productId, ProductPriceStockUpdateService $service): void
     {
+        $categoryRules = ['required', 'integer', 'exists:categories,id'];
+        if (AdminAccess::isBankdarOnly()) {
+            $allowedCategoryIds = app(BankdarCatalogService::class)
+                ->categoryIdsForBankdar((int) auth()->id());
+            $categoryRules[] = Rule::in($allowedCategoryIds);
+        }
+
         $this->validate([
             "rowPrices.{$productId}" => ['required', 'integer', 'min:0'],
             "rowStocks.{$productId}" => ['required', 'integer', 'min:0', 'max:999999'],
-            "rowCategories.{$productId}" => ['required', 'integer', 'exists:categories,id'],
+            "rowCategories.{$productId}" => $categoryRules,
             "rowSkus.{$productId}" => [
                 'nullable',
                 'string',
                 'max:255',
                 Rule::unique(Product::class, 'sku')->ignore($productId),
             ],
-        ], [], [
+        ], [
+            "rowCategories.{$productId}.in" => 'این دسته‌بندی خارج از محدوده شماست.',
+        ], [
             "rowPrices.{$productId}" => 'قیمت',
             "rowStocks.{$productId}" => 'موجودی',
             "rowCategories.{$productId}" => 'دسته‌بندی',
             "rowSkus.{$productId}" => 'SKU',
         ]);
 
-        $product = Product::query()->whereKey($productId)->firstOrFail();
+        $product = $this->findScopedProductOrFail($productId);
 
         $service->updateRow(
             $product,
@@ -191,7 +216,7 @@ class ProductPriceStockUpdate extends Page
 
     public function toggleProductActive(int $productId, ProductPriceStockUpdateService $service): void
     {
-        $product = Product::query()->whereKey($productId)->firstOrFail();
+        $product = $this->findScopedProductOrFail($productId);
 
         $updated = $service->toggleActive($product, auth()->id());
 
@@ -290,18 +315,31 @@ class ProductPriceStockUpdate extends Page
 
     protected function filteredQuery(): Builder
     {
+        $catalog = app(BankdarCatalogService::class);
+
         $query = Product::query()
             ->with(['category:id,name', 'brand:id,name', 'lastEditedBy:id,name'])
             ->orderByDesc('updated_at');
 
+        $query = $catalog->scopeProductsForActor($query);
+
         if ($this->filterCategoryId === 0) {
-            $query->whereNull('category_id');
+            // بنکدار نباید با «بدون دسته» از اسکوپ خارج شود
+            if (! AdminAccess::isBankdarOnly()) {
+                $query->whereNull('category_id');
+            } else {
+                $query->whereRaw('1 = 0');
+            }
         } elseif ($this->filterCategoryId) {
             $query->where('category_id', $this->filterCategoryId);
         }
 
         if ($this->filterBrandId === 0) {
-            $query->whereNull('brand_id');
+            if (! AdminAccess::isBankdarOnly()) {
+                $query->whereNull('brand_id');
+            } else {
+                $query->whereRaw('1 = 0');
+            }
         } elseif ($this->filterBrandId) {
             $query->where('brand_id', $this->filterBrandId);
         }
@@ -326,6 +364,17 @@ class ProductPriceStockUpdate extends Page
         }
 
         return $query;
+    }
+
+    protected function findScopedProductOrFail(int $productId): Product
+    {
+        $product = app(BankdarCatalogService::class)
+            ->scopeProductsForActor(Product::query()->whereKey($productId))
+            ->first();
+
+        abort_unless($product instanceof Product, 403, 'این محصول خارج از محدوده شماست.');
+
+        return $product;
     }
 
     protected function resetRowInputs(): void

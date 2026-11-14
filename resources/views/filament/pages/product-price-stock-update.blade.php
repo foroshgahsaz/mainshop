@@ -1,28 +1,30 @@
 <x-filament-panels::page>
     <div class="admin-order product-price-stock-update" dir="rtl">
-        <section class="ppu-card ppu-card--site-sales" aria-labelledby="ppu-site-sales-title">
-            <header class="ppu-card__head">
-                <span class="ppu-card__icon ppu-card__icon--bulk" aria-hidden="true">
-                    <i class="fa-solid fa-store-slash"></i>
-                </span>
-                <div>
-                    <h2 id="ppu-site-sales-title" class="ppu-card__title">تنظیمات فروش در سایت</h2>
-                    <p class="ppu-card__subtitle">دو حالت مستقل: پنهان کردن قیمت، یا نمایش قیمت بدون امکان خرید آنلاین.</p>
+        @if ($this->canManageSiteSalesToggles())
+            <section class="ppu-card ppu-card--site-sales" aria-labelledby="ppu-site-sales-title">
+                <header class="ppu-card__head">
+                    <span class="ppu-card__icon ppu-card__icon--bulk" aria-hidden="true">
+                        <i class="fa-solid fa-store-slash"></i>
+                    </span>
+                    <div>
+                        <h2 id="ppu-site-sales-title" class="ppu-card__title">تنظیمات فروش در سایت</h2>
+                        <p class="ppu-card__subtitle">دو حالت مستقل: پنهان کردن قیمت، یا نمایش قیمت بدون امکان خرید آنلاین.</p>
+                    </div>
+                </header>
+                <div class="ppu-site-sales-toggles">
+                    <label class="ppu-site-sales-toggle">
+                        <input type="checkbox" wire:model.live="hideShopPrices" class="ppu-checkbox">
+                        <span>عدم نمایش قیمت در سایت</span>
+                    </label>
+                    <p class="ppu-site-sales-hint">قیمت پنهان می‌شود و دکمهٔ «تماس بگیرید» نمایش داده می‌شود.</p>
+                    <label class="ppu-site-sales-toggle">
+                        <input type="checkbox" wire:model.live="disableShopPurchase" class="ppu-checkbox">
+                        <span>غیر قابل فروش</span>
+                    </label>
+                    <p class="ppu-site-sales-hint">قیمت‌ها نمایش داده می‌شوند؛ دکمه «افزودن به سبد» مثل همیشه است ولی پس از کلیک چیزی به سبد اضافه نمی‌شود.</p>
                 </div>
-            </header>
-            <div class="ppu-site-sales-toggles">
-                <label class="ppu-site-sales-toggle">
-                    <input type="checkbox" wire:model.live="hideShopPrices" class="ppu-checkbox">
-                    <span>عدم نمایش قیمت در سایت</span>
-                </label>
-                <p class="ppu-site-sales-hint">قیمت پنهان می‌شود و دکمهٔ «تماس بگیرید» نمایش داده می‌شود.</p>
-                <label class="ppu-site-sales-toggle">
-                    <input type="checkbox" wire:model.live="disableShopPurchase" class="ppu-checkbox">
-                    <span>غیر قابل فروش</span>
-                </label>
-                <p class="ppu-site-sales-hint">قیمت‌ها نمایش داده می‌شوند؛ دکمه «افزودن به سبد» مثل همیشه است ولی پس از کلیک چیزی به سبد اضافه نمی‌شود.</p>
-            </div>
-        </section>
+            </section>
+        @endif
 
         <div class="ppu-toolbar">
             <section class="ppu-card ppu-card--filters" aria-labelledby="ppu-filters-title">
@@ -40,7 +42,9 @@
                         <label class="ppu-label" for="ppu-filter-category">دسته‌بندی</label>
                         <select id="ppu-filter-category" wire:model.live="filterCategoryId" class="ppu-select">
                             <option value="">همه دسته‌ها</option>
-                            <option value="0">بدون دسته</option>
+                            @unless (\App\Support\AdminAccess::isBankdarOnly())
+                                <option value="0">بدون دسته</option>
+                            @endunless
                             @foreach($this->categoryOptions as $id => $name)
                                 <option value="{{ $id }}">{{ $name }}</option>
                             @endforeach
@@ -50,7 +54,9 @@
                         <label class="ppu-label" for="ppu-filter-brand">برند</label>
                         <select id="ppu-filter-brand" wire:model.live="filterBrandId" class="ppu-select">
                             <option value="">همه برندها</option>
-                            <option value="0">بدون برند</option>
+                            @unless (\App\Support\AdminAccess::isBankdarOnly())
+                                <option value="0">بدون برند</option>
+                            @endunless
                             @foreach($this->brandOptions as $id => $name)
                                 <option value="{{ $id }}">{{ $name }}</option>
                             @endforeach

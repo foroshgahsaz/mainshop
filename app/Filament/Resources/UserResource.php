@@ -900,6 +900,16 @@ class UserResource extends Resource
                     ->visible(fn (): bool => AdminAccess::isFullAdmin()),
             ])
             ->actions([
+                Tables\Actions\Action::make('viewSubtree')
+                    ->label('مشاهده زیرمجموعه')
+                    ->icon('heroicon-o-share')
+                    ->color('primary')
+                    ->button()
+                    ->outlined()
+                    ->visible(fn (User $record): bool => AdminAccess::canManageShopInAdmin() && $record->isBankdar())
+                    ->url(fn (User $record): string => \App\Filament\Pages\BankdarSubtreePage::getUrl([
+                        'record' => $record->getKey(),
+                    ])),
                 Tables\Actions\EditAction::make()->label('ویرایش')->iconButton(),
                 Tables\Actions\RestoreAction::make()
                     ->label('بازیابی')

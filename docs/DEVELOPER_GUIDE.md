@@ -1505,6 +1505,8 @@ resources/views/layouts/shop.blade.php
 | 2026-10-27 | ویزارد نماینده — انتخاب محصول: کارت با تصویر اصلی (`rep_product_card`)، گرید؛ رفع گالری (بارگذاری همه تصاویر، بدون lazy+p hidden) |
 | 2026-10-27 | ویزارد نماینده: تب‌های کارخانه/قالب فقط وقتی برای خانواده/برند انتخاب‌شده در کاتالوگ وجود دارد (`RepresentativeCatalogLookup` + `OrderWizard`) |
 | 2026-10-27 | بازگشت پارسیان: مسیر alias **`/payment/callback/pec`** (همان handler که `/payment/callback/parsian`)؛ پس از verify ریدایرکت به صفحه امضاشده **`payment.result`**؛ رفع TypeError ویجت `OrdersTrendChart` (Carbon) |
+| 2026-11-14 | ادمین: دکمه «مشاهده زیرمجموعه» روی بنکدار → درخت مدیر فروش تا نماینده (`BankdarSubtreePage`) |
+| 2026-11-14 | رفع `BankdarHierarchyRepair` compact (`province_filled`) برای migrate/deploy-recover |
 | 2026-11-14 | لیست بنکدار: ستون «مدیر فروش» (`created_by_sales_manager_id`)؛ ترمیم لینک با `BankdarHierarchyRepair` |
 | 2026-11-14 | فرم کاربر ادمین: نقش غیرمشتری تکی (`staff_role` رادیو؛ فقط یک فلگ) |
 | 2026-11-14 | بنکدار: داشبورد اسکوپ‌شده، برند/دسته با `bankdar_id`، محصول/اکسل محدوده، soft-delete سفارش/کاربر/محصول، ایجاد سفارش و مشتری |

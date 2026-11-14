@@ -68,7 +68,7 @@
 | مشتری | ایجاد زیر نماینده؛ حذف فقط اگر سفارش نداشته باشد (soft-delete) |
 | داشبورد | آمار/روند/نقشه/آخرین سفارش‌ها اسکوپ‌شده به نمایندگان زیرمجموعه |
 
-سرویس‌ها: `BankdarCatalogService`, `BankdarOrderService`, `UserSoftDeletionService`, `BankdarHierarchyRepair`.
+سرویس‌ها: `BankdarCatalogService`, `BankdarOrderService`, `UserSoftDeletionService`, `BankdarHierarchyRepair`, `BankdarSubtreeService`.
 
 ## لیست کاربران — بنکدار vs مدیر فروش
 
@@ -79,6 +79,12 @@
 | **بنکدار** | `representative_profiles.sales_manager_id` — فقط برای **نماینده**؛ برای ردیف بنکدار «—» |
 
 اگر بنکدار `created_by_sales_manager_id` نداشته باشد، مدیر فروش او را در «بنکدارهای من» نمی‌بیند. ترمیم خودکار: `BankdarHierarchyRepair` در migrate / `shop:deploy-recover` از پروفایل نمایندگی قدیمی (اگر `sales_manager_id` الان مدیر فروش باشد) لینک را پر می‌کند. ادمین در تب دسترسی با نقش بنکدار می‌تواند مدیر فروش و استان را دستی بگذارد.
+
+## مشاهده زیرمجموعه (ادمین سیستم)
+
+در لیست کاربران → تب **بنکدارها**، برای هر بنکدار دکمه **مشاهده زیرمجموعه** (`BankdarSubtreePage`، مسیر `/admin/bankdars/{id}/subtree`) درخت را نشان می‌دهد:
+
+مدیر فروش → بنکدار → نمایندگان (با لینک ویرایش کاربر).
 
 ## انتقال مشتری (T7)
 

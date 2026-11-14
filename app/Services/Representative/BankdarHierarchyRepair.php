@@ -58,6 +58,9 @@ class BankdarHierarchyRepair
             }
         }
 
-        return compact('linked', 'province_filled');
+        return [
+            'linked' => $linked,
+            'province_filled' => $provinceFilled,
+        ];
     }
 }

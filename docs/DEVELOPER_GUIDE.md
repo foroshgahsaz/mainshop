@@ -601,7 +601,7 @@ Sidebar: `resources/views/filament/partials/admin-sidebar.blade.php` — panel �
 
 ثبت در `AdminPanelProvider.php`: `ManageZarinpal`, `ManageTara`, `ManageSadad`, ...
 
-### 9.9 CSRF و امنیت callback
+### 9.9 CSRF، سشن و امنیت callback
 
 `bootstrap/app.php`:
 
@@ -614,6 +614,8 @@ $middleware->validateCsrfTokens(except: [
 ```
 
 **verify idempotent:** اگر Payment قبلاً `success` بود، دوباره پردازش نمی‌شود (`PaymentService::verify`).
+
+**سشن بعد از بازگشت درگاه:** بازگشت اغلب cross-site است؛ با `SameSite=Lax` کوکی سشن روی POST نمی‌آید و لاراول با `Set-Cookie` سشن خالی، لاگین نماینده/مشتری را پاک می‌کند («بازگشت به پیش‌فاکتور» دوباره لاگین می‌خواهد). `PreserveBrowserSessionOnPaymentCallback` (prepend روی `web`) برای `/payment/callback*` وقتی کوکی سشن نیست → `session.driver=array` و حذف Set-Cookie سشن.
 
 ### 9.10 واحد پول
 
@@ -1503,6 +1505,7 @@ resources/views/layouts/shop.blade.php
 | 2026-10-27 | ویزارد نماینده — انتخاب محصول: کارت با تصویر اصلی (`rep_product_card`)، گرید؛ رفع گالری (بارگذاری همه تصاویر، بدون lazy+p hidden) |
 | 2026-10-27 | ویزارد نماینده: تب‌های کارخانه/قالب فقط وقتی برای خانواده/برند انتخاب‌شده در کاتالوگ وجود دارد (`RepresentativeCatalogLookup` + `OrderWizard`) |
 | 2026-10-27 | بازگشت پارسیان: مسیر alias **`/payment/callback/pec`** (همان handler که `/payment/callback/parsian`)؛ پس از verify ریدایرکت به صفحه امضاشده **`payment.result`**؛ رفع TypeError ویجت `OrdersTrendChart` (Carbon) |
+| 2026-11-12 | بازگشت درگاه: حفظ سشن لاگین (`PreserveBrowserSessionOnPaymentCallback`) تا «بازگشت به پیش‌فاکتور» دوباره لاگین نخواهد |
 | 2026-11-12 | سایدبار: زیر نام، نوع نقش/پنل (`adminListSegmentLabel` مثلاً مدیر فروش) |
 | 2026-11-12 | سایدبار ادمین/نماینده: آواتار حرف اول → `/admin/users/{id}/edit?tab=profile` (نه `/account`)؛ نام کامل زیر آواتار |
 | 2026-11-12 | سایدبار ادمین → کاربران: لینک‌های **مشتریان / مدیران فروش / بنکدارها / مدیران سیستم / نمایندگان / نویسندگان** (تب `adminListSegment`) به‌جای «غیر مشتری» |

@@ -96,6 +96,7 @@ php artisan shop:verify-storage
 
 - CSRF برای `/payment/callback` و `/payment/callback/tara` exempt است — `bootstrap/app.php`.
 - `ZARINPAL_CALLBACK_URL` / `TARA_CALLBACK_URL` مسیر relative روی همان `APP_URL`.
+- **بعد از پرداخت دوباره لاگین می‌خواهد** (صفحه نتیجه guest است / «بازگشت به پیش‌فاکتور» لاگین می‌پرسد): بازگشت cross-site کوکی سشن را نمی‌فرستد و سشن خالی لاگین را overwrite می‌کند. باید `PreserveBrowserSessionOnPaymentCallback` روی `web` prepend باشد — [DEVELOPER_GUIDE §9.9](../DEVELOPER_GUIDE.md#99-csrf-سشن-و-امنیت-callback).
 
 ---
 

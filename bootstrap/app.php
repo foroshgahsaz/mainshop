@@ -34,6 +34,9 @@ $app = Application::configure(basePath: dirname(__DIR__))
 
             return route('login', ['redirect' => $request->fullUrl()]);
         });
+        $middleware->web(prepend: [
+            \App\Http\Middleware\PreserveBrowserSessionOnPaymentCallback::class,
+        ]);
         $middleware->web(append: [
             \App\Http\Middleware\EnsureShopNotInMaintenance::class,
             \App\Http\Middleware\HandleShopUrlRedirects::class,

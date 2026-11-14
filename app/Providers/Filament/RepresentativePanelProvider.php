@@ -49,6 +49,13 @@ class RepresentativePanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Representative/Widgets'), for: 'App\\Filament\\Representative\\Widgets')
             ->widgets([])
             ->renderHook(PanelsRenderHook::HEAD_END, fn () => view('filament.hooks.styles'))
+            ->renderHook(PanelsRenderHook::BODY_START, function (): string|\Illuminate\Contracts\View\View {
+                if (! session()->has(\App\Services\Auth\AdminImpersonationService::SESSION_ACTOR_ID)) {
+                    return '';
+                }
+
+                return view('filament.hooks.impersonation-banner');
+            })
             ->renderHook(PanelsRenderHook::BODY_END, fn () => view('filament.hooks.scripts'))
             ->middleware([
                 SetPersianLocale::class,

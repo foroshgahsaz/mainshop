@@ -930,6 +930,32 @@ class UserResource extends Resource
                     ->url(fn (User $record): string => \App\Filament\Pages\BankdarSubtreePage::getUrl([
                         'record' => $record->getKey(),
                     ])),
+                Tables\Actions\Action::make('impersonate')
+                    ->label('ورود به پنل')
+                    ->icon('heroicon-o-arrow-right-on-rectangle')
+                    ->color('warning')
+                    ->iconButton()
+                    ->tooltip(fn (User $record): string => $record->isBankdar()
+                        ? 'ورود موقت به پنل بنکدار'
+                        : 'ورود موقت به پنل نماینده')
+                    ->requiresConfirmation()
+                    ->modalHeading('ورود موقت به پنل این کاربر؟')
+                    ->modalDescription('به‌عنوان این کاربر وارد می‌شوید و دسترسی‌های همان نقش را می‌بینید. با «بازگشت به ادمین» دوباره مدیر سیستم می‌شوید.')
+                    ->modalSubmitActionLabel('ورود به پنل')
+                    ->visible(function (User $record): bool {
+                        $actor = auth()->user();
+
+                        return $actor instanceof User
+                            && app(\App\Services\Auth\AdminImpersonationService::class)->canStart($actor, $record);
+                    })
+                    ->action(function (User $record) {
+                        $actor = auth()->user();
+                        abort_unless($actor instanceof User, 403);
+
+                        $url = app(\App\Services\Auth\AdminImpersonationService::class)->start($actor, $record);
+
+                        return redirect()->to($url);
+                    }),
                 Tables\Actions\EditAction::make()->label('ویرایش')->iconButton(),
                 Tables\Actions\RestoreAction::make()
                     ->label('بازیابی')

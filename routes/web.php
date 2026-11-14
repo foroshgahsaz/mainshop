@@ -158,6 +158,9 @@ Route::get('/representative/payment/{payment:tracking_code}/receipt.pdf', Paymen
 Route::middleware('auth')->get('/representative/proforma/{order}/pdf', ProformaPdfController::class)
     ->name('representative.proforma.pdf');
 
+Route::middleware(['auth', 'throttle:20,1'])->post('/staff/impersonation/stop', \App\Http\Controllers\Admin\StopAdminImpersonationController::class)
+    ->name('admin.impersonation.stop');
+
 Route::middleware('auth')->prefix('account')->name('account.')->group(function () {
     Route::get('/', AccountDashboard::class)->name('dashboard');
     Route::get('/orders', OrderList::class)->name('orders');

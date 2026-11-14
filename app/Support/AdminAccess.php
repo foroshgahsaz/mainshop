@@ -84,6 +84,16 @@ class AdminAccess
         return static::$memoUser;
     }
 
+    /** پس از عوض شدن هویت (مثلاً impersonation) memo را خالی کن. */
+    public static function flushMemo(): void
+    {
+        static::$memoUser = null;
+        static::$memoIsFullAdmin = null;
+        static::$memoIsSalesManagerOnly = null;
+        static::$memoIsBankdarOnly = null;
+        static::$memoIsRepresentativeProfileOnly = null;
+    }
+
     public static function isFullAdmin(?User $user = null): bool
     {
         if ($user !== null) {

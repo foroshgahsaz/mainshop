@@ -43,6 +43,7 @@
 | `app/Services/Order/BankdarOrderService.php` | ایجاد پیش‌نویس سفارش توسط بنکدار |
 | `app/Services/User/UserSoftDeletionService.php` | soft-delete کاربر بدون سفارش |
 | `app/Filament/Pages/BankdarSubtreePage.php` | درخت زیرمجموعه بنکدار (ادمین / مدیر فروش / بنکدار) |
+| `app/Services/Auth/AdminImpersonationService.php` | ورود موقت مدیر سیستم به پنل بنکدار/نماینده |
 | `app/Services/Representative/BankdarSubtreeService.php` | ساخت درخت مدیر فروش → بنکدار → نماینده |
 | `app/Services/Representative/BankdarHierarchyRepair.php` | ترمیم `created_by_sales_manager_id` / استان بنکدار |
 | `app/Http/Middleware/RestrictSalesManagerAdminAccess.php` | 403 مسیرهای غیرمجاز |

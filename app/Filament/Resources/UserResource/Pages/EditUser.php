@@ -101,6 +101,11 @@ class EditUser extends EditRecord
                 $data[$flag] = (bool) $user->{$flag};
             }
 
+            // مدیر فروش نمی‌تواند انتساب بنکدار به مدیر دیگر را عوض کند.
+            if (AdminAccess::isSalesManagerOnly()) {
+                $data['created_by_sales_manager_id'] = $user->created_by_sales_manager_id;
+            }
+
             return CreateUser::stripVirtualAccessFormKeys($data);
         }
 

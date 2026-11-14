@@ -64,6 +64,7 @@ class AdminAccess
         'filament.admin.resources.brands.*',
         'filament.admin.resources.media-files.*',
         'filament.admin.resources.reservation-requests.*',
+        'filament.admin.pages.bankdar-subtree',
         'livewire.upload-file',
         'livewire.preview-file',
         'livewire.update',
@@ -247,6 +248,12 @@ class AdminAccess
     public static function canSoftDeleteShopRecordsInAdmin(?User $user = null): bool
     {
         return static::isFullAdmin($user) || static::isLimitedStaffOnly($user);
+    }
+
+    /** مشاهده درخت زیرمجموعه بنکدار: ادمین سیستم یا مدیر فروش. */
+    public static function canViewBankdarSubtreeInAdmin(?User $user = null): bool
+    {
+        return static::isFullAdmin($user) || static::isSalesManagerOnly($user);
     }
 
     /** @return list<string> */

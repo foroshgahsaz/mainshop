@@ -64,7 +64,9 @@ class AdminAccess
         'filament.admin.resources.brands.*',
         'filament.admin.resources.media-files.*',
         'filament.admin.resources.reservation-requests.*',
+        // slug: bankdar-subtree/{record} → filament.admin.pages.bankdar-subtree.{record}
         'filament.admin.pages.bankdar-subtree',
+        'filament.admin.pages.bankdar-subtree.*',
         'livewire.upload-file',
         'livewire.preview-file',
         'livewire.update',

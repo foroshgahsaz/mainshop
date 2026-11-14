@@ -4,7 +4,10 @@ namespace App\Console\Commands;
 
 use App\Models\Order;
 use App\Services\Order\OrderService;
+use App\Services\Shop\SoftDeletesSchemaRepair;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Schema;
 
 class ExpirePendingOrders extends Command
 {
@@ -14,12 +17,20 @@ class ExpirePendingOrders extends Command
 
     public function handle(OrderService $orders): int
     {
+        // اگر SoftDeletes روی مدل هست ولی ستون هنوز migrate نشده، کرون نترکد.
+        app(SoftDeletesSchemaRepair::class)->ensure();
+
         $minutes = (int) ($this->option('minutes') ?: config('shop.checkout.unpaid_ttl_minutes', 60));
         $cutoff = now()->subMinutes($minutes);
 
         $directRepId = Order::directShopRepresentativeId();
 
-        $pending = Order::query()
+        $pendingQuery = Order::query();
+        if (! Schema::hasColumn('orders', 'deleted_at')) {
+            $pendingQuery->withoutGlobalScope(SoftDeletingScope::class);
+        }
+
+        $pending = $pendingQuery
             ->when(
                 $directRepId,
                 fn ($q) => $q->where(function ($q) use ($directRepId) {
@@ -49,7 +60,12 @@ class ExpirePendingOrders extends Command
 
         $proformaExpired = 0;
 
-        $proformas = Order::query()
+        $proformaQuery = Order::query();
+        if (! Schema::hasColumn('orders', 'deleted_at')) {
+            $proformaQuery->withoutGlobalScope(SoftDeletingScope::class);
+        }
+
+        $proformas = $proformaQuery
             ->where('status', Order::STATUS_PROFORMA)
             ->where('stock_reserved', true)
             ->whereNotNull('stock_reserved_until')

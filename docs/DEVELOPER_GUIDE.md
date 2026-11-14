@@ -1505,6 +1505,7 @@ resources/views/layouts/shop.blade.php
 | 2026-10-27 | ویزارد نماینده — انتخاب محصول: کارت با تصویر اصلی (`rep_product_card`)، گرید؛ رفع گالری (بارگذاری همه تصاویر، بدون lazy+p hidden) |
 | 2026-10-27 | ویزارد نماینده: تب‌های کارخانه/قالب فقط وقتی برای خانواده/برند انتخاب‌شده در کاتالوگ وجود دارد (`RepresentativeCatalogLookup` + `OrderWizard`) |
 | 2026-10-27 | بازگشت پارسیان: مسیر alias **`/payment/callback/pec`** (همان handler که `/payment/callback/parsian`)؛ پس از verify ریدایرکت به صفحه امضاشده **`payment.result`**؛ رفع TypeError ویجت `OrdersTrendChart` (Carbon) |
+| 2026-11-14 | بنکدار: داشبورد اسکوپ‌شده، برند/دسته با `bankdar_id`، محصول/اکسل محدوده، soft-delete سفارش/کاربر/محصول، ایجاد سفارش و مشتری |
 | 2026-11-14 | بنکدار: دسترسی صریح محصولات + بارگذاری اکسل (`canManageProductsInAdmin` / `canImportProductsInAdmin`، تست `SalesManagerAccessTest`) |
 | 2026-11-12 | بازگشت درگاه: حفظ سشن لاگین (`PreserveBrowserSessionOnPaymentCallback`) تا «بازگشت به پیش‌فاکتور» دوباره لاگین نخواهد |
 | 2026-11-12 | سایدبار: زیر نام، نوع نقش/پنل (`adminListSegmentLabel` مثلاً مدیر فروش) |

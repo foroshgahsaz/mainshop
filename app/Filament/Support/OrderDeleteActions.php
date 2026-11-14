@@ -20,7 +20,7 @@ class OrderDeleteActions
         return Tables\Actions\DeleteAction::make()
             ->label('حذف')
             ->iconButton()
-            ->visible(fn (): bool => AdminAccess::canManageShopInAdmin())
+            ->visible(fn (): bool => AdminAccess::canSoftDeleteShopRecordsInAdmin())
             ->action(function (Order $record): void {
                 static::notifySingle(app(OrderDeletionService::class)->delete($record));
             });
@@ -32,10 +32,10 @@ class OrderDeleteActions
             ->label('حذف انتخاب‌شده‌ها')
             ->requiresConfirmation()
             ->modalHeading('حذف سفارش‌های انتخاب‌شده')
-            ->modalDescription('سفارش‌هایی که پرداخت موفق دارند حذف نمی‌شوند. موجودی رزرو‌شده قبل از حذف آزاد می‌شود.')
+            ->modalDescription('سفارش‌هایی که پرداخت موفق دارند حذف نمی‌شوند. حذف یعنی از فروشگاه و داشبورد بنکدار پنهان می‌شود؛ مدیر سیستم می‌تواند برگرداند.')
             ->color('danger')
             ->icon('heroicon-o-trash')
-            ->visible(fn (): bool => AdminAccess::canManageShopInAdmin())
+            ->visible(fn (): bool => AdminAccess::canSoftDeleteShopRecordsInAdmin())
             ->action(function (Collection $records): void {
                 static::notifyBulk(app(OrderDeletionService::class)->deleteMany($records));
             })
@@ -47,10 +47,10 @@ class OrderDeleteActions
         return PageDeleteAction::make()
             ->label($label)
             ->color('danger')
-            ->visible(fn (): bool => AdminAccess::canManageShopInAdmin())
+            ->visible(fn (): bool => AdminAccess::canSoftDeleteShopRecordsInAdmin())
             ->requiresConfirmation()
             ->modalHeading('حذف سفارش')
-            ->modalDescription('سفارش‌های با پرداخت موفق قابل حذف نیستند. اگر رزرو موجودی فعال باشد، قبل از حذف آزاد می‌شود.')
+            ->modalDescription('سفارش‌های با پرداخت موفق قابل حذف نیستند. حذف یعنی از فروشگاه و داشبورد بنکدار پنهان می‌شود؛ مدیر سیستم می‌تواند برگرداند.')
             ->action(function (Order $record, PageDeleteAction $action): void {
                 $outcome = app(OrderDeletionService::class)->delete($record);
                 static::notifySingle($outcome);
@@ -75,7 +75,8 @@ class OrderDeleteActions
         }
 
         Notification::make()
-            ->title('سفارش حذف شد')
+            ->title('سفارش از لیست پنهان شد')
+            ->body('تا بازیابی توسط مدیر سیستم در فروشگاه و داشبورد بنکدار دیده نمی‌شود.')
             ->success()
             ->send();
     }

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Resources\OrderResource;
 use App\Filament\Resources\UserResource;
 use App\Filament\Widgets\LatestOrdersTable;
 use App\Filament\Widgets\OrdersMapWidget;
@@ -41,10 +42,15 @@ class Dashboard extends BaseDashboard
         if (AdminAccess::isBankdarOnly()) {
             return [
                 Actions\Action::make('newRepresentative')
-                    ->label('افزودن نماینده')
+                    ->label('افزودن نماینده / مشتری')
                     ->icon('heroicon-o-user-plus')
                     ->color('primary')
                     ->url(UserResource::getUrl('create')),
+                Actions\Action::make('newOrder')
+                    ->label('ایجاد سفارش')
+                    ->icon('heroicon-o-shopping-bag')
+                    ->color('success')
+                    ->url(OrderResource::getUrl('create')),
             ];
         }
 

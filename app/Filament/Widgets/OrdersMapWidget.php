@@ -2,6 +2,8 @@
 
 namespace App\Filament\Widgets;
 
+use App\Services\Representative\SalesRegionService;
+use App\Support\AdminAccess;
 use App\Support\IranCityCoordinates;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\Cache;
@@ -23,7 +25,9 @@ class OrdersMapWidget extends Widget
     public function getMapPoints(): array
     {
         try {
-            return Cache::remember('admin:dashboard:orders_map_points', 600, function (): array {
+            $scopeKey = AdminAccess::isLimitedStaffOnly() ? 'staff:'.(int) auth()->id() : 'global';
+
+            return Cache::remember('admin:dashboard:orders_map_points:'.$scopeKey, 600, function (): array {
                 return $this->buildMapPoints();
             });
         } catch (\Throwable) {
@@ -38,11 +42,19 @@ class OrdersMapWidget extends Widget
     {
         $colors = ['#7239ea', '#3699ff', '#ffc700', '#50cd89', '#f1416c'];
 
-        $counts = DB::table('orders')
+        $query = DB::table('orders')
             ->join('user_addresses', 'orders.address_id', '=', 'user_addresses.id')
             ->whereNotNull('orders.address_id')
             ->whereNotNull('user_addresses.city')
             ->where('user_addresses.city', '!=', '')
+            ->whereNull('orders.deleted_at');
+
+        if (AdminAccess::isLimitedStaffOnly()) {
+            $repIds = app(SalesRegionService::class)->managedRepresentativeIds((int) auth()->id());
+            $query->whereIn('orders.representative_id', $repIds !== [] ? $repIds : [0]);
+        }
+
+        $counts = $query
             ->selectRaw('user_addresses.city as city, COUNT(*) as aggregate')
             ->groupBy('user_addresses.city')
             ->orderByDesc('aggregate')

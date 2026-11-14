@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Services\Catalog\BankdarCatalogService;
 use App\Services\Product\ProductExcelImportParser;
 use App\Services\Product\ProductListImportService;
 use App\Support\AdminAccess;
@@ -34,6 +35,10 @@ class ProductListImport extends Page
     public $importFile = null;
 
     public bool $updateExistingBySku = true;
+
+    public ?int $defaultBrandId = null;
+
+    public ?int $defaultCategoryId = null;
 
     public bool $importRunning = false;
 
@@ -70,11 +75,34 @@ class ProductListImport extends Page
 
         $this->resetImportUi();
 
-        $this->validate([
+        $rules = [
             'importFile' => ['required', 'file', 'mimes:xlsx,xls,csv,txt', 'max:10240'],
-        ], [], [
-            'importFile' => 'فایل اکسل',
-        ]);
+        ];
+        $labels = ['importFile' => 'فایل اکسل'];
+
+        if (AdminAccess::isBankdarOnly()) {
+            $rules['defaultBrandId'] = ['required', 'integer'];
+            $rules['defaultCategoryId'] = ['required', 'integer'];
+            $labels['defaultBrandId'] = 'برند';
+            $labels['defaultCategoryId'] = 'دسته‌بندی';
+        }
+
+        $this->validate($rules, [], $labels);
+
+        if (AdminAccess::isBankdarOnly()) {
+            $catalog = app(BankdarCatalogService::class);
+            $bankdarId = (int) auth()->id();
+            if (! in_array((int) $this->defaultBrandId, $catalog->brandIdsForBankdar($bankdarId), true)
+                || ! in_array((int) $this->defaultCategoryId, $catalog->categoryIdsForBankdar($bankdarId), true)
+            ) {
+                Notification::make()
+                    ->title('برند یا دسته خارج از محدوده شماست')
+                    ->danger()
+                    ->send();
+
+                return;
+            }
+        }
 
         /** @var TemporaryUploadedFile $upload */
         $upload = $this->importFile;
@@ -117,6 +145,8 @@ class ProductListImport extends Page
             'rows' => $rows,
             'index' => 0,
             'update_existing' => $this->updateExistingBySku,
+            'default_brand_id' => $this->defaultBrandId,
+            'default_category_id' => $this->defaultCategoryId,
         ], now()->addHour());
 
         $this->importCurrentName = $rows[0]['name'] ?? '';
@@ -142,6 +172,8 @@ class ProductListImport extends Page
         $rows = $state['rows'];
         $index = (int) $state['index'];
         $updateExisting = (bool) ($state['update_existing'] ?? true);
+        $defaultBrandId = isset($state['default_brand_id']) ? (int) $state['default_brand_id'] : null;
+        $defaultCategoryId = isset($state['default_category_id']) ? (int) $state['default_category_id'] : null;
 
         if ($index >= count($rows)) {
             $this->finishImport();
@@ -153,7 +185,14 @@ class ProductListImport extends Page
         $this->importCurrentName = $row['name'];
         $line = $index + 2;
 
-        $result = $importer->importRow($row, $line, auth()->id(), $updateExisting);
+        $result = $importer->importRow(
+            $row,
+            $line,
+            auth()->id(),
+            $updateExisting,
+            $defaultBrandId ?: null,
+            $defaultCategoryId ?: null,
+        );
 
         if ($result['status'] === 'created') {
             $this->importCreated++;
@@ -232,5 +271,25 @@ class ProductListImport extends Page
         }
 
         return (int) min(100, round(($this->importProgress / $this->importTotal) * 100));
+    }
+
+    /** @return array<int, string> */
+    public function getBrandOptionsProperty(): array
+    {
+        if (! AdminAccess::isBankdarOnly()) {
+            return [];
+        }
+
+        return app(BankdarCatalogService::class)->brandOptionsForBankdar((int) auth()->id());
+    }
+
+    /** @return array<int, string> */
+    public function getCategoryOptionsProperty(): array
+    {
+        if (! AdminAccess::isBankdarOnly()) {
+            return [];
+        }
+
+        return app(BankdarCatalogService::class)->categoryOptionsForBankdar((int) auth()->id());
     }
 }

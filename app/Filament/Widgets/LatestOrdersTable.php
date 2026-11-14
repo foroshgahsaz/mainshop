@@ -5,6 +5,8 @@ namespace App\Filament\Widgets;
 use App\Filament\Resources\OrderResource;
 use App\Filament\Support\UserTableColumns;
 use App\Models\Order;
+use App\Services\Representative\SalesRegionService;
+use App\Support\AdminAccess;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
@@ -21,13 +23,15 @@ class LatestOrdersTable extends BaseWidget
 
     public function table(Table $table): Table
     {
+        $query = Order::query()->with('user')->latest();
+
+        if (AdminAccess::isLimitedStaffOnly()) {
+            $query = app(SalesRegionService::class)
+                ->scopeOrdersManagedBy($query, (int) auth()->id());
+        }
+
         return $table
-            ->query(
-                Order::query()
-                    ->with('user')
-                    ->latest()
-                    ->take(8)
-            )
+            ->query($query->take(8))
             ->columns([
                 Tables\Columns\TextColumn::make('tracking_code')
                     ->label('کد سفارش')

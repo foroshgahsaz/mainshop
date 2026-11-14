@@ -13,14 +13,26 @@ final class ProductListImportService
      * @param  list<array{sku: string, name: string, stock: int, price: int}>  $rows
      * @return array{created: int, updated: int, errors: list<string>}
      */
-    public function importRows(array $rows, ?int $editorUserId, bool $updateExisting = true): array
-    {
+    public function importRows(
+        array $rows,
+        ?int $editorUserId,
+        bool $updateExisting = true,
+        ?int $defaultBrandId = null,
+        ?int $defaultCategoryId = null,
+    ): array {
         $created = 0;
         $updated = 0;
         $errors = [];
 
         foreach ($rows as $index => $row) {
-            $result = $this->importRow($row, $index + 2, $editorUserId, $updateExisting);
+            $result = $this->importRow(
+                $row,
+                $index + 2,
+                $editorUserId,
+                $updateExisting,
+                $defaultBrandId,
+                $defaultCategoryId,
+            );
 
             if ($result['status'] === 'created') {
                 $created++;
@@ -38,11 +50,28 @@ final class ProductListImportService
      * @param  array{sku: string, name: string, stock: int, price: int}  $row
      * @return array{status: 'created'|'updated'|'skipped'|'error', name?: string, message?: string}
      */
-    public function importRow(array $row, int $lineNumber, ?int $editorUserId, bool $updateExisting): array
-    {
+    public function importRow(
+        array $row,
+        int $lineNumber,
+        ?int $editorUserId,
+        bool $updateExisting,
+        ?int $defaultBrandId = null,
+        ?int $defaultCategoryId = null,
+    ): array {
         try {
-            return DB::transaction(function () use ($row, $lineNumber, $editorUserId, $updateExisting): array {
-                $existing = Product::query()->where('sku', $row['sku'])->first();
+            return DB::transaction(function () use ($row, $lineNumber, $editorUserId, $updateExisting, $defaultBrandId, $defaultCategoryId): array {
+                $existingQuery = Product::query()->where('sku', $row['sku']);
+                $existingQuery = app(\App\Services\Catalog\BankdarCatalogService::class)
+                    ->scopeProductsForActor($existingQuery);
+                $existing = $existingQuery->first();
+
+                // اگر SKU در کل سیستم هست ولی خارج از محدوده بنکدار است، ایجاد جدید ممنوع
+                if ($existing === null && Product::query()->where('sku', $row['sku'])->exists()) {
+                    return [
+                        'status' => 'error',
+                        'message' => "سطر {$lineNumber}: SKU «{$row['sku']}» متعلق به محدوده دیگری است.",
+                    ];
+                }
 
                 if ($existing !== null) {
                     if (! $updateExisting) {
@@ -65,7 +94,8 @@ final class ProductListImportService
                 $slug = $this->uniqueSlug(SlugFromTitle::fromProductName($row['name']), $row['sku']);
 
                 Product::query()->create([
-                    'category_id' => null,
+                    'category_id' => $defaultCategoryId,
+                    'brand_id' => $defaultBrandId,
                     'name' => $row['name'],
                     'slug' => $slug,
                     'sku' => $row['sku'],

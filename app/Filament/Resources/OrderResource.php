@@ -35,14 +35,29 @@ class OrderResource extends Resource
         return AdminAccess::canAccessAdminResource(static::class);
     }
 
+    public static function canCreate(): bool
+    {
+        return AdminAccess::canCreateOrdersInAdmin();
+    }
+
     public static function canDelete($record): bool
     {
-        return AdminAccess::canManageShopInAdmin();
+        return AdminAccess::canSoftDeleteShopRecordsInAdmin();
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return AdminAccess::canSoftDeleteShopRecordsInAdmin();
     }
 
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery()->with(['user', 'representative', 'payments']);
+
+        // ادمین سیستم می‌تواند حذف‌شده‌ها را با فیلتر ببیند؛ بنکدار/نماینده soft-deleted را نمی‌بینند.
+        if (AdminAccess::isFullAdmin()) {
+            $query = $query->withTrashed();
+        }
 
         if (AdminAccess::isLimitedStaffOnly()) {
             $query = app(SalesRegionService::class)->scopeOrdersManagedBy($query, (int) auth()->id());
@@ -98,6 +113,8 @@ class OrderResource extends Resource
                 Tables\Filters\SelectFilter::make('status')
                     ->label('وضعیت')
                     ->options(static::statusFilterOptions()),
+                Tables\Filters\TrashedFilter::make()
+                    ->visible(fn (): bool => AdminAccess::isFullAdmin()),
             ])
             ->defaultSort('created_at', 'desc')
             ->actions([
@@ -107,12 +124,17 @@ class OrderResource extends Resource
                     ->color('primary')
                     ->button()
                     ->outlined(),
+                Tables\Actions\RestoreAction::make()
+                    ->label('بازیابی')
+                    ->visible(fn (Order $record): bool => AdminAccess::isFullAdmin() && $record->trashed()),
                 OrderDeleteActions::tableDeleteAction(),
             ])
             ->actionsColumnLabel('عملیات')
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     OrderDeleteActions::tableBulkDeleteAction(),
+                    Tables\Actions\RestoreBulkAction::make()
+                        ->visible(fn (): bool => AdminAccess::isFullAdmin()),
                 ]),
             ]);
     }
@@ -177,6 +199,7 @@ class OrderResource extends Resource
     {
         return [
             'index' => Pages\ListOrders::route('/'),
+            'create' => Pages\CreateOrder::route('/create'),
             'view' => Pages\ViewOrder::route('/{record}'),
         ];
     }

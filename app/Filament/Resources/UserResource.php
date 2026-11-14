@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Rules\IranianNationalCode;
 use App\Services\Auth\OtpService;
 use App\Services\Representative\SalesRegionService;
+use App\Services\User\UserSoftDeletionService;
 use App\Support\AdminAccess;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -54,12 +55,33 @@ class UserResource extends Resource
     public static function canCreate(): bool
     {
         return AdminAccess::canCreateRepresentativesInAdmin()
-            || AdminAccess::canCreateBankdarsInAdmin();
+            || AdminAccess::canCreateBankdarsInAdmin()
+            || AdminAccess::canCreateCustomersInAdmin();
     }
 
     public static function canDelete($record): bool
     {
-        return AdminAccess::canManageShopInAdmin();
+        if (AdminAccess::canManageShopInAdmin()) {
+            return true;
+        }
+
+        if (! AdminAccess::isBankdarOnly() || ! $record instanceof User) {
+            return false;
+        }
+
+        // بنکدار فقط مشتریان زیرمجموعه بدون سفارش را می‌تواند soft-delete کند.
+        if ($record->isRepresentative() || $record->isBankdar() || $record->isSalesManager() || $record->isAdmin()) {
+            return false;
+        }
+
+        if ($record->orders()->withTrashed()->exists()) {
+            return false;
+        }
+
+        $actor = auth()->user();
+
+        return $actor instanceof User
+            && app(SalesRegionService::class)->managesUser($actor, $record);
     }
 
     public static function canEdit($record): bool
@@ -127,7 +149,7 @@ class UserResource extends Resource
         }
 
         if (AdminAccess::isBankdarOnly()) {
-            return static::createRepresentativeFormSchemaForBankdar();
+            return static::createFormSchemaForBankdar();
         }
 
         return [
@@ -169,7 +191,7 @@ class UserResource extends Resource
     }
 
     /** @return array<int, Forms\Components\Component> */
-    protected static function createRepresentativeFormSchemaForBankdar(): array
+    protected static function createFormSchemaForBankdar(): array
     {
         $provinceId = (int) (auth()->user()?->bankdar_province_id ?? 0);
         $provinceName = $provinceId > 0
@@ -177,15 +199,22 @@ class UserResource extends Resource
             : '';
 
         return [
+            Forms\Components\Section::make('نوع کاربر')
+                ->schema([
+                    Forms\Components\Radio::make('bankdar_create_kind')
+                        ->label('ایجاد')
+                        ->options([
+                            'representative' => 'نماینده',
+                            'customer' => 'مشتری',
+                        ])
+                        ->default('representative')
+                        ->required()
+                        ->live()
+                        ->dehydrated(false),
+                ])
+                ->columnSpanFull(),
             ...static::profileTabSchema(),
             ...static::accountTabSchema(),
-            Forms\Components\Hidden::make('user_kind')->default('staff'),
-            Forms\Components\Hidden::make('is_representative')->default(true),
-            Forms\Components\Hidden::make('is_admin')->default(false),
-            Forms\Components\Hidden::make('is_author')->default(false),
-            Forms\Components\Hidden::make('is_sales_manager')->default(false),
-            Forms\Components\Hidden::make('is_bankdar')->default(false),
-            Forms\Components\Hidden::make('rep_province_id')->default($provinceId ?: null),
             Forms\Components\Section::make('پروفایل نمایندگی')
                 ->description('این نماینده زیرمجموعه شما (بنکدار) ثبت می‌شود. استان فعالیت همان استان شماست و قابل تغییر نیست.')
                 ->schema([
@@ -196,7 +225,7 @@ class UserResource extends Resource
                         ->label('شهر فعالیت')
                         ->options(fn (): array => static::cityOptions($provinceId ?: null))
                         ->searchable()
-                        ->required()
+                        ->required(fn (Forms\Get $get): bool => ($get('bankdar_create_kind') ?? 'representative') === 'representative')
                         ->disabled($provinceId <= 0)
                         ->dehydrated(false),
                     Forms\Components\TextInput::make('rep_max_active_reservations')
@@ -209,6 +238,22 @@ class UserResource extends Resource
                         ->helperText('حداکثر پیش‌فاکتور باز با رزرو موجودی (پیش‌فرض ۳).'),
                 ])
                 ->columns(2)
+                ->visible(fn (Forms\Get $get): bool => ($get('bankdar_create_kind') ?? 'representative') === 'representative')
+                ->columnSpanFull(),
+            Forms\Components\Section::make('انتساب به نماینده')
+                ->description('مشتری زیر یکی از نمایندگان شما ثبت می‌شود.')
+                ->schema([
+                    Forms\Components\Select::make('created_by_representative_id')
+                        ->label('نماینده')
+                        ->options(fn (): array => app(SalesRegionService::class)
+                            ->scopeRepresentativesManagedBy(User::query(), (int) auth()->id())
+                            ->orderBy('name')
+                            ->pluck('name', 'id')
+                            ->all())
+                        ->required(fn (Forms\Get $get): bool => ($get('bankdar_create_kind') ?? 'representative') === 'customer')
+                        ->searchable(),
+                ])
+                ->visible(fn (Forms\Get $get): bool => ($get('bankdar_create_kind') ?? 'representative') === 'customer')
                 ->columnSpanFull(),
         ];
     }
@@ -706,11 +751,17 @@ class UserResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->with([
+        $query = parent::getEloquentQuery()->with([
             'createdByRepresentative',
             'representativeProfile.salesManager:id,name',
             'representativeProfile.province:id,name',
         ]);
+
+        if (AdminAccess::isFullAdmin()) {
+            $query = $query->withTrashed();
+        }
+
+        return $query;
     }
 
     public static function table(Table $table): Table
@@ -795,16 +846,53 @@ class UserResource extends Resource
                         return $query->adminListSegment($value);
                     }),
                 Tables\Filters\TernaryFilter::make('status')->label('فعال'),
+                Tables\Filters\TrashedFilter::make()
+                    ->visible(fn (): bool => AdminAccess::isFullAdmin()),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()->label('ویرایش')->iconButton(),
-                Tables\Actions\DeleteAction::make()->label('حذف')->iconButton()
-                    ->successNotificationTitle('حذف شد'),
+                Tables\Actions\RestoreAction::make()
+                    ->label('بازیابی')
+                    ->visible(fn (User $record): bool => AdminAccess::isFullAdmin() && $record->trashed()),
+                Tables\Actions\DeleteAction::make()
+                    ->label('حذف')
+                    ->iconButton()
+                    ->modalDescription('کاربری که سفارش دارد حذف نمی‌شود. حذف یعنی از فروشگاه و داشبورد بنکدار پنهان می‌شود؛ مدیر سیستم می‌تواند برگرداند.')
+                    ->action(function (User $record): void {
+                        $outcome = app(UserSoftDeletionService::class)->delete($record);
+                        if ($outcome === 'skipped') {
+                            \Filament\Notifications\Notification::make()
+                                ->title('کاربر قابل حذف نیست')
+                                ->body('این کاربر سفارش دارد.')
+                                ->warning()
+                                ->send();
+
+                            return;
+                        }
+
+                        \Filament\Notifications\Notification::make()
+                            ->title('کاربر از لیست پنهان شد')
+                            ->success()
+                            ->send();
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()->label('حذف انتخاب‌شده‌ها')
-                        ->successNotificationTitle('حذف شد'),
+                    Tables\Actions\BulkAction::make('softDelete')
+                        ->label('حذف انتخاب‌شده‌ها')
+                        ->requiresConfirmation()
+                        ->color('danger')
+                        ->icon('heroicon-o-trash')
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records): void {
+                            $result = app(UserSoftDeletionService::class)->deleteMany($records);
+                            \Filament\Notifications\Notification::make()
+                                ->title('عملیات حذف')
+                                ->body($result->message())
+                                ->success()
+                                ->send();
+                        }),
+                    Tables\Actions\RestoreBulkAction::make()
+                        ->visible(fn (): bool => AdminAccess::isFullAdmin()),
                 ]),
             ]);
     }

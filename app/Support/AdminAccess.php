@@ -214,6 +214,41 @@ class AdminAccess
         return static::canManageProductsInAdmin($user);
     }
 
+    /** تعریف برند/دسته‌بندی (ساخت و ویرایش و حذف) فقط مدیر سیستم. */
+    public static function canManageCatalogDefinitionsInAdmin(?User $user = null): bool
+    {
+        return static::isFullAdmin($user);
+    }
+
+    /** بنکدار می‌تواند مشتری زیرمجموعه نمایندگانش بسازد. */
+    public static function canCreateCustomersInAdmin(?User $user = null): bool
+    {
+        return static::isFullAdmin($user) || static::isBankdarOnly($user);
+    }
+
+    /**
+     * ویرایش سفارش در پنل ادمین (وضعیت، اقلام پیش‌فاکتور، …).
+     * مدیر سیستم یا staff محدود برای سفارش‌های زیرمجموعه.
+     */
+    public static function canEditOrdersInAdmin(?User $user = null): bool
+    {
+        return static::isFullAdmin($user) || static::isLimitedStaffOnly($user);
+    }
+
+    /** ایجاد سفارش پیش‌نویس توسط بنکدار (یا مدیر سیستم). */
+    public static function canCreateOrdersInAdmin(?User $user = null): bool
+    {
+        return static::isFullAdmin($user) || static::isBankdarOnly($user);
+    }
+
+    /**
+     * حذف نرم (پنهان از فروشگاه و داشبورد بنکدار/نماینده؛ ادمین بازیابی می‌کند).
+     */
+    public static function canSoftDeleteShopRecordsInAdmin(?User $user = null): bool
+    {
+        return static::isFullAdmin($user) || static::isLimitedStaffOnly($user);
+    }
+
     /** @return list<string> */
     public static function salesManagerAllowedRoutePatterns(): array
     {

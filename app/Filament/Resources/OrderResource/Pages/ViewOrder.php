@@ -184,7 +184,7 @@ class ViewOrder extends ViewRecord
 
     public function addNote(OrderActivityLogger $logger): void
     {
-        if (! AdminAccess::canManageShopInAdmin()) {
+        if (! AdminAccess::canEditOrdersInAdmin()) {
             return;
         }
 
@@ -202,7 +202,7 @@ class ViewOrder extends ViewRecord
 
     public function saveOrderMeta(OrderService $orders): void
     {
-        if (! AdminAccess::canManageShopInAdmin()) {
+        if (! AdminAccess::canEditOrdersInAdmin()) {
             return;
         }
 
@@ -441,7 +441,7 @@ class ViewOrder extends ViewRecord
     {
         $order = $this->record;
 
-        return AdminAccess::canManageShopInAdmin()
+        return AdminAccess::canEditOrdersInAdmin()
             && $order->isRepresentativeOrder()
             && $order->isProforma()
             && ! $order->isPaid();
@@ -494,7 +494,10 @@ class ViewOrder extends ViewRecord
 
     protected function canDownloadSalesInvoicePdf(): bool
     {
-        if (! AdminAccess::isFullAdmin() && ! AdminAccess::isSalesManagerOnly()) {
+        if (! AdminAccess::isFullAdmin()
+            && ! AdminAccess::isSalesManagerOnly()
+            && ! AdminAccess::isBankdarOnly()
+        ) {
             return false;
         }
 

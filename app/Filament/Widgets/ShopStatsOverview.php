@@ -5,6 +5,9 @@ namespace App\Filament\Widgets;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\Product;
+use App\Services\Catalog\BankdarCatalogService;
+use App\Services\Representative\SalesRegionService;
+use App\Support\AdminAccess;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\Cache;
@@ -56,19 +59,32 @@ class ShopStatsOverview extends BaseWidget
     protected function metrics(): array
     {
         try {
-            return Cache::remember('admin:dashboard:shop_stats', 120, function (): array {
+            $scopeKey = 'global';
+            if (AdminAccess::isLimitedStaffOnly()) {
+                $scopeKey = 'staff:'.(int) auth()->id();
+            }
+
+            return Cache::remember('admin:dashboard:shop_stats:'.$scopeKey, 120, function (): array {
+                $orders = Order::query();
+                $payments = Payment::query()
+                    ->where('status', Payment::STATUS_SUCCESS);
+                $products = Product::query()->where('is_active', true)->where('stock', '<=', 5);
+
+                if (AdminAccess::isLimitedStaffOnly()) {
+                    $actorId = (int) auth()->id();
+                    $regions = app(SalesRegionService::class);
+                    $orders = $regions->scopeOrdersManagedBy($orders, $actorId);
+                    $repIds = $regions->managedRepresentativeIds($actorId);
+                    $payments = $payments->whereHas('order', fn ($q) => $q->whereIn('representative_id', $repIds ?: [0]));
+                    $products = app(BankdarCatalogService::class)->scopeProductsForActor($products);
+                }
+
                 return [
-                    'today_orders' => Order::whereDate('created_at', today())->count(),
-                    'today_revenue' => (int) Payment::query()
-                        ->where('status', Payment::STATUS_SUCCESS)
-                        ->whereDate('paid_at', today())
-                        ->sum('amount'),
-                    'pending_orders' => Order::where('status', Order::STATUS_PENDING)->count(),
-                    'month_revenue' => (int) Payment::query()
-                        ->where('status', Payment::STATUS_SUCCESS)
-                        ->where('paid_at', '>=', now()->startOfMonth())
-                        ->sum('amount'),
-                    'low_stock' => Product::where('is_active', true)->where('stock', '<=', 5)->count(),
+                    'today_orders' => (clone $orders)->whereDate('created_at', today())->count(),
+                    'today_revenue' => (int) (clone $payments)->whereDate('paid_at', today())->sum('amount'),
+                    'pending_orders' => (clone $orders)->where('status', Order::STATUS_PENDING)->count(),
+                    'month_revenue' => (int) (clone $payments)->where('paid_at', '>=', now()->startOfMonth())->sum('amount'),
+                    'low_stock' => $products->count(),
                 ];
             });
         } catch (\Throwable $e) {

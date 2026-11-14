@@ -38,7 +38,10 @@
 | `app/Services/Auth/LoginRedirectService.php` | ریدایرکت بعد از login فروشگاه |
 | `app/Filament/Pages/Auth/Login.php` | صفحه ورود ادمین |
 | `app/Http/Responses/Filament/AdminLoginResponse.php` | ریدایرکت پس از login |
-| `app/Support/AdminAccess.php` | مدیر فروش — resource/route |
+| `app/Support/AdminAccess.php` | مدیر فروش / بنکدار — resource/route و گیت‌های محصول/سفارش/کاتالوگ |
+| `app/Services/Catalog/BankdarCatalogService.php` | اسکوپ برند/دسته/محصول برای بنکدار |
+| `app/Services/Order/BankdarOrderService.php` | ایجاد پیش‌نویس سفارش توسط بنکدار |
+| `app/Services/User/UserSoftDeletionService.php` | soft-delete کاربر بدون سفارش |
 | `app/Http/Middleware/RestrictSalesManagerAdminAccess.php` | 403 مسیرهای غیرمجاز |
 
 ---

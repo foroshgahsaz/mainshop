@@ -19,10 +19,44 @@
                     به‌روزرسانی محصول موجود با همان SKU
                 </label>
                 <p class="ppu-bulk-field-hint">
-                    محصول جدید <strong>غیرفعال</strong> و <strong>بدون دسته</strong> ایجاد می‌شود — دسته و فعال‌سازی از «بروزرسانی قیمت».
+                    محصول جدید <strong>غیرفعال</strong> ایجاد می‌شود.
+                    @if(\App\Support\AdminAccess::isBankdarOnly())
+                        برند و دستهٔ پیش‌فرض زیر برای محصولات جدید الزامی است (فقط محدودهٔ شما).
+                    @else
+                        بدون دستهٔ پیش‌فرض — دسته و فعال‌سازی را بعداً تنظیم کنید.
+                    @endif
                     ردیف با SKU تکراری فقط قیمت/موجودی/نام به‌روز می‌شود.
                 </p>
             </div>
+
+            @if(\App\Support\AdminAccess::isBankdarOnly())
+                <div class="ppu-field" style="display:grid;gap:0.75rem;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));">
+                    <div>
+                        <label class="ppu-label" for="pli-brand">برند (محدوده شما)</label>
+                        <select id="pli-brand" wire:model="defaultBrandId" class="ppu-file-input" @disabled($importRunning)>
+                            <option value="">— انتخاب برند —</option>
+                            @foreach($this->brandOptions as $id => $name)
+                                <option value="{{ $id }}">{{ $name }}</option>
+                            @endforeach
+                        </select>
+                        @error('defaultBrandId')
+                            <p class="pli-error">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div>
+                        <label class="ppu-label" for="pli-category">دسته‌بندی (محدوده شما)</label>
+                        <select id="pli-category" wire:model="defaultCategoryId" class="ppu-file-input" @disabled($importRunning)>
+                            <option value="">— انتخاب دسته —</option>
+                            @foreach($this->categoryOptions as $id => $name)
+                                <option value="{{ $id }}">{{ $name }}</option>
+                            @endforeach
+                        </select>
+                        @error('defaultCategoryId')
+                            <p class="pli-error">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
+            @endif
 
             <div class="ppu-field pli-upload">
                 <label class="ppu-label" for="pli-file">فایل (.xlsx, .xls, .csv)</label>

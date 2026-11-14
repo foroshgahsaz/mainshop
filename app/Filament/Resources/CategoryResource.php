@@ -11,12 +11,14 @@ use App\Filament\Support\SeoFormSchema;
 use App\Filament\Support\ShopMediaPicker;
 use App\Models\Category;
 use App\Models\ProductFamily;
+use App\Services\Catalog\BankdarCatalogService;
 use App\Support\AdminAccess;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
@@ -40,6 +42,32 @@ class CategoryResource extends Resource
     public static function canViewAny(): bool
     {
         return AdminAccess::canAccessAdminResource(static::class);
+    }
+
+    public static function canCreate(): bool
+    {
+        return AdminAccess::canManageCatalogDefinitionsInAdmin();
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return AdminAccess::canManageCatalogDefinitionsInAdmin();
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return AdminAccess::canManageCatalogDefinitionsInAdmin();
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return AdminAccess::canManageCatalogDefinitionsInAdmin();
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return app(BankdarCatalogService::class)
+            ->scopeCategoriesForActor(parent::getEloquentQuery());
     }
 
     public static function form(Form $form): Form
@@ -86,6 +114,14 @@ class CategoryResource extends Resource
                         ->label('ترتیب')
                         ->numeric()
                         ->default(0),
+                    Forms\Components\Select::make('bankdar_id')
+                        ->label('بنکدار مالک')
+                        ->options(fn (): array => app(BankdarCatalogService::class)->bankdarOptions())
+                        ->searchable()
+                        ->preload()
+                        ->nullable()
+                        ->helperText('اگر مشخص شود، فقط همان بنکدار این دسته و محصولاتش را در پنل می‌بیند.')
+                        ->visible(fn (): bool => AdminAccess::canManageCatalogDefinitionsInAdmin()),
                     Forms\Components\Toggle::make('show_in_mega')
                         ->label('نمایش در مگامنو')
                         ->default(true),
@@ -108,6 +144,11 @@ class CategoryResource extends Resource
                 AdminImageColumn::make('image', 48, 'تصویر'),
                 Tables\Columns\TextColumn::make('name')->label('نام')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('parent.name')->label('والد')->placeholder('—'),
+                Tables\Columns\TextColumn::make('bankdar.name')
+                    ->label('بنکدار')
+                    ->placeholder('—')
+                    ->toggleable()
+                    ->visible(fn (): bool => AdminAccess::canManageCatalogDefinitionsInAdmin() || AdminAccess::isSalesManagerOnly()),
                 Tables\Columns\TextColumn::make('productFamily.name')->label('خانواده')->placeholder('—'),
                 Tables\Columns\IconColumn::make('show_in_mega')->label('مگامenu')->boolean(),
                 Tables\Columns\IconColumn::make('is_active')->label('فعال')->boolean(),
@@ -115,7 +156,10 @@ class CategoryResource extends Resource
                 Tables\Columns\TextColumn::make('position')->label('ترتیب')->sortable(),
             ])
             ->actions([
-                Tables\Actions\EditAction::make()->label('ویرایش')->iconButton(),
+                Tables\Actions\EditAction::make()
+                    ->label('ویرایش')
+                    ->iconButton()
+                    ->visible(fn (): bool => AdminAccess::canManageCatalogDefinitionsInAdmin()),
                 CategoryDeleteActions::tableDeleteAction(),
             ]);
     }

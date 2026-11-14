@@ -16,6 +16,7 @@ use App\Services\Auth\OtpService;
 use App\Services\Representative\SalesRegionService;
 use App\Services\User\UserSoftDeletionService;
 use App\Support\AdminAccess;
+use App\Support\UserNationalCodeCredentials;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -306,6 +307,18 @@ class UserResource extends Resource
         ];
     }
 
+    /** پر کردن ایمیل و رمز از روی کد ملی (UI فرم ایجاد/ویرایش). */
+    protected static function fillCredentialsFromNationalCode(Get $get, Set $set): void
+    {
+        $code = IranianNationalCode::normalize((string) ($get('national_code') ?? ''));
+        if (strlen($code) !== 10) {
+            return;
+        }
+
+        $set('email', UserNationalCodeCredentials::emailForNationalCode($code));
+        $set('password', UserNationalCodeCredentials::passwordPlainForNationalCode($code));
+    }
+
     /** @return array<int, Forms\Components\Component> */
     protected static function accountTabSchema(): array
     {
@@ -318,6 +331,10 @@ class UserResource extends Resource
                         ->required()
                         ->tel()
                         ->maxLength(15)
+                        ->live(onBlur: true)
+                        ->afterStateUpdated(function (Get $get, Set $set): void {
+                            static::fillCredentialsFromNationalCode($get, $set);
+                        })
                         ->dehydrateStateUsing(fn (?string $state): ?string => filled($state)
                             ? app(OtpService::class)->normalizePhone($state)
                             : null)
@@ -329,26 +346,32 @@ class UserResource extends Resource
                     Forms\Components\TextInput::make('national_code')
                         ->label('کد ملی')
                         ->length(10)
+                        ->live(onBlur: true)
+                        ->afterStateUpdated(function (Get $get, Set $set): void {
+                            static::fillCredentialsFromNationalCode($get, $set);
+                        })
                         ->dehydrateStateUsing(fn (?string $state): ?string => filled($state)
                             ? IranianNationalCode::normalize($state)
                             : null)
-                        ->rules(fn (): array => [
-                            'nullable',
+                        ->rules(fn (string $operation): array => [
+                            $operation === 'create' ? 'required' : 'nullable',
                             new IranianNationalCode,
                         ])
                         ->unique(ignoreRecord: true)
-                        ->helperText('برای پرداخت باجت‌پی باید با موبایل مشتری در باجت یکی باشد.'),
+                        ->helperText('با خروج از این فیلد، ایمیل و رمز عبور از روی کد ملی پر می‌شوند.'),
                     Forms\Components\TextInput::make('email')
                         ->label('ایمیل')
                         ->email()
-                        ->unique(ignoreRecord: true),
+                        ->unique(ignoreRecord: true)
+                        ->helperText('پیش‌فرض: کدملی@chinibazar.ir'),
                     Forms\Components\TextInput::make('password')
                         ->label('رمز عبور')
                         ->password()
+                        ->revealable()
                         ->dehydrateStateUsing(fn ($state) => filled($state) ? Hash::make($state) : null)
                         ->dehydrated(fn ($state) => filled($state))
                         ->required(fn (string $operation) => $operation === 'create')
-                        ->helperText('در ویرایش، فقط در صورت تغییر رمز پر کنید.'),
+                        ->helperText('پیش‌فرض ایجاد: /*کدملی/* — در ویرایش فقط در صورت تغییر پر کنید.'),
                     Forms\Components\Toggle::make('status')
                         ->label('حساب فعال')
                         ->default(true),

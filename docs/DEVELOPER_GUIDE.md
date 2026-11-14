@@ -693,7 +693,7 @@ $middleware->validateCsrfTokens(except: [
 | کلاس | `DarikGateway`, `DarikApiClient` |
 | Admin | `/admin/darik` → `ManageDarik.php` |
 | OTP UI | `/payment/darik/{tracking}` — `Confirm` با OTP پنج‌رقمی |
-| شناسه خریدار | `users.darik_member_code` (۱۶ رقم، با `5892`) — checkout و مشتری نماینده |
+| شناسه خریدار | `users.darik_member_code` (۱۶ رقم، با `5892`) — فقط checkout فروشگاه (نه فرم ایجاد مشتری نماینده) |
 
 **جریان:** `Login` (ApiKey) → `Order` → `SendOTP` → صفحه سایت → `Confirm`.
 
@@ -1505,6 +1505,7 @@ resources/views/layouts/shop.blade.php
 | 2026-10-27 | ویزارد نماینده — انتخاب محصول: کارت با تصویر اصلی (`rep_product_card`)، گرید؛ رفع گالری (بارگذاری همه تصاویر، بدون lazy+p hidden) |
 | 2026-10-27 | ویزارد نماینده: تب‌های کارخانه/قالب فقط وقتی برای خانواده/برند انتخاب‌شده در کاتالوگ وجود دارد (`RepresentativeCatalogLookup` + `OrderWizard`) |
 | 2026-10-27 | بازگشت پارسیان: مسیر alias **`/payment/callback/pec`** (همان handler که `/payment/callback/parsian`)؛ پس از verify ریدایرکت به صفحه امضاشده **`payment.result`**؛ رفع TypeError ویجت `OrdersTrendChart` (Carbon) |
+| 2026-11-14 | ایجاد کاربر: پر شدن خودکار ایمیل/رمز از کد ملی؛ حذف فیلد داریک از فرم مشتری نماینده |
 | 2026-11-14 | بنکدار: اسکوپ `product-price-stock-update` + فیلتر برند/دسته + پیش‌نویس ایجاد محصول در محدوده خودش |
 | 2026-11-14 | بنر ورود موقت داخل `main-content` تا متن زیر سایدبار نرود |
 | 2026-11-14 | رفع ۵۰۰ روت start ورود موقت: حذف regenerate دوبل + لاگ `start_failed` + repair بی‌صدا |

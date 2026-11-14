@@ -277,6 +277,7 @@ class RepresentativeCustomerService
         $cityName = $city->name;
 
         return DB::transaction(function () use ($representative, $data, $phone, $nationalCode, $provinceId, $cityId, $addressLine, $provinceName, $cityName): User {
+            // ایمیل/رمز از UserNationalCodeCredentials روی saving مدل ست می‌شود
             $customer = User::query()->create([
                 'name' => $data['name'],
                 'phone' => $phone,

@@ -5,7 +5,6 @@ namespace App\Filament\Representative\Resources;
 use App\Filament\Representative\Resources\CustomerResource\Pages;
 use App\Models\City;
 use App\Models\User;
-use App\Rules\DarikMemberCode;
 use App\Rules\IranianNationalCode;
 use App\Services\Representative\RepresentativeCustomerService;
 use Filament\Forms;
@@ -68,12 +67,6 @@ class CustomerResource extends Resource
                         ->dehydrated(false)
                         ->columnSpanFull()
                         ->visible(fn ($livewire): bool => filled($livewire->existingCustomerMessage ?? null)),
-                    Forms\Components\TextInput::make('darik_member_code')
-                        ->label('شناسه کیف پول داریک')
-                        ->maxLength(16)
-                        ->placeholder('5892xxxxxxxxxxxx')
-                        ->rule(new DarikMemberCode)
-                        ->helperText('برای پرداخت اعتباری داریک در پیش‌فاکتور الزامی است.'),
                 ])
                 ->columns(2),
             Forms\Components\Section::make('آدرس')

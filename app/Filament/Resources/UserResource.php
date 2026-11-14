@@ -907,18 +907,25 @@ class UserResource extends Resource
                     ->iconButton()
                     ->tooltip('مشاهده زیرمجموعه')
                     ->visible(function (User $record): bool {
-                        if (! $record->isBankdar() || ! AdminAccess::canViewBankdarSubtreeInAdmin()) {
+                        if (! $record->isBankdar()) {
                             return false;
                         }
 
-                        if (AdminAccess::isSalesManagerOnly()) {
-                            $actor = auth()->user();
-
-                            return $actor instanceof User
-                                && app(SalesRegionService::class)->managesBankdar($actor, $record);
+                        if (AdminAccess::isFullAdmin()) {
+                            return true;
                         }
 
-                        return true;
+                        $actor = auth()->user();
+                        if (! $actor instanceof User) {
+                            return false;
+                        }
+
+                        if (AdminAccess::isSalesManagerOnly($actor)) {
+                            return app(SalesRegionService::class)->managesBankdar($actor, $record);
+                        }
+
+                        return AdminAccess::isBankdarOnly($actor)
+                            && (int) $actor->getKey() === (int) $record->getKey();
                     })
                     ->url(fn (User $record): string => \App\Filament\Pages\BankdarSubtreePage::getUrl([
                         'record' => $record->getKey(),

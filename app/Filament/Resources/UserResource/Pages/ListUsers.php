@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\UserResource\Pages;
 
+use App\Filament\Pages\BankdarSubtreePage;
 use App\Filament\Resources\Pages\AdminListRecords;
 use App\Filament\Resources\UserResource;
 use App\Models\User;
@@ -109,7 +110,14 @@ class ListUsers extends AdminListRecords
         }
 
         if (AdminAccess::isBankdarOnly()) {
+            $bankdarId = (int) auth()->id();
+
             return [
+                Actions\Action::make('viewOwnSubtree')
+                    ->label('ساختار زیرمجموعه')
+                    ->icon('heroicon-o-share')
+                    ->color('gray')
+                    ->url(BankdarSubtreePage::getUrl(['record' => $bankdarId])),
                 Actions\CreateAction::make()
                     ->label('افزودن نماینده / مشتری')
                     ->icon('heroicon-o-user-plus'),

@@ -250,10 +250,12 @@ class AdminAccess
         return static::isFullAdmin($user) || static::isLimitedStaffOnly($user);
     }
 
-    /** مشاهده درخت زیرمجموعه بنکدار: ادمین سیستم یا مدیر فروش. */
+    /** مشاهده درخت زیرمجموعه بنکدار: ادمین سیستم، مدیر فروش، یا خود بنکدار. */
     public static function canViewBankdarSubtreeInAdmin(?User $user = null): bool
     {
-        return static::isFullAdmin($user) || static::isSalesManagerOnly($user);
+        return static::isFullAdmin($user)
+            || static::isSalesManagerOnly($user)
+            || static::isBankdarOnly($user);
     }
 
     /** @return list<string> */

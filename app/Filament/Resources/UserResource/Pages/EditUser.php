@@ -141,6 +141,7 @@ class EditUser extends EditRecord
         $data = parent::mutateFormDataBeforeFill($data);
 
         $data['user_kind'] = CreateUser::resolveUserKindFromFlags($data);
+        $data['staff_role'] = CreateUser::resolveStaffRoleFromFlags($data);
 
         $user = $this->getRecord();
         if ($user instanceof User) {

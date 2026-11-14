@@ -43,4 +43,27 @@ class UserAccessKindTest extends TestCase
             'is_representative' => false,
         ]));
     }
+
+    public function test_staff_role_is_mutually_exclusive(): void
+    {
+        $this->assertSame('admin', CreateUser::resolveStaffRoleFromFlags([
+            'is_admin' => true,
+            'is_representative' => true,
+            'is_bankdar' => true,
+        ]));
+
+        $data = CreateUser::applyStaffRoleFlags([
+            'is_admin' => true,
+            'is_author' => true,
+            'is_representative' => true,
+            'is_sales_manager' => true,
+            'is_bankdar' => true,
+        ], 'bankdar');
+
+        $this->assertFalse($data['is_admin']);
+        $this->assertFalse($data['is_author']);
+        $this->assertFalse($data['is_representative']);
+        $this->assertFalse($data['is_sales_manager']);
+        $this->assertTrue($data['is_bankdar']);
+    }
 }

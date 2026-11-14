@@ -11,7 +11,39 @@ use Illuminate\Support\Facades\Schema;
  */
 final class SoftDeletesSchemaRepair
 {
+    private const CACHE_OK_KEY = 'soft_deletes_schema_ok_v2';
+
     private static bool $ensuredThisProcess = false;
+
+    /** @var array<string, bool> */
+    private static array $columnPresent = [];
+
+    public static function hasDeletedAtColumn(string $table): bool
+    {
+        if (array_key_exists($table, self::$columnPresent)) {
+            return self::$columnPresent[$table];
+        }
+
+        try {
+            self::$columnPresent[$table] = Schema::hasTable($table)
+                && Schema::hasColumn($table, 'deleted_at');
+        } catch (\Throwable) {
+            self::$columnPresent[$table] = false;
+        }
+
+        return self::$columnPresent[$table];
+    }
+
+    public static function forgetColumnCache(?string $table = null): void
+    {
+        if ($table === null) {
+            self::$columnPresent = [];
+
+            return;
+        }
+
+        unset(self::$columnPresent[$table]);
+    }
 
     /** @return list<string> */
     public function ensure(): array
@@ -23,6 +55,7 @@ final class SoftDeletesSchemaRepair
                 $table->softDeletes();
             });
             $actions[] = 'orders.deleted_at';
+            self::forgetColumnCache('orders');
         }
 
         if (Schema::hasTable('users') && ! Schema::hasColumn('users', 'deleted_at')) {
@@ -30,13 +63,14 @@ final class SoftDeletesSchemaRepair
                 $table->softDeletes();
             });
             $actions[] = 'users.deleted_at';
+            self::forgetColumnCache('users');
         }
 
         return $actions;
     }
 
     /**
-     * یک‌بار در هر process (+ کش اپ) — برای جلوگیری از ۵۰۰ داشبورد وقتی ستون هنوز نیست.
+     * یک‌بار در هر process — فقط وقتی هر دو ستون واقعاً هستند کش «ok» می‌زند.
      *
      * @return list<string>
      */
@@ -48,18 +82,33 @@ final class SoftDeletesSchemaRepair
         self::$ensuredThisProcess = true;
 
         try {
-            if (Cache::get('soft_deletes_schema_ok') === 1) {
+            if (Cache::get(self::CACHE_OK_KEY) === 1
+                && self::hasDeletedAtColumn('orders')
+                && self::hasDeletedAtColumn('users')
+            ) {
                 return [];
             }
         } catch (\Throwable) {
-            // کش در دسترس نیست؛ ادامه با Schema::hasColumn
+            // ادامه
+        }
+
+        // کش قدیمی/غلط را پاک کن تا دوباره تعمیر شود
+        try {
+            Cache::forget(self::CACHE_OK_KEY);
+            Cache::forget('soft_deletes_schema_ok');
+        } catch (\Throwable) {
         }
 
         $actions = $this->ensure();
 
-        try {
-            Cache::forever('soft_deletes_schema_ok', 1);
-        } catch (\Throwable) {
+        $ordersOk = self::hasDeletedAtColumn('orders');
+        $usersOk = self::hasDeletedAtColumn('users');
+
+        if ($ordersOk && $usersOk) {
+            try {
+                Cache::forever(self::CACHE_OK_KEY, 1);
+            } catch (\Throwable) {
+            }
         }
 
         return $actions;

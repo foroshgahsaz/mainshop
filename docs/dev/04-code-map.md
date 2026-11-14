@@ -46,6 +46,8 @@
 | `app/Services/Auth/AdminImpersonationService.php` | ورود موقت مدیر سیستم به پنل مدیر فروش / بنکدار / نماینده |
 | `app/Services/Representative/BankdarSubtreeService.php` | ساخت درخت مدیر فروش → بنکدار → نماینده |
 | `app/Services/Shop/SoftDeletesSchemaRepair.php` | اطمینان از `orders/users.deleted_at` در deploy |
+| `app/Support/ConditionalSoftDeletingScope.php` | SoftDeletes بدون ستون → بدون شرط SQL (نه ۵۰۰) |
+| `shop:repair-soft-deletes` | ایجاد دستی ستون‌های soft-delete |
 | `app/Services/Representative/BankdarHierarchyRepair.php` | ترمیم `created_by_sales_manager_id` / استان بنکدار |
 | `app/Http/Middleware/RestrictSalesManagerAdminAccess.php` | 403 مسیرهای غیرمجاز |
 

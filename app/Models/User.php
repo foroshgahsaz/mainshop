@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use App\Support\ConditionalSoftDeletingScope;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Services\Auth\OtpService;
 use App\Support\UserNationalCodeCredentials;
@@ -20,6 +21,12 @@ class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, SoftDeletes;
+
+    /** اگر ستون deleted_at در DB نباشد، شرط soft-delete اعمال نمی‌شود. */
+    public static function bootSoftDeletes(): void
+    {
+        static::addGlobalScope(new ConditionalSoftDeletingScope);
+    }
 
     protected $fillable = [
         'name',

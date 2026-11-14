@@ -97,13 +97,7 @@ class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([])
             ->renderHook(PanelsRenderHook::HEAD_END, fn () => view('filament.hooks.styles'))
-            ->renderHook(PanelsRenderHook::BODY_START, function (): string|\Illuminate\Contracts\View\View {
-                if (! session()->has(\App\Services\Auth\AdminImpersonationService::SESSION_ACTOR_ID)) {
-                    return '';
-                }
-
-                return view('filament.hooks.impersonation-banner');
-            })
+            // بنر ورود موقت داخل layout main-content است (نه BODY_START) تا زیر سایدبار نرود
             ->renderHook(PanelsRenderHook::BODY_END, fn () => view('filament.hooks.scripts'))
             ->middleware([
                 SetPersianLocale::class,

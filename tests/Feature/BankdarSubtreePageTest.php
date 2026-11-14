@@ -142,4 +142,39 @@ class BankdarSubtreePageTest extends TestCase
         Livewire::test(BankdarSubtreePage::class, ['record' => $other->id])
             ->assertForbidden();
     }
+
+    public function test_bankdar_can_open_own_subtree_only(): void
+    {
+        $own = User::query()->forceCreate([
+            'name' => 'بنکدار خودم',
+            'phone' => '09121110021',
+            'password' => bcrypt('x'),
+            'status' => true,
+            'is_bankdar' => true,
+        ]);
+
+        $other = User::query()->forceCreate([
+            'name' => 'بنکدار دیگر',
+            'phone' => '09121110022',
+            'password' => bcrypt('x'),
+            'status' => true,
+            'is_bankdar' => true,
+        ]);
+
+        $this->actingAs($own);
+        foreach (['memoUser', 'memoIsFullAdmin', 'memoIsSalesManagerOnly', 'memoIsBankdarOnly'] as $p) {
+            (new \ReflectionProperty(AdminAccess::class, $p))->setValue(null, null);
+        }
+
+        $this->assertTrue(AdminAccess::canViewBankdarSubtreeInAdmin($own));
+
+        Livewire::test(BankdarSubtreePage::class, ['record' => $own->id])
+            ->assertSuccessful()
+            ->assertSee('بنکدار خودم')
+            ->assertSee('نمایندگان')
+            ->assertDontSee('سلسله‌مراتب از مدیر فروش');
+
+        Livewire::test(BankdarSubtreePage::class, ['record' => $other->id])
+            ->assertForbidden();
+    }
 }

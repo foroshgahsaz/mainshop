@@ -41,10 +41,17 @@ class BankdarSubtreePage extends Page
             ->findOrFail($record);
 
         $actor = auth()->user();
-        if ($actor instanceof User
-            && AdminAccess::isSalesManagerOnly($actor)
+        if (! $actor instanceof User) {
+            abort(403);
+        }
+
+        if (AdminAccess::isSalesManagerOnly($actor)
             && ! app(SalesRegionService::class)->managesBankdar($actor, $this->bankdar)
         ) {
+            abort(403);
+        }
+
+        if (AdminAccess::isBankdarOnly($actor) && (int) $actor->getKey() !== (int) $this->bankdar->getKey()) {
             abort(403);
         }
 
@@ -58,6 +65,18 @@ class BankdarSubtreePage extends Page
 
     protected function getHeaderActions(): array
     {
+        if (AdminAccess::isBankdarOnly()) {
+            return [
+                Actions\Action::make('back')
+                    ->label('بازگشت به نمایندگان')
+                    ->icon('heroicon-o-arrow-right')
+                    ->color('gray')
+                    ->url(UserResource::getUrl('index', [
+                        'activeTab' => 'representatives',
+                    ])),
+            ];
+        }
+
         $backTab = AdminAccess::isSalesManagerOnly()
             ? 'bankdars'
             : User::ADMIN_LIST_SEGMENT_BANKDAR;

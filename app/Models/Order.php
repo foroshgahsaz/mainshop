@@ -7,11 +7,18 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use App\Support\ConditionalSoftDeletingScope;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Order extends Model
 {
     use SoftDeletes;
+
+    /** اگر ستون deleted_at در DB نباشد، شرط soft-delete اعمال نمی‌شود. */
+    public static function bootSoftDeletes(): void
+    {
+        static::addGlobalScope(new ConditionalSoftDeletingScope);
+    }
 
     public const STATUS_DRAFT = 'draft';
 

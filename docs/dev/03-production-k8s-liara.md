@@ -35,7 +35,14 @@ php artisan migrate --force
 php artisan shop:deploy-recover
 ```
 
-اگر لاگ `Unknown column 'orders.deleted_at'` یا `compact(): Undefined variable $province_filled` دیدید: آخرین `master` را deploy کنید و دوباره `migrate --force && shop:deploy-recover` — `SoftDeletesSchemaRepair` ستون‌ها را می‌سازد و `BankdarHierarchyRepair` دیگر compact غلط ندارد.
+اگر لاگ `Unknown column 'orders.deleted_at'` یا ۵۰۰ هنگام ورود به پنل بنکدار/مدیر فروش دیدید:
+
+```bash
+php artisan shop:repair-soft-deletes
+php artisan migrate --force && php artisan shop:deploy-recover
+```
+
+مدل‌ها با `ConditionalSoftDeletingScope` دیگر بدون ستون، شرط `deleted_at` نمی‌زنند. اگر `compact(): Undefined variable $province_filled` بود، آخرین master را deploy کنید (فیکس `BankdarHierarchyRepair`).
 
 `shop:deploy-recover` چه می‌کند:
 

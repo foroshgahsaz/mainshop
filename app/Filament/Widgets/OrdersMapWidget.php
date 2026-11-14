@@ -46,8 +46,11 @@ class OrdersMapWidget extends Widget
             ->join('user_addresses', 'orders.address_id', '=', 'user_addresses.id')
             ->whereNotNull('orders.address_id')
             ->whereNotNull('user_addresses.city')
-            ->where('user_addresses.city', '!=', '')
-            ->whereNull('orders.deleted_at');
+            ->where('user_addresses.city', '!=', '');
+
+        if (\App\Services\Shop\SoftDeletesSchemaRepair::hasDeletedAtColumn('orders')) {
+            $query->whereNull('orders.deleted_at');
+        }
 
         if (AdminAccess::isLimitedStaffOnly()) {
             $repIds = app(SalesRegionService::class)->managedRepresentativeIds((int) auth()->id());

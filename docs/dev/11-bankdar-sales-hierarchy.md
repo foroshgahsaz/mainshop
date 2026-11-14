@@ -87,6 +87,8 @@
 - **ادمین / مدیر فروش:** آیکون درخت روی ردیف بنکدار → مدیر فروش → بنکدار → شبکهٔ نمایندگان
 - **بنکدار:** دکمهٔ «ساختار زیرمجموعه» در لیست کاربران؛ فقط درخت خودش (بدون لایهٔ مدیر فروش)
 
+مسیر Filament: `filament.admin.pages.bankdar-subtree.{record}` — در `AdminAccess::LIMITED_STAFF_ROUTE_PATTERNS` با `bankdar-subtree` و `bankdar-subtree.*` مجاز است (بدون این، مدیر فروش به‌جای صفحه، ممنوعیت/۴۰۴ می‌گیرد).
+
 ## انتقال مشتری (T7)
 
 - سرویس: `RepresentativeCustomerService::lookupByNationalCode` / `sendTransferOtp` / `confirmTransfer`

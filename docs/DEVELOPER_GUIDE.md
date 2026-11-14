@@ -1506,6 +1506,7 @@ resources/views/layouts/shop.blade.php
 | 2026-10-27 | ویزارد نماینده: تب‌های کارخانه/قالب فقط وقتی برای خانواده/برند انتخاب‌شده در کاتالوگ وجود دارد (`RepresentativeCatalogLookup` + `OrderWizard`) |
 | 2026-10-27 | بازگشت پارسیان: مسیر alias **`/payment/callback/pec`** (همان handler که `/payment/callback/parsian`)؛ پس از verify ریدایرکت به صفحه امضاشده **`payment.result`**؛ رفع TypeError ویجت `OrdersTrendChart` (Carbon) |
 | 2026-11-14 | مدیر سیستم: ورود موقت به پنل بنکدار/نماینده (`AdminImpersonationService` + بنر بازگشت) |
+| 2026-11-14 | رفع ۴۰۴ زیرمجموعه برای مدیر فروش (روت `bankdar-subtree.*`)؛ `SoftDeletesSchemaRepair` برای `orders/users.deleted_at` |
 | 2026-11-14 | UI زیرمجموعه بنکدار: هدر آمار + کارت/تایم‌لاین؛ دسترسی بنکدار به درخت خودش |
 | 2026-11-14 | زیرمجموعه بنکدار: آیکون‌فقط + دسترسی مدیر فروش به بنکدارهای خودش (`canViewBankdarSubtreeInAdmin`) |
 | 2026-11-14 | ادمین: دکمه «مشاهده زیرمجموعه» روی بنکدار → درخت مدیر فروش تا نماینده (`BankdarSubtreePage`) |

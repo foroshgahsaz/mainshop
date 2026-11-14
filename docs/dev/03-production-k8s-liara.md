@@ -35,6 +35,8 @@ php artisan migrate --force
 php artisan shop:deploy-recover
 ```
 
+اگر لاگ `Unknown column 'orders.deleted_at'` یا `compact(): Undefined variable $province_filled` دیدید: آخرین `master` را deploy کنید و دوباره `migrate --force && shop:deploy-recover` — `SoftDeletesSchemaRepair` ستون‌ها را می‌سازد و `BankdarHierarchyRepair` دیگر compact غلط ندارد.
+
 `shop:deploy-recover` چه می‌کند:
 
 - پاک کردن config/route/view/cache و **Filament component cache** (`filament:clear-cached-components`) — **بدون این مرحله، routeهای تازهٔ deploy (صفحهٔ عمومی یا Resource ادمین مثل `/admin/otp-messages`) ممکن است 404 بدهند**

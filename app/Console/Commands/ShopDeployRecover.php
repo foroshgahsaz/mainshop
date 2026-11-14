@@ -32,6 +32,12 @@ class ShopDeployRecover extends Command
             $this->line(trim(Artisan::output()));
         }
 
+        // قبل از migrate: اگر SoftDeletes روی مدل هست ولی ستون نیست، کرون/پنل 500 ندهد.
+        $softDeletesRepair = app(\App\Services\Shop\SoftDeletesSchemaRepair::class)->ensure();
+        if ($softDeletesRepair !== []) {
+            $this->components->info('Soft-deletes schema repaired: '.implode(', ', $softDeletesRepair));
+        }
+
         $this->components->info('Running migrations…');
         Artisan::call('migrate', ['--force' => true]);
         $this->line(trim(Artisan::output()));

@@ -17,7 +17,7 @@
 جزئیات سلسله‌مراتب: [dev/11-bankdar-sales-hierarchy.md](11-bankdar-sales-hierarchy.md)
 
 - **API جدا نداریم** — همهٔ session از guard `web` (کوکی Laravel) است.
-- یک کاربر می‌تواند چند نقش داشته باشد (مثلاً هم admin هم representative). رفتار `canAccessPanel` در `app/Models/User.php` تعیین می‌کند به کدام پنل اجازه دارد.
+- در فرم ادمین (`/admin/users` → دسترسی) برای «غیر مشتری» **فقط یک نقش** انتخاب می‌شود (`staff_role` → یک فلگ از `is_admin` / `is_sales_manager` / `is_bankdar` / `is_representative` / `is_author`). دادهٔ قدیمی چندنقشی در DB ممکن است باشد؛ اولویت نمایش همان اولویت دستهٔ لیست است.
 
 ### لیست `/admin/users` (مدیر کل)
 

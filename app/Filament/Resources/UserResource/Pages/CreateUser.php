@@ -133,11 +133,11 @@ class CreateUser extends CreateRecord
         $data['user_kind'] = $userKind;
 
         if ($userKind === 'staff') {
-            $data['is_admin'] = (bool) ($raw['is_admin'] ?? $data['is_admin'] ?? false);
-            $data['is_author'] = (bool) ($raw['is_author'] ?? $data['is_author'] ?? false);
-            $data['is_representative'] = (bool) ($raw['is_representative'] ?? $data['is_representative'] ?? false);
-            $data['is_sales_manager'] = (bool) ($raw['is_sales_manager'] ?? $data['is_sales_manager'] ?? false);
-            $data['is_bankdar'] = (bool) ($raw['is_bankdar'] ?? $data['is_bankdar'] ?? false);
+            $role = (string) ($raw['staff_role'] ?? $data['staff_role'] ?? '');
+            if ($role === '') {
+                $role = static::resolveStaffRoleFromFlags($data) ?? '';
+            }
+            $data = static::applyStaffRoleFlags($data, $role !== '' ? $role : null);
         }
 
         return static::normalizeUserKind($data);
@@ -155,18 +155,55 @@ class CreateUser extends CreateRecord
         return 'customer';
     }
 
+    /**
+     * اولویت نقش تکی: مدیر سیستم → مدیر فروش → بنکدار → نماینده → نویسنده.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public static function resolveStaffRoleFromFlags(array $data): ?string
+    {
+        $map = [
+            'admin' => 'is_admin',
+            'sales_manager' => 'is_sales_manager',
+            'bankdar' => 'is_bankdar',
+            'representative' => 'is_representative',
+            'author' => 'is_author',
+        ];
+
+        foreach ($map as $role => $flag) {
+            if (filter_var($data[$flag] ?? false, FILTER_VALIDATE_BOOLEAN)) {
+                return $role;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * فقط یک نقش staff روشن می‌شود.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    public static function applyStaffRoleFlags(array $data, ?string $role): array
+    {
+        $data['is_admin'] = $role === 'admin';
+        $data['is_author'] = $role === 'author';
+        $data['is_representative'] = $role === 'representative';
+        $data['is_sales_manager'] = $role === 'sales_manager';
+        $data['is_bankdar'] = $role === 'bankdar';
+
+        return $data;
+    }
+
     /** @param  array<string, mixed>  $data */
     public static function normalizeUserKind(array $data): array
     {
         if (($data['user_kind'] ?? 'customer') === 'customer') {
-            $data['is_admin'] = false;
-            $data['is_author'] = false;
-            $data['is_representative'] = false;
-            $data['is_sales_manager'] = false;
-            $data['is_bankdar'] = false;
+            $data = static::applyStaffRoleFlags($data, null);
         }
 
-        unset($data['user_kind']);
+        unset($data['user_kind'], $data['staff_role']);
 
         return $data;
     }
@@ -176,6 +213,7 @@ class CreateUser extends CreateRecord
     {
         unset(
             $data['user_kind'],
+            $data['staff_role'],
             $data['rep_sales_manager_id'],
             $data['rep_province_id'],
             $data['rep_city_id'],

@@ -450,25 +450,22 @@ class UserResource extends Resource
                 ->live(),
             Forms\Components\Fieldset::make('نقش‌های غیر مشتری')
                 ->schema([
-                    Forms\Components\Toggle::make('is_admin')
-                        ->label('مدیر — دسترسی پنل ادمین')
-                        ->disabled(fn (): bool => AdminAccess::isLimitedStaffOnly()),
-                    Forms\Components\Toggle::make('is_author')
-                        ->label('نویسنده — انتشار در بلاگ')
-                        ->disabled(fn (): bool => AdminAccess::isLimitedStaffOnly()),
-                    Forms\Components\Toggle::make('is_representative')
-                        ->label('نماینده — پنل نمایندگی')
+                    Forms\Components\Radio::make('staff_role')
+                        ->label('نقش')
+                        ->options([
+                            'admin' => 'مدیر — دسترسی پنل ادمین',
+                            'author' => 'نویسنده — انتشار در بلاگ',
+                            'representative' => 'نماینده — پنل نمایندگی',
+                            'sales_manager' => 'مدیر فروش — مدیریت بنکدارها و زیرمجموعه فروش',
+                            'bankdar' => 'بنکدار — مدیریت نمایندگان استان',
+                        ])
+                        ->required(fn (Get $get): bool => $get('user_kind') === 'staff')
+                        ->live()
                         ->disabled(fn (): bool => AdminAccess::isLimitedStaffOnly())
-                        ->live(),
-                    Forms\Components\Toggle::make('is_sales_manager')
-                        ->label('مدیر فروش — مدیریت بنکدارها و زیرمجموعه فروش')
-                        ->disabled(fn (): bool => AdminAccess::isLimitedStaffOnly()),
-                    Forms\Components\Toggle::make('is_bankdar')
-                        ->label('بنکدار — مدیریت نمایندگان استان')
-                        ->disabled(fn (): bool => AdminAccess::isLimitedStaffOnly())
-                        ->live(),
+                        ->dehydrated(false)
+                        ->helperText('فقط یک نقش قابل انتخاب است.'),
                 ])
-                ->columns(2)
+                ->columns(1)
                 ->visible(fn (Get $get): bool => $get('user_kind') === 'staff'),
         ];
 
@@ -508,23 +505,15 @@ class UserResource extends Resource
                 $fields[] = Forms\Components\Fieldset::make('پروفایل نمایندگی')
                     ->schema(static::representativeProfileFieldsForCreate())
                     ->columns(2)
-                    ->visible(fn (Get $get): bool => $get('user_kind') === 'staff' && (bool) $get('is_representative'));
+                    ->visible(fn (Get $get): bool => $get('user_kind') === 'staff'
+                        && ($get('staff_role') ?? null) === 'representative');
             } else {
                 $fields[] = Forms\Components\Fieldset::make('پروفایل نمایندگی')
                     ->relationship('representativeProfile')
                     ->schema(static::representativeProfileFieldsForEdit())
                     ->columns(2)
-                    ->visible(function (Get $get, mixed $record): bool {
-                        if ($get('user_kind') === 'staff' && (bool) $get('is_representative')) {
-                            return true;
-                        }
-
-                        if ($record instanceof User) {
-                            return $record->isRepresentative();
-                        }
-
-                        return $record instanceof RepresentativeProfile;
-                    });
+                    ->visible(fn (Get $get): bool => $get('user_kind') === 'staff'
+                        && ($get('staff_role') ?? null) === 'representative');
             }
         }
 

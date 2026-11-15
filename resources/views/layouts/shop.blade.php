@@ -58,6 +58,8 @@
         @include('shop.partials.admin-bar')
     @endif
 
+    @include('shop.partials.gateway-test-banner')
+
     @include('shop.partials.cart-sidebar-shell')
 
     <div id="shopAppShell" class="shop-app-shell">

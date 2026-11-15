@@ -100,6 +100,8 @@ class EditUser extends EditRecord
             foreach (['is_admin', 'is_author', 'is_representative', 'is_sales_manager', 'is_bankdar'] as $flag) {
                 $data[$flag] = (bool) $user->{$flag};
             }
+            // فقط مدیر سیستم می‌تواند «تست درگاه» را عوض کند
+            $data['can_shop_gateway_test'] = (bool) $user->can_shop_gateway_test;
 
             // مدیر فروش نمی‌تواند انتساب بنکدار به مدیر دیگر را عوض کند.
             if (AdminAccess::isSalesManagerOnly()) {
@@ -128,6 +130,7 @@ class EditUser extends EditRecord
             'national_code' => $user->national_code,
             'email' => $user->email,
             'status' => $user->status,
+            'can_shop_gateway_test' => $user->can_shop_gateway_test,
             'phone_verified_at' => $user->phone_verified_at,
             'email_verified_at' => $user->email_verified_at,
             'created_by_representative_id' => $user->created_by_representative_id,

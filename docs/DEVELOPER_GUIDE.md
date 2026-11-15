@@ -572,7 +572,7 @@ Order paid / partial paid → Notification + SMS
 | UI پیش‌فاکتور | `ViewDraftOrder` — ledger + پرداخت نقد چندمرحله‌ای + پرداخت اعتبار |
 | تست | `tests/Unit/CreditPlanRepresentativeCheckoutTest.php`، `RepresentativeProformaSplitPaymentTest` |
 
-Deploy: `php artisan migrate --force` (ستون‌های `credit_plans.credit_gateway` / `cash_gateway` و `orders.credit_plan_id`).
+Deploy: `php artisan migrate --force && php artisan shop:deploy-recover` (ستون‌های `credit_plans.credit_gateway` / `cash_gateway` و `orders.credit_plan_id`). اگر هنوز `Unknown column 'credit_gateway'`: `php artisan shop:repair-credit-plan-gateways`.
 
 ### 9.6 PaymentGatewayCatalog — UI checkout
 
@@ -1520,6 +1520,7 @@ resources/views/layouts/shop.blade.php
 | 2026-10-27 | ویزارد نماینده — انتخاب محصول: کارت با تصویر اصلی (`rep_product_card`)، گرید؛ رفع گالری (بارگذاری همه تصاویر، بدون lazy+p hidden) |
 | 2026-10-27 | ویزارد نماینده: تب‌های کارخانه/قالب فقط وقتی برای خانواده/برند انتخاب‌شده در کاتالوگ وجود دارد (`RepresentativeCatalogLookup` + `OrderWizard`) |
 | 2026-10-27 | بازگشت پارسیان: مسیر alias **`/payment/callback/pec`** (همان handler که `/payment/callback/parsian`)؛ پس از verify ریدایرکت به صفحه امضاشده **`payment.result`**؛ رفع TypeError ویجت `OrdersTrendChart` (Carbon) |
+| 2026-11-15 | رفع ۵۰۰ ذخیره طرح: اگر migrate اجرا نشده باشد `CreditPlanGatewaySchemaRepair` ستون‌های `credit_gateway`/`cash_gateway` را می‌سازد (`shop:repair-credit-plan-gateways` / `shop:deploy-recover`) |
 | 2026-11-15 | پیش‌فاکتور نماینده: انتخاب **طرح پرداخت** (`CreditPlan` با `credit_gateway`/`cash_gateway`) به‌جای لیست آزاد درگاه؛ چند پرداخت نقدی سپس اعتبار — §9.5.1 |
 | 2026-11-14 | پنل نماینده: استان آدرس مشتری قفل روی استان فعالیت (بنکدار) |
 | 2026-11-14 | ایجاد کاربر: پر شدن خودکار ایمیل/رمز از کد ملی؛ حذف فیلد داریک از فرم مشتری نماینده |

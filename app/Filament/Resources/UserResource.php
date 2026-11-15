@@ -490,6 +490,14 @@ class UserResource extends Resource
                 ])
                 ->columns(1)
                 ->visible(fn (Get $get): bool => $get('user_kind') === 'staff'),
+            Forms\Components\Toggle::make('can_shop_gateway_test')
+                ->label('تست درگاه')
+                ->helperText('می‌تواند در فروشگاه محصولات/دسته‌هایی با تیک «نمایش برای مدیر / تست درگاه» را ببیند و تا درگاه تست کند. پنل ادمین نمی‌گیرد.')
+                ->default(false)
+                ->inline(false)
+                ->visible(fn (): bool => AdminAccess::canManageShopInAdmin())
+                ->disabled(fn (): bool => ! AdminAccess::canManageShopInAdmin())
+                ->dehydrated(fn (): bool => AdminAccess::canManageShopInAdmin()),
             Forms\Components\Fieldset::make('انتساب بنکدار')
                 ->schema([
                     Forms\Components\Select::make('created_by_sales_manager_id')

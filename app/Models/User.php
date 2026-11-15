@@ -40,6 +40,7 @@ class User extends Authenticatable implements FilamentUser
         'avatar',
         'bio',
         'status',
+        'can_shop_gateway_test',
         'is_admin',
         'is_author',
         'is_representative',
@@ -74,6 +75,7 @@ class User extends Authenticatable implements FilamentUser
             'phone_verified_at' => 'datetime',
             'last_login_at' => 'datetime',
             'status' => 'boolean',
+            'can_shop_gateway_test' => 'boolean',
             'is_admin' => 'boolean',
             'is_author' => 'boolean',
             'is_representative' => 'boolean',
@@ -120,6 +122,12 @@ class User extends Authenticatable implements FilamentUser
     public function isBankdar(): bool
     {
         return (bool) $this->is_bankdar;
+    }
+
+    /** دیدن محصولات/دسته‌های «نمایش برای مدیر» در فروشگاه برای تست درگاه */
+    public function canShopGatewayTest(): bool
+    {
+        return (bool) $this->can_shop_gateway_test && $this->status;
     }
 
     public function isCustomer(): bool

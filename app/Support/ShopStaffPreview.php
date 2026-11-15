@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * پیش‌نمایش فروشگاه برای مدیر سیستم و مدیر فروش (بدون نمایش به مشتری).
+ * پیش‌نمایش فروشگاه برای مدیر سیستم، مدیر فروش، و کاربران با دسترسی «تست درگاه».
  */
 final class ShopStaffPreview
 {
+    /** نوار ادمین بالای فروشگاه — فقط مدیر سیستم / مدیر فروش */
     public static function viewerIsStaff(?User $user = null): bool
     {
         $user ??= auth()->user();
@@ -20,9 +21,23 @@ final class ShopStaffPreview
             && ($user->isAdmin() || $user->isSalesManager());
     }
 
+    /** دیدن آیتم‌های admin_shop_preview در فروشگاه */
+    public static function viewerCanSeePreview(?User $user = null): bool
+    {
+        $user ??= auth()->user();
+
+        if (! $user instanceof User || ! $user->status) {
+            return false;
+        }
+
+        return $user->isAdmin()
+            || $user->isSalesManager()
+            || $user->canShopGatewayTest();
+    }
+
     public static function enabled(): bool
     {
-        return self::viewerIsStaff();
+        return self::viewerCanSeePreview();
     }
 
     public static function modelVisibleOnShop(Model $model, ?bool $asStaff = null): bool

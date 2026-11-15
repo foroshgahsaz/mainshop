@@ -1162,6 +1162,15 @@ body.has-admin-bar .store-admin-bar {
   z-index: 100;
 }
 
+.gateway-test-banner {
+  background: #0f766e;
+  color: #ecfdf5;
+  text-align: center;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  padding: 0.45rem 0.75rem;
+}
+
 html {
   overflow-x: clip;
 }

@@ -19,15 +19,12 @@ return new class extends Migration
             });
         }
 
-        if (Schema::hasTable('orders')) {
+        // بدون FK — روی پروداکشن MySQL/MariaDB خطای 1824 «Failed to open the referenced table»
+        // برای credit_plans دیده شد (همان الگوی mega_menu / product_families).
+        if (Schema::hasTable('orders') && ! Schema::hasColumn('orders', 'credit_plan_id')) {
             Schema::table('orders', function (Blueprint $table): void {
-                if (! Schema::hasColumn('orders', 'credit_plan_id')) {
-                    $table->foreignId('credit_plan_id')
-                        ->nullable()
-                        ->after('payment_method')
-                        ->constrained('credit_plans')
-                        ->nullOnDelete();
-                }
+                $table->unsignedBigInteger('credit_plan_id')->nullable()->after('payment_method');
+                $table->index('credit_plan_id');
             });
         }
     }
@@ -36,7 +33,8 @@ return new class extends Migration
     {
         if (Schema::hasTable('orders') && Schema::hasColumn('orders', 'credit_plan_id')) {
             Schema::table('orders', function (Blueprint $table): void {
-                $table->dropConstrainedForeignId('credit_plan_id');
+                $table->dropIndex(['credit_plan_id']);
+                $table->dropColumn('credit_plan_id');
             });
         }
 

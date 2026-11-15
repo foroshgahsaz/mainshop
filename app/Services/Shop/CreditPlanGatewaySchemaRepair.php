@@ -51,14 +51,11 @@ final class CreditPlanGatewaySchemaRepair
             }
         }
 
-        if (Schema::hasTable('orders') && Schema::hasTable('credit_plans')
-            && ! Schema::hasColumn('orders', 'credit_plan_id')) {
+        // بدون FK — خطای 1824 روی پروداکشن وقتی referenced table باز نمی‌شود
+        if (Schema::hasTable('orders') && ! Schema::hasColumn('orders', 'credit_plan_id')) {
             Schema::table('orders', function (Blueprint $table): void {
-                $table->foreignId('credit_plan_id')
-                    ->nullable()
-                    ->after('payment_method')
-                    ->constrained('credit_plans')
-                    ->nullOnDelete();
+                $table->unsignedBigInteger('credit_plan_id')->nullable()->after('payment_method');
+                $table->index('credit_plan_id');
             });
             $actions[] = 'orders.credit_plan_id';
         }

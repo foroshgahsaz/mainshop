@@ -48,6 +48,7 @@
 | `app/Http/Controllers/Admin/StopAdminImpersonationController.php` | بازگشت از ورود موقت به ادمین |
 | `app/Services/Representative/BankdarSubtreeService.php` | ساخت درخت مدیر فروش → بنکدار → نماینده |
 | `app/Services/Shop/SoftDeletesSchemaRepair.php` | اطمینان از `orders/users.deleted_at` در deploy |
+| `app/Services/Shop/CreditPlanGatewaySchemaRepair.php` | ستون‌های `credit_plans.credit_gateway` / `cash_gateway` (+ `orders.credit_plan_id`) |
 | `app/Support/ConditionalSoftDeletingScope.php` | SoftDeletes بدون ستون → بدون شرط SQL (نه ۵۰۰) |
 | `shop:repair-soft-deletes` | ایجاد دستی ستون‌های soft-delete |
 | `app/Services/Representative/BankdarHierarchyRepair.php` | ترمیم `created_by_sales_manager_id` / استان بنکدار |

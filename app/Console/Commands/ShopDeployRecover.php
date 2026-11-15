@@ -38,6 +38,11 @@ class ShopDeployRecover extends Command
             $this->components->info('Soft-deletes schema repaired: '.implode(', ', $softDeletesRepair));
         }
 
+        $creditPlanGwRepair = app(\App\Services\Shop\CreditPlanGatewaySchemaRepair::class)->ensure();
+        if ($creditPlanGwRepair !== []) {
+            $this->components->info('Credit plan gateway schema repaired: '.implode(', ', $creditPlanGwRepair));
+        }
+
         $this->components->info('Running migrations…');
         Artisan::call('migrate', ['--force' => true]);
         $this->line(trim(Artisan::output()));
@@ -45,6 +50,12 @@ class ShopDeployRecover extends Command
         $megaRepair = app(\App\Services\Shop\MegaMenuSchemaRepair::class)->ensure();
         if ($megaRepair !== []) {
             $this->components->info('Mega menu schema repaired: '.implode(', ', $megaRepair));
+        }
+
+        // بعد از migrate هم دوباره چک — اگر ردیف migrations ثبت شده ولی ستون نبوده.
+        $creditPlanGwRepairAfter = app(\App\Services\Shop\CreditPlanGatewaySchemaRepair::class)->ensure();
+        if ($creditPlanGwRepairAfter !== []) {
+            $this->components->info('Credit plan gateway schema repaired (post-migrate): '.implode(', ', $creditPlanGwRepairAfter));
         }
 
         $bankdarRepair = app(\App\Services\Representative\BankdarHierarchyRepair::class)

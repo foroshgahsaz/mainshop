@@ -24,6 +24,12 @@ App\Models\User::where("is_sales_manager", true)->get(["id","phone"])->each(fn($
 
 ```bash
 php artisan migrate --force && php artisan shop:deploy-recover
+```
+
+| علامت | اقدام |
+|--------|--------|
+| `Unknown column 'credit_gateway'` هنگام ذخیره طرح در ادمین | `php artisan shop:repair-credit-plan-gateways` یا `shop:deploy-recover` |
+| migrate: `1824 Failed to open the referenced table 'credit_plans'` | FK را حذف کردیم؛ کد جدید را deploy کنید و دوباره `migrate --force` (ستون بدون constraint) |
 
 ### ۵۰۰ ادمین / ورود موقت — لاگ در `/data/logs` است نه `storage/logs`
 
@@ -33,7 +39,6 @@ grep -E "EMERGENCY|production\.ERROR|laravel\.ERROR" /data/logs/laravel.log | ta
 ```
 
 اگر دیدی `Log [deprecations] is not defined`: در `.env` بگذار `LOG_DEPRECATIONS_CHANNEL=null` و `php artisan optimize:clear`؛ کد جدید کانال `deprecations` را هم به‌صورت null تعریف می‌کند.
-```
 
 ### `shop:seed-category-taxonomy` — MySQL 1093
 

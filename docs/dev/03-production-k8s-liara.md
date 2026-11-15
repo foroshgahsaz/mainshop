@@ -110,6 +110,8 @@ php artisan shop:verify-storage
 - `LOG_STACK=daily` (با `FILESYSTEM_PUBLIC_ROOT=/data` یا `SHOP_LOGS_DIRECTORY`، پیش‌فرض config خودکار `daily` است — فایل‌های `laravel-YYYY-MM-DD.log`)
 - `PAYMENT_LOG_LIST_DAYS=30` — تعداد روز در پنل `/admin/payment-logs`
 - پس از deploy ویژگی‌های نماینده (پرداخت ترکیبی / طرح پرداخت): حتماً `php artisan migrate --force && php artisan shop:deploy-recover` — ستون‌های `proforma_planned_credit_amount` و `proforma_cash_gateway` روی `orders`، به‌علاوه `credit_plans.credit_gateway` / `cash_gateway` و `orders.credit_plan_id`
+- اگر ذخیره `/admin/credit-plans/*/edit` خطای `Unknown column 'credit_gateway'` داد: `php artisan shop:repair-credit-plan-gateways` یا همان `shop:deploy-recover`
+- اگر migrate با `1824 Failed to open the referenced table 'credit_plans'` شکست: migration بدون FK است (ستون `unsignedBigInteger` + index) — آخرین `master` / PR ترمیم را pull کنید و دوباره `migrate --force`
 - `PAYMENT_LOG_ARCHIVE_AFTER_DAYS=30` — بعد از آن فایل plain به `.zip` می‌رود (حذف نمی‌شود)
 - `LOG_PAYMENTS_DAYS=45` — نگه‌داری Monolog برای `payments-*.log`
 - `DB_BACKUP_DIRECTORY=/data/database-backups`

@@ -78,8 +78,13 @@
                 </p>
 
                 @if (! $order->payments()->where('status', \App\Models\Payment::STATUS_SUCCESS)->exists())
-                    @php $gwType = $catalog->definition((string) $order->payment_method)['type'] ?? 'cash'; @endphp
-                    @if ($gwType === \App\Services\Payment\PaymentGatewayCatalog::TYPE_CREDIT || $creditPlan)
+                    @php
+                        $gwType = $catalog->definition((string) $order->payment_method)['type'] ?? 'cash';
+                        $canEditSplit = $creditPlan
+                            ? $creditPlan->supportsSplitCheckout()
+                            : ($gwType === \App\Services\Payment\PaymentGatewayCatalog::TYPE_CREDIT);
+                    @endphp
+                    @if ($canEditSplit)
                         <div class="rep-split-plan rep-split-plan--inline">
                             <label class="rep-field rep-field--grow">
                                 <span class="rep-field__label">سهم اعتباری (ریال)</span>

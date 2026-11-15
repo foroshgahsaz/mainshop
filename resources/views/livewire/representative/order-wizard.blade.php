@@ -483,14 +483,24 @@
                     <div class="rep-fulfillment-field rep-fulfillment-field--gateways">
                         <span class="rep-fulfillment-label" id="creditPlanLegend">طرح پرداخت</span>
                         @if ($this->creditPlans->isEmpty())
-                            <p class="rep-wizard-empty">طرح فعالی با درگاه نقدی و اعتباری تعریف نشده است. از ادمین بخواهید در «طرح‌ها» درگاه‌ها را تنظیم کند.</p>
+                            <p class="rep-wizard-empty">طرح فعالی با حداقل یک درگاه (نقدی یا اعتباری) تعریف نشده است. در ادمین → طرح‌ها، درگاه نقدی و/یا اعتباری را تنظیم کنید.</p>
                         @else
                             <ul class="rep-gateway-list rep-gateway-list--compact" role="radiogroup" aria-labelledby="creditPlanLegend">
                                 @foreach ($this->creditPlans as $plan)
                                     @php
                                         $catalog = app(\App\Services\Payment\PaymentGatewayCatalog::class);
-                                        $creditLabel = $catalog->definition((string) $plan->credit_gateway)['label'] ?? $plan->credit_gateway;
-                                        $cashLabel = $catalog->definition((string) $plan->cash_gateway)['label'] ?? $plan->cash_gateway;
+                                        $metaParts = [];
+                                        if ($plan->filledCreditGateway()) {
+                                            $metaParts[] = 'اعتباری: '.($catalog->definition((string) $plan->credit_gateway)['label'] ?? $plan->credit_gateway);
+                                        }
+                                        if ($plan->filledCashGateway()) {
+                                            $metaParts[] = 'نقدی: '.($catalog->definition((string) $plan->cash_gateway)['label'] ?? $plan->cash_gateway);
+                                        }
+                                        if ($plan->isCashOnlyCheckout()) {
+                                            $metaParts[] = 'فقط نقدی';
+                                        } elseif ($plan->isCreditOnlyCheckout()) {
+                                            $metaParts[] = 'فقط اعتباری';
+                                        }
                                     @endphp
                                     <li wire:key="rep-credit-plan-{{ $plan->id }}">
                                         <label class="rep-gateway-option {{ (int) $creditPlanId === (int) $plan->id ? 'is-selected' : '' }}">
@@ -502,9 +512,7 @@
                                             <x-checkout-option-icon :src="\App\Support\ShopMedia::url($plan->icon)" :alt="$plan->name" />
                                             <span class="rep-gateway-option__body">
                                                 <span class="rep-gateway-option__title">{{ $plan->name }}</span>
-                                                <span class="rep-gateway-option__meta">
-                                                    اعتباری: {{ $creditLabel }} · نقدی: {{ $cashLabel }}
-                                                </span>
+                                                <span class="rep-gateway-option__meta">{{ implode(' · ', $metaParts) }}</span>
                                             </span>
                                             <span class="rep-plan-row__radio" aria-hidden="true"></span>
                                         </label>
@@ -514,7 +522,24 @@
                         @endif
                         @error('credit_plan_id') <p class="rep-wizard-error">{{ $message }}</p> @enderror
                         @error('payment_gateway') <p class="rep-wizard-error">{{ $message }}</p> @enderror
-                        @if ($creditPlanId && $order)
+                        @php
+                            $selectedPlan = $creditPlanId
+                                ? $this->creditPlans->firstWhere('id', (int) $creditPlanId)
+                                : null;
+                        @endphp
+                        @if ($selectedPlan && $order && $selectedPlan->isCashOnlyCheckout())
+                            <p class="rep-wizard-hint">
+                                این طرح فقط نقدی است — کل مبلغ از درگاه
+                                <strong>{{ app(\App\Services\Payment\PaymentGatewayCatalog::class)->definition((string) $selectedPlan->cash_gateway)['label'] ?? $selectedPlan->cash_gateway }}</strong>
+                                پرداخت می‌شود.
+                            </p>
+                        @elseif ($selectedPlan && $order && $selectedPlan->isCreditOnlyCheckout())
+                            <p class="rep-wizard-hint">
+                                این طرح فقط اعتباری است — کل مبلغ از درگاه
+                                <strong>{{ app(\App\Services\Payment\PaymentGatewayCatalog::class)->definition((string) $selectedPlan->credit_gateway)['label'] ?? $selectedPlan->credit_gateway }}</strong>
+                                پرداخت می‌شود.
+                            </p>
+                        @elseif ($selectedPlan && $order && $selectedPlan->supportsSplitCheckout())
                             <div class="rep-split-plan-card" role="region" aria-label="طرح پرداخت اعتبار و نقد">
                                 <div class="rep-split-plan-card__glow" aria-hidden="true"></div>
                                 <div class="rep-split-plan-card__ribbon" aria-hidden="true">اعتبار + نقد</div>

@@ -681,8 +681,16 @@ class OrderWizard extends Component
         }
 
         $this->creditPlanId = (int) $plan->id;
-        $this->paymentGateway = (string) $plan->credit_gateway;
-        $this->cashGateway = (string) $plan->cash_gateway;
+        $creditGw = $plan->filledCreditGateway() ? (string) $plan->credit_gateway : '';
+        $cashGw = $plan->filledCashGateway() ? (string) $plan->cash_gateway : '';
+        // درگاه اصلی سفارش: اعتباری اگر باشد، وگرنه نقدی (طرح فقط‌نقدی مثل دیبا)
+        $this->paymentGateway = $creditGw !== '' ? $creditGw : $cashGw;
+        $this->cashGateway = $cashGw;
+
+        if ($plan->isCashOnlyCheckout()) {
+            $this->plannedCreditAmount = null;
+            $this->plannedCreditRial = '';
+        }
     }
 
     #[Computed]
@@ -1203,24 +1211,47 @@ class OrderWizard extends Component
 
         $this->applyCreditPlanSelection($this->creditPlanId);
 
-        if ($this->paymentGateway === '' || $this->cashGateway === '') {
+        if ($this->paymentGateway === '') {
             $this->addError('credit_plan_id', 'طرح انتخاب‌شده درگاه معتبر ندارد.');
 
             return false;
         }
 
+        $plan = CreditPlan::query()->find($this->creditPlanId);
         $creditAmount = $this->plannedCreditAmount;
         $finalAmount = (int) $order->fresh()->final_amount;
 
-        // تمام‌نقدی روی درگاه نقدی طرح
-        if ($creditAmount === null || $creditAmount <= 0) {
+        if ($plan?->isCashOnlyCheckout()) {
+            // طرح فقط‌نقدی (مثل دیبا): کل مبلغ از درگاه نقدی
+            $creditAmount = null;
+            $paymentGateway = $this->cashGateway !== '' ? $this->cashGateway : $this->paymentGateway;
+        } elseif ($plan?->isCreditOnlyCheckout()) {
+            // طرح فقط‌اعتباری: تقسیم مجاز نیست
+            if ($creditAmount !== null && $creditAmount > 0 && $creditAmount < $finalAmount) {
+                $this->addError('planned_credit', 'این طرح فقط درگاه اعتباری دارد؛ پرداخت ترکیبی ممکن نیست.');
+
+                return false;
+            }
+            $creditAmount = null;
+            $paymentGateway = $this->paymentGateway;
+        } elseif ($creditAmount === null || $creditAmount <= 0) {
+            // ترکیبی ولی تمام‌نقدی
+            if ($this->cashGateway === '') {
+                $this->addError('credit_plan_id', 'برای پرداخت نقدی، درگاه نقدی طرح را در ادمین تنظیم کنید.');
+
+                return false;
+            }
             $creditAmount = null;
             $paymentGateway = $this->cashGateway;
         } elseif ($creditAmount >= $finalAmount) {
-            // تمام‌اعتباری
             $creditAmount = $finalAmount;
             $paymentGateway = $this->paymentGateway;
         } else {
+            if ($this->cashGateway === '') {
+                $this->addError('credit_plan_id', 'برای پرداخت ترکیبی، درگاه نقدی طرح را در ادمین تنظیم کنید.');
+
+                return false;
+            }
             $paymentGateway = $this->paymentGateway;
         }
 

@@ -7,6 +7,7 @@ use App\Models\FreightCarrier;
 use App\Models\Order;
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\CreditPlan;
 use App\Models\Product;
 use App\Models\ProductFamily;
 use App\Models\ProductPlant;
@@ -70,9 +71,12 @@ class OrderWizard extends Component
 
     public ?int $freightCarrierId = null;
 
+    /** طرح پرداخت از ادمین (`credit_plans`) — درگاه نقدی/اعتباری از روی طرح می‌آید */
+    public ?int $creditPlanId = null;
+
     public string $paymentGateway = '';
 
-    /** مبلغ اعتباری (تومان) — فقط وقتی درگاه اعتباری و کمتر از کل فاکتور باشد */
+    /** مبلغ اعتباری (تومان) — سهم اعتبار طرح روی این پیش‌فاکتور */
     public ?int $plannedCreditAmount = null;
 
     /** نمایش ورودی اعتبار به ریال با جداکننده */
@@ -637,6 +641,50 @@ class OrderWizard extends Component
         return app(PaymentGatewayCatalog::class)->enabled();
     }
 
+    /** @return Collection<int, CreditPlan> */
+    #[Computed]
+    public function creditPlans(): Collection
+    {
+        if ($this->step !== 'review') {
+            return collect();
+        }
+
+        return CreditPlan::query()->forRepresentativeCheckout()->get();
+    }
+
+    public function updatedCreditPlanId(?int $value): void
+    {
+        $this->applyCreditPlanSelection($value);
+    }
+
+    protected function applyCreditPlanSelection(?int $planId): void
+    {
+        $this->resetErrorBag('credit_plan_id');
+        $this->resetErrorBag('payment_gateway');
+
+        if ($planId === null) {
+            $this->paymentGateway = '';
+            $this->cashGateway = '';
+
+            return;
+        }
+
+        $plan = CreditPlan::query()->forRepresentativeCheckout()->whereKey($planId)->first();
+
+        if ($plan === null) {
+            $this->creditPlanId = null;
+            $this->paymentGateway = '';
+            $this->cashGateway = '';
+            $this->addError('credit_plan_id', 'طرح انتخاب‌شده معتبر نیست یا درگاه‌هایش فعال نیستند.');
+
+            return;
+        }
+
+        $this->creditPlanId = (int) $plan->id;
+        $this->paymentGateway = (string) $plan->credit_gateway;
+        $this->cashGateway = (string) $plan->cash_gateway;
+    }
+
     #[Computed]
     public function activeReservedProformas(): Collection
     {
@@ -1039,18 +1087,28 @@ class OrderWizard extends Component
 
         if ($order === null) {
             $this->freightCarrierId = null;
-            $this->paymentGateway = app(PaymentGatewayCatalog::class)->enabledNames()[0] ?? 'zarinpal';
+            $this->creditPlanId = null;
+            $this->paymentGateway = '';
+            $this->cashGateway = '';
 
             return;
         }
 
         $this->freightCarrierId = $order->freight_carrier_id;
-        $this->paymentGateway = (string) ($order->payment_method ?: app(PaymentGatewayCatalog::class)->enabledNames()[0] ?? 'zarinpal');
+        $this->creditPlanId = $order->credit_plan_id ? (int) $order->credit_plan_id : null;
+        if ($this->creditPlanId) {
+            $this->applyCreditPlanSelection($this->creditPlanId);
+        } else {
+            $this->paymentGateway = '';
+            $this->cashGateway = '';
+        }
         $this->plannedCreditAmount = $order->proforma_planned_credit_amount !== null
             ? (int) $order->proforma_planned_credit_amount
             : null;
         $this->plannedCreditRial = RialAmountInput::formatRialFromToman($this->plannedCreditAmount);
-        $this->cashGateway = (string) ($order->proforma_cash_gateway ?: $this->defaultCashGateway());
+        if ($this->cashGateway === '') {
+            $this->cashGateway = (string) ($order->proforma_cash_gateway ?: '');
+        }
         $this->couponCode = (string) ($order->coupon?->code ?? '');
     }
 
@@ -1128,6 +1186,8 @@ class OrderWizard extends Component
 
         $this->resetErrorBag('freight_carrier_id');
         $this->resetErrorBag('payment_gateway');
+        $this->resetErrorBag('credit_plan_id');
+        $this->resetErrorBag('planned_credit');
 
         if ($this->freightCarrierId === null) {
             $this->addError('freight_carrier_id', 'باربری را انتخاب کنید.');
@@ -1135,24 +1195,43 @@ class OrderWizard extends Component
             return false;
         }
 
-        if ($this->paymentGateway === '') {
-            $this->addError('payment_gateway', 'درگاه پرداخت را انتخاب کنید.');
+        if ($this->creditPlanId === null) {
+            $this->addError('credit_plan_id', 'طرح پرداخت را انتخاب کنید.');
+
+            return false;
+        }
+
+        $this->applyCreditPlanSelection($this->creditPlanId);
+
+        if ($this->paymentGateway === '' || $this->cashGateway === '') {
+            $this->addError('credit_plan_id', 'طرح انتخاب‌شده درگاه معتبر ندارد.');
 
             return false;
         }
 
         $creditAmount = $this->plannedCreditAmount;
-        if ($this->selectedPaymentGatewayType !== PaymentGatewayCatalog::TYPE_CREDIT) {
+        $finalAmount = (int) $order->fresh()->final_amount;
+
+        // تمام‌نقدی روی درگاه نقدی طرح
+        if ($creditAmount === null || $creditAmount <= 0) {
             $creditAmount = null;
+            $paymentGateway = $this->cashGateway;
+        } elseif ($creditAmount >= $finalAmount) {
+            // تمام‌اعتباری
+            $creditAmount = $finalAmount;
+            $paymentGateway = $this->paymentGateway;
+        } else {
+            $paymentGateway = $this->paymentGateway;
         }
 
         try {
             app(RepresentativeDraftOrderService::class)->syncFulfillment(
                 $order,
                 (int) $this->freightCarrierId,
-                $this->paymentGateway,
+                $paymentGateway,
                 $creditAmount,
-                $this->cashGateway !== '' ? $this->cashGateway : $this->defaultCashGateway(),
+                $this->cashGateway,
+                $this->creditPlanId,
             );
         } catch (ValidationException $exception) {
             foreach ($exception->errors() as $field => $messages) {
@@ -1161,7 +1240,7 @@ class OrderWizard extends Component
 
             return false;
         } catch (\RuntimeException|\InvalidArgumentException $exception) {
-            $this->addError('payment_gateway', $exception->getMessage());
+            $this->addError('credit_plan_id', $exception->getMessage());
 
             return false;
         }
@@ -1171,7 +1250,7 @@ class OrderWizard extends Component
                 app(RepresentativeDraftCouponService::class)->apply(
                     $order->fresh(),
                     $this->couponCode,
-                    $this->paymentGateway,
+                    $paymentGateway,
                 );
             } catch (ValidationException $exception) {
                 foreach ($exception->errors() as $field => $messages) {

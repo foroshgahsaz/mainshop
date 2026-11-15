@@ -559,6 +559,21 @@ Order paid / partial paid → Notification + SMS
   → Payment#2 zarinpal 600,000 → درگاه
 ```
 
+### 9.5.1 پیش‌فاکتور نماینده — طرح پرداخت (`CreditPlan`)
+
+در جمع‌بندی ویزارد نماینده، نماینده **درگاه آزاد انتخاب نمی‌کند**؛ یک **طرح** از `/admin` → طرح‌ها (`CreditPlanResource`) برمی‌گزیند. هر طرح فیلدهای `credit_gateway` و `cash_gateway` دارد (هر دو باید درگاه فعال کاتالوگ باشند).
+
+| مفهوم | جزئیات |
+|--------|--------|
+| اسکوپ قابل‌استفاده | `CreditPlan::scopeForRepresentativeCheckout` — فعال + هر دو درگاه پر و enabled |
+| ذخیره روی سفارش | `orders.credit_plan_id` + `payment_method` (= درگاه اعتباری یا نقدی طرح) + `proforma_planned_credit_amount` / `proforma_cash_gateway` |
+| سناریو چندنقدی | مثلاً سفارش ۳۰M، اعتبار ۲۰M، نقد ۵M + ۵M سپس ۲۰M اعتبار — `RepresentativeProformaSplitPayment` |
+| UI ویزارد | انتخاب طرح → مبلغ اعتبار (ریال) → CTA «ثبت + پرداخت نقدی این مرحله» |
+| UI پیش‌فاکتور | `ViewDraftOrder` — ledger + پرداخت نقد چندمرحله‌ای + پرداخت اعتبار |
+| تست | `tests/Unit/CreditPlanRepresentativeCheckoutTest.php`، `RepresentativeProformaSplitPaymentTest` |
+
+Deploy: `php artisan migrate --force` (ستون‌های `credit_plans.credit_gateway` / `cash_gateway` و `orders.credit_plan_id`).
+
 ### 9.6 PaymentGatewayCatalog — UI checkout
 
 `PaymentGatewayCatalog` درگاه‌های **فعال** را برای checkout برمی‌گرداند:
@@ -1505,6 +1520,7 @@ resources/views/layouts/shop.blade.php
 | 2026-10-27 | ویزارد نماینده — انتخاب محصول: کارت با تصویر اصلی (`rep_product_card`)، گرید؛ رفع گالری (بارگذاری همه تصاویر، بدون lazy+p hidden) |
 | 2026-10-27 | ویزارد نماینده: تب‌های کارخانه/قالب فقط وقتی برای خانواده/برند انتخاب‌شده در کاتالوگ وجود دارد (`RepresentativeCatalogLookup` + `OrderWizard`) |
 | 2026-10-27 | بازگشت پارسیان: مسیر alias **`/payment/callback/pec`** (همان handler که `/payment/callback/parsian`)؛ پس از verify ریدایرکت به صفحه امضاشده **`payment.result`**؛ رفع TypeError ویجت `OrdersTrendChart` (Carbon) |
+| 2026-11-15 | پیش‌فاکتور نماینده: انتخاب **طرح پرداخت** (`CreditPlan` با `credit_gateway`/`cash_gateway`) به‌جای لیست آزاد درگاه؛ چند پرداخت نقدی سپس اعتبار — §9.5.1 |
 | 2026-11-14 | پنل نماینده: استان آدرس مشتری قفل روی استان فعالیت (بنکدار) |
 | 2026-11-14 | ایجاد کاربر: پر شدن خودکار ایمیل/رمز از کد ملی؛ حذف فیلد داریک از فرم مشتری نماینده |
 | 2026-11-14 | بنکدار: اسکوپ `product-price-stock-update` + فیلتر برند/دسته + پیش‌نویس ایجاد محصول در محدوده خودش |

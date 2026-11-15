@@ -64,4 +64,65 @@ class RepresentativeProformaSplitPaymentTest extends TestCase
         $this->assertTrue($split->isSettlementComplete($order));
         $this->assertTrue($order->isPaid());
     }
+
+    public function test_multi_cash_then_credit_settlement(): void
+    {
+        $customer = User::factory()->create();
+        $rep = User::factory()->create();
+
+        $order = Order::query()->create([
+            'user_id' => $customer->id,
+            'representative_id' => $rep->id,
+            'final_amount' => 30000000,
+            'total_amount' => 30000000,
+            'shipping_amount' => 0,
+            'discount_amount' => 0,
+            'payment_method' => 'tara',
+            'proforma_planned_credit_amount' => 20000000,
+            'proforma_cash_gateway' => 'parsian',
+            'status' => Order::STATUS_PROFORMA,
+            'stock_reserved' => true,
+        ]);
+
+        $split = app(RepresentativeProformaSplitPayment::class);
+
+        Payment::query()->create([
+            'order_id' => $order->id,
+            'user_id' => $customer->id,
+            'paid_by_representative_id' => $rep->id,
+            'amount' => 5000000,
+            'gateway' => 'parsian',
+            'status' => Payment::STATUS_SUCCESS,
+            'tracking_code' => 'CASH_A',
+        ]);
+        Payment::query()->create([
+            'order_id' => $order->id,
+            'user_id' => $customer->id,
+            'paid_by_representative_id' => $rep->id,
+            'amount' => 5000000,
+            'gateway' => 'parsian',
+            'status' => Payment::STATUS_SUCCESS,
+            'tracking_code' => 'CASH_B',
+        ]);
+
+        $order = $order->fresh(['payments']);
+        $this->assertSame(10000000, $split->paidCashAmount($order));
+        $this->assertSame(0, $split->remainingCashAmount($order));
+        $this->assertSame(20000000, $split->remainingCreditAmount($order));
+        $this->assertFalse($split->isSettlementComplete($order));
+
+        Payment::query()->create([
+            'order_id' => $order->id,
+            'user_id' => $customer->id,
+            'paid_by_representative_id' => $rep->id,
+            'amount' => 20000000,
+            'gateway' => 'tara',
+            'status' => Payment::STATUS_SUCCESS,
+            'tracking_code' => 'CRED_FULL',
+        ]);
+
+        $order = $order->fresh(['payments']);
+        $this->assertTrue($split->isSettlementComplete($order));
+        $this->assertTrue($order->isPaid());
+    }
 }

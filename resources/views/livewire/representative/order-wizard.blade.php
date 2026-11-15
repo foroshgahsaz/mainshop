@@ -481,25 +481,30 @@
                         @error('freight_carrier_id') <p class="rep-wizard-error">{{ $message }}</p> @enderror
                     </div>
                     <div class="rep-fulfillment-field rep-fulfillment-field--gateways">
-                        <span class="rep-fulfillment-label" id="paymentGatewayLegend">درگاه پرداخت</span>
-                        @if (count($this->paymentGateways) === 0)
-                            <p class="rep-wizard-empty">درگاه فعالی نیست</p>
+                        <span class="rep-fulfillment-label" id="creditPlanLegend">طرح پرداخت</span>
+                        @if ($this->creditPlans->isEmpty())
+                            <p class="rep-wizard-empty">طرح فعالی با درگاه نقدی و اعتباری تعریف نشده است. از ادمین بخواهید در «طرح‌ها» درگاه‌ها را تنظیم کند.</p>
                         @else
-                            <ul class="rep-gateway-list rep-gateway-list--compact" role="radiogroup" aria-labelledby="paymentGatewayLegend">
-                                @foreach ($this->paymentGateways as $gateway)
-                                    <li wire:key="rep-gateway-{{ $gateway['name'] }}">
-                                        <label class="rep-gateway-option {{ $paymentGateway === $gateway['name'] ? 'is-selected' : '' }}">
+                            <ul class="rep-gateway-list rep-gateway-list--compact" role="radiogroup" aria-labelledby="creditPlanLegend">
+                                @foreach ($this->creditPlans as $plan)
+                                    @php
+                                        $catalog = app(\App\Services\Payment\PaymentGatewayCatalog::class);
+                                        $creditLabel = $catalog->definition((string) $plan->credit_gateway)['label'] ?? $plan->credit_gateway;
+                                        $cashLabel = $catalog->definition((string) $plan->cash_gateway)['label'] ?? $plan->cash_gateway;
+                                    @endphp
+                                    <li wire:key="rep-credit-plan-{{ $plan->id }}">
+                                        <label class="rep-gateway-option {{ (int) $creditPlanId === (int) $plan->id ? 'is-selected' : '' }}">
                                             <input type="radio"
                                                    class="rep-gateway-option__input"
-                                                   name="repPaymentGateway"
-                                                   value="{{ $gateway['name'] }}"
-                                                   wire:model.live="paymentGateway">
-                                            <x-checkout-option-icon :src="$gateway['icon'] ?? null" :alt="$gateway['label']" />
+                                                   name="repCreditPlan"
+                                                   value="{{ $plan->id }}"
+                                                   wire:model.live="creditPlanId">
+                                            <x-checkout-option-icon :src="\App\Support\ShopMedia::url($plan->icon)" :alt="$plan->name" />
                                             <span class="rep-gateway-option__body">
-                                                <span class="rep-gateway-option__title">{{ $gateway['label'] }}</span>
-                                                @if (! empty($gateway['description']))
-                                                    <span class="rep-gateway-option__meta">{{ $gateway['description'] }}</span>
-                                                @endif
+                                                <span class="rep-gateway-option__title">{{ $plan->name }}</span>
+                                                <span class="rep-gateway-option__meta">
+                                                    اعتباری: {{ $creditLabel }} · نقدی: {{ $cashLabel }}
+                                                </span>
                                             </span>
                                             <span class="rep-plan-row__radio" aria-hidden="true"></span>
                                         </label>
@@ -507,8 +512,9 @@
                                 @endforeach
                             </ul>
                         @endif
+                        @error('credit_plan_id') <p class="rep-wizard-error">{{ $message }}</p> @enderror
                         @error('payment_gateway') <p class="rep-wizard-error">{{ $message }}</p> @enderror
-                        @if ($this->selectedPaymentGatewayType === \App\Services\Payment\PaymentGatewayCatalog::TYPE_CREDIT && $order)
+                        @if ($creditPlanId && $order)
                             <div class="rep-split-plan-card" role="region" aria-label="طرح پرداخت اعتبار و نقد">
                                 <div class="rep-split-plan-card__glow" aria-hidden="true"></div>
                                 <div class="rep-split-plan-card__ribbon" aria-hidden="true">اعتبار + نقد</div>
@@ -522,11 +528,11 @@
                                         </span>
                                         <div>
                                             <span class="rep-split-plan-card__badge">پرداخت ترکیبی</span>
-                                            <h3 class="rep-split-plan-card__title">تقسیم مبلغ بین اعتبار و درگاه نقدی</h3>
+                                            <h3 class="rep-split-plan-card__title">سهم اعتبار و پرداخت نقدی چندمرحله‌ای</h3>
                                         </div>
                                     </div>
                                     <p class="rep-split-plan-card__lead">
-                                        بخشی <strong>اعتباری</strong> (باجت/…) و مابقی <strong>نقدی</strong> — چند پرداخت نقدی مجاز است.
+                                        مبلغ اعتباری را وارد کنید (مثلاً ۲۰ میلیون از ۳۰). مابقی نقدی است و می‌توانید چند بار نقدی بپردازید؛ سپس اعتبار را بزنید.
                                     </p>
                                 </div>
                                 <label class="rep-field rep-field--grow">
@@ -539,6 +545,7 @@
                                            dir="ltr"
                                            autocomplete="off">
                                 </label>
+                                @error('planned_credit') <p class="rep-wizard-error">{{ $message }}</p> @enderror
                                 @php
                                     $plannedCreditTomans = (int) ($plannedCreditAmount ?? 0);
                                     $cashRemainTomans = max(0, (int) $order->final_amount - $plannedCreditTomans);
@@ -547,16 +554,16 @@
                                     <div class="rep-split-cash-pay">
                                         <p class="rep-wizard-hint">
                                             مابقی نقدی: <strong>{{ $this->formatMoney($cashRemainTomans) }}</strong>
-                                            — می‌توانید پس از ثبت، نقدی بزنید یا همین‌جا ثبت + پرداخت نقدی کنید.
+                                            — می‌توانید چند قسط نقدی بزنید (مثلاً ۵ + ۵) و بعد اعتبار را پرداخت کنید.
                                         </p>
                                         <div class="rep-split-cash-pay__row">
                                             <label class="rep-field rep-field--grow">
-                                                <span class="rep-field__label">مبلغ پرداخت نقدی (ریال)</span>
+                                                <span class="rep-field__label">مبلغ پرداخت نقدی این مرحله (ریال)</span>
                                                 <input type="text"
                                                        inputmode="numeric"
                                                        wire:model.live="cashPayRial"
                                                        class="rep-field__input rep-field__input--rial-lg"
-                                                       placeholder="{{ number_format($cashRemainTomans * 10) }}"
+                                                       placeholder="{{ number_format(min($cashRemainTomans, 5000000) * 10) }}"
                                                        dir="ltr"
                                                        autocomplete="off">
                                             </label>
@@ -565,41 +572,20 @@
                                                     wire:click="finishDraftAndPayCash"
                                                     wire:loading.attr="disabled"
                                                     wire:target="finishDraftAndPayCash">
-                                                <span wire:loading.remove wire:target="finishDraftAndPayCash">ثبت پیش‌فاکتور و پرداخت نقدی</span>
+                                                <span wire:loading.remove wire:target="finishDraftAndPayCash">
+                                                    ثبت پیش‌فاکتور و پرداخت
+                                                    @if (trim($cashPayRial) !== '')
+                                                        {{ $cashPayRial }} ریال
+                                                    @else
+                                                        نقدی
+                                                    @endif
+                                                </span>
                                                 <span wire:loading wire:target="finishDraftAndPayCash">در حال اتصال…</span>
                                             </button>
                                         </div>
                                     </div>
-                                @endif
-                                @if (count($this->cashGateways) === 0)
-                                    <p class="rep-wizard-empty">درگاه نقدی فعالی برای مابقی مبلغ نیست.</p>
-                                @else
-                                    <div class="rep-cash-gateway-section">
-                                        <span class="rep-cash-gateway-section__title" id="repCashGatewayLegend">
-                                            درگاه نقدی (برای مابقی مبلغ)
-                                        </span>
-                                        <p class="rep-cash-gateway-section__hint">روی آیکون درگاه کلیک کنید:</p>
-                                        <ul class="rep-cash-gateway-grid" role="radiogroup" aria-labelledby="repCashGatewayLegend">
-                                            @foreach ($this->cashGateways as $cashGw)
-                                                <li wire:key="rep-cash-gw-{{ $cashGw['name'] }}">
-                                                    <label @class([
-                                                        'rep-cash-gateway-tile',
-                                                        'is-selected' => $cashGateway === $cashGw['name'],
-                                                    ])>
-                                                        <input type="radio"
-                                                               class="rep-gateway-option__input"
-                                                               name="repCashGateway"
-                                                               value="{{ $cashGw['name'] }}"
-                                                               wire:model.live="cashGateway">
-                                                        <span class="rep-cash-gateway-tile__icon-wrap">
-                                                            <x-checkout-option-icon :src="$cashGw['icon'] ?? null" :alt="$cashGw['label']" />
-                                                        </span>
-                                                        <span class="rep-cash-gateway-tile__label">{{ $cashGw['label'] }}</span>
-                                                    </label>
-                                                </li>
-                                            @endforeach
-                                        </ul>
-                                    </div>
+                                @elseif ($plannedCreditTomans <= 0)
+                                    <p class="rep-wizard-hint">اگر مبلغ اعتباری را خالی بگذارید، کل فاکتور نقدی از درگاه طرح پرداخت می‌شود.</p>
                                 @endif
                             </div>
                         @endif

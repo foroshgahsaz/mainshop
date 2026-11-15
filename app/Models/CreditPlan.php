@@ -40,7 +40,9 @@ class CreditPlan extends Model
     }
 
     /**
-     * طرح‌های قابل استفاده در جمع‌بندی نماینده: فعال + هر دو درگاه تنظیم و روشن.
+     * طرح‌های قابل استفاده در جمع‌بندی نماینده:
+     * فعال + حداقل یک درگاه (نقدی و/یا اعتباری) که در کاتالوگ روشن باشد.
+     * طرح فقط‌نقدی (مثل دیبا) و فقط‌اعتباری و ترکیبی پذیرفته می‌شوند.
      *
      * @param  Builder<CreditPlan>  $query
      * @return Builder<CreditPlan>
@@ -53,18 +55,86 @@ class CreditPlan extends Model
 
         return $query
             ->active()
-            ->whereNotNull('credit_gateway')
-            ->whereNotNull('cash_gateway')
-            ->where('credit_gateway', '!=', '')
-            ->where('cash_gateway', '!=', '')
-            ->when($creditNames !== [], fn (Builder $q) => $q->whereIn('credit_gateway', $creditNames), fn (Builder $q) => $q->whereRaw('1 = 0'))
-            ->when($cashNames !== [], fn (Builder $q) => $q->whereIn('cash_gateway', $cashNames), fn (Builder $q) => $q->whereRaw('1 = 0'))
+            ->where(function (Builder $outer) use ($creditNames, $cashNames): void {
+                // فقط نقدی
+                $outer->where(function (Builder $onlyCash) use ($cashNames): void {
+                    $onlyCash
+                        ->where(function (Builder $c): void {
+                            $c->whereNull('credit_gateway')->orWhere('credit_gateway', '');
+                        })
+                        ->whereNotNull('cash_gateway')
+                        ->where('cash_gateway', '!=', '')
+                        ->when(
+                            $cashNames !== [],
+                            fn (Builder $q) => $q->whereIn('cash_gateway', $cashNames),
+                            fn (Builder $q) => $q->whereRaw('1 = 0'),
+                        );
+                })
+                // فقط اعتباری
+                    ->orWhere(function (Builder $onlyCredit) use ($creditNames): void {
+                        $onlyCredit
+                            ->where(function (Builder $c): void {
+                                $c->whereNull('cash_gateway')->orWhere('cash_gateway', '');
+                            })
+                            ->whereNotNull('credit_gateway')
+                            ->where('credit_gateway', '!=', '')
+                            ->when(
+                                $creditNames !== [],
+                                fn (Builder $q) => $q->whereIn('credit_gateway', $creditNames),
+                                fn (Builder $q) => $q->whereRaw('1 = 0'),
+                            );
+                    })
+                // ترکیبی: هر دو پر و هر دو فعال
+                    ->orWhere(function (Builder $both) use ($creditNames, $cashNames): void {
+                        $both
+                            ->whereNotNull('credit_gateway')
+                            ->where('credit_gateway', '!=', '')
+                            ->whereNotNull('cash_gateway')
+                            ->where('cash_gateway', '!=', '')
+                            ->when(
+                                $creditNames !== [],
+                                fn (Builder $q) => $q->whereIn('credit_gateway', $creditNames),
+                                fn (Builder $q) => $q->whereRaw('1 = 0'),
+                            )
+                            ->when(
+                                $cashNames !== [],
+                                fn (Builder $q) => $q->whereIn('cash_gateway', $cashNames),
+                                fn (Builder $q) => $q->whereRaw('1 = 0'),
+                            );
+                    });
+            })
             ->orderBy('position')
             ->orderBy('name');
     }
 
     public function hasCheckoutGateways(): bool
     {
-        return filled($this->credit_gateway) && filled($this->cash_gateway);
+        return $this->filledCashGateway() || $this->filledCreditGateway();
+    }
+
+    public function filledCreditGateway(): bool
+    {
+        return filled($this->credit_gateway);
+    }
+
+    public function filledCashGateway(): bool
+    {
+        return filled($this->cash_gateway);
+    }
+
+    /** هر دو درگاه برای پرداخت ترکیبی */
+    public function supportsSplitCheckout(): bool
+    {
+        return $this->filledCreditGateway() && $this->filledCashGateway();
+    }
+
+    public function isCashOnlyCheckout(): bool
+    {
+        return $this->filledCashGateway() && ! $this->filledCreditGateway();
+    }
+
+    public function isCreditOnlyCheckout(): bool
+    {
+        return $this->filledCreditGateway() && ! $this->filledCashGateway();
     }
 }

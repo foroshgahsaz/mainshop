@@ -68,7 +68,7 @@ class CreditPlanResource extends Resource
                             ->all())
                         ->searchable()
                         ->nullable()
-                        ->helperText('برای استفاده در پیش‌فاکتور نماینده الزامی است.'),
+                        ->helperText('اختیاری. برای طرح ترکیبی یا فقط‌اعتباری. اگر خالی بگذارید، طرح فقط‌نقدی است (مثل دیبا).'),
                     Forms\Components\Select::make('cash_gateway')
                         ->label('درگاه نقدی')
                         ->options(fn (): array => collect(app(PaymentGatewayCatalog::class)->cash())
@@ -76,7 +76,7 @@ class CreditPlanResource extends Resource
                             ->all())
                         ->searchable()
                         ->nullable()
-                        ->helperText('پرداخت‌های نقدی چندمرحله‌ای روی همین درگاه انجام می‌شود.'),
+                        ->helperText('اختیاری. برای طرح فقط‌نقدی یا مابقی پرداخت ترکیبی. حداقل یکی از دو درگاه برای ویزارد نماینده لازم است.'),
                     Forms\Components\Toggle::make('show_on_homepage_desktop')
                         ->label('نمایش در صفحه اصلی (دسکتاپ)')
                         ->helperText('حداکثر ۴ طرح با این تیک در ردیف زیر بنر دسکتاپ نمایش داده می‌شود.'),

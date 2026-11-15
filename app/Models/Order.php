@@ -51,6 +51,7 @@ class Order extends Model
         'shipping_amount',
         'discount_amount',
         'payment_method',
+        'credit_plan_id',
         'proforma_planned_credit_amount',
         'proforma_cash_gateway',
         'status',
@@ -237,6 +238,11 @@ class Order extends Model
     public function freightCarrier(): BelongsTo
     {
         return $this->belongsTo(FreightCarrier::class);
+    }
+
+    public function creditPlan(): BelongsTo
+    {
+        return $this->belongsTo(CreditPlan::class);
     }
 
     public function items(): HasMany

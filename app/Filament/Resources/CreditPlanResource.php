@@ -7,6 +7,7 @@ use App\Filament\Support\AdminImageColumn;
 use App\Filament\Support\AdminTable;
 use App\Filament\Support\ShopMediaPicker;
 use App\Models\CreditPlan;
+use App\Services\Payment\PaymentGatewayCatalog;
 use App\Support\AdminAccess;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -60,6 +61,22 @@ class CreditPlanResource extends Resource
                         ->required()
                         ->maxLength(2048)
                         ->helperText('آدرس داخلی (مثل /plans/digipay-leasing/) یا URL کامل.'),
+                    Forms\Components\Select::make('credit_gateway')
+                        ->label('درگاه اعتباری')
+                        ->options(fn (): array => collect(app(PaymentGatewayCatalog::class)->credit())
+                            ->mapWithKeys(fn (array $g): array => [$g['name'] => $g['label']])
+                            ->all())
+                        ->searchable()
+                        ->nullable()
+                        ->helperText('برای استفاده در پیش‌فاکتور نماینده الزامی است.'),
+                    Forms\Components\Select::make('cash_gateway')
+                        ->label('درگاه نقدی')
+                        ->options(fn (): array => collect(app(PaymentGatewayCatalog::class)->cash())
+                            ->mapWithKeys(fn (array $g): array => [$g['name'] => $g['label']])
+                            ->all())
+                        ->searchable()
+                        ->nullable()
+                        ->helperText('پرداخت‌های نقدی چندمرحله‌ای روی همین درگاه انجام می‌شود.'),
                     Forms\Components\Toggle::make('show_on_homepage_desktop')
                         ->label('نمایش در صفحه اصلی (دسکتاپ)')
                         ->helperText('حداکثر ۴ طرح با این تیک در ردیف زیر بنر دسکتاپ نمایش داده می‌شود.'),
@@ -76,6 +93,16 @@ class CreditPlanResource extends Resource
             ->columns([
                 AdminImageColumn::make('icon', 40, 'آیکون')->circular(),
                 Tables\Columns\TextColumn::make('name')->label('نام')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('credit_gateway')
+                    ->label('اعتباری')
+                    ->formatStateUsing(fn (?string $state): string => $state
+                        ? (string) (app(PaymentGatewayCatalog::class)->definition($state)['label'] ?? $state)
+                        : '—'),
+                Tables\Columns\TextColumn::make('cash_gateway')
+                    ->label('نقدی')
+                    ->formatStateUsing(fn (?string $state): string => $state
+                        ? (string) (app(PaymentGatewayCatalog::class)->definition($state)['label'] ?? $state)
+                        : '—'),
                 Tables\Columns\IconColumn::make('show_on_homepage_desktop')->label('صفحه اصلی')->boolean(),
                 Tables\Columns\IconColumn::make('is_active')->label('فعال')->boolean(),
                 Tables\Columns\TextColumn::make('position')->label('ترتیب')->sortable()->alignCenter(),

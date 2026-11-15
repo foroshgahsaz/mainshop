@@ -217,6 +217,7 @@ class RepresentativeDraftOrderService
         string $paymentGateway,
         ?int $plannedCreditAmount = null,
         ?string $cashGateway = null,
+        ?int $creditPlanId = null,
     ): void {
         $this->assertDraftOwnedBy($order, auth()->user());
 
@@ -234,12 +235,18 @@ class RepresentativeDraftOrderService
         $catalog = app(PaymentGatewayCatalog::class);
         $catalog->assertEnabled($paymentGateway);
 
-        $order->update([
+        $payload = [
             'freight_carrier_id' => $carrier->id,
             'shipping_method_id' => null,
             'shipping_amount' => 0,
             'payment_method' => $paymentGateway,
-        ]);
+        ];
+
+        if (\Illuminate\Support\Facades\Schema::hasColumn('orders', 'credit_plan_id')) {
+            $payload['credit_plan_id'] = $creditPlanId;
+        }
+
+        $order->update($payload);
 
         $this->recalculateTotals($order);
         $order = $order->fresh(['coupon', 'user', 'items']);

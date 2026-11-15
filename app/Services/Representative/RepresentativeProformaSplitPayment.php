@@ -93,6 +93,11 @@ class RepresentativeProformaSplitPayment
             return $configured;
         }
 
+        $planCash = (string) ($order->creditPlan?->cash_gateway ?? '');
+        if ($planCash !== '' && $this->catalog->isEnabled($planCash)) {
+            return $planCash;
+        }
+
         foreach ($this->catalog->cash() as $gateway) {
             return (string) $gateway['name'];
         }

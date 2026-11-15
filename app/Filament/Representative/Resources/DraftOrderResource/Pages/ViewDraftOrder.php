@@ -262,18 +262,31 @@ class ViewDraftOrder extends ViewRecord
             \App\Support\OrderProformaSplitColumns::ensureAvailable();
 
             if ($credit !== null && $credit > 0 && $credit < $final) {
-                app(\App\Services\Representative\RepresentativeProformaSplitPayment::class)
-                    ->assertPlanAmounts($final, $credit);
-                $order->update([
+                $split = app(\App\Services\Representative\RepresentativeProformaSplitPayment::class);
+                $split->assertPlanAmounts($final, $credit);
+                $plan = $order->creditPlan;
+                $cashGw = $order->proforma_cash_gateway
+                    ?: $plan?->cash_gateway
+                    ?: $split->cashGateway($order);
+                $payload = [
                     'proforma_planned_credit_amount' => $credit,
-                    'proforma_cash_gateway' => $order->proforma_cash_gateway
-                        ?: app(\App\Services\Representative\RepresentativeProformaSplitPayment::class)->cashGateway($order),
-                ]);
+                    'proforma_cash_gateway' => $cashGw,
+                ];
+                if ($plan?->credit_gateway) {
+                    $payload['payment_method'] = (string) $plan->credit_gateway;
+                }
+                $order->update($payload);
             } else {
-                $order->update([
+                $payload = [
                     'proforma_planned_credit_amount' => null,
                     'proforma_cash_gateway' => null,
-                ]);
+                ];
+                if ($order->creditPlan?->cash_gateway && ($credit === null || $credit <= 0)) {
+                    $payload['payment_method'] = (string) $order->creditPlan->cash_gateway;
+                } elseif ($order->creditPlan?->credit_gateway && $credit !== null && $credit >= $final) {
+                    $payload['payment_method'] = (string) $order->creditPlan->credit_gateway;
+                }
+                $order->update($payload);
             }
 
             Notification::make()->title('طرح پرداخت ذخیره شد')->success()->send();

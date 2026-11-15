@@ -1,12 +1,13 @@
 <x-filament-panels::page>
     @php
         /** @var \App\Models\Order $order */
-        $order = $this->record->loadMissing(['items', 'user', 'freightCarrier.province', 'freightCarrier.city', 'payments']);
+        $order = $this->record->loadMissing(['items', 'user', 'freightCarrier.province', 'freightCarrier.city', 'payments', 'creditPlan']);
         $gatewayDef = app(\App\Services\Payment\PaymentGatewayCatalog::class)->definition((string) $order->payment_method);
         $gatewayLabel = $gatewayDef['label'] ?? \App\Support\ShopLabels::paymentMethod($order->payment_method);
         $gatewayIcon = $gatewayDef['icon'] ?? null;
         $splitPay = app(\App\Services\Representative\RepresentativeProformaSplitPayment::class);
         $catalog = app(\App\Services\Payment\PaymentGatewayCatalog::class);
+        $creditPlan = $order->creditPlan;
     @endphp
 
     <link rel="stylesheet" href="{{ asset('css/rep-order-wizard.css') }}?v={{ filemtime(public_path('css/rep-order-wizard.css')) }}">
@@ -67,6 +68,10 @@
                 <h3 class="rep-payment-info__title">پرداخت پیش‌فاکتور</h3>
                 <p class="rep-wizard-hint rep-payment-info__lead">
                     پرداخت از <strong>پنل نماینده</strong> برای مشتری <strong>{{ $order->user?->name }}</strong> ثبت می‌شود.
+                    @if ($creditPlan)
+                        طرح: <strong>{{ $creditPlan->name }}</strong>
+                        (اعتباری {{ $gatewayLabel }} · نقدی {{ $cashGwDef['label'] ?? '—' }}).
+                    @endif
                     @if ($usesSplit)
                         تا وقتی <strong>مجموع اعتبار و نقد</strong> با مبلغ فاکتور برابر نشود، پیش‌فاکتور بسته نمی‌شود.
                     @endif
@@ -74,7 +79,7 @@
 
                 @if (! $order->payments()->where('status', \App\Models\Payment::STATUS_SUCCESS)->exists())
                     @php $gwType = $catalog->definition((string) $order->payment_method)['type'] ?? 'cash'; @endphp
-                    @if ($gwType === \App\Services\Payment\PaymentGatewayCatalog::TYPE_CREDIT)
+                    @if ($gwType === \App\Services\Payment\PaymentGatewayCatalog::TYPE_CREDIT || $creditPlan)
                         <div class="rep-split-plan rep-split-plan--inline">
                             <label class="rep-field rep-field--grow">
                                 <span class="rep-field__label">سهم اعتباری (ریال)</span>
@@ -86,7 +91,7 @@
                                        autocomplete="off">
                             </label>
                             <button type="button" class="rep-btn-secondary" wire:click="saveSplitPaymentPlan">ذخیره طرح</button>
-                            <p class="rep-wizard-hint">مابقی = نقدی (پرداخت چندمرحله‌ای از درگاه {{ $cashGwDef['label'] ?? 'نقدی' }})</p>
+                            <p class="rep-wizard-hint">مابقی = نقدی (چندمرحله‌ای از درگاه {{ $cashGwDef['label'] ?? 'نقدی' }}{{ $creditPlan ? ' طبق طرح «'.$creditPlan->name.'»' : '' }})</p>
                         </div>
                     @endif
                 @endif
@@ -221,6 +226,12 @@
                 <div class="rep-proforma-summary__row">
                     <dt>باربری</dt>
                     <dd>{{ $order->freightCarrier->displayLabel() }}</dd>
+                </div>
+            @endif
+            @if ($creditPlan)
+                <div class="rep-proforma-summary__row">
+                    <dt>طرح پرداخت</dt>
+                    <dd>{{ $creditPlan->name }}</dd>
                 </div>
             @endif
             <div class="rep-proforma-summary__row rep-proforma-summary__row--gateway">

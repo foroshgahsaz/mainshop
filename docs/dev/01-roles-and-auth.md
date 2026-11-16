@@ -12,7 +12,7 @@
 | **تستر درگاه** (اختیاری روی هر کاربر) | `can_shop_gateway_test=1` | فروشگاه: دیدن آیتم‌های `admin_shop_preview`؛ بدون پنل ادمین | همان ورود مشتری |
 | **مدیر سیستم** | `is_admin=1`, `status=1` | Filament ادمین | **`/admin/login`** |
 | **مدیر فروش** | `is_sales_manager=1`, `is_admin=0`, `status=1` | همان Filament با منوی محدود — CRUD بنکدار | **`/admin/login`** |
-| **بنکدار** | `is_bankdar=1`, `bankdar_province_id`, `created_by_sales_manager_id` | منوی محدود — داشبورد اسکوپ‌شده، نماینده/مشتری، برند/دستهٔ اختصاصی (فقط مشاهده)، محصول/اکسل محدوده، سفارش ایجاد/ویرایش، soft-delete | **`/admin/login`** |
+| **بنکدار** | `is_bankdar=1`, `bankdar_province_id`, `created_by_sales_manager_id` | منوی محدود — داشبورد اسکوپ‌شده، **ایجاد فقط نماینده**، مشاهده مشتریان نمایندگان، برند/دستهٔ اختصاصی (فقط مشاهده)، محصول/اکسل محدوده، سفارش ایجاد/ویرایش، soft-delete | **`/admin/login`** |
 | **نماینده** | `is_representative=1`, `status=1` | Filament نماینده | **`/representative/login`** |
 
 جزئیات سلسله‌مراتب: [dev/11-bankdar-sales-hierarchy.md](11-bankdar-sales-hierarchy.md)

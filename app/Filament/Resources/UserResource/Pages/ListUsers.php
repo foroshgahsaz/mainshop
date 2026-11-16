@@ -86,7 +86,7 @@ class ListUsers extends AdminListRecords
         }
 
         if (AdminAccess::isBankdarOnly()) {
-            return 'افزودن کاربر';
+            return 'افزودن نماینده';
         }
 
         return 'افزودن کاربر';
@@ -119,7 +119,7 @@ class ListUsers extends AdminListRecords
                     ->color('gray')
                     ->url(BankdarSubtreePage::getUrl(['record' => $bankdarId])),
                 Actions\CreateAction::make()
-                    ->label('افزودن نماینده / مشتری')
+                    ->label('افزودن نماینده')
                     ->icon('heroicon-o-user-plus'),
             ];
         }

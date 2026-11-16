@@ -2625,6 +2625,20 @@ html.checkout-coupon-alert-open {
 }
 
 /* ===== Darik wallet ID modal (checkout) ===== */
+/* Fallback اگر فایل .min قدیمی باشد: مودال باز حتماً دیده شود */
+.checkout-darik-modal.checkout-darik-modal--open {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 130 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 1rem !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
 .checkout-darik-summary {
   margin-top: 1rem;
   display: flex;

@@ -308,39 +308,42 @@
         </div>
     </div>
 
-    <div class="checkout-darik-modal {{ ($showDarikWalletModal ?? false) ? 'checkout-darik-modal--open' : '' }}"
-         role="dialog"
-         aria-modal="true"
-         aria-labelledby="checkoutDarikWalletTitle"
-         aria-hidden="{{ ($showDarikWalletModal ?? false) ? 'false' : 'true' }}"
-         wire:ignore.self>
-        <div class="checkout-darik-modal__backdrop" wire:click="cancelDarikWalletModal" aria-hidden="true"></div>
-        <div class="checkout-darik-modal__panel shop-card">
-            <h3 id="checkoutDarikWalletTitle" class="checkout-darik-modal__title">شناسه کیف پول داریک</h3>
-            <p class="checkout-darik-modal__hint">۱۶ رقم که با <span dir="ltr">5892</span> شروع می‌شود — روی کارت یا اپ داریک.</p>
-            <label class="checkout-field-label" for="darik-member-code-modal">شناسه کاربری داریک</label>
-            <input id="darik-member-code-modal"
-                   type="text"
-                   inputmode="numeric"
-                   maxlength="16"
-                   wire:model="darikMemberCodeDraft"
-                   wire:keydown.enter.prevent="confirmDarikWallet"
-                   class="checkout-input checkout-darik-modal__input"
-                   dir="ltr"
-                   autocomplete="off"
-                   placeholder="5892xxxxxxxxxxxx"
-                   @if($showDarikWalletModal ?? false) autofocus @endif>
-            @error('darikMemberCodeDraft') <span class="checkout-field-error">{{ $message }}</span> @enderror
-            <div class="checkout-darik-modal__actions">
-                <button type="button" class="shop-btn-gold checkout-darik-modal__confirm" wire:click="confirmDarikWallet">
-                    تأیید و ادامه خرید
-                </button>
-                <button type="button" class="checkout-darik-modal__cancel" wire:click="cancelDarikWalletModal">
-                    انصراف
-                </button>
+    @if ($showDarikWalletModal ?? false)
+        {{-- بدون wire:ignore: کلاس/وجود مودال باید با Livewire morph شود --}}
+        <div class="checkout-darik-modal checkout-darik-modal--open"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="checkoutDarikWalletTitle"
+             aria-hidden="false"
+             wire:key="checkout-darik-wallet-modal">
+            <div class="checkout-darik-modal__backdrop" wire:click="cancelDarikWalletModal" aria-hidden="true"></div>
+            <div class="checkout-darik-modal__panel shop-card" wire:click.stop>
+                <h3 id="checkoutDarikWalletTitle" class="checkout-darik-modal__title">شناسه کیف پول داریک</h3>
+                <p class="checkout-darik-modal__hint">۱۶ رقم که با <span dir="ltr">5892</span> شروع می‌شود — روی کارت یا اپ داریک.</p>
+                <label class="checkout-field-label" for="darik-member-code-modal">شناسه کاربری داریک</label>
+                <input id="darik-member-code-modal"
+                       type="text"
+                       inputmode="numeric"
+                       maxlength="16"
+                       wire:model="darikMemberCodeDraft"
+                       wire:keydown.enter.prevent="confirmDarikWallet"
+                       class="checkout-input checkout-darik-modal__input"
+                       dir="ltr"
+                       autocomplete="off"
+                       placeholder="5892xxxxxxxxxxxx"
+                       autofocus>
+                @error('darikMemberCodeDraft') <span class="checkout-field-error">{{ $message }}</span> @enderror
+                <div class="checkout-darik-modal__actions">
+                    <button type="button" class="shop-btn-gold checkout-darik-modal__confirm" wire:click="confirmDarikWallet">
+                        تأیید و ادامه خرید
+                    </button>
+                    <button type="button" class="checkout-darik-modal__cancel" wire:click="cancelDarikWalletModal">
+                        انصراف
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
+    @endif
 
     @push('scripts')
         <script>

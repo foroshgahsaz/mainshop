@@ -28,7 +28,8 @@ class CheckoutDarikWalletModalTest extends TestCase
             ->set('paymentMethod', 'darik')
             ->assertSet('showDarikWalletModal', true)
             ->assertSee('شناسه کیف پول داریک')
-            ->assertSee('تأیید و ادامه خرید');
+            ->assertSee('تأیید و ادامه خرید')
+            ->assertSeeHtml('checkout-darik-modal--open');
     }
 
     public function test_confirm_darik_wallet_closes_modal_and_keeps_code(): void

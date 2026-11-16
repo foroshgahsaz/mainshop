@@ -232,15 +232,17 @@
                             @endif
                             @error('paymentMethod') <span class="checkout-field-error">{{ $message }}</span> @enderror
 
-                            @if($paymentMethod === 'darik')
-                                <div class="mt-4">
-                                    <label class="checkout-field-label" for="darik-member-code">شناسه کیف پول داریک (۱۶ رقم — با 5892)</label>
-                                    <input id="darik-member-code" type="text" inputmode="numeric" maxlength="16"
-                                           wire:model="darikMemberCode" class="checkout-input" dir="ltr" autocomplete="off"
-                                           placeholder="5892xxxxxxxxxxxx">
-                                    <p class="text-xs text-gray-500 mt-1">این شناسه روی کارت یا اپ داریک مشتری است؛ برای پرداخت نمایندگی در پروفایل مشتری هم ذخیره می‌شود.</p>
-                                    @error('darikMemberCode') <span class="checkout-field-error">{{ $message }}</span> @enderror
+                            @if($paymentMethod === 'darik' && filled($darikMemberCode))
+                                <div class="checkout-darik-summary">
+                                    <div class="checkout-darik-summary__text">
+                                        <span class="checkout-darik-summary__label">شناسه کیف پول داریک</span>
+                                        <span class="checkout-darik-summary__code" dir="ltr">{{ $darikMemberCode }}</span>
+                                    </div>
+                                    <button type="button" class="checkout-darik-summary__edit" wire:click="openDarikWalletModal">
+                                        تغییر
+                                    </button>
                                 </div>
+                                @error('darikMemberCode') <span class="checkout-field-error">{{ $message }}</span> @enderror
                             @endif
                         </section>
                     </div>
@@ -303,6 +305,40 @@
             <h3 id="checkoutCouponAlertTitle" class="font-bold text-navy text-sm mb-2">کد تخفیف قابل اعمال نیست</h3>
             <p class="checkout-coupon-alert__message mb-4" data-checkout-coupon-alert-message></p>
             <button type="button" class="shop-btn-primary w-full" onclick="toggleCheckoutCouponAlert(false)">متوجه شدم</button>
+        </div>
+    </div>
+
+    <div class="checkout-darik-modal {{ ($showDarikWalletModal ?? false) ? 'checkout-darik-modal--open' : '' }}"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="checkoutDarikWalletTitle"
+         aria-hidden="{{ ($showDarikWalletModal ?? false) ? 'false' : 'true' }}"
+         wire:ignore.self>
+        <div class="checkout-darik-modal__backdrop" wire:click="cancelDarikWalletModal" aria-hidden="true"></div>
+        <div class="checkout-darik-modal__panel shop-card">
+            <h3 id="checkoutDarikWalletTitle" class="checkout-darik-modal__title">شناسه کیف پول داریک</h3>
+            <p class="checkout-darik-modal__hint">۱۶ رقم که با <span dir="ltr">5892</span> شروع می‌شود — روی کارت یا اپ داریک.</p>
+            <label class="checkout-field-label" for="darik-member-code-modal">شناسه کاربری داریک</label>
+            <input id="darik-member-code-modal"
+                   type="text"
+                   inputmode="numeric"
+                   maxlength="16"
+                   wire:model="darikMemberCodeDraft"
+                   wire:keydown.enter.prevent="confirmDarikWallet"
+                   class="checkout-input checkout-darik-modal__input"
+                   dir="ltr"
+                   autocomplete="off"
+                   placeholder="5892xxxxxxxxxxxx"
+                   @if($showDarikWalletModal ?? false) autofocus @endif>
+            @error('darikMemberCodeDraft') <span class="checkout-field-error">{{ $message }}</span> @enderror
+            <div class="checkout-darik-modal__actions">
+                <button type="button" class="shop-btn-gold checkout-darik-modal__confirm" wire:click="confirmDarikWallet">
+                    تأیید و ادامه خرید
+                </button>
+                <button type="button" class="checkout-darik-modal__cancel" wire:click="cancelDarikWalletModal">
+                    انصراف
+                </button>
+            </div>
         </div>
     </div>
 

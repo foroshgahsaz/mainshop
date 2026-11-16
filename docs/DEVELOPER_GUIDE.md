@@ -731,6 +731,8 @@ $middleware->validateCsrfTokens(except: [
 | OTP UI | `/payment/darik/{tracking}` — `Confirm` با OTP پنج‌رقمی |
 | شناسه خریدار | `users.darik_member_code` (۱۶ رقم، با `5892`) — فقط checkout فروشگاه (نه فرم ایجاد مشتری نماینده) |
 
+**Checkout:** با انتخاب درگاه داریک مودال شناسه کیف پول باز می‌شود (`CheckoutPage::openDarikWalletModal`)؛ بعد از تأیید، خلاصهٔ شناسه زیر درگاه نمایش داده می‌شود و ثبت سفارش ادامه می‌یابد.
+
 **جریان:** `Login` (ApiKey) → `Order` → `SendOTP` → صفحه سایت → `Confirm`.
 
 ---
@@ -1398,6 +1400,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-16 | Checkout: انتخاب داریک → مودال شناسه کیف پول ۱۶رقمی؛ تأیید و ادامه خرید |
 | 2026-11-16 | فرم کاربر: نقش غیرمشتری — کارت‌های کنارهم با آیکون؛ انتخاب بنفش واضح (`fi-staff-role-toggles`) |
 | 2026-11-16 | لیست کاربران ادمین: soft-deleted با تگ «حذف‌شده» + بازیابی؛ فیلتر حذف نرم پیش‌فرض فعال+حذف‌شده؛ بنکدار/نماینده نمی‌بینند |
 | 2026-11-16 | ایجاد مجدد کاربر بعد از soft-delete: unique فقط فعال‌ها؛ `purgeTrashedIdentityConflicts` قبل از create/edit |

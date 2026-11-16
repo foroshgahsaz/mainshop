@@ -38,6 +38,11 @@ class CheckoutPage extends Component
 
     public string $darikMemberCode = '';
 
+    /** پیش‌نویس شناسه در مودال انتخاب داریک */
+    public string $darikMemberCodeDraft = '';
+
+    public bool $showDarikWalletModal = false;
+
     public ?string $note = null;
 
     public bool $showAddressForm = false;
@@ -93,6 +98,55 @@ class CheckoutPage extends Component
         $this->bootstrapAuthenticatedCheckout($catalog, $cache, refreshReceiverName: true);
     }
 
+    public function updatedPaymentMethod(string $value): void
+    {
+        if ($value === 'darik') {
+            $this->openDarikWalletModal();
+        } else {
+            $this->showDarikWalletModal = false;
+        }
+
+        $this->alertCouponValidationIfNeeded();
+    }
+
+    public function openDarikWalletModal(): void
+    {
+        $this->darikMemberCodeDraft = $this->darikMemberCode !== ''
+            ? $this->darikMemberCode
+            : (string) (auth()->user()?->darik_member_code ?? '');
+        $this->resetValidation(['darikMemberCode', 'darikMemberCodeDraft']);
+        $this->showDarikWalletModal = true;
+    }
+
+    public function confirmDarikWallet(): void
+    {
+        $this->validate(
+            [
+                'darikMemberCodeDraft' => ['required', 'string', new DarikMemberCode],
+            ],
+            [
+                'darikMemberCodeDraft.required' => 'شناسه کیف پول داریک را وارد کنید.',
+            ]
+        );
+
+        $this->darikMemberCode = DarikMemberCode::normalize($this->darikMemberCodeDraft);
+        $this->paymentMethod = 'darik';
+        $this->showDarikWalletModal = false;
+        $this->resetValidation(['darikMemberCode', 'darikMemberCodeDraft']);
+    }
+
+    public function cancelDarikWalletModal(PaymentGatewayCatalog $catalog): void
+    {
+        $this->showDarikWalletModal = false;
+        $this->resetValidation(['darikMemberCodeDraft']);
+
+        $normalized = DarikMemberCode::normalize($this->darikMemberCode);
+        if ($normalized === '' || ! preg_match('/^5892\d{12}$/', $normalized)) {
+            $this->darikMemberCode = '';
+            $this->paymentMethod = $this->defaultPaymentMethod($catalog);
+        }
+    }
+
     protected function bootstrapAuthenticatedCheckout(
         PaymentGatewayCatalog $catalog,
         ShopCacheService $cache,
@@ -101,6 +155,8 @@ class CheckoutPage extends Component
         $this->awaitingLogin = false;
         $this->paymentMethod = $this->defaultPaymentMethod($catalog);
         $this->darikMemberCode = (string) (auth()->user()->darik_member_code ?? '');
+        $this->darikMemberCodeDraft = $this->darikMemberCode;
+        $this->showDarikWalletModal = false;
 
         $addresses = auth()->user()->addresses;
         $default = $addresses->firstWhere('is_default', true) ?? $addresses->first();
@@ -151,11 +207,6 @@ class CheckoutPage extends Component
         $this->alertCouponValidationIfNeeded();
     }
 
-    public function updatedPaymentMethod(): void
-    {
-        $this->alertCouponValidationIfNeeded();
-    }
-
     public function saveAddress(OtpService $otp): void
     {
         $this->receiver_name = trim($this->receiver_name);
@@ -195,6 +246,13 @@ class CheckoutPage extends Component
 
     public function placeOrder(CheckoutService $checkout, PaymentService $payment, PaymentGatewayCatalog $catalog): void
     {
+        if ($this->paymentMethod === 'darik'
+            && ! preg_match('/^5892\d{12}$/', DarikMemberCode::normalize($this->darikMemberCode))) {
+            $this->openDarikWalletModal();
+
+            return;
+        }
+
         $this->validate($this->checkoutRules($catalog));
 
         $isCod = $this->paymentMethod === 'cod';

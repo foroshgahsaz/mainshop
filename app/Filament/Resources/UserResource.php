@@ -472,18 +472,33 @@ class UserResource extends Resource
                     Forms\Components\ToggleButtons::make('staff_role')
                         ->label('نقش')
                         ->options([
-                            'admin' => 'مدیر — دسترسی پنل ادمین',
-                            'author' => 'نویسنده — انتشار در بلاگ',
-                            'representative' => 'نماینده — پنل نمایندگی',
-                            'sales_manager' => 'مدیر فروش — مدیریت بنکدارها و زیرمجموعه فروش',
-                            'bankdar' => 'بنکدار — مدیریت نمایندگان استان',
+                            'admin' => 'مدیر سیستم',
+                            'author' => 'نویسنده',
+                            'representative' => 'نماینده',
+                            'sales_manager' => 'مدیر فروش',
+                            'bankdar' => 'بنکدار',
                         ])
-                        ->inline(false)
+                        ->icons([
+                            'admin' => 'heroicon-o-shield-check',
+                            'author' => 'heroicon-o-pencil-square',
+                            'representative' => 'heroicon-o-building-storefront',
+                            'sales_manager' => 'heroicon-o-chart-bar',
+                            'bankdar' => 'heroicon-o-map',
+                        ])
+                        ->colors([
+                            'admin' => 'primary',
+                            'author' => 'primary',
+                            'representative' => 'primary',
+                            'sales_manager' => 'primary',
+                            'bankdar' => 'primary',
+                        ])
+                        ->inline()
                         ->required(fn (Get $get): bool => $get('user_kind') === 'staff')
                         ->live()
                         ->disabled(fn (): bool => AdminAccess::isLimitedStaffOnly())
                         ->dehydrated(false)
-                        ->helperText('فقط یک نقش قابل انتخاب است؛ گزینهٔ انتخاب‌شده با رنگ مشخص می‌شود.'),
+                        ->extraAttributes(['class' => 'fi-staff-role-toggles'])
+                        ->helperText('فقط یک نقش؛ انتخاب‌شده بنفش می‌شود. مدیر سیستم · نویسنده · نماینده · مدیر فروش · بنکدار'),
                 ])
                 ->columns(1)
                 ->visible(fn (Get $get): bool => $get('user_kind') === 'staff'),

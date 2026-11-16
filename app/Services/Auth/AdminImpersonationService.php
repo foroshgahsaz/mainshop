@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 /**
- * ورود موقت مدیر سیستم به پنل مدیر فروش / بنکدار / نماینده — بدون remember و با بازگشت امن.
+ * ورود موقت مدیر سیستم (و مدیر فروش به بنکدار زیرمجموعه) — بدون remember و با بازگشت امن.
  *
  * سشن فقط چند کلید سبک نگه می‌دارد؛ isActive() کوئری DB ندارد.
  */
@@ -20,6 +20,8 @@ class AdminImpersonationService
     public const SESSION_TARGET_ID = 'admin_impersonation.target_id';
 
     public const SESSION_ACTOR_NAME = 'admin_impersonation.actor_name';
+
+    public const SESSION_ACTOR_ROLE = 'admin_impersonation.actor_role';
 
     public const SESSION_TARGET_NAME = 'admin_impersonation.target_name';
 
@@ -35,7 +37,7 @@ class AdminImpersonationService
     /**
      * دادهٔ بنر بدون کوئری — برای رندر هر درخواست سبک است.
      *
-     * @return array{actor_name:string,target_name:string,target_role:string}|null
+     * @return array{actor_name:string,actor_role:string,target_name:string,target_role:string}|null
      */
     public function bannerContext(): ?array
     {
@@ -45,6 +47,7 @@ class AdminImpersonationService
 
         return [
             'actor_name' => (string) session(self::SESSION_ACTOR_NAME, 'مدیر سیستم'),
+            'actor_role' => (string) session(self::SESSION_ACTOR_ROLE, 'admin'),
             'target_name' => (string) session(self::SESSION_TARGET_NAME, 'کاربر'),
             'target_role' => (string) session(self::SESSION_TARGET_ROLE, ''),
         ];
@@ -56,7 +59,7 @@ class AdminImpersonationService
             return false;
         }
 
-        if (! $actor->isAdmin() || ! $actor->status || $this->isTrashedSafe($actor)) {
+        if (! $actor->status || $this->isTrashedSafe($actor)) {
             return false;
         }
 
@@ -76,7 +79,23 @@ class AdminImpersonationService
             return false;
         }
 
-        return $this->resolveTargetRole($target) !== null;
+        $role = $this->resolveTargetRole($target);
+        if ($role === null) {
+            return false;
+        }
+
+        // مدیر سیستم: مدیر فروش / بنکدار / نماینده
+        if ($actor->isAdmin()) {
+            return true;
+        }
+
+        // مدیر فروش: فقط بنکدار زیرمجموعه خودش
+        if ($actor->isSalesManager() && $role === 'bankdar') {
+            return app(\App\Services\Representative\SalesRegionService::class)
+                ->managesBankdar($actor, $target);
+        }
+
+        return false;
     }
 
     public function start(User $actor, User $target): string
@@ -89,9 +108,12 @@ class AdminImpersonationService
         $role = $this->resolveTargetRole($target);
         abort_unless($role !== null, 403);
 
-        $returnTab = match ($role) {
-            'sales_manager' => User::ADMIN_LIST_SEGMENT_SALES_MANAGER,
-            'bankdar' => User::ADMIN_LIST_SEGMENT_BANKDAR,
+        $actorRole = $actor->isAdmin() ? 'admin' : 'sales_manager';
+
+        $returnTab = match (true) {
+            $actorRole === 'sales_manager' => 'bankdars',
+            $role === 'sales_manager' => User::ADMIN_LIST_SEGMENT_SALES_MANAGER,
+            $role === 'bankdar' => User::ADMIN_LIST_SEGMENT_BANKDAR,
             default => User::ADMIN_LIST_SEGMENT_REPRESENTATIVE,
         };
 
@@ -105,6 +127,7 @@ class AdminImpersonationService
             self::SESSION_ACTOR_ID => (int) $actor->getKey(),
             self::SESSION_TARGET_ID => (int) $target->getKey(),
             self::SESSION_ACTOR_NAME => (string) $actor->name,
+            self::SESSION_ACTOR_ROLE => $actorRole,
             self::SESSION_TARGET_NAME => (string) $target->name,
             self::SESSION_TARGET_ROLE => $role,
             self::SESSION_RETURN_TAB => $returnTab,
@@ -134,13 +157,19 @@ class AdminImpersonationService
 
         $actorId = (int) session(self::SESSION_ACTOR_ID);
         $targetId = (int) session(self::SESSION_TARGET_ID);
-        $returnTab = (string) session(self::SESSION_RETURN_TAB, User::ADMIN_LIST_SEGMENT_BANKDAR);
+        $actorRole = (string) session(self::SESSION_ACTOR_ROLE, 'admin');
+        $returnTab = (string) session(
+            self::SESSION_RETURN_TAB,
+            $actorRole === 'sales_manager' ? 'bankdars' : User::ADMIN_LIST_SEGMENT_BANKDAR,
+        );
 
-        $actor = User::query()
-            ->whereKey($actorId)
-            ->where('is_admin', true)
-            ->where('status', true)
-            ->first();
+        $actorQuery = User::query()->whereKey($actorId)->where('status', true);
+        if ($actorRole === 'sales_manager') {
+            $actorQuery->where('is_sales_manager', true)->where('is_admin', false);
+        } else {
+            $actorQuery->where('is_admin', true);
+        }
+        $actor = $actorQuery->first();
 
         $this->forgetSessionKeys();
 
@@ -154,12 +183,13 @@ class AdminImpersonationService
                 Log::warning('admin.impersonation.stop_actor_missing', [
                     'actor_id' => $actorId,
                     'target_id' => $targetId,
+                    'actor_role' => $actorRole,
                     'ip' => request()->ip(),
                 ]);
             } catch (\Throwable) {
             }
 
-            abort(403, 'نشست مدیر سیستم قابل بازیابی نیست.');
+            abort(403, 'نشست مدیر قابل بازیابی نیست.');
         }
 
         AdminAccess::flushMemo();
@@ -217,6 +247,7 @@ class AdminImpersonationService
             self::SESSION_ACTOR_ID,
             self::SESSION_TARGET_ID,
             self::SESSION_ACTOR_NAME,
+            self::SESSION_ACTOR_ROLE,
             self::SESSION_TARGET_NAME,
             self::SESSION_TARGET_ROLE,
             self::SESSION_RETURN_TAB,

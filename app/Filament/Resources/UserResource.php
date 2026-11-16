@@ -948,7 +948,7 @@ class UserResource extends Resource
                     })
                     ->requiresConfirmation()
                     ->modalHeading('ورود موقت به پنل این کاربر؟')
-                    ->modalDescription('به‌عنوان این کاربر وارد می‌شوید و دسترسی‌های همان نقش را می‌بینید. با «بازگشت به ادمین» دوباره مدیر سیستم می‌شوید.')
+                    ->modalDescription('به‌عنوان این کاربر وارد می‌شوید و دسترسی‌های همان نقش را می‌بینید. با دکمهٔ بازگشت در بنر، دوباره به حساب خود برمی‌گردید.')
                     ->modalSubmitActionLabel('ورود به پنل')
                     ->visible(function (User $record): bool {
                         $actor = auth()->user();

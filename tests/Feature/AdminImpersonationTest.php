@@ -41,6 +41,16 @@ class AdminImpersonationTest extends TestCase
             'password' => bcrypt('x'),
             'status' => true,
             'is_bankdar' => true,
+            'created_by_sales_manager_id' => $sm->id,
+        ]);
+
+        $otherBankdar = User::query()->forceCreate([
+            'name' => 'بنکدار دیگر',
+            'phone' => '09120000005',
+            'password' => bcrypt('x'),
+            'status' => true,
+            'is_bankdar' => true,
+            'created_by_sales_manager_id' => null,
         ]);
 
         $rep = User::query()->forceCreate([
@@ -56,8 +66,48 @@ class AdminImpersonationTest extends TestCase
         $this->assertTrue($svc->canStart($admin, $bankdar));
         $this->assertTrue($svc->canStart($admin, $rep));
         $this->assertTrue($svc->canStart($admin, $sm));
-        $this->assertFalse($svc->canStart($sm, $bankdar));
+        $this->assertTrue($svc->canStart($sm, $bankdar));
+        $this->assertFalse($svc->canStart($sm, $otherBankdar));
+        $this->assertFalse($svc->canStart($sm, $rep));
         $this->assertFalse($svc->canStart($admin, $admin));
+    }
+
+    public function test_sales_manager_can_impersonate_managed_bankdar_and_stop(): void
+    {
+        $sm = User::query()->forceCreate([
+            'name' => 'مدیر فروش',
+            'phone' => '09120000071',
+            'password' => bcrypt('x'),
+            'status' => true,
+            'is_sales_manager' => true,
+        ]);
+
+        $bankdar = User::query()->forceCreate([
+            'name' => 'بنکدار زیرمجموعه',
+            'phone' => '09120000072',
+            'password' => bcrypt('x'),
+            'status' => true,
+            'is_bankdar' => true,
+            'created_by_sales_manager_id' => $sm->id,
+        ]);
+
+        $this->actingAs($sm);
+        $this->flushAccessMemo();
+
+        $svc = app(AdminImpersonationService::class);
+        $url = $svc->start($sm, $bankdar);
+
+        $this->assertStringContainsString('/admin', $url);
+        $this->assertTrue($svc->isActive());
+        $this->assertTrue(auth()->user()->is($bankdar));
+        $this->assertSame('sales_manager', session(AdminImpersonationService::SESSION_ACTOR_ROLE));
+        $this->assertTrue(AdminAccess::isBankdarOnly());
+
+        $stopUrl = $svc->stop();
+        $this->assertStringContainsString('activeTab=bankdars', $stopUrl);
+        $this->assertFalse($svc->isActive());
+        $this->assertTrue(auth()->user()->is($sm));
+        $this->assertTrue(AdminAccess::isSalesManagerOnly());
     }
 
     public function test_admin_can_impersonate_sales_manager(): void

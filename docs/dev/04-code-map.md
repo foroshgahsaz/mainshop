@@ -43,7 +43,7 @@
 | `app/Services/Order/BankdarOrderService.php` | ایجاد پیش‌نویس سفارش توسط بنکدار |
 | `app/Services/User/UserSoftDeletionService.php` | soft-delete کاربر بدون سفارش |
 | `app/Filament/Pages/BankdarSubtreePage.php` | درخت زیرمجموعه بنکدار (ادمین / مدیر فروش / بنکدار) |
-| `app/Services/Auth/AdminImpersonationService.php` | ورود موقت مدیر سیستم به پنل مدیر فروش / بنکدار / نماینده |
+| `app/Services/Auth/AdminImpersonationService.php` | ورود موقت مدیر سیستم (و مدیر فروش→بنکدار زیرمجموعه) |
 | `app/Http/Controllers/Admin/StartAdminImpersonationController.php` | شروع ورود موقت (روت signed خارج از Livewire) |
 | `app/Http/Controllers/Admin/StopAdminImpersonationController.php` | بازگشت از ورود موقت به ادمین |
 | `app/Services/Representative/BankdarSubtreeService.php` | ساخت درخت مدیر فروش → بنکدار → نماینده |

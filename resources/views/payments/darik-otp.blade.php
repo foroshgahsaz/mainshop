@@ -1,62 +1,98 @@
-<!DOCTYPE html>
-<html lang="fa" dir="rtl">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>تأیید پرداخت داریک</title>
-    <style>
-        :root { color-scheme: light; }
-        body { font-family: system-ui, sans-serif; background: #f8fafc; margin: 0; padding: 2rem 1rem; color: #0f172a; }
-        .card { max-width: 28rem; margin: 0 auto; background: #fff; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 8px 30px rgba(15, 23, 42, .08); }
-        h1 { font-size: 1.25rem; margin: 0 0 .5rem; }
-        p { margin: .25rem 0; line-height: 1.7; color: #475569; font-size: .95rem; }
-        .amount { font-weight: 700; color: #0f172a; }
-        label { display: block; margin: 1.25rem 0 .35rem; font-weight: 600; }
-        input[type=text] { width: 100%; box-sizing: border-box; padding: .75rem 1rem; font-size: 1.25rem; letter-spacing: .35em; text-align: center; border: 1px solid #cbd5e1; border-radius: .75rem; }
-        .actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.25rem; }
-        button, .btn { border: 0; border-radius: .75rem; padding: .65rem 1.1rem; font-weight: 700; cursor: pointer; font-size: .95rem; text-decoration: none; display: inline-block; }
-        .btn-primary { background: #7c3aed; color: #fff; flex: 1; }
-        .btn-muted { background: #e2e8f0; color: #334155; }
-        .btn-link { background: transparent; color: #7c3aed; padding: 0; }
-        .flash { padding: .65rem .85rem; border-radius: .65rem; margin-bottom: 1rem; font-size: .9rem; }
-        .flash-error { background: #fef2f2; color: #b91c1c; }
-        .flash-success { background: #ecfdf5; color: #047857; }
-    </style>
-</head>
-<body>
-    <div class="card">
-        <h1>پرداخت اعتباری داریک</h1>
-        <p>رمز ۵ رقمی خرید به موبایل مشتری ارسال شده است. برای تکمیل پرداخت آن را وارد کنید.</p>
-        @if($order)
-            <p class="amount">مبلغ: {{ number_format($payment->amount) }} تومان</p>
-        @endif
+@extends('layouts.shop')
 
-        @if(session('error'))
-            <div class="flash flash-error">{{ session('error') }}</div>
-        @endif
-        @if(session('success'))
-            <div class="flash flash-success">{{ session('success') }}</div>
-        @endif
+@section('title', 'تأیید پرداخت داریک | '.site_name())
 
-        <form method="post" action="{{ $confirmUrl }}">
-            @csrf
-            <label for="darik-otp">رمز خرید (OTP)</label>
-            <input id="darik-otp" name="otp" type="text" inputmode="numeric" pattern="\d{5}" maxlength="5" autocomplete="one-time-code" required autofocus>
-            <div class="actions">
-                <button type="submit" class="btn-primary">تأیید و پرداخت</button>
+@section('meta')
+    <meta name="robots" content="noindex, nofollow">
+@endsection
+
+@section('body_class', 'account-page darik-otp-page')
+
+@section('content')
+@php
+    $orderTracking = $order?->tracking_code;
+    $amountLabel = function_exists('shop_money')
+        ? shop_money($payment->amount)
+        : number_format((int) $payment->amount).' تومان';
+@endphp
+
+<x-account-layout title="تأیید پرداخت داریک" active="orders">
+    @if (session('error'))
+        <div class="mb-4 p-3 bg-red-50 text-red-700 rounded-xl text-sm">{{ session('error') }}</div>
+    @endif
+    @if (session('success'))
+        <div class="mb-4 p-3 bg-emerald-50 text-emerald-700 rounded-xl text-sm">{{ session('success') }}</div>
+    @endif
+    @if ($errors->any())
+        <div class="mb-4 p-3 bg-red-50 text-red-700 rounded-xl text-sm">
+            {{ $errors->first() }}
+        </div>
+    @endif
+
+    <div class="shop-card p-5 mb-4 darik-otp-card">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div>
+                <p class="text-xs text-gray-400 mb-1">پرداخت اعتباری از کیف پول داریک</p>
+                <h2 class="font-bold text-navy text-lg">رمز خرید پیامک‌شده را وارد کنید</h2>
             </div>
+            <span class="text-xs bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full">در انتظار OTP</span>
+        </div>
+
+        <dl class="grid gap-2 text-sm mb-5 border-b border-gray-100 pb-4">
+            @if ($orderTracking)
+                <div class="flex justify-between gap-3">
+                    <dt class="text-gray-500">کد سفارش</dt>
+                    <dd class="font-bold text-navy" dir="ltr">{{ $orderTracking }}</dd>
+                </div>
+            @endif
+            <div class="flex justify-between gap-3">
+                <dt class="text-gray-500">کد پرداخت</dt>
+                <dd class="font-medium" dir="ltr">{{ $payment->tracking_code }}</dd>
+            </div>
+            <div class="flex justify-between gap-3 items-center">
+                <dt class="text-gray-500">مبلغ</dt>
+                <dd class="text-lg font-black text-brand-green">{{ $amountLabel }}</dd>
+            </div>
+        </dl>
+
+        <p class="text-sm text-gray-600 leading-7 mb-4">
+            رمز ۵ رقمی به موبایل ثبت‌شده در کیف پول داریک ارسال شده است.
+            پس از تأیید، اعتبار کیف پول مصرف و سفارش تکمیل می‌شود.
+        </p>
+
+        <form method="post" action="{{ $confirmUrl }}" class="darik-otp-form">
+            @csrf
+            <label for="darik-otp" class="block text-sm font-bold text-navy mb-2">رمز خرید (OTP)</label>
+            <input
+                id="darik-otp"
+                name="otp"
+                type="text"
+                inputmode="numeric"
+                pattern="\d{5}"
+                maxlength="5"
+                autocomplete="one-time-code"
+                required
+                autofocus
+                class="darik-otp-form__input"
+                placeholder="•••••"
+                value="{{ old('otp') }}"
+            >
+            <button type="submit" class="shop-btn-gold darik-otp-form__submit">
+                تأیید و پرداخت
+            </button>
         </form>
 
-        <div class="actions">
+        <div class="darik-otp-actions">
             <form method="post" action="{{ $resendUrl }}">
                 @csrf
-                <button type="submit" class="btn-muted">ارسال مجدد رمز</button>
+                <button type="submit" class="shop-btn-outline text-sm">ارسال مجدد رمز</button>
             </form>
             <form method="post" action="{{ $cancelUrl }}">
                 @csrf
-                <button type="submit" class="btn-muted">انصراف</button>
+                <button type="submit" class="darik-otp-actions__cancel text-sm">انصراف از پرداخت</button>
             </form>
+            <a href="{{ route('account.orders') }}" class="darik-otp-actions__link text-sm">بازگشت به سفارش‌ها</a>
         </div>
     </div>
-</body>
-</html>
+</x-account-layout>
+@endsection

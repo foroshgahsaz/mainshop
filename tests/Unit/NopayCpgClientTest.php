@@ -44,4 +44,36 @@ class NopayCpgClientTest extends TestCase
 
         $this->assertSame('abc', $body['result']['entity']['token']);
     }
+
+    public function test_double_encoded_json_string_is_unwrapped(): void
+    {
+        $inner = [
+            'result' => null,
+            'notification' => [
+                'errors' => [[
+                    'message' => 'خطای احراز هویت',
+                    'code' => -7,
+                ]],
+                'hasErrors' => true,
+            ],
+        ];
+
+        Http::fake([
+            'https://op-cpg.test/*' => Http::response(
+                json_encode(json_encode($inner, JSON_UNESCAPED_UNICODE), JSON_UNESCAPED_UNICODE),
+                200,
+                ['Content-Type' => 'application/json'],
+            ),
+        ]);
+
+        $client = app(NopayCpgClient::class);
+        $body = $client->call(
+            'https://op-cpg.test',
+            NopayCpgClient::SERVICE_REQUEST_TOKEN,
+            ['amount' => 1000],
+        );
+
+        $this->assertTrue($client->hasErrors($body));
+        $this->assertSame('خطای احراز هویت (کد -7)', $client->firstErrorMessage($body));
+    }
 }

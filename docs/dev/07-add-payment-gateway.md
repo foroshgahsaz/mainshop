@@ -8,6 +8,7 @@
 - مستندات درگاه سداد در repo: `docs/PHP-master.zip`، `docs/15470-51A234D3-CD9B-4DEB-8D6A-F9D72518FCB9.pdf`؛ مسیر مستعار `/payment/callback/bmi` همان سداد است اگر پنل بانک فقط این URL را بپذیرد.
 - درگاه **نوپی (CPG)**: `docs/CPG Ver 2-5.pdf` — `NopayGateway`، `RequestToken` + `VerifyTransaction`.
   - خطای «پاسخ نامعتبر از درگاه»: بدنه غیرJSON از `api_base_url` — لاگ `nopay.cpg.non_json_or_http_error` در `laravel.log`.
+  - Wrapper گاهی JSON را به‌صورت رشته برمی‌گرداند (`NopayCpgClient::decodeBody`); کد `-7` = احراز هویت (رمز/کلید).
 - درگاه **داریک (کیف پول اعتباری)**: `docs/darik.pdf` — `DarikGateway` + `DarikApiClient`؛ جریان `Login` → `Order` → `SendOTP` → صفحه `/payment/darik/{tracking}` → `Confirm` با OTP پنج‌رقمی (بدون redirect خارجی).
 - قرارداد: `app/Services/Payment/PaymentGatewayInterface.php`
   - `initiate(Payment, Order): string` — URL یا مسیر redirect

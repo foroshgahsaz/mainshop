@@ -231,19 +231,6 @@
                                 </div>
                             @endif
                             @error('paymentMethod') <span class="checkout-field-error">{{ $message }}</span> @enderror
-
-                            @if($paymentMethod === 'darik' && filled($darikMemberCode))
-                                <div class="checkout-darik-summary">
-                                    <div class="checkout-darik-summary__text">
-                                        <span class="checkout-darik-summary__label">شناسه کیف پول داریک</span>
-                                        <span class="checkout-darik-summary__code" dir="ltr">{{ $darikMemberCode }}</span>
-                                    </div>
-                                    <button type="button" class="checkout-darik-summary__edit" wire:click="openDarikWalletModal">
-                                        تغییر
-                                    </button>
-                                </div>
-                                @error('darikMemberCode') <span class="checkout-field-error">{{ $message }}</span> @enderror
-                            @endif
                         </section>
                     </div>
 
@@ -266,6 +253,18 @@
                                     <span>{{ $preview['shipping'] === 0 ? 'رایگان' : shop_money($preview['shipping']) }}</span>
                                 </div>
                             </div>
+                            @if($paymentMethod === 'darik' && filled($darikMemberCode))
+                                <div class="checkout-darik-summary checkout-darik-summary--in-total">
+                                    <div class="checkout-darik-summary__text">
+                                        <span class="checkout-darik-summary__label">شناسه کیف پول داریک</span>
+                                        <span class="checkout-darik-summary__code" dir="ltr">{{ $darikMemberCode }}</span>
+                                    </div>
+                                    <button type="button" class="checkout-darik-summary__edit" wire:click="openDarikWalletModal">
+                                        تغییر
+                                    </button>
+                                </div>
+                                @error('darikMemberCode') <span class="checkout-field-error">{{ $message }}</span> @enderror
+                            @endif
                             <div class="checkout-summary__total">
                                 <span class="font-bold text-navy">مبلغ نهایی</span>
                                 <span class="text-lg font-black text-brand-green">{{ shop_money($preview['total']) }}</span>

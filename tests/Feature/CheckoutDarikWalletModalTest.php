@@ -46,7 +46,9 @@ class CheckoutDarikWalletModalTest extends TestCase
             ->assertSet('showDarikWalletModal', false)
             ->assertSet('paymentMethod', 'darik')
             ->assertSet('darikMemberCode', '5892251560796087')
-            ->assertSee('5892251560796087');
+            ->assertSee('5892251560796087')
+            ->assertSeeHtml('checkout-darik-summary--in-total')
+            ->assertSee('مبلغ نهایی', false);
     }
 
     public function test_cancel_darik_modal_without_code_reverts_payment_method(): void

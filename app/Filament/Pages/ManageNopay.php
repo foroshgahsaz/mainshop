@@ -48,6 +48,7 @@ class ManageNopay extends Page implements HasForms
             'service_password_encrypted' => $nopay['service_password_encrypted'],
             'merchant_number' => $nopay['merchant_number'],
             'public_key' => $nopay['public_key'],
+            'private_key' => $nopay['private_key'],
             'amount_unit' => $nopay['amount_unit'],
             'callback_url' => $nopay['callback_url'],
             'test_mode' => $nopay['test_mode'],
@@ -76,23 +77,28 @@ class ManageNopay extends Page implements HasForms
                         ->label('serviceUserName')
                         ->required(),
                     Forms\Components\TextInput::make('service_password')
-                        ->label('servicePassword (متن — اختیاری)')
+                        ->label('servicePassword (متن)')
                         ->password()
                         ->revealable()
-                        ->helperText('در صورت خالی بودن «رمز رمزنگاری‌شده»، با publicKey رمزنگاری می‌شود.'),
+                        ->helperText('رمز خام (مثلاً از User information). با AES-128-CBC و publicKey+privateKey رمز می‌شود. ارسال خام = خطای -7.'),
                     Forms\Components\Textarea::make('service_password_encrypted')
-                        ->label('servicePassword رمزنگاری‌شده')
+                        ->label('servicePassword رمزنگاری‌شده (اختیاری)')
                         ->rows(2)
                         ->columnSpanFull()
-                        ->helperText('خروجی ابزار CPG — در production ترجیحاً فقط همین فیلد پر شود.'),
+                        ->helperText('اگر رمز متنی پر باشد همان اولویت دارد و AES می‌شود. در غیر این صورت خروجی ابزار Encrypt را اینجا بگذارید.'),
                     Forms\Components\TextInput::make('merchant_number')
                         ->label('merchantNumber')
                         ->required(),
                     Forms\Components\Textarea::make('public_key')
-                        ->label('publicKey')
+                        ->label('publicKey (کلید AES)')
                         ->rows(2)
                         ->columnSpanFull()
-                        ->helperText('پیش‌فرض مستند CPG؛ برای رمزنگاری رمز سرویس.'),
+                        ->helperText('مستند: WtX3qPVc1lrHX/+ug9iILQ== — باید کامل باشد (۱۶ بایت base64).'),
+                    Forms\Components\Textarea::make('private_key')
+                        ->label('privateKey (IV)')
+                        ->rows(2)
+                        ->columnSpanFull()
+                        ->helperText('از فایل Encrypt / User information — IV شانزده‌بایتی base64 (نه نسخه کوتاه‌شده).'),
                     Forms\Components\Select::make('amount_unit')
                         ->label('واحد مبلغ فروشگاه')
                         ->options([
@@ -131,7 +137,8 @@ class ManageNopay extends Page implements HasForms
             'api_base_url' => rtrim((string) ($data['api_base_url'] ?? ''), '/'),
             'service_username' => $data['service_username'] ?? '',
             'merchant_number' => $data['merchant_number'] ?? '',
-            'public_key' => $data['public_key'] ?? '',
+            'public_key' => trim((string) ($data['public_key'] ?? '')),
+            'private_key' => trim((string) ($data['private_key'] ?? '')),
             'amount_unit' => $data['amount_unit'] ?? 'toman',
             'callback_url' => $callbackPath,
             'test_mode' => $data['test_mode'] ?? false,

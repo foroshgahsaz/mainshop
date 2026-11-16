@@ -97,6 +97,7 @@ return [
             'service_password_encrypted' => env('NOPAY_SERVICE_PASSWORD_ENCRYPTED', ''),
             'merchant_number' => env('NOPAY_MERCHANT_NUMBER', ''),
             'public_key' => env('NOPAY_PUBLIC_KEY', 'WtX3qPVc1lrHX/+ug9iILQ=='),
+            'private_key' => env('NOPAY_PRIVATE_KEY', ''),
             'callback_url' => env('NOPAY_CALLBACK_URL', '/payment/callback/nopay'),
             'amount_unit' => env('NOPAY_AMOUNT_UNIT', 'toman'),
             'test_mode' => env('NOPAY_TEST_MODE', false),

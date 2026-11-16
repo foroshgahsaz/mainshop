@@ -293,6 +293,7 @@ class SettingsService
             'service_password_encrypted' => (string) ($this->get('nopay', 'service_password_encrypted') ?: $this->get('toopi', 'service_password_encrypted') ?: ($cfg['service_password_encrypted'] ?? '')),
             'merchant_number' => (string) ($this->get('nopay', 'merchant_number') ?: $this->get('toopi', 'merchant_number') ?: ($cfg['merchant_number'] ?? '')),
             'public_key' => (string) ($this->get('nopay', 'public_key') ?: $this->get('toopi', 'public_key') ?: ($cfg['public_key'] ?? 'WtX3qPVc1lrHX/+ug9iILQ==')),
+            'private_key' => (string) ($this->get('nopay', 'private_key') ?: $this->get('toopi', 'private_key') ?: ($cfg['private_key'] ?? '')),
             'amount_unit' => (string) ($this->get('nopay', 'amount_unit') ?: $this->get('toopi', 'amount_unit') ?: ($cfg['amount_unit'] ?? 'toman')),
             'callback_url' => (string) ($this->get('nopay', 'callback_url') ?: $this->get('toopi', 'callback_url') ?: ($cfg['callback_url'] ?? '/payment/callback/nopay')),
             'test_mode' => filter_var($this->get('nopay', 'test_mode') ?? $this->get('toopi', 'test_mode', $cfg['test_mode'] ?? false), FILTER_VALIDATE_BOOLEAN),

@@ -720,11 +720,13 @@ $middleware->validateCsrfTokens(except: [
 
 **جریان:** `CPG/Security/Token/RequestToken` (موبایل، amount، returnURL) → redirect به `redirectURL` → callback → `CPG/Financial/VerifyTransaction`.
 
-**تنظیمات:** `api_base_url` (از نامه نوپی — باید endpoint واقعی JSON/CPG باشد نه صفحه HTML)، `service_username`, `service_password_encrypted` (ترجیحاً), `merchant_number`, `public_key`, `test_mode`, `test_cell_number`.
+**تنظیمات:** `api_base_url`، `service_username`، `service_password` (متن) یا `service_password_encrypted`، `merchant_number`، `public_key`، `private_key`، `test_mode`، `test_cell_number`.
+
+**رمزنگاری رمز:** طبق CPG Ver 2-5 و نمونه C# — **AES-128-CBC**؛ `publicKey` = کلید ۱۶بایتی base64 (پیش‌فرض `WtX3qPVc1lrHX/+ug9iILQ==`)، `privateKey` = IV ۱۶بایتی base64. `NopayCpgPasswordEncryptor`؛ ارسال رمز خام = Authentication code **-7**.
 
 **خطای «پاسخ نامعتبر از درگاه نوپی»:** HTTP موفق بوده ولی بدنه JSON قابل‌parse نبوده (`NopayCpgClient`) — معمولاً HTML/خالی یا آدرس اشتباه. Wrapper نوپی گاهی پاسخ را **double-encoded** (رشته JSON) می‌دهد؛ کلاینت یک/چندبار unwrap می‌کند.
 
-**خطای احراز هویت (کد -7):** بعد از parse، `serviceUserName` / `servicePassword` (رمزنگاری‌شده با `publicKey`) یا merchant اشتباه است — در `/admin/nopay` رمز را با ابزار Encrypt دوباره بسازید یا plain + publicKey کامل بگذارید.
+**خطای احراز هویت (کد -7):** معمولاً رمز خام یا AES اشتباه (کلید/IV ناقص). در `/admin/nopay` رمز متنی + publicKey/privateKey کامل از فایل Encrypt بگذارید؛ فیلد encrypted قدیمی (RSA) را خالی کنید.
 
 ### 9.15 درگاه داریک (credit — کیف پول `docs/darik.pdf`)
 
@@ -1407,6 +1409,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-16 | نوپی: رمز سرویس AES-128-CBC (publicKey+privateKey/IV) به‌جای RSA؛ فیلد `private_key`؛ رفع خطای احراز هویت -7 |
 | 2026-11-16 | نوپی: unwrap پاسخ double-encoded JSON؛ نمایش «خطای احراز هویت (کد -7)» به‌جای «پاسخ نامعتبر» |
 | 2026-11-16 | نوپی: خطای «پاسخ نامعتبر» = بدنه غیرJSON؛ لاگ `nopay.cpg.non_json_or_http_error` + پیام واضح‌تر |
 | 2026-11-16 | داریک روی /plans و خانه: ensure قبل از کش + مایگریت `ensure_darik_credit_plan_present` + `shop:ensure-darik-credit-plan`؛ کش `shop:plans:index:v2` |

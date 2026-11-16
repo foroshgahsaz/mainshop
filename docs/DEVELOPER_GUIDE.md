@@ -1398,6 +1398,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-16 | ایجاد مجدد کاربر بعد از soft-delete: unique فقط فعال‌ها؛ `purgeTrashedIdentityConflicts` قبل از create/edit |
 | 2026-11-16 | فرم کاربر ادمین: نقش غیرمشتری با `ToggleButtons` (نمایش واضح انتخاب)؛ CSS رادیو `:checked` در `filament-overrides`؛ کد ملی اجباری در ایجاد؛ ایمیل/رمز قفل نمایشی وقتی کد ملی معتبر است |
 | 2026-11-12 | ویزارد نماینده — انتخاب محصول: حذف فاصله خالی فیلتر برند (`flex` روی نوار برند)، کارت کامل با نام/قیمت/دکمه، گرید ۲ستونه موبایل و نوار ابزار فشرده |
 | 2026-11-12 | 404 مسیر Filament جدید (مثل `/admin/otp-messages`): کش `filament/panels/admin.php` + `route:cache` اگر Resource تازه در کش نباشد پاک می‌شود؛ دکمه کش ادمین `filament:clear-cached-components` |

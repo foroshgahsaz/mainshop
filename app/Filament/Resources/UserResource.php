@@ -16,7 +16,9 @@ use App\Services\Auth\OtpService;
 use App\Services\Representative\SalesRegionService;
 use App\Services\User\UserSoftDeletionService;
 use App\Support\AdminAccess;
+use App\Support\UserIdentityUnique;
 use App\Support\UserNationalCodeCredentials;
+use Illuminate\Validation\Rules\Unique;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -319,8 +321,9 @@ class UserResource extends Resource
                         ->rule('regex:/^09\d{9}$/')
                         ->validationMessages([
                             'regex' => 'شماره موبایل باید با 09 شروع شود و ۱۱ رقم باشد.',
+                            'unique' => 'این موبایل قبلاً برای کاربر فعال دیگری ثبت شده است.',
                         ])
-                        ->unique(ignoreRecord: true),
+                        ->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule): Unique => UserIdentityUnique::withoutTrashed($rule)),
                     Forms\Components\TextInput::make('national_code')
                         ->label('کد ملی')
                         ->length(10)
@@ -336,12 +339,18 @@ class UserResource extends Resource
                             $operation === 'create' ? 'required' : 'nullable',
                             new IranianNationalCode,
                         ])
-                        ->unique(ignoreRecord: true)
+                        ->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule): Unique => UserIdentityUnique::withoutTrashed($rule))
+                        ->validationMessages([
+                            'unique' => 'این کد ملی قبلاً برای کاربر فعال دیگری ثبت شده است.',
+                        ])
                         ->helperText('با خروج از این فیلد، ایمیل و رمز عبور از روی کد ملی پر می‌شوند.'),
                     Forms\Components\TextInput::make('email')
                         ->label('ایمیل')
                         ->email()
-                        ->unique(ignoreRecord: true)
+                        ->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule): Unique => UserIdentityUnique::withoutTrashed($rule))
+                        ->validationMessages([
+                            'unique' => 'این ایمیل قبلاً برای کاربر فعال دیگری ثبت شده است.',
+                        ])
                         ->disabled(fn (Get $get): bool => static::nationalCodeDrivesCredentials($get('national_code')))
                         ->dehydrated()
                         ->helperText(fn (Get $get): string => static::nationalCodeDrivesCredentials($get('national_code'))

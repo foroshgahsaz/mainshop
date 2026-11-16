@@ -5,6 +5,7 @@ namespace App\Livewire\Auth\Concerns;
 use App\Models\User;
 use App\Rules\IranianNationalCode;
 use App\Support\UserDisplayName;
+use App\Support\UserIdentityUnique;
 use App\Services\Auth\LoginRedirectService;
 use App\Services\Auth\OtpService;
 use App\Services\Auth\ShopLoginGuard;
@@ -189,7 +190,7 @@ trait HandlesOtpLogin
             'nationalCode' => [
                 'required',
                 new IranianNationalCode,
-                Rule::unique('users', 'national_code')->ignore($user->getKey()),
+                UserIdentityUnique::rule('national_code')->ignore($user->getKey()),
             ],
         ], [
             'profileName.required' => 'نام و نام خانوادگی را وارد کنید.',

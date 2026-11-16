@@ -21,9 +21,7 @@ class CreateUser extends CreateRecord
         }
 
         if (AdminAccess::isBankdarOnly()) {
-            $kind = (string) ($this->form->getRawState()['bankdar_create_kind'] ?? 'representative');
-
-            return $kind === 'customer' ? 'افزودن مشتری' : 'افزودن نماینده';
+            return 'افزودن نماینده';
         }
 
         return parent::getTitle();
@@ -48,33 +46,14 @@ class CreateUser extends CreateRecord
         }
 
         if (AdminAccess::isBankdarOnly()) {
-            $raw = $this->form->getRawState();
-            $kind = (string) ($raw['bankdar_create_kind'] ?? 'representative');
-
+            // بنکدار فقط نماینده می‌سازد (بدون انتخاب مشتری)
             $data['is_admin'] = false;
             $data['is_author'] = false;
             $data['is_sales_manager'] = false;
             $data['is_bankdar'] = false;
+            $data['is_representative'] = true;
             $data['status'] = $data['status'] ?? true;
-
-            if ($kind === 'customer') {
-                $repId = (int) ($data['created_by_representative_id'] ?? $raw['created_by_representative_id'] ?? 0);
-                $actor = auth()->user();
-                if ($repId <= 0 || ! $actor || ! app(SalesRegionService::class)->managesRepresentative(
-                    $actor,
-                    \App\Models\User::query()->findOrFail($repId),
-                )) {
-                    throw ValidationException::withMessages([
-                        'data.created_by_representative_id' => 'نماینده باید زیرمجموعه شما باشد.',
-                    ]);
-                }
-
-                $data['is_representative'] = false;
-                $data['created_by_representative_id'] = $repId;
-            } else {
-                $data['is_representative'] = true;
-                unset($data['created_by_representative_id']);
-            }
+            unset($data['created_by_representative_id']);
         }
 
         return static::stripVirtualAccessFormKeys($data);
@@ -89,10 +68,6 @@ class CreateUser extends CreateRecord
         $raw = $this->form->getRawState();
 
         if (AdminAccess::isBankdarOnly()) {
-            if (($raw['bankdar_create_kind'] ?? 'representative') === 'customer') {
-                return;
-            }
-
             $bankdar = auth()->user();
             $provinceId = (int) ($bankdar?->bankdar_province_id ?? 0);
             if ($provinceId <= 0) {

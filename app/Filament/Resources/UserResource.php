@@ -200,24 +200,10 @@ class UserResource extends Resource
             : '';
 
         return [
-            Forms\Components\Section::make('نوع کاربر')
-                ->schema([
-                    Forms\Components\Radio::make('bankdar_create_kind')
-                        ->label('ایجاد')
-                        ->options([
-                            'representative' => 'نماینده',
-                            'customer' => 'مشتری',
-                        ])
-                        ->default('representative')
-                        ->required()
-                        ->live()
-                        ->dehydrated(false),
-                ])
-                ->columnSpanFull(),
             ...static::profileTabSchema(),
             ...static::accountTabSchema(),
             Forms\Components\Section::make('پروفایل نمایندگی')
-                ->description('این نماینده زیرمجموعه شما (بنکدار) ثبت می‌شود. استان فعالیت همان استان شماست و قابل تغییر نیست.')
+                ->description('بنکدار فقط نماینده می‌سازد. این نماینده زیرمجموعه شما ثبت می‌شود؛ استان فعالیت همان استان شماست و قابل تغییر نیست.')
                 ->schema([
                     Forms\Components\Placeholder::make('locked_province')
                         ->label('استان فعالیت')
@@ -226,7 +212,7 @@ class UserResource extends Resource
                         ->label('شهر فعالیت')
                         ->options(fn (): array => static::cityOptions($provinceId ?: null))
                         ->searchable()
-                        ->required(fn (Forms\Get $get): bool => ($get('bankdar_create_kind') ?? 'representative') === 'representative')
+                        ->required()
                         ->disabled($provinceId <= 0)
                         ->dehydrated(false),
                     Forms\Components\TextInput::make('rep_max_active_reservations')
@@ -239,22 +225,6 @@ class UserResource extends Resource
                         ->helperText('حداکثر پیش‌فاکتور باز با رزرو موجودی (پیش‌فرض ۳).'),
                 ])
                 ->columns(2)
-                ->visible(fn (Forms\Get $get): bool => ($get('bankdar_create_kind') ?? 'representative') === 'representative')
-                ->columnSpanFull(),
-            Forms\Components\Section::make('انتساب به نماینده')
-                ->description('مشتری زیر یکی از نمایندگان شما ثبت می‌شود.')
-                ->schema([
-                    Forms\Components\Select::make('created_by_representative_id')
-                        ->label('نماینده')
-                        ->options(fn (): array => app(SalesRegionService::class)
-                            ->scopeRepresentativesManagedBy(User::query(), (int) auth()->id())
-                            ->orderBy('name')
-                            ->pluck('name', 'id')
-                            ->all())
-                        ->required(fn (Forms\Get $get): bool => ($get('bankdar_create_kind') ?? 'representative') === 'customer')
-                        ->searchable(),
-                ])
-                ->visible(fn (Forms\Get $get): bool => ($get('bankdar_create_kind') ?? 'representative') === 'customer')
                 ->columnSpanFull(),
         ];
     }

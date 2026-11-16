@@ -137,7 +137,8 @@ body.fi-body .fi-field-wrp-label {
 
 .fi-admin-shell .fi-fo-toggle-buttons .fi-btn-toggle[aria-pressed='true'],
 .fi-admin-shell .fi-fo-toggle-buttons .fi-btn-toggle[aria-checked='true'],
-.fi-admin-shell .fi-fo-toggle-buttons button[aria-pressed='true'] {
+.fi-admin-shell .fi-fo-toggle-buttons button[aria-pressed='true'],
+.fi-admin-shell .fi-fo-toggle-buttons .fi-btn.fi-color-primary {
     background: #7239ea !important;
     border-color: #7239ea !important;
     color: #fff !important;
@@ -149,6 +150,97 @@ body.fi-body .fi-field-wrp-label {
     width: 100%;
     justify-content: flex-start;
     text-align: right;
+}
+
+/* نقش غیرمشتری — کارت‌های کنارهم با حالت انتخاب واضح */
+.fi-admin-shell .fi-staff-role-toggles.fi-fo-toggle-buttons,
+.fi-admin-shell .fi-fo-field-wrp:has(.fi-staff-role-toggles) .fi-fo-toggle-buttons,
+.fi-admin-shell .fi-staff-role-toggles {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.75rem !important;
+    width: 100%;
+    flex-wrap: unset !important;
+}
+
+@media (max-width: 1100px) {
+    .fi-admin-shell .fi-staff-role-toggles.fi-fo-toggle-buttons,
+    .fi-admin-shell .fi-fo-field-wrp:has(.fi-staff-role-toggles) .fi-fo-toggle-buttons,
+    .fi-admin-shell .fi-staff-role-toggles {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .fi-admin-shell .fi-staff-role-toggles.fi-fo-toggle-buttons,
+    .fi-admin-shell .fi-fo-field-wrp:has(.fi-staff-role-toggles) .fi-fo-toggle-buttons,
+    .fi-admin-shell .fi-staff-role-toggles {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.fi-admin-shell .fi-staff-role-toggles > button,
+.fi-admin-shell .fi-staff-role-toggles .fi-btn,
+.fi-admin-shell .fi-fo-field-wrp:has(.fi-staff-role-toggles) .fi-fo-toggle-buttons > button {
+    width: 100% !important;
+    min-height: 4.75rem !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0.85rem 0.75rem !important;
+    border-radius: 14px !important;
+    border: 1.5px solid #e4e6ef !important;
+    background: #f9f9fb !important;
+    background-image: none !important;
+    color: #3f4254 !important;
+    box-shadow: 0 1px 2px rgba(24, 28, 50, 0.04) !important;
+    display: inline-flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.4rem !important;
+    white-space: normal !important;
+    text-align: center !important;
+    line-height: 1.35 !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease !important;
+}
+
+.fi-admin-shell .fi-staff-role-toggles > button:hover,
+.fi-admin-shell .fi-fo-field-wrp:has(.fi-staff-role-toggles) .fi-fo-toggle-buttons > button:hover {
+    border-color: #cbb7f7 !important;
+    background: #f3eeff !important;
+    color: #7239ea !important;
+    transform: translateY(-1px);
+}
+
+.fi-admin-shell .fi-staff-role-toggles > button svg,
+.fi-admin-shell .fi-fo-field-wrp:has(.fi-staff-role-toggles) .fi-fo-toggle-buttons > button svg {
+    width: 1.35rem !important;
+    height: 1.35rem !important;
+    color: inherit !important;
+}
+
+/* انتخاب‌شده: بنفش پررنگ — نه سفید */
+.fi-admin-shell .fi-staff-role-toggles > button[aria-pressed='true'],
+.fi-admin-shell .fi-staff-role-toggles > button[aria-checked='true'],
+.fi-admin-shell .fi-staff-role-toggles > button.fi-color-primary,
+.fi-admin-shell .fi-staff-role-toggles > button.fi-btn-color-primary,
+.fi-admin-shell .fi-staff-role-toggles > .fi-btn.fi-color-custom,
+.fi-admin-shell .fi-fo-field-wrp:has(.fi-staff-role-toggles) .fi-fo-toggle-buttons > button[aria-pressed='true'],
+.fi-admin-shell .fi-fo-field-wrp:has(.fi-staff-role-toggles) .fi-fo-toggle-buttons > button.fi-color-primary {
+    background: #7239ea !important;
+    background-image: linear-gradient(145deg, #8b5cf6 0%, #7239ea 55%, #5b21b6 100%) !important;
+    border-color: #7239ea !important;
+    color: #fff !important;
+    box-shadow: 0 8px 20px rgba(114, 57, 234, 0.28) !important;
+}
+
+.fi-admin-shell .fi-staff-role-toggles > button[aria-pressed='true'] svg,
+.fi-admin-shell .fi-staff-role-toggles > button.fi-color-primary svg,
+.fi-admin-shell .fi-fo-field-wrp:has(.fi-staff-role-toggles) .fi-fo-toggle-buttons > button[aria-pressed='true'] svg,
+.fi-admin-shell .fi-fo-field-wrp:has(.fi-staff-role-toggles) .fi-fo-toggle-buttons > button.fi-color-primary svg {
+    color: #fff !important;
 }
 
 .fi-admin-shell .sidebar-menu a.submenu-item {

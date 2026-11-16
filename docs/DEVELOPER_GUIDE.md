@@ -1398,6 +1398,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-16 | فرم کاربر ادمین: نقش غیرمشتری با `ToggleButtons` (نمایش واضح انتخاب)؛ CSS رادیو `:checked` در `filament-overrides`؛ کد ملی اجباری در ایجاد؛ ایمیل/رمز قفل نمایشی وقتی کد ملی معتبر است |
 | 2026-11-12 | ویزارد نماینده — انتخاب محصول: حذف فاصله خالی فیلتر برند (`flex` روی نوار برند)، کارت کامل با نام/قیمت/دکمه، گرید ۲ستونه موبایل و نوار ابزار فشرده |
 | 2026-11-12 | 404 مسیر Filament جدید (مثل `/admin/otp-messages`): کش `filament/panels/admin.php` + `route:cache` اگر Resource تازه در کش نباشد پاک می‌شود؛ دکمه کش ادمین `filament:clear-cached-components` |
 | 2026-11-12 | ادمین: `/admin/otp-messages` لیست OTPهای ارسال‌شده (شماره، کد، نام، زمان جلالی) — فقط مدیر سیستم |
@@ -1565,7 +1566,7 @@ resources/views/layouts/shop.blade.php
 | 2026-11-14 | ادمین: دکمه «مشاهده زیرمجموعه» روی بنکدار → درخت مدیر فروش تا نماینده (`BankdarSubtreePage`) |
 | 2026-11-14 | رفع `BankdarHierarchyRepair` compact (`province_filled`) برای migrate/deploy-recover |
 | 2026-11-14 | لیست بنکدار: ستون «مدیر فروش» (`created_by_sales_manager_id`)؛ ترمیم لینک با `BankdarHierarchyRepair` |
-| 2026-11-14 | فرم کاربر ادمین: نقش غیرمشتری تکی (`staff_role` رادیو؛ فقط یک فلگ) |
+| 2026-11-14 | فرم کاربر ادمین: نقش غیرمشتری تکی (`staff_role`؛ فقط یک فلگ) — از 2026-11-16 با ToggleButtons |
 | 2026-11-14 | بنکدار: داشبورد اسکوپ‌شده، برند/دسته با `bankdar_id`، محصول/اکسل محدوده، soft-delete سفارش/کاربر/محصول، ایجاد سفارش و مشتری |
 | 2026-11-14 | بنکدار: دسترسی صریح محصولات + بارگذاری اکسل (`canManageProductsInAdmin` / `canImportProductsInAdmin`، تست `SalesManagerAccessTest`) |
 | 2026-11-12 | بازگشت درگاه: حفظ سشن لاگین (`PreserveBrowserSessionOnPaymentCallback`) تا «بازگشت به پیش‌فاکتور» دوباره لاگین نخواهد |

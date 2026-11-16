@@ -7,9 +7,11 @@ use App\Services\Cart\CartService;
 use App\Services\Payment\PaymentGatewayCatalog;
 use App\Services\Settings\SettingsService;
 use App\Support\ShopLabels;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use RuntimeException;
 
 class AddToCart extends Component
 {
@@ -102,14 +104,29 @@ class AddToCart extends Component
             return;
         }
 
+        try {
+            $this->refreshPurchasableState();
+        } catch (RuntimeException $e) {
+            session()->flash('error', $e->getMessage());
+
+            return;
+        }
+
         if ($this->product->isNotForSale()) {
             session()->flash('error', 'این محصول غیر قابل فروش است.');
 
             return;
         }
 
-        if ($this->product->variants->isNotEmpty() && ! $this->variantId) {
+        $activeVariants = $this->product->variants->where('is_active', true)->values();
+        if ($activeVariants->isNotEmpty() && ! $this->variantId) {
             session()->flash('error', 'لطفاً واریانت محصول را انتخاب کنید.');
+
+            return;
+        }
+
+        if (($this->selectedStock ?? 0) < $this->quantity) {
+            session()->flash('error', 'موجودی کافی نیست.');
 
             return;
         }
@@ -118,9 +135,63 @@ class AddToCart extends Component
             $cart->add($this->product->id, $this->quantity, $this->variantId);
             $this->dispatch('cart-updated');
             $this->js('window.toggleCartSidebar && window.toggleCartSidebar(true)');
-        } catch (\RuntimeException $e) {
+        } catch (ModelNotFoundException) {
+            session()->flash('error', 'این محصول در فروشگاه یافت نشد.');
+        } catch (RuntimeException $e) {
             session()->flash('error', $e->getMessage());
+            $this->syncSelectedStockFromProduct();
         }
+    }
+
+    /** بارگذاری مجدد محصول از DB تا موجودی/فعال بودن کهنه نباشد. */
+    protected function refreshPurchasableState(): void
+    {
+        $fresh = Product::query()->find($this->product->id);
+
+        if (! $fresh) {
+            throw new RuntimeException('این محصول در فروشگاه یافت نشد.');
+        }
+
+        if (! $fresh->is_active) {
+            throw new RuntimeException('این محصول فعلاً قابل خرید نیست.');
+        }
+
+        $fresh->load(['variants' => fn ($q) => $q->where('is_active', true)]);
+        $this->product = $fresh;
+        $this->syncSelectedStockFromProduct();
+    }
+
+    protected function syncSelectedStockFromProduct(): void
+    {
+        if ($this->variantId) {
+            $variant = $this->product->variants->firstWhere('id', $this->variantId);
+            if (! $variant) {
+                $this->variantId = null;
+                $this->selectedLabel = null;
+                $first = $this->product->variants->first();
+                if ($first) {
+                    $this->applyVariant(
+                        $first->id,
+                        $first->name,
+                        $first->effective_price,
+                        ($first->sale_price && $first->sale_price < $first->price) ? $first->price : null,
+                        $first->stock,
+                    );
+
+                    return;
+                }
+
+                $this->selectedStock = (int) $this->product->stock;
+
+                return;
+            }
+
+            $this->selectedStock = (int) $variant->stock;
+
+            return;
+        }
+
+        $this->selectedStock = (int) $this->product->stock;
     }
 
     public function render(SettingsService $settings, PaymentGatewayCatalog $catalog)

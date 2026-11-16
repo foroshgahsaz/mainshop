@@ -443,6 +443,8 @@ public function mount(CheckoutService $checkout, ShopCacheService $cache) { ... 
 
 **Merge:** بعد از login سبد مهمان به DB منتقل می‌شود (`CartService`).
 
+**افزودن به سبد:** `CartService::resolvePurchasable` — محصول غیرفعال/حذف‌شده پیام فارسی می‌دهد (نه `ModelNotFound`). قبل از add، `AddToCart` موجودی را از DB تازه می‌کند؛ سقف موجودی روی **جمع** تعداد داخل سبد (مهمان و کاربر) اعمال می‌شود.
+
 ### Checkout — `app/Livewire/Checkout/CheckoutPage.php`
 
 1. انتخاب/ثبت آدرس (inline) — استان/شهر از `provinces`/`cities` (select، نه متن آزاد)، کد پستی با `IranianPostalCode`
@@ -1400,6 +1402,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-16 | افزودن به سبد: پیام فارسی به‌جای ModelNotFound؛ refresh موجودی قبل از add؛ سقف موجودی روی جمع سبد مهمان/کاربر |
 | 2026-11-16 | رفع باز نشدن مودال داریک: حذف `wire:ignore.self` + رندر شرطی مودال؛ `SHOP_CSS_VERSION`=14 |
 | 2026-11-16 | Checkout: انتخاب داریک → مودال شناسه کیف پول ۱۶رقمی؛ تأیید و ادامه خرید |
 | 2026-11-16 | فرم کاربر: نقش غیرمشتری — کارت‌های کنارهم با آیکون؛ انتخاب بنفش واضح (`fi-staff-role-toggles`) |

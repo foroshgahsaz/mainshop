@@ -33,15 +33,24 @@ class CartService
             throw new RuntimeException('فعلاً امکان افزودن به سبد خرید وجود ندارد (غیر قابل فروش).');
         }
 
-        $product = Product::active()->findOrFail($productId);
+        [$product, $variant] = $this->resolvePurchasable($productId, $variantId);
 
-        if ($product->isNotForSale()) {
-            throw new RuntimeException('این محصول غیر قابل فروش است.');
+        $desiredQty = $quantity;
+        if ($user = Auth::user()) {
+            $existing = ShoppingCart::query()
+                ->where('user_id', $user->id)
+                ->where('product_id', $productId)
+                ->when($variantId, fn ($q) => $q->where('product_variant_id', $variantId))
+                ->when(! $variantId, fn ($q) => $q->whereNull('product_variant_id'))
+                ->value('quantity');
+            $desiredQty = (int) $existing + $quantity;
+        } else {
+            $guest = $this->getGuestCart();
+            $key = $this->itemKey($productId, $variantId);
+            $desiredQty = (int) ($guest[$key]['quantity'] ?? 0) + $quantity;
         }
 
-        $variant = $variantId ? ProductVariant::where('product_id', $productId)->findOrFail($variantId) : null;
-
-        $this->stockService->assertAvailable($product, $variant, $quantity);
+        $this->stockService->assertAvailable($product, $variant, $desiredQty);
 
         $price = $variant ? $variant->effective_price : $product->effective_price;
         $sku = $variant?->sku ?? $product->sku;
@@ -64,13 +73,7 @@ class CartService
             return;
         }
 
-        $product = Product::active()->findOrFail($productId);
-
-        if ($product->isNotForSale()) {
-            throw new RuntimeException('این محصول غیر قابل فروش است.');
-        }
-
-        $variant = $variantId ? ProductVariant::where('product_id', $productId)->findOrFail($variantId) : null;
+        [$product, $variant] = $this->resolvePurchasable($productId, $variantId);
 
         $this->stockService->assertAvailable($product, $variant, $quantity);
 
@@ -355,5 +358,39 @@ class CartService
     protected function itemKey(int $productId, ?int $variantId): string
     {
         return $productId.':'.($variantId ?? '0');
+    }
+
+    /**
+     * @return array{0: Product, 1: ?ProductVariant}
+     */
+    protected function resolvePurchasable(int $productId, ?int $variantId): array
+    {
+        $product = Product::query()->find($productId);
+
+        if (! $product) {
+            throw new RuntimeException('این محصول در فروشگاه یافت نشد.');
+        }
+
+        if (! $product->is_active) {
+            throw new RuntimeException('این محصول فعلاً قابل خرید نیست.');
+        }
+
+        if ($product->isNotForSale()) {
+            throw new RuntimeException('این محصول غیر قابل فروش است.');
+        }
+
+        $variant = null;
+        if ($variantId) {
+            $variant = ProductVariant::query()
+                ->where('product_id', $productId)
+                ->where('is_active', true)
+                ->find($variantId);
+
+            if (! $variant) {
+                throw new RuntimeException('تنوع انتخاب‌شده معتبر نیست. صفحه را تازه کنید.');
+            }
+        }
+
+        return [$product, $variant];
     }
 }

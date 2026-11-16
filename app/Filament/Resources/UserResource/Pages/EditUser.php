@@ -7,6 +7,7 @@ use App\Filament\Resources\UserResource;
 use App\Filament\Resources\UserResource\UserEditTabs;
 use App\Models\User;
 use App\Services\Auth\OtpService;
+use App\Services\User\UserSoftDeletionService;
 use App\Support\AdminAccess;
 use Filament\Actions;
 use Illuminate\Contracts\Support\Htmlable;
@@ -95,6 +96,13 @@ class EditUser extends EditRecord
         if (filled($data['phone'] ?? null)) {
             $data['phone'] = app(OtpService::class)->normalizePhone((string) $data['phone']);
         }
+
+        app(UserSoftDeletionService::class)->purgeTrashedIdentityConflicts(
+            phone: isset($data['phone']) ? (string) $data['phone'] : null,
+            email: isset($data['email']) ? (string) $data['email'] : null,
+            nationalCode: isset($data['national_code']) ? (string) $data['national_code'] : null,
+            exceptUserId: (int) $user->getKey(),
+        );
 
         if (AdminAccess::isLimitedStaffOnly()) {
             foreach (['is_admin', 'is_author', 'is_representative', 'is_sales_manager', 'is_bankdar'] as $flag) {

@@ -11,6 +11,8 @@ use App\Models\UserAddress;
 use App\Rules\IranianNationalCode;
 use App\Services\Auth\OtpService;
 use App\Services\Settings\SettingsService;
+use App\Services\User\UserSoftDeletionService;
+use App\Support\UserIdentityUnique;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -218,7 +220,7 @@ class RepresentativeCustomerService
                 'national_code' => [
                     'required',
                     new IranianNationalCode,
-                    Rule::unique('users', 'national_code'),
+                    UserIdentityUnique::rule('national_code'),
                 ],
             ],
             [
@@ -289,6 +291,11 @@ class RepresentativeCustomerService
         $cityName = $city->name;
 
         return DB::transaction(function () use ($representative, $data, $phone, $nationalCode, $provinceId, $cityId, $addressLine, $provinceName, $cityName): User {
+            app(UserSoftDeletionService::class)->purgeTrashedIdentityConflicts(
+                phone: $phone,
+                nationalCode: $nationalCode,
+            );
+
             // ایمیل/رمز از UserNationalCodeCredentials روی saving مدل ست می‌شود
             $customer = User::query()->create([
                 'name' => $data['name'],

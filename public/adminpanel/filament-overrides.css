@@ -484,6 +484,32 @@ body.fi-body .tippy-box {
     font-weight: 600;
     color: #181c32;
     font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.fi-admin-user-cell__trashed-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: #fff;
+    background: #f1416c;
+}
+
+.fi-admin-shell .fi-ta-row.fi-admin-user-row--trashed {
+    background: #fff5f8 !important;
+    opacity: 0.92;
+}
+
+.fi-admin-shell .fi-ta-row.fi-admin-user-row--trashed .fi-admin-user-cell__name {
+    color: #a1a5b7;
+    text-decoration: line-through;
 }
 
 .fi-admin-shell .fi-ta-cell .text-primary-600,

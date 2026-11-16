@@ -731,7 +731,7 @@ $middleware->validateCsrfTokens(except: [
 | کلاس | `DarikGateway`, `DarikApiClient` |
 | Admin | `/admin/darik` → `ManageDarik.php` |
 | OTP UI | `/payment/darik/{tracking}` — صفحه داخل پوسته حساب (شبیه سفارش‌ها)؛ `Confirm` با OTP پنج‌رقمی |
-| صفحه طرح | `/plans/darik/` — معرفی کیف پول؛ کارت در `/plans` از مایگریت `ensure_darik_credit_plan` |
+| صفحه طرح | `/plans/darik/` — معرفی کیف پول؛ کارت در `/plans`/خانه با `EnsureDarikCreditPlan` (migrate / deploy-recover / اولین بازدید / `shop:ensure-darik-credit-plan`) |
 | شناسه خریدار | `users.darik_member_code` (۱۶ رقم، با `5892`) — فقط checkout فروشگاه (نه فرم ایجاد مشتری نماینده) |
 
 **Checkout:** با انتخاب درگاه داریک مودال شناسه کیف پول باز می‌شود (`CheckoutPage::openDarikWalletModal`)؛ بعد از تأیید، خلاصهٔ شناسه در **خلاصه سفارش** (بالای مبلغ نهایی، با خط جدا) نمایش داده می‌شود. مودال با `@if` رندر می‌شود (نه `wire:ignore`). اگر `custom.min.css` از ادمین فعال است، بعد از deploy یک‌بار `shop:minify-assets` بزنید.
@@ -1403,6 +1403,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-16 | داریک روی /plans و خانه: ensure قبل از کش + مایگریت `ensure_darik_credit_plan_present` + `shop:ensure-darik-credit-plan`؛ کش `shop:plans:index:v2` |
 | 2026-11-16 | صفحه اصلی: همه طرح‌های فعال `/plans` در ویجت خانه (بدون سقف ۴ + بدون «مشاهده همه»)؛ EnsureDarikCreditPlan در deploy-recover؛ کش `shop:home:payload:v5`؛ `SHOP_CSS_VERSION`=17 |
 | 2026-11-16 | داریک OTP: رفع 500 (`$otp` تعریف‌نشده)؛ صفحه تأیید داخل layout حساب کاربری؛ `SHOP_CSS_VERSION`=16 |
 | 2026-11-16 | Checkout: باکس شناسه داریک در خلاصه سفارش (بالای مبلغ نهایی + خط جدا)؛ `SHOP_CSS_VERSION`=15 |

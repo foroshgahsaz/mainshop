@@ -33,6 +33,8 @@ cd /var/www   # یا مسیر root اپ
 composer install --no-dev --optimize-autoloader
 php artisan migrate --force
 php artisan shop:deploy-recover
+# اگر کارت داریک در /plans یا خانه نبود:
+php artisan shop:ensure-darik-credit-plan
 ```
 
 اگر لاگ `Unknown column 'orders.deleted_at'` یا ۵۰۰ هنگام ورود به پنل بنکدار/مدیر فروش دیدید:

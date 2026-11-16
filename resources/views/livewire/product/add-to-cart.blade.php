@@ -36,6 +36,9 @@
                 :compare="$comparePrice"
                 class="items-start text-right product-buy-box__price-wrap"
             />
+            @if ($productNotForSale ?? false)
+                <p class="product-not-for-sale-label mt-2">غیر قابل فروش</p>
+            @endif
         </div>
 
     @endif
@@ -64,7 +67,7 @@
 
 
 
-    @if ($selectedStock !== null && ! ($shopPricesHidden ?? false))
+    @if ($selectedStock !== null && ! ($shopPricesHidden ?? false) && ! ($productNotForSale ?? false))
 
         <p class="text-xs text-gray-500 mb-3">
 
@@ -84,19 +87,15 @@
 
     <div class="flex items-center gap-3 flex-wrap">
 
-        @if (! ($shopPricesHidden ?? false))
-            <div class="product-qty">
-
-                <button type="button" wire:click="decrementQuantity" aria-label="کم کردن">−</button>
-
-                <span class="product-qty__value" aria-live="polite">{{ $quantity }}</span>
-
-                <button type="button" wire:click="incrementQuantity" aria-label="زیاد کردن">+</button>
-
-            </div>
-        @endif
-
-        @if ($shopPricesHidden ?? false)
+        @if ($productNotForSale ?? false)
+            <button
+                type="button"
+                disabled
+                class="product-add-cart flex-1 min-w-[200px] opacity-60 cursor-not-allowed product-add-cart--not-for-sale"
+            >
+                غیر قابل فروش
+            </button>
+        @elseif ($shopPricesHidden ?? false)
             @if(filled($sitePhone ?? ''))
                 <a
                     href="tel:{{ preg_replace('/[^\d+]/', '', $sitePhone) }}"
@@ -114,6 +113,16 @@
                 </button>
             @endif
         @else
+            <div class="product-qty">
+
+                <button type="button" wire:click="decrementQuantity" aria-label="کم کردن">−</button>
+
+                <span class="product-qty__value" aria-live="polite">{{ $quantity }}</span>
+
+                <button type="button" wire:click="incrementQuantity" aria-label="زیاد کردن">+</button>
+
+            </div>
+
             <button type="button"
 
                     wire:click="add"
@@ -136,4 +145,3 @@
     </div>
 
 </div>
-

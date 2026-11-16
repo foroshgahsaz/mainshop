@@ -1171,6 +1171,25 @@ body.has-admin-bar .store-admin-bar {
   padding: 0.45rem 0.75rem;
 }
 
+.product-not-for-sale-label {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #b91c1c;
+  line-height: 1.4;
+}
+
+.product-not-for-sale-label--on-dark {
+  color: #fecaca;
+}
+
+.product-add-cart--not-for-sale {
+  background: #e5e7eb !important;
+  color: #6b7280 !important;
+  border-color: #d1d5db !important;
+}
+
 html {
   overflow-x: clip;
 }

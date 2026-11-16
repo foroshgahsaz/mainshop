@@ -68,6 +68,43 @@ body.fi-body .fi-field-wrp-label {
     background-repeat: no-repeat !important;
 }
 
+/* Filament radio — same Bootstrap RTL / appearance reset: checked dot must be explicit */
+.fi-admin-shell input.fi-radio-input,
+.fi-admin-shell .fi-fo-radio input[type='radio'],
+.fi-admin-shell .fi-fo-radio-list input[type='radio'] {
+    width: 1.125rem !important;
+    height: 1.125rem !important;
+    flex-shrink: 0;
+    cursor: pointer;
+    opacity: 1 !important;
+    position: relative !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 999px !important;
+    background-color: #fff !important;
+    color: #7239ea !important;
+    vertical-align: middle;
+}
+
+.fi-admin-shell input.fi-radio-input:checked,
+.fi-admin-shell .fi-fo-radio input[type='radio']:checked,
+.fi-admin-shell .fi-fo-radio-list input[type='radio']:checked {
+    background-color: #7239ea !important;
+    border-color: #7239ea !important;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='3.25' fill='%23fff'/%3E%3C/svg%3E") !important;
+    background-size: 100% 100% !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
+
+.fi-admin-shell .fi-fo-radio-option:has(input:checked),
+.fi-admin-shell .fi-fo-radio-list-option:has(input:checked) {
+    background: rgba(114, 57, 234, 0.08);
+    border-radius: 0.5rem;
+}
+
 /* Filament column wrappers ship with px-3 py-4 — overrides Tailwind padding on cells */
 .fi-admin-shell .fi-ta-icon,
 .fi-admin-shell .fi-ta-image {
@@ -98,10 +135,20 @@ body.fi-body .fi-field-wrp-label {
     min-height: 2.5rem;
 }
 
-.fi-admin-shell .fi-fo-toggle-buttons .fi-btn-toggle[aria-pressed='true'] {
+.fi-admin-shell .fi-fo-toggle-buttons .fi-btn-toggle[aria-pressed='true'],
+.fi-admin-shell .fi-fo-toggle-buttons .fi-btn-toggle[aria-checked='true'],
+.fi-admin-shell .fi-fo-toggle-buttons button[aria-pressed='true'] {
     background: #7239ea !important;
     border-color: #7239ea !important;
     color: #fff !important;
+    box-shadow: 0 0 0 2px rgba(114, 57, 234, 0.2);
+}
+
+.fi-admin-shell .fi-fo-toggle-buttons.fi-fo-toggle-buttons-stacked .fi-btn-toggle,
+.fi-admin-shell .fi-fo-toggle-buttons:not(.fi-fo-toggle-buttons-inline) .fi-btn-toggle {
+    width: 100%;
+    justify-content: flex-start;
+    text-align: right;
 }
 
 .fi-admin-shell .sidebar-menu a.submenu-item {

@@ -277,6 +277,14 @@ class UserResource extends Resource
         ];
     }
 
+    /** آیا کد ملی معتبر است و ایمیل/رمز باید از روی آن قفل شوند؟ */
+    protected static function nationalCodeDrivesCredentials(mixed $nationalCode): bool
+    {
+        $code = IranianNationalCode::normalize((string) ($nationalCode ?? ''));
+
+        return strlen($code) === 10;
+    }
+
     /** پر کردن ایمیل و رمز از روی کد ملی (UI فرم ایجاد/ویرایش). */
     protected static function fillCredentialsFromNationalCode(Get $get, Set $set): void
     {
@@ -316,6 +324,7 @@ class UserResource extends Resource
                     Forms\Components\TextInput::make('national_code')
                         ->label('کد ملی')
                         ->length(10)
+                        ->required(fn (string $operation): bool => $operation === 'create')
                         ->live(onBlur: true)
                         ->afterStateUpdated(function (Get $get, Set $set): void {
                             static::fillCredentialsFromNationalCode($get, $set);
@@ -333,15 +342,23 @@ class UserResource extends Resource
                         ->label('ایمیل')
                         ->email()
                         ->unique(ignoreRecord: true)
-                        ->helperText('پیش‌فرض: کدملی@chinibazar.ir'),
+                        ->disabled(fn (Get $get): bool => static::nationalCodeDrivesCredentials($get('national_code')))
+                        ->dehydrated()
+                        ->helperText(fn (Get $get): string => static::nationalCodeDrivesCredentials($get('national_code'))
+                            ? 'خودکار از کد ملی — فقط نمایش؛ قابل ویرایش نیست.'
+                            : 'پیش‌فرض: کدملی@chinibazar.ir'),
                     Forms\Components\TextInput::make('password')
                         ->label('رمز عبور')
                         ->password()
                         ->revealable()
+                        ->disabled(fn (Get $get): bool => static::nationalCodeDrivesCredentials($get('national_code')))
                         ->dehydrateStateUsing(fn ($state) => filled($state) ? Hash::make($state) : null)
                         ->dehydrated(fn ($state) => filled($state))
-                        ->required(fn (string $operation) => $operation === 'create')
-                        ->helperText('پیش‌فرض ایجاد: /*کدملی/* — در ویرایش فقط در صورت تغییر پر کنید.'),
+                        ->required(fn (string $operation, Get $get): bool => $operation === 'create'
+                            && ! static::nationalCodeDrivesCredentials($get('national_code')))
+                        ->helperText(fn (Get $get): string => static::nationalCodeDrivesCredentials($get('national_code'))
+                            ? 'خودکار از کد ملی (/*کدملی/*) — فقط نمایش؛ قابل ویرایش نیست.'
+                            : 'پیش‌فرض ایجاد: /*کدملی/* — در ویرایش فقط در صورت تغییر پر کنید.'),
                     Forms\Components\Toggle::make('status')
                         ->label('حساب فعال')
                         ->default(true),
@@ -443,7 +460,7 @@ class UserResource extends Resource
                 ->live(),
             Forms\Components\Fieldset::make('نقش‌های غیر مشتری')
                 ->schema([
-                    Forms\Components\Radio::make('staff_role')
+                    Forms\Components\ToggleButtons::make('staff_role')
                         ->label('نقش')
                         ->options([
                             'admin' => 'مدیر — دسترسی پنل ادمین',
@@ -452,11 +469,12 @@ class UserResource extends Resource
                             'sales_manager' => 'مدیر فروش — مدیریت بنکدارها و زیرمجموعه فروش',
                             'bankdar' => 'بنکدار — مدیریت نمایندگان استان',
                         ])
+                        ->inline(false)
                         ->required(fn (Get $get): bool => $get('user_kind') === 'staff')
                         ->live()
                         ->disabled(fn (): bool => AdminAccess::isLimitedStaffOnly())
                         ->dehydrated(false)
-                        ->helperText('فقط یک نقش قابل انتخاب است.'),
+                        ->helperText('فقط یک نقش قابل انتخاب است؛ گزینهٔ انتخاب‌شده با رنگ مشخص می‌شود.'),
                 ])
                 ->columns(1)
                 ->visible(fn (Get $get): bool => $get('user_kind') === 'staff'),

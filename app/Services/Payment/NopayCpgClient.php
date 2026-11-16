@@ -3,6 +3,7 @@
 namespace App\Services\Payment;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 class NopayCpgClient
@@ -27,13 +28,23 @@ class NopayCpgClient
                 'ServiceName' => $serviceName,
             ]);
 
+        $contentType = (string) $response->header('Content-Type');
+
         if ($response->failed()) {
+            $this->logBadResponse($url, $serviceName, $response->status(), $contentType, $response->body());
+
             throw new RuntimeException('خطا در اتصال به درگاه نوپی (HTTP '.$response->status().').');
         }
 
         $body = $response->json();
         if (! is_array($body)) {
-            throw new RuntimeException('پاسخ نامعتبر از درگاه نوپی.');
+            $preview = $this->bodyPreview($response->body());
+            $this->logBadResponse($url, $serviceName, $response->status(), $contentType, $response->body());
+
+            throw new RuntimeException(
+                'پاسخ نامعتبر از درگاه نوپی (بدنه JSON نبود؛ احتمالاً آدرس API اشتباه یا پاسخ HTML/خالی).'
+                .($preview !== '' ? ' نمونه: '.$preview : '')
+            );
         }
 
         return $body;
@@ -77,5 +88,34 @@ class NopayCpgClient
         $entity = data_get($response, 'result.entity');
 
         return is_array($entity) ? $entity : null;
+    }
+
+    protected function logBadResponse(
+        string $url,
+        string $serviceName,
+        int $status,
+        string $contentType,
+        string $rawBody,
+    ): void {
+        Log::warning('nopay.cpg.non_json_or_http_error', [
+            'url' => $url,
+            'service' => $serviceName,
+            'http_status' => $status,
+            'content_type' => $contentType !== '' ? $contentType : null,
+            'body_preview' => $this->bodyPreview($rawBody),
+            'body_length' => strlen($rawBody),
+        ]);
+    }
+
+    protected function bodyPreview(string $rawBody): string
+    {
+        $trimmed = trim($rawBody);
+        if ($trimmed === '') {
+            return '(خالی)';
+        }
+
+        $oneLine = preg_replace('/\s+/u', ' ', $trimmed) ?? $trimmed;
+
+        return mb_substr($oneLine, 0, 180);
     }
 }

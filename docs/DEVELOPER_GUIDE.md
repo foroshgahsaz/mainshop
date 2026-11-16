@@ -720,7 +720,9 @@ $middleware->validateCsrfTokens(except: [
 
 **جریان:** `CPG/Security/Token/RequestToken` (موبایل، amount، returnURL) → redirect به `redirectURL` → callback → `CPG/Financial/VerifyTransaction`.
 
-**تنظیمات:** `api_base_url` (از نامه نوپی)، `service_username`, `service_password_encrypted` (ترجیحاً), `merchant_number`, `public_key`, `test_mode`, `test_cell_number`.
+**تنظیمات:** `api_base_url` (از نامه نوپی — باید endpoint واقعی JSON/CPG باشد نه صفحه HTML)، `service_username`, `service_password_encrypted` (ترجیحاً), `merchant_number`, `public_key`, `test_mode`, `test_cell_number`.
+
+**خطای «پاسخ نامعتبر از درگاه نوپی»:** HTTP موفق بوده ولی بدنه JSON نبوده (`NopayCpgClient`) — معمولاً `api_base_url` اشتباه/sandbox، یا درگاه HTML/خالی برمی‌گرداند. در `laravel.log` کلید `nopay.cpg.non_json_or_http_error` با `body_preview` را ببینید.
 
 ### 9.15 درگاه داریک (credit — کیف پول `docs/darik.pdf`)
 
@@ -1403,6 +1405,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-16 | نوپی: خطای «پاسخ نامعتبر» = بدنه غیرJSON؛ لاگ `nopay.cpg.non_json_or_http_error` + پیام واضح‌تر |
 | 2026-11-16 | داریک روی /plans و خانه: ensure قبل از کش + مایگریت `ensure_darik_credit_plan_present` + `shop:ensure-darik-credit-plan`؛ کش `shop:plans:index:v2` |
 | 2026-11-16 | صفحه اصلی: همه طرح‌های فعال `/plans` در ویجت خانه (بدون سقف ۴ + بدون «مشاهده همه»)؛ EnsureDarikCreditPlan در deploy-recover؛ کش `shop:home:payload:v5`؛ `SHOP_CSS_VERSION`=17 |
 | 2026-11-16 | داریک OTP: رفع 500 (`$otp` تعریف‌نشده)؛ صفحه تأیید داخل layout حساب کاربری؛ `SHOP_CSS_VERSION`=16 |

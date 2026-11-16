@@ -2624,6 +2624,136 @@ html.checkout-coupon-alert-open {
   overflow: hidden;
 }
 
+/* ===== Darik wallet ID modal (checkout) ===== */
+.checkout-darik-summary {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.85rem;
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+}
+
+.checkout-darik-summary__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.checkout-darik-summary__label {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.checkout-darik-summary__code {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #065f46;
+  letter-spacing: 0.04em;
+}
+
+.checkout-darik-summary__edit {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: #059669;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0.35rem 0.5rem;
+}
+
+.checkout-darik-summary__edit:hover {
+  color: #047857;
+  text-decoration: underline;
+}
+
+.checkout-darik-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 130;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.checkout-darik-modal--open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.checkout-darik-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+}
+
+.checkout-darik-modal__panel {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 24rem);
+  padding: 1.35rem 1.25rem 1.25rem;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+}
+
+.checkout-darik-modal__title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.35rem;
+}
+
+.checkout-darik-modal__hint {
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: #6b7280;
+  margin: 0 0 1rem;
+}
+
+.checkout-darik-modal__input {
+  margin-bottom: 0.35rem;
+}
+
+.checkout-darik-modal__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.checkout-darik-modal__confirm {
+  width: 100%;
+}
+
+.checkout-darik-modal__cancel {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.55rem;
+  cursor: pointer;
+}
+
+.checkout-darik-modal__cancel:hover {
+  color: #374151;
+}
+
+html:has(.checkout-darik-modal--open) {
+  overflow: hidden;
+}
+
 .checkout-option__icon {
   width: 2.5rem;
   height: 2.5rem;

@@ -21,7 +21,7 @@
             <form method="POST" action="{{ route('admin.impersonation.stop') }}" class="fi-impersonation-banner__form">
                 @csrf
                 <button type="submit" class="fi-impersonation-banner__btn">
-                    بازگشت به ادمین
+                    {{ ($ctx['actor_role'] ?? 'admin') === 'sales_manager' ? 'بازگشت به مدیر فروش' : 'بازگشت به ادمین' }}
                 </button>
             </form>
         </div>

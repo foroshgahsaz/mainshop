@@ -10,6 +10,7 @@ use App\Models\Post;
 use App\Models\Product;
 use App\Models\ShippingMethod;
 use App\Services\Settings\HomepageSettingsService;
+use App\Services\Shop\EnsureDarikCreditPlan;
 use App\Services\Shop\HomepageCreditPlanService;
 use App\Services\Shop\HomepagePartnerService;
 use App\Services\Shop\CatalogFamilyCategoryMapper;
@@ -30,7 +31,7 @@ class ShopCacheService
     /** Bump when home payload shape changes so deploys never serve stale layout. */
     public const HOME_PAYLOAD_KEY = 'shop:home:payload:v5';
 
-    public const PLANS_INDEX_KEY = 'shop:plans:index:v1';
+    public const PLANS_INDEX_KEY = 'shop:plans:index:v2';
 
     /** @var array<string, mixed>|null */
     private ?array $headerPayloadMemo = null;
@@ -58,6 +59,9 @@ class ShopCacheService
     public function homePayload(): array
     {
         $staff = ShopStaffPreview::enabled();
+
+        // اگر ردیف داریک در DB نبود، قبل از کش خانه ساخته شود.
+        app(EnsureDarikCreditPlan::class)->ensure();
 
         return $this->remember(
             self::HOME_PAYLOAD_KEY.$this->staffCacheSuffix($staff),
@@ -446,6 +450,8 @@ class ShopCacheService
      */
     public function plansIndexCards(): array
     {
+        app(EnsureDarikCreditPlan::class)->ensure();
+
         return $this->remember(
             self::PLANS_INDEX_KEY,
             config('shop.cache.home_ttl'),

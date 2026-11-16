@@ -67,6 +67,30 @@ class CreditPlanAndPartnerHomepageTest extends TestCase
             ->assertSee('/plans/darik/', false);
     }
 
+    public function test_visiting_plans_auto_creates_missing_darik_card(): void
+    {
+        CreditPlan::query()
+            ->where('name', EnsureDarikCreditPlan::PLAN_NAME)
+            ->orWhere('plan_url', EnsureDarikCreditPlan::PLAN_URL)
+            ->delete();
+
+        app(ShopCacheService::class)->forgetHome();
+
+        $this->assertDatabaseMissing('credit_plans', [
+            'plan_url' => EnsureDarikCreditPlan::PLAN_URL,
+        ]);
+
+        $this->get('/plans')
+            ->assertOk()
+            ->assertSee('داریک', false);
+
+        $this->assertDatabaseHas('credit_plans', [
+            'name' => EnsureDarikCreditPlan::PLAN_NAME,
+            'plan_url' => EnsureDarikCreditPlan::PLAN_URL,
+            'is_active' => true,
+        ]);
+    }
+
     public function test_plans_index_lists_all_active_plans(): void
     {
         CreditPlan::query()->create([

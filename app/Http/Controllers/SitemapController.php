@@ -21,6 +21,8 @@ class SitemapController extends Controller
             ['loc' => route('products.index'), 'priority' => '0.9', 'changefreq' => 'daily'],
             ['loc' => route('blog.index'), 'priority' => '0.7', 'changefreq' => 'weekly'],
             ['loc' => route('plans.digipay-leasing'), 'priority' => '0.6', 'changefreq' => 'monthly'],
+            ['loc' => route('plans.darik'), 'priority' => '0.6', 'changefreq' => 'monthly'],
+            ['loc' => route('plans.index'), 'priority' => '0.7', 'changefreq' => 'weekly'],
         ];
 
         foreach ($static as $item) {

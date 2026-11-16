@@ -8,6 +8,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\Plans\CreditPlanIndexController;
+use App\Http\Controllers\Plans\DarikWalletPlanController;
 use App\Http\Controllers\Plans\DigipayLeasingController;
 use App\Http\Controllers\Plans\HowToBuyController;
 use App\Http\Controllers\PaymentController;
@@ -92,6 +93,10 @@ Route::get('/how-to-buy/', HowToBuyController::class)->name('plans.how-to-buy');
 
 Route::redirect('/plans/digipay-leasing', '/plans/digipay-leasing/', 301);
 Route::get('/plans/digipay-leasing/', DigipayLeasingController::class)->name('plans.digipay-leasing');
+
+Route::redirect('/plans/darik', '/plans/darik/', 301);
+Route::get('/plans/darik/', DarikWalletPlanController::class)->name('plans.darik');
+
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::get('/robots.txt', function () {
     $lines = [

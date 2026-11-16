@@ -98,6 +98,18 @@ class HowToBuyController extends Controller
                 'buy_url' => route('plans.digipay-leasing'),
             ],
             [
+                'key' => 'darik',
+                'label' => $gateways->definition('darik')['label'] ?: 'داریک',
+                'icon' => $icon('darik'),
+                'ceil' => 'موجودی کیف پول',
+                'categories' => 'کلیه کالاها (درگاه فعال در checkout)',
+                'installments' => 'یک‌جا از کیف پول',
+                'guarantee' => 'بدون ضامن در فروشگاه',
+                'credit_grades' => [],
+                'special' => 'شناسه ۱۶رقمی کیف پول (شروع با 5892) و تأیید با رمز پنج‌رقمی پیامکی',
+                'buy_url' => route('plans.darik'),
+            ],
+            [
                 'key' => 'diba',
                 'label' => 'دیبا کارت',
                 'icon' => null,

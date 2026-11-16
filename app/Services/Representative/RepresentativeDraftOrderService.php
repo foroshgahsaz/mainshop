@@ -88,6 +88,12 @@ class RepresentativeDraftOrderService
     {
         $this->assertDraftOwnedBy($order, auth()->user());
 
+        if ($product->isNotForSale()) {
+            throw ValidationException::withMessages([
+                'product' => 'این محصول غیر قابل فروش است.',
+            ]);
+        }
+
         if ($quantity < 1) {
             throw ValidationException::withMessages([
                 'quantity' => 'تعداد باید حداقل ۱ باشد.',

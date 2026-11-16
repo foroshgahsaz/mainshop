@@ -102,6 +102,12 @@ class AddToCart extends Component
             return;
         }
 
+        if ($this->product->isNotForSale()) {
+            session()->flash('error', 'این محصول غیر قابل فروش است.');
+
+            return;
+        }
+
         if ($this->product->variants->isNotEmpty() && ! $this->variantId) {
             session()->flash('error', 'لطفاً واریانت محصول را انتخاب کنید.');
 
@@ -131,6 +137,7 @@ class AddToCart extends Component
             'digipayInstallmentPromoText' => $digipay['product_installment_promo_text'] ?? '',
             'shopPricesHidden' => ShopLabels::shopPricesHidden(),
             'shopPurchaseDisabled' => ShopLabels::shopPurchaseDisabled(),
+            'productNotForSale' => $this->product->isNotForSale(),
             'sitePhone' => is_string($site['phone'] ?? null) ? trim($site['phone']) : '',
         ]);
     }

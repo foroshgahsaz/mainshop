@@ -37,6 +37,7 @@ class Product extends Model
         'is_active',
         'admin_shop_preview',
         'is_featured',
+        'is_not_for_sale',
         'views',
         'last_edited_by_user_id',
         'meta_title',
@@ -60,8 +61,14 @@ class Product extends Model
             'is_active' => 'boolean',
             'admin_shop_preview' => 'boolean',
             'is_featured' => 'boolean',
+            'is_not_for_sale' => 'boolean',
             'views' => 'integer',
         ];
+    }
+
+    public function isNotForSale(): bool
+    {
+        return (bool) $this->is_not_for_sale;
     }
 
     public function category(): BelongsTo

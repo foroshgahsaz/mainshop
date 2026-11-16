@@ -116,6 +116,11 @@ class CheckoutService
 
             foreach ($preview['items'] as $item) {
                 $product = Product::query()->findOrFail($item['product_id']);
+
+                if ($product->isNotForSale()) {
+                    throw new RuntimeException('محصول «'.$product->name.'» غیر قابل فروش است.');
+                }
+
                 $variant = isset($item['product_variant_id'])
                     ? ProductVariant::query()->find($item['product_variant_id'])
                     : null;

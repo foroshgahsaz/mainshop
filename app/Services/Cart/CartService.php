@@ -34,6 +34,11 @@ class CartService
         }
 
         $product = Product::active()->findOrFail($productId);
+
+        if ($product->isNotForSale()) {
+            throw new RuntimeException('این محصول غیر قابل فروش است.');
+        }
+
         $variant = $variantId ? ProductVariant::where('product_id', $productId)->findOrFail($variantId) : null;
 
         $this->stockService->assertAvailable($product, $variant, $quantity);
@@ -60,6 +65,11 @@ class CartService
         }
 
         $product = Product::active()->findOrFail($productId);
+
+        if ($product->isNotForSale()) {
+            throw new RuntimeException('این محصول غیر قابل فروش است.');
+        }
+
         $variant = $variantId ? ProductVariant::where('product_id', $productId)->findOrFail($variantId) : null;
 
         $this->stockService->assertAvailable($product, $variant, $quantity);

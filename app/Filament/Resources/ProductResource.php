@@ -235,6 +235,10 @@ class ProductResource extends Resource
                             ->label('محصول ویژه')
                             ->default(false)
                             ->helperText('محصولات ویژه در بخش‌های خاصی از سایت نمایش داده می‌شوند'),
+                        Forms\Components\Toggle::make('is_not_for_sale')
+                            ->label('غیر قابل فروش')
+                            ->default(false)
+                            ->helperText('قیمت نمایش داده می‌شود ولی افزودن به سبد و خرید آنلاین غیرفعال است؛ زیر قیمت متن «غیر قابل فروش» می‌آید.'),
                     ])->columns(2),
 
                 ...SeoFormSchema::productSection(),
@@ -319,6 +323,18 @@ class ProductResource extends Resource
                     ->grow(false)
                     ->alignCenter(),
 
+                Tables\Columns\IconColumn::make('is_not_for_sale')
+                    ->label('غیرقابل‌فروش')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-no-symbol')
+                    ->falseIcon('heroicon-o-shopping-cart')
+                    ->trueColor('danger')
+                    ->falseColor('gray')
+                    ->width('4rem')
+                    ->grow(false)
+                    ->alignCenter()
+                    ->toggleable(),
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاریخ ایجاد')
                     ->shopJalaliDateTime()
@@ -365,6 +381,8 @@ class ProductResource extends Resource
                     ->label('وضعیت'),
                 Tables\Filters\TernaryFilter::make('is_featured')
                     ->label('محصول ویژه'),
+                Tables\Filters\TernaryFilter::make('is_not_for_sale')
+                    ->label('غیر قابل فروش'),
                 Tables\Filters\TrashedFilter::make()
                     ->visible(fn (): bool => AdminAccess::isFullAdmin()),
             ])

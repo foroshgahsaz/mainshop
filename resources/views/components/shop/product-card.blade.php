@@ -23,6 +23,9 @@
                         :compare="$comparePrice"
                         inline
                     />
+                    @if($product->isNotForSale())
+                        <span class="product-not-for-sale-label product-not-for-sale-label--on-dark">غیر قابل فروش</span>
+                    @endif
                 </div>
             </div>
         @endif
@@ -43,18 +46,24 @@
                             :compare="$comparePrice"
                             inline
                         />
+                        @if($product->isNotForSale())
+                            <span class="product-not-for-sale-label">غیر قابل فروش</span>
+                        @endif
                     </div>
                 </div>
             </div>
         @else
             <div class="p-3 flex flex-col gap-2 flex-1">
                 <h4 class="text-xs font-bold line-clamp-2 leading-6">{{ $product->name }}</h4>
-                <div class="flex items-center justify-end mt-auto">
+                <div class="flex flex-col items-end mt-auto">
                     <x-shop.price
                         :amount="$product->effective_price"
                         :compare="$comparePrice"
                         class="product-card__price items-start text-left mt-2.5"
                     />
+                    @if($product->isNotForSale())
+                        <span class="product-not-for-sale-label">غیر قابل فروش</span>
+                    @endif
                 </div>
             </div>
         @endif

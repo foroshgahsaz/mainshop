@@ -113,6 +113,7 @@ php artisan shop:verify-storage
 - اگر ذخیره `/admin/credit-plans/*/edit` خطای `Unknown column 'credit_gateway'` داد: `php artisan shop:repair-credit-plan-gateways` یا همان `shop:deploy-recover`
 - اگر migrate با `1824 Failed to open the referenced table 'credit_plans'` شکست: migration بدون FK است (ستون `unsignedBigInteger` + index) — آخرین `master` / PR ترمیم را pull کنید و دوباره `migrate --force`
 - دسترسی تست درگاه: migration `can_shop_gateway_test` روی `users` — بعد از deploy `migrate --force`
+- غیر قابل فروش محصول: migration `products.is_not_for_sale` — `migrate --force`
 - `PAYMENT_LOG_ARCHIVE_AFTER_DAYS=30` — بعد از آن فایل plain به `.zip` می‌رود (حذف نمی‌شود)
 - `LOG_PAYMENTS_DAYS=45` — نگه‌داری Monolog برای `payments-*.log`
 - `DB_BACKUP_DIRECTORY=/data/database-backups`

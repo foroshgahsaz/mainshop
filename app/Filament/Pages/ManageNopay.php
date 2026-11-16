@@ -69,7 +69,7 @@ class ManageNopay extends Page implements HasForms
                     Forms\Components\TextInput::make('api_base_url')
                         ->label('آدرس پایه API')
                         ->placeholder('https://example.com')
-                        ->helperText('طبق نامه/onboarding نوپی — POST با ServiceName در body')
+                        ->helperText('طبق نامه/onboarding نوپی — باید endpoint JSON باشد (نه صفحه وب/HTML). خطای «پاسخ نامعتبر» معمولاً یعنی همین آدرس اشتباه است.')
                         ->columnSpanFull()
                         ->required(),
                     Forms\Components\TextInput::make('service_username')

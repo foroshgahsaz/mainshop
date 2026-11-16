@@ -730,7 +730,7 @@ $middleware->validateCsrfTokens(except: [
 | type | `credit` |
 | کلاس | `DarikGateway`, `DarikApiClient` |
 | Admin | `/admin/darik` → `ManageDarik.php` |
-| OTP UI | `/payment/darik/{tracking}` — `Confirm` با OTP پنج‌رقمی |
+| OTP UI | `/payment/darik/{tracking}` — صفحه داخل پوسته حساب (شبیه سفارش‌ها)؛ `Confirm` با OTP پنج‌رقمی |
 | صفحه طرح | `/plans/darik/` — معرفی کیف پول؛ کارت در `/plans` از مایگریت `ensure_darik_credit_plan` |
 | شناسه خریدار | `users.darik_member_code` (۱۶ رقم، با `5892`) — فقط checkout فروشگاه (نه فرم ایجاد مشتری نماینده) |
 
@@ -1403,6 +1403,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-16 | داریک OTP: رفع 500 (`$otp` تعریف‌نشده)؛ صفحه تأیید داخل layout حساب کاربری؛ `SHOP_CSS_VERSION`=16 |
 | 2026-11-16 | Checkout: باکس شناسه داریک در خلاصه سفارش (بالای مبلغ نهایی + خط جدا)؛ `SHOP_CSS_VERSION`=15 |
 | 2026-11-16 | طرح داریک: صفحه `/plans/darik/` + ردیف `credit_plans` (مایگریت) برای لیست `/plans` و homepage؛ how-to-buy + sitemap |
 | 2026-11-16 | افزودن به سبد: پیام فارسی به‌جای ModelNotFound؛ refresh موجودی قبل از add؛ سقف موجودی روی جمع سبد مهمان/کاربر |

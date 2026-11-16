@@ -3126,6 +3126,66 @@ html:has(.checkout-darik-modal--open) {
   margin-bottom: 1.5rem;
 }
 
+/* صفحه OTP داریک — داخل پوسته حساب کاربری */
+.darik-otp-form__input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.85rem 1rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  text-align: center;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.85rem;
+  background: #fff;
+  color: #181c32;
+  margin-bottom: 1rem;
+}
+
+.darik-otp-form__input:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+.darik-otp-form__submit {
+  width: 100%;
+  justify-content: center;
+}
+
+.darik-otp-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f3f4f6;
+}
+
+.darik-otp-actions__cancel {
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.35rem 0;
+}
+
+.darik-otp-actions__cancel:hover {
+  color: #b91c1c;
+}
+
+.darik-otp-actions__link {
+  color: #6b7280;
+  font-weight: 600;
+  margin-inline-start: auto;
+}
+
+.darik-otp-actions__link:hover {
+  color: #059669;
+}
+
 @media (min-width: 768px) {
   .account-page {
     padding-top: 2.5rem;

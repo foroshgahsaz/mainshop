@@ -98,12 +98,14 @@ class PaymentController extends Controller
 
         $this->assertDarikPaymentAccess($payment);
 
-        $request->validate([
+        $validated = $request->validate([
             'otp' => ['required', 'regex:/^\d{5}$/'],
         ], [
             'otp.required' => 'رمز خرید را وارد کنید.',
             'otp.regex' => 'رمز خرید باید ۵ رقم باشد.',
         ]);
+
+        $otp = preg_replace('/\D+/', '', (string) $validated['otp']) ?? '';
 
         return $this->processDarikVerification($payment, $otp);
     }

@@ -38,8 +38,8 @@ class GatewayHomepagePlanFields
                     ->live(),
                 Forms\Components\TextInput::make('homepage_plan_url')
                     ->label('آدرس صفحه طرح')
-                    ->placeholder('/plans/digipay-leasing/')
-                    ->helperText('مسیر نسبی یا URL کامل صفحه معرفی طرح.')
+                    ->placeholder('/plans/darik/')
+                    ->helperText('مسیر نسبی یا URL کامل صفحه معرفی طرح (مثل /plans/digipay-leasing/ یا /plans/darik/).')
                     ->maxLength(500)
                     ->visible(fn (Forms\Get $get): bool => (bool) $get('show_on_homepage'))
                     ->columnSpanFull(),

@@ -731,6 +731,7 @@ $middleware->validateCsrfTokens(except: [
 | کلاس | `DarikGateway`, `DarikApiClient` |
 | Admin | `/admin/darik` → `ManageDarik.php` |
 | OTP UI | `/payment/darik/{tracking}` — `Confirm` با OTP پنج‌رقمی |
+| صفحه طرح | `/plans/darik/` — معرفی کیف پول؛ کارت در `/plans` از مایگریت `ensure_darik_credit_plan` |
 | شناسه خریدار | `users.darik_member_code` (۱۶ رقم، با `5892`) — فقط checkout فروشگاه (نه فرم ایجاد مشتری نماینده) |
 
 **Checkout:** با انتخاب درگاه داریک مودال شناسه کیف پول باز می‌شود (`CheckoutPage::openDarikWalletModal`)؛ بعد از تأیید، خلاصهٔ شناسه زیر درگاه نمایش داده می‌شود و ثبت سفارش ادامه می‌یابد. مودال با `@if` رندر می‌شود (نه `wire:ignore`) تا Livewire کلاس/وجودش را به‌روز کند. اگر `custom.min.css` از ادمین فعال است، بعد از deploy یک‌بار `shop:minify-assets` بزنید.
@@ -1402,6 +1403,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-16 | طرح داریک: صفحه `/plans/darik/` + ردیف `credit_plans` (مایگریت) برای لیست `/plans` و homepage؛ how-to-buy + sitemap |
 | 2026-11-16 | افزودن به سبد: پیام فارسی به‌جای ModelNotFound؛ refresh موجودی قبل از add؛ سقف موجودی روی جمع سبد مهمان/کاربر |
 | 2026-11-16 | رفع باز نشدن مودال داریک: حذف `wire:ignore.self` + رندر شرطی مودال؛ `SHOP_CSS_VERSION`=14 |
 | 2026-11-16 | Checkout: انتخاب داریک → مودال شناسه کیف پول ۱۶رقمی؛ تأیید و ادامه خرید |

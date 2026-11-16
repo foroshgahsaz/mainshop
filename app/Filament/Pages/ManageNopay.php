@@ -69,7 +69,7 @@ class ManageNopay extends Page implements HasForms
                     Forms\Components\TextInput::make('api_base_url')
                         ->label('آدرس پایه API')
                         ->placeholder('https://example.com')
-                        ->helperText('طبق نامه/onboarding نوپی — باید endpoint JSON باشد (نه صفحه وب/HTML). خطای «پاسخ نامعتبر» معمولاً یعنی همین آدرس اشتباه است.')
+                        ->helperText('طبق نامه نوپی (مثلاً …/ConsumerExternalWebapiWrapper). اگر «خطای احراز هویت / کد -7» دیدید آدرس درست است؛ username و رمز رمزنگاری‌شده را چک کنید.')
                         ->columnSpanFull()
                         ->required(),
                     Forms\Components\TextInput::make('service_username')

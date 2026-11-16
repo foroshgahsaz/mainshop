@@ -36,7 +36,7 @@ class NopayCpgClient
             throw new RuntimeException('خطا در اتصال به درگاه نوپی (HTTP '.$response->status().').');
         }
 
-        $body = $response->json();
+        $body = $this->decodeBody($response->body(), $response->json());
         if (! is_array($body)) {
             $preview = $this->bodyPreview($response->body());
             $this->logBadResponse($url, $serviceName, $response->status(), $contentType, $response->body());
@@ -48,6 +48,41 @@ class NopayCpgClient
         }
 
         return $body;
+    }
+
+    /**
+     * Wrapper نوپی گاهی آبجکت را به‌صورت رشته JSON (double-encoded) برمی‌گرداند.
+     *
+     * @param  mixed  $decoded
+     * @return array<string, mixed>|null
+     */
+    public function decodeBody(string $rawBody, mixed $decoded = null): ?array
+    {
+        if ($decoded === null && $rawBody !== '') {
+            $decoded = json_decode($rawBody, true);
+        }
+
+        for ($i = 0; $i < 3; $i++) {
+            if (is_array($decoded)) {
+                return $decoded;
+            }
+
+            if (! is_string($decoded)) {
+                break;
+            }
+
+            $trimmed = trim($decoded);
+            if ($trimmed === '' || (! str_starts_with($trimmed, '{') && ! str_starts_with($trimmed, '['))) {
+                break;
+            }
+
+            $decoded = json_decode($trimmed, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                break;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -73,7 +108,13 @@ class NopayCpgClient
         }
 
         if (is_array($errors) && isset($errors[0]['message'])) {
-            return (string) $errors[0]['message'];
+            $message = (string) $errors[0]['message'];
+            $code = $errors[0]['code'] ?? null;
+            if ($code !== null && $code !== '') {
+                return $message.' (کد '.$code.')';
+            }
+
+            return $message;
         }
 
         return 'خطا در پاسخ درگاه نوپی.';

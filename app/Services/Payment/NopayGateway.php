@@ -213,6 +213,14 @@ class NopayGateway implements PaymentGatewayInterface
         if (! $hasEncrypted && ! $hasPlain) {
             throw new RuntimeException('رمز سرویس نوپی تنظیم نشده است.');
         }
+
+        if ($hasPlain) {
+            foreach (['public_key', 'private_key'] as $key) {
+                if (trim((string) ($config[$key] ?? '')) === '') {
+                    throw new RuntimeException('برای رمزنگاری AES رمز سرویس، publicKey و privateKey الزامی است.');
+                }
+            }
+        }
     }
 
     /**

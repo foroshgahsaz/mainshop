@@ -58,6 +58,10 @@ class ShopDeployRecover extends Command
             $this->components->info('Credit plan gateway schema repaired (post-migrate): '.implode(', ', $creditPlanGwRepairAfter));
         }
 
+        if (app(\App\Services\Shop\EnsureDarikCreditPlan::class)->ensure()) {
+            $this->components->info('Darik credit plan card ensured on /plans and homepage.');
+        }
+
         $bankdarRepair = app(\App\Services\Representative\BankdarHierarchyRepair::class)
             ->repairMissingSalesManagerLinks();
         if (($bankdarRepair['linked'] ?? 0) > 0 || ($bankdarRepair['province_filled'] ?? 0) > 0) {

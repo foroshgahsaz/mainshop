@@ -28,7 +28,7 @@ class ShopCacheService
     private const LISTING_INDEX_KEY = 'shop:products:list:index';
 
     /** Bump when home payload shape changes so deploys never serve stale layout. */
-    public const HOME_PAYLOAD_KEY = 'shop:home:payload:v4';
+    public const HOME_PAYLOAD_KEY = 'shop:home:payload:v5';
 
     public const PLANS_INDEX_KEY = 'shop:plans:index:v1';
 

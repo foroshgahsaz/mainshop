@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\CreditPlan;
 use App\Models\Partner;
 use App\Services\Cache\ShopCacheService;
+use App\Services\Shop\EnsureDarikCreditPlan;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -18,7 +19,7 @@ class CreditPlanAndPartnerHomepageTest extends TestCase
         app(ShopCacheService::class)->forgetHome();
     }
 
-    public function test_homepage_shows_four_plans_and_continue_link(): void
+    public function test_homepage_shows_all_active_plans_without_continue_card(): void
     {
         for ($i = 1; $i <= 5; $i++) {
             CreditPlan::query()->create([
@@ -26,38 +27,44 @@ class CreditPlanAndPartnerHomepageTest extends TestCase
                 'short_description' => "توضیح {$i}",
                 'plan_url' => "/plans/plan-{$i}/",
                 'position' => $i,
-                'show_on_homepage_desktop' => true,
+                'show_on_homepage_desktop' => false,
                 'is_active' => true,
             ]);
         }
+
+        CreditPlan::query()->create([
+            'name' => 'طرح غیرفعال',
+            'short_description' => 'مخفی',
+            'plan_url' => '/plans/hidden/',
+            'position' => 99,
+            'show_on_homepage_desktop' => true,
+            'is_active' => false,
+        ]);
 
         $response = $this->get('/');
 
         $response->assertOk();
         $response->assertSee('طرح 1', false);
-        $response->assertSee('طرح 4', false);
-        $response->assertDontSee('طرح 5', false);
-        $response->assertSee('مشاهده همه', false);
+        $response->assertSee('طرح 5', false);
+        $response->assertDontSee('طرح غیرفعال', false);
+        $response->assertDontSee('مشاهده همه', false);
         $response->assertSee('homePlansSwiper', false);
     }
 
-    public function test_homepage_shows_view_all_with_exactly_four_plans(): void
+    public function test_homepage_and_plans_include_darik_after_ensure(): void
     {
-        for ($i = 1; $i <= 4; $i++) {
-            CreditPlan::query()->create([
-                'name' => "طرح {$i}",
-                'short_description' => "توضیح {$i}",
-                'plan_url' => "/plans/plan-{$i}/",
-                'position' => $i,
-                'show_on_homepage_desktop' => true,
-                'is_active' => true,
-            ]);
-        }
+        app(EnsureDarikCreditPlan::class)->ensure();
+        app(ShopCacheService::class)->forgetHome();
 
         $this->get('/')
             ->assertOk()
-            ->assertSee('طرح 4', false)
-            ->assertSee('مشاهده همه', false);
+            ->assertSee('داریک', false)
+            ->assertSee('کیف پول اعتباری', false);
+
+        $this->get('/plans')
+            ->assertOk()
+            ->assertSee('داریک', false)
+            ->assertSee('/plans/darik/', false);
     }
 
     public function test_plans_index_lists_all_active_plans(): void

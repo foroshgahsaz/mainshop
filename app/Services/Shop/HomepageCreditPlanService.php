@@ -8,13 +8,13 @@ use App\Support\ShopFormatter;
 
 class HomepageCreditPlanService
 {
-    public const HOMEPAGE_DESKTOP_LIMIT = 4;
-
     public function __construct(
         protected PaymentGatewayCatalog $gatewayCatalog,
     ) {}
 
     /**
+     * ویجت خانه = همان طرح‌های فعال `/plans` (بدون سقف ۴ تایی).
+     *
      * @return array{cards: list<array{label: string, intro: string, plan_url: string, icon: ?string}>, show_continue: bool, continue_url: string}
      */
     public function homepageWidget(): array
@@ -22,21 +22,19 @@ class HomepageCreditPlanService
         $continueUrl = route('plans.index');
 
         if (CreditPlan::query()->active()->exists()) {
-            $eligible = CreditPlan::query()
-                ->active()
-                ->homepageDesktop()
-                ->orderBy('position')
-                ->orderBy('id')
-                ->get();
-
-            $cards = $eligible->take(self::HOMEPAGE_DESKTOP_LIMIT)
-                ->map(fn (CreditPlan $plan) => $this->cardFromModel($plan))
-                ->values()
-                ->all();
+            $cards = array_map(
+                static fn (array $card): array => [
+                    'label' => $card['label'],
+                    'intro' => $card['intro'],
+                    'plan_url' => $card['plan_url'],
+                    'icon' => $card['icon'],
+                ],
+                $this->allActiveCards(),
+            );
 
             return [
                 'cards' => $cards,
-                'show_continue' => true,
+                'show_continue' => false,
                 'continue_url' => $continueUrl,
             ];
         }
@@ -50,8 +48,8 @@ class HomepageCreditPlanService
         ], $gatewayCards);
 
         return [
-            'cards' => array_slice($mapped, 0, self::HOMEPAGE_DESKTOP_LIMIT),
-            'show_continue' => count($mapped) > self::HOMEPAGE_DESKTOP_LIMIT,
+            'cards' => $mapped,
+            'show_continue' => false,
             'continue_url' => $continueUrl,
         ];
     }
@@ -94,6 +92,10 @@ class HomepageCreditPlanService
             : null;
         if ($icon === '') {
             $icon = null;
+        }
+
+        if ($icon === null && filled($plan->credit_gateway)) {
+            $icon = $this->gatewayCatalog->iconUrl((string) $plan->credit_gateway);
         }
 
         return [

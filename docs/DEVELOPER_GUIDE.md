@@ -1403,6 +1403,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-16 | صفحه اصلی: همه طرح‌های فعال `/plans` در ویجت خانه (بدون سقف ۴ + بدون «مشاهده همه»)؛ EnsureDarikCreditPlan در deploy-recover؛ کش `shop:home:payload:v5`؛ `SHOP_CSS_VERSION`=17 |
 | 2026-11-16 | داریک OTP: رفع 500 (`$otp` تعریف‌نشده)؛ صفحه تأیید داخل layout حساب کاربری؛ `SHOP_CSS_VERSION`=16 |
 | 2026-11-16 | Checkout: باکس شناسه داریک در خلاصه سفارش (بالای مبلغ نهایی + خط جدا)؛ `SHOP_CSS_VERSION`=15 |
 | 2026-11-16 | طرح داریک: صفحه `/plans/darik/` + ردیف `credit_plans` (مایگریت) برای لیست `/plans` و homepage؛ how-to-buy + sitemap |
@@ -1539,7 +1540,7 @@ resources/views/layouts/shop.blade.php
 | 2026-10-29 | hero layout fix: پس‌زمینه `#EDF0F2` تمام‌عرض (`home-hero-hub__inner` برای max-width)؛ رفع override `height:auto` روی Swiper؛ `SHOP_CSS_VERSION` / `shop.assets.css_version` |
 | 2026-10-29 | hero: پس‌زمینه کل `section.home-hero-hub` = `#EDF0F2`؛ `home-hero-hub__grid` سفید؛ در دسکتاپ ارتفاع اسلایدر = ارتفاع grid (تصویر `object-fit: cover`)؛ لیست سایدبار با خط جداکننده |
 | 2026-10-29 | کش صفحه اصلی: `ShopCacheService::HOME_PAYLOAD_KEY` (`shop:home:payload:v2`) — با تغییر ساختار hero نسخه را بالا ببرید تا بعد از deploy چیدمان قدیمی از کش نیاید |
-| 2026-10-31 | **طرح‌ها** — ویجت صفحه اصلی: ۴ طرح + «مشاهده همه»؛ ردیف کارت‌ها **تمام‌عرض** زیر `home-hero-hub__shell` (padding `36px 22px 0`، گرید ۵ ستونه)؛ موبایل `homePlansSwiper` (۲ کارت) + `homePartnersSwiper`؛ `/plans` + کش `shop:plans:index:v1` |
+| 2026-10-31 | **طرح‌ها** — ویجت صفحه اصلی: همه طرح‌های فعال `/plans`؛ ردیف کارت‌ها تمام‌عرض؛ موبایل `homePlansSwiper` + `homePartnersSwiper`؛ `/plans` + کش `shop:plans:index:v1` |
 | 2026-10-29 | hero سایدبار: لیست بالا فقط زیرمجموعه «سرویس چینی»؛ خانواده‌های `show_on_homepage_sidebar` بدون repeater → ردیف آیکون پایین (flex دایره‌ای) |
 | 2026-10-29 | hero سایدبار (قبلی): چند خانوade + `rebuildAggregatedHeroSidebarLinks`؛ MediaPicker repeater |
 | 2026-10-29 | hero: قاب سفید + پنل `#EDF0F2`؛ کارت درگاه RTL (لوگو راست در DOM)؛ کش CSS با `?v=filemtime`؛ سه خانوade سریع با fallback نام فارسی |

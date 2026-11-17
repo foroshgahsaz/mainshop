@@ -276,6 +276,26 @@ class SettingsService
         ];
     }
 
+    /**
+     * خواندن credential نوپی: اگر کلید در گروه nopay وجود داشته باشد (حتی رشته خالی)
+     * همان استفاده می‌شود — با ?: به toopi/env نمی‌افتد.
+     * در غیر این صورت toopi، سپس پیش‌فرض config.
+     */
+    protected function nopayCredential(string $key, mixed $configDefault = ''): string
+    {
+        $all = $this->all();
+
+        if (array_key_exists($key, $all['nopay'] ?? [])) {
+            return (string) ($all['nopay'][$key] ?? '');
+        }
+
+        if (array_key_exists($key, $all['toopi'] ?? [])) {
+            return (string) ($all['toopi'][$key] ?? '');
+        }
+
+        return (string) $configDefault;
+    }
+
     /** @return array<string, mixed> */
     public function nopay(): array
     {
@@ -289,8 +309,9 @@ class SettingsService
             'enabled' => filter_var($this->get('nopay', 'enabled') ?? $this->get('toopi', 'enabled', false), FILTER_VALIDATE_BOOLEAN),
             'api_base_url' => rtrim((string) ($this->get('nopay', 'api_base_url') ?: $this->get('toopi', 'api_base_url') ?: ($cfg['api_base_url'] ?? '')), '/'),
             'service_username' => (string) ($this->get('nopay', 'service_username') ?: $this->get('toopi', 'service_username') ?: ($cfg['service_username'] ?? '')),
-            'service_password' => (string) ($this->get('nopay', 'service_password') ?: $this->get('toopi', 'service_password') ?: ($cfg['service_password'] ?? '')),
-            'service_password_encrypted' => (string) ($this->get('nopay', 'service_password_encrypted') ?: $this->get('toopi', 'service_password_encrypted') ?: ($cfg['service_password_encrypted'] ?? '')),
+            // خالی عمدی در nopay نباید با ?: برود سراغ toopi/env و دوباره AES بسازد
+            'service_password' => $this->nopayCredential('service_password', $cfg['service_password'] ?? ''),
+            'service_password_encrypted' => $this->nopayCredential('service_password_encrypted', $cfg['service_password_encrypted'] ?? ''),
             'merchant_number' => (string) ($this->get('nopay', 'merchant_number') ?: $this->get('toopi', 'merchant_number') ?: ($cfg['merchant_number'] ?? '')),
             'public_key' => (string) ($this->get('nopay', 'public_key') ?: $this->get('toopi', 'public_key') ?: ($cfg['public_key'] ?? 'WtX3qPVc1lrHX/+ug9iILQ==')),
             'private_key' => (string) ($this->get('nopay', 'private_key') ?: $this->get('toopi', 'private_key') ?: ($cfg['private_key'] ?? '')),

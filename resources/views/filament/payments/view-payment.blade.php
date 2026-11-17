@@ -58,12 +58,14 @@
                     @endif
                 @endif
 
-                @if($payment->raw_response)
-                    <section class="admin-order__section">
-                        <h2 class="admin-order__section-title">درخواست / پاسخ درگاه</h2>
+                <section class="admin-order__section">
+                    <h2 class="admin-order__section-title">درخواست / پاسخ درگاه</h2>
+                    @if(is_array($payment->raw_response) && $payment->raw_response !== [])
                         <pre class="admin-order__raw-json" dir="ltr">{{ json_encode($payment->raw_response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
-                    </section>
-                @endif
+                    @else
+                        <p class="admin-order__empty">برای این پرداخت هنوز درخواست/پاسخ درگاه ذخیره نشده است. اگر خطا قبل از ارسال به درگاه بوده، دکمه «لاگ فایل پرداخت» را ببینید یا یک پرداخت تست جدید بعد از آخرین deploy بزنید.</p>
+                    @endif
+                </section>
 
                 @include('filament.payments.partials.notes-timeline', ['payment' => $payment])
             </div>

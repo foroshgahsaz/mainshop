@@ -10,7 +10,7 @@
   - خطای «پاسخ نامعتبر از درگاه»: بدنه غیرJSON از `api_base_url` — لاگ `nopay.cpg.non_json_or_http_error` در `laravel.log`.
   - Wrapper گاهی JSON را به‌صورت رشته برمی‌گرداند (`NopayCpgClient::decodeBody`); کد `-7` = احراز هویت (رمز خام یا AES اشتباه).
   - رمز: AES-128-CBC با `public_key` + `private_key` (`NopayCpgPasswordEncryptor`) — نه RSA.
-  - `raw_response` پرداخت: `request` + `response` برای RequestToken/Verify (صفحه جزئیات پرداخت ادمین).
+  - `raw_response` پرداخت: `request` قبل از HTTP ذخیره می‌شود، سپس `response`؛ صفحه جزئیات پرداخت همیشه بخش «درخواست / پاسخ درگاه» را نشان می‌دهد.
 - درگاه **داریک (کیف پول اعتباری)**: `docs/darik.pdf` — `DarikGateway` + `DarikApiClient`؛ جریان `Login` → `Order` → `SendOTP` → صفحه `/payment/darik/{tracking}` → `Confirm` با OTP پنج‌رقمی (بدون redirect خارجی).
 - قرارداد: `app/Services/Payment/PaymentGatewayInterface.php`
   - `initiate(Payment, Order): string` — URL یا مسیر redirect

@@ -136,6 +136,19 @@ class PaymentService
         try {
             $redirectUrl = $this->gateway($payment->gateway)->initiate($payment, $order);
         } catch (Throwable $e) {
+            $fresh = $payment->fresh();
+            if ($fresh !== null) {
+                $raw = is_array($fresh->raw_response) ? $fresh->raw_response : [];
+                if ($raw === [] || ! array_key_exists('request', $raw)) {
+                    $fresh->update([
+                        'raw_response' => array_merge($raw, [
+                            'initiate_exception' => $e->getMessage(),
+                            'initiate_exception_class' => $e::class,
+                        ]),
+                    ]);
+                }
+            }
+
             $this->audit->failure(
                 $payment->fresh(),
                 PaymentAuditStep::GATEWAY_RESPONSE,

@@ -72,4 +72,50 @@ class NopayRequestStoredOnPaymentTest extends TestCase
         $this->assertSame('233333020', data_get($raw, 'request.merchantNumber'));
         $this->assertSame(-7, data_get($raw, 'response.notification.errors.0.code'));
     }
+
+    public function test_request_is_persisted_even_when_http_throws(): void
+    {
+        Setting::query()->updateOrCreate(['group' => 'nopay', 'key' => 'enabled'], ['value' => '1']);
+        Setting::query()->updateOrCreate(['group' => 'nopay', 'key' => 'api_base_url'], ['value' => 'https://nopay.test']);
+        Setting::query()->updateOrCreate(['group' => 'nopay', 'key' => 'service_username'], ['value' => 'cbazar']);
+        Setting::query()->updateOrCreate(['group' => 'nopay', 'key' => 'service_password_encrypted'], ['value' => 'enc-from-support']);
+        Setting::query()->updateOrCreate(['group' => 'nopay', 'key' => 'merchant_number'], ['value' => '233333020']);
+        Setting::query()->updateOrCreate(['group' => 'nopay', 'key' => 'amount_unit'], ['value' => 'toman']);
+
+        Http::fake([
+            'https://nopay.test/*' => Http::response('bad-gateway', 502),
+        ]);
+
+        $user = User::factory()->create(['phone' => '09121234567']);
+        $order = Order::query()->create([
+            'user_id' => $user->id,
+            'total_amount' => 4000,
+            'final_amount' => 4000,
+            'shipping_amount' => 0,
+            'discount_amount' => 0,
+            'payment_method' => 'nopay',
+            'status' => Order::STATUS_PENDING,
+            'stock_reserved' => true,
+        ]);
+
+        $payment = Payment::query()->create([
+            'order_id' => $order->id,
+            'user_id' => $user->id,
+            'amount' => 4000,
+            'gateway' => 'nopay',
+            'status' => Payment::STATUS_PENDING,
+            'tracking_code' => 'NOPAYREQ2',
+        ]);
+
+        try {
+            app(NopayGateway::class)->initiate($payment, $order);
+            $this->fail('Expected HTTP failure');
+        } catch (RuntimeException) {
+            // expected
+        }
+
+        $raw = $payment->fresh()->raw_response;
+        $this->assertSame('enc-from-support', data_get($raw, 'request.servicePassword'));
+        $this->assertNotEmpty(data_get($raw, 'exception'));
+    }
 }

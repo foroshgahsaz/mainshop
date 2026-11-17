@@ -50,8 +50,16 @@ class NopayGateway implements PaymentGatewayInterface
             'merchantNumber' => (string) $config['merchant_number'],
         ];
 
+        // قبل از HTTP ذخیره می‌شود تا در جزئیات پرداخت حتی اگر بعداً exception بیاید دیده شود.
+        $payment->update([
+            'raw_response' => [
+                'request' => $input,
+                'response' => null,
+            ],
+        ]);
+
         $this->audit->step(
-            $payment,
+            $payment->fresh(),
             PaymentAuditStep::GATEWAY_REQUEST,
             'nopay_request_token',
             'درخواست Token به CPG نوپی ارسال شد.',
@@ -71,6 +79,7 @@ class NopayGateway implements PaymentGatewayInterface
         } catch (RuntimeException $e) {
             $this->markInitiateFailed($payment, $order, [
                 'request' => $input,
+                'response' => null,
                 'exception' => $e->getMessage(),
             ]);
 
@@ -103,10 +112,8 @@ class NopayGateway implements PaymentGatewayInterface
         $payment->update([
             'transaction_id' => $token,
             'raw_response' => [
-                'request_token' => [
-                    'request' => $input,
-                    'response' => $response,
-                ],
+                'request' => $input,
+                'response' => $response,
             ],
         ]);
 

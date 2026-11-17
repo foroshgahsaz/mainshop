@@ -58,6 +58,7 @@ class NopayGateway implements PaymentGatewayInterface
             [
                 'amount' => $amount,
                 'cell_number' => $cellNumber,
+                'request' => $input,
             ]
         );
 
@@ -68,14 +69,20 @@ class NopayGateway implements PaymentGatewayInterface
                 $input,
             );
         } catch (RuntimeException $e) {
-            $this->markInitiateFailed($payment, $order, ['exception' => $e->getMessage()]);
+            $this->markInitiateFailed($payment, $order, [
+                'request' => $input,
+                'exception' => $e->getMessage(),
+            ]);
 
             throw $e;
         }
 
         if ($this->client->hasErrors($response)) {
             $message = $this->client->firstErrorMessage($response);
-            $this->markInitiateFailed($payment, $order, $response);
+            $this->markInitiateFailed($payment, $order, [
+                'request' => $input,
+                'response' => $response,
+            ]);
 
             throw new RuntimeException($message);
         }
@@ -85,14 +92,22 @@ class NopayGateway implements PaymentGatewayInterface
         $redirectUrl = trim((string) ($entity['redirectURL'] ?? $entity['redirectUrl'] ?? ''));
 
         if ($token === '' || $redirectUrl === '') {
-            $this->markInitiateFailed($payment, $order, $response);
+            $this->markInitiateFailed($payment, $order, [
+                'request' => $input,
+                'response' => $response,
+            ]);
 
             throw new RuntimeException('پاسخ توکن/redirect از درگاه نوپی ناقص است.');
         }
 
         $payment->update([
             'transaction_id' => $token,
-            'raw_response' => ['request_token' => $response],
+            'raw_response' => [
+                'request_token' => [
+                    'request' => $input,
+                    'response' => $response,
+                ],
+            ],
         ]);
 
         $this->audit->step(
@@ -100,7 +115,7 @@ class NopayGateway implements PaymentGatewayInterface
             PaymentAuditStep::GATEWAY_RESPONSE,
             'nopay_token_received',
             'Token از درگاه نوپی دریافت شد.',
-            ['token' => $token],
+            ['token' => $token, 'request' => $input],
             $response
         );
 
@@ -146,7 +161,7 @@ class NopayGateway implements PaymentGatewayInterface
             PaymentAuditStep::GATEWAY_REQUEST,
             'nopay_verify_request',
             'درخواست VerifyTransaction به نوپی ارسال شد.',
-            ['token' => $token]
+            ['token' => $token, 'request' => $input]
         );
 
         try {
@@ -157,27 +172,50 @@ class NopayGateway implements PaymentGatewayInterface
             );
         } catch (RuntimeException $e) {
             return GatewayVerificationResult::failed(
-                ['exception' => $e->getMessage()],
+                [
+                    'verify' => [
+                        'request' => $input,
+                        'exception' => $e->getMessage(),
+                    ],
+                ],
                 'خطا در تأیید تراکنش نوپی.'
             );
         }
 
         if ($this->client->hasErrors($response)) {
             return GatewayVerificationResult::failed(
-                $response,
+                [
+                    'verify' => [
+                        'request' => $input,
+                        'response' => $response,
+                    ],
+                ],
                 $this->client->firstErrorMessage($response)
             );
         }
 
         $entity = $this->client->entity($response);
         if ($entity === null) {
-            return GatewayVerificationResult::failed($response, 'پاسخ VerifyTransaction نامعتبر است.');
+            return GatewayVerificationResult::failed(
+                [
+                    'verify' => [
+                        'request' => $input,
+                        'response' => $response,
+                    ],
+                ],
+                'پاسخ VerifyTransaction نامعتبر است.'
+            );
         }
 
         $approved = filter_var($entity['isApproved'] ?? false, FILTER_VALIDATE_BOOLEAN);
         if (! $approved) {
             return GatewayVerificationResult::canceled(
-                $response,
+                [
+                    'verify' => [
+                        'request' => $input,
+                        'response' => $response,
+                    ],
+                ],
                 'تراکنش نوپی تأیید نشد.'
             );
         }
@@ -189,7 +227,10 @@ class NopayGateway implements PaymentGatewayInterface
         return GatewayVerificationResult::success(
             $refNumber !== '' ? $refNumber : null,
             [
-                'verify' => $response,
+                'verify' => [
+                    'request' => $input,
+                    'response' => $response,
+                ],
                 'callback_status' => $status,
             ],
             $paidInShop,

@@ -726,7 +726,9 @@ $middleware->validateCsrfTokens(except: [
 
 **خطای «پاسخ نامعتبر از درگاه نوپی»:** HTTP موفق بوده ولی بدنه JSON قابل‌parse نبوده (`NopayCpgClient`) — معمولاً HTML/خالی یا آدرس اشتباه. Wrapper نوپی گاهی پاسخ را **double-encoded** (رشته JSON) می‌دهد؛ کلاینت یک/چندبار unwrap می‌کند.
 
-**خطای احراز هویت (کد -7):** معمولاً رمز خام یا AES اشتباه (کلید/IV ناقص). در `/admin/nopay` رمز متنی + publicKey/privateKey کامل از فایل Encrypt بگذارید؛ فیلد encrypted قدیمی (RSA) را خالی کنید.
+**خطای احراز هویت (کد -7):** معمولاً رمز خام یا AES اشتباه (کلید/IV ناقص). در `/admin/nopay` رمز متنی + publicKey/privateKey کامل از فایل Encrypt بگذارید؛ فیلد encrypted قدیمی (RSA) را خالی کنید. اگر پشتیبانی encrypted جدا داده، فقط همان را در «رمز رمزنگاری‌شده» بگذارید و رمز متنی را خالی کنید.
+
+**جزئیات پرداخت:** در `raw_response` هم `request` ارسالی به CPG و هم `response` ذخیره می‌شود (`request_token` / `verify`) تا در صفحه پرداخت ادمین دیده شود.
 
 ### 9.15 درگاه داریک (credit — کیف پول `docs/darik.pdf`)
 
@@ -1409,6 +1411,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-17 | نوپی: ذخیره request+response در `payment.raw_response` برای مشاهده در جزئیات پرداخت ادمین |
 | 2026-11-16 | نوپی: رمز سرویس AES-128-CBC (publicKey+privateKey/IV) به‌جای RSA؛ فیلد `private_key`؛ رفع خطای احراز هویت -7 |
 | 2026-11-16 | نوپی: unwrap پاسخ double-encoded JSON؛ نمایش «خطای احراز هویت (کد -7)» به‌جای «پاسخ نامعتبر» |
 | 2026-11-16 | نوپی: خطای «پاسخ نامعتبر» = بدنه غیرJSON؛ لاگ `nopay.cpg.non_json_or_http_error` + پیام واضح‌تر |

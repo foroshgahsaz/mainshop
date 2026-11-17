@@ -724,11 +724,13 @@ $middleware->validateCsrfTokens(except: [
 
 **رمزنگاری رمز:** اگر `service_password_encrypted` در ادمین پر باشد **عیناً** همان به درگاه می‌رود (اولویت با مقدار پشتیبانی). فقط وقتی encrypted خالی است، رمز متنی با **AES-128-CBC** (`publicKey`+`privateKey`) ساخته می‌شود. ارسال رمز خام = کد **-7**.
 
+**خواندن تنظیمات:** `SettingsService::nopay()` برای `service_password` / `service_password_encrypted` اگر کلید در گروه `nopay` وجود داشته باشد (حتی رشتهٔ خالی) همان را می‌گیرد و با `?:` به `toopi`/env نمی‌افتد — وگرنه با خالی کردن عمدی رمز متنی، رمز قدیمی toopi دوباره AES می‌شد.
+
 **خطای «پاسخ نامعتبر از درگاه نوپی»:** HTTP موفق بوده ولی بدنه JSON قابل‌parse نبوده (`NopayCpgClient`) — معمولاً HTML/خالی یا آدرس اشتباه. Wrapper نوپی گاهی پاسخ را **double-encoded** (رشته JSON) می‌دهد؛ کلاینت یک/چندبار unwrap می‌کند.
 
-**خطای احراز هویت (کد -7):** معمولاً رمز خام یا AES اشتباه (کلید/IV ناقص). در `/admin/nopay` رمز متنی + publicKey/privateKey کامل از فایل Encrypt بگذارید؛ فیلد encrypted قدیمی (RSA) را خالی کنید. اگر پشتیبانی encrypted جدا داده، فقط همان را در «رمز رمزنگاری‌شده» بگذارید و رمز متنی را خالی کنید.
+**خطای احراز هویت (کد -7):** معمولاً رمز خام یا AES اشتباه (کلید/IV ناقص). در `/admin/nopay` رمز متنی + publicKey/privateKey کامل از فایل Encrypt بگذارید؛ فیلد encrypted قدیمی (RSA) را خالی کنید. اگر پشتیبانی encrypted جدا داده، فقط همان را در «رمز رمزنگاری‌شده» بگذارید و رمز متنی را خالی کنید (یا «پاک کردن رمز متنی»). بعد از ذخیره، دکمهٔ سبز «پاک کردن کش» ادمین را بزنید (`cache:clear` شامل `shop:settings:all`).
 
-**جزئیات پرداخت:** در `raw_response` هم `request` ارسالی به CPG و هم `response` ذخیره می‌شود (`request_token` / `verify`) تا در صفحه پرداخت ادمین دیده شود.
+**جزئیات پرداخت:** در `raw_response` فیلدهای `request`، `password_source` (`service_password_encrypted` یا `aes_from_service_password`)، و `response` ذخیره می‌شود تا منبع رمز ارسالی مشخص باشد.
 
 ### 9.15 درگاه داریک (credit — کیف پول `docs/darik.pdf`)
 
@@ -1411,6 +1413,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-17 | نوپی: `nopayCredential` — رمز خالی nopay دیگر با `?:` به toopi/env نمی‌افتد؛ `password_source` در `raw_response` |
 | 2026-11-17 | نوپی: اولویت با `service_password_encrypted` ادمین (مقدار پشتیبانی)؛ رمز متنی فقط اگر encrypted خالی باشد |
 | 2026-11-17 | نوپی: ذخیره request قبل از HTTP + نمایش همیشگی بخش درخواست/پاسخ در جزئیات پرداخت (حتی اگر خالی) |
 | 2026-11-17 | نوپی: ذخیره request+response در `payment.raw_response` برای مشاهده در جزئیات پرداخت ادمین |

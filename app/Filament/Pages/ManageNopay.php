@@ -80,12 +80,12 @@ class ManageNopay extends Page implements HasForms
                         ->label('servicePassword رمزنگاری‌شده')
                         ->rows(2)
                         ->columnSpanFull()
-                        ->helperText('اولویت با این فیلد است — همان مقدار عیناً به درگاه می‌رود. مقدار پشتیبانی نوپی را اینجا بگذارید.'),
+                        ->helperText('اولویت با این فیلد است — همان مقدار عیناً به درگاه می‌رود. مقدار پشتیبانی نوپی را اینجا بگذارید. بعد از ذخیره، «پاک کردن کش» ادمین را بزنید و در جزئیات پرداخت فیلد password_source را چک کنید.'),
                     Forms\Components\TextInput::make('service_password')
                         ->label('servicePassword (متن — فقط اگر encrypted خالی است)')
                         ->password()
                         ->revealable()
-                        ->helperText('فقط وقتی فیلد رمزنگاری‌شده خالی باشد با AES ساخته می‌شود. اگر encrypted پر است این فیلد نادیده گرفته می‌شود.'),
+                        ->helperText('فقط وقتی فیلد رمزنگاری‌شده خالی باشد با AES ساخته می‌شود. ذخیرهٔ encrypted رمز متنی را خالی می‌کند تا دوباره از toopi/env AES نشود.'),
                     Forms\Components\Toggle::make('clear_service_password')
                         ->label('پاک کردن رمز متنی ذخیره‌شده')
                         ->helperText('اگر قبلاً رمز خام ذخیره شده و می‌خواهید فقط encrypted پشتیبانی استفاده شود، این را روشن کنید.')

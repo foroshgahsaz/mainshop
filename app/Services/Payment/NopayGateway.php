@@ -39,6 +39,10 @@ class NopayGateway implements PaymentGatewayInterface
         $amountUnit = (string) ($config['amount_unit'] ?? AmountConverter::UNIT_TOMAN);
         $amount = AmountConverter::toGateway($payment->amount, $amountUnit);
 
+        $passwordSource = trim((string) ($config['service_password_encrypted'] ?? '')) !== ''
+            ? 'service_password_encrypted'
+            : 'aes_from_service_password';
+
         $encryptedPassword = $this->passwordEncryptor->resolveEncryptedPassword($config);
 
         $input = [
@@ -54,6 +58,7 @@ class NopayGateway implements PaymentGatewayInterface
         $payment->update([
             'raw_response' => [
                 'request' => $input,
+                'password_source' => $passwordSource,
                 'response' => null,
             ],
         ]);
@@ -66,6 +71,7 @@ class NopayGateway implements PaymentGatewayInterface
             [
                 'amount' => $amount,
                 'cell_number' => $cellNumber,
+                'password_source' => $passwordSource,
                 'request' => $input,
             ]
         );
@@ -79,6 +85,7 @@ class NopayGateway implements PaymentGatewayInterface
         } catch (RuntimeException $e) {
             $this->markInitiateFailed($payment, $order, [
                 'request' => $input,
+                'password_source' => $passwordSource,
                 'response' => null,
                 'exception' => $e->getMessage(),
             ]);
@@ -90,6 +97,7 @@ class NopayGateway implements PaymentGatewayInterface
             $message = $this->client->firstErrorMessage($response);
             $this->markInitiateFailed($payment, $order, [
                 'request' => $input,
+                'password_source' => $passwordSource,
                 'response' => $response,
             ]);
 
@@ -103,6 +111,7 @@ class NopayGateway implements PaymentGatewayInterface
         if ($token === '' || $redirectUrl === '') {
             $this->markInitiateFailed($payment, $order, [
                 'request' => $input,
+                'password_source' => $passwordSource,
                 'response' => $response,
             ]);
 
@@ -113,6 +122,7 @@ class NopayGateway implements PaymentGatewayInterface
             'transaction_id' => $token,
             'raw_response' => [
                 'request' => $input,
+                'password_source' => $passwordSource,
                 'response' => $response,
             ],
         ]);

@@ -60,7 +60,7 @@
 
                 @if($payment->raw_response)
                     <section class="admin-order__section">
-                        <h2 class="admin-order__section-title">پاسخ درگاه</h2>
+                        <h2 class="admin-order__section-title">درخواست / پاسخ درگاه</h2>
                         <pre class="admin-order__raw-json" dir="ltr">{{ json_encode($payment->raw_response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
                     </section>
                 @endif

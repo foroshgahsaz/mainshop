@@ -39,22 +39,25 @@ class NopayCpgPasswordEncryptor
     }
 
     /**
+     * اگر «رمز رمزنگاری‌شده» در ادمین پر باشد همان عیناً به درگاه می‌رود
+     * (مقدار پشتیبانی نوپی). فقط وقتی encrypted خالی است از رمز متنی + AES استفاده می‌شود.
+     *
      * @param  array<string, mixed>  $config
      */
     public function resolveEncryptedPassword(array $config): string
     {
-        $plain = trim((string) ($config['service_password'] ?? ''));
-        $publicKey = trim((string) ($config['public_key'] ?? ''));
-        $privateKey = trim((string) ($config['private_key'] ?? ''));
-
-        // اگر رمز متنی هست، همیشه با AES از نو بساز (تا مقدار RSA/اشتباه قبلی در encrypted اولویت نگیرد).
-        if ($plain !== '') {
-            return $this->encryptServicePassword($plain, $publicKey, $privateKey);
-        }
-
         $preEncrypted = trim((string) ($config['service_password_encrypted'] ?? ''));
         if ($preEncrypted !== '') {
             return $preEncrypted;
+        }
+
+        $plain = trim((string) ($config['service_password'] ?? ''));
+        if ($plain !== '') {
+            return $this->encryptServicePassword(
+                $plain,
+                (string) ($config['public_key'] ?? ''),
+                (string) ($config['private_key'] ?? ''),
+            );
         }
 
         throw new RuntimeException('رمز سرویس نوپی تنظیم نشده است.');

@@ -722,7 +722,7 @@ $middleware->validateCsrfTokens(except: [
 
 **تنظیمات:** `api_base_url`، `service_username`، `service_password` (متن) یا `service_password_encrypted`، `merchant_number`، `public_key`، `private_key`، `test_mode`، `test_cell_number`.
 
-**رمزنگاری رمز:** طبق CPG Ver 2-5 و نمونه C# — **AES-128-CBC**؛ `publicKey` = کلید ۱۶بایتی base64 (پیش‌فرض `WtX3qPVc1lrHX/+ug9iILQ==`)، `privateKey` = IV ۱۶بایتی base64. `NopayCpgPasswordEncryptor`؛ ارسال رمز خام = Authentication code **-7**.
+**رمزنگاری رمز:** اگر `service_password_encrypted` در ادمین پر باشد **عیناً** همان به درگاه می‌رود (اولویت با مقدار پشتیبانی). فقط وقتی encrypted خالی است، رمز متنی با **AES-128-CBC** (`publicKey`+`privateKey`) ساخته می‌شود. ارسال رمز خام = کد **-7**.
 
 **خطای «پاسخ نامعتبر از درگاه نوپی»:** HTTP موفق بوده ولی بدنه JSON قابل‌parse نبوده (`NopayCpgClient`) — معمولاً HTML/خالی یا آدرس اشتباه. Wrapper نوپی گاهی پاسخ را **double-encoded** (رشته JSON) می‌دهد؛ کلاینت یک/چندبار unwrap می‌کند.
 
@@ -1411,6 +1411,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-17 | نوپی: اولویت با `service_password_encrypted` ادمین (مقدار پشتیبانی)؛ رمز متنی فقط اگر encrypted خالی باشد |
 | 2026-11-17 | نوپی: ذخیره request قبل از HTTP + نمایش همیشگی بخش درخواست/پاسخ در جزئیات پرداخت (حتی اگر خالی) |
 | 2026-11-17 | نوپی: ذخیره request+response در `payment.raw_response` برای مشاهده در جزئیات پرداخت ادمین |
 | 2026-11-16 | نوپی: رمز سرویس AES-128-CBC (publicKey+privateKey/IV) به‌جای RSA؛ فیلد `private_key`؛ رفع خطای احراز هویت -7 |

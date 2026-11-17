@@ -18,7 +18,7 @@ class NopayCpgPasswordEncryptorTest extends TestCase
 
         $raw = base64_decode($encrypted, true);
         $this->assertNotFalse($raw);
-        $this->assertSame(16, strlen((string) $raw)); // PKCS7 padded "C3456" → 16 bytes
+        $this->assertSame(16, strlen((string) $raw));
 
         $plain = openssl_decrypt(
             (string) $raw,
@@ -31,19 +31,30 @@ class NopayCpgPasswordEncryptorTest extends TestCase
         $this->assertSame('C3456', $plain);
     }
 
-    public function test_plain_password_preferred_over_stale_encrypted(): void
+    public function test_pre_encrypted_password_is_preferred_over_plain(): void
+    {
+        $resolved = app(NopayCpgPasswordEncryptor::class)->resolveEncryptedPassword([
+            'service_password' => 'C3456',
+            'service_password_encrypted' => 'from-nopay-support',
+            'public_key' => 'WtX3qPVc1lrHX/+ug9iILQ==',
+            'private_key' => base64_encode(str_repeat('V', 16)),
+        ]);
+
+        $this->assertSame('from-nopay-support', $resolved);
+    }
+
+    public function test_plain_used_only_when_encrypted_empty(): void
     {
         $publicKey = 'WtX3qPVc1lrHX/+ug9iILQ==';
         $privateKey = base64_encode(str_repeat('V', 16));
 
         $resolved = app(NopayCpgPasswordEncryptor::class)->resolveEncryptedPassword([
             'service_password' => 'C3456',
-            'service_password_encrypted' => 'stale-wrong-value',
+            'service_password_encrypted' => '',
             'public_key' => $publicKey,
             'private_key' => $privateKey,
         ]);
 
-        $this->assertNotSame('stale-wrong-value', $resolved);
         $this->assertSame(
             app(NopayCpgPasswordEncryptor::class)->encryptServicePassword('C3456', $publicKey, $privateKey),
             $resolved,

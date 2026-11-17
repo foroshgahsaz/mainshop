@@ -76,16 +76,20 @@ class ManageNopay extends Page implements HasForms
                     Forms\Components\TextInput::make('service_username')
                         ->label('serviceUserName')
                         ->required(),
-                    Forms\Components\TextInput::make('service_password')
-                        ->label('servicePassword (متن)')
-                        ->password()
-                        ->revealable()
-                        ->helperText('رمز خام (مثلاً از User information). با AES-128-CBC و publicKey+privateKey رمز می‌شود. ارسال خام = خطای -7.'),
                     Forms\Components\Textarea::make('service_password_encrypted')
-                        ->label('servicePassword رمزنگاری‌شده (اختیاری)')
+                        ->label('servicePassword رمزنگاری‌شده')
                         ->rows(2)
                         ->columnSpanFull()
-                        ->helperText('اگر رمز متنی پر باشد همان اولویت دارد و AES می‌شود. در غیر این صورت خروجی ابزار Encrypt را اینجا بگذارید.'),
+                        ->helperText('اولویت با این فیلد است — همان مقدار عیناً به درگاه می‌رود. مقدار پشتیبانی نوپی را اینجا بگذارید.'),
+                    Forms\Components\TextInput::make('service_password')
+                        ->label('servicePassword (متن — فقط اگر encrypted خالی است)')
+                        ->password()
+                        ->revealable()
+                        ->helperText('فقط وقتی فیلد رمزنگاری‌شده خالی باشد با AES ساخته می‌شود. اگر encrypted پر است این فیلد نادیده گرفته می‌شود.'),
+                    Forms\Components\Toggle::make('clear_service_password')
+                        ->label('پاک کردن رمز متنی ذخیره‌شده')
+                        ->helperText('اگر قبلاً رمز خام ذخیره شده و می‌خواهید فقط encrypted پشتیبانی استفاده شود، این را روشن کنید.')
+                        ->default(false),
                     Forms\Components\TextInput::make('merchant_number')
                         ->label('merchantNumber')
                         ->required(),
@@ -148,12 +152,19 @@ class ManageNopay extends Page implements HasForms
             ...GatewayHomepagePlanFields::saveState($data),
         ];
 
-        if (filled($data['service_password_encrypted'] ?? null)) {
-            $payload['service_password_encrypted'] = trim((string) $data['service_password_encrypted']);
+        if (array_key_exists('service_password_encrypted', $data)) {
+            $payload['service_password_encrypted'] = trim((string) ($data['service_password_encrypted'] ?? ''));
         }
 
-        if (filled($data['service_password'] ?? null)) {
+        if (! empty($data['clear_service_password'])) {
+            $payload['service_password'] = '';
+        } elseif (filled($data['service_password'] ?? null)) {
             $payload['service_password'] = (string) $data['service_password'];
+        }
+
+        // وقتی encrypted از پشتیبانی ذخیره می‌شود، رمز متنی قدیمی را پاک کن تا دوباره AES نشود.
+        if (trim((string) ($payload['service_password_encrypted'] ?? '')) !== '') {
+            $payload['service_password'] = '';
         }
 
         $settings->setMany('nopay', $payload);

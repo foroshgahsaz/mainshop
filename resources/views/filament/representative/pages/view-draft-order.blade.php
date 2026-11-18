@@ -8,6 +8,7 @@
         $splitPay = app(\App\Services\Representative\RepresentativeProformaSplitPayment::class);
         $catalog = app(\App\Services\Payment\PaymentGatewayCatalog::class);
         $creditPlan = $order->creditPlan;
+        $repProformaPayTargets = 'saveSplitPaymentPlan,payCashPortion,payCreditPortion,payProformaFromPage,requestReReservation';
     @endphp
 
     <link rel="stylesheet" href="{{ asset('css/rep-order-wizard.css') }}?v={{ filemtime(public_path('css/rep-order-wizard.css')) }}">
@@ -95,7 +96,14 @@
                                        dir="ltr"
                                        autocomplete="off">
                             </label>
-                            <button type="button" class="rep-btn-secondary" wire:click="saveSplitPaymentPlan">ذخیره طرح</button>
+                            <button type="button"
+                                    class="rep-btn-secondary"
+                                    wire:click="saveSplitPaymentPlan"
+                                    wire:loading.attr="disabled"
+                                    wire:target="saveSplitPaymentPlan,payCashPortion,payCreditPortion,payProformaFromPage,requestReReservation">
+                                <span wire:loading.remove wire:target="saveSplitPaymentPlan">ذخیره طرح</span>
+                                <span wire:loading wire:target="saveSplitPaymentPlan">در حال ذخیره…</span>
+                            </button>
                             <p class="rep-wizard-hint">مابقی = نقدی (چندمرحله‌ای از درگاه {{ $cashGwDef['label'] ?? 'نقدی' }}{{ $creditPlan ? ' طبق طرح «'.$creditPlan->name.'»' : '' }})</p>
                         </div>
                     @endif
@@ -140,7 +148,8 @@
                                 <button type="button"
                                         class="rep-btn-primary"
                                         wire:click="payCashPortion"
-                                        wire:loading.attr="disabled">
+                                        wire:loading.attr="disabled"
+                                        wire:target="payCashPortion,{{ $repProformaPayTargets }}">
                                     <span wire:loading.remove wire:target="payCashPortion">پرداخت نقدی</span>
                                     <span wire:loading wire:target="payCashPortion">…</span>
                                 </button>
@@ -152,7 +161,8 @@
                         <button type="button"
                                 class="rep-btn-primary rep-payment-info__pay"
                                 wire:click="payCreditPortion"
-                                wire:loading.attr="disabled">
+                                wire:loading.attr="disabled"
+                                wire:target="payCreditPortion,{{ $repProformaPayTargets }}">
                             <span wire:loading.remove wire:target="payCreditPortion">پرداخت اعتبار ({{ \App\Support\ShopFormatter::money($splitPay->remainingCreditAmount($order)) }})</span>
                             <span wire:loading wire:target="payCreditPortion">در حال اتصال…</span>
                         </button>
@@ -176,7 +186,8 @@
                         <button type="button"
                                 class="rep-btn-primary rep-payment-info__pay"
                                 wire:click="payProformaFromPage"
-                                wire:loading.attr="disabled">
+                                wire:loading.attr="disabled"
+                                wire:target="payProformaFromPage,{{ $repProformaPayTargets }}">
                             <span wire:loading.remove wire:target="payProformaFromPage">پرداخت و رفتن به درگاه</span>
                             <span wire:loading wire:target="payProformaFromPage">در حال اتصال…</span>
                         </button>
@@ -210,7 +221,8 @@
                         <button type="button"
                                 class="rep-btn-primary rep-payment-info__pay"
                                 wire:click="requestReReservation"
-                                wire:loading.attr="disabled">
+                                wire:loading.attr="disabled"
+                                wire:target="requestReReservation,{{ $repProformaPayTargets }}">
                             <span wire:loading.remove wire:target="requestReReservation">درخواست رزرو مجدد</span>
                             <span wire:loading wire:target="requestReReservation">در حال ثبت…</span>
                         </button>
@@ -259,4 +271,10 @@
         </dl>
 
     </section>
+
+    <x-rep-wizard-busy-overlay
+        :targets="$repProformaPayTargets"
+        message="در حال پردازش…"
+        hint="تا اتصال به درگاه یا ثبت درخواست صبر کنید."
+    />
 </x-filament-panels::page>

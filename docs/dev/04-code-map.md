@@ -73,7 +73,7 @@
 |------|-----|
 | `app/Filament/Representative/Resources/DraftOrderResource.php` | پیش‌نویس/پیش‌فاکتور |
 | `app/Filament/Representative/Resources/CustomerResource.php` | مشتری نماینده |
-| `app/Livewire/Representative/OrderWizard.php` | ویزارد (جمع‌بندی: انتخاب `CreditPlan` با درگاه نقدی/اعتباری) |
+| `app/Livewire/Representative/OrderWizard.php` | ویزارد (جمع‌بندی: انتخاب `CreditPlan` با درگاه نقدی/اعتباری)؛ `order-wizard.blade.php` + `components/rep-wizard-busy-overlay` — اسپینر و قفل کلیک تا پاسخ Livewire |
 | `app/Models/CreditPlan.php` | طرح‌های اقساط/اعتبار + `scopeForRepresentativeCheckout` |
 | `app/Services/Representative/RepresentativeProformaSplitPayment.php` | سهم اعتبار/نقد، مانده، تسویه چندمرحله‌ای |
 | `app/Services/Representative/*` | منطق پیش‌سفارش، PDF، پرداخت، `SalesRegionService`، انتقال مشتری OTP |

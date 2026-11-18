@@ -1413,6 +1413,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-18 | ویزارد نماینده: overlay اسپینر (`rep-wizard-busy-overlay`) + `wire:loading` روی انتقال مراحل/ثبت پیش‌فاکتور؛ جستجوی محصول بدون تیره شدن کل صفحه |
 | 2026-11-17 | نوپی: `nopayCredential` — رمز خالی nopay دیگر با `?:` به toopi/env نمی‌افتد؛ `password_source` در `raw_response` |
 | 2026-11-17 | نوپی: اولویت با `service_password_encrypted` ادمین (مقدار پشتیبانی)؛ رمز متنی فقط اگر encrypted خالی باشد |
 | 2026-11-17 | نوپی: ذخیره request قبل از HTTP + نمایش همیشگی بخش درخواست/پاسخ در جزئیات پرداخت (حتی اگر خالی) |

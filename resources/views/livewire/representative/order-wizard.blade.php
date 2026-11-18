@@ -3,13 +3,35 @@
     $wizardStepKeys = array_keys($wizardSteps);
     $activeStepIndex = array_search($step, $wizardStepKeys, true);
     $catalogTrail = $this->catalogSelectionSummary;
+    $repWizardBusyTargets = implode(',', [
+        'goToStep',
+        'selectCustomer',
+        'selectCategory',
+        'goBackInCategory',
+        'selectFamily',
+        'selectPlant',
+        'selectBrand',
+        'selectTemplate',
+        'selectProductBrand',
+        'addProduct',
+        'removeItem',
+        'incrementLineQuantity',
+        'decrementLineQuantity',
+        'refreshReviewTotals',
+        'finishDraft',
+        'finishDraftAndPayCash',
+        'applyCoupon',
+        'removeCoupon',
+        'gotoPage',
+        'nextPage',
+        'previousPage',
+    ]);
 @endphp
 <div @class([
         'rep-order-wizard',
         'rep-order-wizard--review' => $step === 'review',
         'rep-order-wizard--product' => $step === 'product',
     ])
-     wire:loading.class="opacity-75"
      @rep-product-images-modal-closed.window="document.documentElement.classList.remove('rep-modal-open')">
     <nav class="rep-wizard-stepper" aria-label="مراحل سفارش">
         @foreach ($wizardSteps as $key => $label)
@@ -20,6 +42,8 @@
             @endphp
             <button type="button"
                     wire:click="goToStep('{{ $key }}')"
+                    wire:loading.attr="disabled"
+                    wire:target="{{ $repWizardBusyTargets }}"
                     @disabled($key !== 'customer' && $orderId === null)
                     class="rep-wizard-stepper__item {{ $isStepActive ? 'is-active' : '' }} {{ $isStepComplete ? 'is-complete' : '' }}"
                     @if ($isStepActive) aria-current="step" @endif>
@@ -32,7 +56,9 @@
         'rep-wizard-stage',
         'rep-wizard-stage--products' => $step === 'product',
         'rep-wizard-stage--review' => $step === 'review',
-    ])>
+    ])
+         wire:loading.class="rep-wizard-stage--busy"
+         wire:target="{{ $repWizardBusyTargets }}">
     @if ($step === 'customer')
         <section class="rep-wizard-panel">
             <header class="rep-wizard-header">
@@ -45,7 +71,9 @@
                     <li>
                         <button type="button"
                                 class="rep-plan-row"
-                                wire:click="selectCustomer({{ $customer->id }})">
+                                wire:click="selectCustomer({{ $customer->id }})"
+                                wire:loading.attr="disabled"
+                                wire:target="{{ $repWizardBusyTargets }}">
                             <span class="rep-plan-row__icon" aria-hidden="true">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                             </span>
@@ -77,7 +105,11 @@
             <div class="rep-wizard-panel__body">
                 @if ($categoryPath !== [])
                     <p class="rep-wizard-hint mb-3">
-                        <button type="button" class="rep-btn-secondary rep-btn-secondary--compact" wire:click="goBackInCategory">بازگشت به سطح قبل</button>
+                        <button type="button"
+                                class="rep-btn-secondary rep-btn-secondary--compact"
+                                wire:click="goBackInCategory"
+                                wire:loading.attr="disabled"
+                                wire:target="{{ $repWizardBusyTargets }}">بازگشت به سطح قبل</button>
                     </p>
                 @endif
                 <div class="rep-chip-grid" role="list">
@@ -85,7 +117,9 @@
                         <button type="button"
                                 role="listitem"
                                 class="rep-chip"
-                                wire:click="selectCategory({{ $category->id }})">
+                                wire:click="selectCategory({{ $category->id }})"
+                                wire:loading.attr="disabled"
+                                wire:target="{{ $repWizardBusyTargets }}">
                             {{ $category->name }}
                         </button>
                     @empty
@@ -108,7 +142,9 @@
                     <button type="button"
                             role="listitem"
                             class="rep-chip {{ $familyId === $family->id ? 'is-selected' : '' }}"
-                            wire:click="selectFamily({{ $family->id }})">
+                            wire:click="selectFamily({{ $family->id }})"
+                            wire:loading.attr="disabled"
+                            wire:target="{{ $repWizardBusyTargets }}">
                         {{ $family->name }}
                     </button>
                 @empty
@@ -133,7 +169,9 @@
                     <button type="button"
                             role="listitem"
                             class="rep-chip {{ $plantId === $plant->id ? 'is-selected' : '' }}"
-                            wire:click="selectPlant({{ $plant->id }})">
+                            wire:click="selectPlant({{ $plant->id }})"
+                            wire:loading.attr="disabled"
+                            wire:target="{{ $repWizardBusyTargets }}">
                         {{ $plant->name }}
                     </button>
                 @empty
@@ -161,7 +199,9 @@
                     <button type="button"
                             role="listitem"
                             class="rep-chip {{ $brandId === $brand->id ? 'is-selected' : '' }}"
-                            wire:click="selectBrand({{ $brand->id }})">
+                            wire:click="selectBrand({{ $brand->id }})"
+                            wire:loading.attr="disabled"
+                            wire:target="{{ $repWizardBusyTargets }}">
                         {{ $brand->name }}
                     </button>
                 @empty
@@ -186,7 +226,9 @@
                     <button type="button"
                             role="listitem"
                             class="rep-chip {{ $templateId === $template->id ? 'is-selected' : '' }}"
-                            wire:click="selectTemplate({{ $template->id }})">
+                            wire:click="selectTemplate({{ $template->id }})"
+                            wire:loading.attr="disabled"
+                            wire:target="{{ $repWizardBusyTargets }}">
                         {{ $template->name }}
                     </button>
                 @empty
@@ -217,14 +259,18 @@
                             <button type="button"
                                     role="listitem"
                                     class="rep-chip {{ $brandId === null ? 'is-selected' : '' }}"
-                                    wire:click="selectProductBrand(null)">
+                                    wire:click="selectProductBrand(null)"
+                                    wire:loading.attr="disabled"
+                                    wire:target="{{ $repWizardBusyTargets }}">
                                 همه برندها
                             </button>
                             @foreach ($this->productBrandFilters as $brand)
                                 <button type="button"
                                         role="listitem"
                                         class="rep-chip {{ (int) $brandId === (int) $brand->id ? 'is-selected' : '' }}"
-                                        wire:click="selectProductBrand({{ $brand->id }})">
+                                        wire:click="selectProductBrand({{ $brand->id }})"
+                                        wire:loading.attr="disabled"
+                                        wire:target="{{ $repWizardBusyTargets }}">
                                     {{ $brand->name }}
                                 </button>
                             @endforeach
@@ -293,8 +339,13 @@
                                     <span wire:loading.remove wire:target="openProductImages">گالری</span>
                                     <span wire:loading wire:target="openProductImages">…</span>
                                 </button>
-                                <button type="button" class="rep-btn-primary rep-product-card__add" wire:click="addProduct({{ $product->id }})">
-                                    افزودن
+                                <button type="button"
+                                        class="rep-btn-primary rep-product-card__add"
+                                        wire:click="addProduct({{ $product->id }})"
+                                        wire:loading.attr="disabled"
+                                        wire:target="{{ $repWizardBusyTargets }}">
+                                    <span wire:loading.remove wire:target="addProduct">افزودن</span>
+                                    <span wire:loading wire:target="addProduct">در حال افزودن…</span>
                                 </button>
                             </div>
                         </li>
@@ -364,6 +415,8 @@
                                         <button type="button"
                                                 class="rep-qty-stepper-btn"
                                                 wire:click="decrementLineQuantity({{ $item->id }})"
+                                                wire:loading.attr="disabled"
+                                                wire:target="{{ $repWizardBusyTargets }}"
                                                 aria-label="کاهش تعداد">−</button>
                                         <input type="number"
                                                class="rep-qty-stepper-input"
@@ -374,13 +427,18 @@
                                         <button type="button"
                                                 class="rep-qty-stepper-btn"
                                                 wire:click="incrementLineQuantity({{ $item->id }})"
+                                                wire:loading.attr="disabled"
+                                                wire:target="{{ $repWizardBusyTargets }}"
                                                 aria-label="افزایش تعداد">+</button>
                                     </div>
                                 </div>
                                 <button type="button"
                                         class="rep-btn-danger"
-                                        wire:click="removeItem({{ $item->id }})">
-                                    حذف
+                                        wire:click="removeItem({{ $item->id }})"
+                                        wire:loading.attr="disabled"
+                                        wire:target="{{ $repWizardBusyTargets }}">
+                                    <span wire:loading.remove wire:target="removeItem">حذف</span>
+                                    <span wire:loading wire:target="removeItem">…</span>
                                 </button>
                             </div>
                         </li>
@@ -596,7 +654,7 @@
                                                     class="rep-btn-primary rep-split-cash-pay__btn"
                                                     wire:click="finishDraftAndPayCash"
                                                     wire:loading.attr="disabled"
-                                                    wire:target="finishDraftAndPayCash">
+                                                    wire:target="finishDraftAndPayCash,{{ $repWizardBusyTargets }}">
                                                 <span wire:loading.remove wire:target="finishDraftAndPayCash">
                                                     ثبت پیش‌فاکتور و پرداخت
                                                     @if (trim($cashPayRial) !== '')
@@ -632,14 +690,17 @@
                             <button type="button"
                                     class="rep-btn-secondary"
                                     wire:click="removeCoupon"
-                                    wire:loading.attr="disabled">
-                                حذف
+                                    wire:loading.attr="disabled"
+                                    wire:target="{{ $repWizardBusyTargets }}">
+                                <span wire:loading.remove wire:target="removeCoupon">حذف</span>
+                                <span wire:loading wire:target="removeCoupon">…</span>
                             </button>
                         @else
                             <button type="button"
                                     class="rep-btn-primary rep-coupon-box__apply"
                                     wire:click="applyCoupon"
-                                    wire:loading.attr="disabled">
+                                    wire:loading.attr="disabled"
+                                    wire:target="{{ $repWizardBusyTargets }}">
                                 <span wire:loading.remove wire:target="applyCoupon">اعمال</span>
                                 <span wire:loading wire:target="applyCoupon">…</span>
                             </button>
@@ -689,7 +750,9 @@
                     </p>
                     <button type="button"
                             class="rep-review-cta__add-product"
-                            wire:click="goToStep('product')">
+                            wire:click="goToStep('product')"
+                            wire:loading.attr="disabled"
+                            wire:target="{{ $repWizardBusyTargets }}">
                         <span class="rep-review-cta__add-icon" aria-hidden="true">+</span>
                         <span>افزودن محصول دیگر</span>
                     </button>
@@ -698,7 +761,7 @@
                                 class="rep-review-cta__update"
                                 wire:click="refreshReviewTotals"
                                 wire:loading.attr="disabled"
-                                wire:target="refreshReviewTotals,finishDraft">
+                                wire:target="refreshReviewTotals,finishDraft,{{ $repWizardBusyTargets }}">
                             <span wire:loading.remove wire:target="refreshReviewTotals">بروزرسانی مبالغ</span>
                             <span wire:loading wire:target="refreshReviewTotals">در حال محاسبه…</span>
                         </button>
@@ -706,7 +769,7 @@
                                 class="rep-review-cta__submit"
                                 wire:click="finishDraft"
                                 wire:loading.attr="disabled"
-                                wire:target="finishDraft,refreshReviewTotals">
+                                wire:target="finishDraft,refreshReviewTotals,{{ $repWizardBusyTargets }}">
                             <span wire:loading.remove wire:target="finishDraft">ثبت پیش‌فاکتور</span>
                             <span wire:loading wire:target="finishDraft">در حال ثبت…</span>
                             <span class="rep-review-cta__submit-note" wire:loading.remove wire:target="finishDraft">بدون ویرایش بعدی</span>
@@ -743,6 +806,8 @@
         </section>
     @endif
     </div>
+
+    <x-rep-wizard-busy-overlay :targets="$repWizardBusyTargets" />
 
     @teleport('body')
         <div wire:loading.flex

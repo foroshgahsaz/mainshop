@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Services\Cache\ShopCacheService;
 use App\Support\ShopFormatter;
 use App\Support\ShopLabels;
+use App\Support\ShopVat;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -143,15 +144,18 @@ class CartService
         $subtotal = (int) $items->sum(fn ($item) => $item['price'] * $item['quantity']);
         $itemCount = (int) $items->sum('quantity');
         $discount = $this->discountAmount();
-        $afterDiscount = max(0, $subtotal - $discount);
+        $taxable = max(0, $subtotal - $discount);
         $shippingMethod = $this->shopCache->shippingMethods()->sortBy('price')->first();
-        $shipping = $shippingMethod ? $shippingMethod->calculateCost($afterDiscount) : 0;
+        $shipping = $shippingMethod ? $shippingMethod->calculateCost($taxable) : 0;
+        $vat = ShopVat::amountOnTaxable($taxable);
 
         return [
             'subtotal' => $subtotal,
             'discount' => $discount,
+            'taxable' => $taxable,
+            'vat' => $vat,
             'shipping' => $shipping,
-            'total' => $afterDiscount + $shipping,
+            'total' => $taxable + $vat + $shipping,
             'item_count' => $itemCount,
             'shipping_method' => $shippingMethod?->name,
         ];

@@ -99,6 +99,12 @@
                         <span>− {{ shop_money($summary['discount']) }}</span>
                     </div>
                 @endif
+                @if (($summary['vat'] ?? 0) > 0)
+                    <div class="flex justify-between text-gray-600">
+                        <span>ارزش افزوده ({{ config('shop.invoice.vat_percent', 10) }}٪)</span>
+                        <span>{{ shop_money($summary['vat']) }}</span>
+                    </div>
+                @endif
                 <div class="flex justify-between text-gray-600">
                     <span>
                         هزینه ارسال

@@ -2857,6 +2857,13 @@ html:has(.checkout-darik-modal--open) {
   color: #059669;
 }
 
+.checkout-summary__vat-hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: #6b7280;
+}
+
 .checkout-summary__total {
   display: flex;
   justify-content: space-between;

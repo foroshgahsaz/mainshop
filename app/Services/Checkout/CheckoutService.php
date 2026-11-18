@@ -15,6 +15,7 @@ use App\Services\Cart\StockService;
 use App\Services\Order\OrderActivityLogger;
 use App\Services\Sms\OrderSmsNotifier;
 use App\Support\ShopLabels;
+use App\Support\ShopVat;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -59,10 +60,12 @@ class CheckoutService
         $shippingMethod = $shippingMethodId
             ? ShippingMethod::where('is_active', true)->findOrFail($shippingMethodId)
             : null;
-        $shipping = $shippingMethod ? $shippingMethod->calculateCost($subtotal - $discount) : 0;
-        $total = max(0, $subtotal - $discount + $shipping);
+        $taxable = max(0, $subtotal - $discount);
+        $shipping = $shippingMethod ? $shippingMethod->calculateCost($taxable) : 0;
+        $vat = ShopVat::amountOnTaxable($taxable);
+        $total = max(0, $taxable + $vat + $shipping);
 
-        return compact('items', 'subtotal', 'coupon', 'couponError', 'discount', 'shippingMethod', 'shipping', 'total');
+        return compact('items', 'subtotal', 'coupon', 'couponError', 'discount', 'shippingMethod', 'shipping', 'taxable', 'vat', 'total');
     }
 
     public function placeOrder(

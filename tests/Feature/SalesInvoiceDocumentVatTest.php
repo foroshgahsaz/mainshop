@@ -43,7 +43,7 @@ class SalesInvoiceDocumentVatTest extends TestCase
         $this->assertFalse($empty->showsSuccessfulPaymentsBlock());
     }
 
-    public function test_financial_breakdown_adds_ten_percent_vat_line_amount(): void
+    public function test_additive_ten_percent_vat_on_taxable_base(): void
     {
         config(['shop.invoice.vat_percent' => 10]);
 
@@ -58,17 +58,16 @@ class SalesInvoiceDocumentVatTest extends TestCase
             itemsTotal: 1_000_000,
             discountAmount: 0,
             shippingAmount: 0,
-            finalAmount: 1_000_000,
+            finalAmount: 1_100_000,
             showVatBreakdown: true,
         );
 
-        $this->assertSame(90909, $doc->vatAmount());
-        $this->assertSame(909_091, $doc->payableAmountExcludingVat());
-        $this->assertSame(909_091, $doc->priceExcludingVat(1_000_000));
-        $this->assertSame(1_000_000, $doc->payableAmount());
+        $this->assertSame(100_000, $doc->vatAmount());
+        $this->assertSame(1_100_000, $doc->goodsTotalIncludingVat());
+        $this->assertSame(1_100_000, $doc->payableAmount());
     }
 
-    public function test_product_lines_vat_breakdown_for_representative_style_invoice(): void
+    public function test_product_lines_vat_matches_order_taxable(): void
     {
         config(['shop.invoice.vat_percent' => 10]);
 
@@ -93,17 +92,16 @@ class SalesInvoiceDocumentVatTest extends TestCase
             itemsTotal: 1_100_000,
             discountAmount: 0,
             shippingAmount: 0,
-            finalAmount: 1_100_000,
+            finalAmount: 1_210_000,
             showVatBreakdown: true,
         );
 
-        $this->assertSame(1_000_000, $doc->productLinesNetTotal());
-        $this->assertSame(100_000, $doc->productLinesVatAmount());
-        $this->assertSame(1_100_000, $doc->productLinesGrossTotal());
-        $this->assertSame(500_000, $doc->lineAmountForDisplay(550_000));
+        $this->assertSame(1_100_000, $doc->productLinesNetTotal());
+        $this->assertSame(110_000, $doc->productLinesVatAmount());
+        $this->assertSame(550_000, $doc->lineAmountForDisplay(550_000));
     }
 
-    public function test_customer_document_hides_vat(): void
+    public function test_vat_can_be_hidden_when_breakdown_disabled(): void
     {
         $doc = new SalesInvoiceDocument(
             title: 'فاکتور',

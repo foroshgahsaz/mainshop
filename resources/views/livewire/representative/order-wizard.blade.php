@@ -734,6 +734,12 @@
                                 <strong>{{ $order->freightCarrier->displayLabel() }}</strong>
                             </div>
                         @endif
+                        @if ($order->vatAmount() > 0)
+                            <div class="rep-order-totals-card__row">
+                                <span>ارزش افزوده ({{ config('shop.invoice.vat_percent', 10) }}٪)</span>
+                                <strong>{{ $this->formatMoney($order->vatAmount()) }}</strong>
+                            </div>
+                        @endif
                         <div class="rep-order-totals-card__row">
                             <span>درگاه</span>
                             <strong>{{ \App\Support\ShopLabels::paymentMethod($order->payment_method) }}</strong>

@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\OrderInvoiceLine;
 use App\Services\Representative\RepresentativeDraftCouponService;
 use App\Support\Order\OrderItemLinePricing;
+use App\Support\ShopVat;
 
 class OrderInvoiceTotalsService
 {
@@ -50,10 +51,13 @@ class OrderInvoiceTotalsService
             $couponDiscount = app(RepresentativeDraftCouponService::class)->couponDiscountAmount($order);
         }
 
+        $taxable = max(0, $itemsNet - $orderDiscount - $couponDiscount);
+        $vat = ShopVat::amountOnTaxable($taxable);
+
         $order->update([
             'total_amount' => $itemsGross,
             'discount_amount' => $itemDiscountTotal + $orderDiscount + $couponDiscount,
-            'final_amount' => max(0, $itemsNet - $orderDiscount - $couponDiscount + $feesTotal + $shipping),
+            'final_amount' => max(0, $taxable + $vat + $feesTotal + $shipping),
         ]);
 
         return $order->fresh(['items', 'invoiceLines']);

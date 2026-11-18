@@ -31,7 +31,7 @@ return [
         'direct_representative_id' => (int) env('SHOP_DIRECT_REPRESENTATIVE_ID', 81),
     ],
 
-    /** فاکتور PDF مالی: سهم ارزش افزوده از مبلغ قابل پرداخت (درصد، فقط نسخه مالی) */
+    /** ارزش افزوده: درصد روی پایهٔ کالا (پس از تخفیف) که به مبلغ نهایی اضافه می‌شود — `SHOP_INVOICE_VAT_PERCENT` */
     'invoice' => [
         'vat_percent' => (int) env('SHOP_INVOICE_VAT_PERCENT', 10),
     ],
@@ -91,7 +91,7 @@ return [
 
     /** Bump css_version after shop CSS changes if CDN/browser keeps old custom.css */
     'assets' => [
-        'css_version' => (int) env('SHOP_CSS_VERSION', 18),
+        'css_version' => (int) env('SHOP_CSS_VERSION', 19),
     ],
 
 ];

@@ -4,6 +4,7 @@ namespace App\Filament\Representative\Resources\DraftOrderResource\Pages;
 
 use App\Filament\Representative\Resources\DraftOrderResource;
 use App\Models\Order;
+use App\Rules\DarikMemberCode;
 use App\Services\Representative\ProformaReservationRequestService;
 use App\Services\Representative\RepresentativeDraftOrderService;
 use App\Services\Representative\RepresentativeProformaPaymentService;
@@ -23,6 +24,13 @@ class ViewDraftOrder extends ViewRecord
     public string $plannedCreditEditRial = '';
 
     public ?int $plannedCreditEdit = null;
+
+    public bool $showDarikWalletModal = false;
+
+    public string $darikMemberCodeDraft = '';
+
+    /** @var 'credit'|'full'|'save'|null پس از تأیید مودال */
+    public ?string $darikPayIntent = null;
 
     protected static string $resource = DraftOrderResource::class;
 
@@ -53,6 +61,10 @@ class ViewDraftOrder extends ViewRecord
             if ($remainCash > 0) {
                 $this->cashPayAmount = RialAmountInput::formatRialFromToman($remainCash);
             }
+        }
+
+        if ($this->shouldAutoOpenDarikWalletModal($order)) {
+            $this->openDarikWalletModal($order, 'credit');
         }
     }
 
@@ -98,27 +110,74 @@ class ViewDraftOrder extends ViewRecord
                     .' از درگاه '
                     .ShopLabels::paymentMethod($order->payment_method)
                     .' انجام می‌شود.')
-                ->action(function () use ($order): void {
-                    $representative = auth()->user();
-                    if ($representative === null) {
-                        return;
-                    }
-
-                    try {
-                        $url = app(RepresentativeProformaPaymentService::class)
-                            ->initiateGatewayPayment($order->fresh(), $representative);
-                        $this->redirect($url, navigate: false);
-                    } catch (\Throwable $e) {
-                        Notification::make()
-                            ->title('خطا در اتصال به درگاه')
-                            ->body($e->getMessage())
-                            ->danger()
-                            ->send();
-                    }
-                });
+                ->action(fn () => $this->payProformaFromPage(app(RepresentativeProformaPaymentService::class)));
         }
 
         return $actions;
+    }
+
+    public function openDarikWalletModal(Order $order, string $intent): void
+    {
+        $this->darikMemberCodeDraft = (string) ($order->user?->darik_member_code ?? '');
+        $this->darikPayIntent = $intent;
+        $this->showDarikWalletModal = true;
+        $this->resetValidation(['darikMemberCodeDraft']);
+    }
+
+    public function cancelDarikWalletModal(): void
+    {
+        $this->showDarikWalletModal = false;
+        $this->darikPayIntent = null;
+        $this->resetValidation(['darikMemberCodeDraft']);
+    }
+
+    public function confirmDarikWalletModal(): void
+    {
+        $this->validate(
+            [
+                'darikMemberCodeDraft' => ['required', 'string', new DarikMemberCode],
+            ],
+            [
+                'darikMemberCodeDraft.required' => 'شناسه کیف پول داریک را وارد کنید.',
+            ]
+        );
+
+        $order = $this->getRecord()->fresh(['user']);
+        $normalized = DarikMemberCode::normalize($this->darikMemberCodeDraft);
+
+        $customer = $order->user;
+        if ($customer && $customer->darik_member_code !== $normalized) {
+            $customer->update(['darik_member_code' => $normalized]);
+        }
+
+        $intent = $this->darikPayIntent;
+        $this->showDarikWalletModal = false;
+        $this->darikPayIntent = null;
+        $this->resetValidation(['darikMemberCodeDraft']);
+
+        $payments = app(RepresentativeProformaPaymentService::class);
+
+        try {
+            if ($intent === 'credit') {
+                $this->executePayCreditPortion($payments);
+            } elseif ($intent === 'full') {
+                $this->executePayProformaFromPage($payments);
+            } else {
+                Notification::make()
+                    ->title('شناسه داریک ذخیره شد')
+                    ->body('برای مشتری '.$customer?->name.' ثبت شد. اکنون می‌توانید پرداخت اعتبار را بزنید.')
+                    ->success()
+                    ->send();
+            }
+        } catch (\Throwable $e) {
+            Notification::make()
+                ->title('خطا در اتصال به درگاه')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+        }
+
+        $this->record = $order->fresh(['payments', 'user', 'freightCarrier']);
     }
 
     public function requestReReservation(ProformaReservationRequestService $requests): void
@@ -150,23 +209,15 @@ class ViewDraftOrder extends ViewRecord
 
     public function payProformaFromPage(RepresentativeProformaPaymentService $payments): void
     {
-        $order = $this->getRecord();
-        $representative = auth()->user();
+        $order = $this->getRecord()->fresh(['payments', 'user']);
 
-        if ($representative === null) {
+        if ($this->shouldCollectDarikWalletBeforeFullGatewayPay($order)) {
+            $this->openDarikWalletModal($order, 'full');
+
             return;
         }
 
-        try {
-            $url = $payments->initiateGatewayPayment($order->fresh(['payments']), $representative);
-            $this->redirect($url, navigate: false);
-        } catch (\Throwable $e) {
-            Notification::make()
-                ->title('خطا در اتصال به درگاه')
-                ->body($e->getMessage())
-                ->danger()
-                ->send();
-        }
+        $this->executePayProformaFromPage($payments);
     }
 
     public function payCashPortion(RepresentativeProformaPaymentService $payments): void
@@ -212,14 +263,48 @@ class ViewDraftOrder extends ViewRecord
 
     public function payCreditPortion(RepresentativeProformaPaymentService $payments): void
     {
+        $order = $this->getRecord()->fresh(['payments', 'user']);
+
+        if ($this->shouldCollectDarikWalletBeforeCreditPay($order)) {
+            $this->openDarikWalletModal($order, 'credit');
+
+            return;
+        }
+
+        $this->executePayCreditPortion($payments);
+    }
+
+    protected function executePayProformaFromPage(RepresentativeProformaPaymentService $payments): void
+    {
+        $order = $this->getRecord();
         $representative = auth()->user();
 
         if ($representative === null) {
             return;
         }
 
-        $order = $this->getRecord()->fresh(['payments']);
-        $split = app(\App\Services\Representative\RepresentativeProformaSplitPayment::class);
+        try {
+            $url = $payments->initiateGatewayPayment($order->fresh(['payments', 'user']), $representative);
+            $this->redirect($url, navigate: false);
+        } catch (\Throwable $e) {
+            Notification::make()
+                ->title('خطا در اتصال به درگاه')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+        }
+    }
+
+    protected function executePayCreditPortion(RepresentativeProformaPaymentService $payments): void
+    {
+        $representative = auth()->user();
+
+        if ($representative === null) {
+            return;
+        }
+
+        $order = $this->getRecord()->fresh(['payments', 'user']);
+        $split = app(RepresentativeProformaSplitPayment::class);
         $amount = $split->remainingCreditAmount($order);
 
         if ($amount <= 0) {
@@ -238,6 +323,65 @@ class ViewDraftOrder extends ViewRecord
                 ->danger()
                 ->send();
         }
+    }
+
+    protected function customerHasValidDarikCode(Order $order): bool
+    {
+        $code = DarikMemberCode::normalize($order->user?->darik_member_code ?? '');
+
+        return (bool) preg_match('/^5892\d{12}$/', $code);
+    }
+
+    protected function orderCreditGatewayIsDarik(Order $order): bool
+    {
+        return (string) $order->payment_method === 'darik';
+    }
+
+    protected function shouldCollectDarikWalletBeforeCreditPay(Order $order): bool
+    {
+        if (! $order->canRepresentativePayProforma()) {
+            return false;
+        }
+
+        if (! $this->orderCreditGatewayIsDarik($order)) {
+            return false;
+        }
+
+        return ! $this->customerHasValidDarikCode($order);
+    }
+
+    protected function shouldCollectDarikWalletBeforeFullGatewayPay(Order $order): bool
+    {
+        if (! $order->canRepresentativePayProforma()) {
+            return false;
+        }
+
+        $split = app(RepresentativeProformaSplitPayment::class);
+
+        if ($split->usesSplitPlan($order) && $split->remainingCashAmount($order) > 0) {
+            return false;
+        }
+
+        if ($split->usesSplitPlan($order) && $split->remainingCreditAmount($order) <= 0) {
+            return false;
+        }
+
+        return $this->shouldCollectDarikWalletBeforeCreditPay($order);
+    }
+
+    protected function shouldAutoOpenDarikWalletModal(Order $order): bool
+    {
+        if (! $this->shouldCollectDarikWalletBeforeCreditPay($order)) {
+            return false;
+        }
+
+        $split = app(RepresentativeProformaSplitPayment::class);
+
+        if ($split->usesSplitPlan($order) && $split->remainingCashAmount($order) > 0) {
+            return false;
+        }
+
+        return $split->remainingCreditAmount($order) > 0 || ! $split->usesSplitPlan($order);
     }
 
     public function saveSplitPaymentPlan(RepresentativeDraftOrderService $drafts): void
@@ -262,7 +406,7 @@ class ViewDraftOrder extends ViewRecord
             \App\Support\OrderProformaSplitColumns::ensureAvailable();
 
             if ($credit !== null && $credit > 0 && $credit < $final) {
-                $split = app(\App\Services\Representative\RepresentativeProformaSplitPayment::class);
+                $split = app(RepresentativeProformaSplitPayment::class);
                 $split->assertPlanAmounts($final, $credit);
                 $plan = $order->creditPlan;
                 $cashGw = $order->proforma_cash_gateway

@@ -3,7 +3,9 @@
 namespace App\Services\Representative;
 
 use App\Models\Order;
+use App\Models\Payment;
 use App\Models\User;
+use App\Rules\DarikMemberCode;
 use App\Services\Order\OrderActivityLogger;
 use App\Services\Payment\PaymentGatewayCatalog;
 use App\Services\Payment\PaymentService;
@@ -37,6 +39,7 @@ class RepresentativeProformaPaymentService
         $this->catalog->assertEnabled($gateway);
 
         $payment = $this->payments->createForOrder($order, $gateway, $representative->id);
+        $this->attachDarikMemberCodeIfNeeded($payment, $order->fresh('user'));
 
         $this->orderLog->system(
             $order,
@@ -44,7 +47,7 @@ class RepresentativeProformaPaymentService
             'rep_payment_initiated'
         );
 
-        return $this->payments->initiate($payment, $order->fresh(['user', 'representative']));
+        return $this->payments->initiate($payment->fresh(), $order->fresh(['user', 'representative']));
     }
 
     public function initiateCashPayment(Order $order, User $representative, int $amountTomans): string
@@ -58,6 +61,7 @@ class RepresentativeProformaPaymentService
         $this->catalog->assertEnabled($gateway);
 
         $payment = $this->payments->createForOrder($order, $gateway, $representative->id, $amountTomans);
+        $this->attachDarikMemberCodeIfNeeded($payment, $order->fresh('user'));
 
         $this->orderLog->system(
             $order,
@@ -65,7 +69,7 @@ class RepresentativeProformaPaymentService
             'rep_payment_cash_initiated'
         );
 
-        return $this->payments->initiate($payment, $order->fresh(['user', 'representative']));
+        return $this->payments->initiate($payment->fresh(), $order->fresh(['user', 'representative']));
     }
 
     public function initiateCreditPayment(Order $order, User $representative, int $amountTomans): string
@@ -76,6 +80,7 @@ class RepresentativeProformaPaymentService
         $this->catalog->assertEnabled($gateway);
 
         $payment = $this->payments->createForOrder($order, $gateway, $representative->id, $amountTomans);
+        $this->attachDarikMemberCodeIfNeeded($payment, $order->fresh('user'));
 
         $this->orderLog->system(
             $order,
@@ -83,7 +88,28 @@ class RepresentativeProformaPaymentService
             'rep_payment_credit_initiated'
         );
 
-        return $this->payments->initiate($payment, $order->fresh(['user', 'representative']));
+        return $this->payments->initiate($payment->fresh(), $order->fresh(['user', 'representative']));
+    }
+
+    protected function attachDarikMemberCodeIfNeeded(Payment $payment, Order $order): void
+    {
+        if ($payment->gateway !== 'darik') {
+            return;
+        }
+
+        $code = DarikMemberCode::normalize($order->user?->darik_member_code ?? '');
+        if (! preg_match('/^5892\d{12}$/', $code)) {
+            throw new RuntimeException('شناسه ۱۶ رقمی کیف پول داریک (شروع با 5892) برای مشتری ثبت نشده است.');
+        }
+
+        $existing = $payment->raw_response;
+        $payload = is_array($existing) ? $existing : [];
+
+        $payment->update([
+            'raw_response' => array_merge($payload, [
+                'darik' => ['member_code' => $code],
+            ]),
+        ]);
     }
 
     public function assertCanPay(Order $order, User $representative): void

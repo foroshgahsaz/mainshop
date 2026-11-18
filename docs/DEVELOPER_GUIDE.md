@@ -742,7 +742,7 @@ $middleware->validateCsrfTokens(except: [
 | Admin | `/admin/darik` → `ManageDarik.php` |
 | OTP UI | `/payment/darik/{tracking}` — صفحه داخل پوسته حساب (شبیه سفارش‌ها)؛ `Confirm` با OTP پنج‌رقمی |
 | صفحه طرح | `/plans/darik/` — معرفی کیف پول؛ کارت در `/plans`/خانه با `EnsureDarikCreditPlan` (migrate / deploy-recover / اولین بازدید / `shop:ensure-darik-credit-plan`) |
-| شناسه خریدار | `users.darik_member_code` (۱۶ رقم، با `5892`) — فقط checkout فروشگاه (نه فرم ایجاد مشتری نماینده) |
+| شناسه خریدار | `users.darik_member_code` (۱۶ رقم، با `5892`) — checkout فروشگاه و **پیش‌فاکتور نماینده** (`ViewDraftOrder` مودال قبل از پرداخت اعتبار) |
 
 **Checkout:** با انتخاب درگاه داریک مودال شناسه کیف پول باز می‌شود (`CheckoutPage::openDarikWalletModal`)؛ بعد از تأیید، خلاصهٔ شناسه در **خلاصه سفارش** (بالای مبلغ نهایی، با خط جدا) نمایش داده می‌شود. مودال با `@if` رندر می‌شود (نه `wire:ignore`). اگر `custom.min.css` از ادمین فعال است، بعد از deploy یک‌بار `shop:minify-assets` بزنید.
 
@@ -1413,6 +1413,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-18 | نماینده + داریک: مودال شناسه ۱۶رقمی مشتری در پیش‌فاکتور؛ ذخیره `darik_member_code` قبل از `initiateCreditPayment` |
 | 2026-11-18 | ویزارد نماینده: overlay اسپینر (`rep-wizard-busy-overlay`) + `wire:loading` روی انتقال مراحل/ثبت پیش‌فاکتور؛ جستجوی محصول بدون تیره شدن کل صفحه |
 | 2026-11-17 | نوپی: `nopayCredential` — رمز خالی nopay دیگر با `?:` به toopi/env نمی‌افتد؛ `password_source` در `raw_response` |
 | 2026-11-17 | نوپی: اولویت با `service_password_encrypted` ادمین (مقدار پشتیبانی)؛ رمز متنی فقط اگر encrypted خالی باشد |

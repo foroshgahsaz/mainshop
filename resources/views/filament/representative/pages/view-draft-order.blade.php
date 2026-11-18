@@ -260,6 +260,12 @@
                     <dd>{{ $creditPlan->name }}</dd>
                 </div>
             @endif
+            @if ($order->vatAmount() > 0)
+                <div class="rep-proforma-summary__row">
+                    <dt>ارزش افزوده ({{ config('shop.invoice.vat_percent', 10) }}٪)</dt>
+                    <dd>{{ \App\Support\ShopFormatter::money($order->vatAmount()) }}</dd>
+                </div>
+            @endif
             <div class="rep-proforma-summary__row rep-proforma-summary__row--gateway">
                 <dt>درگاه پرداخت</dt>
                 <dd class="rep-proforma-summary__gateway">

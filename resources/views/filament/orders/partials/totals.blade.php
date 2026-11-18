@@ -27,6 +27,12 @@
                 <dd>+{{ number_format($feeLine['amount']) }} تومان</dd>
             </div>
         @endforeach
+        @if ($order->vatAmount() > 0)
+            <div class="admin-order__totals-row">
+                <dt>ارزش افزوده ({{ config('shop.invoice.vat_percent', 10) }}٪)</dt>
+                <dd>+{{ number_format($order->vatAmount()) }} تومان</dd>
+            </div>
+        @endif
         <div class="admin-order__totals-row">
             <dt>هزینه ارسال @if($order->shippingMethod)({{ $order->shippingMethod->name }})@endif</dt>
             <dd>{{ number_format($order->shipping_amount) }} تومان</dd>

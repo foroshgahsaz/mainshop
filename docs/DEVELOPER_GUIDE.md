@@ -1413,6 +1413,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-18 | ارزش‌افزوده یکسان: `ShopVat` — ۱۰٪ افزایشی روی پایهٔ کالا؛ ردیف در تسویه/سبد، حساب کاربر، ادمین، پیش‌فاکتور نماینده؛ `CheckoutService` / `OrderInvoiceTotalsService`؛ PDF/HTML فاکتور (`SalesInvoiceDocument`، همه سفارش‌ها) |
 | 2026-11-18 | صفحه محصول: یادآور ارزش‌افزوده زیر قیمت در باکس خرید (`shop.invoice.vat_percent`، پیش‌فرض ۱۰٪) |
 | 2026-11-18 | نماینده + داریک: مودال شناسه ۱۶رقمی مشتری در پیش‌فاکتور؛ ذخیره `darik_member_code` قبل از `initiateCreditPayment` |
 | 2026-11-18 | ویزارد نماینده: overlay اسپینر (`rep-wizard-busy-overlay`) + `wire:loading` روی انتقال مراحل/ثبت پیش‌فاکتور؛ جستجوی محصول بدون تیره شدن کل صفحه |

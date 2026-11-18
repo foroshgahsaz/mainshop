@@ -291,6 +291,17 @@ class Order extends Model
         return max(0, (int) $this->final_amount - $this->paidAmount());
     }
 
+    /** پایهٔ مشمول ارزش افزوده (کالا پس از تخفیف، بدون ارسال). */
+    public function taxableGoodsAmount(): int
+    {
+        return max(0, (int) $this->total_amount - (int) $this->discount_amount);
+    }
+
+    public function vatAmount(): int
+    {
+        return \App\Support\ShopVat::amountOnTaxable($this->taxableGoodsAmount());
+    }
+
     public function hasSuccessfulPayment(): bool
     {
         if ($this->relationLoaded('payments')) {

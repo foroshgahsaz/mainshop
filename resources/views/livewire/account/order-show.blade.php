@@ -65,6 +65,12 @@
             @if($order->discount_amount > 0)
                 <div class="flex justify-between text-emerald-600"><dt>تخفیف</dt><dd>−{{ number_format($order->discount_amount) }} تومان</dd></div>
             @endif
+            @if ($order->vatAmount() > 0)
+                <div class="flex justify-between">
+                    <dt class="text-gray-500">ارزش افزوده ({{ config('shop.invoice.vat_percent', 10) }}٪)</dt>
+                    <dd>{{ number_format($order->vatAmount()) }} تومان</dd>
+                </div>
+            @endif
             @if($order->shipping_amount > 0)
                 <div class="flex justify-between"><dt class="text-gray-500">هزینه ارسال</dt><dd>{{ number_format($order->shipping_amount) }} تومان</dd></div>
             @endif

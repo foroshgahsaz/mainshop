@@ -36,11 +36,8 @@
                 :compare="$comparePrice"
                 class="items-start text-right product-buy-box__price-wrap"
             />
-            @php($vatPercent = max(0, (int) config('shop.invoice.vat_percent', 10)))
-            @if ($vatPercent > 0 && ! ($shopPricesHidden ?? false))
-                <p class="product-buy-box__vat-hint">
-                    {{ $vatPercent }}٪ به مبلغ فوق به‌عنوان ارزش‌افزوده در پرداخت نهایی افزوده می‌شود.
-                </p>
+            @if (! ($shopPricesHidden ?? false) && ($vatHint = \App\Support\ShopVat::reminderText()))
+                <p class="product-buy-box__vat-hint">{{ $vatHint }}</p>
             @endif
             @if ($productNotForSale ?? false)
                 <p class="product-not-for-sale-label mt-2">غیر قابل فروش</p>

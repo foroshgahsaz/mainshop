@@ -248,11 +248,20 @@
                                         <span>− {{ shop_money($preview['discount']) }}</span>
                                     </div>
                                 @endif
+                                @if (($preview['vat'] ?? 0) > 0)
+                                    <div class="checkout-summary__line">
+                                        <span>ارزش افزوده ({{ config('shop.invoice.vat_percent', 10) }}٪)</span>
+                                        <span>{{ shop_money($preview['vat']) }}</span>
+                                    </div>
+                                @endif
                                 <div class="checkout-summary__line">
                                     <span>ارسال</span>
                                     <span>{{ $preview['shipping'] === 0 ? 'رایگان' : shop_money($preview['shipping']) }}</span>
                                 </div>
                             </div>
+                            @if ($vatHint = \App\Support\ShopVat::reminderText())
+                                <p class="checkout-summary__vat-hint">{{ $vatHint }}</p>
+                            @endif
                             @if($paymentMethod === 'darik' && filled($darikMemberCode))
                                 <div class="checkout-darik-summary checkout-darik-summary--in-total">
                                     <div class="checkout-darik-summary__text">

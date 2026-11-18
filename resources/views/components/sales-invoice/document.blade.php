@@ -127,7 +127,7 @@
                         @if ($document->showsLineDiscountColumn())
                             <td></td>
                         @endif
-                        <td dir="ltr">{{ $siRial($document->productLinesGrossTotal()) }}</td>
+                        <td dir="ltr">{{ $siRial($document->goodsTotalIncludingVat()) }}</td>
                     </tr>
                 @else
                     <tr class="si-sum">
@@ -165,7 +165,7 @@
                             <dd>{{ number_format($line['quantity']) }}</dd>
                         </div>
                         <div>
-                            <dt>بهای واحد@if($document->showVatBreakdown && ! $isAdjustment) (بدون مالیات)@endif</dt>
+                            <dt>بهای واحد</dt>
                             <dd dir="ltr">{{ ShopLabels::formatInvoiceMoney($document->lineAmountForDisplay((int) $line['unit_price'], $isAdjustment)) }}</dd>
                         </div>
                         @if ($document->showsLineDiscountColumn())
@@ -175,7 +175,7 @@
                             </div>
                         @endif
                         <div class="si-line-card__total">
-                            <dt>مبلغ کل@if($document->showVatBreakdown && ! $isAdjustment) (بدون مالیات)@endif</dt>
+                            <dt>مبلغ کل</dt>
                             <dd dir="ltr">{{ ShopLabels::formatInvoiceMoney($document->lineAmountForDisplay((int) $line['line_total'], $isAdjustment)) }}</dd>
                         </div>
                     </dl>
@@ -193,7 +193,7 @@
                 <div class="si-line-card si-line-card--sum">
                     <div class="si-line-card__sum-row">
                         <span>جمع کل</span>
-                        <strong dir="ltr">{{ ShopLabels::formatInvoiceMoney($document->productLinesGrossTotal()) }}</strong>
+                        <strong dir="ltr">{{ ShopLabels::formatInvoiceMoney($document->goodsTotalIncludingVat()) }}</strong>
                     </div>
                 </div>
             @else
@@ -227,6 +227,9 @@
             <td class="si-footer__totals">
                 @if ($document->discountAmount > 0)
                     <div><span class="si-k">جمع تخفیف‌ها:</span> {{ ShopLabels::formatInvoiceMoney($document->discountAmount) }}</div>
+                @endif
+                @if ($document->showVatBreakdown && $document->vatAmount() > 0)
+                    <div><span class="si-k">ارزش افزوده ({{ $document->vatPercent() }}٪):</span> {{ ShopLabels::formatInvoiceMoney($document->vatAmount()) }}</div>
                 @endif
                 @if ($document->feesTotal > 0)
                     <div><span class="si-k">جمع هزینه‌های اضافه:</span> {{ ShopLabels::formatInvoiceMoney($document->feesTotal) }}</div>

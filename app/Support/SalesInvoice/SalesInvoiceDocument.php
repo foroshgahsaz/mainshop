@@ -2,6 +2,8 @@
 
 namespace App\Support\SalesInvoice;
 
+use App\Support\ShopVat;
+
 final class SalesInvoiceDocument
 {
     /**
@@ -25,7 +27,7 @@ final class SalesInvoiceDocument
         public ?string $paymentMethodLabel = null,
         public ?string $freightLabel = null,
         public ?string $notes = null,
-        public bool $showVatBreakdown = false,
+        public bool $showVatBreakdown = true,
         public int $paidCashSuccessTomans = 0,
         public int $paidCreditSuccessTomans = 0,
     ) {}
@@ -37,54 +39,22 @@ final class SalesInvoiceDocument
 
     public function vatPercent(): int
     {
-        return max(0, (int) config('shop.invoice.vat_percent', 10));
+        return ShopVat::percent();
     }
 
-    /** ضریب قیمت با مالیات (مثلاً ۱.۱ برای ۱۰٪). */
-    public function grossPriceMultiplier(): float
+    /** پایهٔ مشمول مالیات بر ارزش افزوده (پس از تخفیف‌ها، بدون ارسال و هزینه‌های جانبی). */
+    public function taxableGoodsAmount(): int
     {
-        $percent = $this->vatPercent();
-
-        return 1 + ($percent / 100);
+        return max(0, $this->itemsTotal - $this->discountAmount);
     }
 
-    /**
-     * قیمت اصلی بدون مالیات = قیمت با مالیات ÷ (۱ + درصد/۱۰۰).
-     * مبالغ فروشگاه به‌صورت شامل ارزش افزوده ذخیره می‌شوند.
-     */
-    public function priceExcludingVat(int $amountWithVat): int
-    {
-        if ($this->vatPercent() <= 0) {
-            return $amountWithVat;
-        }
-
-        return (int) round($amountWithVat / $this->grossPriceMultiplier());
-    }
-
-    /** مبلغ قابل پرداخت بدون سهم ارزش افزوده (فقط نمایش/PDF مالی). */
-    public function payableAmountExcludingVat(): int
-    {
-        if (! $this->showVatBreakdown) {
-            return $this->payableAmount();
-        }
-
-        return $this->priceExcludingVat($this->payableAmount());
-    }
-
-    /** سهم ارزش افزوده داخل مبلغ نهایی (قیمت با مالیات − قیمت بدون مالیات). */
     public function vatAmount(): int
     {
         if (! $this->showVatBreakdown) {
             return 0;
         }
 
-        if ($this->vatPercent() <= 0) {
-            return 0;
-        }
-
-        $gross = $this->payableAmount();
-
-        return max(0, $gross - $this->priceExcludingVat($gross));
+        return ShopVat::amountOnTaxable($this->taxableGoodsAmount());
     }
 
     /** @param  array<string, mixed>  $line */
@@ -93,7 +63,7 @@ final class SalesInvoiceDocument
         return ! (bool) ($line['is_adjustment'] ?? false);
     }
 
-    /** جمع مبلغ ردیف کالا (شامل مالیات). */
+    /** جمع مبلغ ردیف کالا. */
     public function productLinesGrossTotal(): int
     {
         $sum = 0;
@@ -107,36 +77,28 @@ final class SalesInvoiceDocument
         return $sum;
     }
 
-    /** جمع اقلام کالا بدون مالیات. */
+  /** جمع اقلام کالا برای نمایش (همان مبالغ ذخیره‌شده). */
     public function productLinesNetTotal(): int
     {
-        if (! $this->showVatBreakdown) {
-            return $this->productLinesGrossTotal();
-        }
-
-        return $this->priceExcludingVat($this->productLinesGrossTotal());
+        return $this->productLinesGrossTotal();
     }
 
-    /** سهم ارزش افزوده داخل جمع کالاها. */
+    /** سهم ارزش افزوده روی پایهٔ مشمول سفارش. */
     public function productLinesVatAmount(): int
     {
-        if (! $this->showVatBreakdown) {
-            return 0;
-        }
-
-        $gross = $this->productLinesGrossTotal();
-
-        return max(0, $gross - $this->priceExcludingVat($gross));
+        return $this->vatAmount();
     }
 
-    /** بهای واحد/ردیف برای PDF مالی (فقط ردیف کالا). */
-    public function lineAmountForDisplay(int $amountWithVat, bool $isAdjustmentLine = false): int
+    /** جمع کالا به‌همراه ردیف ارزش افزوده (قبل از ارسال و هزینه‌ها). */
+    public function goodsTotalIncludingVat(): int
     {
-        if (! $this->showVatBreakdown || $isAdjustmentLine) {
-            return $amountWithVat;
-        }
+        return $this->taxableGoodsAmount() + $this->vatAmount();
+    }
 
-        return $this->priceExcludingVat($amountWithVat);
+    /** بهای واحد/ردیف برای نمایش. */
+    public function lineAmountForDisplay(int $amountTomans, bool $isAdjustmentLine = false): int
+    {
+        return $amountTomans;
     }
 
     public function showsLineDiscountColumn(): bool

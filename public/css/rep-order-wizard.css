@@ -967,6 +967,15 @@
     display: none !important;
 }
 
+.rep-wizard-stage--busy {
+    pointer-events: none;
+    user-select: none;
+}
+
+.rep-wizard-busy-overlay {
+    z-index: 10040;
+}
+
 .rep-order-wizard {
     --rep-primary: #7367f0;
     --rep-primary-hover: #6258e8;

@@ -1215,19 +1215,38 @@ body.has-admin-bar .shop-app-shell {
   width: 100%;
 }
 
+.shop-top-banner__viewport--desktop {
+  display: none;
+}
+
+.shop-top-banner__viewport--mobile {
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .shop-top-banner__viewport--desktop {
+    display: block;
+  }
+
+  .shop-top-banner__viewport--mobile {
+    display: none;
+  }
+}
+
 .shop-top-banner__img {
   display: block;
   width: 100%;
   height: auto;
-  max-height: 120px;
   object-fit: cover;
   object-position: center;
 }
 
-@media (max-width: 767px) {
-  .shop-top-banner__img {
-    max-height: 72px;
-  }
+.shop-top-banner__viewport--desktop .shop-top-banner__img {
+  max-height: 120px;
+}
+
+.shop-top-banner__viewport--mobile .shop-top-banner__img {
+  max-height: 96px;
 }
 
 .shop-header {

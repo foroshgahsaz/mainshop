@@ -8,6 +8,9 @@
         $splitPay = app(\App\Services\Representative\RepresentativeProformaSplitPayment::class);
         $catalog = app(\App\Services\Payment\PaymentGatewayCatalog::class);
         $creditPlan = $order->creditPlan;
+        $darikCreditPay = (string) $order->payment_method === 'darik';
+        $customerDarikCode = \App\Rules\DarikMemberCode::normalize($order->user?->darik_member_code ?? '');
+        $customerDarikOk = (bool) preg_match('/^5892\d{12}$/', $customerDarikCode);
     @endphp
 
     <link rel="stylesheet" href="{{ asset('css/rep-order-wizard.css') }}?v={{ filemtime(public_path('css/rep-order-wizard.css')) }}">
@@ -148,11 +151,18 @@
                         </div>
                     @endif
 
+                    @if ($darikCreditPay && ! $customerDarikOk)
+                        <p class="rep-wizard-hint rep-darik-wallet-hint">
+                            برای پرداخت اعتبار داریک، شناسه ۱۶ رقمی کیف پول مشتری (شروع با <span dir="ltr">5892</span>) لازم است — با زدن دکمه پرداخت اعتبار، مودال ورود شناسه باز می‌شود.
+                        </p>
+                    @endif
+
                     @if ($canPay && $splitPay->remainingCreditAmount($order) > 0)
                         <button type="button"
                                 class="rep-btn-primary rep-payment-info__pay"
                                 wire:click="payCreditPortion"
-                                wire:loading.attr="disabled">
+                                wire:loading.attr="disabled"
+                                wire:target="payCreditPortion,confirmDarikWalletModal">
                             <span wire:loading.remove wire:target="payCreditPortion">پرداخت اعتبار ({{ \App\Support\ShopFormatter::money($splitPay->remainingCreditAmount($order)) }})</span>
                             <span wire:loading wire:target="payCreditPortion">در حال اتصال…</span>
                         </button>
@@ -259,4 +269,59 @@
         </dl>
 
     </section>
+
+    @if ($showDarikWalletModal)
+        <div class="rep-darik-wallet-backdrop"
+             role="presentation"
+             wire:click="cancelDarikWalletModal"
+             wire:key="rep-darik-wallet-modal">
+            <div class="rep-darik-wallet-modal"
+                 role="dialog"
+                 aria-modal="true"
+                 aria-labelledby="repDarikWalletTitle"
+                 wire:click.stop>
+                <h3 id="repDarikWalletTitle" class="rep-darik-wallet-modal__title">شناسه کیف پول داریک مشتری</h3>
+                <p class="rep-darik-wallet-modal__hint">
+                    برای مشتری <strong>{{ $order->user?->name }}</strong> — ۱۶ رقم که با <span dir="ltr">5892</span> شروع می‌شود (روی کارت یا اپ داریک).
+                </p>
+                <label class="rep-field__label" for="rep-darik-member-code">شناسه کاربری داریک</label>
+                <input id="rep-darik-member-code"
+                       type="text"
+                       inputmode="numeric"
+                       autocomplete="off"
+                       dir="ltr"
+                       maxlength="16"
+                       placeholder="5892xxxxxxxxxxxx"
+                       wire:model="darikMemberCodeDraft"
+                       class="rep-field__input rep-darik-wallet-modal__input"
+                       @keydown.enter.prevent="$wire.confirmDarikWalletModal()">
+                @error('darikMemberCodeDraft')
+                    <p class="rep-wizard-error">{{ $message }}</p>
+                @enderror
+                <div class="rep-darik-wallet-modal__actions">
+                    <button type="button"
+                            class="rep-btn-primary"
+                            wire:click="confirmDarikWalletModal"
+                            wire:loading.attr="disabled"
+                            wire:target="confirmDarikWalletModal">
+                        <span wire:loading.remove wire:target="confirmDarikWalletModal">
+                            @if ($darikPayIntent === 'credit' || $darikPayIntent === 'full')
+                                تأیید و رفتن به پرداخت
+                            @else
+                                تأیید و ذخیره
+                            @endif
+                        </span>
+                        <span wire:loading wire:target="confirmDarikWalletModal">در حال اتصال…</span>
+                    </button>
+                    <button type="button"
+                            class="rep-btn-secondary"
+                            wire:click="cancelDarikWalletModal"
+                            wire:loading.attr="disabled"
+                            wire:target="confirmDarikWalletModal">
+                        انصراف
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
 </x-filament-panels::page>

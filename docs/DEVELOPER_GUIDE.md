@@ -1413,7 +1413,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
-| 2026-11-19 | بنر بالای هدر: `site.top_banner_*` در تنظیمات عمومی؛ partial `top-header-banner`؛ GIF/تصویر + لینک |
+| 2026-11-19 | بنر بالای هدر: دسکتاپ/موبایل جدا (`top_banner_image_desktop` / `_mobile`، لینک و alt اختیاری موبایل)؛ partial `top-header-banner` |
 | 2026-11-18 | ارزش‌افزوده یکسان: `ShopVat` — ۱۰٪ افزایشی روی پایهٔ کالا؛ ردیف در تسویه/سبد، حساب کاربر، ادمین، پیش‌فاکتور نماینده؛ `CheckoutService` / `OrderInvoiceTotalsService`؛ PDF/HTML فاکتور (`SalesInvoiceDocument`، همه سفارش‌ها) |
 | 2026-11-18 | صفحه محصول: یادآور ارزش‌افزوده زیر قیمت در باکس خرید (`shop.invoice.vat_percent`، پیش‌فرض ۱۰٪) |
 | 2026-11-18 | نماینده + داریک: مودال شناسه ۱۶رقمی مشتری در پیش‌فاکتور؛ ذخیره `darik_member_code` قبل از `initiateCreditPayment` |

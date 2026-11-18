@@ -424,25 +424,66 @@ class SettingsService
             'disable_shop_purchase' => filter_var($this->get('site', 'disable_shop_purchase', false), FILTER_VALIDATE_BOOLEAN),
             'top_banner_enabled' => filter_var($this->get('site', 'top_banner_enabled', false), FILTER_VALIDATE_BOOLEAN),
             'top_banner_image' => $this->get('site', 'top_banner_image') ?: null,
+            'top_banner_image_desktop' => $this->get('site', 'top_banner_image_desktop')
+                ?: $this->get('site', 'top_banner_image'),
+            'top_banner_image_mobile' => $this->get('site', 'top_banner_image_mobile') ?: null,
             'top_banner_link' => $this->get('site', 'top_banner_link') ?: null,
+            'top_banner_link_mobile' => $this->get('site', 'top_banner_link_mobile') ?: null,
             'top_banner_alt' => (string) ($this->get('site', 'top_banner_alt') ?? ''),
+            'top_banner_alt_mobile' => (string) ($this->get('site', 'top_banner_alt_mobile') ?? ''),
         ];
     }
 
-    /** @return array{enabled: bool, image: ?string, link: ?string, alt: string, image_url: ?string} */
+    /**
+     * @return array{
+     *     enabled: bool,
+     *     show_desktop: bool,
+     *     show_mobile: bool,
+     *     desktop: array{image_url: ?string, link: ?string, alt: string},
+     *     mobile: array{image_url: ?string, link: ?string, alt: string},
+     * }
+     */
     public function siteTopBanner(): array
     {
         $site = $this->site();
-        $image = is_string($site['top_banner_image'] ?? null) && $site['top_banner_image'] !== ''
-            ? $site['top_banner_image']
+        $enabled = (bool) ($site['top_banner_enabled'] ?? false);
+
+        $desktopPath = is_string($site['top_banner_image_desktop'] ?? null) && $site['top_banner_image_desktop'] !== ''
+            ? $site['top_banner_image_desktop']
+            : null;
+        $mobilePath = is_string($site['top_banner_image_mobile'] ?? null) && $site['top_banner_image_mobile'] !== ''
+            ? $site['top_banner_image_mobile']
             : null;
 
+        $desktopUrl = $desktopPath ? \App\Support\ShopMedia::url($desktopPath) : null;
+        $mobileUrl = $mobilePath
+            ? \App\Support\ShopMedia::url($mobilePath)
+            : $desktopUrl;
+
+        $desktopLink = filled($site['top_banner_link'] ?? null) ? (string) $site['top_banner_link'] : null;
+        $mobileLink = filled($site['top_banner_link_mobile'] ?? null)
+            ? (string) $site['top_banner_link_mobile']
+            : $desktopLink;
+
+        $desktopAlt = (string) ($site['top_banner_alt'] ?? 'بنر تبلیغاتی');
+        $mobileAlt = filled($site['top_banner_alt_mobile'] ?? null)
+            ? (string) $site['top_banner_alt_mobile']
+            : $desktopAlt;
+
         return [
-            'enabled' => (bool) ($site['top_banner_enabled'] ?? false),
-            'image' => $image,
-            'link' => filled($site['top_banner_link'] ?? null) ? (string) $site['top_banner_link'] : null,
-            'alt' => (string) ($site['top_banner_alt'] ?? 'بنر تبلیغاتی'),
-            'image_url' => $image ? \App\Support\ShopMedia::url($image) : null,
+            'enabled' => $enabled,
+            'show_desktop' => $enabled && $desktopUrl !== null,
+            'show_mobile' => $enabled && $mobileUrl !== null,
+            'desktop' => [
+                'image_url' => $desktopUrl,
+                'link' => $desktopLink,
+                'alt' => $desktopAlt,
+            ],
+            'mobile' => [
+                'image_url' => $mobileUrl,
+                'link' => $mobileLink,
+                'alt' => $mobileAlt,
+            ],
         ];
     }
 

@@ -36,7 +36,7 @@
                              alt="{{ $mob['alt'] }}"
                              class="shop-top-banner__img"
                              width="768"
-                             height="80"
+                             height="35"
                              decoding="async"
                              fetchpriority="high">
                     </a>

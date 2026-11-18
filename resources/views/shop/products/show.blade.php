@@ -46,7 +46,7 @@
 @endsection
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('shop/css/product.css') }}">
+    <link rel="stylesheet" href="{{ asset('shop/css/product.css') }}?v={{ filemtime(public_path('shop/css/product.css')) }}">
 @endpush
 
 @push('scripts')

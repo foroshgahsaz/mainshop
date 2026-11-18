@@ -1413,6 +1413,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-18 | صفحه محصول: یادآور ارزش‌افزوده زیر قیمت در باکس خرید (`shop.invoice.vat_percent`، پیش‌فرض ۱۰٪) |
 | 2026-11-18 | نماینده + داریک: مودال شناسه ۱۶رقمی مشتری در پیش‌فاکتور؛ ذخیره `darik_member_code` قبل از `initiateCreditPayment` |
 | 2026-11-18 | ویزارد نماینده: overlay اسپینر (`rep-wizard-busy-overlay`) + `wire:loading` روی انتقال مراحل/ثبت پیش‌فاکتور؛ جستجوی محصول بدون تیره شدن کل صفحه |
 | 2026-11-17 | نوپی: `nopayCredential` — رمز خالی nopay دیگر با `?:` به toopi/env نمی‌افتد؛ `password_source` در `raw_response` |

@@ -566,6 +566,14 @@
   color: #6b7280;
 }
 
+.product-buy-box__vat-hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.55;
+  color: #6b7280;
+  font-weight: 500;
+}
+
 .product-qty {
   display: inline-flex;
   align-items: center;

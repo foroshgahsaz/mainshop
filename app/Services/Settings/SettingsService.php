@@ -422,6 +422,27 @@ class SettingsService
             ),
             'hide_shop_prices' => filter_var($this->get('site', 'hide_shop_prices', false), FILTER_VALIDATE_BOOLEAN),
             'disable_shop_purchase' => filter_var($this->get('site', 'disable_shop_purchase', false), FILTER_VALIDATE_BOOLEAN),
+            'top_banner_enabled' => filter_var($this->get('site', 'top_banner_enabled', false), FILTER_VALIDATE_BOOLEAN),
+            'top_banner_image' => $this->get('site', 'top_banner_image') ?: null,
+            'top_banner_link' => $this->get('site', 'top_banner_link') ?: null,
+            'top_banner_alt' => (string) ($this->get('site', 'top_banner_alt') ?? ''),
+        ];
+    }
+
+    /** @return array{enabled: bool, image: ?string, link: ?string, alt: string, image_url: ?string} */
+    public function siteTopBanner(): array
+    {
+        $site = $this->site();
+        $image = is_string($site['top_banner_image'] ?? null) && $site['top_banner_image'] !== ''
+            ? $site['top_banner_image']
+            : null;
+
+        return [
+            'enabled' => (bool) ($site['top_banner_enabled'] ?? false),
+            'image' => $image,
+            'link' => filled($site['top_banner_link'] ?? null) ? (string) $site['top_banner_link'] : null,
+            'alt' => (string) ($site['top_banner_alt'] ?? 'بنر تبلیغاتی'),
+            'image_url' => $image ? \App\Support\ShopMedia::url($image) : null,
         ];
     }
 

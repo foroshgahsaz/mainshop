@@ -1204,6 +1204,32 @@ body.has-admin-bar .shop-app-shell {
   padding-top: var(--shop-admin-bar-height);
 }
 
+.shop-top-banner {
+  width: 100%;
+  line-height: 0;
+  background: #f3f4f6;
+}
+
+.shop-top-banner__link {
+  display: block;
+  width: 100%;
+}
+
+.shop-top-banner__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 120px;
+  object-fit: cover;
+  object-position: center;
+}
+
+@media (max-width: 767px) {
+  .shop-top-banner__img {
+    max-height: 72px;
+  }
+}
+
 .shop-header {
   top: 0;
   overflow: visible;

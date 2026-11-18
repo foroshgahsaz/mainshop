@@ -64,6 +64,8 @@
 
     <div id="shopAppShell" class="shop-app-shell">
 
+    @include('shop.partials.top-header-banner')
+
     @include('shop.partials.header')
 
     <main>

@@ -53,6 +53,10 @@ class ManageGeneralSettings extends Page implements HasForms
             'telegram' => $site['telegram'],
             'maintenance_mode' => $site['maintenance_mode'],
             'maintenance_message' => $site['maintenance_message'],
+            'top_banner_enabled' => $site['top_banner_enabled'] ?? false,
+            'top_banner_image' => ($site['top_banner_image'] ?? null) ? [$site['top_banner_image']] : [],
+            'top_banner_link' => $site['top_banner_link'] ?? '',
+            'top_banner_alt' => $site['top_banner_alt'] ?? '',
         ]);
     }
 
@@ -101,6 +105,28 @@ class ManageGeneralSettings extends Page implements HasForms
                             ->url()
                             ->placeholder('https://t.me/...'),
                     ])->columns(2),
+                Forms\Components\Section::make('بنر بالای هدر')
+                    ->description('نوار تمام‌عرض بالای هدر فروشگاه — تصویر یا GIF و لینک مقصد (مثلاً کمپین یا صفحهٔ فرود).')
+                    ->schema([
+                        Forms\Components\Toggle::make('top_banner_enabled')
+                            ->label('نمایش بنر')
+                            ->inline(false)
+                            ->live(),
+                        ShopMediaPicker::image('top_banner_image', 'settings/banners', 'تصویر بنر')
+                            ->helperText('پیشنهاد: نوار افقی تمام‌عرض (مثلاً نسبت ۳۲:۱). GIF پشتیبانی می‌شود.')
+                            ->visible(fn (Forms\Get $get): bool => (bool) $get('top_banner_enabled')),
+                        Forms\Components\TextInput::make('top_banner_link')
+                            ->label('لینک مقصد')
+                            ->url()
+                            ->maxLength(500)
+                            ->placeholder('https://...')
+                            ->helperText('با کلیک روی بنر کاربر به این آدرس می‌رود؛ خالی = بدون لینک.')
+                            ->visible(fn (Forms\Get $get): bool => (bool) $get('top_banner_enabled')),
+                        Forms\Components\TextInput::make('top_banner_alt')
+                            ->label('متن جایگزین (دسترسی‌پذیری)')
+                            ->maxLength(200)
+                            ->visible(fn (Forms\Get $get): bool => (bool) $get('top_banner_enabled')),
+                    ])->columns(2),
                 Forms\Components\Section::make('حالت بروزرسانی')
                     ->description('با فعال‌سازی، فقط مدیران می‌توانند فروشگاه را ببینند و سایر کاربران صفحه «در حال بروزرسانی» را مشاهده می‌کنند.')
                     ->schema([
@@ -126,6 +152,7 @@ class ManageGeneralSettings extends Page implements HasForms
 
         $logo = collect($data['logo'] ?? [])->first(fn ($value) => is_string($value) && $value !== '') ?? '';
         $favicon = collect($data['favicon'] ?? [])->first(fn ($value) => is_string($value) && $value !== '') ?? '';
+        $topBannerImage = collect($data['top_banner_image'] ?? [])->first(fn ($value) => is_string($value) && $value !== '') ?? '';
 
         $settings->setMany('site', [
             'name' => $data['name'] ?? '',
@@ -139,9 +166,17 @@ class ManageGeneralSettings extends Page implements HasForms
             'telegram' => $data['telegram'] ?? '',
             'maintenance_mode' => (bool) ($data['maintenance_mode'] ?? false),
             'maintenance_message' => $data['maintenance_message'] ?? '',
+            'top_banner_enabled' => (bool) ($data['top_banner_enabled'] ?? false),
+            'top_banner_image' => $topBannerImage,
+            'top_banner_link' => trim((string) ($data['top_banner_link'] ?? '')),
+            'top_banner_alt' => trim((string) ($data['top_banner_alt'] ?? '')),
         ]);
 
-        foreach (array_filter(['logo' => $logo, 'favicon' => $favicon]) as $path) {
+        foreach (array_filter([
+            'logo' => $logo,
+            'favicon' => $favicon,
+            'top_banner_image' => $topBannerImage,
+        ]) as $path) {
             $media->registerFromPath('public', $path);
         }
 

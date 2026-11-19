@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Rules\IranianNationalCode;
 use App\Services\Auth\OtpService;
 use App\Services\Representative\SalesRegionService;
+use App\Services\User\UserForceDeletionService;
 use App\Services\User\UserSoftDeletionService;
 use App\Support\AdminAccess;
 use App\Support\UserIdentityUnique;
@@ -1050,6 +1051,31 @@ class UserResource extends Resource
                     ->button()
                     ->successNotificationTitle('کاربر بازیابی شد و دوباره در چرخه است')
                     ->visible(fn (User $record): bool => AdminAccess::isFullAdmin() && $record->trashed()),
+                Tables\Actions\Action::make('forceDelete')
+                    ->label('حذف نهایی')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->button()
+                    ->requiresConfirmation()
+                    ->modalHeading('حذف نهایی کاربر')
+                    ->modalDescription('این عمل غیرقابل بازگشت است. کاربر، سفارش‌ها (شامل حذف‌شده از لیست)، پرداخت‌ها و داده‌های وابسته از پایگاه داده پاک می‌شوند.')
+                    ->modalSubmitActionLabel('حذف نهایی')
+                    ->visible(fn (User $record): bool => AdminAccess::isFullAdmin() && $record->trashed())
+                    ->action(function (User $record): void {
+                        try {
+                            app(UserForceDeletionService::class)->forceDelete($record);
+                            \Filament\Notifications\Notification::make()
+                                ->title('کاربر به‌طور کامل حذف شد')
+                                ->success()
+                                ->send();
+                        } catch (\Throwable $exception) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('حذف نهایی ناموفق')
+                                ->body($exception->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    }),
                 Tables\Actions\DeleteAction::make()
                     ->label('حذف')
                     ->iconButton()

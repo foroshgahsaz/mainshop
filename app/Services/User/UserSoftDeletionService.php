@@ -15,7 +15,8 @@ class UserSoftDeletionService
      */
     public function delete(User $user): string
     {
-        if ($user->orders()->withTrashed()->exists()) {
+        // فقط سفارش‌های فعال (غیرحذف‌شده) مانع soft-delete کاربر می‌شوند؛ سفارش soft-delete از لیست کافی است.
+        if ($user->orders()->exists()) {
             return 'skipped';
         }
 

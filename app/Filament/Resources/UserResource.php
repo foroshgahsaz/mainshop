@@ -77,7 +77,7 @@ class UserResource extends Resource
             return false;
         }
 
-        if ($record->orders()->withTrashed()->exists()) {
+        if ($record->orders()->exists()) {
             return false;
         }
 
@@ -1054,13 +1054,16 @@ class UserResource extends Resource
                     ->label('حذف')
                     ->iconButton()
                     ->visible(fn (User $record): bool => ! $record->trashed())
-                    ->modalDescription('کاربری که سفارش دارد حذف نمی‌شود. حذف یعنی از فروشگاه و داشبورد بنکدار پنهان می‌شود؛ مدیر سیستم می‌تواند برگرداند.')
+                    ->modalDescription('کاربری که سفارش فعال (در لیست) دارد حذف نمی‌شود؛ سفارش‌هایی که از لیست حذف کرده‌اید مانع نیست. حذف کاربر = پنهان از فروشگاه؛ مدیر می‌تواند بازیابی کند.')
                     ->action(function (User $record): void {
                         $outcome = app(UserSoftDeletionService::class)->delete($record);
                         if ($outcome === 'skipped') {
+                            $activeOrders = $record->orders()->count();
                             \Filament\Notifications\Notification::make()
                                 ->title('کاربر قابل حذف نیست')
-                                ->body('این کاربر سفارش دارد.')
+                                ->body($activeOrders > 0
+                                    ? "این کاربر {$activeOrders} سفارش فعال دارد (سفارش با پرداخت موفق یا حذف‌نشده از لیست)."
+                                    : 'این کاربر سفارش فعال دارد.')
                                 ->warning()
                                 ->send();
 

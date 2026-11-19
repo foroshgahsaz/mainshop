@@ -13,9 +13,12 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use App\Support\ConditionalSoftDeletingScope;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Services\Auth\OtpService;
+use App\Rules\IranianNationalCode;
+use App\Services\User\UserSoftDeletionService;
 use App\Support\UserNationalCodeCredentials;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Validation\ValidationException;
 
 class User extends Authenticatable implements FilamentUser
 {
@@ -62,9 +65,35 @@ class User extends Authenticatable implements FilamentUser
     protected static function booted(): void
     {
         static::saving(function (User $user): void {
-            if (UserNationalCodeCredentials::shouldApplyOnSave($user)) {
-                UserNationalCodeCredentials::applyIfNationalCodePresent($user);
+            if (! UserNationalCodeCredentials::shouldApplyOnSave($user)) {
+                return;
             }
+
+            $code = IranianNationalCode::normalize((string) ($user->national_code ?? ''));
+            if ($code === '') {
+                return;
+            }
+
+            $email = UserNationalCodeCredentials::emailForNationalCode($code);
+
+            app(UserSoftDeletionService::class)->purgeTrashedIdentityConflicts(
+                email: $email,
+                nationalCode: $code,
+                exceptUserId: $user->exists ? (int) $user->getKey() : null,
+            );
+
+            $conflictId = User::query()
+                ->where('email', $email)
+                ->when($user->exists, fn (Builder $query) => $query->whereKeyNot($user->getKey()))
+                ->value('id');
+
+            if ($conflictId !== null) {
+                throw ValidationException::withMessages([
+                    'national_code' => "این کد ملی به ایمیل {$email} منتهی می‌شود که متعلق به کاربر دیگر (#{$conflictId}) است. ابتدا آن حساب را حذف یا ادغام کنید.",
+                ]);
+            }
+
+            UserNationalCodeCredentials::applyIfNationalCodePresent($user);
         });
     }
 

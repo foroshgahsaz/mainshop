@@ -4,8 +4,11 @@ namespace Tests\Feature;
 
 use App\Filament\Resources\UserResource;
 use App\Filament\Resources\UserResource\Pages\ListUsers;
+use App\Models\Order;
 use App\Models\User;
+use App\Models\UserAddress;
 use App\Services\User\UserSoftDeletionService;
+use Illuminate\Validation\ValidationException;
 use App\Support\AdminAccess;
 use App\Support\UserIdentityUnique;
 use Filament\Facades\Filament;
@@ -158,5 +161,85 @@ class UserSoftDeletedIdentityReuseTest extends TestCase
 
         Livewire::test(ListUsers::class)
             ->assertCanSeeTableRecords([$trashed]);
+    }
+
+    public function test_user_soft_delete_allowed_when_only_trashed_orders(): void
+    {
+        $user = User::factory()->create();
+        $order = $this->createMinimalOrderForUser($user);
+        $order->delete();
+
+        $outcome = app(UserSoftDeletionService::class)->delete($user->fresh());
+
+        $this->assertSame('deleted', $outcome);
+        $this->assertSoftDeleted('users', ['id' => $user->id]);
+    }
+
+    public function test_national_code_save_rejects_when_active_user_has_derived_email(): void
+    {
+        $other = User::factory()->create([
+            'national_code' => '0072138343',
+            'email' => '0072138343@chinibazar.ir',
+        ]);
+
+        $user = User::factory()->create([
+            'national_code' => null,
+            'email' => 'standalone@example.com',
+        ]);
+
+        $user->national_code = '0072138343';
+
+        try {
+            $user->save();
+            $this->fail('Expected ValidationException');
+        } catch (ValidationException $exception) {
+            $this->assertArrayHasKey('national_code', $exception->errors());
+            $this->assertStringContainsString((string) $other->id, $exception->errors()['national_code'][0]);
+        }
+    }
+
+    public function test_national_code_save_purges_trashed_duplicate_then_succeeds(): void
+    {
+        $trashed = User::factory()->create([
+            'national_code' => '0072138343',
+            'email' => '0072138343@chinibazar.ir',
+        ]);
+        $trashedId = (int) $trashed->id;
+        $trashed->delete();
+
+        $user = User::factory()->create([
+            'national_code' => null,
+            'email' => 'other@example.com',
+        ]);
+
+        $user->national_code = '0072138343';
+        $user->save();
+
+        $this->assertSame('0072138343@chinibazar.ir', $user->fresh()->email);
+        $this->assertDatabaseMissing('users', ['id' => $trashedId]);
+    }
+
+    protected function createMinimalOrderForUser(User $user): Order
+    {
+        $address = UserAddress::query()->create([
+            'user_id' => $user->id,
+            'receiver_name' => 'علی',
+            'receiver_phone' => '09121112233',
+            'province' => 'تهران',
+            'city' => 'تهران',
+            'address' => 'خیابان تست',
+            'postal_code' => '1234567890',
+        ]);
+
+        return Order::query()->create([
+            'user_id' => $user->id,
+            'address_id' => $address->id,
+            'total_amount' => 1000,
+            'final_amount' => 1000,
+            'shipping_amount' => 0,
+            'discount_amount' => 0,
+            'payment_method' => 'online',
+            'status' => 'pending',
+        ]);
     }
 }

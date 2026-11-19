@@ -1413,6 +1413,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-19 | کاربر: حذف با سفارش soft-delete مجاز؛ کدملی → ایمیل — purge کاربر حذف‌شده + خطای فارسی اگر حساب فعال تکراری باشد |
 | 2026-11-19 | بنر بالای هدر موبایل: ارتفاع ثابت ۳۵px + `object-fit: cover` (GIFهای باریک) |
 | 2026-11-19 | بنر بالای هدر: دسکتاپ/موبایل جدا (`top_banner_image_desktop` / `_mobile`، لینک و alt اختیاری موبایل)؛ partial `top-header-banner` |
 | 2026-11-18 | ارزش‌افزوده یکسان: `ShopVat` — ۱۰٪ افزایشی روی پایهٔ کالا؛ ردیف در تسویه/سبد، حساب کاربر، ادمین، پیش‌فاکتور نماینده؛ `CheckoutService` / `OrderInvoiceTotalsService`؛ PDF/HTML فاکتور (`SalesInvoiceDocument`، همه سفارش‌ها) |

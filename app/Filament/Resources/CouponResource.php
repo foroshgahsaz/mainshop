@@ -4,8 +4,11 @@ namespace App\Filament\Resources;
 
 use App\Filament\Pages\CouponAnalyticsPage;
 use App\Filament\Resources\CouponResource\Pages;
+use App\Models\Category;
 use App\Models\Coupon;
+use App\Models\Product;
 use App\Services\Payment\PaymentGatewayCatalog;
+use Filament\Forms\Get;
 use App\Support\AdminAccess;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -62,6 +65,44 @@ class CouponResource extends Resource
                     $component->state(is_array($state) ? $state : []);
                 }),
             Forms\Components\TextInput::make('description')->label('توضیح'),
+            Forms\Components\Select::make('scope_type')
+                ->label('محدوده اعمال')
+                ->options([
+                    Coupon::SCOPE_ALL => 'کل سبد خرید',
+                    Coupon::SCOPE_PRODUCTS => 'محصولات مشخص',
+                    Coupon::SCOPE_CATEGORIES => 'دسته‌بندی‌های مشخص',
+                ])
+                ->default(Coupon::SCOPE_ALL)
+                ->live()
+                ->required()
+                ->columnSpanFull(),
+            Forms\Components\Select::make('product_ids')
+                ->label('محصولات مشمول')
+                ->multiple()
+                ->searchable()
+                ->getSearchResultsUsing(function (string $search): array {
+                    return Product::query()
+                        ->when($search !== '', fn ($q) => $q->where('name', 'like', '%'.$search.'%'))
+                        ->orderBy('name')
+                        ->limit(50)
+                        ->pluck('name', 'id')
+                        ->all();
+                })
+                ->getOptionLabelsUsing(fn (array $values): array => Product::query()
+                    ->whereIn('id', $values)
+                    ->pluck('name', 'id')
+                    ->all())
+                ->visible(fn (Get $get): bool => $get('scope_type') === Coupon::SCOPE_PRODUCTS)
+                ->required(fn (Get $get): bool => $get('scope_type') === Coupon::SCOPE_PRODUCTS)
+                ->columnSpanFull(),
+            Forms\Components\Select::make('category_ids')
+                ->label('دسته‌بندی‌های مشمول')
+                ->multiple()
+                ->searchable()
+                ->options(fn (): array => Category::query()->orderBy('name')->pluck('name', 'id')->all())
+                ->visible(fn (Get $get): bool => $get('scope_type') === Coupon::SCOPE_CATEGORIES)
+                ->required(fn (Get $get): bool => $get('scope_type') === Coupon::SCOPE_CATEGORIES)
+                ->columnSpanFull(),
         ]);
     }
 
@@ -89,6 +130,13 @@ class CouponResource extends Resource
             Tables\Columns\TextColumn::make('type')->label('نوع'),
             Tables\Columns\TextColumn::make('value')->label('مقدار'),
             Tables\Columns\IconColumn::make('is_active')->label('فعال')->boolean(),
+            Tables\Columns\TextColumn::make('scope_type')
+                ->label('محدوده')
+                ->formatStateUsing(fn (?string $state): string => match ($state) {
+                    Coupon::SCOPE_PRODUCTS => 'محصولات',
+                    Coupon::SCOPE_CATEGORIES => 'دسته‌ها',
+                    default => 'کل سبد',
+                }),
         ])->actions([
             Tables\Actions\Action::make('analytics')
                 ->label('آنالیز')

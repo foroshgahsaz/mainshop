@@ -1114,6 +1114,8 @@ Product
 
 **انواع:** درصد / مبلغ ثابت — متد `Coupon::calculateDiscount()`
 
+**محدوده اعمال (`scope_type`):** `all` (پیش‌فرض، کل سبد) | `products` (جدول واسط `coupon_product`) | `categories` (جدول واسط `coupon_category` — فقط `category_id` مستقیم محصول). تخفیف و حداقل مبلغ سبد روی **جمع اقلام مشمول** محاسبه می‌شود؛ `CouponApplicabilityService` + خطوط سبد (`product_id`, `quantity`, `price`).
+
 **Usage:** جدول `coupon_usages` — یک بار per user (بسته به rule)
 
 ---
@@ -1605,6 +1607,7 @@ resources/views/layouts/shop.blade.php
 | 2026-11-14 | UI زیرمجموعه بنکدار: هدر آمار + کارت/تایم‌لاین؛ دسترسی بنکدار به درخت خودش |
 | 2026-11-14 | زیرمجموعه بنکدار: آیکون‌فقط + دسترسی مدیر فروش به بنکدارهای خودش (`canViewBankdarSubtreeInAdmin`) |
 | 2026-11-14 | ادمین: دکمه «مشاهده زیرمجموعه» روی بنکدار → درخت مدیر فروش تا نماینده (`BankdarSubtreePage`) |
+| 2026-11-19 | کوپن: محدوده اعمال روی محصولات یا دسته‌بندی (`scope_type`, `coupon_product`, `coupon_category`)؛ تخفیف فقط روی اقلام مشمول |
 | 2026-11-14 | رفع `BankdarHierarchyRepair` compact (`province_filled`) برای migrate/deploy-recover |
 | 2026-11-14 | لیست بنکدار: ستون «مدیر فروش» (`created_by_sales_manager_id`)؛ ترمیم لینک با `BankdarHierarchyRepair` |
 | 2026-11-14 | فرم کاربر ادمین: نقش غیرمشتری تکی (`staff_role`؛ فقط یک فلگ) — از 2026-11-16 با ToggleButtons |

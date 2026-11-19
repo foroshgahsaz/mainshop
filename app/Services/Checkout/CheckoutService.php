@@ -46,14 +46,16 @@ class CheckoutService
         $coupon = null;
         $couponError = null;
         $discount = 0;
+        $lines = app(CouponApplicabilityService::class)->cartLinesFromEnrichedItems($items);
 
         if ($couponCode) {
-            $validation = $this->couponService->validate($couponCode, $user, $subtotal, $paymentMethod);
+            $validation = $this->couponService->validate($couponCode, $user, $subtotal, $paymentMethod, $lines);
             if (! $validation['valid']) {
                 $couponError = $validation['message'];
             } else {
                 $coupon = $validation['coupon'];
-                $discount = $coupon->calculateDiscount($subtotal);
+                $discountBase = (int) ($validation['eligible_subtotal'] ?? $subtotal);
+                $discount = $coupon->calculateDiscount($discountBase);
             }
         }
 

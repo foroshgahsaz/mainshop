@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Coupon extends Model
@@ -11,6 +12,12 @@ class Coupon extends Model
     public const TYPE_PERCENT = 'percent';
 
     public const TYPE_FIXED = 'fixed';
+
+    public const SCOPE_ALL = 'all';
+
+    public const SCOPE_PRODUCTS = 'products';
+
+    public const SCOPE_CATEGORIES = 'categories';
 
     protected $fillable = [
         'code',
@@ -26,6 +33,7 @@ class Coupon extends Model
         'stackable_with_other_coupons',
         'allowed_payment_gateways',
         'description',
+        'scope_type',
     ];
 
     protected function casts(): array
@@ -59,6 +67,16 @@ class Coupon extends Model
     public function usages(): HasMany
     {
         return $this->hasMany(CouponUsage::class);
+    }
+
+    public function products(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class, 'coupon_product');
+    }
+
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(Category::class, 'coupon_category');
     }
 
     public function isValidFor(?User $user, int $orderTotal): bool

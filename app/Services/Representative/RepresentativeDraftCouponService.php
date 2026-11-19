@@ -5,6 +5,7 @@ namespace App\Services\Representative;
 use App\Models\CouponUsage;
 use App\Models\Order;
 use App\Models\OrderInvoiceLine;
+use App\Services\Checkout\CouponApplicabilityService;
 use App\Services\Checkout\CouponService;
 use App\Support\Order\OrderItemLinePricing;
 use Illuminate\Validation\ValidationException;
@@ -29,11 +30,12 @@ class RepresentativeDraftCouponService
         $order->loadMissing(['user', 'items', 'invoiceLines']);
 
         $itemsGross = $this->itemsGrossSubtotal($order);
+        $lines = $this->orderLines($order);
         $gateway = $paymentMethod !== null && $paymentMethod !== ''
             ? $paymentMethod
             : (string) $order->payment_method;
 
-        $validation = $this->coupons->validate($normalized, $order->user, $itemsGross, $gateway);
+        $validation = $this->coupons->validate($normalized, $order->user, $itemsGross, $gateway, $lines);
 
         if (! $validation['valid']) {
             throw ValidationException::withMessages([
@@ -93,6 +95,7 @@ class RepresentativeDraftCouponService
             $order->user,
             $this->itemsGrossSubtotal($order),
             (string) $order->payment_method,
+            $this->orderLines($order),
         );
     }
 
@@ -135,12 +138,16 @@ class RepresentativeDraftCouponService
         }
 
         $itemsGross = $this->itemsGrossSubtotal($order);
+        $lines = $this->orderLines($order);
 
-        if ($this->coupons->failureMessage($coupon, $order->user, $itemsGross, (string) $order->payment_method) !== null) {
+        if ($this->coupons->failureMessage($coupon, $order->user, $itemsGross, (string) $order->payment_method, $lines) !== null) {
             return 0;
         }
 
-        return $coupon->calculateDiscount($itemsGross);
+        $applicability = app(CouponApplicabilityService::class);
+        $discountBase = $applicability->eligibleSubtotal($coupon, $lines);
+
+        return $coupon->calculateDiscount($discountBase);
     }
 
     private function itemsGrossSubtotal(Order $order): int
@@ -152,5 +159,19 @@ class RepresentativeDraftCouponService
         }
 
         return $sum;
+    }
+
+    /** @return list<array{product_id: int, quantity: int, price: int, line_total: int}> */
+    private function orderLines(Order $order): array
+    {
+        return $order->items
+            ->map(fn ($item) => [
+                'product_id' => (int) $item->product_id,
+                'quantity' => (int) $item->quantity,
+                'price' => (int) $item->price,
+                'line_total' => OrderItemLinePricing::grossAmount($item),
+            ])
+            ->values()
+            ->all();
     }
 }

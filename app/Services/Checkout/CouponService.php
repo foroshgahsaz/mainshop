@@ -15,11 +15,12 @@ class CouponService
 {
     public function __construct(
         protected PaymentGatewayCatalog $gateways,
+        protected CouponApplicabilityService $applicability,
     ) {}
 
-    public function findValid(string $code, User $user, int $orderTotal, ?string $paymentMethod = null): Coupon
+    public function findValid(string $code, User $user, int $orderTotal, ?string $paymentMethod = null, ?array $lines = null): Coupon
     {
-        $result = $this->validate($code, $user, $orderTotal, $paymentMethod);
+        $result = $this->validate($code, $user, $orderTotal, $paymentMethod, $lines);
 
         if (! $result['valid']) {
             throw new RuntimeException($result['message'] ?? 'کد تخفیف معتبر نیست.');
@@ -29,9 +30,10 @@ class CouponService
     }
 
     /**
-     * @return array{valid: bool, coupon: ?Coupon, message: ?string}
+     * @param  list<array{product_id: int, quantity: int, price: int, line_total?: int}>|null  $lines
+     * @return array{valid: bool, coupon: ?Coupon, message: ?string, eligible_subtotal?: int}
      */
-    public function validate(string $code, User $user, int $orderTotal, ?string $paymentMethod = null): array
+    public function validate(string $code, User $user, int $orderTotal, ?string $paymentMethod = null, ?array $lines = null): array
     {
         $normalized = strtoupper(trim($code));
 
@@ -49,16 +51,31 @@ class CouponService
             ];
         }
 
-        $message = $this->failureMessage($coupon, $user, $orderTotal, $paymentMethod);
+        [$eligibleSubtotal, $amountForRules] = $this->resolveAmounts($coupon, $orderTotal, $lines);
+
+        $scopeMessage = $this->applicability->scopeFailureMessage($coupon, $eligibleSubtotal);
+        if ($scopeMessage !== null) {
+            return ['valid' => false, 'coupon' => null, 'message' => $scopeMessage];
+        }
+
+        $message = $this->failureMessage($coupon, $user, $amountForRules, $paymentMethod);
 
         if ($message !== null) {
             return ['valid' => false, 'coupon' => null, 'message' => $message];
         }
 
-        return ['valid' => true, 'coupon' => $coupon, 'message' => null];
+        return [
+            'valid' => true,
+            'coupon' => $coupon,
+            'message' => null,
+            'eligible_subtotal' => $eligibleSubtotal,
+        ];
     }
 
-    public function failureMessage(Coupon $coupon, ?User $user, int $orderTotal, ?string $paymentMethod = null): ?string
+    /**
+     * @param  list<array{product_id: int, quantity: int, price: int, line_total?: int}>|null  $lines
+     */
+    public function failureMessage(Coupon $coupon, ?User $user, int $orderTotal, ?string $paymentMethod = null, ?array $lines = null): ?string
     {
         if (! $coupon->is_active) {
             return 'این کد تخفیف غیرفعال است.';
@@ -74,11 +91,17 @@ class CouponService
             return 'مهلت استفاده از این کد تخفیف به پایان رسیده است.';
         }
 
-        if ($coupon->minimum_order_amount && $orderTotal < $coupon->minimum_order_amount) {
-            return 'حداقل مبلغ سبد برای این کد '
+        [, $amountForRules] = $this->resolveAmounts($coupon, $orderTotal, $lines);
+
+        if ($coupon->minimum_order_amount && $amountForRules < $coupon->minimum_order_amount) {
+            $scopeHint = $this->applicability->appliesToAll($coupon)
+                ? 'سبد'
+                : 'اقلام مشمول این کد';
+
+            return 'حداقل مبلغ '.$scopeHint.' برای این کد '
                 .ShopLabels::formatMoney($coupon->minimum_order_amount)
-                .' است؛ مبلغ فعلی سبد '
-                .ShopLabels::formatMoney($orderTotal)
+                .' است؛ مبلغ فعلی '
+                .ShopLabels::formatMoney($amountForRules)
                 .' است.';
         }
 
@@ -104,9 +127,30 @@ class CouponService
         return null;
     }
 
-    public function isValidFor(Coupon $coupon, ?User $user, int $orderTotal, ?string $paymentMethod = null): bool
+    public function isValidFor(Coupon $coupon, ?User $user, int $orderTotal, ?string $paymentMethod = null, ?array $lines = null): bool
     {
-        return $this->failureMessage($coupon, $user, $orderTotal, $paymentMethod) === null;
+        return $this->failureMessage($coupon, $user, $orderTotal, $paymentMethod, $lines) === null;
+    }
+
+    /**
+     * @param  list<array{product_id: int, quantity: int, price: int, line_total?: int}>|null  $lines
+     * @return array{0: int, 1: int} eligible subtotal, amount for min-order rules
+     */
+    protected function resolveAmounts(Coupon $coupon, int $orderTotal, ?array $lines): array
+    {
+        if ($this->applicability->appliesToAll($coupon)) {
+            $gross = $lines !== null
+                ? $this->applicability->grossFromLines($lines)
+                : $orderTotal;
+
+            return [$gross, $gross];
+        }
+
+        $eligible = $lines !== null
+            ? $this->applicability->eligibleSubtotal($coupon, $lines)
+            : 0;
+
+        return [$eligible, $eligible];
     }
 
     public function recordUsage(Coupon $coupon, User $user, Order $order): void

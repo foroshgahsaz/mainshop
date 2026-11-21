@@ -59,6 +59,20 @@ class MediaPickerTest extends TestCase
         $this->assertSame('categories/uploaded.webp', $path);
     }
 
+    public function test_it_does_not_treat_temp_filename_as_public_path(): void
+    {
+        $picker = MediaPicker::make('image')->directory('settings');
+
+        $path = $this->invokeResolvePath($picker, [
+            'selected_path' => null,
+            'upload_file' => [
+                'tmp-key' => 'not-a-real-public-path-yet.png',
+            ],
+        ]);
+
+        $this->assertNull($path);
+    }
+
     public function test_it_extracts_string_or_file_upload_array_state(): void
     {
         $picker = MediaPicker::make('image')->directory('categories');

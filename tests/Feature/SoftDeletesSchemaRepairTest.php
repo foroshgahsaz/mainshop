@@ -14,16 +14,15 @@ class SoftDeletesSchemaRepairTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_order_and_user_use_conditional_soft_deleting_scope(): void
+    public function test_order_uses_conditional_soft_deleting_scope(): void
     {
         $this->assertTrue(Order::hasGlobalScope(ConditionalSoftDeletingScope::class));
-        $this->assertTrue(User::hasGlobalScope(ConditionalSoftDeletingScope::class));
+        $this->assertFalse(User::hasGlobalScope(ConditionalSoftDeletingScope::class));
     }
 
     public function test_repair_command_is_idempotent_when_columns_exist(): void
     {
         $this->assertTrue(Schema::hasColumn('orders', 'deleted_at'));
-        $this->assertTrue(Schema::hasColumn('users', 'deleted_at'));
 
         SoftDeletesSchemaRepair::forgetColumnCache();
         $actions = app(SoftDeletesSchemaRepair::class)->ensure();
@@ -36,6 +35,6 @@ class SoftDeletesSchemaRepairTest extends TestCase
     {
         SoftDeletesSchemaRepair::forgetColumnCache();
         $this->assertTrue(SoftDeletesSchemaRepair::hasDeletedAtColumn('orders'));
-        $this->assertTrue(SoftDeletesSchemaRepair::hasDeletedAtColumn('users'));
+        $this->assertFalse(SoftDeletesSchemaRepair::hasDeletedAtColumn('users'));
     }
 }

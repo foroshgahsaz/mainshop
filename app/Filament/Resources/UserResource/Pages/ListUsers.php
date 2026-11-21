@@ -25,6 +25,10 @@ class ListUsers extends AdminListRecords
 
     public function getDefaultActiveTab(): string|int|null
     {
+        if (AdminAccess::isFullAdmin()) {
+            return 'all';
+        }
+
         if (AdminAccess::isSalesManagerOnly()) {
             return 'bankdars';
         }
@@ -64,6 +68,8 @@ class ListUsers extends AdminListRecords
         }
 
         return [
+            'all' => Tab::make('همه')
+                ->modifyQueryUsing(fn (Builder $query) => $query),
             User::ADMIN_LIST_SEGMENT_CUSTOMER => Tab::make('مشتریان')
                 ->modifyQueryUsing(fn (Builder $query) => $query->adminListSegment(User::ADMIN_LIST_SEGMENT_CUSTOMER)),
             User::ADMIN_LIST_SEGMENT_SALES_MANAGER => Tab::make('مدیران فروش')

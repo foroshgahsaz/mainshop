@@ -4,16 +4,17 @@ namespace App\Support;
 
 use Illuminate\Validation\Rules\Unique;
 
-/** قوانین یکتایی هویت کاربر — رکوردهای soft-deleted را در نظر نمی‌گیرد. */
+/** قوانین یکتایی موبایل / ایمیل / کد ملی در جدول users. */
 final class UserIdentityUnique
 {
     public static function rule(string $column): Unique
     {
-        return self::withoutTrashed(new Unique('users', $column));
+        return new Unique('users', $column);
     }
 
+    /** @deprecated کاربران دیگر soft-delete ندارند؛ همان rule کافی است. */
     public static function withoutTrashed(Unique $rule): Unique
     {
-        return $rule->whereNull('deleted_at');
+        return $rule;
     }
 }

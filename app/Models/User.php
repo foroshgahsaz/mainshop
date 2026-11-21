@@ -10,11 +10,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use App\Support\ConditionalSoftDeletingScope;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Services\Auth\OtpService;
 use App\Rules\IranianNationalCode;
-use App\Services\User\UserSoftDeletionService;
 use App\Support\UserNationalCodeCredentials;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -23,13 +20,7 @@ use Illuminate\Validation\ValidationException;
 class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, SoftDeletes;
-
-    /** اگر ستون deleted_at در DB نباشد، شرط soft-delete اعمال نمی‌شود. */
-    public static function bootSoftDeletes(): void
-    {
-        static::addGlobalScope(new ConditionalSoftDeletingScope);
-    }
+    use HasFactory, Notifiable;
 
     protected $fillable = [
         'name',
@@ -76,20 +67,17 @@ class User extends Authenticatable implements FilamentUser
 
             $email = UserNationalCodeCredentials::emailForNationalCode($code);
 
-            app(UserSoftDeletionService::class)->purgeTrashedIdentityConflicts(
-                email: $email,
-                nationalCode: $code,
-                exceptUserId: $user->exists ? (int) $user->getKey() : null,
-            );
-
-            $conflictId = User::query()
-                ->where('email', $email)
+            $conflict = User::query()
+                ->where(function (Builder $inner) use ($email, $code): void {
+                    $inner->where('email', $email)->orWhere('national_code', $code);
+                })
                 ->when($user->exists, fn (Builder $query) => $query->whereKeyNot($user->getKey()))
-                ->value('id');
+                ->first();
 
-            if ($conflictId !== null) {
+            if ($conflict !== null) {
+                $segment = $conflict->adminListSegmentLabel();
                 throw ValidationException::withMessages([
-                    'national_code' => "این کد ملی به ایمیل {$email} منتهی می‌شود که متعلق به کاربر دیگر (#{$conflictId}) است. ابتدا آن حساب را حذف یا ادغام کنید.",
+                    'national_code' => "کاربر #{$conflict->getKey()} ({$segment}) با این کد ملی یا ایمیل {$email} وجود دارد. در لیست کاربران تب «همه» یا «{$segment}» جستجو کنید؛ در صورت نیاز حذف کنید.",
                 ]);
             }
 

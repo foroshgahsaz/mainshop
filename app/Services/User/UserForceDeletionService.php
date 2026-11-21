@@ -8,7 +8,7 @@ use App\Services\Cart\StockService;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
-/** حذف فیزیکی کاربر و داده‌های وابسته — فقط برای مدیر سیستم. */
+/** حذف فیزیکی کاربر و داده‌های وابسته (شامل سفارش‌ها). */
 class UserForceDeletionService
 {
     public function __construct(
@@ -18,9 +18,15 @@ class UserForceDeletionService
     public function forceDelete(User $user): void
     {
         if (auth()->id() !== null && (int) auth()->id() === (int) $user->getKey()) {
-            throw new RuntimeException('نمی‌توانید حساب ورود فعلی خود را به‌طور کامل حذف کنید.');
+            throw new RuntimeException('نمی‌توانید حساب ورود فعلی خود را حذف کنید.');
         }
 
+        $this->systemForceDelete($user);
+    }
+
+    /** برای migration/deploy؛ بدون بررسی کاربر جاری. */
+    public function systemForceDelete(User $user): void
+    {
         DB::transaction(function () use ($user): void {
             $user->refresh();
 
@@ -37,11 +43,9 @@ class UserForceDeletionService
             $user->reviews()->delete();
             $user->productQuestions()->delete();
 
-            if ($user->representativeProfile) {
-                $user->representativeProfile()->delete();
-            }
+            $user->representativeProfile?->delete();
 
-            $user->forceDelete();
+            $user->delete();
         });
     }
 

@@ -51,7 +51,7 @@
 - `users.is_bankdar` (bool)
 - `users.bankdar_province_id` nullable FK → provinces
 - `users.created_by_sales_manager_id` nullable FK → users
-- `users.deleted_at` / `orders.deleted_at` — soft-delete (فروشگاه و پنل بنکدار/نماینده پنهان؛ ادمین با فیلتر بازیابی)
+- `orders.deleted_at` — soft-delete سفارش؛ کاربران حذف فیزیکی دارند (`UserDeletionService`)
 - `brands.bankdar_id` / `categories.bankdar_id` — مالک بنکدار (تعریف توسط مدیر سیستم)
 - `sales_regions.sales_manager_id` دیگر در فرم استفاده نمی‌شود (nullable/legacy)
 - `representative_profiles.sales_manager_id` = **بنکدار** مسئول
@@ -69,7 +69,7 @@
 | مشتری | مشاهده مشتریان نمایندگان؛ حذف فقط اگر سفارش نداشته باشد (soft-delete). ایجاد مشتری از پنل بنکدار نیست |
 | داشبورد | آمار/روند/نقشه/آخرین سفارش‌ها اسکوپ‌شده به نمایندگان زیرمجموعه |
 
-سرویس‌ها: `BankdarCatalogService`, `BankdarOrderService`, `UserSoftDeletionService`, `BankdarHierarchyRepair`, `BankdarSubtreeService`.
+سرویس‌ها: `BankdarCatalogService`, `BankdarOrderService`, `UserDeletionService`, `UserForceDeletionService`, `BankdarHierarchyRepair`, `BankdarSubtreeService`.
 
 ## لیست کاربران — بنکدار vs مدیر فروش
 

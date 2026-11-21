@@ -73,6 +73,40 @@ class MediaPickerTest extends TestCase
         $this->assertNull($path);
     }
 
+    public function test_it_resolves_upload_nested_inside_tab_structure(): void
+    {
+        $picker = MediaPicker::make('image')->directory('settings');
+
+        $path = $this->invokeResolvePath($picker, [
+            'selected_path' => null,
+            'media_center_tabs' => [
+                'upload' => [
+                    'upload_file' => [
+                        'file-key' => 'settings/nested.webp',
+                    ],
+                ],
+            ],
+        ]);
+
+        $this->assertSame('settings/nested.webp', $path);
+    }
+
+    public function test_it_finds_nested_selected_path_from_library_tab(): void
+    {
+        $picker = MediaPicker::make('image')->directory('settings');
+
+        $path = $this->invokeResolvePath($picker, [
+            'media_center_tabs' => [
+                'library' => [
+                    'selected_path' => 'settings/from-library.webp',
+                ],
+            ],
+            'upload_file' => [],
+        ]);
+
+        $this->assertSame('settings/from-library.webp', $path);
+    }
+
     public function test_it_extracts_string_or_file_upload_array_state(): void
     {
         $picker = MediaPicker::make('image')->directory('categories');

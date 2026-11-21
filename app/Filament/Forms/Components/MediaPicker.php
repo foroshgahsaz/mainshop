@@ -95,11 +95,20 @@ class MediaPicker extends Field
             ->fillForm(fn (): array => $this->getMediaCenterFormDefaults())
             ->form(fn (): array => $this->getMediaCenterFormSchema())
             ->action(function (array $data, MediaRegistry $registry): void {
+                $data = $this->mergeMountedModalFormData($data);
                 $path = $this->resolvePathFromModalData($data);
 
                 if (! is_string($path) || $path === '') {
+                    $message = 'یک تصویر از کتابخانه انتخاب کنید یا در تب بارگذاری تا ۱۰۰٪ آپلود کنید، سپس تأیید بزنید.';
+
+                    Notification::make()
+                        ->title('تصویری انتخاب نشد')
+                        ->body($message)
+                        ->danger()
+                        ->send();
+
                     throw ValidationException::withMessages([
-                        'selected_path' => 'یک تصویر از کتابخانه انتخاب کنید یا در تب بارگذاری فایل آپلود کنید.',
+                        'upload_file' => $message,
                     ]);
                 }
 
@@ -176,7 +185,8 @@ class MediaPicker extends Field
         $tempDirectory = trim((string) config('livewire.temporary_file_upload.directory', 'livewire-tmp'), '/');
 
         return [
-            Hidden::make('selected_path'),
+            Hidden::make('selected_path')
+                ->dehydratedWhenHidden(),
             Tabs::make('media_center_tabs')
                 ->tabs([
                     Tabs\Tab::make('library')
@@ -205,6 +215,7 @@ class MediaPicker extends Field
                                 ->visibility('private')
                                 ->maxSize($maxSize)
                                 ->maxFiles(1)
+                                ->dehydratedWhenHidden()
                                 ->helperText('پس از انتخاب فایل تا پایان آپلود (۱۰۰٪) صبر کنید، سپس «تأیید و استفاده» بزنید. تصویر فعلی تا ذخیرهٔ فرم اصلی دست‌نخورده می‌ماند.'),
                         ]),
                 ])
@@ -232,13 +243,65 @@ class MediaPicker extends Field
     /** @param  array<string, mixed>  $data */
     protected function resolvePathFromModalData(array $data): ?string
     {
-        $path = $this->extractPathFromUploadState($data['upload_file'] ?? null);
+        $upload = $data['upload_file'] ?? $this->findNestedFormValue($data, 'upload_file');
+        $path = $this->extractPathFromUploadState($upload);
 
         if (is_string($path) && $path !== '') {
             return $path;
         }
 
-        return $this->extractPath($data['selected_path'] ?? null);
+        $selected = $data['selected_path'] ?? $this->findNestedFormValue($data, 'selected_path');
+
+        return $this->extractPath($selected);
+    }
+
+    /** @param  array<string, mixed>  $data */
+    protected function mergeMountedModalFormData(array $data): array
+    {
+        $livewire = $this->getLivewire();
+
+        if (! is_array($livewire->mountedFormComponentActionsData ?? null)) {
+            return $data;
+        }
+
+        $index = array_key_last($livewire->mountedFormComponentActionsData);
+
+        if ($index === null) {
+            return $data;
+        }
+
+        $mounted = $livewire->mountedFormComponentActionsData[$index] ?? [];
+
+        if (! is_array($mounted)) {
+            return $data;
+        }
+
+        return array_replace_recursive($mounted, $data);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return mixed
+     */
+    protected function findNestedFormValue(array $data, string $key): mixed
+    {
+        if (array_key_exists($key, $data)) {
+            return $data[$key];
+        }
+
+        foreach ($data as $value) {
+            if (! is_array($value)) {
+                continue;
+            }
+
+            $found = $this->findNestedFormValue($value, $key);
+
+            if ($found !== null) {
+                return $found;
+            }
+        }
+
+        return null;
     }
 
     protected function extractPathFromUploadState(mixed $upload): ?string

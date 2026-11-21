@@ -112,7 +112,8 @@ class ManageNopay extends Page implements HasForms
                         ->required(),
                     Forms\Components\TextInput::make('callback_url')
                         ->label('returnURL / Callback')
-                        ->placeholder('/payment/callback/nopay'),
+                        ->placeholder('/payment/callback/nopay')
+                        ->helperText('بدون query string (نوپی با ?tv= به انتهای آدرس می‌چسبد). شناسایی پرداخت از tv/token در callback.'),
                     Forms\Components\Toggle::make('test_mode')
                         ->label('محیط تست')
                         ->helperText('در تست از test_cell_number استفاده می‌شود؛ OTP نمونه در مستند: 123456'),

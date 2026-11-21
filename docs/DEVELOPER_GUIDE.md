@@ -722,7 +722,7 @@ $middleware->validateCsrfTokens(except: [
 
 **returnURL:** بدون query string ارسال شود (`NopayReturnUrl`) — CPG به انتهای آدرس `?tv=token` می‌چسباند؛ اگر قبلاً `?payment=` بود آدرس بازگشت خراب می‌شود. callback پرداخت را با `tv` / `t` / `token` یا `payment` پیدا می‌کند.
 
-**ERR_CONNECTION_TIMED_OUT روی `op-n-cpg.bmicc.ir`:** سمت میزبان پرداخت BMICC است (شبکه/فایروال/پورت ۴۴۳۶۶) — با پشتیبانی نوپی/بانک چک شود؛ `api_base_url` فقط wrapper API است نه آدرس صفحه پرداخت.
+**ERR_CONNECTION_TIMED_OUT روی `op-n-cpg.bmicc.ir`:** Token موفق است؛ مشکل اتصال مرورگر به `redirectURL` است. پشتیبانی نوپی/BMICC؛ ادمین: `payment_page_base_url` برای آدرس جایگزین صفحه پرداخت.
 
 **تنظیمات:** `api_base_url`، `service_username`، `service_password` (متن) یا `service_password_encrypted`، `merchant_number`، `public_key`، `private_key`، `test_mode`، `test_cell_number`.
 

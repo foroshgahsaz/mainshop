@@ -99,6 +99,7 @@ return [
             'public_key' => env('NOPAY_PUBLIC_KEY', 'WtX3qPVc1lrHX/+ug9iILQ=='),
             'private_key' => env('NOPAY_PRIVATE_KEY', ''),
             'callback_url' => env('NOPAY_CALLBACK_URL', '/payment/callback/nopay'),
+            'payment_page_base_url' => env('NOPAY_PAYMENT_PAGE_BASE_URL', ''),
             'amount_unit' => env('NOPAY_AMOUNT_UNIT', 'toman'),
             'test_mode' => env('NOPAY_TEST_MODE', false),
             'test_cell_number' => env('NOPAY_TEST_CELL_NUMBER', ''),

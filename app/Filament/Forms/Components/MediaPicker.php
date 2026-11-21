@@ -216,6 +216,15 @@ class MediaPicker extends Field
                                 ->maxSize($maxSize)
                                 ->maxFiles(1)
                                 ->dehydratedWhenHidden()
+                                ->saveUploadedFileUsing(function (TemporaryUploadedFile $file, FileUpload $component): string {
+                                    if (! $file->isValid()) {
+                                        throw ValidationException::withMessages([
+                                            $component->getName() => 'فایل موقت آپلود منقضی شده. دوباره انتخاب کنید و تا پایان آپلود صبر کنید.',
+                                        ]);
+                                    }
+
+                                    return $file->serializeForLivewireResponse();
+                                })
                                 ->helperText('پس از انتخاب فایل تا پایان آپلود (۱۰۰٪) صبر کنید، سپس «تأیید و استفاده» بزنید. تصویر فعلی تا ذخیرهٔ فرم اصلی دست‌نخورده می‌ماند.'),
                         ]),
                 ])
@@ -276,7 +285,47 @@ class MediaPicker extends Field
             return $data;
         }
 
-        return array_replace_recursive($mounted, $data);
+        $merged = array_replace_recursive($data, $mounted);
+
+        $mountedUpload = $this->findNestedFormValue($mounted, 'upload_file');
+        $dataUpload = $this->findNestedFormValue($merged, 'upload_file');
+
+        if ($this->uploadStateIsEmpty($dataUpload) && ! $this->uploadStateIsEmpty($mountedUpload)) {
+            $merged['upload_file'] = $mountedUpload;
+        }
+
+        return $merged;
+    }
+
+    protected function uploadStateIsEmpty(mixed $upload): bool
+    {
+        if ($upload === null) {
+            return true;
+        }
+
+        if ($upload === []) {
+            return true;
+        }
+
+        if (is_string($upload) && trim($upload) === '') {
+            return true;
+        }
+
+        if (is_array($upload)) {
+            foreach ($upload as $value) {
+                if ($value instanceof TemporaryUploadedFile) {
+                    return false;
+                }
+
+                if (is_string($value) && trim($value) !== '') {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -342,6 +391,30 @@ class MediaPicker extends Field
         $reference = trim($reference);
 
         if ($reference === '') {
+            return null;
+        }
+
+        if (str_starts_with($reference, 'livewire-files:')) {
+            $payload = substr($reference, strlen('livewire-files:'));
+
+            try {
+                $signedPaths = json_decode($payload, true, 512, JSON_THROW_ON_ERROR);
+            } catch (\JsonException) {
+                $signedPaths = [];
+            }
+
+            foreach (is_array($signedPaths) ? $signedPaths : [] as $signedPath) {
+                if (! is_string($signedPath) || $signedPath === '') {
+                    continue;
+                }
+
+                $resolved = $this->resolveUploadedReference($signedPath);
+
+                if (is_string($resolved) && $resolved !== '') {
+                    return $resolved;
+                }
+            }
+
             return null;
         }
 

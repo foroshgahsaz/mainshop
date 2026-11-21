@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Filament\Forms\Components\MediaPicker;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class MediaPickerTest extends TestCase
@@ -57,6 +58,21 @@ class MediaPickerTest extends TestCase
         ]);
 
         $this->assertSame('categories/uploaded.webp', $path);
+    }
+
+    public function test_it_resolves_upload_from_livewire_files_bundle_string(): void
+    {
+        Storage::fake('public');
+        Storage::disk('public')->put('settings/bundled.webp', 'content');
+
+        $picker = MediaPicker::make('image')->directory('settings');
+
+        $path = $this->invokeResolvePath($picker, [
+            'selected_path' => null,
+            'upload_file' => 'livewire-files:'.json_encode(['settings/bundled.webp'], JSON_THROW_ON_ERROR),
+        ]);
+
+        $this->assertSame('settings/bundled.webp', $path);
     }
 
     public function test_it_does_not_treat_temp_filename_as_public_path(): void

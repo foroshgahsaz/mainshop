@@ -1419,6 +1419,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-22 | صفحه اصلی: فروش ویژه بالای جدیدترین؛ گرید `/pages/{slug}` — کارت جمع‌تر، بج تخفیف روی تصویر، ۵۰px فاصله تا فوتر |
 | 2026-11-22 | صفحات کمپین: `Page.layout=product_grid` + `product_ids` — ادمین → صفحات؛ URL `/pages/{slug}`؛ `CuratedProductListingService` |
 | 2026-11-19 | کاربر: **حذف نهایی** (`UserForceDeletionService`) فقط مدیر سیستم روی رکورد soft-delete — purge سفارش/پرداخت و `forceDelete` |
 | 2026-11-19 | کاربر: حذف با سفارش soft-delete مجاز؛ کدملی → ایمیل — purge کاربر حذف‌شده + خطای فارسی اگر حساب فعال تکراری باشد |

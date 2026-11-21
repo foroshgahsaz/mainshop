@@ -40,6 +40,29 @@ class ManageBlackFridaySettings extends Page implements HasForms
 
     public function form(Form $form): Form
     {
+        $promoSlots = [];
+
+        for ($i = 1; $i <= BlackFridaySettingsService::PROMO_SLOT_COUNT; $i++) {
+            $promoSlots[] = Forms\Components\Section::make("بنر {$i}")
+                ->schema([
+                    Forms\Components\TextInput::make("promo_slot_{$i}_label")
+                        ->label('عنوان (aria / سئو)')
+                        ->required()
+                        ->maxLength(160),
+                    ShopMediaPicker::make("promo_slot_{$i}_image")
+                        ->label('تصویر بنر')
+                        ->directory('campaigns/blackfriday')
+                        ->maxSize(51200),
+                    Forms\Components\TextInput::make("promo_slot_{$i}_url")
+                        ->label('لینک مقصد')
+                        ->required()
+                        ->maxLength(500)
+                        ->placeholder('https://chinibazar.ir/...'),
+                ])
+                ->columns(1)
+                ->collapsible();
+        }
+
         return $form
             ->schema([
                 Forms\Components\Section::make('وضعیت و لینک')
@@ -96,29 +119,8 @@ class ManageBlackFridaySettings extends Page implements HasForms
                             ->addActionLabel('افزودن لینک منو'),
                     ]),
                 Forms\Components\Section::make('بنرهای تخفیف (پایین صفحه)')
-                    ->description('تصویر و لینک هر بنر؛ دکمه «مشاهده تخفیف» با اسکرول نرم به این بخش می‌رود.')
-                    ->schema([
-                        Forms\Components\Repeater::make('promos')
-                            ->label('بنرها')
-                            ->schema([
-                                Forms\Components\TextInput::make('label')
-                                    ->label('عنوان (aria / سئو)')
-                                    ->required()
-                                    ->maxLength(160),
-                                ShopMediaPicker::image('image', 'campaigns/blackfriday', 'تصویر بنر')
-                                    ->required(),
-                                Forms\Components\TextInput::make('url')
-                                    ->label('لینک مقصد')
-                                    ->required()
-                                    ->maxLength(500)
-                                    ->placeholder('https://chinibazar.ir/...'),
-                            ])
-                            ->columns(1)
-                            ->reorderable()
-                            ->collapsible()
-                            ->itemLabel(fn (array $state): ?string => $state['label'] ?? 'بنر')
-                            ->addActionLabel('افزودن بنر'),
-                    ]),
+                    ->description('پنج بنر ثابت — هر تصویر روی همان بنر ذخیره می‌شود (بدون تداخل Repeater و MediaPicker).')
+                    ->schema($promoSlots),
                 Forms\Components\Section::make('نوار متحرک و فوتر')
                     ->schema([
                         Forms\Components\Repeater::make('marquee_items')

@@ -51,10 +51,11 @@ class PageResource extends Resource
                         ->default(Page::LAYOUT_CONTENT)
                         ->live()
                         ->required(),
-                    RichContentEditor::make('content', 'محتوا', 'pages')
-                        ->columnSpanFull()
-                        ->helperText('برای نوع «گرید محصولات» اختیاری است (متن بالای لیست).')
-                        ->required(fn (Get $get): bool => $get('layout') === Page::LAYOUT_CONTENT),
+                    RichContentEditor::make('content', 'محتوا', 'pages'),
+                    Forms\Components\Placeholder::make('content_grid_hint')
+                        ->hiddenLabel()
+                        ->content('در نوع «گرید محصولات»، متن بالای لیست اختیاری است.')
+                        ->visible(fn (Get $get): bool => $get('layout') === Page::LAYOUT_PRODUCT_GRID),
                     Forms\Components\Select::make('product_ids')
                         ->label('محصولات صفحه')
                         ->multiple()

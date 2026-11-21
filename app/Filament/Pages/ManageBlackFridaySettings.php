@@ -49,10 +49,7 @@ class ManageBlackFridaySettings extends Page implements HasForms
                         ->label('عنوان (aria / سئو)')
                         ->required()
                         ->maxLength(160),
-                    ShopMediaPicker::make("promo_slot_{$i}_image")
-                        ->label('تصویر بنر')
-                        ->directory('campaigns/blackfriday')
-                        ->maxSize(51200),
+                    ShopMediaPicker::image("promo_slot_{$i}_image", 'campaigns/blackfriday', 'تصویر بنر'),
                     Forms\Components\TextInput::make("promo_slot_{$i}_url")
                         ->label('لینک مقصد')
                         ->required()

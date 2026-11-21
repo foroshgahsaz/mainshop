@@ -1201,7 +1201,7 @@ $settings->site();       // نام سایت، لوگو، ...
 | موجودیت | Resource | Route |
 |---------|----------|-------|
 | Post (blog) | `PostResource` | `/blog/{slug}` |
-| Page | `PageResource` | `/pages/{slug}` |
+| Page | `PageResource` | `/pages/{slug}` — `layout=content` (CMS) یا `product_grid` (تا ۳۰ محصول انتخابی، گرید لیستینگ) |
 | HomeSlider | `HomeSliderResource` | home view |
 | MenuItem | `MenuItemResource` | header/nav cache |
 
@@ -1419,6 +1419,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-22 | صفحات کمپین: `Page.layout=product_grid` + `product_ids` — ادمین → صفحات؛ URL `/pages/{slug}`؛ `CuratedProductListingService` |
 | 2026-11-19 | کاربر: **حذف نهایی** (`UserForceDeletionService`) فقط مدیر سیستم روی رکورد soft-delete — purge سفارش/پرداخت و `forceDelete` |
 | 2026-11-19 | کاربر: حذف با سفارش soft-delete مجاز؛ کدملی → ایمیل — purge کاربر حذف‌شده + خطای فارسی اگر حساب فعال تکراری باشد |
 | 2026-11-19 | بنر بالای هدر موبایل: ارتفاع ثابت ۳۵px + `object-fit: cover` (GIFهای باریک) |

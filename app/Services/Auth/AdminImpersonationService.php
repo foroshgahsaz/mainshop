@@ -274,10 +274,6 @@ class AdminImpersonationService
 
     protected function isTrashedSafe(User $user): bool
     {
-        try {
-            return $user->trashed();
-        } catch (\Throwable) {
-            return false;
-        }
+        return false;
     }
 }

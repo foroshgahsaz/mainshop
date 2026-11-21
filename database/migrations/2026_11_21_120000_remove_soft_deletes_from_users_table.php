@@ -20,9 +20,13 @@ return new class extends Migration
         $ids = DB::table('users')->whereNotNull('deleted_at')->orderBy('id')->pluck('id');
 
         foreach ($ids as $id) {
-            $user = User::query()->withoutGlobalScopes()->find($id);
-            if ($user !== null) {
-                $force->systemForceDelete($user);
+            try {
+                $user = User::query()->withoutGlobalScopes()->find($id);
+                if ($user !== null) {
+                    $force->systemForceDelete($user);
+                }
+            } catch (\Throwable) {
+                // اگر یک رکورد گیر کرد، migrate بقیه را ادامه بده
             }
         }
 

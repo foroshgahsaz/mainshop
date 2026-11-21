@@ -2,7 +2,15 @@
     $files = $files ?? collect();
     $directoryLabel = $directoryLabel ?? 'فایل‌ها';
     $statePath = $getStatePath();
-    $formRoot = str($statePath)->beforeLast('.')->toString();
+  // Filament modal data lives at mountedFormComponentActionsData.{index} — not under tabs/view field paths.
+    $formRoot = $modalFormRoot ?? null;
+    if (! is_string($formRoot) || $formRoot === '') {
+        if (preg_match('/^(mountedFormComponentActionsData\.\d+)/', $statePath, $matches)) {
+            $formRoot = $matches[1];
+        } else {
+            $formRoot = str($statePath)->beforeLast('.')->toString();
+        }
+    }
     $selectedStatePath = $formRoot.'.selected_path';
     $wireKey = md5($statePath.'|'.$directory);
 @endphp

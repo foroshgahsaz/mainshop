@@ -364,7 +364,7 @@ class AppServiceProvider extends ServiceProvider
                             ]);
                         }
 
-                        return $file->getFilename();
+                        return $file->serializeForLivewireResponse();
                     }
 
                     $disk = $component->getDiskName();

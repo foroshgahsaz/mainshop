@@ -20,7 +20,9 @@ use Filament\Forms\Components\ViewField;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use Livewire\Features\SupportFileUploads\FileUploadConfiguration;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class MediaPicker extends Field
@@ -100,13 +102,15 @@ class MediaPicker extends Field
                     return;
                 }
 
-                $form = $livewire->getMountedFormComponentActionForm(mountedAction: $action);
+                try {
+                    $form = $livewire->getMountedFormComponentActionForm();
 
-                if ($form === null) {
-                    return;
+                    if ($form !== null) {
+                        FileUploadSanitizer::sanitize($livewire, $form);
+                    }
+                } catch (\Throwable $exception) {
+                    report($exception);
                 }
-
-                FileUploadSanitizer::sanitize($livewire, $form);
             })
             ->action(function (array $data, MediaRegistry $registry): void {
                 $path = $this->resolvePathFromModalData($data);
@@ -258,7 +262,7 @@ class MediaPicker extends Field
     protected function extractPathFromUploadState(mixed $upload): ?string
     {
         if (is_string($upload) && $upload !== '') {
-            return $upload;
+            return $this->resolveUploadedReference($upload);
         }
 
         if (! is_array($upload) || $upload === []) {
@@ -275,13 +279,76 @@ class MediaPicker extends Field
             }
 
             if (is_string($value) && $value !== '') {
-                return $value;
+                $resolved = $this->resolveUploadedReference($value);
+
+                if (is_string($resolved) && $resolved !== '') {
+                    return $resolved;
+                }
             }
         }
 
         $path = Arr::first(array_filter($upload, fn ($value) => is_string($value) && $value !== ''));
 
-        return is_string($path) && $path !== '' ? $path : null;
+        return is_string($path) && $path !== '' ? $this->resolveUploadedReference($path) : null;
+    }
+
+    protected function resolveUploadedReference(string $reference): ?string
+    {
+        $reference = trim($reference);
+
+        if ($reference === '') {
+            return null;
+        }
+
+        $normalized = MediaPath::normalize($reference) ?? ltrim(str_replace('\\', '/', $reference), '/');
+
+        if (Storage::disk('public')->exists($normalized)) {
+            return $normalized;
+        }
+
+        if (TemporaryUploadedFile::canUnserialize($reference)) {
+            $file = TemporaryUploadedFile::unserializeFromLivewireRequest($reference);
+
+            if ($file instanceof TemporaryUploadedFile && $file->isValid()) {
+                return $this->persistUploadedTempFile($file);
+            }
+        }
+
+        if (str_contains($reference, ':')) {
+            $extracted = TemporaryUploadedFile::extractPathFromSignedPath($reference);
+
+            if (is_string($extracted) && $extracted !== '') {
+                $file = TemporaryUploadedFile::createFromLivewire($extracted);
+
+                if ($file->isValid()) {
+                    return $this->persistUploadedTempFile($file);
+                }
+            }
+        }
+
+        $tempDirectory = trim(FileUploadConfiguration::directory(), '/');
+
+        foreach (array_unique([
+            $normalized,
+            $reference,
+            basename($normalized),
+            $tempDirectory.'/'.$normalized,
+            $tempDirectory.'/'.basename($normalized),
+        ]) as $candidate) {
+            $candidate = ltrim(str_replace('\\', '/', $candidate), '/');
+
+            if ($candidate === '') {
+                continue;
+            }
+
+            $file = TemporaryUploadedFile::createFromLivewire($candidate);
+
+            if ($file->isValid()) {
+                return $this->persistUploadedTempFile($file);
+            }
+        }
+
+        return null;
     }
 
     protected function persistUploadedTempFile(TemporaryUploadedFile $file): string

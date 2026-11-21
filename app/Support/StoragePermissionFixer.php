@@ -45,6 +45,36 @@ class StoragePermissionFixer
         foreach (self::requiredPaths() as $path) {
             self::ensureWritableDirectory($path);
         }
+
+        self::ensureLogFilesOwnedByWebUser();
+    }
+
+    /**
+     * Artisan as root creates daily log files as root:root 0644; PHP-FPM (www-data) then cannot append.
+     */
+    public static function ensureLogFilesOwnedByWebUser(): void
+    {
+        if (! self::runningAsRoot()) {
+            return;
+        }
+
+        $directory = ShopStoragePaths::logsDirectory();
+
+        if (! is_dir($directory)) {
+            return;
+        }
+
+        $webUser = self::webUser();
+
+        foreach (glob($directory.DIRECTORY_SEPARATOR.'*.log') ?: [] as $file) {
+            if (! is_file($file)) {
+                continue;
+            }
+
+            @chown($file, $webUser);
+            @chgrp($file, $webUser);
+            @chmod($file, 0664);
+        }
     }
 
     public static function ensureWritableDirectory(string $path): void

@@ -136,8 +136,28 @@ class DiagnoseUploads extends Command
         $this->line('  max_file_uploads: '.ini_get('max_file_uploads'));
 
         $this->newLine();
+        $this->line('Application logs:');
+        $logsDir = \App\Support\ShopStoragePaths::logsDirectory();
+        $this->describeDirectoryPermissions($logsDir, 'logs dir');
+        $todayLog = $logsDir.DIRECTORY_SEPARATOR.'laravel-'.now()->format('Y-m-d').'.log';
+        $legacyLog = \App\Support\ShopStoragePaths::laravelLogPath();
+        foreach (array_unique([$todayLog, $legacyLog]) as $candidate) {
+            if (! is_file($candidate)) {
+                continue;
+            }
+
+            $owner = function_exists('posix_getpwuid')
+                ? (posix_getpwuid(fileowner($candidate))['name'] ?? (string) fileowner($candidate))
+                : (string) fileowner($candidate);
+            $this->line('  log file: '.$candidate.' owner='.$owner.' writable='.(is_writable($candidate) ? 'yes' : 'NO'));
+            if ($owner === 'root') {
+                $this->warn('  PHP-FPM (www-data) cannot write this file. Run as root: chown www-data:www-data '.escapeshellarg($candidate));
+            }
+        }
+
+        $this->newLine();
         $this->line('Recent upload log lines:');
-        $logPath = storage_path('logs/laravel.log');
+        $logPath = is_file($todayLog) ? $todayLog : $legacyLog;
         if (is_file($logPath)) {
             $lines = collect(file($logPath, FILE_IGNORE_NEW_LINES))
                 ->filter(fn (string $line) => str_contains($line, 'livewire.upload'))

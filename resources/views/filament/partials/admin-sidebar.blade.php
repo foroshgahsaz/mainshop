@@ -9,6 +9,7 @@
     use App\Filament\Pages\ManageSmsIr;
     use App\Filament\Pages\ManageTransactionalSms;
     use App\Filament\Pages\ManageHomepageImages;
+    use App\Filament\Pages\ManageBlackFridaySettings;
     use App\Filament\Pages\ManageHomepageSettings;
     use App\Filament\Pages\ManageMediaPresets;
     use App\Filament\Pages\ManageBajetPay;
@@ -359,6 +360,7 @@
                 'filament.admin.pages.site-header-settings',
                 'filament.admin.pages.search-popup-settings',
                 'filament.admin.pages.homepage-settings',
+                'filament.admin.pages.blackfriday-settings',
                 'filament.admin.pages.kavenegar',
                 'filament.admin.pages.sms-ir',
                 'filament.admin.pages.transactional-sms',
@@ -371,6 +373,7 @@
                     ['label' => 'هدر سایت', 'url' => ManageSiteHeaderSettings::getUrl(), 'icon' => 'fa-code'],
                     ['label' => 'پاپ‌آپ جستجو', 'url' => ManageSearchPopupSettings::getUrl(), 'icon' => 'fa-magnifying-glass'],
                     ['label' => 'صفحه اصلی فروشگاه', 'url' => ManageHomepageSettings::getUrl(), 'icon' => 'fa-house'],
+                    ['label' => 'مدیریت بلک فرایدی', 'url' => ManageBlackFridaySettings::getUrl(), 'icon' => 'fa-bolt'],
                     ['label' => 'فشرده‌سازی CSS/JS فروشگاه', 'url' => ManageShopAssetSettings::getUrl(), 'icon' => 'fa-compress'],
                     ['label' => 'مجوزها', 'url' => ManageTrustBadges::getUrl(), 'icon' => 'fa-certificate'],
                 ]],

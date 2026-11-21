@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthorController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\BrandController;
+use App\Http\Controllers\Campaigns\BlackFridayController;
 use App\Http\Controllers\CartAddController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\HomeController;
@@ -69,6 +70,9 @@ Route::get('/session/ping', fn () => response()->noContent()->header('Cache-Cont
     ->name('session.ping');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
+Route::redirect('/blackfriday', '/blackfriday/', 301);
+Route::get('/blackfriday/', BlackFridayController::class)->name('campaigns.blackfriday');
 
 Route::get('/shop/search/suggest', ShopSearchSuggestController::class)->name('shop.search.suggest');
 

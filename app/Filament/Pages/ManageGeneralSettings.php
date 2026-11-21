@@ -172,11 +172,28 @@ class ManageGeneralSettings extends Page implements HasForms
         FileUploadSanitizer::sanitize($this, $this->form);
 
         $data = $this->form->getState();
+        $existing = $settings->site();
 
         $logo = collect($data['logo'] ?? [])->first(fn ($value) => is_string($value) && $value !== '') ?? '';
         $favicon = collect($data['favicon'] ?? [])->first(fn ($value) => is_string($value) && $value !== '') ?? '';
         $topBannerDesktop = collect($data['top_banner_image_desktop'] ?? [])->first(fn ($value) => is_string($value) && $value !== '') ?? '';
         $topBannerMobile = collect($data['top_banner_image_mobile'] ?? [])->first(fn ($value) => is_string($value) && $value !== '') ?? '';
+
+        if ($logo === '') {
+            $logo = (string) ($existing['logo'] ?? '');
+        }
+
+        if ($favicon === '') {
+            $favicon = (string) ($existing['favicon'] ?? '');
+        }
+
+        if ($topBannerDesktop === '') {
+            $topBannerDesktop = (string) ($existing['top_banner_image_desktop'] ?? $existing['top_banner_image'] ?? '');
+        }
+
+        if ($topBannerMobile === '') {
+            $topBannerMobile = (string) ($existing['top_banner_image_mobile'] ?? '');
+        }
 
         $settings->setMany('site', [
             'name' => $data['name'] ?? '',

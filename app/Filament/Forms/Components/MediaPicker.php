@@ -3,6 +3,7 @@
 namespace App\Filament\Forms\Components;
 
 use App\Models\MediaFile;
+use App\Filament\Support\FileUploadSanitizer;
 use App\Services\Media\MediaRegistry;
 use App\Services\Media\UploadedPublicImageStorage;
 use App\Support\MediaPath;
@@ -92,6 +93,21 @@ class MediaPicker extends Field
             ->modalCancelActionLabel('انصراف')
             ->fillForm(fn (): array => $this->getMediaCenterFormDefaults())
             ->form(fn (): array => $this->getMediaCenterFormSchema())
+            ->beforeFormValidated(function (Action $action): void {
+                $livewire = $action->getLivewire();
+
+                if (! method_exists($livewire, 'getMountedFormComponentActionForm')) {
+                    return;
+                }
+
+                $form = $livewire->getMountedFormComponentActionForm(mountedAction: $action);
+
+                if ($form === null) {
+                    return;
+                }
+
+                FileUploadSanitizer::sanitize($livewire, $form);
+            })
             ->action(function (array $data, MediaRegistry $registry): void {
                 $path = $this->resolvePathFromModalData($data);
 
@@ -170,6 +186,8 @@ class MediaPicker extends Field
     {
         $directory = $this->getDirectory();
         $maxSize = $this->getMaxSize();
+        $tempDisk = (string) config('livewire.temporary_file_upload.disk', 'livewire-tmp');
+        $tempDirectory = trim((string) config('livewire.temporary_file_upload.directory', 'livewire-tmp'), '/');
 
         return [
             Hidden::make('selected_path'),
@@ -195,12 +213,13 @@ class MediaPicker extends Field
                             FileUpload::make('upload_file')
                                 ->label('فایل جدید')
                                 ->image()
-                                ->disk('public')
-                                ->directory($directory !== '' ? $directory : 'uploads')
-                                ->visibility('public')
+                                ->storeFiles(false)
+                                ->disk($tempDisk)
+                                ->directory($tempDirectory !== '' ? $tempDirectory : 'livewire-tmp')
+                                ->visibility('private')
                                 ->maxSize($maxSize)
                                 ->maxFiles(1)
-                                ->helperText('پس از انتخاب، فایل آپلود می‌شود. سپس فیلدهای سئو را تکمیل و تأیید کنید.'),
+                                ->helperText('پس از انتخاب فایل تا پایان آپلود (۱۰۰٪) صبر کنید، سپس «تأیید و استفاده» بزنید. تصویر فعلی تا ذخیرهٔ فرم اصلی دست‌نخورده می‌ماند.'),
                         ]),
                 ])
                 ->contained(false)

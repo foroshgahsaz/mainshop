@@ -357,6 +357,16 @@ class AppServiceProvider extends ServiceProvider
                     }
                 })
                 ->saveUploadedFileUsing(function (TemporaryUploadedFile $file, FileUpload $component): ?string {
+                    if (method_exists($component, 'shouldStoreFiles') && ! $component->shouldStoreFiles()) {
+                        if (! $file->isValid()) {
+                            throw ValidationException::withMessages([
+                                $component->getName() => 'فایل موقت آپلود منقضی شده. دوباره انتخاب کنید و تا پایان آپلود صبر کنید.',
+                            ]);
+                        }
+
+                        return $file->getFilename();
+                    }
+
                     $disk = $component->getDiskName();
                     $directory = trim((string) $component->getDirectory(), '/');
                     $extension = strtolower((string) ($file->getClientOriginalExtension() ?: $file->extension() ?: 'bin'));

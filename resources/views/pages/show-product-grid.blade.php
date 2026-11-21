@@ -37,7 +37,7 @@
         </div>
     @else
         <p class="text-sm text-gray-500 mb-4">{{ number_format($products->count()) }} محصول</p>
-        <div class="page-product-grid__cards grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 md:gap-4">
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
             @foreach($products as $product)
                 <x-shop.product-card :product="$product" variant="clothing" section="page_product_grid" />
             @endforeach

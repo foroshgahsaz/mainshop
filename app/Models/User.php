@@ -15,8 +15,6 @@ use App\Rules\IranianNationalCode;
 use App\Support\UserNationalCodeCredentials;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Validation\ValidationException;
-
 class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<UserFactory> */
@@ -63,22 +61,6 @@ class User extends Authenticatable implements FilamentUser
             $code = IranianNationalCode::normalize((string) ($user->national_code ?? ''));
             if ($code === '') {
                 return;
-            }
-
-            $email = UserNationalCodeCredentials::emailForNationalCode($code);
-
-            $conflict = User::query()
-                ->where(function (Builder $inner) use ($email, $code): void {
-                    $inner->where('email', $email)->orWhere('national_code', $code);
-                })
-                ->when($user->exists, fn (Builder $query) => $query->whereKeyNot($user->getKey()))
-                ->first();
-
-            if ($conflict !== null) {
-                $segment = $conflict->adminListSegmentLabel();
-                throw ValidationException::withMessages([
-                    'national_code' => "کاربر #{$conflict->getKey()} ({$segment}) با این کد ملی یا ایمیل {$email} وجود دارد. در لیست کاربران تب «همه» یا «{$segment}» جستجو کنید؛ در صورت نیاز حذف کنید.",
-                ]);
             }
 
             UserNationalCodeCredentials::applyIfNationalCodePresent($user);

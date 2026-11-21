@@ -3,7 +3,6 @@
 namespace App\Filament\Forms\Components;
 
 use App\Models\MediaFile;
-use App\Filament\Support\FileUploadSanitizer;
 use App\Services\Media\MediaRegistry;
 use App\Services\Media\UploadedPublicImageStorage;
 use App\Support\MediaPath;
@@ -95,23 +94,6 @@ class MediaPicker extends Field
             ->modalCancelActionLabel('انصراف')
             ->fillForm(fn (): array => $this->getMediaCenterFormDefaults())
             ->form(fn (): array => $this->getMediaCenterFormSchema())
-            ->beforeFormValidated(function (Action $action): void {
-                $livewire = $action->getLivewire();
-
-                if (! method_exists($livewire, 'getMountedFormComponentActionForm')) {
-                    return;
-                }
-
-                try {
-                    $form = $livewire->getMountedFormComponentActionForm();
-
-                    if ($form !== null) {
-                        FileUploadSanitizer::sanitize($livewire, $form);
-                    }
-                } catch (\Throwable $exception) {
-                    report($exception);
-                }
-            })
             ->action(function (array $data, MediaRegistry $registry): void {
                 $path = $this->resolvePathFromModalData($data);
 

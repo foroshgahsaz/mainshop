@@ -1565,7 +1565,7 @@ resources/views/layouts/shop.blade.php
 | 2026-11-06 | سداد / بانک ملی: مسیر مستعار `/payment/callback/bmi` → همان `sadadCallback` (برای ReturnUrl ثبت‌شده در پنل بانک) |
 | 2026-10-31 | درگاه **سداد** (`SadadGateway`): IPG JSON بانک ملی — `PaymentRequest` / `Verify`، SignData DES-EDE3؛ admin `/admin/sadad`؛ callback `/payment/callback/sadad`؛ مستندات `docs/PHP-master.zip` |
 | 2026-11-21 | `shop:fix-storage-permissions` مالکیت فایل‌های `/data/logs/*.log` را به www-data برمی‌گرداند (artisan به‌عنوان root فایل daily را root می‌کند و PHP-FPM نمی‌تواند بنویسد) |
-| 2026-11-21 | MediaPicker «تأیید و استفاده»: رفع ۵۰۰ (`getMountedFormComponentActionForm` بدون آرگومنت اشتباه) + کپی فایل موقت به `public` هنگام تأیید |
+| 2026-11-21 | MediaPicker «تأیید و استفاده»: حذف `beforeFormValidated` اشتباه (متد Filament وجود نداشت) + کپی فایل موقت به `public` هنگام تأیید |
 | 2026-11-21 | MediaPicker مدال: آپلود روی دیسک موقت Livewire + `storeFiles(false)` تا قبل از «تأیید» روی `public` کپی نشود (رفع `uploaded` / timeout چند پاد)؛ `ManageGeneralSettings` لوگو/بنر قبلی را با ذخیرهٔ خالی پاک نمی‌کند |
 | 2026-10-31 | MediaPicker: اکشن‌های `openMediaCenter` / `clearImage` ثابت روی هر فیلد (Filament با `mountFormComponentAction(statePath, name)` کامپوننت را پیدا می‌کند؛ نام هش‌شده با state path باعث unmount خالی می‌شد) |
 | 2026-11-08 | hero: دسکتاپ **2560×567**؛ موبایل **1000×500** (aspect 2:1)؛ `shop:home:payload:v4` |

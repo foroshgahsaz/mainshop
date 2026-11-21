@@ -8,10 +8,14 @@
         ? ShopFormatter::productImageForSection($product, $section)
         : ShopFormatter::productImage($product);
     $isOverlay = $variant === 'overlay';
+    $discountOnImage = $section === 'page_product_grid';
 @endphp
 
-<a href="{{ route('products.show', $product) }}" class="product-card product-card-link {{ $isOverlay ? 'product-overlay-card' : ($variant === 'clothing' ? 'clothing-card' : 'product-scroll-card') }} h-full w-full">
+<a href="{{ route('products.show', $product) }}" class="product-card product-card-link {{ $isOverlay ? 'product-overlay-card' : ($variant === 'clothing' ? 'clothing-card' : 'product-scroll-card') }} {{ $discountOnImage ? 'clothing-card--page-grid' : '' }} h-full w-full">
     <div class="product-card__media @if($variant === 'scroll' && ! $isOverlay) p-4 @endif">
+        @if($discount && $discountOnImage)
+            <span class="product-card__discount product-card__discount--on-image">{{ $discount }}٪</span>
+        @endif
         <img src="{{ $image }}" alt="{{ $product->name }}" loading="lazy" @if($variant === 'scroll' && ! $isOverlay) class="h-28 object-contain mx-auto" @endif>
         @if($isOverlay)
             <div class="product-card__overlay" aria-hidden="true">
@@ -39,7 +43,7 @@
                 </div>
                 <h4 class="clothing-card__title">{{ $product->name }}</h4>
                 <div class="product-card__price-row">
-                    @if($discount)<span class="product-card__discount">{{ $discount }}٪</span>@endif
+                    @if($discount && ! $discountOnImage)<span class="product-card__discount">{{ $discount }}٪</span>@endif
                     <div class="product-card__price-group">
                         <x-shop.price
                             :amount="$product->effective_price"

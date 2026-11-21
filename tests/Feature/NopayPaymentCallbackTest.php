@@ -27,6 +27,39 @@ class NopayPaymentCallbackTest extends TestCase
         Setting::query()->updateOrCreate(['group' => 'nopay', 'key' => 'merchant_number'], ['value' => '111']);
     }
 
+    public function test_nopay_callback_resolves_payment_by_tv_without_payment_query(): void
+    {
+        Http::fake([
+            'https://nopay.test/*' => Http::response([
+                'result' => null,
+                'notification' => [
+                    'hasErrors' => true,
+                    'errors' => [
+                        ['message' => 'توکن نامعتبر', 'code' => -3],
+                    ],
+                ],
+            ]),
+        ]);
+
+        [$user, $order] = $this->makeUserAndOrder();
+        $token = 'nopay-token-tv-only';
+
+        $payment = Payment::query()->create([
+            'order_id' => $order->id,
+            'user_id' => $user->id,
+            'amount' => 50_000,
+            'gateway' => 'nopay',
+            'status' => Payment::STATUS_PENDING,
+            'tracking_code' => 'NOPAYTV1',
+            'transaction_id' => $token,
+        ]);
+
+        $this->get('/payment/callback/nopay?'.http_build_query(['tv' => $token]))
+            ->assertRedirect();
+
+        $this->assertSame(Payment::STATUS_FAILED, $payment->fresh()->status);
+    }
+
     public function test_nopay_callback_verify_failure_marks_payment_failed(): void
     {
         Http::fake([

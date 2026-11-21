@@ -718,7 +718,11 @@ $middleware->validateCsrfTokens(except: [
 | Callback | `/payment/callback/nopay` — تأیید با API `VerifyTransaction` و `token` ذخیره‌شده |
 | مستند | `docs/CPG Ver 2-5.pdf` |
 
-**جریان:** `CPG/Security/Token/RequestToken` (موبایل، amount، returnURL) → redirect به `redirectURL` → callback → `CPG/Financial/VerifyTransaction`.
+**جریان:** `CPG/Security/Token/RequestToken` (موبایل، amount، returnURL) → redirect به `redirectURL` (معمولاً `op-n-cpg.bmicc.ir:44366/?t=…&rt=…`) → callback → `CPG/Financial/VerifyTransaction`.
+
+**returnURL:** بدون query string ارسال شود (`NopayReturnUrl`) — CPG به انتهای آدرس `?tv=token` می‌چسباند؛ اگر قبلاً `?payment=` بود آدرس بازگشت خراب می‌شود. callback پرداخت را با `tv` / `t` / `token` یا `payment` پیدا می‌کند.
+
+**ERR_CONNECTION_TIMED_OUT روی `op-n-cpg.bmicc.ir`:** سمت میزبان پرداخت BMICC است (شبکه/فایروال/پورت ۴۴۳۶۶) — با پشتیبانی نوپی/بانک چک شود؛ `api_base_url` فقط wrapper API است نه آدرس صفحه پرداخت.
 
 **تنظیمات:** `api_base_url`، `service_username`، `service_password` (متن) یا `service_password_encrypted`، `merchant_number`، `public_key`، `private_key`، `test_mode`، `test_cell_number`.
 
@@ -1607,6 +1611,7 @@ resources/views/layouts/shop.blade.php
 | 2026-11-14 | UI زیرمجموعه بنکدار: هدر آمار + کارت/تایم‌لاین؛ دسترسی بنکدار به درخت خودش |
 | 2026-11-14 | زیرمجموعه بنکدار: آیکون‌فقط + دسترسی مدیر فروش به بنکدارهای خودش (`canViewBankdarSubtreeInAdmin`) |
 | 2026-11-14 | ادمین: دکمه «مشاهده زیرمجموعه» روی بنکدار → درخت مدیر فروش تا نماینده (`BankdarSubtreePage`) |
+| 2026-11-21 | نوپی: returnURL بدون query (رفع `?payment=…?tv=`)؛ callback با پارامتر `tv` |
 | 2026-11-21 | رفع ۵۰۰ ادمین کاربر: بدون ValidationException در `User::saving`؛ تب `all_users`؛ impersonate بدون `trashed()` |
 | 2026-11-21 | کاربر: حذف soft-delete؛ حذف فقط مدیر سیستم/مدیر فروش؛ تب «همه» + جستجوی کد ملی؛ «حذف کامل» با سفارش |
 | 2026-11-19 | کوپن: محدوده اعمال روی محصولات یا دسته‌بندی (`scope_type`, `coupon_product`, `coupon_category`)؛ تخفیف فقط روی اقلام مشمول |

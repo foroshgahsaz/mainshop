@@ -300,7 +300,9 @@ class PaymentController extends Controller
             $payment = $payment->fresh();
         } elseif (in_array($payment->gateway, ['nopay', 'toopi'], true)) {
             $authority = (string) (
-                $request->input('token')
+                $request->input('tv')
+                ?: $request->input('t')
+                ?: $request->input('token')
                 ?: $request->input('Token')
                 ?: $payment->transaction_id
             );
@@ -428,10 +430,36 @@ class PaymentController extends Controller
     {
         $tracking = (string) $request->input('payment', $request->query('payment', ''));
 
+        if (str_contains($tracking, '?tv=')) {
+            [$tracking, $rest] = explode('?tv=', $tracking, 2);
+            $embeddedTv = trim(explode('&', $rest)[0]);
+            if ($embeddedTv !== '') {
+                $byEmbeddedTv = Payment::query()
+                    ->where('transaction_id', $embeddedTv)
+                    ->whereIn('gateway', ['nopay', 'toopi'])
+                    ->first();
+                if ($byEmbeddedTv) {
+                    return $byEmbeddedTv;
+                }
+            }
+        }
+
+        $tracking = trim($tracking);
         if ($tracking !== '') {
             $byTracking = Payment::query()->where('tracking_code', $tracking)->first();
             if ($byTracking) {
                 return $byTracking;
+            }
+        }
+
+        $tv = trim((string) ($request->input('tv', $request->query('tv', '')));
+        if ($tv !== '') {
+            $byTv = Payment::query()
+                ->where('transaction_id', $tv)
+                ->whereIn('gateway', ['nopay', 'toopi'])
+                ->first();
+            if ($byTv) {
+                return $byTv;
             }
         }
 

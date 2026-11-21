@@ -8,6 +8,8 @@ class BlackFridaySettingsService
 {
     public const SETTINGS_GROUP = 'blackfriday';
 
+    public const PROMO_SLOT_COUNT = 5;
+
     protected const CACHE_KEY = 'shop:blackfriday:settings:all';
 
     public function __construct(
@@ -40,6 +42,8 @@ class BlackFridaySettingsService
     {
         $data = $this->all();
 
+        $data = $this->expandPromoSlotsForAdmin($data);
+
         $data['marquee_items'] = collect($data['marquee_items'] ?? [])
             ->map(fn (mixed $item): array => [
                 'text' => is_array($item) ? trim((string) ($item['text'] ?? '')) : trim((string) $item),
@@ -52,6 +56,9 @@ class BlackFridaySettingsService
     /** @param  array<string, mixed>  $data */
     public function saveFromAdminForm(array $data): void
     {
+        $data['promos'] = $this->collapsePromoSlotsFromAdmin($data);
+        $data = $this->stripPromoSlotFields($data);
+
         $normalized = $this->normalize($data);
         Cache::forget(self::CACHE_KEY);
 
@@ -159,7 +166,7 @@ class BlackFridaySettingsService
                 $image = trim((string) ($item['image'] ?? ''));
                 $url = trim((string) ($item['url'] ?? ''));
 
-                if ($label === '' || $image === '' || $url === '') {
+                if ($label === '' || $url === '') {
                     return null;
                 }
 
@@ -208,5 +215,93 @@ class BlackFridaySettingsService
             'promos' => $promos !== [] ? $promos : $defaults['promos'],
             'marquee_items' => $marquee !== [] ? $marquee : $defaults['marquee_items'],
         ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    public function expandPromoSlotsForAdmin(array $data): array
+    {
+        $promos = is_array($data['promos'] ?? null) ? $data['promos'] : [];
+
+        for ($i = 1; $i <= self::PROMO_SLOT_COUNT; $i++) {
+            $slot = is_array($promos[$i - 1] ?? null) ? $promos[$i - 1] : [];
+
+            $data["promo_slot_{$i}_label"] = trim((string) ($slot['label'] ?? ''));
+            $data["promo_slot_{$i}_image"] = trim((string) ($slot['image'] ?? ''));
+            $data["promo_slot_{$i}_url"] = trim((string) ($slot['url'] ?? ''));
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return list<array{label: string, image: string, url: string}>
+     */
+    public function collapsePromoSlotsFromAdmin(array $data): array
+    {
+        $existing = is_array($data['promos'] ?? null) ? $data['promos'] : [];
+        $promos = [];
+
+        for ($i = 1; $i <= self::PROMO_SLOT_COUNT; $i++) {
+            $label = trim((string) ($data["promo_slot_{$i}_label"] ?? ''));
+            $image = $this->normalizeSlotImage($data["promo_slot_{$i}_image"] ?? '');
+            $url = trim((string) ($data["promo_slot_{$i}_url"] ?? ''));
+
+            if ($label === '' && $image === '' && $url === '') {
+                continue;
+            }
+
+            if ($label === '' || $url === '') {
+                continue;
+            }
+
+            if ($image === '') {
+                $fallback = $existing[$i - 1]['image'] ?? '';
+                $image = is_string($fallback) ? trim($fallback) : '';
+            }
+
+            $promos[] = [
+                'label' => $label,
+                'image' => $image,
+                'url' => $url,
+            ];
+        }
+
+        return $promos;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    protected function stripPromoSlotFields(array $data): array
+    {
+        for ($i = 1; $i <= self::PROMO_SLOT_COUNT; $i++) {
+            unset(
+                $data["promo_slot_{$i}_label"],
+                $data["promo_slot_{$i}_image"],
+                $data["promo_slot_{$i}_url"],
+            );
+        }
+
+        return $data;
+    }
+
+    protected function normalizeSlotImage(mixed $image): string
+    {
+        if (is_array($image)) {
+            foreach ($image as $value) {
+                if (is_string($value) && trim($value) !== '') {
+                    return trim($value);
+                }
+            }
+
+            return '';
+        }
+
+        return is_string($image) ? trim($image) : '';
     }
 }

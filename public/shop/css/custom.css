@@ -439,7 +439,6 @@ body.page-product-grid main {
 
 .page-product-grid .clothing-card .product-card__media {
   position: relative;
-  aspect-ratio: 1 / 1;
 }
 
 .product-card__discount--on-image {
@@ -447,44 +446,10 @@ body.page-product-grid main {
   left: 8px;
   right: auto;
   transform: none;
-  font-size: 10px;
-  padding: 2px 7px;
-  border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
-}
-
-.page-product-grid .clothing-card__body {
-  padding: 6px 0 0;
-}
-
-.page-product-grid .clothing-card__title {
   font-size: 11px;
-  min-height: 2.1rem;
-  line-height: 1.45;
-}
-
-.page-product-grid .product-card__brand {
-  font-size: 10px;
-  margin-bottom: 2px;
-}
-
-.page-product-grid .product-card__brand-icon {
-  width: 14px;
-  height: 14px;
-  background-size: 10px;
-}
-
-.page-product-grid .clothing-card .shop-price__current {
-  font-size: 12px;
-}
-
-.page-product-grid .clothing-card .shop-price__compare {
-  font-size: 10px;
-}
-
-.page-product-grid .clothing-card .product-card__price-row {
-  min-height: 20px;
-  margin-top: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
 }
 
 .featuredDealsSwiper .swiper-slide--promo,

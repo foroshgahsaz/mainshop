@@ -4,14 +4,18 @@
     use App\Support\ShopFormatter;
     $discount = ShopFormatter::discountPercent($product);
     $comparePrice = ShopFormatter::comparePrice($product);
-    $image = $section
-        ? ShopFormatter::productImageForSection($product, $section)
+    $discountOnImage = $section === 'page_product_grid';
+    $imageSection = match ($section) {
+        'page_product_grid' => 'product_listing',
+        default => $section,
+    };
+    $image = $imageSection
+        ? ShopFormatter::productImageForSection($product, $imageSection)
         : ShopFormatter::productImage($product);
     $isOverlay = $variant === 'overlay';
-    $discountOnImage = $section === 'page_product_grid';
 @endphp
 
-<a href="{{ route('products.show', $product) }}" class="product-card product-card-link {{ $isOverlay ? 'product-overlay-card' : ($variant === 'clothing' ? 'clothing-card' : 'product-scroll-card') }} {{ $discountOnImage ? 'clothing-card--page-grid' : '' }} h-full w-full">
+<a href="{{ route('products.show', $product) }}" class="product-card product-card-link {{ $isOverlay ? 'product-overlay-card' : ($variant === 'clothing' ? 'clothing-card' : 'product-scroll-card') }} h-full w-full">
     <div class="product-card__media @if($variant === 'scroll' && ! $isOverlay) p-4 @endif">
         @if($discount && $discountOnImage)
             <span class="product-card__discount product-card__discount--on-image">{{ $discount }}٪</span>

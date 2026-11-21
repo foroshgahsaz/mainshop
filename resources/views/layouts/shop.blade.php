@@ -9,7 +9,7 @@
         use App\Support\ShopLabels;
 
         $siteSettings = app(\App\Services\Settings\SettingsService::class)->site();
-        $needsListingAssets = request()->routeIs('products.*', 'categories.*', 'brands.*');
+        $needsListingAssets = request()->routeIs('products.*', 'categories.*', 'brands.*', 'pages.show');
         $needsSwiper = request()->routeIs('home', 'products.show') || $needsListingAssets;
     @endphp
     <script>

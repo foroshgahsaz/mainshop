@@ -106,7 +106,12 @@ class NopayGateway implements PaymentGatewayInterface
 
         $entity = $this->client->entity($response);
         $token = trim((string) ($entity['token'] ?? ''));
-        $redirectUrl = trim((string) ($entity['redirectURL'] ?? $entity['redirectUrl'] ?? ''));
+        $redirectUrl = NopayPaymentPageUrl::resolve(
+            trim((string) ($entity['redirectURL'] ?? $entity['redirectUrl'] ?? '')),
+            $token,
+            $config,
+            $payment,
+        );
 
         if ($token === '' || $redirectUrl === '') {
             $this->markInitiateFailed($payment, $order, [

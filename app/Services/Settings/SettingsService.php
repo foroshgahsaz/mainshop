@@ -317,6 +317,7 @@ class SettingsService
             'private_key' => (string) ($this->get('nopay', 'private_key') ?: $this->get('toopi', 'private_key') ?: ($cfg['private_key'] ?? '')),
             'amount_unit' => (string) ($this->get('nopay', 'amount_unit') ?: $this->get('toopi', 'amount_unit') ?: ($cfg['amount_unit'] ?? 'toman')),
             'callback_url' => (string) ($this->get('nopay', 'callback_url') ?: $this->get('toopi', 'callback_url') ?: ($cfg['callback_url'] ?? '/payment/callback/nopay')),
+            'payment_page_base_url' => (string) ($this->get('nopay', 'payment_page_base_url') ?: ($cfg['payment_page_base_url'] ?? '')),
             'test_mode' => filter_var($this->get('nopay', 'test_mode') ?? $this->get('toopi', 'test_mode', $cfg['test_mode'] ?? false), FILTER_VALIDATE_BOOLEAN),
             'test_cell_number' => (string) ($this->get('nopay', 'test_cell_number') ?: $this->get('toopi', 'test_cell_number') ?: ($cfg['test_cell_number'] ?? '')),
             'icon' => $this->get('nopay', 'icon') ?: $this->get('toopi', 'icon') ?: null,

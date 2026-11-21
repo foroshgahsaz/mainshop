@@ -51,6 +51,7 @@ class ManageNopay extends Page implements HasForms
             'private_key' => $nopay['private_key'],
             'amount_unit' => $nopay['amount_unit'],
             'callback_url' => $nopay['callback_url'],
+            'payment_page_base_url' => $nopay['payment_page_base_url'] ?? '',
             'test_mode' => $nopay['test_mode'],
             'test_cell_number' => $nopay['test_cell_number'],
             'icon' => ShopIconUpload::forForm($nopay['icon'] ?? null),
@@ -73,6 +74,11 @@ class ManageNopay extends Page implements HasForms
                         ->helperText('طبق نامه نوپی (مثلاً …/ConsumerExternalWebapiWrapper). اگر «خطای احراز هویت / کد -7» دیدید آدرس درست است؛ username و رمز رمزنگاری‌شده را چک کنید.')
                         ->columnSpanFull()
                         ->required(),
+                    Forms\Components\TextInput::make('payment_page_base_url')
+                        ->label('آدرس پایه صفحه پرداخت (اختیاری)')
+                        ->placeholder('https://op-n-cpg.bmicc.ir:44366')
+                        ->helperText('خالی = همان redirectURL از API. اگر ERR_CONNECTION_TIMED_OUT روی op-n-cpg دارید، آدرس جایگزین را از پشتیبانی نوپی/BMICC بگیرید و اینجا بگذارید.')
+                        ->columnSpanFull(),
                     Forms\Components\TextInput::make('service_username')
                         ->label('serviceUserName')
                         ->required(),
@@ -146,6 +152,7 @@ class ManageNopay extends Page implements HasForms
             'private_key' => trim((string) ($data['private_key'] ?? '')),
             'amount_unit' => $data['amount_unit'] ?? 'toman',
             'callback_url' => $callbackPath,
+            'payment_page_base_url' => rtrim((string) ($data['payment_page_base_url'] ?? ''), '/'),
             'test_mode' => $data['test_mode'] ?? false,
             'test_cell_number' => $data['test_cell_number'] ?? '',
             'icon' => ShopIconUpload::fromState($data['icon'] ?? null),

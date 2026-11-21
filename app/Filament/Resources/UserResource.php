@@ -15,7 +15,8 @@ use App\Rules\IranianNationalCode;
 use App\Services\Auth\OtpService;
 use App\Services\Representative\SalesRegionService;
 use App\Services\User\UserForceDeletionService;
-use App\Services\User\UserSoftDeletionService;
+use App\Services\User\UserDeletionService;
+use App\Services\User\UserForceDeletionService;
 use App\Support\AdminAccess;
 use App\Support\UserIdentityUnique;
 use App\Support\UserNationalCodeCredentials;
@@ -65,20 +66,19 @@ class UserResource extends Resource
 
     public static function canDelete($record): bool
     {
-        if (AdminAccess::canManageShopInAdmin()) {
+        if (! $record instanceof User) {
+            return false;
+        }
+
+        if (AdminAccess::isFullAdmin()) {
             return true;
         }
 
-        if (! AdminAccess::isBankdarOnly() || ! $record instanceof User) {
+        if (! AdminAccess::isSalesManagerOnly()) {
             return false;
         }
 
-        // بنکدار فقط مشتریان زیرمجموعه بدون سفارش را می‌تواند soft-delete کند.
         if ($record->isRepresentative() || $record->isBankdar() || $record->isSalesManager() || $record->isAdmin()) {
-            return false;
-        }
-
-        if ($record->orders()->exists()) {
             return false;
         }
 
@@ -322,7 +322,7 @@ class UserResource extends Resource
                         ->rule('regex:/^09\d{9}$/')
                         ->validationMessages([
                             'regex' => 'شماره موبایل باید با 09 شروع شود و ۱۱ رقم باشد.',
-                            'unique' => 'این موبایل قبلاً برای کاربر فعال دیگری ثبت شده است.',
+                            'unique' => 'این موبایل قبلاً ثبت شده است. در لیست کاربران تب «همه» جستجو کنید.',
                         ])
                         ->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule): Unique => UserIdentityUnique::withoutTrashed($rule)),
                     Forms\Components\TextInput::make('national_code')
@@ -342,7 +342,7 @@ class UserResource extends Resource
                         ])
                         ->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule): Unique => UserIdentityUnique::withoutTrashed($rule))
                         ->validationMessages([
-                            'unique' => 'این کد ملی قبلاً برای کاربر فعال دیگری ثبت شده است.',
+                            'unique' => 'این کد ملی قبلاً ثبت شده است. در لیست کاربران تب «همه» جستجو کنید.',
                         ])
                         ->helperText('با خروج از این فیلد، ایمیل و رمز عبور از روی کد ملی پر می‌شوند.'),
                     Forms\Components\TextInput::make('email')
@@ -350,7 +350,7 @@ class UserResource extends Resource
                         ->email()
                         ->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule): Unique => UserIdentityUnique::withoutTrashed($rule))
                         ->validationMessages([
-                            'unique' => 'این ایمیل قبلاً برای کاربر فعال دیگری ثبت شده است.',
+                            'unique' => 'این ایمیل قبلاً ثبت شده است. در لیست کاربران تب «همه» جستجو کنید.',
                         ])
                         ->disabled(fn (Get $get): bool => static::nationalCodeDrivesCredentials($get('national_code')))
                         ->dehydrated()
@@ -819,11 +819,6 @@ class UserResource extends Resource
             'representativeProfile.province:id,name',
         ]);
 
-        // فقط مدیر سیستم soft-deleted را می‌بیند؛ بنکدار/مدیر فروش/نماینده نه.
-        if (AdminAccess::isFullAdmin()) {
-            $query = $query->withTrashed();
-        }
-
         return $query;
     }
 
@@ -831,23 +826,12 @@ class UserResource extends Resource
     {
         return AdminTable::configure($table)
             ->searchPlaceholder('جستجوی کاربر')
-            ->recordClasses(fn (User $record): ?string => $record->trashed() ? 'fi-admin-user-row--trashed' : null)
             ->columns([
                 ViewColumn::make('name')
                     ->label('کاربر')
                     ->view('filament.tables.columns.user-cell')
-                    ->searchable(['name', 'email', 'phone']),
+                    ->searchable(['name', 'email', 'phone', 'national_code']),
                 UserTableColumns::phone(),
-                Tables\Columns\TextColumn::make('soft_delete_badge')
-                    ->label('حذف')
-                    ->state(fn (User $record): ?string => $record->trashed() ? 'حذف‌شده' : null)
-                    ->badge()
-                    ->color('danger')
-                    ->placeholder('—')
-                    ->visible(fn (): bool => AdminAccess::isFullAdmin())
-                    ->tooltip(fn (User $record): ?string => $record->trashed() && $record->deleted_at
-                        ? 'حذف نرم در '.$record->deleted_at->shopJalali('Y/m/d H:i').' — با «بازیابی» به چرخه برمی‌گردد'
-                        : null),
                 Tables\Columns\TextColumn::make('admin_list_segment')
                     ->label('دسته')
                     ->state(fn (User $record): string => $record->adminListSegmentLabel())
@@ -952,14 +936,6 @@ class UserResource extends Resource
                         return $query->adminListSegment($value);
                     }),
                 Tables\Filters\TernaryFilter::make('status')->label('فعال'),
-                Tables\Filters\TrashedFilter::make()
-                    ->label('حذف نرم')
-                    ->placeholder('فقط فعال')
-                    ->trueLabel('فعال + حذف‌شده')
-                    ->falseLabel('فقط حذف‌شده')
-                    // پیش‌فرض: ادمین حذف‌شده‌ها را هم ببیند (با تگ در جدول)
-                    ->default(true)
-                    ->visible(fn (): bool => AdminAccess::isFullAdmin()),
             ])
             ->actions([
                 Tables\Actions\Action::make('viewSubtree')
@@ -969,10 +945,6 @@ class UserResource extends Resource
                     ->iconButton()
                     ->tooltip('مشاهده زیرمجموعه')
                     ->visible(function (User $record): bool {
-                        if ($record->trashed()) {
-                            return false;
-                        }
-
                         if (! $record->isBankdar()) {
                             return false;
                         }
@@ -1016,10 +988,6 @@ class UserResource extends Resource
                     ->modalDescription('به‌عنوان این کاربر وارد می‌شوید و دسترسی‌های همان نقش را می‌بینید. با دکمهٔ بازگشت در بنر، دوباره به حساب خود برمی‌گردید.')
                     ->modalSubmitActionLabel('ورود به پنل')
                     ->visible(function (User $record): bool {
-                        if ($record->trashed()) {
-                            return false;
-                        }
-
                         $actor = auth()->user();
 
                         return $actor instanceof User
@@ -1042,35 +1010,27 @@ class UserResource extends Resource
                     }),
                 Tables\Actions\EditAction::make()
                     ->label('ویرایش')
-                    ->iconButton()
-                    ->visible(fn (User $record): bool => ! $record->trashed()),
-                Tables\Actions\RestoreAction::make()
-                    ->label('بازیابی')
-                    ->icon('heroicon-o-arrow-uturn-left')
-                    ->color('success')
-                    ->button()
-                    ->successNotificationTitle('کاربر بازیابی شد و دوباره در چرخه است')
-                    ->visible(fn (User $record): bool => AdminAccess::isFullAdmin() && $record->trashed()),
+                    ->iconButton(),
                 Tables\Actions\Action::make('forceDelete')
-                    ->label('حذف نهایی')
+                    ->label('حذف کامل')
                     ->icon('heroicon-o-trash')
                     ->color('danger')
-                    ->button()
                     ->requiresConfirmation()
-                    ->modalHeading('حذف نهایی کاربر')
-                    ->modalDescription('این عمل غیرقابل بازگشت است. کاربر، سفارش‌ها (شامل حذف‌شده از لیست)، پرداخت‌ها و داده‌های وابسته از پایگاه داده پاک می‌شوند.')
-                    ->modalSubmitActionLabel('حذف نهایی')
-                    ->visible(fn (User $record): bool => AdminAccess::isFullAdmin() && $record->trashed())
+                    ->modalHeading('حذف کامل کاربر')
+                    ->modalDescription('همهٔ سفارش‌ها و پرداخت‌های این کاربر برای همیشه حذف می‌شوند. غیرقابل بازگشت.')
+                    ->visible(fn (User $record): bool => AdminAccess::isFullAdmin()
+                        && static::canDelete($record)
+                        && $record->orders()->exists())
                     ->action(function (User $record): void {
                         try {
                             app(UserForceDeletionService::class)->forceDelete($record);
                             \Filament\Notifications\Notification::make()
-                                ->title('کاربر به‌طور کامل حذف شد')
+                                ->title('کاربر و سفارش‌هایش حذف شدند')
                                 ->success()
                                 ->send();
                         } catch (\Throwable $exception) {
                             \Filament\Notifications\Notification::make()
-                                ->title('حذف نهایی ناموفق')
+                                ->title('حذف کامل ناموفق')
                                 ->body($exception->getMessage())
                                 ->danger()
                                 ->send();
@@ -1079,17 +1039,16 @@ class UserResource extends Resource
                 Tables\Actions\DeleteAction::make()
                     ->label('حذف')
                     ->iconButton()
-                    ->visible(fn (User $record): bool => ! $record->trashed())
-                    ->modalDescription('کاربری که سفارش فعال (در لیست) دارد حذف نمی‌شود؛ سفارش‌هایی که از لیست حذف کرده‌اید مانع نیست. حذف کاربر = پنهان از فروشگاه؛ مدیر می‌تواند بازیابی کند.')
+                    ->visible(fn (User $record): bool => static::canDelete($record))
+                    ->modalDescription(fn (User $record): string => $record->orders()->exists()
+                        ? 'این کاربر سفارش دارد. مدیر سیستم می‌تواند «حذف کامل» بزند؛ مدیر فروش فقط کاربر بدون سفارش را حذف می‌کند.'
+                        : 'کاربر برای همیشه از سیستم حذف می‌شود.')
                     ->action(function (User $record): void {
-                        $outcome = app(UserSoftDeletionService::class)->delete($record);
+                        $outcome = app(UserDeletionService::class)->delete($record, AdminAccess::isFullAdmin());
                         if ($outcome === 'skipped') {
-                            $activeOrders = $record->orders()->count();
                             \Filament\Notifications\Notification::make()
                                 ->title('کاربر قابل حذف نیست')
-                                ->body($activeOrders > 0
-                                    ? "این کاربر {$activeOrders} سفارش فعال دارد (سفارش با پرداخت موفق یا حذف‌نشده از لیست)."
-                                    : 'این کاربر سفارش فعال دارد.')
+                                ->body('این کاربر سفارش دارد — از «حذف کامل» استفاده کنید.')
                                 ->warning()
                                 ->send();
 
@@ -1097,28 +1056,30 @@ class UserResource extends Resource
                         }
 
                         \Filament\Notifications\Notification::make()
-                            ->title('کاربر از لیست پنهان شد')
+                            ->title('کاربر حذف شد')
                             ->success()
                             ->send();
                     }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\BulkAction::make('softDelete')
+                    Tables\Actions\BulkAction::make('deleteUsers')
                         ->label('حذف انتخاب‌شده‌ها')
                         ->requiresConfirmation()
                         ->color('danger')
                         ->icon('heroicon-o-trash')
+                        ->visible(fn (): bool => AdminAccess::isFullAdmin() || AdminAccess::isSalesManagerOnly())
                         ->action(function (\Illuminate\Database\Eloquent\Collection $records): void {
-                            $result = app(UserSoftDeletionService::class)->deleteMany($records);
+                            $result = app(UserDeletionService::class)->deleteMany(
+                                $records,
+                                AdminAccess::isFullAdmin(),
+                            );
                             \Filament\Notifications\Notification::make()
                                 ->title('عملیات حذف')
                                 ->body($result->message())
                                 ->success()
                                 ->send();
                         }),
-                    Tables\Actions\RestoreBulkAction::make()
-                        ->visible(fn (): bool => AdminAccess::isFullAdmin()),
                 ]),
             ]);
     }

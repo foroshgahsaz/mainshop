@@ -41,7 +41,8 @@
 | `app/Support/AdminAccess.php` | مدیر فروش / بنکدار — resource/route و گیت‌های محصول/سفارش/کاتالوگ |
 | `app/Services/Catalog/BankdarCatalogService.php` | اسکوپ برند/دسته/محصول برای بنکدار |
 | `app/Services/Order/BankdarOrderService.php` | ایجاد پیش‌نویس سفارش توسط بنکدار |
-| `app/Services/User/UserSoftDeletionService.php` | soft-delete کاربر بدون سفارش؛ purge هویت soft-deleted برای ایجاد مجدد |
+| `app/Services/User/UserDeletionService.php` | حذف فیزیکی کاربر بدون سفارش |
+| `app/Services/User/UserForceDeletionService.php` | حذف کامل کاربر + سفارش‌ها (مدیر سیستم) |
 | `app/Support/UserIdentityUnique.php` | unique موبایل/ایمیل/کدملی بدون درنظرگرفتن soft-deleted |
 | `app/Filament/Pages/BankdarSubtreePage.php` | درخت زیرمجموعه بنکدار (ادمین / مدیر فروش / بنکدار) |
 | `app/Services/Auth/AdminImpersonationService.php` | ورود موقت مدیر سیستم (و مدیر فروش→بنکدار زیرمجموعه) |

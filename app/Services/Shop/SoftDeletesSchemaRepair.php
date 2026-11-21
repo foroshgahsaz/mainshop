@@ -58,14 +58,6 @@ final class SoftDeletesSchemaRepair
             self::forgetColumnCache('orders');
         }
 
-        if (Schema::hasTable('users') && ! Schema::hasColumn('users', 'deleted_at')) {
-            Schema::table('users', function (Blueprint $table): void {
-                $table->softDeletes();
-            });
-            $actions[] = 'users.deleted_at';
-            self::forgetColumnCache('users');
-        }
-
         return $actions;
     }
 
@@ -84,7 +76,6 @@ final class SoftDeletesSchemaRepair
         try {
             if (Cache::get(self::CACHE_OK_KEY) === 1
                 && self::hasDeletedAtColumn('orders')
-                && self::hasDeletedAtColumn('users')
             ) {
                 return [];
             }
@@ -101,10 +92,7 @@ final class SoftDeletesSchemaRepair
 
         $actions = $this->ensure();
 
-        $ordersOk = self::hasDeletedAtColumn('orders');
-        $usersOk = self::hasDeletedAtColumn('users');
-
-        if ($ordersOk && $usersOk) {
+        if (self::hasDeletedAtColumn('orders')) {
             try {
                 Cache::forever(self::CACHE_OK_KEY, 1);
             } catch (\Throwable) {

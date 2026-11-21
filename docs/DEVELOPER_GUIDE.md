@@ -1607,6 +1607,7 @@ resources/views/layouts/shop.blade.php
 | 2026-11-14 | UI زیرمجموعه بنکدار: هدر آمار + کارت/تایم‌لاین؛ دسترسی بنکدار به درخت خودش |
 | 2026-11-14 | زیرمجموعه بنکدار: آیکون‌فقط + دسترسی مدیر فروش به بنکدارهای خودش (`canViewBankdarSubtreeInAdmin`) |
 | 2026-11-14 | ادمین: دکمه «مشاهده زیرمجموعه» روی بنکدار → درخت مدیر فروش تا نماینده (`BankdarSubtreePage`) |
+| 2026-11-21 | کاربر: حذف soft-delete؛ حذف فقط مدیر سیستم/مدیر فروش؛ تب «همه» + جستجوی کد ملی؛ «حذف کامل» با سفارش |
 | 2026-11-19 | کوپن: محدوده اعمال روی محصولات یا دسته‌بندی (`scope_type`, `coupon_product`, `coupon_category`)؛ تخفیف فقط روی اقلام مشمول |
 | 2026-11-14 | رفع `BankdarHierarchyRepair` compact (`province_filled`) برای migrate/deploy-recover |
 | 2026-11-14 | لیست بنکدار: ستون «مدیر فروش» (`created_by_sales_manager_id`)؛ ترمیم لینک با `BankdarHierarchyRepair` |

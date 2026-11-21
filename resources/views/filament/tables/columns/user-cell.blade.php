@@ -16,9 +16,6 @@
     <div class="fi-admin-user-cell__text">
         <span class="fi-admin-user-cell__name">
             {{ $record->name }}
-            @if ($record->trashed())
-                <span class="fi-admin-user-cell__trashed-badge" title="حذف نرم — مدیر سیستم می‌تواند بازیابی کند">حذف‌شده</span>
-            @endif
         </span>
         @if (filled($record->phone))
             <span class="fi-admin-user-cell__phone" dir="ltr">{{ $record->phone }}</span>

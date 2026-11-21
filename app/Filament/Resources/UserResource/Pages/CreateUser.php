@@ -5,7 +5,6 @@ namespace App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\Pages\CreateRecord;
 use App\Filament\Resources\UserResource;
 use App\Services\Representative\SalesRegionService;
-use App\Services\User\UserSoftDeletionService;
 use App\Support\AdminAccess;
 use Filament\Forms\Form;
 use Illuminate\Contracts\Support\Htmlable;
@@ -31,12 +30,6 @@ class CreateUser extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data = static::applyAccessFieldsFromForm($this->form, $data);
-
-        app(UserSoftDeletionService::class)->purgeTrashedIdentityConflicts(
-            phone: isset($data['phone']) ? (string) $data['phone'] : null,
-            email: isset($data['email']) ? (string) $data['email'] : null,
-            nationalCode: isset($data['national_code']) ? (string) $data['national_code'] : null,
-        );
 
         if (AdminAccess::isSalesManagerOnly()) {
             $provinceId = (int) ($data['bankdar_province_id'] ?? 0);

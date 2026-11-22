@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;700;900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/blackfriday-neon.css') }}?v=2026-11-21">
+    <link rel="stylesheet" href="{{ asset('css/blackfriday-neon.css') }}?v=2026-11-22-mobile-promo">
     <style>
         #products { scroll-margin-top: 32px; }
         .btn-neon { cursor: pointer; font: inherit; }

@@ -160,6 +160,33 @@ class OrderResource extends Resource
         return $options;
     }
 
+    /**
+     * فیلترهای لیست سفارش (ادمین) — برای خروجی اکسل و هم‌خوانی با جدول Filament.
+     *
+     * @param  array{status?: mixed, payment_gateway?: mixed, trashed?: mixed}  $filters
+     */
+    public static function applyListTableFiltersToQuery(Builder $query, array $filters): Builder
+    {
+        $status = $filters['status'] ?? null;
+        if (is_string($status) && $status !== '') {
+            $query->where('status', $status);
+        }
+
+        $gateway = $filters['payment_gateway'] ?? null;
+        if (is_string($gateway) && $gateway !== '') {
+            $query = static::applyPaymentGatewayFilter($query, $gateway);
+        }
+
+        $trashed = $filters['trashed'] ?? null;
+        if ($trashed === 'only') {
+            $query->onlyTrashed();
+        } elseif ($trashed !== 'with' && AdminAccess::isFullAdmin()) {
+            $query->whereNull($query->getModel()->getQualifiedDeletedAtColumn());
+        }
+
+        return $query;
+    }
+
     protected static function applyPaymentGatewayFilter(Builder $query, mixed $gateway): Builder
     {
         if (! is_string($gateway) || $gateway === '') {

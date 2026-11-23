@@ -1230,7 +1230,7 @@ $settings->site();       // نام سایت، لوگو، ...
 
 | Page | URL | کار |
 |------|-----|-----|
-| List | `/admin/orders` | لیست + فیلتر — ستون کاربر فقط **نام**؛ فیلتر **روش پرداخت** = درگاه‌های فعال (`PaymentGatewayCatalog`) + پرداخت در محل |
+| List | `/admin/orders` | لیست + فیلتر — ستون کاربر فقط **نام**؛ فیلتر **روش پرداخت** = درگاه‌های فعال (`PaymentGatewayCatalog`) + پرداخت در محل؛ دکمه **خروجی اکسل** (ستون **موبایل مشتری** + فیلترهای جدول) → `GET /admin/orders/export` (`OrderExcelExportService` / OpenSpout) |
 | View | `/admin/orders/{id}` | جزئیات، timeline، items؛ دکمه **PDF فاکتور** (همان قالب `pdf/sales-invoice` نماینده) برای سفارش‌های سایت و پیش‌فاکتور |
 
 **View custom:** `resources/views/filament/orders/` — items table، notes
@@ -1419,6 +1419,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-23 | ادمین سفارش‌ها: خروجی اکسل با موبایل مشتری (`/admin/orders/export`) |
 | 2026-11-22 | صفحه اصلی: فروش ویژه بالای جدیدترین؛ گرید `/pages/{slug}` — کارت جمع‌تر، بج تخفیف روی تصویر، ۵۰px فاصله تا فوتر |
 | 2026-11-22 | صفحات کمپین: `Page.layout=product_grid` + `product_ids` — ادمین → صفحات؛ URL `/pages/{slug}`؛ `CuratedProductListingService` |
 | 2026-11-19 | کاربر: **حذف نهایی** (`UserForceDeletionService`) فقط مدیر سیستم روی رکورد soft-delete — purge سفارش/پرداخت و `forceDelete` |

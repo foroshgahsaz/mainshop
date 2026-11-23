@@ -86,6 +86,7 @@ class SalesManagerAccessTest extends TestCase
         $this->assertTrue(ProductPriceStockUpdate::canAccess());
         $this->assertContains('filament.admin.pages.product-list-import', AdminAccess::limitedStaffAllowedRoutePatterns());
         $this->assertContains('filament.admin.product-import.template', AdminAccess::limitedStaffAllowedRoutePatterns());
+        $this->assertContains('filament.admin.orders.export', AdminAccess::limitedStaffAllowedRoutePatterns());
         $this->assertContains('filament.admin.resources.products.*', AdminAccess::limitedStaffAllowedRoutePatterns());
     }
 

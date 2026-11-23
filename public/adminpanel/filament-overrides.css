@@ -1237,6 +1237,20 @@ body.fi-body .fi-no-notification-icon {
     font-size: 14px;
 }
 
+.fi-admin-list-header__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-inline-start: auto;
+}
+
+.fi-admin-list-header__actions .fi-btn {
+    border-radius: 10px;
+    font-weight: 600;
+}
+
 .fi-admin-list-header__title {
     font-size: 14px;
     font-weight: 500;

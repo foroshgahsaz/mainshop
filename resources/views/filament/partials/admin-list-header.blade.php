@@ -2,6 +2,7 @@
     'icon' => 'fa-users',
     'section' => '',
     'title' => '',
+    'actions' => [],
 ])
 
 <header class="fi-header fi-admin-list-header">
@@ -13,4 +14,11 @@
         <span class="fi-admin-list-header__sep" aria-hidden="true">|</span>
         <span class="fi-admin-list-header__title">{{ $title }}</span>
     </div>
+
+    @if (filled($actions ?? null))
+        <x-filament::actions
+            :actions="$actions"
+            class="fi-admin-list-header__actions"
+        />
+    @endif
 </header>

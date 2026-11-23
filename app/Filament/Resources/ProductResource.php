@@ -413,6 +413,61 @@ class ProductResource extends Resource
             ]);
     }
 
+    /**
+     * فیلترهای لیست محصول (ادمین) — برای خروجی اکسل و هم‌خوانی با جدول Filament.
+     *
+     * @param  array{category_id?: mixed, brand_id?: mixed, is_active?: mixed, is_featured?: mixed, is_not_for_sale?: mixed, trashed?: mixed, price_min?: mixed, price_max?: mixed}  $filters
+     */
+    public static function applyListTableFiltersToQuery(Builder $query, array $filters): Builder
+    {
+        $categoryId = $filters['category_id'] ?? null;
+        if (is_numeric($categoryId)) {
+            $query->where('category_id', (int) $categoryId);
+        }
+
+        $brandId = $filters['brand_id'] ?? null;
+        if (is_numeric($brandId)) {
+            $query->where('brand_id', (int) $brandId);
+        }
+
+        $query = static::applyTernaryTableFilter($query, 'is_active', $filters['is_active'] ?? null);
+        $query = static::applyTernaryTableFilter($query, 'is_featured', $filters['is_featured'] ?? null);
+        $query = static::applyTernaryTableFilter($query, 'is_not_for_sale', $filters['is_not_for_sale'] ?? null);
+
+        $priceMin = $filters['price_min'] ?? null;
+        if (is_numeric($priceMin)) {
+            $query->where('price', '>=', (int) $priceMin);
+        }
+
+        $priceMax = $filters['price_max'] ?? null;
+        if (is_numeric($priceMax)) {
+            $query->where('price', '<=', (int) $priceMax);
+        }
+
+        $trashed = $filters['trashed'] ?? null;
+        if ($trashed === 'only') {
+            $query->onlyTrashed();
+        } elseif ($trashed !== 'with' && AdminAccess::isFullAdmin()) {
+            $query->whereNull($query->getModel()->getQualifiedDeletedAtColumn());
+        }
+
+        return $query;
+    }
+
+    protected static function applyTernaryTableFilter(Builder $query, string $column, mixed $value): Builder
+    {
+        if ($value === null || $value === '') {
+            return $query;
+        }
+
+        $bool = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+        if ($bool === null) {
+            return $query;
+        }
+
+        return $query->where($column, $bool);
+    }
+
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery()->with([

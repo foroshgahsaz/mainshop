@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\ClearApplicationCacheController;
 use App\Http\Controllers\Admin\DownloadApplicationLogFileController;
 use App\Http\Controllers\Admin\DownloadDatabaseBackupController;
 use App\Http\Controllers\Admin\DownloadPaymentLogFileController;
+use App\Http\Controllers\Admin\OrderExcelExportController;
 use App\Http\Controllers\Admin\ProductImportTemplateController;
 use App\Http\Middleware\RestrictSalesManagerAdminAccess;
 use App\Http\Middleware\SetPersianLocale;
@@ -124,6 +125,8 @@ class AdminPanelProvider extends PanelProvider
                     ->name('database-backups.download');
                 Route::get('/product-import/template', ProductImportTemplateController::class)
                     ->name('product-import.template');
+                Route::get('/orders/export', OrderExcelExportController::class)
+                    ->name('orders.export');
                 Route::post('/tools/clear-application-cache', ClearApplicationCacheController::class)
                     ->name('tools.clear-application-cache');
             });

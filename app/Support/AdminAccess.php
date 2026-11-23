@@ -48,6 +48,7 @@ class AdminAccess
     protected const LIMITED_STAFF_ROUTE_PATTERNS = [
         'filament.admin.pages.dashboard',
         'filament.admin.resources.orders.*',
+        'filament.admin.orders.export',
         'filament.admin.resources.payments.*',
         'filament.admin.resources.users.index',
         'filament.admin.resources.users.create',

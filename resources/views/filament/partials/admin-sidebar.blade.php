@@ -15,6 +15,7 @@
     use App\Filament\Pages\ManageBajetPay;
     use App\Filament\Pages\ManageDarik;
     use App\Filament\Pages\ManageDigiPay;
+    use App\Filament\Pages\ManageSnappPay;
     use App\Filament\Pages\ManageTara;
     use App\Filament\Pages\ManageParsian;
     use App\Filament\Pages\ManageSadad;
@@ -295,6 +296,7 @@
                 'filament.admin.pages.tara',
                 'filament.admin.pages.bajet',
                 'filament.admin.pages.digipay',
+                'filament.admin.pages.snapppay',
                 'filament.admin.pages.parsian',
                 'filament.admin.pages.sadad',
                 'filament.admin.pages.nopay',
@@ -310,6 +312,7 @@
                     ['label' => 'تارا', 'url' => ManageTara::getUrl(), 'icon' => 'fa-wallet'],
                     ['label' => 'باجت‌پی', 'url' => ManageBajetPay::getUrl(), 'icon' => 'fa-credit-card'],
                     ['label' => 'دیجی‌پی', 'url' => ManageDigiPay::getUrl(), 'icon' => 'fa-credit-card'],
+                    ['label' => 'اسنپ‌پی', 'url' => ManageSnappPay::getUrl(), 'icon' => 'fa-credit-card'],
                     ['label' => 'داریک', 'url' => ManageDarik::getUrl(), 'icon' => 'fa-wallet'],
                 ]],
             ],

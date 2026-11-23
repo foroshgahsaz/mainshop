@@ -4,7 +4,7 @@
 
 ## قبل از شروع
 
-- الگوهای موجود: `ZarinpalGateway` (نقدی REST)، `ParsianGateway` (نقدی SOAP / PEC)، `SadadGateway` (نقدی JSON / سداد)، `TaraGateway` (اعتباری + redirect میانی).
+- الگوهای موجود: `ZarinpalGateway` (نقدی REST)، `ParsianGateway` (نقدی SOAP / PEC)، `SadadGateway` (نقدی JSON / سداد)، `TaraGateway` (اعتباری + redirect میانی)، `SnappPayGateway` (اعتباری اقساطی — OAuth password + `payment/v1/token` + verify/settle، مبالغ **ریال**).
 - مستندات درگاه سداد در repo: `docs/PHP-master.zip`، `docs/15470-51A234D3-CD9B-4DEB-8D6A-F9D72518FCB9.pdf`؛ مسیر مستعار `/payment/callback/bmi` همان سداد است اگر پنل بانک فقط این URL را بپذیرد.
 - درگاه **نوپی (CPG)**: `docs/CPG Ver 2-5.pdf` — `NopayGateway`، `RequestToken` + `VerifyTransaction`.
   - خطای «پاسخ نامعتبر از درگاه»: بدنه غیرJSON از `api_base_url` — لاگ `nopay.cpg.non_json_or_http_error` در `laravel.log`.

@@ -93,6 +93,7 @@ class ShopLabels
             'tara' => 'تارا',
             'bajet' => 'باجت‌پی',
             'digipay' => 'دیجی‌پی',
+            'snapppay' => 'اسنپ‌پی',
             'parsian' => 'پارسیان',
             'sadad' => 'سداد',
             'nopay' => 'نوپی',

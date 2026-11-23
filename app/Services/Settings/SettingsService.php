@@ -27,6 +27,9 @@ class SettingsService
     protected static ?array $digipayMemo = null;
 
     /** @var array<string, mixed>|null */
+    protected static ?array $snapppayMemo = null;
+
+    /** @var array<string, mixed>|null */
     protected static ?array $parsianMemo = null;
 
     /** @var array<string, mixed>|null */
@@ -61,13 +64,14 @@ class SettingsService
         static::$taraMemo = null;
         static::$bajetMemo = null;
         static::$digipayMemo = null;
+        static::$snapppayMemo = null;
         static::$parsianMemo = null;
         static::$sadadMemo = null;
         static::$nopayMemo = null;
         static::$darikMemo = null;
         static::$codMemo = null;
 
-        if (in_array($group, ['zarinpal', 'tara', 'bajet', 'digipay', 'parsian', 'sadad', 'nopay', 'darik', 'cod', 'homepage'], true)) {
+        if (in_array($group, ['zarinpal', 'tara', 'bajet', 'digipay', 'snapppay', 'parsian', 'sadad', 'nopay', 'darik', 'cod', 'homepage'], true)) {
             app(ShopCacheService::class)->forgetHome();
         }
     }
@@ -189,6 +193,29 @@ class SettingsService
             'icon' => $this->get('bajet', 'icon') ?: null,
             ...$this->gatewayCheckoutDisplayFields('bajet'),
             ...$this->gatewayHomepagePlanFields('bajet'),
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    public function snapppay(): array
+    {
+        if (static::$snapppayMemo !== null) {
+            return static::$snapppayMemo;
+        }
+
+        $cfg = config('payment.gateways.snapppay', []);
+
+        return static::$snapppayMemo = [
+            'enabled' => filter_var($this->get('snapppay', 'enabled', false), FILTER_VALIDATE_BOOLEAN),
+            'base_url' => rtrim((string) ($this->get('snapppay', 'base_url') ?: ($cfg['base_url'] ?? 'https://api.snapppay.ir')), '/'),
+            'client_id' => (string) ($this->get('snapppay', 'client_id') ?: ($cfg['client_id'] ?? '')),
+            'client_secret' => (string) ($this->get('snapppay', 'client_secret') ?: ($cfg['client_secret'] ?? '')),
+            'client_username' => (string) ($this->get('snapppay', 'client_username') ?: ($cfg['client_username'] ?? '')),
+            'client_password' => (string) ($this->get('snapppay', 'client_password') ?: ($cfg['client_password'] ?? '')),
+            'amount_unit' => (string) ($this->get('snapppay', 'amount_unit') ?: ($cfg['amount_unit'] ?? 'toman')),
+            'callback_url' => (string) ($this->get('snapppay', 'callback_url') ?: ($cfg['callback_url'] ?? '/payment/callback/snapppay')),
+            'icon' => $this->get('snapppay', 'icon') ?: null,
+            ...$this->gatewayCheckoutDisplayFields('snapppay'),
         ];
     }
 

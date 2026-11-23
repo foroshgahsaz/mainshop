@@ -18,6 +18,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
             'payment/callback/tara',
             'payment/callback/bajet',
             'payment/callback/digipay',
+            'payment/callback/snapppay',
             'payment/callback/parsian',
             'payment/callback/pec',
             'payment/callback/sadad',

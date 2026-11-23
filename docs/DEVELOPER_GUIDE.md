@@ -1419,6 +1419,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-23 | درگاه اعتباری **اسنپ‌پی** (`SnappPayGateway`, `/admin/snapppay`, callback `POST state=OK`) — OAuth + token + verify/settle |
 | 2026-11-23 | ادمین سفارش‌ها: خروجی اکسل با موبایل مشتری؛ دکمه در هدر لیست (`admin-list-header` + `getCachedHeaderActions`) |
 | 2026-11-22 | صفحه اصلی: فروش ویژه بالای جدیدترین؛ گرید `/pages/{slug}` — کارت جمع‌تر، بج تخفیف روی تصویر، ۵۰px فاصله تا فوتر |
 | 2026-11-22 | صفحات کمپین: `Page.layout=product_grid` + `product_ids` — ادمین → صفحات؛ URL `/pages/{slug}`؛ `CuratedProductListingService` |

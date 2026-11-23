@@ -44,6 +44,11 @@ class PaymentController extends Controller
         return $this->handleCallback($request);
     }
 
+    public function snapppayCallback(Request $request)
+    {
+        return $this->handleCallback($request);
+    }
+
     public function parsianCallback(Request $request)
     {
         return $this->handleCallback($request);
@@ -278,6 +283,16 @@ class PaymentController extends Controller
         } elseif ($payment->gateway === 'digipay') {
             $authority = (string) ($request->input('trackingCode') ?: $payment->transaction_id);
             $status = (string) $request->input('result', '');
+        } elseif ($payment->gateway === 'snapppay') {
+            $authority = (string) ($payment->transaction_id ?: data_get($payment->raw_response, 'snapppay_payment_token', ''));
+            $status = (string) ($request->input('state') ?: $request->input('State') ?: '');
+            $payment->update([
+                'raw_response' => array_merge(
+                    is_array($payment->raw_response) ? $payment->raw_response : [],
+                    ['snapppay_callback' => $request->except(['payment'])]
+                ),
+            ]);
+            $payment = $payment->fresh();
         } elseif ($payment->gateway === 'parsian') {
             $authority = (string) ($request->input('Token') ?: $request->input('token') ?: $payment->transaction_id);
             $status = (string) $request->input('status', '');

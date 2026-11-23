@@ -12,6 +12,7 @@ use App\Filament\Pages\ManageDigiPay;
 use App\Filament\Pages\ManageParsian;
 use App\Filament\Pages\ManageCodPayment;
 use App\Filament\Pages\ManageSadad;
+use App\Filament\Pages\ManageSnappPay;
 use App\Filament\Pages\ManageNopay;
 use App\Filament\Pages\ManageTara;
 use App\Filament\Pages\ManageZarinpal;
@@ -84,6 +85,7 @@ class AdminPanelProvider extends PanelProvider
                 ManageTara::class,
                 ManageBajetPay::class,
                 ManageDigiPay::class,
+                ManageSnappPay::class,
                 ManageParsian::class,
                 ManageSadad::class,
                 ManageNopay::class,

@@ -5,6 +5,7 @@ use App\Services\Payment\DarikGateway;
 use App\Services\Payment\DigiPayGateway;
 use App\Services\Payment\ParsianGateway;
 use App\Services\Payment\SadadGateway;
+use App\Services\Payment\SnappPayGateway;
 use App\Services\Payment\TaraGateway;
 use App\Services\Payment\NopayGateway;
 use App\Services\Payment\ZarinpalGateway;
@@ -66,6 +67,20 @@ return [
             'amount_unit' => env('BAJET_AMOUNT_UNIT', 'toman'),
             'default_product_type' => env('BAJET_DEFAULT_PRODUCT_TYPE', 2),
             'default_brand' => env('BAJET_DEFAULT_BRAND', 'general'),
+        ],
+
+        'snapppay' => [
+            'driver' => SnappPayGateway::class,
+            'type' => 'credit',
+            'label' => 'اسنپ‌پی',
+            'description' => 'پرداخت اقساطی اسنپ‌پی',
+            'base_url' => env('SNAPPPAY_BASE_URL', 'https://api.snapppay.ir'),
+            'client_id' => env('SNAPPPAY_CLIENT_ID', ''),
+            'client_secret' => env('SNAPPPAY_CLIENT_SECRET', ''),
+            'client_username' => env('SNAPPPAY_CLIENT_USERNAME', ''),
+            'client_password' => env('SNAPPPAY_CLIENT_PASSWORD', ''),
+            'callback_url' => env('SNAPPPAY_CALLBACK_URL', '/payment/callback/snapppay'),
+            'amount_unit' => env('SNAPPPAY_AMOUNT_UNIT', 'toman'),
         ],
 
         'digipay' => [

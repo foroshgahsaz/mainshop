@@ -60,6 +60,7 @@ abstract class AdminListRecords extends ListRecords
             'icon' => $this->adminListIcon() ?? AdminListHeader::icon($resource),
             'section' => $this->adminListSection() ?? AdminListHeader::sectionLabel($resource),
             'title' => $this->adminListTitle() ?? AdminListHeader::listTitle($resource),
+            'actions' => $this->getCachedHeaderActions(),
         ]);
     }
 }

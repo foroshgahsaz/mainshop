@@ -1419,7 +1419,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
-| 2026-11-23 | ادمین سفارش‌ها: خروجی اکسل با موبایل مشتری (`/admin/orders/export`) |
+| 2026-11-23 | ادمین سفارش‌ها: خروجی اکسل با موبایل مشتری؛ دکمه در هدر لیست (`admin-list-header` + `getCachedHeaderActions`) |
 | 2026-11-22 | صفحه اصلی: فروش ویژه بالای جدیدترین؛ گرید `/pages/{slug}` — کارت جمع‌تر، بج تخفیف روی تصویر، ۵۰px فاصله تا فوتر |
 | 2026-11-22 | صفحات کمپین: `Page.layout=product_grid` + `product_ids` — ادمین → صفحات؛ URL `/pages/{slug}`؛ `CuratedProductListingService` |
 | 2026-11-19 | کاربر: **حذف نهایی** (`UserForceDeletionService`) فقط مدیر سیستم روی رکورد soft-delete — purge سفارش/پرداخت و `forceDelete` |

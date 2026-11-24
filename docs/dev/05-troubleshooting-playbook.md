@@ -111,7 +111,8 @@ php artisan shop:verify-storage
 - CSRF برای `/payment/callback` و `/payment/callback/tara` exempt است — `bootstrap/app.php`.
 - `ZARINPAL_CALLBACK_URL` / `TARA_CALLBACK_URL` مسیر relative روی همان `APP_URL`.
 - **بعد از پرداخت دوباره لاگین می‌خواهد** (صفحه نتیجه guest است / «بازگشت به پیش‌فاکتور» لاگین می‌پرسد): بازگشت cross-site کوکی سشن را نمی‌فرستد و سشن خالی لاگین را overwrite می‌کند. باید `PreserveBrowserSessionOnPaymentCallback` روی `web` prepend باشد — [DEVELOPER_GUIDE §9.9](../DEVELOPER_GUIDE.md#99-csrf-سشن-و-امنیت-callback).
-- **دیجی‌پی ۵۰۰ در `/payment/callback/digipay`:** در لاگ `payments` باید `callback_received` باشد؛ اگر نیست، درخواست به اپ نرسیده یا قبل از resolve قطع شده. callback معمولاً POST با `providerId`، `trackingCode`، `result`، `type` است — `?payment=` در initiate اضافه می‌شود (`DigiPayCallbackUrl`). برای verify از `type` بازگشت استفاده کنید (۵/۱۳/…)، نه نوع تیکت UPG. پرداخت `2U2NF61HNEWU` را در ادمین با وضعیت pending چک کنید؛ بعد از deploy در صورت کسر وجه دوباره از درگاه برگردید یا verify دستی از پشتیبانی.
+- **۵۰۰ روی هر `/payment/callback/*`:** اول `laravel.log` را بگردید — اگر `ParseError` در `PaymentController.php` (مثلاً خط `resolvePayment` / `$tv = trim`) دیدید، دیپلوی با syntax error است؛ پرانتز بسته `)` قبل از `;` را چک کنید.
+- **دیجی‌پی ۵۰۰ در `/payment/callback/digipay`:** در لاگ `payments` باید `callback_received` باشد؛ اگر نیست و در `laravel.log` ParseError نیست، درخواست قبل از audit قطع شده. callback معمولاً POST با `providerId`، `trackingCode`، `result`، `type` — `DigiPayCallbackUrl` برای `?payment=`.
 
 ---
 

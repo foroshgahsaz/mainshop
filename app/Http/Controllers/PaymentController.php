@@ -518,7 +518,7 @@ class PaymentController extends Controller
             }
         }
 
-        $tv = trim((string) ($request->input('tv', $request->query('tv', '')));
+        $tv = trim((string) ($request->input('tv', $request->query('tv', ''))));
         if ($tv !== '') {
             $byTv = Payment::query()
                 ->where('transaction_id', $tv)

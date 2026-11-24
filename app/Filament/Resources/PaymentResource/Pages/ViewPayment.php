@@ -41,7 +41,7 @@ class ViewPayment extends ViewRecord
                 ->requiresConfirmation()
                 ->modalHeading('انتقال سفارش به پردازش انبار')
                 ->modalDescription('وضعیت سفارش به «پردازش انبار» تغییر می‌کند و در صورت فعال بودن قالب، پیامک به مشتری ارسال می‌شود.')
-                ->visible(fn (): bool => AdminAccess::canManageShopInAdmin()
+                ->visible(fn (): bool => AdminAccess::canAdvanceOrderToWarehouseInAdmin()
                     && $this->record->status === Payment::STATUS_SUCCESS
                     && $this->record->order !== null
                     && $this->record->order->canAdvanceToWarehouseProcessing())

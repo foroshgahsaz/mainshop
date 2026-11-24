@@ -121,7 +121,7 @@ class ViewOrder extends ViewRecord
                 });
         }
 
-        if (AdminAccess::canManageShopInAdmin() && $order->canAdvanceToWarehouseProcessing()) {
+        if (AdminAccess::canAdvanceOrderToWarehouseInAdmin() && $order->canAdvanceToWarehouseProcessing()) {
             $actions[] = Actions\Action::make('confirmWarehouseProcessing')
                 ->label('تأیید پرداخت — پردازش انبار')
                 ->icon('heroicon-o-building-storefront')
@@ -129,15 +129,7 @@ class ViewOrder extends ViewRecord
                 ->requiresConfirmation()
                 ->modalHeading('انتقال به پردازش انبار')
                 ->modalDescription('وضعیت سفارش به «پردازش انبار» تغییر می‌کند و در صورت فعال بودن قالب، پیامک به مشتری ارسال می‌شود.')
-                ->action(function (OrderService $orders): void {
-                    try {
-                        $orders->advanceToWarehouseProcessing($this->record->fresh(), auth()->user());
-                        $this->refreshRecord();
-                        Notification::make()->title('سفارش به پردازش انبار منتقل شد')->success()->send();
-                    } catch (\RuntimeException $e) {
-                        Notification::make()->title('انتقال ممکن نیست')->body($e->getMessage())->danger()->send();
-                    }
-                });
+                ->action(fn () => $this->advanceOrderToWarehouse());
         }
 
         $actions[] = OrderDeleteActions::pageDeleteAction();
@@ -200,8 +192,34 @@ class ViewOrder extends ViewRecord
         Notification::make()->title('یادداشت ثبت شد')->success()->send();
     }
 
+    public function advanceOrderToWarehouse(): void
+    {
+        if (! AdminAccess::canAdvanceOrderToWarehouseInAdmin()) {
+            return;
+        }
+
+        try {
+            app(OrderService::class)->advanceToWarehouseProcessing($this->record->fresh(), auth()->user());
+            $this->refreshRecord();
+            $this->syncFormFields();
+            Notification::make()->title('سفارش به پردازش انبار منتقل شد')->success()->send();
+        } catch (\RuntimeException $e) {
+            Notification::make()->title('انتقال ممکن نیست')->body($e->getMessage())->danger()->send();
+        }
+    }
+
     public function saveOrderMeta(OrderService $orders): void
     {
+        if (AdminAccess::isAccountantOnly()) {
+            Notification::make()
+                ->title('فقط پردازش انبار')
+                ->body('از دکمه «تأیید پرداخت — پردازش انبار» در بالای صفحه استفاده کنید.')
+                ->warning()
+                ->send();
+
+            return;
+        }
+
         if (! AdminAccess::canEditOrdersInAdmin()) {
             return;
         }

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Filament\Resources\OrderResource;
 use App\Filament\Resources\PaymentResource;
+use App\Models\Order;
 use App\Models\User;
 use App\Services\Auth\AdminLoginGuard;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -46,6 +47,29 @@ class AccountantAccessTest extends TestCase
         $this->actingAs($accountant);
 
         $this->get('/admin/products')->assertForbidden();
+    }
+
+    public function test_accountant_can_open_order_detail_page(): void
+    {
+        $customer = User::factory()->create();
+        $order = Order::query()->create([
+            'user_id' => $customer->id,
+            'total_amount' => 100_000,
+            'final_amount' => 100_000,
+            'shipping_amount' => 0,
+            'discount_amount' => 0,
+            'payment_method' => 'zarinpal',
+            'status' => Order::STATUS_PROCESSING,
+        ]);
+
+        $accountant = User::factory()->create([
+            'is_accountant' => true,
+            'status' => true,
+        ]);
+
+        $this->actingAs($accountant);
+
+        $this->get(OrderResource::getUrl('view', ['record' => $order]))->assertOk();
     }
 
     public function test_accountant_can_download_order_excel_export(): void

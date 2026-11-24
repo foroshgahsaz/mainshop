@@ -51,6 +51,15 @@ class Product extends Model
         'robots',
     ];
 
+    protected static function booted(): void
+    {
+        static::saving(function (Product $product): void {
+            if ($product->stock === null) {
+                $product->stock = 0;
+            }
+        });
+    }
+
     protected function casts(): array
     {
         return [

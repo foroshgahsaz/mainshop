@@ -210,6 +210,7 @@ class ProductResource extends Resource
                             ->numeric()
                             ->default(0)
                             ->minValue(0)
+                            ->dehydrateStateUsing(fn ($state) => max(0, (int) ($state === null || $state === '' ? 0 : $state)))
                             ->helperText('فعلاً از این فرم ثبت می‌شود. پس از راه‌اندازی «مدیر موجودی»، مرجع نهایی موجودی از آن پنل خواهد بود.'),
 
                         Forms\Components\TextInput::make('sku')

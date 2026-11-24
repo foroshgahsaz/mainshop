@@ -26,6 +26,12 @@ trait RecordsProductLastEditor
             $data['slug'] = SlugFromTitle::fromProductName($name);
         }
 
+        if (! isset($data['stock']) || $data['stock'] === null || $data['stock'] === '') {
+            $data['stock'] = 0;
+        } else {
+            $data['stock'] = max(0, (int) $data['stock']);
+        }
+
         return $data;
     }
 }

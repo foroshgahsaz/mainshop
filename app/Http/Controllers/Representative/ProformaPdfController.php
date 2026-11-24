@@ -93,6 +93,8 @@ class ProformaPdfController extends Controller
 
     private function userCanDownloadFromAdminPanel(User $user): bool
     {
-        return AdminAccess::isFullAdmin($user) || AdminAccess::isSalesManagerOnly($user);
+        return AdminAccess::isFullAdmin($user)
+            || AdminAccess::isSalesManagerOnly($user)
+            || AdminAccess::isAccountantOnly($user);
     }
 }

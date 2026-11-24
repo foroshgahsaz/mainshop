@@ -6,6 +6,7 @@
                 <tr>
                     <th>کد پیگیری</th>
                     <th>درگاه</th>
+                    <th>نوع</th>
                     <th>مبلغ</th>
                     <th>وضعیت</th>
                     <th>پرداخت‌کننده</th>
@@ -18,6 +19,7 @@
                     <tr>
                         <td dir="ltr">{{ $payment->tracking_code }}</td>
                         <td>{{ \App\Support\ShopLabels::gateway($payment->gateway) }}</td>
+                        <td>{{ \App\Filament\Support\FinancialTableFilters::gatewayTypeLabel($payment->gateway) }}</td>
                         <td>{{ number_format($payment->amount) }} تومان</td>
                         <td>
                             <span class="admin-order__badge admin-order__badge--payment-status admin-order__badge--pay-{{ $payment->status }}">

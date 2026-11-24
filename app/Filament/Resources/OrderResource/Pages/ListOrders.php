@@ -4,12 +4,27 @@ namespace App\Filament\Resources\OrderResource\Pages;
 
 use App\Filament\Resources\OrderResource;
 use App\Filament\Resources\Pages\AdminListRecords;
+use App\Models\Order;
 use App\Support\AdminAccess;
 use Filament\Actions;
 
 class ListOrders extends AdminListRecords
 {
     protected static string $resource = OrderResource::class;
+
+    public function mount(): void
+    {
+        parent::mount();
+
+        if (! AdminAccess::isAccountantOnly()) {
+            return;
+        }
+
+        $this->tableFilters = array_replace_recursive($this->tableFilters ?? [], [
+            'status' => ['value' => Order::STATUS_PROCESSING],
+            'has_successful_payment' => ['value' => true],
+        ]);
+    }
 
     protected function adminListIcon(): ?string
     {
@@ -20,7 +35,7 @@ class ListOrders extends AdminListRecords
     {
         $actions = [];
 
-        if (AdminAccess::canAccessAdminResource(OrderResource::class)) {
+        if (AdminAccess::canExportFinancialsInAdmin()) {
             $actions[] = Actions\Action::make('exportExcel')
                 ->label('خروجی اکسل')
                 ->icon('heroicon-o-arrow-down-tray')
@@ -59,6 +74,33 @@ class ListOrders extends AdminListRecords
         $trashed = data_get($filters, 'trashed.value');
         if (is_string($trashed) && $trashed !== '') {
             $params['trashed'] = $trashed;
+        }
+
+        $creditPlan = data_get($filters, 'credit_plan_id.value');
+        if (filled($creditPlan)) {
+            $params['credit_plan_id'] = (string) $creditPlan;
+        }
+
+        $gatewayType = data_get($filters, 'payment_gateway_type.value');
+        if (is_string($gatewayType) && $gatewayType !== '') {
+            $params['payment_gateway_type'] = $gatewayType;
+        }
+
+        $hasSuccess = data_get($filters, 'has_successful_payment.value');
+        if ($hasSuccess === true || $hasSuccess === 1 || $hasSuccess === '1') {
+            $params['has_successful_payment'] = '1';
+        } elseif ($hasSuccess === false || $hasSuccess === 0 || $hasSuccess === '0') {
+            $params['has_successful_payment'] = '0';
+        }
+
+        $from = data_get($filters, 'created_at_range.from');
+        if (filled($from)) {
+            $params['created_from'] = (string) $from;
+        }
+
+        $until = data_get($filters, 'created_at_range.until');
+        if (filled($until)) {
+            $params['created_until'] = (string) $until;
         }
 
         return $params;

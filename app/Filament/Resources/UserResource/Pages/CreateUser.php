@@ -151,6 +151,7 @@ class CreateUser extends CreateRecord
             'admin' => 'is_admin',
             'sales_manager' => 'is_sales_manager',
             'bankdar' => 'is_bankdar',
+            'accountant' => 'is_accountant',
             'representative' => 'is_representative',
             'author' => 'is_author',
         ];
@@ -177,6 +178,7 @@ class CreateUser extends CreateRecord
         $data['is_representative'] = $role === 'representative';
         $data['is_sales_manager'] = $role === 'sales_manager';
         $data['is_bankdar'] = $role === 'bankdar';
+        $data['is_accountant'] = $role === 'accountant';
 
         return $data;
     }

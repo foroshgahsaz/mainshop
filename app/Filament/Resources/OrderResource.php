@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Support\AdminTable;
+use App\Filament\Support\FinancialTableFilters;
 use App\Filament\Support\UserTableColumns;
 use App\Filament\Support\OrderDeleteActions;
 use App\Models\Order;
@@ -52,7 +53,7 @@ class OrderResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        $query = parent::getEloquentQuery()->with(['user', 'representative', 'payments']);
+        $query = parent::getEloquentQuery()->with(['user', 'representative', 'payments', 'creditPlan']);
 
         // ادمین سیستم می‌تواند حذف‌شده‌ها را با فیلتر ببیند؛ بنکدار/نماینده soft-deleted را نمی‌بینند.
         if (AdminAccess::isFullAdmin()) {
@@ -92,6 +93,22 @@ class OrderResource extends Resource
                     ->label('روش پرداخت')
                     ->badge()
                     ->formatStateUsing(fn (Order $record): string => $record->paymentMethodLabel()),
+                Tables\Columns\TextColumn::make('creditPlan.name')
+                    ->label('طرح اعتباری')
+                    ->placeholder('—')
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('latest_success_payment_tracking')
+                    ->label('پیگیری پرداخت')
+                    ->state(function (Order $record): string {
+                        $payment = $record->payments
+                            ->where('status', \App\Models\Payment::STATUS_SUCCESS)
+                            ->sortByDesc('paid_at')
+                            ->first();
+
+                        return $payment?->tracking_code ?? '—';
+                    })
+                    ->copyable()
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('status')
                     ->label('وضعیت')
                     ->badge()
@@ -113,6 +130,10 @@ class OrderResource extends Resource
                 Tables\Filters\SelectFilter::make('status')
                     ->label('وضعیت')
                     ->options(static::statusFilterOptions()),
+                FinancialTableFilters::orderHasSuccessfulPaymentFilter(),
+                FinancialTableFilters::orderCreditPlanFilter(),
+                FinancialTableFilters::orderGatewayTypeFilter(),
+                FinancialTableFilters::orderCreatedDateFilter(),
                 Tables\Filters\TrashedFilter::make()
                     ->visible(fn (): bool => AdminAccess::isFullAdmin()),
             ])
@@ -163,7 +184,7 @@ class OrderResource extends Resource
     /**
      * فیلترهای لیست سفارش (ادمین) — برای خروجی اکسل و هم‌خوانی با جدول Filament.
      *
-     * @param  array{status?: mixed, payment_gateway?: mixed, trashed?: mixed}  $filters
+     * @param  array<string, mixed>  $filters
      */
     public static function applyListTableFiltersToQuery(Builder $query, array $filters): Builder
     {
@@ -175,6 +196,37 @@ class OrderResource extends Resource
         $gateway = $filters['payment_gateway'] ?? null;
         if (is_string($gateway) && $gateway !== '') {
             $query = static::applyPaymentGatewayFilter($query, $gateway);
+        }
+
+        $creditPlan = $filters['credit_plan_id'] ?? null;
+        if (filled($creditPlan)) {
+            $query->where('credit_plan_id', (int) $creditPlan);
+        }
+
+        $gatewayType = $filters['payment_gateway_type'] ?? null;
+        if (is_string($gatewayType) && $gatewayType !== '') {
+            $query = FinancialTableFilters::applyOrderGatewayTypeFilter($query, $gatewayType);
+        }
+
+        if (($filters['has_successful_payment'] ?? null) === true || $filters['has_successful_payment'] === '1') {
+            $query->whereHas(
+                'payments',
+                fn (Builder $payments): Builder => $payments->where('status', \App\Models\Payment::STATUS_SUCCESS)
+            );
+        } elseif (($filters['has_successful_payment'] ?? null) === false || $filters['has_successful_payment'] === '0') {
+            $query->whereDoesntHave(
+                'payments',
+                fn (Builder $payments): Builder => $payments->where('status', \App\Models\Payment::STATUS_SUCCESS)
+            );
+        }
+
+        $from = $filters['created_from'] ?? $filters['from'] ?? null;
+        $until = $filters['created_until'] ?? $filters['until'] ?? null;
+        if ($from) {
+            $query->whereDate('created_at', '>=', $from);
+        }
+        if ($until) {
+            $query->whereDate('created_at', '<=', $until);
         }
 
         $trashed = $filters['trashed'] ?? null;

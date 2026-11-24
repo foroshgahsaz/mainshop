@@ -13,12 +13,13 @@
 | **مدیر سیستم** | `is_admin=1`, `status=1` | Filament ادمین | **`/admin/login`** |
 | **مدیر فروش** | `is_sales_manager=1`, `is_admin=0`, `status=1` | همان Filament با منوی محدود — CRUD بنکدار | **`/admin/login`** |
 | **بنکدار** | `is_bankdar=1`, `bankdar_province_id`, `created_by_sales_manager_id` | منوی محدود — داشبورد اسکوپ‌شده، **ایجاد فقط نماینده**، مشاهده مشتریان نمایندگان، برند/دستهٔ اختصاصی (فقط مشاهده)، محصول/اکسل محدوده، سفارش ایجاد/ویرایش، soft-delete | **`/admin/login`** |
+| **حسابداری** | `is_accountant=1`, `is_admin=0`, `status=1` | Filament ادمین محدود: سفارش/پرداخت، اکسل، PDF مالی | **`/admin/login`** |
 | **نماینده** | `is_representative=1`, `status=1` | Filament نماینده | **`/representative/login`** |
 
 جزئیات سلسله‌مراتب: [dev/11-bankdar-sales-hierarchy.md](11-bankdar-sales-hierarchy.md)
 
 - **API جدا نداریم** — همهٔ session از guard `web` (کوکی Laravel) است.
-- در فرم ادمین (`/admin/users` → دسترسی) برای «غیر مشتری» **فقط یک نقش** انتخاب می‌شود (`staff_role` → یک فلگ از `is_admin` / `is_sales_manager` / `is_bankdar` / `is_representative` / `is_author`). دادهٔ قدیمی چندنقشی در DB ممکن است باشد؛ اولویت نمایش همان اولویت دستهٔ لیست است.
+- در فرم ادمین (`/admin/users` → دسترسی) برای «غیر مشتری» **فقط یک نقش** انتخاب می‌شود (`staff_role` → یک فلگ از `is_admin` / `is_sales_manager` / `is_bankdar` / `is_accountant` / `is_representative` / `is_author`). دادهٔ قدیمی چندنقشی در DB ممکن است باشد؛ اولویت نمایش همان اولویت دستهٔ لیست است.
 
 ### لیست `/admin/users` (مدیر کل)
 
@@ -56,7 +57,7 @@
 
 - **فقط** `https://دامنه/admin/login`
 - OTP (تب موبایل) یا نام کاربری/رمز (تب دوم).
-- گارد OTP: `app/Services/Auth/AdminLoginGuard.php` — مجاز: `is_admin` **یا** `is_sales_manager`.
+- گارد OTP: `app/Services/Auth/AdminLoginGuard.php` — مجاز: `is_admin`، مدیر فروش، بنکدار، یا **حسابداری**.
 
 ### بعد از ورود
 

@@ -477,6 +477,7 @@ class UserResource extends Resource
                             'representative' => 'نماینده',
                             'sales_manager' => 'مدیر فروش',
                             'bankdar' => 'بنکدار',
+                            'accountant' => 'حسابداری',
                         ])
                         ->icons([
                             'admin' => 'heroicon-o-shield-check',
@@ -484,6 +485,7 @@ class UserResource extends Resource
                             'representative' => 'heroicon-o-building-storefront',
                             'sales_manager' => 'heroicon-o-chart-bar',
                             'bankdar' => 'heroicon-o-map',
+                            'accountant' => 'heroicon-o-calculator',
                         ])
                         ->colors([
                             'admin' => 'primary',
@@ -491,6 +493,7 @@ class UserResource extends Resource
                             'representative' => 'primary',
                             'sales_manager' => 'primary',
                             'bankdar' => 'primary',
+                            'accountant' => 'primary',
                         ])
                         ->inline()
                         ->required(fn (Get $get): bool => $get('user_kind') === 'staff')

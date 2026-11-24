@@ -45,6 +45,20 @@ class RestrictSalesManagerAdminAccess
             abort(403);
         }
 
+        if (AdminAccess::isAccountantOnly($user)) {
+            if ($request->routeIs('filament.admin.auth.logout')) {
+                return $next($request);
+            }
+
+            foreach (AdminAccess::accountantAllowedRoutePatterns() as $pattern) {
+                if ($request->routeIs($pattern)) {
+                    return $next($request);
+                }
+            }
+
+            abort(403);
+        }
+
         if (! AdminAccess::isLimitedStaffOnly($user)) {
             return $next($request);
         }

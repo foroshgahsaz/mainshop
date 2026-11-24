@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PaymentResource\Pages;
 use App\Filament\Support\AdminTable;
+use App\Filament\Support\FinancialTableFilters;
 use App\Filament\Support\UserTableColumns;
 use App\Filament\Support\PaymentDeleteActions;
 use App\Models\Order;
@@ -48,7 +49,7 @@ class PaymentResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        $query = parent::getEloquentQuery()->with(['order', 'user']);
+        $query = parent::getEloquentQuery()->with(['order.creditPlan', 'user']);
 
         if (AdminAccess::isLimitedStaffOnly()) {
             $repIds = app(SalesRegionService::class)
@@ -80,6 +81,14 @@ class PaymentResource extends Resource
                 Tables\Columns\TextColumn::make('gateway')
                     ->label('درگاه')
                     ->formatStateUsing(fn (?string $state) => ShopLabels::gateway($state)),
+                Tables\Columns\TextColumn::make('gateway_type')
+                    ->label('نوع')
+                    ->state(fn (Payment $record): string => FinancialTableFilters::gatewayTypeLabel($record->gateway))
+                    ->badge(),
+                Tables\Columns\TextColumn::make('order.creditPlan.name')
+                    ->label('طرح اعتباری')
+                    ->placeholder('—')
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('status')
                     ->label('وضعیت')
                     ->badge()
@@ -114,6 +123,9 @@ class PaymentResource extends Resource
                 Tables\Filters\SelectFilter::make('status')
                     ->label('وضعیت پرداخت')
                     ->options(static::paymentStatusFilterOptions()),
+                FinancialTableFilters::paymentGatewayTypeFilter(),
+                FinancialTableFilters::paymentCreditPlanFilter(),
+                FinancialTableFilters::paymentPaidDateFilter(),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()
@@ -132,6 +144,60 @@ class PaymentResource extends Resource
                         ->visible(fn (): bool => AdminAccess::canManageShopInAdmin()),
                 ]),
             ]);
+    }
+
+    /**
+     * فیلترهای لیست پرداخت — برای خروجی اکسل.
+     *
+     * @param  array<string, mixed>  $filters
+     */
+    public static function applyListTableFiltersToQuery(Builder $query, array $filters): Builder
+    {
+        $gateway = $filters['gateway'] ?? null;
+        if (is_string($gateway) && $gateway !== '') {
+            $query->where('gateway', $gateway);
+        }
+
+        $status = $filters['status'] ?? null;
+        if (is_string($status) && $status !== '') {
+            $query->where('status', $status);
+        }
+
+        $orderStatus = $filters['order_status'] ?? null;
+        if (is_string($orderStatus) && $orderStatus !== '') {
+            $query->whereHas('order', fn (Builder $order): Builder => $order->where('status', $orderStatus));
+        }
+
+        $creditPlan = $filters['credit_plan_id'] ?? null;
+        if (filled($creditPlan)) {
+            $query->whereHas('order', fn (Builder $order): Builder => $order->where('credit_plan_id', (int) $creditPlan));
+        }
+
+        $gatewayType = $filters['gateway_type'] ?? null;
+        if (is_string($gatewayType) && $gatewayType !== '') {
+            $query = FinancialTableFilters::applyPaymentGatewayTypeFilter($query, $gatewayType);
+        }
+
+        $from = $filters['paid_from'] ?? $filters['from'] ?? null;
+        $until = $filters['paid_until'] ?? $filters['until'] ?? null;
+        if ($from) {
+            $query->where(function (Builder $inner) use ($from): void {
+                $inner->whereDate('paid_at', '>=', $from)
+                    ->orWhere(function (Builder $fallback) use ($from): void {
+                        $fallback->whereNull('paid_at')->whereDate('created_at', '>=', $from);
+                    });
+            });
+        }
+        if ($until) {
+            $query->where(function (Builder $inner) use ($until): void {
+                $inner->whereDate('paid_at', '<=', $until)
+                    ->orWhere(function (Builder $fallback) use ($until): void {
+                        $fallback->whereNull('paid_at')->whereDate('created_at', '<=', $until);
+                    });
+            });
+        }
+
+        return $query;
     }
 
     /** @return array<string, string> */

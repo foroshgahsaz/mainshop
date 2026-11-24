@@ -28,6 +28,14 @@ class AdminAccess
 
     private static ?bool $memoIsRepresentativeProfileOnly = null;
 
+    private static ?bool $memoIsAccountantOnly = null;
+
+    /** @var array<class-string, true> */
+    protected const ACCOUNTANT_RESOURCES = [
+        OrderResource::class => true,
+        PaymentResource::class => true,
+    ];
+
     /** @var array<class-string, true> */
     protected const LIMITED_STAFF_RESOURCES = [
         OrderResource::class => true,
@@ -75,6 +83,19 @@ class AdminAccess
         'default.livewire.update',
     ];
 
+    /** @var list<string> */
+    protected const ACCOUNTANT_ROUTE_PATTERNS = [
+        'filament.admin.pages.dashboard',
+        'filament.admin.resources.orders.*',
+        'filament.admin.orders.export',
+        'filament.admin.resources.payments.*',
+        'filament.admin.payments.export',
+        'livewire.upload-file',
+        'livewire.preview-file',
+        'livewire.update',
+        'default.livewire.update',
+    ];
+
     public static function user(): ?User
     {
         if (static::$memoUser !== null) {
@@ -96,6 +117,7 @@ class AdminAccess
         static::$memoIsSalesManagerOnly = null;
         static::$memoIsBankdarOnly = null;
         static::$memoIsRepresentativeProfileOnly = null;
+        static::$memoIsAccountantOnly = null;
     }
 
     public static function isFullAdmin(?User $user = null): bool
@@ -159,7 +181,8 @@ class AdminAccess
             return $user->isRepresentative()
                 && ! $user->isAdmin()
                 && ! $user->isSalesManager()
-                && ! $user->isBankdar();
+                && ! $user->isBankdar()
+                && ! $user->isAccountant();
         }
 
         if (static::$memoIsRepresentativeProfileOnly !== null) {
@@ -171,9 +194,33 @@ class AdminAccess
             && $current->isRepresentative()
             && ! $current->isAdmin()
             && ! $current->isSalesManager()
-            && ! $current->isBankdar();
+            && ! $current->isBankdar()
+            && ! $current->isAccountant();
 
         return static::$memoIsRepresentativeProfileOnly;
+    }
+
+    public static function isAccountantOnly(?User $user = null): bool
+    {
+        if ($user !== null) {
+            return $user->isAccountant()
+                && ! $user->isAdmin()
+                && ! $user->isSalesManager()
+                && ! $user->isBankdar();
+        }
+
+        if (static::$memoIsAccountantOnly !== null) {
+            return static::$memoIsAccountantOnly;
+        }
+
+        $current = static::user();
+        static::$memoIsAccountantOnly = $current !== null
+            && $current->isAccountant()
+            && ! $current->isAdmin()
+            && ! $current->isSalesManager()
+            && ! $current->isBankdar();
+
+        return static::$memoIsAccountantOnly;
     }
 
     /** مدیر فروش یا بنکدار با منوی محدود ادمین (نه مدیر سیستم). */
@@ -182,10 +229,24 @@ class AdminAccess
         return static::isSalesManagerOnly($user) || static::isBankdarOnly($user);
     }
 
+    public static function canViewFinancialsInAdmin(?User $user = null): bool
+    {
+        return static::isFullAdmin($user) || static::isAccountantOnly($user);
+    }
+
+    public static function canExportFinancialsInAdmin(?User $user = null): bool
+    {
+        return static::canViewFinancialsInAdmin($user);
+    }
+
     public static function canAccessAdminResource(string $resourceClass): bool
     {
         if (static::isFullAdmin()) {
             return true;
+        }
+
+        if (static::isAccountantOnly()) {
+            return isset(static::ACCOUNTANT_RESOURCES[$resourceClass]);
         }
 
         if (! static::isLimitedStaffOnly()) {
@@ -282,5 +343,11 @@ class AdminAccess
     public static function limitedStaffAllowedRoutePatterns(): array
     {
         return self::LIMITED_STAFF_ROUTE_PATTERNS;
+    }
+
+    /** @return list<string> */
+    public static function accountantAllowedRoutePatterns(): array
+    {
+        return self::ACCOUNTANT_ROUTE_PATTERNS;
     }
 }

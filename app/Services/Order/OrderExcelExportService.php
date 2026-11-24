@@ -3,6 +3,8 @@
 namespace App\Services\Order;
 
 use App\Models\Order;
+use App\Models\Payment;
+use App\Services\Representative\RepresentativeProformaSplitPayment;
 use App\Support\ShopLabels;
 use Illuminate\Database\Eloquent\Builder;
 use OpenSpout\Common\Entity\Row;
@@ -22,6 +24,10 @@ final class OrderExcelExportService
             'نماینده',
             'مبلغ نهایی (تومان)',
             'روش پرداخت',
+            'طرح اعتباری',
+            'پیگیری پرداخت موفق',
+            'جمع پرداخت اعتباری (تومان)',
+            'جمع پرداخت نقدی (تومان)',
             'وضعیت',
             'حذف‌شده',
         ];
@@ -32,7 +38,13 @@ final class OrderExcelExportService
      */
     public function rowValues(Order $order): array
     {
+        $order->loadMissing(['user', 'creditPlan', 'payments']);
         $user = $order->user;
+        $split = app(RepresentativeProformaSplitPayment::class);
+        $successPayment = $order->payments
+            ->where('status', Payment::STATUS_SUCCESS)
+            ->sortByDesc('paid_at')
+            ->first();
 
         return [
             (string) ($order->tracking_code ?? ''),
@@ -42,6 +54,10 @@ final class OrderExcelExportService
             $order->representativeLabel(),
             (int) ($order->final_amount ?? 0),
             ShopLabels::orderPaymentMethodLabel($order),
+            (string) ($order->creditPlan?->name ?? ''),
+            (string) ($successPayment?->tracking_code ?? ''),
+            $split->paidCreditAmount($order),
+            $split->paidCashAmount($order),
             ShopLabels::orderStatus($order->status),
             $order->trashed() ? 'بله' : 'خیر',
         ];

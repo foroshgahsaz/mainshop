@@ -46,7 +46,7 @@ class DigiPayGateway implements PaymentGatewayInterface
         $attempt = (int) ($raw['digipay_attempt'] ?? 0) + 1;
         $providerId = $payment->tracking_code.'___'.$attempt;
         $amountRial = $this->amountInRial((int) $payment->amount, $config);
-        $callbackUrl = url($config['callback_url']).'?payment='.$payment->tracking_code;
+        $callbackUrl = DigiPayCallbackUrl::forPayment($payment, $config);
         $ticketType = (int) ($config['ticket_type'] ?? 11);
 
         $payment->update([
@@ -134,7 +134,12 @@ class DigiPayGateway implements PaymentGatewayInterface
         $callback = request()->only(['amount', 'type', 'trackingCode', 'result']);
         $raw = is_array($payment->raw_response) ? $payment->raw_response : [];
         $providerId = (string) ($raw['digipay_provider_id'] ?? $payment->tracking_code);
-        $type = (string) ($callback['type'] ?? $raw['digipay_type'] ?? '0');
+        $type = (string) (
+            $callback['type']
+            ?? $raw['digipay_callback_type']
+            ?? $raw['digipay_ticket_type']
+            ?? ($config['ticket_type'] ?? 11)
+        );
         $callbackAmount = (int) ($callback['amount'] ?? 0);
         $expectedRial = $this->amountInRial((int) $payment->amount, $config);
 
@@ -200,8 +205,8 @@ class DigiPayGateway implements PaymentGatewayInterface
             return true;
         }
 
-        if ($status === 9011) {
-            sleep(5);
+        if ($status === 9011 && $retries < 2) {
+            usleep(1_000_000);
 
             return $this->verifyTicket($config, $trackingCode, $providerId, $type, $retries + 1);
         }

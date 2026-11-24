@@ -15,6 +15,8 @@ use App\Support\PaymentReturnUrl;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Throwable;
 
 class PaymentController extends Controller
 {
@@ -275,14 +277,63 @@ class PaymentController extends Controller
 
     protected function handleCallback(Request $request)
     {
+        try {
+            return $this->handleCallbackCore($request);
+        } catch (HttpExceptionInterface $e) {
+            throw $e;
+        } catch (Throwable $e) {
+            Log::error('Payment callback unhandled exception', [
+                'path' => $request->path(),
+                'query' => $request->query(),
+                'message' => $e->getMessage(),
+            ]);
+
+            return redirect()
+                ->route('home')
+                ->with('error', 'خطا در پردازش بازگشت از درگاه. اگر مبلغ از حساب شما کسر شده، با پشتیبانی چینی‌بازار تماس بگیرید.');
+        }
+    }
+
+    protected function handleCallbackCore(Request $request)
+    {
         $payment = $this->resolvePayment($request);
 
         if ($payment->gateway === 'bajet') {
             $authority = (string) ($request->input('id') ?: $payment->transaction_id);
             $status = (string) $request->input('status', '');
         } elseif ($payment->gateway === 'digipay') {
-            $authority = (string) ($request->input('trackingCode') ?: $payment->transaction_id);
-            $status = (string) $request->input('result', '');
+            $callbackPayload = array_merge($request->query(), $request->post());
+            $authority = (string) (
+                $request->input('trackingCode')
+                ?: $request->query('trackingCode')
+                ?: $payment->transaction_id
+            );
+            $status = (string) (
+                $request->input('result')
+                ?: $request->query('result')
+                ?: ''
+            );
+
+            $mergedRaw = array_merge(
+                is_array($payment->raw_response) ? $payment->raw_response : [],
+                [
+                    'digipay_callback' => $callbackPayload,
+                ]
+            );
+            if (isset($callbackPayload['type']) && $callbackPayload['type'] !== '') {
+                $mergedRaw['digipay_callback_type'] = $callbackPayload['type'];
+            }
+            if (isset($callbackPayload['providerId']) && $callbackPayload['providerId'] !== '') {
+                $mergedRaw['digipay_callback_provider_id'] = $callbackPayload['providerId'];
+            }
+
+            $attributes = ['raw_response' => $mergedRaw];
+            if ($authority !== '') {
+                $attributes['transaction_id'] = $authority;
+            }
+
+            $payment->update($attributes);
+            $payment = $payment->fresh();
         } elseif ($payment->gateway === 'snapppay') {
             $authority = (string) ($payment->transaction_id ?: data_get($payment->raw_response, 'snapppay_payment_token', ''));
             $status = (string) ($request->input('state') ?: $request->input('State') ?: '');
@@ -500,6 +551,42 @@ class PaymentController extends Controller
             $byToken = Payment::query()->where('transaction_id', $token)->first();
             if ($byToken) {
                 return $byToken;
+            }
+        }
+
+        $providerId = trim((string) ($request->input('providerId') ?: $request->query('providerId', '')));
+        if ($providerId !== '') {
+            if (str_contains($providerId, '___')) {
+                $trackingFromProvider = explode('___', $providerId, 2)[0];
+                $byProviderPrefix = Payment::query()
+                    ->where('tracking_code', $trackingFromProvider)
+                    ->where('gateway', 'digipay')
+                    ->first();
+                if ($byProviderPrefix) {
+                    return $byProviderPrefix;
+                }
+            }
+
+            $byDigipayProvider = Payment::query()
+                ->where('gateway', 'digipay')
+                ->where('raw_response->digipay_provider_id', $providerId)
+                ->first();
+            if ($byDigipayProvider) {
+                return $byDigipayProvider;
+            }
+        }
+
+        $digipayTracking = trim((string) (
+            $request->input('trackingCode')
+            ?: $request->query('trackingCode', '')
+        ));
+        if ($digipayTracking !== '') {
+            $byDigipayTracking = Payment::query()
+                ->where('transaction_id', $digipayTracking)
+                ->where('gateway', 'digipay')
+                ->first();
+            if ($byDigipayTracking) {
+                return $byDigipayTracking;
             }
         }
 

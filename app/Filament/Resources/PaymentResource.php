@@ -72,7 +72,27 @@ class PaymentResource extends Resource
         return AdminTable::configure($table)
             ->recordUrl(fn (Payment $record): string => static::getUrl('view', ['record' => $record]))
             ->columns([
-                Tables\Columns\TextColumn::make('tracking_code')->label('پیگیری')->searchable(),
+                Tables\Columns\TextColumn::make('gateway_tracking_reference')
+                    ->label('کد پیگیری درگاه')
+                    ->state(fn (Payment $record): string => $record->gatewayTrackingReference() ?? '—')
+                    ->copyable()
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        $term = trim($search);
+                        if ($term === '') {
+                            return $query;
+                        }
+
+                        return $query->where(function (Builder $inner) use ($term): void {
+                            $inner
+                                ->where('transaction_id', 'like', "%{$term}%")
+                                ->orWhere('card_number', 'like', "%{$term}%")
+                                ->orWhere('tracking_code', 'like', "%{$term}%");
+                        });
+                    }),
+                Tables\Columns\TextColumn::make('tracking_code')
+                    ->label('شناسه پرداخت')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('order.tracking_code')->label('سفارش'),
                 UserTableColumns::nameWithPhone(),
                 Tables\Columns\TextColumn::make('amount')

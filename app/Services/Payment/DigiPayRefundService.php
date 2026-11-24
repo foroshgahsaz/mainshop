@@ -142,21 +142,7 @@ class DigiPayRefundService
 
     protected function saleTrackingCode(Payment $payment): string
     {
-        $raw = is_array($payment->raw_response) ? $payment->raw_response : [];
-
-        foreach ([
-            data_get($raw, 'trackingCode'),
-            $payment->transaction_id,
-            $payment->card_number,
-            data_get($raw, 'digipay_tracking_code'),
-        ] as $candidate) {
-            $code = trim((string) $candidate);
-            if ($code !== '') {
-                return $code;
-            }
-        }
-
-        return '';
+        return trim((string) ($payment->gatewayTrackingReference() ?? ''));
     }
 
     protected function ticketType(Payment $payment): string

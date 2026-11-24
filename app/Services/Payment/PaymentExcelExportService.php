@@ -48,7 +48,7 @@ final class PaymentExcelExportService
             FinancialTableFilters::gatewayTypeLabel((string) $payment->gateway),
             (string) ($payment->order?->creditPlan?->name ?? ''),
             ShopLabels::paymentStatus($payment->status),
-            (string) ($payment->gatewayReference() ?? ''),
+            (string) ($payment->gatewayTrackingReference() ?? $payment->gatewayReference() ?? ''),
         ];
     }
 

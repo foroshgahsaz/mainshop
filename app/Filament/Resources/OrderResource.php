@@ -97,8 +97,42 @@ class OrderResource extends Resource
                     ->label('طرح اعتباری')
                     ->placeholder('—')
                     ->toggleable(),
+                Tables\Columns\TextColumn::make('latest_success_payment_gateway_tracking')
+                    ->label('کد پیگیری درگاه')
+                    ->state(function (Order $record): string {
+                        $payment = $record->payments
+                            ->where('status', \App\Models\Payment::STATUS_SUCCESS)
+                            ->sortByDesc('paid_at')
+                            ->first();
+
+                        if ($payment === null) {
+                            return '—';
+                        }
+
+                        return $payment->gatewayTrackingReference()
+                            ?? $payment->tracking_code
+                            ?? '—';
+                    })
+                    ->copyable()
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        $term = trim($search);
+                        if ($term === '') {
+                            return $query;
+                        }
+
+                        return $query->whereHas('payments', function (Builder $payments) use ($term): void {
+                            $payments
+                                ->where('status', \App\Models\Payment::STATUS_SUCCESS)
+                                ->where(function (Builder $inner) use ($term): void {
+                                    $inner
+                                        ->where('transaction_id', 'like', "%{$term}%")
+                                        ->orWhere('card_number', 'like', "%{$term}%")
+                                        ->orWhere('tracking_code', 'like', "%{$term}%");
+                                });
+                        });
+                    }),
                 Tables\Columns\TextColumn::make('latest_success_payment_tracking')
-                    ->label('پیگیری پرداخت')
+                    ->label('شناسه پرداخت')
                     ->state(function (Order $record): string {
                         $payment = $record->payments
                             ->where('status', \App\Models\Payment::STATUS_SUCCESS)
@@ -108,7 +142,7 @@ class OrderResource extends Resource
                         return $payment?->tracking_code ?? '—';
                     })
                     ->copyable()
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('status')
                     ->label('وضعیت')
                     ->badge()

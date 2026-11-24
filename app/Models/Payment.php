@@ -68,6 +68,11 @@ class Payment extends Model
 
     public function gatewayReference(): ?string
     {
+        $tracking = $this->gatewayTrackingReference();
+        if ($tracking !== null && $tracking !== '') {
+            return $tracking;
+        }
+
         if (is_array($this->raw_response)) {
             $rrn = (string) data_get($this->raw_response, 'rrn', data_get($this->raw_response, 'data.rrn', ''));
             if ($rrn !== '') {
@@ -76,5 +81,41 @@ class Payment extends Model
         }
 
         return $this->transaction_id ?: null;
+    }
+
+    /**
+     * کد پیگیری برگشتی از درگاه (مثلاً trackingCode دیجی‌پی)، نه شناسه داخلی payments.tracking_code.
+     */
+    public function gatewayTrackingReference(): ?string
+    {
+        $raw = is_array($this->raw_response) ? $this->raw_response : [];
+
+        $candidates = $this->gateway === 'digipay'
+            ? [
+                data_get($raw, 'digipay_callback.trackingCode'),
+                data_get($raw, 'trackingCode'),
+                $this->transaction_id,
+                $this->card_number,
+                data_get($raw, 'digipay_tracking_code'),
+            ]
+            : [
+                data_get($raw, 'trackingCode'),
+                data_get($raw, 'rrn'),
+                data_get($raw, 'data.rrn'),
+                data_get($raw, 'RefNum'),
+                data_get($raw, 'referenceId'),
+                data_get($raw, 'data.referenceId'),
+                $this->transaction_id,
+                $this->card_number,
+            ];
+
+        foreach ($candidates as $candidate) {
+            $code = trim((string) $candidate);
+            if ($code !== '') {
+                return $code;
+            }
+        }
+
+        return null;
     }
 }

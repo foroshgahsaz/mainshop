@@ -40,6 +40,7 @@ class UserFactory extends Factory
             'is_admin' => false,
             'is_sales_manager' => true,
             'is_bankdar' => false,
+            'is_accountant' => false,
         ]);
     }
 

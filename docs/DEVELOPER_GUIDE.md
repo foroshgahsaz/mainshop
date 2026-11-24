@@ -1419,6 +1419,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-24 | نقش **حسابداری** (`is_accountant`): پنل ادمین محدود (سفارش/پرداخت)، فیلتر تاریخ/طرح/اعتباری-نقدی، اکسل، PDF مالی، خلاصه تسویه در جزئیات سفارش |
 | 2026-11-24 | **۵۰۰ همه callbackها:** پرانتز گم‌شده در `PaymentController::resolvePayment` (`$tv = trim(...)` ) — کلاس لود نمی‌شد؛ رفع + بهبود بازگشت دیجی‌پی (`providerId`، `type` verify، `DigiPayCallbackUrl`) |
 | 2026-11-23 | ادمین محصولات: خروجی اکسل (`/admin/products/export`) — کد کالا، نام، قیمت، قیمت ویژه، تعداد، وضعیت، موجودی |
 | 2026-11-23 | درگاه اعتباری **اسنپ‌پی** (`SnappPayGateway`, `/admin/snapppay`, callback `POST state=OK`) — OAuth + token + verify/settle |

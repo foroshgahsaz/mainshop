@@ -47,6 +47,8 @@
 
                 @include('filament.orders.partials.totals', ['order' => $order])
 
+                @include('filament.orders.partials.financial-settlement-summary', ['order' => $order])
+
                 @if($order->payments->isNotEmpty())
                     @include('filament.orders.partials.payments-table', ['order' => $order])
                 @endif

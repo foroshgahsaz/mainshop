@@ -122,17 +122,16 @@ public static function canViewAny(): bool
 
 ---
 
-## سناریو F — نقش کاملاً جدید (مثلاً «حسابدار»)
+## سناریو F — نقش «حسابداری» (پیاده‌سازی‌شده)
 
-الگوی توصیه‌شده در این پروژه:
+- migration: `users.is_accountant`
+- `AdminAccess::isAccountantOnly()` — فقط `OrderResource` + `PaymentResource`، بدون scope منطقه فروش (کل فروشگاه)
+- `RestrictSalesManagerAdminAccess` — الگوی route `ACCOUNTANT_ROUTE_PATTERNS` (+ export اکسل)
+- لیست سفارش: پیش‌فرض `processing` + پرداخت موفق؛ فیلتر طرح/نقدی-اعتباری/تاریخ
+- لیست پرداخت: نوع درگاه، طرح، بازه تاریخ؛ اکسل `/admin/payments/export`
+- PDF: `representative.proforma.pdf` برای حسابداری (customer + `?financial=1`)
 
-1. migration: `users.is_accountant` (boolean)
-2. `User::isAccountant()` + به‌روزرسانی `canAccessPanel()` اگر به admin دسترسی دارد
-3. کلاس کمکی مثل `AdminAccess` یا گسترش همان با `isAccountantOnly()`
-4. middleware جدا **یا** گسترش `RestrictSalesManagerAdminAccess` به `RestrictStaffAdminAccess` (نام پیشنهادی)
-5. مستندات: `01-roles-and-auth.md` + این فایل + `PROJECT-PHASES.md`
-
-از ساخت پنل Filament سوم بدون نیاز واقعی پرهیز کنید.
+جزئیات: [01-roles-and-auth.md](01-roles-and-auth.md)
 
 ---
 

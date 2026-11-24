@@ -497,6 +497,7 @@ class ViewOrder extends ViewRecord
         if (! AdminAccess::isFullAdmin()
             && ! AdminAccess::isSalesManagerOnly()
             && ! AdminAccess::isBankdarOnly()
+            && ! AdminAccess::isAccountantOnly()
         ) {
             return false;
         }

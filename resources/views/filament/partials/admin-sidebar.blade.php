@@ -61,6 +61,7 @@
     $user = filament()->auth()->user();
     $salesManagerOnly = AdminAccess::isSalesManagerOnly($user);
     $bankdarOnly = AdminAccess::isBankdarOnly($user);
+    $accountantOnly = AdminAccess::isAccountantOnly($user);
     $limitedStaffOnly = AdminAccess::isLimitedStaffOnly($user);
     $brand = filament()->getBrandName();
     $isDashboard = request()->routeIs('filament.admin.pages.dashboard');
@@ -390,6 +391,10 @@
         ],
     ];
 
+    if ($accountantOnly) {
+        $panels = array_intersect_key($panels, array_flip(['dashboard', 'orders', 'payments']));
+    }
+
     if ($limitedStaffOnly) {
         $panels = array_intersect_key($panels, array_flip(['products', 'brands', 'orders', 'requests', 'payments', 'users', 'media']));
         if ($salesManagerOnly) {
@@ -454,7 +459,13 @@
         ['id' => 'settings', 'icon' => 'fa-cog', 'tooltip' => 'تنظیمات', 'panel' => 'settings'],
     ];
 
-    if ($limitedStaffOnly) {
+    if ($accountantOnly) {
+        $navIcons = array_values(array_filter(
+            $navIcons,
+            fn (array $icon): bool => ($icon['isLink'] ?? false)
+                || in_array($icon['panel'] ?? '', ['dashboard', 'orders', 'payments'], true)
+        ));
+    } elseif ($limitedStaffOnly) {
         $navIcons = array_values(array_filter(
             $navIcons,
             fn (array $icon): bool => ($icon['isLink'] ?? false)

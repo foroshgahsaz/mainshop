@@ -1419,7 +1419,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
-| 2026-11-24 | بازگشت دیجی‌پی: resolve با `providerId`/`trackingCode`، ذخیره callback، نوع verify از `type` بازگشت (نه `0`)، `DigiPayCallbackUrl`، بدون ۵۰۰ در exception |
+| 2026-11-24 | **۵۰۰ همه callbackها:** پرانتز گم‌شده در `PaymentController::resolvePayment` (`$tv = trim(...)` ) — کلاس لود نمی‌شد؛ رفع + بهبود بازگشت دیجی‌پی (`providerId`، `type` verify، `DigiPayCallbackUrl`) |
 | 2026-11-23 | ادمین محصولات: خروجی اکسل (`/admin/products/export`) — کد کالا، نام، قیمت، قیمت ویژه، تعداد، وضعیت، موجودی |
 | 2026-11-23 | درگاه اعتباری **اسنپ‌پی** (`SnappPayGateway`, `/admin/snapppay`, callback `POST state=OK`) — OAuth + token + verify/settle |
 | 2026-11-23 | ادمین سفارش‌ها: خروجی اکسل با موبایل مشتری؛ دکمه در هدر لیست (`admin-list-header` + `getCachedHeaderActions`) |

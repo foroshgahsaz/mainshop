@@ -82,7 +82,7 @@ class ManageDigiPay extends Page implements HasForms
                     Forms\Components\TextInput::make('callback_url')
                         ->label('آدرس بازگشت (Callback)')
                         ->placeholder('/payment/callback/digipay')
-                        ->helperText('دیجی‌پی با POST به این آدرس برمی‌گردد؛ شناسه payment در query است.'),
+                        ->helperText('فقط مسیر (مثل /payment/callback/digipay). شناسه ?payment= خودکار اضافه می‌شود؛ در callback دیجی‌پی فیلدهای providerId، trackingCode و type را هم می‌فرستد.'),
                     ShopIconUpload::make('icon', 'gateway-icons', 'آیکون درگاه')
                         ->columnSpanFull(),
                     Forms\Components\Toggle::make('show_product_installment_promo')

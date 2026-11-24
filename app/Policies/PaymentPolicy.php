@@ -9,7 +9,23 @@ class PaymentPolicy
 {
     public function view(User $user, Payment $payment): bool
     {
-        return $user->id === $payment->user_id || $user->isAdmin() || $user->isSalesManager();
+        if ($user->id === $payment->user_id) {
+            return true;
+        }
+
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        if ($user->isAccountant()) {
+            return true;
+        }
+
+        if ($user->isSalesManager() || $user->isBankdar()) {
+            return true;
+        }
+
+        return false;
     }
 
     public function delete(User $user, Payment $payment): bool

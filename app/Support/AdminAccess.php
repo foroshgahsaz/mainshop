@@ -311,6 +311,20 @@ class AdminAccess
         return static::isFullAdmin($user) || static::isLimitedStaffOnly($user);
     }
 
+    /** تأیید پرداخت و انتقال سفارش به «پردازش انبار» (مدیر سیستم یا حسابداری). */
+    public static function canAdvanceOrderToWarehouseInAdmin(?User $user = null): bool
+    {
+        return static::isFullAdmin($user) || static::isAccountantOnly($user);
+    }
+
+    /**
+     * بلوک «مدیریت سفارش» در جزئیات: ویرایش کامل برای staff؛ برای حسابداری فقط مسیر پردازش انبار.
+     */
+    public static function canManageOrderStatusInAdmin(?User $user = null): bool
+    {
+        return static::canEditOrdersInAdmin($user) || static::isAccountantOnly($user);
+    }
+
     /** ایجاد سفارش پیش‌نویس توسط بنکدار (یا مدیر سیستم). */
     public static function canCreateOrdersInAdmin(?User $user = null): bool
     {

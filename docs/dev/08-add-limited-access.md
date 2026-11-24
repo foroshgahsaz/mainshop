@@ -130,6 +130,7 @@ public static function canViewAny(): bool
 - لیست سفارش: پیش‌فرض `processing` + پرداخت موفق؛ فیلتر طرح/نقدی-اعتباری/تاریخ
 - لیست پرداخت: نوع درگاه، طرح، بازه تاریخ؛ اکسل `/admin/payments/export`
 - PDF: `representative.proforma.pdf` برای حسابداری (customer + `?financial=1`)
+- جزئیات سفارش: `OrderPolicy::view` + `PaymentPolicy::view` برای `is_accountant`؛ عملیات فقط **پردازش انبار** (`AdminAccess::canAdvanceOrderToWarehouseInAdmin`)
 
 جزئیات: [01-roles-and-auth.md](01-roles-and-auth.md)
 

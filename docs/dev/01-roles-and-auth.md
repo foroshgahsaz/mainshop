@@ -13,7 +13,7 @@
 | **مدیر سیستم** | `is_admin=1`, `status=1` | Filament ادمین | **`/admin/login`** |
 | **مدیر فروش** | `is_sales_manager=1`, `is_admin=0`, `status=1` | همان Filament با منوی محدود — CRUD بنکدار | **`/admin/login`** |
 | **بنکدار** | `is_bankdar=1`, `bankdar_province_id`, `created_by_sales_manager_id` | منوی محدود — داشبورد اسکوپ‌شده، **ایجاد فقط نماینده**، مشاهده مشتریان نمایندگان، برند/دستهٔ اختصاصی (فقط مشاهده)، محصول/اکسل محدوده، سفارش ایجاد/ویرایش، soft-delete | **`/admin/login`** |
-| **حسابداری** | `is_accountant=1`, `is_admin=0`, `status=1` | Filament ادمین محدود: سفارش/پرداخت، اکسل، PDF مالی | **`/admin/login`** |
+| **حسابداری** | `is_accountant=1`, `is_admin=0`, `status=1` | Filament ادمین محدود: سفارش/پرداخت، اکسل، PDF مالی؛ جزئیات سفارش + **فقط** انتقال به پردازش انبار | **`/admin/login`** |
 | **نماینده** | `is_representative=1`, `status=1` | Filament نماینده | **`/representative/login`** |
 
 جزئیات سلسله‌مراتب: [dev/11-bankdar-sales-hierarchy.md](11-bankdar-sales-hierarchy.md)

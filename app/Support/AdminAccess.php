@@ -64,6 +64,7 @@ class AdminAccess
         'filament.admin.resources.users.edit',
         'filament.admin.resources.products.*',
         'filament.admin.pages.product-price-stock-update',
+        'filament.admin.pages.product-sku-lookup',
         'filament.admin.pages.product-list-import',
         'filament.admin.product-import.template',
         'filament.admin.products.export',

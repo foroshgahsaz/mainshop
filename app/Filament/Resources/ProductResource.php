@@ -260,6 +260,14 @@ class ProductResource extends Resource
 
                 AdminImageColumn::make('primary_image_path', 44, 'تصویر'),
 
+                Tables\Columns\TextColumn::make('sku')
+                    ->label('SKU')
+                    ->searchable()
+                    ->copyable()
+                    ->placeholder('—')
+                    ->toggleable()
+                    ->extraCellAttributes(['class' => 'fi-admin-product-sku']),
+
                 Tables\Columns\TextColumn::make('name')
                     ->label('نام محصول')
                     ->searchable()
@@ -361,6 +369,32 @@ class ProductResource extends Resource
             ])
             ->defaultSort('updated_at', 'desc')
             ->filters([
+                Tables\Filters\Filter::make('sku')
+                    ->form([
+                        Forms\Components\TextInput::make('sku')
+                            ->label('SKU دقیق')
+                            ->maxLength(255),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        $sku = trim((string) ($data['sku'] ?? ''));
+                        if ($sku === '') {
+                            return $query;
+                        }
+
+                        $normalized = preg_replace('/\s+/u', '', $sku) ?? $sku;
+
+                        return $query->where(function (Builder $inner) use ($sku, $normalized): void {
+                            $inner
+                                ->where('sku', $sku)
+                                ->orWhere('sku', $normalized)
+                                ->orWhereRaw('REPLACE(sku, " ", "") = ?', [$normalized]);
+                        });
+                    })
+                    ->indicateUsing(function (array $data): ?string {
+                        $sku = trim((string) ($data['sku'] ?? ''));
+
+                        return $sku !== '' ? 'SKU: '.$sku : null;
+                    }),
                 Tables\Filters\SelectFilter::make('category_id')
                     ->relationship(
                         'category',

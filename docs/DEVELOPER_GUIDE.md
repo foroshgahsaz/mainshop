@@ -1419,6 +1419,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-25 | جستجوی سراسری SKU: `/admin/product-sku-lookup` + `php artisan shop:find-sku`؛ شامل حذف‌شده/variant؛ ستون و فیلتر SKU در لیست محصولات |
 | 2026-11-25 | مدیر فروش/بنکدار: رفع 403 روی `filament.admin.auth.logout` (`/admin/logout`) در `RestrictSalesManagerAdminAccess` |
 | 2026-11-24 | لیست سفارش/پرداخت حسابداری: ستون **کد پیگیری درگاه** (`Payment::gatewayTrackingReference` — مثلاً `trackingCode` دیجی‌پی)؛ شناسه داخلی پرداخت در ستون مخفی |
 | 2026-11-24 | حسابداری: رفع 403 جزئیات سفارش (`OrderPolicy`/`PaymentPolicy`)؛ دکمه و سایدبار **پردازش انبار** بدون ویرایش کامل سفارش |

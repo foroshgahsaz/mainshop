@@ -121,12 +121,12 @@ final class ProductSkuLookupService
             }, function ($query) use ($normalized): void {
                 $query->where('sku', 'like', '%'.$normalized.'%');
             })
-            ->orderByDesc('updated_at')
+            ->orderByDesc('id')
             ->limit($exact ? 50 : 25)
             ->get();
     }
 
-  /**
+    /**
      * @return array{
      *     match_type: string,
      *     entity: string,

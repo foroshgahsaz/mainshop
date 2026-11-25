@@ -14,10 +14,34 @@ use App\Models\RepresentativeProfile;
 use App\Models\User;
 use App\Services\Auth\AdminLoginGuard;
 use App\Support\AdminAccess;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class SalesManagerAccessTest extends TestCase
 {
+    use RefreshDatabase;
+
+    public function test_limited_staff_allowed_routes_include_admin_logout(): void
+    {
+        $this->assertContains('filament.admin.auth.logout', AdminAccess::limitedStaffAllowedRoutePatterns());
+    }
+
+    public function test_sales_manager_post_logout_is_not_forbidden(): void
+    {
+        $manager = User::factory()->create([
+            'is_sales_manager' => true,
+            'is_admin' => false,
+            'status' => true,
+        ]);
+
+        $this->actingAs($manager);
+
+        $this->post(filament()->getPanel('admin')->getLogoutUrl())
+            ->assertRedirect();
+
+        $this->assertGuest();
+    }
+
     public function test_sales_manager_can_access_orders_and_products_but_not_full_shop_admin(): void
     {
         $manager = User::make([

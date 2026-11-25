@@ -1419,6 +1419,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-25 | جستجوی SKU: دکمه‌های **بازگردانی** و **حذف برای همیشه** (مدیر سیستم) روی محصولات soft-delete — `ProductDeletionService::restore` / `forceDeleteForever` |
 | 2026-11-25 | جستجوی سراسری SKU: `/admin/product-sku-lookup` + `php artisan shop:find-sku`؛ شامل حذف‌شده/variant؛ ستون و فیلتر SKU در لیست محصولات |
 | 2026-11-25 | مدیر فروش/بنکدار: رفع 403 روی `filament.admin.auth.logout` (`/admin/logout`) در `RestrictSalesManagerAdminAccess` |
 | 2026-11-24 | لیست سفارش/پرداخت حسابداری: ستون **کد پیگیری درگاه** (`Payment::gatewayTrackingReference` — مثلاً `trackingCode` دیجی‌پی)؛ شناسه داخلی پرداخت در ستون مخفی |

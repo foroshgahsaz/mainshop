@@ -79,10 +79,30 @@
                                             <span class="text-warning-600">خارج از کاتالوگ شما</span>
                                         @endif
                                     </td>
-                                    <td class="p-2">
-                                        @if($this->canEditProduct($row['product_id']))
-                                            <a href="{{ $this->editUrl($row['product_id']) }}" class="text-primary-600 hover:underline">ویرایش</a>
-                                        @endif
+                                    <td class="p-2 whitespace-nowrap">
+                                        <div class="flex flex-wrap gap-2 items-center">
+                                            @if($this->canEditProduct($row['product_id']))
+                                                <a href="{{ $this->editUrl($row['product_id']) }}" class="text-primary-600 hover:underline">ویرایش</a>
+                                            @endif
+                                            @if($row['deleted'] && $this->canManageDeletedProduct())
+                                                <button
+                                                    type="button"
+                                                    wire:click="restoreProduct({{ $row['product_id'] }})"
+                                                    wire:confirm="محصول از آرشیو بازگردانده شود؟"
+                                                    class="text-success-600 hover:underline text-xs"
+                                                >
+                                                    بازگردانی
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    wire:click="forceDeleteProduct({{ $row['product_id'] }})"
+                                                    wire:confirm="حذف دائمی از دیتابیس — برگشت‌پذیر نیست. ادامه؟"
+                                                    class="text-danger-600 hover:underline text-xs"
+                                                >
+                                                    حذف برای همیشه
+                                                </button>
+                                            @endif
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach

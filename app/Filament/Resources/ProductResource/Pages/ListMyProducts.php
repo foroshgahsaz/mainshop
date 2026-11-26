@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ProductResource\Pages;
 
+use App\Services\Product\SalesManagerMyProductsQuery;
 use App\Support\AdminAccess;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -24,7 +25,7 @@ class ListMyProducts extends ListProducts
 
     public function getSubheading(): ?string
     {
-        return 'محصولاتی که شما ایجاد کرده‌اید — آخرین ویرایش‌کننده در جدول نمایش داده می‌شود.';
+        return 'محصولات ثبت‌شده توسط شما؛ ردیف‌های قدیمی بدون ایجادکننده هم اگر آخرین ویرایش‌شان شما باشد اینجا می‌آیند.';
     }
 
     public function table(Table $table): Table
@@ -37,7 +38,7 @@ class ListMyProducts extends ListProducts
                     return $query->whereRaw('1 = 0');
                 }
 
-                return $query->where('created_by_user_id', (int) $userId);
+                return SalesManagerMyProductsQuery::apply($query, (int) $userId);
             });
     }
 }

@@ -26,6 +26,8 @@ class CreateProduct extends EditRecord
     {
         [$categoryId, $brandId] = $this->resolveDraftCatalogIds();
 
+        $creatorId = auth()->id();
+
         $this->record = Product::query()->create([
             'name' => '',
             'slug' => 'draft-'.Str::random(10),
@@ -35,6 +37,8 @@ class CreateProduct extends EditRecord
             'brand_id' => $brandId,
             'is_active' => false,
             'robots' => 'index,follow',
+            'created_by_user_id' => $creatorId,
+            'last_edited_by_user_id' => $creatorId,
         ]);
 
         $this->authorizeAccess();

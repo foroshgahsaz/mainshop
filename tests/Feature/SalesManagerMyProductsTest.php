@@ -70,6 +70,38 @@ class SalesManagerMyProductsTest extends TestCase
         $this->assertSame((int) $manager->id, (int) $mine->fresh()->created_by_user_id);
     }
 
+    public function test_legacy_product_without_created_by_shows_when_last_editor_is_manager(): void
+    {
+        $manager = User::factory()->create([
+            'is_sales_manager' => true,
+            'is_admin' => false,
+            'status' => true,
+        ]);
+
+        $category = Category::query()->forceCreate([
+            'name' => 'دسته قدیمی',
+            'slug' => 'cat-legacy',
+            'is_active' => true,
+        ]);
+
+        Product::query()->create([
+            'name' => 'محصول قدیمی',
+            'slug' => 'legacy-product',
+            'price' => 1000,
+            'stock' => 1,
+            'category_id' => $category->id,
+            'created_by_user_id' => null,
+            'last_edited_by_user_id' => $manager->id,
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($manager);
+
+        $response = $this->get(ProductResource::getUrl('mine'));
+        $response->assertOk();
+        $response->assertSee('محصول قدیمی');
+    }
+
     public function test_bankdar_cannot_open_my_products_page(): void
     {
         $bankdar = User::factory()->create([

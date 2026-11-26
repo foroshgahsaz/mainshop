@@ -1419,6 +1419,7 @@ resources/views/layouts/shop.blade.php
 
 | تاریخ | توضیح |
 |-------|--------|
+| 2026-11-26 | مدیر فروش: **محصولات من** — نمایش legacy بدون `created_by` اگر `last_edited_by` همان مدیر؛ `shop:backfill-product-created-by` |
 | 2026-11-26 | مدیر فروش: منوی **محصولات من** (`/admin/products/mine`) — فیلتر `created_by_user_id` + ستون آخرین ویرایش‌کننده؛ فیلد `products.created_by_user_id` |
 | 2026-11-25 | جستجوی SKU: دکمه‌های **بازگردانی** و **حذف برای همیشه** (مدیر سیستم) روی محصولات soft-delete — `ProductDeletionService::restore` / `forceDeleteForever` |
 | 2026-11-25 | جستجوی سراسری SKU: `/admin/product-sku-lookup` + `php artisan shop:find-sku`؛ شامل حذف‌شده/variant؛ ستون و فیلتر SKU در لیست محصولات |

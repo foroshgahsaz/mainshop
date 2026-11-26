@@ -362,10 +362,10 @@ class ProductResource extends Resource
                     ->placeholder('—')
                     ->searchable()
                     ->sortable()
-                    ->width('6.5rem')
+                    ->width('8rem')
                     ->grow(false)
                     ->wrap(false)
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(),
             ])
             ->defaultSort('updated_at', 'desc')
             ->filters([
@@ -512,6 +512,7 @@ class ProductResource extends Resource
             'productPlant:id,name',
             'productTemplate:id,name',
             'lastEditedBy:id,name',
+            'createdBy:id,name',
             'images' => fn ($query) => $query
                 ->select('id', 'product_id', 'image', 'is_primary', 'position')
                 ->orderByDesc('is_primary')
@@ -539,6 +540,7 @@ class ProductResource extends Resource
     {
         return [
             'index' => Pages\ListProducts::route('/'),
+            'mine' => Pages\ListMyProducts::route('/mine'),
             'create' => Pages\CreateProduct::route('/create'),
             'edit' => Pages\EditProduct::route('/{record}/edit'),
         ];

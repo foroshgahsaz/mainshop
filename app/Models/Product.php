@@ -40,6 +40,7 @@ class Product extends Model
         'is_not_for_sale',
         'views',
         'last_edited_by_user_id',
+        'created_by_user_id',
         'meta_title',
         'meta_description',
         'meta_keywords',
@@ -93,6 +94,11 @@ class Product extends Model
     public function lastEditedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'last_edited_by_user_id');
+    }
+
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by_user_id');
     }
 
     public function productFamily(): BelongsTo

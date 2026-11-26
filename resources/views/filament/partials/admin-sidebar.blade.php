@@ -409,6 +409,13 @@
                     ['label' => 'مشتریان زیرمجموعه', 'url' => UserResource::getUrl('index', ['activeTab' => 'rep_customers']), 'icon' => 'fa-user'],
                 ]],
             ];
+            $productItems = $panels['products']['menus'][0]['items'] ?? [];
+            array_unshift($productItems, [
+                'label' => 'محصولات من',
+                'url' => ProductResource::getUrl('mine'),
+                'icon' => 'fa-box',
+            ]);
+            $panels['products']['menus'][0]['items'] = $productItems;
         } else {
             $panels['users']['menus'] = [
                 ['label' => 'کاربران', 'icon' => 'fa-users', 'items' => [
